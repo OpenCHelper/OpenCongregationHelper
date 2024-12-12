@@ -1,4 +1,19 @@
-RewriteEngine on
+# Set default PHP version to 8.2 (http://it.help.altervista.org/w/Configurazione_personalizzata_(.htaccess)#Direttive_disponibili_nei_file_.htaccess)
+AddHandler av-php82 .php
 
-RewriteCond %{REQUEST_URI} !^/src
-RewriteRule ^(.*)$ /src/$1 [NC,L]
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    Options +FollowSymLinks
+    
+    # Activate the mod_rewrite engine
+    RewriteEngine On
+    RewriteBase /
+
+    # Redirect all traffic to public folder
+    RewriteRule ^(.*)$ /public/$1
+    #RewriteRule ^ index.php [L]
+    RewriteRule ^(/)?$ public/index.php [L] 
+</IfModule>
