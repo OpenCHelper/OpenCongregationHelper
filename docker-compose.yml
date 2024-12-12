@@ -67,6 +67,7 @@ services:
       - 8090:80
     networks:
       - nw-phpmyadmin
+    attach: false
 
 #  ______                              _          
 # |  ___ \       _                    | |         
