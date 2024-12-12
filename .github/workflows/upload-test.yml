@@ -1,0 +1,38 @@
+name: Upload to Altervista
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+**'
+  workflow_dispatch: # Manually trigger a workflow run
+
+jobs:
+  upload:
+    name: Upload to Altervista
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: "FTP Deploy"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.ftp_server_test }}
+          username: ${{ secrets.ftp_username_test }}
+          password: ${{ secrets.ftp_password_test }}
+          local-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .vscode/
+            **/node_modules/**
+
+            *.env
+            .env*
+
+            .gitignore
+            docker-compose.yml
+            Dockerfile
+            *.sql

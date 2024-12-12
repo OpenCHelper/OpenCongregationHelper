@@ -1,0 +1,19 @@
+name: CI
+
+on:
+    push:
+      tags: 
+        - 'v[0-9]+.[0-9]+.[0-9]+**'
+    workflow_dispatch: # Manually trigger a workflow run
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: php-actions/composer@v6
+      with:
+        # ==> Should be the same as Altervista website PHP version
+        php_version: '7.3'
+        php_extensions: gd zip mysqli

@@ -1,0 +1,79 @@
+version: '3'
+name: 'registro-territori'
+
+#  _    _     _                        
+# | |  | |   | |                       
+# | |  | |__ | |_   _ ____   ____  ___ 
+#  \ \/ / _ \| | | | |    \ / _  )/___)
+#   \  / |_| | | |_| | | | ( (/ /|___ |
+#    \/ \___/|_|\____|_|_|_|\____|___/ 
+# Docker automatically creates a new volume and allows data persistence
+volumes:
+  db_volume: {}
+
+#     _                      _                 
+#    | |                    (_)                
+#     \ \   ____  ____ _   _ _  ____ ____  ___ 
+#      \ \ / _  )/ ___) | | | |/ ___) _  )/___)
+#  _____) | (/ /| |    \ V /| ( (__( (/ /|___ |
+# (______/ \____)_|     \_/ |_|\____)____|___/ 
+services:
+  application:
+    container_name: php-apache
+    depends_on:
+      - database
+    # image: php_apache
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: bash -c "COMPOSER_ALLOW_SUPERUSER=1 composer install && /usr/sbin/apache2 -D FOREGROUND"
+    volumes:
+      - ./:/var/www/html/    # Bind mount
+    ports:
+      - 8080:80
+    networks:
+      - nw-application
+
+  database:
+    container_name: mysql
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_HOST}
+      MYSQL_USER: ${DB_USERNAME} # ................ So you don't have to use root, but you can if you like
+      MYSQL_PASSWORD: ${DB_PASSWORD} # ............ You can use whatever password you like
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} # .. Password for root access
+    ports:
+      - 3306:3306 # Syntax: `<Port exposed>:< MySQL Port running inside container>`
+    expose:
+      - 3306 # This documents the presence of exposed ports
+    volumes:
+      - db_volume:/var/lib/mysql
+    networks:
+      - nw-phpmyadmin
+      - nw-application
+
+  phpmyadmin:
+    container_name: pma
+    depends_on:
+      - database
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: password
+    restart: always
+    ports:
+      - 8090:80
+    networks:
+      - nw-phpmyadmin
+
+#  ______                              _          
+# |  ___ \       _                    | |         
+# | |   | | ____| |_ _ _ _  ___   ____| |  _  ___ 
+# | |   | |/ _  )  _) | | |/ _ \ / ___) | / )/___)
+# | |   | ( (/ /| |_| | | | |_| | |   | |< (|___ |
+# |_|   |_|\____)\___)____|\___/|_|   |_| \_|___/ 
+networks:
+  nw-phpmyadmin: {}
+  nw-application: {}
