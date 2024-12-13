@@ -6,6 +6,11 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+**'
   workflow_dispatch: # Manually trigger a workflow run
 
+# Limit the number of concurrent jobs to prevent overloading the server
+concurrency: 
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 # Recreate Altervista PHP environment (using the `phpinfo()` output)
 env:
   php_version: '8.2'
