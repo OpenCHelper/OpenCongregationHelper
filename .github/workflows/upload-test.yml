@@ -16,6 +16,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install NodeJS dependencies
+        run: npm ci
+        
       - name: Setup PHP and Composer
         uses: shivammathur/setup-php@v2
         with:
@@ -45,7 +53,6 @@ jobs:
             **/.git*
             **/.git*/**
             .vscode/
-            **/node_modules/**
 
             *.env
             .env*
