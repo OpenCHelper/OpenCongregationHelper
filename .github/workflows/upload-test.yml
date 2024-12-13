@@ -13,6 +13,7 @@ concurrency:
 
 # Recreate Altervista PHP environment (using the `phpinfo()` output)
 env:
+  node_version: '20.x'
   php_version: '8.2'
   php_extensions: >-
     bcmath,calendar,ctype,curl,date,dom,exif,fileinfo,filter
@@ -34,27 +35,12 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: ${{ env.node_version }}
           cache: 'npm'
 
       - name: Install NodeJS dependencies
         run: npm ci
       
-      - name: Setup cache environment
-        id: extcache
-        uses: shivammathur/cache-extensions@v1
-        with:
-          php-version: ${{ env.php_version }}
-          extensions: ${{ env.php_extensions }}
-          key: cached_extensions-${{ runner.os }}-php${{ env.php_version }}-${{ env.php_extensions }}
-  
-      - name: Cache extensions
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.extcache.outputs.dir }}
-          key: ${{ steps.extcache.outputs.key }}
-          restore-keys: ${{ steps.extcache.outputs.key }}
-  
       - name: Setup PHP and Composer
         uses: shivammathur/setup-php@v2
         with:
