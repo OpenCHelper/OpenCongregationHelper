@@ -39,7 +39,7 @@ jobs:
           cache: 'npm'
 
       - name: Install NodeJS dependencies
-        run: npm ci
+        run: npm ci --omit=dev
       
       - name: Setup PHP and Composer
         uses: shivammathur/setup-php@v2
@@ -51,7 +51,7 @@ jobs:
           fail-fast: true
 
       - name: Install Composer dependencies
-        run: composer install
+        run: composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
         
       - name: "FTP Deploy"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
