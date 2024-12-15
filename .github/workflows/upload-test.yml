@@ -59,6 +59,7 @@ jobs:
       - name: "FTP Deploy"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
+          protocol: ftp
           server: ${{ secrets.ftp_server_test }}
           username: ${{ secrets.ftp_username_test }}
           password: ${{ secrets.ftp_password_test }}
