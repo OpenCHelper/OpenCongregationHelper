@@ -16,9 +16,9 @@ RUN echo "alias ls='ls --color=auto'" >> ~/.bashrc && \
     echo "alias ..='cd ..'" >> ~/.bashrc && \
     echo "PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> ~/.bashrc
 
-# Install PHP extensions
+# Install PHP extensions, Node.js, and NPM
 RUN apt-get update \
-      && apt-get install -y libzip-dev libpng-dev \
+      && apt-get install -y libzip-dev libpng-dev nodejs npm \
       && docker-php-ext-install mysqli pdo pdo_mysql \
       && docker-php-ext-install gd \
       && docker-php-ext-install zip;
