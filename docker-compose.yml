@@ -29,20 +29,25 @@ services:
       dockerfile: Dockerfile
     command: |
       bash -c "
-        echo '----------- Laravel -----------';
-        php artisan migrate || exit 10;
+        # Run Laravel Database migrations
+        (
+          printf -- '-----------------     Laravel     -----------------\\n'
+          php artisan migrate || exit 10
+        )
 
         # Start Vite server for Hot Module Replacement
         (
-          echo '----------- Resources (HMR) -----------';
-          npm run dev -- --host --port 3000;
-        ) & pid_vite=$!;
+          printf -- '----------------- Resources (HMR) -----------------\\n'
+          npm run dev -- --host --port 3000
+        ) & pid_vite=$!
 
-        # Start Apache web server  
+        sleep 10
+
+        # Start Apache web server
         (
-          echo '----------- Apache -----------';
+          printf -- '\\n----------------- Apache + PHP -----------------\\n\\n'
           /usr/sbin/apache2 -D FOREGROUND
-        ) & pid_apache=$!;
+        ) & pid_apache=$!
         
         wait
       "
