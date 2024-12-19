@@ -25,11 +25,31 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: bash -c "COMPOSER_ALLOW_SUPERUSER=1 composer install && /usr/sbin/apache2 -D FOREGROUND"
+    command: |
+      bash -c "
+        echo '----------- Laravel -----------';
+        php artisan migrate || exit 10;
+
+        # Start Vite server for Hot Module Replacement
+        (
+          echo '----------- Resources (HMR) -----------';
+          npm run dev -- --host --port 3000;
+        ) & pid_vite=$!;
+
+        # Start Apache web server  
+        (
+          echo '----------- Apache -----------';
+          /usr/sbin/apache2 -D FOREGROUND
+        ) & pid_apache=$!;
+        
+        wait
+      "
     volumes:
       - ./:/var/www/html/    # Bind mount
     ports:
       - 8080:80
+      - 443:443
+      - 3000:3000
     networks:
       - nw-application
 

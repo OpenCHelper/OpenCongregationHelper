@@ -41,8 +41,18 @@ RUN mkdir -p /home/$APACHE_RUN_USER/.composer && \
 
 # Set working directory
 WORKDIR /var/www/html
-
 USER $user
+
+# Install dependencies (Node.js and PHP)
+COPY package.json package-lock.json composer.json composer.lock ./
+RUN npm install --production=false
+
+# To take advantage of caching until package.json or yarn.lock changes: only now copy
+# all else into the build image, and build.
+# See http://bitjudo.com/blog/2014/03/13/building-efficient-dockerfiles-node-dot-js/
+COPY . .
+
+RUN composer install --no-interaction
 
 # Specify the port number the container should expose
 EXPOSE 80
