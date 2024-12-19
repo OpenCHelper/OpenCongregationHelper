@@ -20,7 +20,9 @@ services:
   application:
     container_name: php-apache
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+        restart: true
     # image: php_apache
     build:
       context: .
@@ -57,6 +59,17 @@ services:
     container_name: mysql
     image: mysql:5.7
     restart: always
+    healthcheck:
+      test: |
+        mysql --connect-timeout=5 -u root \
+          --batch --disable-column-names \
+          --execute='SELECT version()' \
+        || exit 1
+      interval: 2s
+      timeout: 60s
+      retries: 30
+      start_period: 30s
+      start_interval: 5s
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME} # ................ So you don't have to use root, but you can if you like
