@@ -23,7 +23,17 @@ services:
       database:
         condition: service_healthy
         restart: true
-    # image: php_apache
+    healthcheck:
+      # Check if the application is up and running
+      # Note:
+      #   On Docker, a single cURL may take up to 10 seconds to complete
+      test: |
+        timeout 30 curl --silent --fail http://localhost:80/up > /dev/null || exit 1
+      interval: 30s
+      timeout: 120s
+      retries: 4
+      start_period: 1m30s
+      start_interval: 30s
     build:
       context: .
       dockerfile: Dockerfile
