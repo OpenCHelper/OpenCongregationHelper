@@ -38,7 +38,7 @@ services:
         # Start Vite server for Hot Module Replacement
         (
           printf -- '----------------- Resources (HMR) -----------------\\n'
-          npm run dev -- --host --port 3000
+          npm run --silent dev -- --host --port 3000
         ) & pid_vite=$!
 
         sleep 10
@@ -70,10 +70,10 @@ services:
           --batch --disable-column-names \
           --execute='SELECT version()' \
         || exit 1
-      interval: 2s
+      interval: 2s        # Run the healthcheck every 2 seconds
       timeout: 60s
       retries: 30
-      start_period: 30s
+      start_period: 30s   # Give the database some time to start
       start_interval: 5s
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
