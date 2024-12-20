@@ -18,8 +18,8 @@ RUN echo "alias ls='ls --color=auto'" >> ~/.bashrc && \
 
 # Install PHP extensions, Node.js, and NPM
 RUN apt-get update \
-      && apt-get install -y libzip-dev libpng-dev nodejs npm \
-      && docker-php-ext-install gd mysqli pdo pdo_mysql zip;
+      && apt-get install -y libicu-dev libpng-dev libzip-dev nodejs npm \
+      && docker-php-ext-install gd intl mysqli pdo pdo_mysql zip;
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
