@@ -35,10 +35,10 @@ COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 
 # Create system user to run Composer and Artisan Commands
 RUN mkdir -p /home/$APACHE_RUN_USER/.composer && \
-    chown -R $APACHE_RUN_USER /home/$APACHE_RUN_USER
+    chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} /home/$APACHE_RUN_USER $APACHE_RUN_DIR
 
 # Set working directory
-WORKDIR /var/www/html
+WORKDIR $APACHE_RUN_DIR
 USER $user
 
 # Install dependencies (Node.js and PHP)
