@@ -39,7 +39,7 @@ RUN mkdir -p /home/$APACHE_RUN_USER/.composer && \
 
 # Set working directory
 WORKDIR $APACHE_RUN_DIR
-USER $user
+USER $APACHE_RUN_USER
 
 # Install dependencies (Node.js and PHP)
 COPY package.json package-lock.json composer.json composer.lock ./
