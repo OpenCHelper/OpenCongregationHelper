@@ -24,11 +24,8 @@ services:
         condition: service_healthy
         restart: true
     healthcheck:
-      # Check if the application is up and running
-      # Note:
-      #   On Docker, a single cURL may take up to 10 seconds to complete
       test: |
-        timeout 30 curl --silent --fail http://localhost:80/up > /dev/null || exit 1
+        timeout 10 curl --silent --fail http://localhost:80/up > /dev/null || exit 1
       interval: 30s
       timeout: 120s
       retries: 4
@@ -61,15 +58,19 @@ services:
         
         wait
       "
-    volumes:
-      - ./:/var/www/html/    # Bind mount
+    # volumes:
+    #   - ./:/var/www/html/    # Bind mount
     ports:
       - 8080:80
       - 443:443
       - 3000:3000
     networks:
       - nw-application
-
+    develop:
+      watch:
+        - path: ./
+          target: /var/www/html/
+          action: sync
   database:
     container_name: mysql
     image: mysql:5.7
