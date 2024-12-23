@@ -18,6 +18,3 @@ vendor/**/Tests*
 **.gitattributes
 
 readme.md
-
-Dockerfile
-docker-compose.yml

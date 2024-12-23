@@ -70,13 +70,20 @@ services:
     develop:
       watch:
         - path: ./
-          target: /var/www/html/
           action: sync
+          target: /var/www/html/
           ignore:
             - package.json
             - package-lock.json
             - composer.json
             - composer.lock
+            - docker-compose.yml
+            - Dockerfile
+            - .dockerignore
+        - path: ./docker-compose.yml
+          action: rebuild
+        - path: ./Dockerfile
+          action: rebuild
   database:
     container_name: mysql
     image: mysql:5.7
