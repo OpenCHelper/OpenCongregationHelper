@@ -7,7 +7,6 @@ ENV APACHE_RUN_GROUP="www-data"
 ENV APACHE_RUN_UID=1000
 ENV APACHE_RUN_DIR="/var/www/html/"
 ENV APACHE_LOG_DIR="/var/log/apache2/"
-ENV APACHE_PID_FILE="/var/run/apache2.pid"
 
 # [Optional] Create a basic `.bashrc` file to customize the bash shell
 RUN echo "alias ls='ls --color=auto'" >> ~/.bashrc && \
