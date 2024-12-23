@@ -25,11 +25,8 @@ RUN apt-get update \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache modules (mod_rewrite, mod_headers)
-RUN a2enmod rewrite \
-      && a2enmod headers \
-      && service apache2 restart \
-      && apachectl restart;
+# Enable Apache modules (mod_headers, mod_rewrite)
+RUN a2enmod headers rewrite;
 
 # Install the latest release of Composer
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
