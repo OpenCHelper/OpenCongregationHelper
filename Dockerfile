@@ -7,6 +7,7 @@ ENV APACHE_RUN_GROUP="www-data"
 ENV APACHE_RUN_UID=1000
 ENV APACHE_RUN_DIR="/var/www/html/"
 ENV APACHE_LOG_DIR="/var/log/apache2/"
+ENV APACHE_HOME_DIR="/var/www/"
 
 # [Optional] Create a basic `.bashrc` file to customize the bash shell
 RUN echo "alias ls='ls --color=auto'" >> ~/.bashrc && \
@@ -34,21 +35,20 @@ RUN a2enmod rewrite \
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 
 # Create system user to run Composer and Artisan Commands
-RUN mkdir -p /home/$APACHE_RUN_USER/.composer && \
-    chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} /home/$APACHE_RUN_USER $APACHE_RUN_DIR
+RUN chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} ${APACHE_HOME_DIR} ${APACHE_RUN_DIR}
 
 # Set working directory
 WORKDIR $APACHE_RUN_DIR
 USER $APACHE_RUN_USER
 
 # Install dependencies (Node.js and PHP)
-COPY package.json package-lock.json composer.json composer.lock ./
-RUN npm install --production=false
+COPY --chown="${APACHE_RUN_USER}:${APACHE_RUN_GROUP}" package.json package-lock.json composer.json composer.lock ./
+RUN npm install
 
 # To take advantage of caching until package.json or yarn.lock changes: only now copy
 # all else into the build image, and build.
 # See http://bitjudo.com/blog/2014/03/13/building-efficient-dockerfiles-node-dot-js/
-COPY . .
+COPY --chown="${APACHE_RUN_USER}:${APACHE_RUN_GROUP}" . .
 
 RUN composer install --no-interaction
 
