@@ -58,8 +58,9 @@ services:
         
         wait
       "
-    # volumes:
-    #   - ./:/var/www/html/    # Bind mount
+    volumes:
+      # - ./:/var/www/html/    # Bind mount
+      - ./storage/logs/:/var/www/html/storage/logs/
     ports:
       - 8080:80
       - 443:443
