@@ -52,4 +52,4 @@ RUN composer install --no-interaction
 # Specify the port number the container should expose
 EXPOSE 80
 
-CMD ["/usr/sbin/apache2", "-D", "FOREGROUND"]
+CMD ["apache2ctl", "-k", "start", "-D", "FOREGROUND"]

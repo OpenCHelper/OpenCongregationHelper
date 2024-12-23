@@ -53,7 +53,7 @@ services:
         # Start Apache web server
         (
           printf -- '\\n----------------- Apache + PHP -----------------\\n\\n'
-          /usr/sbin/apache2 -D FOREGROUND
+          apache2ctl -k start -D FOREGROUND
         ) & pid_apache=$!
         
         wait
