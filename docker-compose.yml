@@ -61,6 +61,7 @@ services:
     volumes:
       # - ./:/var/www/html/    # Bind mount
       - ./storage/logs/:/var/www/html/storage/logs/:rw
+      - ./database/:/var/www/html/database/:rw
     ports:
       - 8080:80
       - 443:443
@@ -73,13 +74,18 @@ services:
           action: sync
           target: /var/www/html/
           ignore:
+            # Ignore dependency files
             - package.json
             - package-lock.json
             - composer.json
             - composer.lock
+            # Ignore Docker files
             - docker-compose.yml
             - Dockerfile
             - .dockerignore
+            # Ignore mounted directories
+            - storage/logs/
+            - database/
         - path: ./docker-compose.yml
           action: rebuild
         - path: ./Dockerfile
