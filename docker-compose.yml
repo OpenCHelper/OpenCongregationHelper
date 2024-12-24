@@ -90,6 +90,10 @@ services:
           action: rebuild
         - path: ./Dockerfile
           action: rebuild
+        - path: package.json
+          action: rebuild
+        - path: composer.json
+          action: rebuild
   database:
     container_name: mysql
     image: mysql:5.7
