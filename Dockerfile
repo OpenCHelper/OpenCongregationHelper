@@ -17,9 +17,9 @@ RUN echo "alias ls='ls --color=auto'" >> ~/.bashrc && \
     echo "alias ..='cd ..'" >> ~/.bashrc && \
     echo "PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> ~/.bashrc
 
-# Install PHP extensions, Node.js, and NPM
+# Install MySQL Client (for tools like mysqldump), PHP extensions, Node.js, and NPM
 RUN apt-get update \
-      && apt-get install -y libicu-dev libpng-dev libzip-dev nodejs npm \
+      && apt-get install -y default-mysql-client libicu-dev libpng-dev libzip-dev nodejs npm \
       && docker-php-ext-install gd intl mysqli pdo pdo_mysql zip;
 
 # Clear cache
