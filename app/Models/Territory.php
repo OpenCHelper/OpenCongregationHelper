@@ -24,4 +24,19 @@ class Territory extends Model
         'dimensione',
         'territorio_commerciale',
     ];
+
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    // protected $with = ['zona'];
+
+    /**
+     * Get the Zone associated with the territory.
+     */
+    public function zona(): BelongsTo
+    {
+        return $this->belongsTo(TerritoryZone::class, 'zona', 'id');
+    }
 }
