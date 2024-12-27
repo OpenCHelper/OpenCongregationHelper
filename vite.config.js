@@ -6,6 +6,10 @@ export default defineConfig({
         hmr: {
             host: 'localhost',
         },
+        // Workaround for Windows WSL2 (https://vite.dev/config/server-options#server-watch)
+        watch: {
+            usePolling: true,
+        },
     },
     plugins: [
         laravel({
