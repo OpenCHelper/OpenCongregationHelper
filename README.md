@@ -66,6 +66,23 @@ Provare ad eseguire il seguente comando da console `mysql` (_come utente `root`_
 GRANT ALL PRIVILEGES on my_territoriciampino.* To territoriciampino;
 ```
 
+### Maintenance mode
+
+- **Enable** maintenance mode:
+    ```shell
+    $ php artisan down --retry=60 --with-secret --no-interaction --no-ansi -vvv 
+
+       INFO  Application is now in maintenance mode.
+
+       INFO  You may bypass maintenance mode via [http://localhost:8080//2diaCV8mVM8YCjSY].
+    ```
+- **Disable** maintenance mode:
+    ```shell
+    $ php artisan up
+
+       INFO  Application is now live.
+    ```
+
 ## Online resources
 
 - [Google Fonts](https://fonts.google.com/icons)
