@@ -55,6 +55,14 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
+
+      - name: Run optimizations
+        run: |
+          php artisan optimize
+
+          # Clear configuration cache since it creates
+          #    problems on Altervista (https://stackoverflow.com/a/72493970/8965861)
+          php artisan config:clear
         
       - name: "FTP Deploy"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
