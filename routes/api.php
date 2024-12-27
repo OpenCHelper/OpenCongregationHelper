@@ -12,3 +12,9 @@ Route::get('/user', function (Request $request) {
 
 Route::apiResource('territories', TerritoryController::class);
 Route::apiResource('zones', TerritoryZoneController::class);
+Route::get('/assignees', function () {
+    return App\Models\Assignee::all();
+});
+Route::get('/assignments', function () {
+    return App\Models\AssignmentHistory::all();
+}); 
