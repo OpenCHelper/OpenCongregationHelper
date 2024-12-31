@@ -1,4 +1,9 @@
 {
+    "name": "registro-territori",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/LukeSavefrogs/registro-territori.git"
+    },
     "private": true,
     "type": "module",
     "scripts": {
