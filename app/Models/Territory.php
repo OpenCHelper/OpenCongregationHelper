@@ -21,8 +21,13 @@ class Territory extends Model
         'id_territorio',
         'immagine',
         'note',
+        'zona',
         'dimensione',
         'territorio_commerciale',
+    ];
+
+    protected $casts = [
+        'territorio_commerciale' => 'boolean',
     ];
 
     /**
@@ -35,7 +40,7 @@ class Territory extends Model
     /**
      * Get the Zone associated with the territory.
      */
-    public function zona(): BelongsTo
+    public function zone(): BelongsTo
     {
         return $this->belongsTo(TerritoryZone::class, 'zona', 'id');
     }

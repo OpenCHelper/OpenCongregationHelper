@@ -13,6 +13,8 @@ return new class extends Migration
     {
         // Update the existing 'territori' table
         Schema::table('territori', function (Blueprint $table) {
+            $table->integer('id')->unsigned()->autoIncrement();
+            $table->mediumText('immagine');
             $table->timestamps();
         });
     }
@@ -23,6 +25,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('territori', function (Blueprint $table) {
+            $table->integer('id')->primary();
+            $table->mediumText('immagine')->charset('binary');
             $table->dropTimestamps();
         });
     }
