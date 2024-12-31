@@ -41,6 +41,21 @@ services:
     user: "${DOCKER_APACHE_USER:-www-data}:${DOCKER_APACHE_GROUP:-www-data}"
     command: |
       bash -c "
+        set -o errexit
+        set -o pipefail
+
+        # Install Composer dependencies
+        (
+          printf -- '-----------------   Composer    -----------------\\n'
+          composer install --no-interaction --no-progress || exit 1
+        )
+
+        # Install NPM dependencies
+        (
+          printf -- '-----------------     NPM       -----------------\\n'
+          npm install --no-audit --no-fund --no-progress || exit 2
+        )
+
         # Run Laravel Database migrations
         (
           printf -- '-----------------     Laravel     -----------------\\n'
