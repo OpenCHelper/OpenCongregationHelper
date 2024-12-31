@@ -35,9 +35,9 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - APACHE_RUN_USER="${DOCKER_APACHE_USER:-www-data}"
-        - APACHE_RUN_GROUP="${DOCKER_APACHE_GROUP:-www-data}"
-        - APACHE_RUN_UID="${DOCKER_APACHE_UID:-1000}"
+        - APACHE_RUN_USER=${DOCKER_APACHE_USER:-www-data}
+        - APACHE_RUN_GROUP=${DOCKER_APACHE_GROUP:-www-data}
+        - APACHE_RUN_UID=${DOCKER_APACHE_UID:-1000}
     user: "${DOCKER_APACHE_USER:-www-data}:${DOCKER_APACHE_GROUP:-www-data}"
     command: |
       bash -c "
