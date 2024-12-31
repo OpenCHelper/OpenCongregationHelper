@@ -9,6 +9,7 @@ name: 'registro-territori'
 # Docker automatically creates a new volume and allows data persistence
 volumes:
   db_volume: {}
+  npm_cache: {}
 
 #     _                      _                 
 #    | |                    (_)                
@@ -39,6 +40,8 @@ services:
         - APACHE_RUN_GROUP=${DOCKER_APACHE_GROUP:-www-data}
         - APACHE_RUN_UID=${DOCKER_APACHE_UID:-1000}
     user: "${DOCKER_APACHE_USER:-www-data}:${DOCKER_APACHE_GROUP:-www-data}"
+    environment:
+      - npm_config_cache=~/npm-cache
     command: |
       bash -c "
         set -o errexit
@@ -76,13 +79,14 @@ services:
         # Start Apache web server
         (
           printf -- '\\n----------------- Apache + PHP -----------------\\n\\n'
-          apache2ctl -k start -D FOREGROUND
+          apache2ctl -k start -c 'ServerName localhost' -D FOREGROUND
         ) & pid_apache=$!
         
         wait
       "
     volumes:
       - ./:/var/www/html/    # Bind mount
+      # - npm_cache:~/npm-cache
       # - ./storage/logs/:/var/www/html/storage/logs/:rw
       # - ./database/:/var/www/html/database/:rw
     ports:
@@ -113,10 +117,10 @@ services:
           action: rebuild
         - path: ./Dockerfile
           action: rebuild
-        - path: package.json
-          action: rebuild
-        - path: composer.json
-          action: rebuild
+        # - path: package.json
+        #   action: rebuild
+        # - path: composer.json
+        #   action: rebuild
   database:
     container_name: mysql
     image: mysql:5.7
