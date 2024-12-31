@@ -54,7 +54,7 @@ RUN npm install
 # See http://bitjudo.com/blog/2014/03/13/building-efficient-dockerfiles-node-dot-js/
 COPY --chown="${APACHE_RUN_USER}:${APACHE_RUN_GROUP}" . .
 
-RUN composer install --no-interaction
+# RUN composer install --no-interaction
 
 # Specify the port number the container should expose
 EXPOSE 80
