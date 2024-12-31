@@ -34,6 +34,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - APACHE_RUN_USER="${DOCKER_APACHE_USER:-www-data}"
+        - APACHE_RUN_GROUP="${DOCKER_APACHE_GROUP:-www-data}"
+        - APACHE_RUN_UID="${DOCKER_APACHE_UID:-1000}"
+    user: "${DOCKER_APACHE_USER:-www-data}:${DOCKER_APACHE_GROUP:-www-data}"
     command: |
       bash -c "
         # Run Laravel Database migrations
@@ -59,9 +64,9 @@ services:
         wait
       "
     volumes:
-      # - ./:/var/www/html/    # Bind mount
-      - ./storage/logs/:/var/www/html/storage/logs/:rw
-      - ./database/:/var/www/html/database/:rw
+      - ./:/var/www/html/    # Bind mount
+      # - ./storage/logs/:/var/www/html/storage/logs/:rw
+      # - ./database/:/var/www/html/database/:rw
     ports:
       - 8080:80
       - 443:443
@@ -70,22 +75,22 @@ services:
       - nw-application
     develop:
       watch:
-        - path: ./
-          action: sync
-          target: /var/www/html/
-          ignore:
-            # Ignore dependency files
-            - package.json
-            - package-lock.json
-            - composer.json
-            - composer.lock
-            # Ignore Docker files
-            - docker-compose.yml
-            - Dockerfile
-            - .dockerignore
-            # Ignore mounted directories
-            - storage/logs/
-            - database/
+        # - path: ./
+        #   action: sync
+        #   target: /var/www/html/
+        #   ignore:
+        #     # Ignore dependency files
+        #     - package.json
+        #     - package-lock.json
+        #     - composer.json
+        #     - composer.lock
+        #     # Ignore Docker files
+        #     - docker-compose.yml
+        #     - Dockerfile
+        #     - .dockerignore
+        #     # Ignore mounted directories
+        #     - storage/logs/
+        #     - database/
         - path: ./docker-compose.yml
           action: rebuild
         - path: ./Dockerfile
