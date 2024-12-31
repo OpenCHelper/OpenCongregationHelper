@@ -44,6 +44,9 @@ services:
         set -o errexit
         set -o pipefail
 
+        # Fix Composer error: `fatal: detected dubious ownership in repository at '/var/www/html'`
+        git config --global --add safe.directory /var/www/html
+
         # Install Composer dependencies
         (
           printf -- '-----------------   Composer    -----------------\\n'
