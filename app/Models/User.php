@@ -14,6 +14,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Models\Contracts\HasTenants;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements HasTenants, MustVerifyEmail, FilamentUser
@@ -85,5 +86,10 @@ class User extends Authenticatable implements HasTenants, MustVerifyEmail, Filam
     public function canAccessTenant(Model $tenant): bool
     {
         return $this->belongsToTeam($tenant);
+    }
+
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class);
     }
 }
