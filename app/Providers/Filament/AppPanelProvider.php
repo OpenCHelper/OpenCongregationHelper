@@ -30,6 +30,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Fortify\Fortify;
 use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Jetstream;
+use \FilipFonal\FilamentLogManager\FilamentLogManager;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -68,7 +69,7 @@ class AppPanelProvider extends PanelProvider
                 Widgets\FilamentInfoWidget::class,
             ])
             ->plugins([
-                \FilipFonal\FilamentLogManager\FilamentLogManager::make(),
+                FilamentLogManager::make(),
             ])
             ->middleware([
                 EncryptCookies::class,
