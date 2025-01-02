@@ -12,6 +12,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bezhansalleh/filament-language-switch": "^3.1",
         "filament/filament": "^3.2",
         "filipfonal/filament-log-manager": "^2.0",
         "laravel/framework": "^11.9",
@@ -19,6 +20,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.0",
+        "outhebox/blade-flags": "^1.5",
         "phpoffice/phpspreadsheet": "^1.29",
         "stephenjude/filament-jetstream": "^0.0.15"
     },
