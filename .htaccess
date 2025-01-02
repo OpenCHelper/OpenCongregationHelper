@@ -11,9 +11,7 @@ AddHandler av-php82 .php
     # Activate the mod_rewrite engine
     RewriteEngine On
     RewriteBase /
-
+    
     # Redirect all traffic to public folder
-    RewriteRule ^(.*)$ /public/$1
-    #RewriteRule ^ index.php [L]
-    RewriteRule ^(/)?$ public/index.php [L] 
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
