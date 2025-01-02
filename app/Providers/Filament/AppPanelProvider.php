@@ -48,6 +48,7 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Gray,
             ])
+            ->unsavedChangesAlerts()
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Profile')
