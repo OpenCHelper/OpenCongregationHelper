@@ -39,13 +39,14 @@ class TerritoryZoneResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('territories_count')
                     ->counts('territories')
-                    ->label('Numero territori')
+                    ->label('Totale territori')
                     ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -67,6 +68,7 @@ class TerritoryZoneResource extends Resource
         return [
             'index' => Pages\ListTerritoryZones::route('/'),
             'create' => Pages\CreateTerritoryZone::route('/create'),
+            'view' => Pages\ViewTerritoryZone::route('/{record}'),
             'edit' => Pages\EditTerritoryZone::route('/{record}/edit'),
         ];
     }
