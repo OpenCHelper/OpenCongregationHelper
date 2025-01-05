@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Log;
 
 class Territory extends Model
 {
@@ -24,10 +26,12 @@ class Territory extends Model
         'zona',
         'dimensione',
         'territorio_commerciale',
+        'geojson',
     ];
 
     protected $casts = [
         'territorio_commerciale' => 'boolean',
+        'geojson' => 'array',
     ];
 
     /**
@@ -43,5 +47,36 @@ class Territory extends Model
     public function zone(): BelongsTo
     {
         return $this->belongsTo(TerritoryZone::class, 'zona', 'id');
+    }
+
+    public function geojson(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value) {
+                if (is_null($value) || empty($value)) {
+                    return null;
+                }
+
+                return $value;
+            },
+            set: function (mixed $value) {
+                if (is_null($value) || empty($value)) {
+                    return null;
+                }
+
+                // FeatureCollections with no features should be saved as null
+                // Es.: {"type":"FeatureCollection","features":[]}
+                $object = $value;
+                if (is_string($value)) {
+                    $object = json_decode($value);
+                }
+
+                if (empty($object->features ?? [])) {
+                    return null;
+                }
+
+                return $value;
+            },
+        );
     }
 }
