@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('territori', function (Blueprint $table) {
-            $table->text('geojson')
+            $table->json('geojson')
                 ->after('immagine')
                 ->nullable();
         });

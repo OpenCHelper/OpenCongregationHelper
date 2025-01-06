@@ -31,7 +31,7 @@ class Territory extends Model
 
     protected $casts = [
         'territorio_commerciale' => 'boolean',
-        'geojson' => 'array',
+        // 'geojson' => 'array',
     ];
 
     /**

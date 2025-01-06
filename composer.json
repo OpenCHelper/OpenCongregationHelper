@@ -23,7 +23,8 @@
         "livewire/livewire": "^3.0",
         "outhebox/blade-flags": "^1.5",
         "phpoffice/phpspreadsheet": "^1.29",
-        "stephenjude/filament-jetstream": "^0.0.15"
+        "stephenjude/filament-jetstream": "^0.0.15",
+        "webbingbrasil/filament-maps": "^v3.0.0-beta"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
