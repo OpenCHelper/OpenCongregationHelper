@@ -16,6 +16,7 @@ class TerritoryZone extends Model
      */
     protected $fillable = [
         'nome_zona',
+        'color',
     ];
 
     /**

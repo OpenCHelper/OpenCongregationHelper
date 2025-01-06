@@ -27,6 +27,7 @@ class TerritoryZoneResource extends Resource
                 Forms\Components\TextInput::make('nome_zona')
                     ->required()
                     ->maxLength(50),
+                Forms\Components\ColorPicker::make('color'),
             ]);
     }
 

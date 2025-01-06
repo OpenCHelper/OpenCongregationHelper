@@ -10,16 +10,19 @@ use Webbingbrasil\FilamentMaps\Polygone;
 
 use App\Models\Territory;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class TerritoryGlobalMap extends MapWidget
 {
     protected int | string | array $columnSpan = 2;
     protected bool $hasBorder = true;
 
+    // public array $mapOptions = ['center' => [41.896961975616, 12.481241781767], 'zoom' => 13];
     public function setUp(): void
     {
         $this
             ->actions([])
+            // ->mapOptions(['center' => [41.896961975616, 12.481241781767], 'zoom' => 13])
         ;
     }
     
@@ -35,7 +38,7 @@ class TerritoryGlobalMap extends MapWidget
                 if ($feature["geometry"]["type"] != "Polygon") {
                     continue;
                 }
-
+    
                 // The first two elements are longitude and latitude, but we need latitude and longitude
                 // Swap all the coordinates
                 $coords_lat_long = array_map(function($coord) {
@@ -46,7 +49,6 @@ class TerritoryGlobalMap extends MapWidget
 
                 $popup = "
                     <h1>" . htmlspecialchars($territory->id_territorio) . "</h1>
-                    <br>
                     <p>
                         <a href='" . htmlspecialchars(TerritoryResource::getUrl('edit', [
                             'record' => $territory->id,
@@ -56,8 +58,17 @@ class TerritoryGlobalMap extends MapWidget
                     </p>
                 ";
 
+                Log::info("Territory zone color is " . $territory->zone->color);
+
+                // See https://leafletjs.com/reference.html#polygon-color for the full list of options
+                $polygonOptions = [];
+                if ($territory->zone->color) {
+                    $polygonOptions['color'] = $territory->zone->color;
+                }
+
                 $polygones[] = Polygone::make($territory->id_territorio)
                     ->latlngs($coords_lat_long)
+                    ->options($polygonOptions)
                     ->tooltip($territory->id_territorio)
                     ->popup($popup);
             }
@@ -70,6 +81,14 @@ class TerritoryGlobalMap extends MapWidget
     {
         return [
             Actions\CenterMapAction::make()->centerOnUserPosition()->zoom(13),
+        ];
+    }
+
+    public function getMapOptions(): array
+    {
+        return [
+            'center' => [41.896961975616, 12.481241781767],
+            'zoom' => 13,
         ];
     }
 
