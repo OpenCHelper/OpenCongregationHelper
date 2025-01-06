@@ -18,6 +18,7 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Get;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Set;
+use Illuminate\Database\Eloquent\Model;
 
 class TerritoryResource extends Resource
 {
@@ -29,64 +30,101 @@ class TerritoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('id_territorio')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\Select::make('zone')
-                    ->required()
-                    ->relationship(titleAttribute: 'nome_zona')
-                    ->preload()
-                    ->searchable(),
-                Forms\Components\FileUpload::make('immagine')
-                    ->required(),
-                Forms\Components\Textarea::make('note')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('dimensione')
-                    ->numeric(),
-                Forms\Components\Toggle::make('territorio_commerciale'),
-                Map::make('location')
-                    ->label('Location')
-                    ->columnSpanFull()
-                    // ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
-                    ->afterStateUpdated(function (Set $set, ?array $state): void {
-                        $set('geojson',   json_encode($state['geojson'] ?? ''));
-                    })
-                    ->afterStateHydrated(function ($state, $record, Set $set): void {
-                        $set('location', [
-                                'geojson' => json_decode(strip_tags($record->geojson ?? ''))
-                            ]
-                        );
-                    })
-                    // ->extraStyles([
-                    //     'min-height: 150vh',
-                    //     'border-radius: 50px'
-                    // ])
-                    // ->liveLocation(true, false, 5000)
-                    ->showMarker(false)
-                    ->showFullscreenControl()
-                    ->showZoomControl()
-                    ->draggable()
-                    ->zoom(15)
-                    ->showMyLocationButton()
-                    ->geoMan(true)
-                    ->geoManEditable(false)
-                    ->geoManPosition('topleft')
-                    ->rotateMode(false)
-                    ->clickable(false) //click to move marker
-                    ->drawMarker(false)
-                    ->drawPolygon(true)
-                    ->drawPolyline(false)
-                    ->drawCircle(false)
-                    ->drawCircleMarker(false)
-                    ->dragMode(false)
-                    ->cutPolygon(false)
-                    ->editPolygon()
-                    ->deleteLayer()
-                    ->setColor('#3388ff')
-                    ->setFilledColor('#cad9ec'),
-                Forms\Components\TextInput::make('geojson')
-                    // ->hiddenLabel()
-                    ->readOnly(),
+                Forms\Components\Section::make('Informazioni fondamentali')
+                    ->description('Informazioni necessarie per l\'identificazione del territorio')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\TextInput::make('id_territorio')
+                            ->required()
+                            ->numeric(),
+                        Forms\Components\Select::make('zone')
+                            ->required()
+                            ->relationship(titleAttribute: 'nome_zona')
+                            ->preload()
+                            ->searchable(),
+                        Forms\Components\Toggle::make('territorio_commerciale')
+                            // ->inline(false)
+                            ->onIcon('heroicon-o-building-storefront')
+                            ->offIcon('heroicon-o-home'),
+                        Forms\Components\Tabs::make('Tabs')
+                            ->columnSpanFull()
+                            ->contained(false)
+                            ->tabs([
+                                Forms\Components\Tabs\Tab::make('TabImage')
+                                    ->label('Immagine')
+                                    ->icon('heroicon-o-photo')
+                                    ->schema([
+                                        Forms\Components\FileUpload::make('immagine')
+                                            ->extraAttributes(['style' => 'min-height: 320px;'])
+                                            ->image()
+                                            ->panelLayout('integrated')
+                                            ->imageEditor()
+                                            ->openable()
+                                            ->previewable(),
+                                    ]),
+                                Forms\Components\Tabs\Tab::make('TabMap')
+                                    ->label('Mappa')
+                                    ->icon('heroicon-o-map')
+                                    ->schema([
+                                        Map::make('location')
+                                            ->label('Location')
+                                            ->columnSpanFull()
+                                            // ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
+                                            ->afterStateUpdated(function (Set $set, ?array $state): void {
+                                                $set('geojson',   json_encode($state['geojson'] ?? ''));
+                                            })
+                                            ->afterStateHydrated(function ($state, $record, Set $set): void {
+                                                $set('location', [
+                                                        'geojson' => json_decode(strip_tags($record->geojson ?? ''))
+                                                    ]
+                                                );
+                                            })
+                                            // ->extraStyles([
+                                            //     'min-height: 150vh',
+                                            //     'border-radius: 50px'
+                                            // ])
+                                            // ->liveLocation(true, false, 5000)
+                                            ->showMarker(false)
+                                            ->showFullscreenControl()
+                                            ->showZoomControl()
+                                            ->draggable()
+                                            ->zoom(15)
+                                            ->showMyLocationButton()
+                                            ->geoMan(true)
+                                            ->geoManEditable(false)
+                                            ->geoManPosition('topleft')
+                                            ->rotateMode(false)
+                                            ->clickable(false) //click to move marker
+                                            ->drawMarker(false)
+                                            ->drawPolygon(true)
+                                            ->drawPolyline(false)
+                                            ->drawCircle(false)
+                                            ->drawCircleMarker(false)
+                                            ->dragMode(false)
+                                            ->cutPolygon(false)
+                                            ->editPolygon()
+                                            ->deleteLayer()
+                                            ->setColor('#3388ff')
+                                            ->setFilledColor('#cad9ec'),
+                                        Forms\Components\TextInput::make('geojson')
+                                            // ->hiddenLabel()
+                                            ->readOnly(),
+                                ]),
+                            ])
+                            ->activeTab(function (?Model $record) {
+                                return $record?->geojson ? 2 : 1;
+                            })
+                    ]),
+                Forms\Components\Section::make('Informazioni aggiuntive')
+                    ->description('Informazioni utili in fase di lavorazione e/o gestione del territorio')
+                    ->columns(1)
+                    ->schema([
+                        Forms\Components\TextInput::make('dimensione')
+                            ->numeric(),
+                        Forms\Components\Textarea::make('note')
+                            ->helperText('Inserisci eventuali note utili per la lavorazione del territorio')
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
