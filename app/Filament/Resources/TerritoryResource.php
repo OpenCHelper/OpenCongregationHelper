@@ -49,11 +49,11 @@ class TerritoryResource extends Resource
                     ->columnSpanFull()
                     // ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
                     ->afterStateUpdated(function (Set $set, ?array $state): void {
-                        $set('geojson',   json_encode($state['geojson']));
+                        $set('geojson',   json_encode($state['geojson'] ?? ''));
                     })
                     ->afterStateHydrated(function ($state, $record, Set $set): void {
                         $set('location', [
-                                'geojson' => json_decode(strip_tags($record->geojson))
+                                'geojson' => json_decode(strip_tags($record->geojson ?? ''))
                             ]
                         );
                     })
