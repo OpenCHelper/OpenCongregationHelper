@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+use Illuminate\Database\Eloquent\Model;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Tell Eloquent to be strict about the data types it expects 
+        // locally.
+        // https://laraveldaily.com/lesson/laravel-eloquent-expert/model-fillable-guarded/
+        Model::shouldBeStrict(! app()->isProduction()); 
+
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
                 ->locales(['en','it']) // also accepts a closure
