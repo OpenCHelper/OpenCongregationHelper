@@ -10,7 +10,6 @@ use Webbingbrasil\FilamentMaps\Polygone;
 
 use App\Models\Territory;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 
 class TerritoryGlobalMap extends MapWidget
 {
