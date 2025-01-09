@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\Console\Output\BufferedOutput;
+
+class ExecuteArtisanCommandController extends Controller
+{
+    /**
+     * Handle the incoming request.
+     */
+    public function __invoke(Request $request, Response $response, $command)
+    {
+        $token = $request->header('X-Execute-Artisan-Command-Token');
+
+        Log::info($request->input('params'));
+
+        $params = $request->input('params');
+        Log::info('Executing Artisan command: ' . $command . ' with params: ' . json_encode($params));
+
+        $availableCommands = array_keys(Artisan::all());
+        Log::info(json_encode($availableCommands));
+
+        if (!in_array($command, $availableCommands)) {
+            Log::error('Artisan command not found: ' . $command);
+            return response()->json([
+                'success' => false,
+                'output' => "Command '$command' is not a valid artisan command",
+                'returnCode' => -1,
+            ], status: 404);
+        }
+
+        try {
+            $exitCode = Artisan::call("$command $params");
+        } catch (\Exception $e) {
+            Log::error('Error executing Artisan command: ' . $command . ' with params: ' . json_encode($params) . ' - ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'output' => $e->getMessage(),
+                'returnCode' => -1,
+            ], status: 400);
+        }
+        
+        $output = Artisan::output();
+
+        Log::info('Artisan command output: ' . PHP_EOL . implode("\n", array_map(function ($line) {
+            return '    | ' . $line;
+        }, explode("\n", $output))));
+
+        return response()->json(array(
+            'success' => true,
+            'output' => $output,
+            'returnCode' => $exitCode,
+        ));
+    }
+}
