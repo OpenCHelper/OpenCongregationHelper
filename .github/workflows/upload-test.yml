@@ -57,12 +57,19 @@ jobs:
         run: npm run build --if-present
       
       - name: Run optimizations
+        env:
+          ftp_server: ${{ secrets.ftp_server_test }}
         run: |
-          php artisan optimize
+          target_url="${ftp_server##ftp.}"
 
-          # Clear configuration cache since it creates
-          #    problems on Altervista (https://stackoverflow.com/a/72493970/8965861)
-          php artisan config:clear
+          # Show the current environment
+          curl -s -X POST -H "Content-Type: application/json" "http://artisan.localhost:8080/api/execute/config:show" -d '{"params": "app.env"}'
+
+          # Run optimizations
+          curl -s -X POST -H "Content-Type: application/json" "http://artisan.localhost:8080/api/execute/optimize"
+
+          # Run migrations and seeders
+          curl -s -X POST -H "Content-Type: application/json" "http://artisan.localhost:8080/api/execute/migrate:fresh" -d '{"params": "--seed"}'
         
       - name: "FTP Deploy"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
