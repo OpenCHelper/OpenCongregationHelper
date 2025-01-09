@@ -17,8 +17,6 @@ class ExecuteArtisanCommandController extends Controller
     {
         $token = $request->header('X-Execute-Artisan-Command-Token');
 
-        Log::info($request->input('params'));
-
         $params = $request->input('params');
         Log::info('Executing Artisan command: ' . $command . ' with params: ' . json_encode($params));
 
