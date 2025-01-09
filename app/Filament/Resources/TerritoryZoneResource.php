@@ -24,7 +24,7 @@ class TerritoryZoneResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nome_zona')
+                Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(50),
                 Forms\Components\ColorPicker::make('color'),
@@ -35,7 +35,7 @@ class TerritoryZoneResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nome_zona')
+                Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('territories_count')

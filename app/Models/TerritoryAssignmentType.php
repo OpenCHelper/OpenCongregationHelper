@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AssignmentType extends Model
+class TerritoryAssignmentType extends Model
 {
-    // use SoftDeletes;
-
-    protected $table = 'tipo_campagne';
+    /** @use HasFactory<\Database\Factories\TerritoryAssignmentTypeFactory> */
+    use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -18,7 +18,9 @@ class AssignmentType extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'nome_campagna',
+        'name',
         'short_name',
+        'description',
+        'color',
     ];
 }

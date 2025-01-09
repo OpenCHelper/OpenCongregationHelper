@@ -27,7 +27,7 @@ class TerritoryGlobalMap extends MapWidget
     
     public function getPolygones(): array
     {
-        $territories = Territory::all()->where('geojson', '!=', null);
+        $territories = Territory::with('territoryZone')->where('geojson', '!=', null)->get();
         
         $polygones = [];
         foreach ($territories as $territory) {
@@ -47,7 +47,7 @@ class TerritoryGlobalMap extends MapWidget
                 }, $feature["geometry"]["coordinates"]);
 
                 $popup = "
-                    <h1>" . htmlspecialchars($territory->id_territorio) . "</h1>
+                    <h1>" . htmlspecialchars($territory->name) . "</h1>
                     <p>
                         <a href='" . htmlspecialchars(TerritoryResource::getUrl('edit', [
                             'record' => $territory->id,
@@ -57,18 +57,18 @@ class TerritoryGlobalMap extends MapWidget
                     </p>
                 ";
 
-                Log::info("Territory zone color is " . $territory->zone->color);
+                Log::info("Territory zone color is " . $territory->territoryZone->color);
 
                 // See https://leafletjs.com/reference.html#polygon-color for the full list of options
                 $polygonOptions = [];
-                if ($territory->zone->color) {
-                    $polygonOptions['color'] = $territory->zone->color;
+                if ($territory->territoryZone->color) {
+                    $polygonOptions['color'] = $territory->territoryZone->color;
                 }
 
-                $polygones[] = Polygone::make($territory->id_territorio)
+                $polygones[] = Polygone::make($territory->name)
                     ->latlngs($coords_lat_long)
                     ->options($polygonOptions)
-                    ->tooltip($territory->id_territorio)
+                    ->tooltip($territory->name)
                     ->popup($popup);
             }
         }

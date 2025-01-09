@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TerritoryZone extends Model
 {
-    protected $table = 'zone';
+    /** @use HasFactory<\Database\Factories\TerritoryZoneFactory> */
+    use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -15,7 +19,7 @@ class TerritoryZone extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'nome_zona',
+        'name',
         'color',
     ];
 
@@ -24,6 +28,6 @@ class TerritoryZone extends Model
      */
     public function territories(): HasMany
     {
-        return $this->hasMany(Territory::class, 'zona', 'id');
+        return $this->hasMany(Territory::class);
     }
 }

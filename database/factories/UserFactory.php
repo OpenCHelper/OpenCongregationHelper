@@ -69,4 +69,11 @@ class UserFactory extends Factory
             'ownedTeams'
         );
     }
+
+    public function withPassword(string $password): static
+    {
+        return $this->state([
+            'password' => Hash::make($password),
+        ]);
+    }
 }

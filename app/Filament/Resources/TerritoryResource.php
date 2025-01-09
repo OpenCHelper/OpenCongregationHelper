@@ -34,15 +34,14 @@ class TerritoryResource extends Resource
                     ->description('Informazioni necessarie per l\'identificazione del territorio')
                     ->columns(2)
                     ->schema([
-                        Forms\Components\TextInput::make('id_territorio')
+                        Forms\Components\TextInput::make('name')
+                            ->required(),
+                        Forms\Components\Select::make('territory_zone_id')
                             ->required()
-                            ->numeric(),
-                        Forms\Components\Select::make('zone')
-                            ->required()
-                            ->relationship(titleAttribute: 'nome_zona')
+                            ->relationship(name: 'territoryZone', titleAttribute: 'name')
                             ->preload()
                             ->searchable(),
-                        Forms\Components\Toggle::make('territorio_commerciale')
+                        Forms\Components\Toggle::make('is_commercial')
                             // ->inline(false)
                             ->onIcon('heroicon-o-building-storefront')
                             ->offIcon('heroicon-o-home'),
@@ -54,7 +53,7 @@ class TerritoryResource extends Resource
                                     ->label('Immagine')
                                     ->icon('heroicon-o-photo')
                                     ->schema([
-                                        Forms\Components\FileUpload::make('immagine')
+                                        Forms\Components\FileUpload::make('image_path')
                                             ->extraAttributes(['style' => 'min-height: 320px;'])
                                             ->image()
                                             ->panelLayout('integrated')
@@ -69,6 +68,7 @@ class TerritoryResource extends Resource
                                         Map::make('location')
                                             ->label('Location')
                                             ->columnSpanFull()
+                                            ->dehydrated(false)
                                             // ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
                                                 $set('geojson',   json_encode($state['geojson'] ?? ''));
@@ -119,9 +119,9 @@ class TerritoryResource extends Resource
                     ->description('Informazioni utili in fase di lavorazione e/o gestione del territorio')
                     ->columns(1)
                     ->schema([
-                        Forms\Components\TextInput::make('dimensione')
-                            ->numeric(),
-                        Forms\Components\Textarea::make('note')
+                        // Forms\Components\TextInput::make('dimensione')
+                        //     ->numeric(),
+                        Forms\Components\Textarea::make('notes')
                             ->helperText('Inserisci eventuali note utili per la lavorazione del territorio')
                             ->columnSpanFull(),
                     ]),
@@ -131,21 +131,26 @@ class TerritoryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
             ->columns([
-                Tables\Columns\TextColumn::make('id_territorio')
+                Tables\Columns\TextColumn::make('name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('zone.nome_zona')
+                Tables\Columns\TextColumn::make('territoryZone.name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('immagine')
+                Tables\Columns\ImageColumn::make('image_path')
                     ->visibility('private')
                     ->square(),
-                Tables\Columns\TextColumn::make('dimensione')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('territorio_commerciale')
+                // Tables\Columns\TextColumn::make('dimensione')
+                //     ->numeric()
+                //     ->sortable(),
+                Tables\Columns\IconColumn::make('is_commercial')
                     ->boolean(),
+                // Tables\Columns\TextColumn::make('activeAssignment.assegnato_a.nome')
+                //     ->default('')
+                //     ->sortable()
+                //     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

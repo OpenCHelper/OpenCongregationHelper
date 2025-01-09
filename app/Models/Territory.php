@@ -2,17 +2,21 @@
 
 namespace App\Models;
 
+use App\HasParentSoftDeletable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Territory extends Model
 {
-    // use SoftDeletes;
+    /** @use HasFactory<\Database\Factories\TerritoryFactory> */
+    use HasFactory;
+    use SoftDeletes;
 
-    protected $table = 'territori';
+    use HasParentSoftDeletable;
 
     /**
      * The attributes that are mass assignable.
@@ -20,17 +24,17 @@ class Territory extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'id_territorio',
-        'immagine',
-        'note',
-        'zona',
-        'dimensione',
-        'territorio_commerciale',
+        'name',
+        'description',
+        'image_path',
         'geojson',
+        'notes',
+        'is_commercial',
+        'territory_zone_id',
     ];
 
     protected $casts = [
-        'territorio_commerciale' => 'boolean',
+        'is_commercial' => 'boolean',
         // 'geojson' => 'array',
     ];
 
@@ -39,15 +43,33 @@ class Territory extends Model
      *
      * @var array
      */
-    // protected $with = ['zona'];
+    // protected $with = [];
 
     /**
      * Get the Zone associated with the territory.
      */
-    public function zone(): BelongsTo
+    public function territoryZone(): BelongsTo
     {
-        return $this->belongsTo(TerritoryZone::class, 'zona', 'id');
+        return $this->belongsTo(TerritoryZone::class);
     }
+
+    public function assignments(): HasMany {
+        return $this->hasMany(TerritoryAssignment::class);
+    }
+
+    // public function activeAssignment(): Attribute {
+    //     return Attribute::make(
+    //         get: function (mixed $value) {
+    //             Log::info(json_encode($this->assignments()->getResults()->filter(function ($assignment) {
+    //                 return $assignment->data_rientro === null;
+    //             })));
+        
+    //             return $this->assignments()->getResults()->filter(function ($assignment) {
+    //                 return $assignment->data_rientro === null;
+    //             })->first();
+    //         },
+    //     );
+    // }
 
     public function geojson(): Attribute
     {
