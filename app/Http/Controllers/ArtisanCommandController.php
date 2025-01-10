@@ -8,20 +8,20 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-class ExecuteArtisanCommandController extends Controller
+class ArtisanCommandController extends Controller
 {
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request, Response $response, $command)
+    public function execute(Request $request, ?string $command = null)
     {
         $token = $request->header('X-Execute-Artisan-Command-Token');
 
+        $command = $command ?? $request->input('command');
         $params = $request->input('params');
         Log::info('Executing Artisan command: ' . $command . ' with params: ' . json_encode($params));
 
         $availableCommands = array_keys(Artisan::all());
-        Log::info(json_encode($availableCommands));
 
         if (!in_array($command, $availableCommands)) {
             Log::error('Artisan command not found: ' . $command);
@@ -53,6 +53,15 @@ class ExecuteArtisanCommandController extends Controller
             'success' => true,
             'output' => $output,
             'returnCode' => $exitCode,
+        ));
+    }
+
+    public function list()
+    {
+        $availableCommands = array_keys(Artisan::all());
+        return response()->json(array(
+            'success' => true,
+            'output' => $availableCommands,
         ));
     }
 }
