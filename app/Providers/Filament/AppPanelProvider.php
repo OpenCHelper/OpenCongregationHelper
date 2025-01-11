@@ -31,6 +31,7 @@ use Laravel\Fortify\Fortify;
 use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Jetstream;
 use \FilipFonal\FilamentLogManager\FilamentLogManager;
+use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -71,6 +72,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentLogManager::make(),
+                EnvironmentIndicatorPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,
