@@ -35,6 +35,19 @@ class TerritoryAssignmentTypeResource extends Resource
                 Forms\Components\TextInput::make('short_name')
                     ->maxLength(10),
                 Forms\Components\ColorPicker::make('color'),
+                Forms\Components\Section::make('Validity dates')
+                    ->description('Set the date range for when this assignment type is valid (default is always)')
+                    ->columnSpanFull()
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\DateTimePicker::make('valid_from')
+                            ->columnSpan(1)
+                            ->format('Y-m-d H:i:s'),
+                        Forms\Components\DateTimePicker::make('valid_until')
+                            ->requiredWith('valid_from')
+                            ->columnSpan(1)
+                            ->format('Y-m-d H:i:s'),
+                    ]),
                 Forms\Components\Select::make('created_by')
                     ->disabled()
                     ->hiddenOn(['create', 'edit'])
@@ -52,6 +65,19 @@ class TerritoryAssignmentTypeResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('creator.name')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('short_name')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('description')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('valid_from')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('valid_until')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

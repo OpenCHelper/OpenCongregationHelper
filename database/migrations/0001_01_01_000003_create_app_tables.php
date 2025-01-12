@@ -59,6 +59,9 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->tinyText('color')->nullable()->comment('Optional color code (hex, rgb, etc.)');
 
+            $table->dateTime('valid_from')->nullable()->comment('Valid from date');
+            $table->dateTime('valid_until')->nullable()->comment('Valid until date');
+
             $table->foreignIdFor(User::class, 'created_by')->comment('User who created this record')->nullable()->constrained()->nullOnDelete();
 
             $table->timestamps();

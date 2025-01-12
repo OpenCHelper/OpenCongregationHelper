@@ -25,6 +25,8 @@ class TerritoryAssignmentType extends Model
         'description',
         'color',
         'created_by',
+        'valid_from',
+        'valid_until',
     ];
 
     public function creator(): HasOne
