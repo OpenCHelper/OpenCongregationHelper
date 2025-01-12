@@ -13,6 +13,7 @@
     "require": {
         "php": "^8.2",
         "bezhansalleh/filament-language-switch": "^3.1",
+        "discoverydesign/filament-gaze": "^1.1",
         "dotswan/filament-map-picker": "^1.7",
         "filament/filament": "^3.2",
         "filipfonal/filament-log-manager": "^2.0",

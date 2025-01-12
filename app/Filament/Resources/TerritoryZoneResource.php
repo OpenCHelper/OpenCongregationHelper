@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TerritoryZoneResource\Pages;
 use App\Filament\Resources\TerritoryZoneResource\RelationManagers;
 use App\Models\TerritoryZone;
+use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -24,6 +25,11 @@ class TerritoryZoneResource extends Resource
     {
         return $form
             ->schema([
+                GazeBanner::make()
+                    ->lock()
+                    ->columnSpanFull()
+                    // ->canTakeControl(fn() => auth()->user()->isAdmin())
+                    ->hideOnCreate(),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(50),

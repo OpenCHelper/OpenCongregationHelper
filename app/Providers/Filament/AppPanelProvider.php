@@ -73,6 +73,7 @@ class AppPanelProvider extends PanelProvider
             ->plugins([
                 FilamentLogManager::make(),
                 EnvironmentIndicatorPlugin::make(),
+                \DiscoveryDesign\FilamentGaze\FilamentGazePlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,

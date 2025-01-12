@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TerritoryResource\Pages;
 use App\Filament\Resources\TerritoryResource\RelationManagers;
 use App\Models\Territory;
+use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -30,6 +31,11 @@ class TerritoryResource extends Resource
     {
         return $form
             ->schema([
+                GazeBanner::make()
+                    ->lock()
+                    ->columnSpanFull()
+                    // ->canTakeControl(fn() => auth()->user()->isAdmin())
+                    ->hideOnCreate(),
                 Forms\Components\Section::make('Informazioni fondamentali')
                     ->description('Informazioni necessarie per l\'identificazione del territorio')
                     ->columns(2)
