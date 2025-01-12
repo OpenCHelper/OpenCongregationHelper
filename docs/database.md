@@ -4,6 +4,44 @@ While developing, the database is accessible via the [PHPMyAdmin interface](http
 
 ## Snippet
 
+### Stato dei territori nell'ultimo anno di servizio
+
+> [!WARNING]
+> Attenzione: nel conteggio NON vengono considerati territori non ancora rientrati (che quindi risulteranno con un'uscita in meno)!
+
+```sql
+SELECT 
+    ter.id_territorio as territorio,
+    IF (ter.territorio_commerciale, "SI", "NO") as territorio_commerciale,
+    zone.nome_zona,
+    CONCAT(ROUND(AVG(DATEDIFF(uscite.data_rientro, uscite.data_uscita))), ' giorni') as percorrenza_media,
+    COUNT(uscite.id) as totale_uscite,
+    CONCAT(DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), "%Y-09-01"), ' / ', CURDATE()) as intervallo_campionamento,
+    GROUP_CONCAT(CONCAT(uscite.data_uscita, " - ", uscite.data_rientro) ORDER BY uscite.data_uscita SEPARATOR ", ") AS ultime_uscite
+FROM 
+	`territori` as ter
+LEFT JOIN `storico_uscite` as uscite
+    ON (
+        uscite.id_territorio = ter.id
+    	AND uscite.eliminato = 0 
+        AND uscite.data_uscita BETWEEN DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), "%Y-09-01") AND CURDATE()
+        AND uscite.data_rientro IS NOT NULL
+        AND uscite.tipo_campagna = 0
+    )
+LEFT JOIN `proclamatori` as proc
+    ON uscite.assegnato_a = proc.id
+LEFT JOIN `tipo_campagne` as camp
+    ON uscite.tipo_campagna = camp.id
+LEFT JOIN `zone`
+	ON ter.zona = zone.id
+WHERE 
+	ter.rimosso = 0
+GROUP BY 
+    ter.id_territorio,
+    ter.territorio_commerciale  
+ORDER BY ter.territorio_commerciale ASC, `territorio` ASC;
+```
+
 ### Assegnazione massiva
 
 ```sql
