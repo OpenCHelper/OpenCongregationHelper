@@ -57,8 +57,6 @@ class TerritoryGlobalMap extends MapWidget
                     </p>
                 ";
 
-                Log::info("Territory zone color is " . $territory->territoryZone->color);
-
                 // See https://leafletjs.com/reference.html#polygon-color for the full list of options
                 $polygonOptions = [];
                 if ($territory->territoryZone->color) {
