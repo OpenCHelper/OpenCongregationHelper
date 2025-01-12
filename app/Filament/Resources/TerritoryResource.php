@@ -208,7 +208,7 @@ class TerritoryResource extends Resource
                     Tables\Actions\Action::make('cancel_assignment')
                         ->label('Termina assegnazione')
                         ->icon('heroicon-o-document-arrow-up')
-                        ->visible(fn (Territory $record): bool => $record->lastAssignment !== null && $record->lastAssignment()->first()->date_end === null)
+                        // ->visible(fn (Territory $record): bool => $record->lastAssignment() !== null && $record->lastAssignment()->first()->date_end === null)
                         // ->mountUsing(function (Forms\ComponentContainer $form, Territory $record) {
                         //     $last_assignment = $record
                         //         ->with('lastAssignment.assignee')
@@ -233,15 +233,19 @@ class TerritoryResource extends Resource
                         // ])
                         ->requiresConfirmation()
                         ->action(function (Territory $record, array $data): void {
+                            $last_assignment = $record->with('lastAssignment')->first()->lastAssignment;
+
+                            Log::info("Last Assignment ==> " . json_encode($last_assignment));
+
                             // Skip if the last assignment is not null
-                            if ($record->lastAssignment === null || $record->lastAssignment()->first()->date_end !== null) {
+                            if ($last_assignment === null || $last_assignment->date_end !== null) {
                                 Log::warning("Skipping record {$record->id} because it does not has an active assignment");
                                 return;
                             }
                             
-                            $record->lastAssignment()->update([
-                                'date_end' => now(),
-                            ]);
+                            $last_assignment->date_end = now();
+                            $last_assignment->push();
+                            Log::info("Last Assignment ==> " . json_encode($last_assignment));
                         }),
                 ]),
             ])
@@ -278,7 +282,8 @@ class TerritoryResource extends Resource
                                 ]);
                                 $record->save();
                             }
-                        }),
+                        })
+                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\BulkAction::make('cancel_assignment_bulk')
                         ->label('Termina assegnazione massivamente')
                         ->icon('heroicon-o-document-arrow-down')
@@ -296,8 +301,10 @@ class TerritoryResource extends Resource
                                     'date_end' => now(),
                                 ]);
                             }
-                        }),
-                    Tables\Actions\DeleteBulkAction::make(),
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }
