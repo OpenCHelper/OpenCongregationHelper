@@ -19,7 +19,7 @@ class ArtisanCommandController extends Controller
 
         $command = $command ?? $request->input('command');
         $params = $request->input('params');
-        Log::info('Executing Artisan command: ' . $command . ' with params: ' . json_encode($params));
+        Log::info("Executing Artisan command: '$command' with params: " . json_encode($params));
 
         $availableCommands = array_keys(Artisan::all());
 
