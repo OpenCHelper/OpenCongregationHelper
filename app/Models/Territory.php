@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Territory extends Model
 {
@@ -57,19 +59,13 @@ class Territory extends Model
         return $this->hasMany(TerritoryAssignment::class);
     }
 
-    // public function activeAssignment(): Attribute {
-    //     return Attribute::make(
-    //         get: function (mixed $value) {
-    //             Log::info(json_encode($this->assignments()->getResults()->filter(function ($assignment) {
-    //                 return $assignment->data_rientro === null;
-    //             })));
-        
-    //             return $this->assignments()->getResults()->filter(function ($assignment) {
-    //                 return $assignment->data_rientro === null;
-    //             })->first();
-    //         },
-    //     );
-    // }
+    public function lastAssignment(): HasOne {
+        return $this->hasOne(TerritoryAssignment::class)->latest();
+    }
+
+    public function lastAssignee(): HasOneThrough {
+        return $this->hasOneThrough(User::class, TerritoryAssignment::class);
+    }
 
     public function geojson(): Attribute
     {

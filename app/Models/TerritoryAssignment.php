@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -22,6 +23,10 @@ class TerritoryAssignment extends Model
         'date_start',
         'date_end',
         'notes',
+        'assignee_id',
+        'territory_id',
+        'territory_assignment_type_id',
+        'created_by',
     ];
 
     /**
@@ -35,22 +40,22 @@ class TerritoryAssignment extends Model
      * Get the Assignee associated with the territory.
      */
     public function assignee(): HasOne {
-        return $this->hasOne(User::class, 'id', 'assigned_to');
+        return $this->hasOne(User::class, 'id', 'assignee_id');
     }
 
     // /**
     //  * Get the Territory associated with the territory.
     //  */
-    // public function territorio(): HasOne {
-    //     return $this->hasOne(Territory::class, 'id', 'id_territorio');
-    // }
+    public function territory(): BelongsTo {
+        return $this->belongsTo(Territory::class);
+    }
 
     // /**
     //  * Get the CampaignType associated with the territory.
     //  */
-    // public function tipo_campagna(): HasOne {
-    //     return $this->hasOne(TerritoryAssignmentType::class, 'id', 'tipo_campagna');
-    // }
+    public function assignmentType(): BelongsTo {
+        return $this->belongsTo(TerritoryAssignmentType::class, 'territory_assignment_type_id');
+    }
     
     /**
      * Get the attributes that should be cast.
