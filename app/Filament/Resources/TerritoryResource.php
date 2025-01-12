@@ -150,9 +150,9 @@ class TerritoryResource extends Resource
                 Tables\Columns\TextColumn::make('territoryZone.name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image_path')
-                    ->visibility('private')
-                    ->square(),
+                // Tables\Columns\ImageColumn::make('image_path')
+                //     ->visibility('private')
+                //     ->square(),
                 // Tables\Columns\TextColumn::make('dimensione')
                 //     ->numeric()
                 //     ->sortable(),
