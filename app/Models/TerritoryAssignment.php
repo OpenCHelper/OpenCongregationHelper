@@ -56,6 +56,10 @@ class TerritoryAssignment extends Model
     public function assignmentType(): BelongsTo {
         return $this->belongsTo(TerritoryAssignmentType::class, 'territory_assignment_type_id');
     }
+
+    public function creator(): HasOne {
+        return $this->hasOne(User::class, 'id', 'created_by');
+    }
     
     /**
      * Get the attributes that should be cast.
