@@ -18,7 +18,7 @@ class TerritoryAssignmentTypeResource extends Resource
 {
     protected static ?string $model = TerritoryAssignmentType::class;
 
-    protected static ?string $navigationGroup = 'Assignment';
+    protected static ?string $navigationGroup = 'Gestione assegnazioni';
     protected static ?string $navigationLabel = "Assignment Types";
     protected static ?string $navigationIcon = 'heroicon-o-document';
 
@@ -63,9 +63,9 @@ class TerritoryAssignmentTypeResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('creator.name')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('short_name')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('creator.name')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable()
