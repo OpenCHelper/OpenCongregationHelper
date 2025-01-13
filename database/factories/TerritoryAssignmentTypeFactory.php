@@ -20,6 +20,7 @@ class TerritoryAssignmentTypeFactory extends Factory
             'name' => $this->faker->word(),
             'description' => $this->faker->sentence(),
             'short_name' => $this->faker->regexify('[A-Z]{3}'),
+            'created_by' => 1,
         ];
     }
 }

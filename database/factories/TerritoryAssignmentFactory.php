@@ -25,6 +25,7 @@ class TerritoryAssignmentFactory extends Factory
             'date_start' => $date_start,
             'date_end' => $this->faker->randomElement([$date_end, null]),
             'notes' => $this->faker->sentence(),
+            'created_by' => 1,
         ];
     }
 }
