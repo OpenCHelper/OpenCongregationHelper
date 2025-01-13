@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TerritoryResource\Pages;
-use App\Filament\Resources\TerritoryResource\RelationManagers;
 use App\Models\Territory;
 use App\Models\TerritoryAssignmentType;
 use App\Models\User;
@@ -16,9 +15,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Dotswan\MapPicker\Fields\Map;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Get;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Collection;
@@ -150,14 +146,10 @@ class TerritoryResource extends Resource
                 Tables\Columns\TextColumn::make('territoryZone.name')
                     ->sortable()
                     ->searchable(),
-                // Tables\Columns\ImageColumn::make('image_path')
-                //     ->visibility('private')
-                //     ->square(),
-                // Tables\Columns\TextColumn::make('dimensione')
-                //     ->numeric()
-                //     ->sortable(),
                 Tables\Columns\IconColumn::make('is_commercial')
-                    ->boolean(),
+                    ->boolean()
+                    ->label('Commerciale?')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('lastAssignment.assignee.name')
                     ->label('Ultima assegnazione')
                     ->default('')
@@ -173,7 +165,14 @@ class TerritoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TernaryFilter::make('is_commercial')
+                    ->nullable()
+                    ->boolean()
+                    ->label('Tipo territorio')
+                    ->placeholder('Qualsiasi')
+                    ->trueLabel('Commerciale')
+                    ->falseLabel('Residenziale'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -327,5 +326,13 @@ class TerritoryResource extends Resource
             'create' => Pages\CreateTerritory::route('/create'),
             'edit' => Pages\EditTerritory::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }
