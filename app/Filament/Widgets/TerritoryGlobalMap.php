@@ -62,6 +62,7 @@ class TerritoryGlobalMap extends MapWidget
             ->mapOptions([
                 'zoom' => 13,
             ])
+            // More layers on https://leaflet-extras.github.io/leaflet-providers/preview/
             ->tileLayerUrl([
                 'OpenStreetMap' => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 'OpenTopoMap' => 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
