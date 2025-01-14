@@ -38,6 +38,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                                 'OpenTopoMap' => 'OpenTopoMap',
                                 'Stadia.AlidadeSatellite' => 'Stadia Alidade Satellite',
                             ])
+                            ->selectablePlaceholder(false)
                             ->suffixAction(
                                 Action::make('forceRefresh')
                                     ->icon('heroicon-o-arrow-path')
@@ -54,6 +55,15 @@ class Dashboard extends \Filament\Pages\Dashboard
                                         JS);
                                     })
                             ),
+                            // Components\Select::make('viewType')
+                            //     ->selectablePlaceholder(false)
+                            //     ->required()
+                            //     ->options([
+                            //         'default' => 'Default',
+                            //         'workStatus' => 'Stato di lavorazione',
+                            //     ])
+                            //     ->default('default')
+                            //     ->label('Tipo di visualizzazione'),
                     ])
                     ->columns(3),
             ]);
