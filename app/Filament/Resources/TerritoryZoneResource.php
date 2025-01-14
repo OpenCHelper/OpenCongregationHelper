@@ -29,7 +29,7 @@ class TerritoryZoneResource extends Resource
                     ->lock()
                     ->columnSpanFull()
                     // ->canTakeControl(fn() => auth()->user()->isAdmin())
-                    ->hideOnCreate(),
+                    ->hiddenOn(['create', 'view']),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(50),

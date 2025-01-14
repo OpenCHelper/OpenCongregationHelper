@@ -36,7 +36,7 @@ class TerritoryResource extends Resource
                     ->lock()
                     ->columnSpanFull()
                     // ->canTakeControl(fn() => auth()->user()->isAdmin())
-                    ->hideOnCreate(),
+                    ->hiddenOn(['create', 'view']),
                 Forms\Components\Section::make('Informazioni fondamentali')
                     ->description('Informazioni necessarie per l\'identificazione del territorio')
                     ->columns(2)
