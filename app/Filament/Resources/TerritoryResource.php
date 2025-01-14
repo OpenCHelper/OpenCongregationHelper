@@ -200,9 +200,6 @@ class TerritoryResource extends Resource
                                 ->required(),
                         ])
                         ->action(function (Territory $record, array $data): void {
-                            Log::info("Auth::id() ==> " . json_encode(Auth::id()));
-                            Log::info("record ==> " . json_encode($record));
-                            Log::info("data ==> " . json_encode($data));
                             $record->assignments()->create([
                                 'assignee_id' => $data['assignee_id'],
                                 'territory_id' => $record->id,
@@ -244,8 +241,6 @@ class TerritoryResource extends Resource
                         ->action(function (Territory $record, array $data): void {
                             $last_assignment = $record->currentAssignment();
 
-                            Log::info("Last Assignment ==> " . json_encode($last_assignment));
-
                             // Skip if the last assignment is not null
                             if ($last_assignment === null || $last_assignment->date_end !== null) {
                                 Log::warning("Skipping record {$record->id} because it does not has an active assignment");
@@ -254,7 +249,6 @@ class TerritoryResource extends Resource
                             
                             $last_assignment->date_end = now();
                             $last_assignment->push();
-                            Log::info("Last Assignment ==> " . json_encode($last_assignment));
                         }),
                 ]),
             ])
@@ -275,7 +269,6 @@ class TerritoryResource extends Resource
                                 ->required(),
                         ])
                         ->action(function (Collection $records, array $data): void {
-                            Log::info("Auth::id() ==> " . json_encode(Auth::id()));
                             foreach ($records as $record) {
                                 // Skip if the last assignment is not null
                                 if ($record->currentAssignment() !== null && $record->currentAssignment()->date_end === null) {
@@ -298,7 +291,6 @@ class TerritoryResource extends Resource
                         ->icon('heroicon-o-document-arrow-down')
                         ->requiresConfirmation()
                         ->action(function (Collection $records, array $data): void {
-                            Log::info("Auth::id() ==> " . json_encode(Auth::id()));
                             foreach ($records as $record) {
                                 // Skip if the last assignment is not null
                                 if ($record->currentAssignment() === null || $record->currentAssignment()->date_end !== null) {

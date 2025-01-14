@@ -61,13 +61,9 @@ class Territory extends Model
     }
 
     public function currentAssignment() {
-        Log::info('Current Assignment');
-
         $assignments = $this->assignments()->getResults()->reject(function($assignment) {
             return !is_null($assignment->date_end);
         });
-
-        Log::info('Assignments: ' . json_encode($assignments));
 
         if ($assignments->count() > 1) {
             throw new \Exception('Multiple current assignments found');
