@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Facades\Log;
 
 class Territory extends Model
 {
@@ -59,12 +60,20 @@ class Territory extends Model
         return $this->hasMany(TerritoryAssignment::class);
     }
 
-    public function lastAssignment(): HasOne {
-        return $this->hasOne(TerritoryAssignment::class)->latest();
-    }
+    public function currentAssignment() {
+        Log::info('Current Assignment');
 
-    public function lastAssignee(): HasOneThrough {
-        return $this->hasOneThrough(User::class, TerritoryAssignment::class);
+        $assignments = $this->assignments()->getResults()->reject(function($assignment) {
+            return !is_null($assignment->date_end);
+        });
+
+        Log::info('Assignments: ' . json_encode($assignments));
+
+        if ($assignments->count() > 1) {
+            throw new \Exception('Multiple current assignments found');
+        }
+
+        return $assignments->first();
     }
 
     public function geojson(): Attribute
