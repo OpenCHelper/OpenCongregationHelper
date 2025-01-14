@@ -11,64 +11,27 @@ use Filament\Forms;
 use Illuminate\Support\Arr;
 
 use App\Models\Territory;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Support\Facades\Log;
 
 class TerritoryGlobalMap extends MapWidget
 {
+    use InteractsWithPageFilters;
+    
     protected int | string | array $columnSpan = 2;
     protected bool $hasBorder = true;
 
-    public function boot(): void
-    {
-        $polygones = $this->getPolygones();
-        $bounds = Arr::flatten(array_map(function ($polygone) {
-            return $polygone->getLatlngs()[0];
-        }, $polygones), 1);
+    protected $listeners = ['$refresh'];
 
-        $this
-            ->actions([
-                Actions\CenterMapAction::make()
-                    ->centerOnUserPosition()
-                    ->zoom(13)
-                    ->label('Centra su posizione'),
-                Actions\FullscreenAction::make(),
-                // Actions\Action::make('mode')
-                //     ->icon('filamentmapsicon-o-square-3-stack-3d')
-                //     ->alpineClickHandler(<<<JS
-                //         if (confirm('Vuoi davvero cambiare la modalità della mappa?')) {
-                //             \$dispatch('{$this->getMapActionId()}', 'mode');
-                //         }
-                //     JS),
-                // Actions\Action::make('form')
-                //     ->icon('filamentmapsicon-o-square-3-stack-3d')
-                //     ->form([
-                //         Forms\Components\Select::make('tileLayer')
-                //             ->label('Tile Layer')
-                //             ->required()
-                //             ->default('OpenStreetMap')
-                //             ->options([
-                //                 'OpenStreetMap' => 'OpenStreetMap',
-                //                 'OpenTopoMap' => 'OpenTopoMap',
-                //                 'Stadia.AlidadeSatellite' => 'Stadia Alidade Satellite',
-                //             ]),
-                //     ])
-                //     ->action(function (array $data, self $livewire) {
-                //         Log::info("Setting Tile Layer to: '" . $data['tileLayer'] . "'");
-                //         $livewire->tileLayerMode(trim($data['tileLayer']));
-                //         $livewire->dispatch('updateTileLayer');
-                //         $livewire->dispatch('refresh');
-                //     }),
-            ])
-            ->mapOptions([
-                'zoom' => 13,
-            ])
-            // More layers on https://leaflet-extras.github.io/leaflet-providers/preview/
-            ->tileLayerUrl([
+    public static function getTileLayers(): array
+    {
+        return array(
+            "urls" => [
                 'OpenStreetMap' => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 'OpenTopoMap' => 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
                 'Stadia.AlidadeSatellite' => 'https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.{ext}'
-            ])
-            ->tileLayerOptions([
+            ],
+            "options" => [
                 'OpenStreetMap' => [
                     'attribution' => 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
                 ],
@@ -81,7 +44,35 @@ class TerritoryGlobalMap extends MapWidget
                 	'attribution' => '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 	'ext' => 'jpg'
                 ],
+            ]
+        );
+    }
+
+    public function boot(): void
+    {
+        $polygones = $this->getPolygones();
+        $bounds = Arr::flatten(array_map(function ($polygone) {
+            return $polygone->getLatlngs()[0];
+        }, $polygones), 1);
+
+        Log::info("Bounds: " . json_encode($bounds));
+        Log::info("Filter data: " . json_encode($this->filters));
+
+        $this
+            ->actions([
+                Actions\CenterMapAction::make()
+                    ->centerOnUserPosition()
+                    ->zoom(13)
+                    ->label('Centra su posizione'),
+                Actions\FullscreenAction::make(),
             ])
+            ->mapOptions([
+                'zoom' => 13,
+            ])
+            // More layers on https://leaflet-extras.github.io/leaflet-providers/preview/
+            ->tileLayerUrl($this->getTileLayers()['urls'])
+            ->tileLayerOptions($this->getTileLayers()['options'])
+            ->tileLayerMode($this->filters['mapType'] ?? 'OpenStreetMap')
             ->fitBounds($bounds)
         ;
     }
