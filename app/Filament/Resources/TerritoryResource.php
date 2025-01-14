@@ -317,16 +317,13 @@ class TerritoryResource extends Resource
         ];
     }
 
-    public function isTableRecordSelectable(Territory $record): bool
-    {
-        return false;
-    }
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListTerritories::route('/'),
             'create' => Pages\CreateTerritory::route('/create'),
             'edit' => Pages\EditTerritory::route('/{record}/edit'),
+            'view' => Pages\ViewTerritory::route('/{record}'),
         ];
     }
 
