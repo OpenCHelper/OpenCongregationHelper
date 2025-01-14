@@ -26,7 +26,7 @@ RUN echo "alias ls='ls --color=auto'" >> ~/.bashrc && \
 
 # Install MySQL Client (for tools like mysqldump), PHP extensions, Node.js, and NPM
 RUN apt-get update \
-      && apt-get install -y default-mysql-client libicu-dev libpng-dev libzip-dev nodejs npm unzip \
+      && apt-get install -y default-mysql-client jq lftp libicu-dev libpng-dev libzip-dev nodejs npm unzip \
       && docker-php-ext-install gd intl mysqli pdo pdo_mysql zip;
 
 # Clear cache

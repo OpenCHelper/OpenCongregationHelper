@@ -18,17 +18,22 @@ set -o nounset       # Same as `set -u`
 
 
 main () {
-    local artisan_base_url="" command="" response=""
+    local artisan_base_url="" command="" response=""                 \
+        token_file="storage/framework/.artisan-token" token=""       \
+        ftp_hostname="" ftp_username="" ftp_password=""
+
     local -a curl_opts=(
         --fail --show-error
         -H "Accept: application/json"
         -H "Content-Type: application/json"
     );
 
-    if ! command -v jq &> /dev/null; then
-        printf "This script requires 'jq' to be installed\n" >&2
-        return 1
-    fi
+    for cmd in curl jq lftp; do
+        if ! command -v "$cmd" &> /dev/null; then
+            printf "This script requires '%s' to be installed\n" "$cmd" >&2
+            return 1
+        fi
+    done
 
     # From this excellent StackOverflow answer: https://stackoverflow.com/a/14203146/8965861
     OPTIND=1;
@@ -43,8 +48,36 @@ main () {
                 artisan_base_url="$2";
                 shift 2;
             ;;
+            -t | --token)
+                token="$2";
+                shift 2;
+            ;;
+            --ftp-hostname)
+                ftp_hostname="$2";
+                shift 2;
+            ;;
+            --ftp-username)
+                ftp_username="$2";
+                shift 2;
+            ;;
+            --ftp-password)
+                ftp_password="$2";
+                shift 2;
+            ;;
+            --token-file)
+                token_file="$2";
+                shift 2;
+            ;;
             -\? | -h |--help)
-                # Call to usage function goes here
+                printf "Usage: %s [options] <command> [params]\n" "$0" >&2
+                printf "Options:\n" >&2
+                printf "  -v, --verbose        Enable verbose output\n" >&2
+                printf "  -b, --base-url       The base URL of the Artisan server\n" >&2
+                printf "  -t, --token          The token to use for authentication\n" >&2
+                printf "  --ftp-hostname       The hostname of the FTP server\n" >&2
+                printf "  --ftp-username       The username to use for FTP authentication\n" >&2
+                printf "  --ftp-password       The password to use for FTP authentication\n" >&2
+                printf "  --token-file         The file to store the token in\n" >&2
                 return 0;
             ;;
             --)
@@ -64,11 +97,34 @@ main () {
     done;
     [[ ${#POSITIONAL[@]} -gt 0 ]] && set -- "${POSITIONAL[@]}";
 
-    if [[ -z "$1" ]]; then
+    if [[ -z "${1:-}" ]]; then
       printf "No command provided\n" >&2
       return 1
     fi
     command="$1" && shift
+
+    if [[ -z "$artisan_base_url" ]]; then
+      printf "No base URL provided\n" >&2
+      return 1
+    fi
+
+    # Generate a random token if none is provided
+    if [[ -z "$token" ]]; then
+      token="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 64)"
+    fi
+    curl_opts+=(-H "X-Artisan-Token: ${token}")
+
+    if [[ -z "$ftp_hostname" ]] || [[ -z "$ftp_username" ]] || [[ -z "$ftp_password" ]]; then
+      printf "FTP credentials not provided\n" >&2
+      return 1
+    fi
+
+    # Now load the token into the server
+    _temp_token=$(mktemp) && printf '%s' "$token" > "$_temp_token" && trap "rm -f '$_temp_token'" EXIT
+    if ! lftp -e "set ssl:check-hostname no" -u "$ftp_username,$ftp_password" "$ftp_hostname" <<< "put $_temp_token -o '$token_file'"; then
+      printf "Failed to load token into server\n" >&2
+      return 1
+    fi
     
     if ! response="$(curl -skL "${artisan_base_url}/api/execute/${command}" \
       -X POST --data "{\"params\": \"$*\"}" \
@@ -80,6 +136,12 @@ main () {
     fi
 
     jq -r '.output' <<< "$response"
+
+    # Now remove the token from the server
+    if ! lftp -e "set ssl:check-hostname no" -u "$ftp_username,$ftp_password" "$ftp_hostname" <<< "rm '$token_file'"; then
+      printf "Failed to remove token from server\n" >&2
+      return 1
+    fi
 
     return 0;
 }

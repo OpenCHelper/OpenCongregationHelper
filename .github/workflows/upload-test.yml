@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install packages
-        run: sudo apt-get install -y jq
+        run: apt-get update && apt-get install -y jq lftp
 
       - name: Setup NodeJS
         uses: actions/setup-node@v4
@@ -92,7 +92,14 @@ jobs:
 
           [[ ! -x "scripts/remote_artisan.sh" ]] && chmod +x scripts/remote_artisan.sh
 
-          function remote_artisan () { scripts/remote_artisan.sh --base-url "$ARTISAN_BASE_URL" "$@"; }
+          function remote_artisan () { 
+            scripts/remote_artisan.sh                                 \
+              --base-url "$ARTISAN_BASE_URL"                          \
+              --ftp-hostname "${{ secrets.ftp_server_test }}"         \
+              --ftp-username "${{ secrets.ftp_username_test }}"       \
+              --ftp-password "${{ secrets.ftp_password_test }}"       \
+              "$@"
+          }
 
           printf "Using Artisan base URL %s\n\n" "$ARTISAN_BASE_URL"
 
