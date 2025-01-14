@@ -38,32 +38,19 @@ class Dashboard extends \Filament\Pages\Dashboard
                                 'OpenTopoMap' => 'OpenTopoMap',
                                 'Stadia.AlidadeSatellite' => 'Stadia Alidade Satellite',
                             ])
-                            ->selectablePlaceholder(false)
-                            ->suffixAction(
-                                Action::make('forceRefresh')
-                                    ->icon('heroicon-o-arrow-path')
-                                    ->action(function (Get $get) {
-                                        $tileLayers = TerritoryGlobalMap::getTileLayers();
-                                        $mapType = $tileLayers['urls'][$get('mapType')];
-                                        $mapOptions = $tileLayers['options'][$get('mapType')];
-                                        
-                                        $mapOptions = json_encode($mapOptions);
+                            ->live(debounce: 0)
+                            ->afterStateUpdated(function (Get $get) {
+                                $tileLayers = TerritoryGlobalMap::getTileLayers();
+                                $mapType = $tileLayers['urls'][$get('mapType')];
+                                $mapOptions = $tileLayers['options'][$get('mapType')];
+                                
+                                $mapOptions = json_encode($mapOptions);
 
-                                        $this->js(<<<JS
-                                            console.log('forceRefresh');
-                                            L.tileLayer.wms("$mapType", $mapOptions).addTo(window.filamentMaps['app.filament.widgets.territory-global-map']);
-                                        JS);
-                                    })
-                            ),
-                            // Components\Select::make('viewType')
-                            //     ->selectablePlaceholder(false)
-                            //     ->required()
-                            //     ->options([
-                            //         'default' => 'Default',
-                            //         'workStatus' => 'Stato di lavorazione',
-                            //     ])
-                            //     ->default('default')
-                            //     ->label('Tipo di visualizzazione'),
+                                $this->js(<<<JS
+                                    L.tileLayer.wms("$mapType", $mapOptions).addTo(window.filamentMaps['app.filament.widgets.territory-global-map']);
+                                JS);
+                            })
+                            ->selectablePlaceholder(false)
                     ])
                     ->columns(3),
             ]);
