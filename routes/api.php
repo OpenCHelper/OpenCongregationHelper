@@ -7,9 +7,7 @@ use App\Http\Controllers\TerritoryController;
 use App\Http\Controllers\TerritoryZoneController;
 
 // Load special routes for the Artisan command execution
-if (is_file(storage_path('framework/artisan.php'))) {
-    require storage_path('framework/artisan.php');
-}
+require base_path('routes/api/artisan.php');
 
 Route::get('/user', function (Request $request) {
     return $request->user();
