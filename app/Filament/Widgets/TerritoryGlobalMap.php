@@ -28,12 +28,20 @@ class TerritoryGlobalMap extends MapWidget
         return array(
             "urls" => [
                 'OpenStreetMap' => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'OpenStreetMap.HOT' => 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
                 'OpenTopoMap' => 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-                'Stadia.AlidadeSatellite' => 'https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.{ext}'
+                'Stadia.AlidadeSatellite' => 'https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.{ext}',
+                'Stadia.OSMBright' => 'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.{ext}',
+                'Stadia.Outdoors' => 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.{ext}',
+                'CartoDB.Voyager' => 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
             ],
             "options" => [
                 'OpenStreetMap' => [
                     'attribution' => 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+                ],
+                'OpenStreetMap.HOT' => [
+                    'maxZoom' => 19,
+                	'attribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>',
                 ],
                 'OpenTopoMap' => [
                     'attribution' => 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, SRTM | Map style © <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
@@ -44,6 +52,23 @@ class TerritoryGlobalMap extends MapWidget
                 	'attribution' => '&copy; CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | &copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 	'ext' => 'jpg'
                 ],
+                'Stadia.OSMBright' => [
+                    'minZoom' => 0,
+                	'maxZoom' => 20,
+                	'attribution' => '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                	'ext' => 'png'
+                ],
+                'Stadia.Outdoors' => [
+                    'minZoom' => 0,
+                	'maxZoom' => 20,
+                	'attribution' => '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                	'ext' => 'png',
+                ],
+                'CartoDB.Voyager' => [
+                    'attribution' => '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    'subdomains' => 'abcd',
+                    'maxZoom' => 20,
+                ],                
             ]
         );
     }

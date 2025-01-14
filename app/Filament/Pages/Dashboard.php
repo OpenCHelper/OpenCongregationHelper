@@ -33,11 +33,12 @@ class Dashboard extends \Filament\Pages\Dashboard
                             ->required()
                             ->default('OpenStreetMap')
                             ->label('Tipo di mappa')
-                            ->options([
-                                'OpenStreetMap' => 'OpenStreetMap',
-                                'OpenTopoMap' => 'OpenTopoMap',
-                                'Stadia.AlidadeSatellite' => 'Stadia Alidade Satellite',
-                            ])
+                            ->options(function () {
+                                $tileLayers = TerritoryGlobalMap::getTileLayers();
+                                
+                                # Return an associative array with the keys as both option and value
+                                return array_combine(array_keys($tileLayers['urls']), array_keys($tileLayers['urls']));
+                            })
                             ->live(debounce: 0)
                             ->afterStateUpdated(function (Get $get) {
                                 $tileLayers = TerritoryGlobalMap::getTileLayers();
