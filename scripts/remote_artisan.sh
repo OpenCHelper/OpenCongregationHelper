@@ -18,8 +18,8 @@ set -o nounset       # Same as `set -u`
 
 
 main () {
-    local artisan_base_url="" command="" response=""                 \
-        token_file="storage/framework/.artisan-token" token=""       \
+    local artisan_base_url="" command="" response="" \
+        token_file="storage/framework/.artisan-token" token="" bypass_token=false \
         ftp_hostname="" ftp_username="" ftp_password=""
 
     local -a curl_opts=(
@@ -68,6 +68,11 @@ main () {
                 token_file="$2";
                 shift 2;
             ;;
+            --bypass-token)
+                bypass_token=true
+                curl_opts+=(-H "X-Artisan-Token-Bypass: true")
+                shift;
+            ;;
             -\? | -h |--help)
                 printf "Usage: %s [options] <command> [params]\n" "$0" >&2
                 printf "Options:\n" >&2
@@ -78,6 +83,7 @@ main () {
                 printf "  --ftp-username       The username to use for FTP authentication\n" >&2
                 printf "  --ftp-password       The password to use for FTP authentication\n" >&2
                 printf "  --token-file         The file to store the token in\n" >&2
+                printf "  --bypass-token       Bypass token authentication (only in local environment)\n" >&2
                 return 0;
             ;;
             --)
@@ -114,16 +120,18 @@ main () {
     fi
     curl_opts+=(-H "X-Artisan-Token: ${token}")
 
-    if [[ -z "$ftp_hostname" ]] || [[ -z "$ftp_username" ]] || [[ -z "$ftp_password" ]]; then
-      printf "FTP credentials not provided\n" >&2
-      return 1
-    fi
+    if [[ "$bypass_token" == false ]]; then
+        if [[ -z "$ftp_hostname" ]] || [[ -z "$ftp_username" ]] || [[ -z "$ftp_password" ]]; then
+          printf "FTP credentials not provided\n" >&2
+          return 1
+        fi
 
-    # Now load the token into the server
-    _temp_token=$(mktemp) && printf '%s' "$token" > "$_temp_token" && trap "rm -f '$_temp_token'" EXIT
-    if ! lftp -e "set ssl:check-hostname no" -u "$ftp_username,$ftp_password" "$ftp_hostname" <<< "put $_temp_token -o '$token_file'"; then
-      printf "Failed to load token into server\n" >&2
-      return 1
+        # Now load the token into the server
+        _temp_token=$(mktemp) && printf '%s' "$token" > "$_temp_token" && trap "rm -f '$_temp_token'" EXIT
+        if ! lftp -e "set ssl:check-hostname no" -u "$ftp_username,$ftp_password" "$ftp_hostname" <<< "put $_temp_token -o '$token_file'"; then
+          printf "Failed to load token into server\n" >&2
+          return 1
+        fi
     fi
     
     if ! response="$(curl -skL "${artisan_base_url}/api/execute/${command}" \
@@ -138,9 +146,11 @@ main () {
     jq -r '.output' <<< "$response"
 
     # Now remove the token from the server
-    if ! lftp -e "set ssl:check-hostname no" -u "$ftp_username,$ftp_password" "$ftp_hostname" <<< "rm '$token_file'"; then
-      printf "Failed to remove token from server\n" >&2
-      return 1
+    if [[ "$bypass_token" == false ]]; then
+        if ! lftp -e "set ssl:check-hostname no" -u "$ftp_username,$ftp_password" "$ftp_hostname" <<< "rm '$token_file'"; then
+          printf "Failed to remove token from server\n" >&2
+          return 1
+        fi
     fi
 
     return 0;
