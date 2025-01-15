@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Actions\Assignment as AssignmentActions;
 use App\Filament\Resources\TerritoryResource\Pages;
 use App\Models\Territory;
 use App\Models\TerritoryAssignmentType;
@@ -181,75 +182,8 @@ class TerritoryResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('create_assignment')
-                        ->label('Assegna')
-                        ->icon('heroicon-o-document-arrow-up')
-                        ->visible(function (Territory $record): bool {
-                            $assignment = $record->currentAssignment();
-                            return $assignment === null || $assignment->date_end !== null;
-                        })
-                        ->form([
-                            Forms\Components\Select::make('assignee_id')
-                                ->label('Assegnato a')
-                                ->options(User::query()->pluck('name', 'id'))
-                                ->searchable()
-                                ->required(),
-                            Forms\Components\Select::make('assignment_type')
-                                ->label('Tipo di assegnazione')
-                                ->options(TerritoryAssignmentType::query()->pluck('name', 'id'))
-                                ->required(),
-                        ])
-                        ->action(function (Territory $record, array $data): void {
-                            $record->assignments()->create([
-                                'assignee_id' => $data['assignee_id'],
-                                'territory_id' => $record->id,
-                                'territory_assignment_type_id' => $data['assignment_type'],
-                                'created_by' => Auth::id(),
-                            ]);
-                            $record->save();
-                        }),
-                    Tables\Actions\Action::make('cancel_assignment')
-                        ->label('Termina assegnazione')
-                        ->icon('heroicon-o-document-arrow-up')
-                        ->visible(function (Territory $record): bool {
-                            $assignment = $record->currentAssignment();
-                            return $assignment !== null && $assignment->date_end === null;
-                        })
-                        ->mountUsing(function (Forms\ComponentContainer $form, Territory $record) {
-                            $last_assignment = $record
-                                ->with('lastAssignment.assignee')
-                                ->with('lastAssignment.assignmentType')
-                            ->first()->lastAssignment;
-
-                            return $form->fill([
-                                'assignee_id' => $last_assignment->assignee->id,
-                                'assignment_type' => $last_assignment->assignmentType->id,
-                            ]);
-                        })
-                        ->form([
-                            Forms\Components\Select::make('assignee_id')
-                                ->label('Assegnato a')
-                                ->options(User::query()->pluck('name', 'id'))
-                                ->searchable()
-                                ->required(),
-                            Forms\Components\Select::make('assignment_type')
-                                ->label('Tipo di assegnazione')
-                                ->options(TerritoryAssignmentType::query()->pluck('name', 'id'))
-                                ->required(),
-                        ])
-                        ->requiresConfirmation()
-                        ->action(function (Territory $record, array $data): void {
-                            $last_assignment = $record->currentAssignment();
-
-                            // Skip if the last assignment is not null
-                            if ($last_assignment === null || $last_assignment->date_end !== null) {
-                                Log::warning("Skipping record {$record->id} because it does not has an active assignment");
-                                return;
-                            }
-                            
-                            $last_assignment->date_end = now();
-                            $last_assignment->push();
-                        }),
+                    AssignmentActions\CreateAssignmentActionTable::make('create_assignment'),
+                    AssignmentActions\DeleteAssignmentActionTable::make('cancel_assignment'),
                 ]),
             ])
             ->bulkActions([
@@ -286,6 +220,8 @@ class TerritoryResource extends Resource
                             }
                         })
                         ->deselectRecordsAfterCompletion(),
+                    // AssignmentActions\BulkCreateAssignmentActionTable::make('create_assignment_bulk')
+                    //     ->deselectRecordsAfterCompletion(),
                     Tables\Actions\BulkAction::make('cancel_assignment_bulk')
                         ->label('Termina assegnazioni')
                         ->icon('heroicon-o-document-arrow-down')
