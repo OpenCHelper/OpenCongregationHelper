@@ -2,3 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 @tailwind variants;
+
+/* Override for `Webbingbrasil\FilamentMaps` */
+.filament-map-actions {
+    display: flex !important;
+    justify-content: space-evenly !important;
+    margin-bottom: 10px !important;
+}

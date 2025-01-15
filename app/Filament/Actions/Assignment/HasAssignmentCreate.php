@@ -8,6 +8,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
+// From [here](https://filamentglow.com/trick/reuse-action-in-both-table-and-header-702ad05b)
 trait HasAssignmentCreate
 {
     protected function setUp(): void

@@ -8,9 +8,13 @@ use Webbingbrasil\FilamentMaps\Actions;
 use Webbingbrasil\FilamentMaps\Marker;
 use Webbingbrasil\FilamentMaps\Polygone;
 use Filament\Forms;
+use Filament\Forms\Components;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 use App\Models\Territory;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Illuminate\Support\Facades\Log;
 
@@ -21,7 +25,9 @@ class TerritoryGlobalMap extends MapWidget
     protected int | string | array $columnSpan = 2;
     protected bool $hasBorder = true;
 
-    protected $listeners = ['$refresh'];
+    protected $listeners = ['updateMap' => 'mapUpdated', 'refreshComponent' => '$refresh'];
+
+    public string $defaultView = 'zone';
 
     public static function getTileLayers(): array
     {
@@ -80,11 +86,57 @@ class TerritoryGlobalMap extends MapWidget
             return $polygone->getLatlngs()[0];
         }, $polygones), 1);
 
-        Log::info("Bounds: " . json_encode($bounds));
-        Log::info("Filter data: " . json_encode($this->filters));
+        // Log::info("Bounds: " . json_encode($bounds));
+        // Log::info("Filter data: " . json_encode($this->filters));
 
         $this
             ->actions([
+                Actions\Action::make('form')
+                    ->label('Impostazioni mappa')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->form([
+                        Components\Select::make('mapType')
+                            ->required()
+                            ->default('OpenStreetMap')
+                            ->label('Stile mappa')
+                            ->options(function () {
+                                $tileLayers = TerritoryGlobalMap::getTileLayers();
+                                
+                                # Return an associative array with the keys as both option and value
+                                return array_combine(array_keys($tileLayers['urls']), array_keys($tileLayers['urls']));
+                            })
+                            ->selectablePlaceholder(false),
+                        Components\Select::make('visualizationType')
+                            ->required()
+                            ->default($this->getDefaultView())
+                            ->options([
+                                "zone" => "Zone",
+                                "status" => "Stato assegnazione",
+                            ])
+                            ->selectablePlaceholder(false)
+                    ])
+                    ->action(function (array $data, self $livewire) {
+                        $tileLayers = TerritoryGlobalMap::getTileLayers();
+                        $mapType = $tileLayers['urls'][$data['mapType']];
+                        $mapOptions = $tileLayers['options'][$data['mapType']];
+                        
+                        $mapOptions = json_encode($mapOptions);
+
+                        // ? Use TileLayer.setUrl() to change the map type? [TileLayer.setUrl()](https://leafletjs.com/reference.html#tilelayer-seturl)
+                        $this->js(<<<JS
+                            L.tileLayer.wms("$mapType", $mapOptions).addTo(window.filamentMaps['app.filament.widgets.territory-global-map']);
+                        JS);
+                        
+                        if ($data['visualizationType'] !== $this->getDefaultView()) {
+                            $this->setDefaultView($data['visualizationType']);
+
+                            foreach ($this->getPolygones() as $polygone) {
+                                $livewire->updatePolygone($polygone);
+                            }
+                        }
+
+                        $livewire->dispatch('refreshComponent');
+                    })->position('bottomleft'),
                 Actions\CenterMapAction::make()
                     ->centerOnUserPosition()
                     ->zoom(13)
@@ -105,6 +157,10 @@ class TerritoryGlobalMap extends MapWidget
     public function getPolygones(): array
     {
         $territories = Territory::with('territoryZone')->where('geojson', '!=', null)->get();
+
+        $viewType = $this->getDefaultView();
+
+        Log::info("Territories grouped by $viewType");
         
         $polygones = [];
         foreach ($territories as $territory) {
@@ -136,8 +192,27 @@ class TerritoryGlobalMap extends MapWidget
 
                 // See https://leafletjs.com/reference.html#polygon-color for the full list of options
                 $polygonOptions = [];
-                if ($territory->territoryZone->color) {
-                    $polygonOptions['color'] = $territory->territoryZone->color;
+                switch ($viewType) {
+                    case 'zone':
+                        if ($territory->territoryZone->color) {
+                            $polygonOptions['color'] = $territory->territoryZone->color;
+                        }
+                        break;
+                    
+                    case 'status':
+                        $currentAssignment = $territory->currentAssignment();
+
+                        Log::info("Current assignment: " . json_encode($currentAssignment));
+                        if ($currentAssignment === null || $currentAssignment->date_end !== null) {
+                            $polygonOptions['color'] = 'red';
+                        } else {
+                            $polygonOptions['color'] = 'green';
+                        }
+                        break;
+                    
+                    default:
+                        throw new \Exception("Unknown map view type '$viewType'", 1);
+                        break;
                 }
 
                 $polygones[] = Polygone::make($territory->name)
@@ -149,5 +224,16 @@ class TerritoryGlobalMap extends MapWidget
         }
 
         return $polygones;
+    }
+
+    public function getDefaultView()
+    {
+        Log::info("Getting default view: " . json_encode($this->defaultView));
+        return $this->defaultView;
+    }
+    public function setDefaultView($name)
+    {
+        Log::info("Setting default view to " . json_encode($name));
+        $this->defaultView = $name;
     }
 }

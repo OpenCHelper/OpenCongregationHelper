@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Log;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
-    use HasFiltersForm;
     // protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     // protected static string $view = 'filament.pages.dashboard';
@@ -22,39 +21,4 @@ class Dashboard extends \Filament\Pages\Dashboard
             TerritoryGlobalMap::class,
         ];
     }
-
-    public function filtersForm(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Components\Section::make()
-                    ->schema([
-                        Components\Select::make('mapType')
-                            ->required()
-                            ->default('OpenStreetMap')
-                            ->label('Tipo di mappa')
-                            ->options(function () {
-                                $tileLayers = TerritoryGlobalMap::getTileLayers();
-                                
-                                # Return an associative array with the keys as both option and value
-                                return array_combine(array_keys($tileLayers['urls']), array_keys($tileLayers['urls']));
-                            })
-                            ->live(debounce: 0)
-                            ->afterStateUpdated(function (Get $get) {
-                                $tileLayers = TerritoryGlobalMap::getTileLayers();
-                                $mapType = $tileLayers['urls'][$get('mapType')];
-                                $mapOptions = $tileLayers['options'][$get('mapType')];
-                                
-                                $mapOptions = json_encode($mapOptions);
-
-                                $this->js(<<<JS
-                                    L.tileLayer.wms("$mapType", $mapOptions).addTo(window.filamentMaps['app.filament.widgets.territory-global-map']);
-                                JS);
-                            })
-                            ->selectablePlaceholder(false)
-                    ])
-                    ->columns(3),
-            ]);
-    }
-
 }
