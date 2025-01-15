@@ -91,6 +91,11 @@ class TerritoryGlobalMap extends MapWidget
 
         $this
             ->actions([
+                Actions\CenterMapAction::make()
+                    ->centerOnUserPosition(label: "Tu sei qui")
+                    ->zoom(13)
+                    ->label('Centra su posizione'),
+                Actions\FullscreenAction::make(),
                 Actions\Action::make('form')
                     ->label('Impostazioni mappa')
                     ->icon('heroicon-o-cog-6-tooth')
@@ -136,12 +141,7 @@ class TerritoryGlobalMap extends MapWidget
                         }
 
                         $livewire->dispatch('refreshComponent');
-                    })->position('bottomleft'),
-                Actions\CenterMapAction::make()
-                    ->centerOnUserPosition()
-                    ->zoom(13)
-                    ->label('Centra su posizione'),
-                Actions\FullscreenAction::make(),
+                    }),
             ])
             ->mapOptions([
                 'zoom' => 13,
