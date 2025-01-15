@@ -115,6 +115,7 @@ class TerritoryAssignmentResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\TernaryFilter::make('date_end')
                     ->label('Stato assegnazione')
+                    ->default(false)
                     ->nullable()
                     ->placeholder('Tutti gli stati')
                     ->trueLabel('Restituito')
