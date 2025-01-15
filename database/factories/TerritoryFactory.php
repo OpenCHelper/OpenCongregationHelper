@@ -40,41 +40,43 @@ class TerritoryFactory extends Factory
 
     public function withMap(): self
     {
-        $center_coords = [41.9102088,12.3711913];
-        $random_latitude  = $this->faker->latitude($center_coords[0] - 0.1, $center_coords[0] + 0.1);
-        $random_longitude = $this->faker->longitude($center_coords[1] - 0.1, $center_coords[1] + 0.1);
-
-        return $this->state([
-            'geojson' => json_encode(array(
-                'type' => 'FeatureCollection',
-                'features' => array(
-                    array(
-                        'type' => 'Feature',
-                        'properties' => array(
-                            'name' => 'Territory',
-                        ),
-                        'geometry' => array(
-                            'type' => 'Polygon',
-                            'coordinates' => array(
-                                array(
+        return $this->state(function (array $attributes) {
+            $center_coords = [41.9102088,12.3711913];
+            $random_latitude  = $this->faker->latitude($center_coords[0] - 0.1, $center_coords[0] + 0.1);
+            $random_longitude = $this->faker->longitude($center_coords[1] - 0.1, $center_coords[1] + 0.1);
+    
+            return [
+                'geojson' => json_encode(array(
+                    'type' => 'FeatureCollection',
+                    'features' => array(
+                        array(
+                            'type' => 'Feature',
+                            'properties' => array(
+                                'name' => 'Territory',
+                            ),
+                            'geometry' => array(
+                                'type' => 'Polygon',
+                                'coordinates' => array(
                                     array(
-                                        $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
-                                        $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
-                                    ),
-                                    array(
-                                        $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
-                                        $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
-                                    ),
-                                    array(
-                                        $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
-                                        $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
+                                        array(
+                                            $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
+                                            $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
+                                        ),
+                                        array(
+                                            $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
+                                            $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
+                                        ),
+                                        array(
+                                            $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
+                                            $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
+                                        ),
                                     ),
                                 ),
                             ),
                         ),
                     ),
-                ),
-            )),
-        ]);
+                )),
+            ];
+        });
     }
 }

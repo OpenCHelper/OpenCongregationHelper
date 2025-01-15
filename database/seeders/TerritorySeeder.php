@@ -33,10 +33,6 @@ class TerritorySeeder extends Seeder
         Territory::factory(5)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
         ])->withMap()->create();
-        
-        Territory::factory(7)->for($territoryZones->random())->state(fn () => [
-            'created_by' => $users->random()->id,
-        ])->isCommercial()->create();
 
         Territory::factory(2)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
