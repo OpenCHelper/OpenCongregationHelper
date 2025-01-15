@@ -23,7 +23,7 @@ class TerritoryGlobalMap extends MapWidget
     use InteractsWithPageFilters;
     
     protected int | string | array $columnSpan = 2;
-    protected bool $hasBorder = true;
+    protected bool $hasBorder = false;
 
     protected $listeners = ['updateMap' => 'mapUpdated', 'refreshComponent' => '$refresh'];
 
