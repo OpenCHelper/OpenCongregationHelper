@@ -29,6 +29,7 @@ class TerritoryGlobalMap extends MapWidget
 
     public string $defaultView = 'zone';
 
+    // More layers on https://leaflet-extras.github.io/leaflet-providers/preview/
     public static function getTileLayers(): array
     {
         return array(
@@ -146,10 +147,6 @@ class TerritoryGlobalMap extends MapWidget
             ->mapOptions([
                 'zoom' => 13,
             ])
-            // More layers on https://leaflet-extras.github.io/leaflet-providers/preview/
-            ->tileLayerUrl($this->getTileLayers()['urls'])
-            ->tileLayerOptions($this->getTileLayers()['options'])
-            ->tileLayerMode($this->filters['mapType'] ?? 'OpenStreetMap')
             ->fitBounds($bounds)
         ;
     }
