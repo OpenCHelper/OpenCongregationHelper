@@ -28,6 +28,7 @@ class TerritoryGlobalMap extends MapWidget
     protected $listeners = ['updateMap' => 'mapUpdated', 'refreshComponent' => '$refresh'];
 
     public string $defaultView = 'zone';
+    public string $activeTileLayer = 'OpenStreetMap';
 
     // More layers on https://leaflet-extras.github.io/leaflet-providers/preview/
     public static function getTileLayers(): array
@@ -103,7 +104,7 @@ class TerritoryGlobalMap extends MapWidget
                     ->form([
                         Components\Select::make('mapType')
                             ->required()
-                            ->default('OpenStreetMap')
+                            ->default($this->getActiveTileLayer())
                             ->label('Stile mappa')
                             ->options(function () {
                                 $tileLayers = TerritoryGlobalMap::getTileLayers();
@@ -132,6 +133,7 @@ class TerritoryGlobalMap extends MapWidget
                         $this->js(<<<JS
                             L.tileLayer.wms("$mapType", $mapOptions).addTo(window.filamentMaps['app.filament.widgets.territory-global-map']);
                         JS);
+                        $this->setActiveTileLayer($data['mapType']);
                         
                         if ($data['visualizationType'] !== $this->getDefaultView()) {
                             $this->setDefaultView($data['visualizationType']);
@@ -232,5 +234,14 @@ class TerritoryGlobalMap extends MapWidget
     {
         Log::info("Setting default view to " . json_encode($name));
         $this->defaultView = $name;
+    }
+
+    public function getActiveTileLayer()
+    {
+        return $this->activeTileLayer;
+    }
+    public function setActiveTileLayer($name)
+    {
+        $this->activeTileLayer = $name;
     }
 }
