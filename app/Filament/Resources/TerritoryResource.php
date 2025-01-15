@@ -140,6 +140,7 @@ class TerritoryResource extends Resource
     {
         return $table
             ->striped()
+            ->recordUrl(fn (Model $record): string => TerritoryResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()

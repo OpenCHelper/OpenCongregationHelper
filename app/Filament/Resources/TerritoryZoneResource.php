@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
 
@@ -40,6 +41,7 @@ class TerritoryZoneResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Model $record): string => TerritoryZoneResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
@@ -53,7 +55,6 @@ class TerritoryZoneResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
