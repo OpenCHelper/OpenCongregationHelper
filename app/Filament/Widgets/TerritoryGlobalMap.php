@@ -126,7 +126,7 @@ class TerritoryGlobalMap extends MapWidget
                 $popup = "
                     <h1>" . htmlspecialchars($territory->name) . "</h1>
                     <p>
-                        <a href='" . htmlspecialchars(TerritoryResource::getUrl('edit', [
+                        <a href='" . htmlspecialchars(TerritoryResource::getUrl('view', [
                             'record' => $territory->id,
                             ])) . "'>
                             Vai al territorio
