@@ -76,6 +76,7 @@ class TerritoryResource extends Resource
                                         Map::make('location')
                                             ->label('Location')
                                             ->columnSpanFull()
+                                            ->extraStyles(['style' => 'min-height: 320px'])
                                             ->dehydrated(false)
                                             // ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
