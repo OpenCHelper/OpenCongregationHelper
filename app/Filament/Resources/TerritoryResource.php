@@ -98,7 +98,7 @@ class TerritoryResource extends Resource
                                             ->draggable()
                                             ->zoom(15)
                                             ->showMyLocationButton()
-                                            ->geoMan(true)
+                                            ->geoMan($form->getOperation() !== 'view')
                                             ->geoManEditable(false)
                                             ->geoManPosition('topleft')
                                             ->rotateMode(false)
