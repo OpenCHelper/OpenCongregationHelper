@@ -15,11 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Force HTTPS everywhere except on local development
-        if(!$this->app->environment('local')) {
-            $this->app['request']->server->set('HTTPS', true);
-            URL::forceScheme('https');
-        }
+        // 
     }
 
     /**

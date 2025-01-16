@@ -12,7 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        /*
+            On Altervista, HTTPS is proxied and served over port 80, which
+            is recognised by Laravel as insecure. This middleware tells
+            Laravel to trust the proxy and allow URLs to be generated with
+            the HTTPS scheme.
+            
+            See [GH36](https://github.com/LukeSavefrogs/registro-territori/issues/36)
+            for more information.
+        */
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
