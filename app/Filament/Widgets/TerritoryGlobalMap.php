@@ -5,18 +5,12 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\TerritoryResource;
 use Webbingbrasil\FilamentMaps\Widgets\MapWidget;
 use Webbingbrasil\FilamentMaps\Actions;
-use Webbingbrasil\FilamentMaps\Marker;
 use Webbingbrasil\FilamentMaps\Polygone;
-use Filament\Forms;
 use Filament\Forms\Components;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 use App\Models\Territory;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
-use Illuminate\Support\Facades\Log;
 
 class TerritoryGlobalMap extends MapWidget
 {
@@ -88,9 +82,6 @@ class TerritoryGlobalMap extends MapWidget
             return $polygone->getLatlngs()[0];
         }, $polygones), 1);
 
-        // Log::info("Bounds: " . json_encode($bounds));
-        // Log::info("Filter data: " . json_encode($this->filters));
-
         $this
             ->actions([
                 Actions\CenterMapAction::make()
@@ -159,8 +150,6 @@ class TerritoryGlobalMap extends MapWidget
 
         $viewType = $this->getDefaultView();
 
-        Log::info("Territories grouped by $viewType");
-        
         $polygones = [];
         foreach ($territories as $territory) {
             $geojson = json_decode($territory->geojson, true);
@@ -201,7 +190,6 @@ class TerritoryGlobalMap extends MapWidget
                     case 'status':
                         $currentAssignment = $territory->currentAssignment();
 
-                        Log::info("Current assignment: " . json_encode($currentAssignment));
                         if ($currentAssignment === null || $currentAssignment->date_end !== null) {
                             $polygonOptions['color'] = 'red';
                         } else {
@@ -227,12 +215,10 @@ class TerritoryGlobalMap extends MapWidget
 
     public function getDefaultView()
     {
-        Log::info("Getting default view: " . json_encode($this->defaultView));
         return $this->defaultView;
     }
     public function setDefaultView($name)
     {
-        Log::info("Setting default view to " . json_encode($name));
         $this->defaultView = $name;
     }
 
