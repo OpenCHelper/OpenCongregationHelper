@@ -13,6 +13,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "awcodes/filament-versions": "^2.0",
         "bezhansalleh/filament-language-switch": "^3.1",
         "discoverydesign/filament-gaze": "^1.1",
         "dotswan/filament-map-picker": "^1.7",

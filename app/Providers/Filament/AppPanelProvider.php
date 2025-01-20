@@ -8,6 +8,7 @@ use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\EditTeam;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
+use App\Providers\AppVersionProvider;
 use Filament\Events\TenantSet;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -32,6 +33,8 @@ use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Jetstream;
 use \FilipFonal\FilamentLogManager\FilamentLogManager;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
+use Awcodes\FilamentVersions\VersionsPlugin;
+use Illuminate\Support\Facades\App;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -74,6 +77,11 @@ class AppPanelProvider extends PanelProvider
                 FilamentLogManager::make(),
                 EnvironmentIndicatorPlugin::make(),
                 \DiscoveryDesign\FilamentGaze\FilamentGazePlugin::make(),
+                VersionsPlugin::make()
+                    ->hasDefaults(App::environment() !== "production")
+                    ->items([
+                        new AppVersionProvider(),
+                    ]),
             ])
             ->middleware([
                 EncryptCookies::class,

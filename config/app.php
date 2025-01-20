@@ -14,6 +14,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Registro Territori'),
+    'version' => env('APP_VERSION', json_decode(file_get_contents(base_path('./composer.json')))->version),
 
     /*
     |--------------------------------------------------------------------------
