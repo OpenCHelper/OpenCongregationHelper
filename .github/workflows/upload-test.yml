@@ -2,8 +2,6 @@ name: Upload to Altervista (TEST environment)
 
 on:
   push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+**'
   workflow_dispatch: # Manually trigger a workflow run
 
 # Limit the number of concurrent jobs to prevent overloading the server
@@ -63,9 +61,9 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           protocol: ftp
-          server: ${{ secrets.ftp_server_test }}
-          username: ${{ secrets.ftp_username_test }}
-          password: ${{ secrets.ftp_password_test }}
+          server: ${{ secrets.FTP_SERVER_TEST }}
+          username: ${{ secrets.FTP_USERNAME_TEST }}
+          password: ${{ secrets.FTP_PASSWORD_TEST }}
           local-dir: ./
           exclude: |
             **/.git*
@@ -82,7 +80,7 @@ jobs:
                   
       - name: Run Artisan commands
         env:
-          FTP_SERVER_URL: ${{ secrets.ftp_server_test }}
+          FTP_SERVER_URL: ${{ secrets.FTP_SERVER_TEST }}
         run: |
           set -e
           set -o pipefail
@@ -95,9 +93,9 @@ jobs:
           function remote_artisan () { 
             scripts/remote_artisan.sh                                 \
               --base-url "$ARTISAN_BASE_URL"                          \
-              --ftp-hostname "${{ secrets.ftp_server_test }}"         \
-              --ftp-username "${{ secrets.ftp_username_test }}"       \
-              --ftp-password "${{ secrets.ftp_password_test }}"       \
+              --ftp-hostname "${{ secrets.FTP_SERVER_TEST }}"         \
+              --ftp-username "${{ secrets.FTP_USERNAME_TEST }}"       \
+              --ftp-password "${{ secrets.FTP_PASSWORD_TEST }}"       \
               "$@"
           }
 
