@@ -1,0 +1,141 @@
+name: Upload to Altervista (PRE-PRODUCTION environment)
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+**'
+  workflow_dispatch: # Manually trigger a workflow run
+
+# Limit the number of concurrent jobs to prevent overloading the server
+concurrency: 
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+# Recreate Altervista PHP environment (using the `phpinfo()` output)
+env:
+  node_version: '20.x'
+  php_version: '8.2'
+  php_extensions: >-
+    bcmath,calendar,ctype,curl,date,dom,exif,fileinfo,filter
+    ,gd,gettext,gmp,hash,iconv,imagick,intl,json,libxml,mbstring
+    ,mysqli,mysqlnd,openssl,pcre,PDO,pdo_mysql,pdo_sqlite
+    ,Phar,random,Reflection,session,SimpleXML,SPL,sqlite3,standard
+    ,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib
+
+jobs:
+  upload:
+    name: Upload to Altervista
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install packages
+        run: apt-get update && apt-get install -y jq lftp
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node_version }}
+          cache: 'npm'
+
+      - name: Setup PHP and Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.php_version }}
+          extensions: ${{ env.php_extensions }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fail-fast: true
+
+      - name: Install Composer dependencies
+        run: composer install --no-ansi --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
+
+      - name: Install NodeJS dependencies
+        run: npm ci
+      
+      - name: Run build
+        run: npm run build --if-present
+      
+      - name: "FTP Deploy"
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          protocol: ftp
+          server: ${{ secrets.FTP_SERVER_QA }}
+          username: ${{ secrets.FTP_USERNAME_QA }}
+          password: ${{ secrets.FTP_PASSWORD_QA }}
+          local-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .vscode/
+
+            *.env
+            .env*
+
+            .gitignore
+            docker-compose.yml
+            Dockerfile
+            *.sql
+                  
+      - name: Run Artisan commands
+        env:
+          FTP_SERVER_URL: ${{ secrets.FTP_SERVER_QA }}
+        run: |
+          set -e
+          set -o pipefail
+          set -o nounset
+
+          export ARTISAN_BASE_URL="https://artisan.${FTP_SERVER_URL##ftp.}";
+
+          [[ ! -x "scripts/remote_artisan.sh" ]] && chmod +x scripts/remote_artisan.sh
+
+          function remote_artisan () { 
+            scripts/remote_artisan.sh                                 \
+              --base-url "$ARTISAN_BASE_URL"                          \
+              --ftp-hostname "${{ secrets.FTP_SERVER_QA }}"         \
+              --ftp-username "${{ secrets.FTP_USERNAME_QA }}"       \
+              --ftp-password "${{ secrets.FTP_PASSWORD_QA }}"       \
+              "$@"
+          }
+
+          printf "Using Artisan base URL %s\n\n" "$ARTISAN_BASE_URL"
+
+          # ------------------------- Environment -------------------------
+          printf "Current environment:\n"
+          remote_artisan -- config:show app.env --no-interaction --no-ansi | sed 's/^/  | /'
+
+          printf '\n\n'
+          
+          # ------------------------- Migrations -------------------------
+          printf '\nRunning migrations...\n'
+          remote_artisan -- migrate --no-interaction --no-ansi | sed 's/^/  | /'
+        
+          printf '\n\n'
+
+          # ------------------------- Optimizations -------------------------
+          printf '\nOptimizing the application...\n'
+
+          commands=(
+            # First clear all previous optimizations
+            optimize:clear
+            filament:clear-cached-components
+            filament:optimize-clear
+
+            # Now cache individually the configuration, routes, and views (instead of `optimize`, which does all but does not show anything)
+            config:cache
+            event:cache
+            route:cache
+            view:cache
+
+            # Optimize Filament assets
+            filament:cache-components
+            filament:optimize
+          )
+          for command in "${commands[@]}"; do
+            printf ">>> $ artisan %s\n" "$command"
+            remote_artisan -- "$command" --no-interaction --no-ansi | sed 's/^/  | /'
+            printf '\n'
+          done
