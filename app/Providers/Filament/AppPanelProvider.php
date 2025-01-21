@@ -29,6 +29,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Event;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Features as FortifyFeatures;
 use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Jetstream;
 use \FilipFonal\FilamentLogManager\FilamentLogManager;
@@ -45,7 +46,6 @@ class AppPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->login()
-            // ->registration()
             ->passwordReset()
             ->emailVerification()
             ->viteTheme('resources/css/app.css')
@@ -97,6 +97,12 @@ class AppPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+        
+        // Dynamically add registration views based on the fortify
+        // configuration file.
+        if (FortifyFeatures::enabled(FortifyFeatures::registration())) {
+            $panel->registration();
+        }
 
         if (Features::hasApiFeatures()) {
             $panel->userMenuItems([
