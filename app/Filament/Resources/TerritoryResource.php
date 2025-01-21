@@ -76,7 +76,7 @@ class TerritoryResource extends Resource
                                         Map::make('location')
                                             ->label('Location')
                                             ->columnSpanFull()
-                                            ->extraStyles(['style' => 'min-height: 320px'])
+                                            ->extraStyles(['style' => 'min-height: 50vh', 'border-radius: 8px'])
                                             ->dehydrated(false)
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
                                                 $set('geojson',   json_encode($state['geojson'] ?? ''));
