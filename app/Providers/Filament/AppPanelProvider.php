@@ -75,7 +75,14 @@ class AppPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentLogManager::make(),
-                EnvironmentIndicatorPlugin::make(),
+                EnvironmentIndicatorPlugin::make()
+                ->color(fn () => match (app()->environment()) {
+                        'local' => Color::Blue,             # 1. Local development machine
+                        'testing' => Color::Amber,          # 2. First stage (nightly)
+                        'staging', 'uat' => Color::Orange,  # 3. Pre-production
+                        'production' => Color::Red,         # 4. Production
+                        default => Color::Fuchsia,          # (unknown)
+                    }),
                 \DiscoveryDesign\FilamentGaze\FilamentGazePlugin::make(),
                 VersionsPlugin::make()
                     ->hasDefaults(App::environment() !== "production")
