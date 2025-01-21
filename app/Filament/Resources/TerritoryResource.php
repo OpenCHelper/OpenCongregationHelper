@@ -78,21 +78,23 @@ class TerritoryResource extends Resource
                                             ->columnSpanFull()
                                             ->extraStyles(['style' => 'min-height: 320px'])
                                             ->dehydrated(false)
-                                            // ->defaultLocation(latitude: 40.4168, longitude: -3.7038)
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
                                                 $set('geojson',   json_encode($state['geojson'] ?? ''));
                                             })
                                             ->afterStateHydrated(function ($state, $record, Set $set): void {
+                                                $geojson = json_decode(strip_tags($record->geojson ?? ''));
+
+                                                if ($record->geojson == null || $geojson === null) {
+                                                    return;
+                                                }
+
                                                 $set('location', [
-                                                        'geojson' => json_decode(strip_tags($record->geojson ?? ''))
+                                                        'lat'     => -1,
+                                                        'lng'     => -1,
+                                                        'geojson' => $geojson,
                                                     ]
                                                 );
                                             })
-                                            // ->extraStyles([
-                                            //     'min-height: 150vh',
-                                            //     'border-radius: 50px'
-                                            // ])
-                                            // ->liveLocation(true, false, 5000)
                                             ->showMarker(false)
                                             ->showFullscreenControl()
                                             ->showZoomControl()
