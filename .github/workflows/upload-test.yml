@@ -101,6 +101,10 @@ jobs:
 
           printf "Using Artisan base URL %s\n\n" "$ARTISAN_BASE_URL"
 
+          printf "Test Artisan endpoint:\n"
+          remote_artisan -- test-endpoint positional-arg --keyword-arg | sed 's/^/  | /'
+          printf '\n\n'
+
           # ------------------------- Environment -------------------------
           printf "Current environment:\n"
           remote_artisan -- config:show app.env --no-interaction --no-ansi | sed 's/^/  | /'

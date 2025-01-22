@@ -17,7 +17,15 @@ class ArtisanCommandController extends Controller
     {
         $command = $command ?? $request->input('command');
         $params = $request->input('params');
-        Log::info("Executing Artisan command: '$command' with params: " . json_encode($params));
+        Log::info("Executing Artisan command: '$command' with params: " . $params);
+
+        if ($command == "test-endpoint") {
+            return response()->json([
+                'success' => true,
+                'output' => "Endpoint is up & running!\n\nCommand.....: >>> $command <<<\nParameters..: >>> $params <<<",
+                'returnCode' => 0,
+            ]);
+        }
 
         $availableCommands = array_keys(Artisan::all());
 
