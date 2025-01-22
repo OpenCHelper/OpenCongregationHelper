@@ -83,17 +83,15 @@ class TerritoryResource extends Resource
                                             })
                                             ->afterStateHydrated(function ($state, $record, Set $set): void {
                                                 $geojson = json_decode(strip_tags($record->geojson ?? ''));
-
-                                                if ($record->geojson == null || $geojson === null) {
-                                                    return;
+                                                $location = [
+                                                    'geojson' => $geojson,
+                                                ];
+                                                if ($record->geojson ?? null != null && $geojson !== null) {
+                                                    $location['lat'] = -1;
+                                                    $location['lng'] = -1;
                                                 }
 
-                                                $set('location', [
-                                                        'lat'     => -1,
-                                                        'lng'     => -1,
-                                                        'geojson' => $geojson,
-                                                    ]
-                                                );
+                                                $set('location', $location);
                                             })
                                             ->showMarker(false)
                                             ->showFullscreenControl()
