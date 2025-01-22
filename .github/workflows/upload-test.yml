@@ -106,10 +106,17 @@ jobs:
           remote_artisan -- config:show app.env --no-interaction --no-ansi | sed 's/^/  | /'
 
           printf '\n\n'
+
+          # -------------------------     Clear Cache     -------------------------
+          printf '\nClear optimizations...\n'
+          remote_artisan -- optimize:clear --no-interaction --no-ansi | sed 's/^/  | /'
           
           # ------------------------- Migrations / Seeder -------------------------
-          printf '\nRunning migrations and seeders...\n'
+          printf '\nRunning migrations...\n'
           remote_artisan -- migrate:fresh --seed --no-interaction --no-ansi | sed 's/^/  | /'
+          
+          printf '\nRunning fake data seeders...\n'
+          remote_artisan -v -- db:seed --class=FakeDataSeeder --no-interaction --no-ansi | sed 's/^/  | /'
         
           printf '\n\n'
 

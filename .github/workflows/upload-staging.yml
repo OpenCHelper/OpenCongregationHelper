@@ -109,10 +109,14 @@ jobs:
 
           printf '\n\n'
           
-          # ------------------------- Migrations -------------------------
+          # -------------------------     Clear Cache     -------------------------
+          printf '\nClear optimizations...\n'
+          remote_artisan -- optimize:clear --no-interaction --no-ansi | sed 's/^/  | /'
+          
+          # ------------------------- Migrations / Seeder -------------------------
           printf '\nRunning migrations...\n'
-          remote_artisan -- migrate --no-interaction --no-ansi | sed 's/^/  | /'
-        
+          remote_artisan -- migrate --seed --no-interaction --no-ansi | sed 's/^/  | /'
+          
           printf '\n\n'
 
           # ------------------------- Optimizations -------------------------

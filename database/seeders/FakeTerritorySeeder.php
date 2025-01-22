@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 
 use Faker\Generator as Faker;
 
-class TerritorySeeder extends Seeder
+class FakeTerritorySeeder extends Seeder
 {
     use WithoutModelEvents;
 
