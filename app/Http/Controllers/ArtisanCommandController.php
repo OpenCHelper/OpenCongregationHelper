@@ -15,8 +15,6 @@ class ArtisanCommandController extends Controller
      */
     public function execute(Request $request, ?string $command = null)
     {
-        $token = $request->header('X-Execute-Artisan-Command-Token');
-
         $command = $command ?? $request->input('command');
         $params = $request->input('params');
         Log::info("Executing Artisan command: '$command' with params: " . json_encode($params));
