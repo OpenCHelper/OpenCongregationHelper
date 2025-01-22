@@ -136,8 +136,8 @@ main () {
         fi
     fi
     
-    if ! response="$([[ "$_verbose" == true ]] && set -x; curl -skL "${artisan_base_url}/api/execute/${command}" \
-      -X POST --data "{\"params\": $(jq --raw-input <<< "$*")}" \
+    if ! response="$([[ "$_verbose" == true ]] && set -x; curl -skL "${artisan_base_url}/api/execute" \
+      -X POST --data "{\"command\": $(jq --raw-input <<< "$command"), \"params\": $(jq --raw-input <<< "$*")}" \
       "${curl_opts[@]}"
     )"; then
       printf "Failed to execute command '%s'\n" "$command" >&2
