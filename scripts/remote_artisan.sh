@@ -21,6 +21,7 @@ main () {
     local artisan_base_url="" command="" response="" \
         token_file="storage/framework/.artisan-token" token="" bypass_token=false \
         ftp_hostname="" ftp_username="" ftp_password=""
+    local _verbose=false;
 
     local -a curl_opts=(
         --fail --show-error
@@ -42,6 +43,7 @@ main () {
         case $1 in
             -v | --verbose)
                 curl_opts+=(--verbose)
+                _verbose=true
                 shift;
             ;;
             -b | --base-url)
@@ -134,8 +136,8 @@ main () {
         fi
     fi
     
-    if ! response="$(curl -skL "${artisan_base_url}/api/execute/${command}" \
-      -X POST --data "{\"params\": \"$*\"}" \
+    if ! response="$([[ "$_verbose" == true ]] && set -x; curl -skL "${artisan_base_url}/api/execute/${command}" \
+      -X POST --data "{\"params\": $(jq --raw-input <<< "$*")}" \
       "${curl_opts[@]}"
     )"; then
       printf "Failed to execute command '%s'\n" "$command" >&2
