@@ -140,8 +140,17 @@ class TerritoryGlobalMap extends MapWidget
             ->mapOptions([
                 'zoom' => 13,
             ])
-            ->fitBounds($bounds)
         ;
+
+        // If there are no territories, center the map on the default location
+        if (count($bounds) > 0) {
+            $this->fitBounds($bounds);
+        } else {
+            $this->mapOptions([
+                'zoom' => 16,
+                'center' => [41.1585696,-74.2557685], 
+            ]);
+        }
     }
     
     public function getPolygones(): array
