@@ -16,13 +16,14 @@ Per la lista completa delle modifiche consultare il [**Changelog**](CHANGELOG.md
 
 ### Docker
 
-> **Q**: `docker compose` o `docker-compose`?  
-> **A**: Usare sempre [**`docker compose`**](https://stackoverflow.com/a/66516826/8965861) dove possibile
+> **Q**: Should I use `docker compose` or `docker-compose`?  
+> **A**: Always use [**`docker compose`**](https://stackoverflow.com/a/66516826/8965861) when possible
 
 - Start:
 
     ```shell
-    docker compose up -d
+    docker compose up --build --watch
+    docker compose watch --detach
     ```
 
 - Stop:
@@ -36,35 +37,8 @@ A questo punto saranno accessibili:
 - [Sito](http://localhost:8080/) _(porta **8080**)_
 - [PhpMyAdmin](http://localhost:8090/) _(porta **8090**)_
 
-```text
-PSR-4 autoloading configured. Use "namespace Lukesavefrogs\RegistroTerritori;" in src/
-Include the Composer autoloader with: require 'vendor/autoload.php';
-```
-
-### Problemi
-
-#### `mysqli::__construct(): (HY000/1044): Access denied for user`
-
-Se si dovesse incontrare un errore simile a questo:
-
-```html
-<br />
-<b>Warning</b>:  mysqli::__construct(): (HY000/1044): Access denied for user 'territoriciampino'@'%' to database 'my_territoriciampino' in <b>/var/www/html/src/lib/db_connect.php</b> on line <b>20</b><br />
-Access denied for user 'territoriciampino'@'%' to database 'my_territoriciampino'<br />
-<b>Fatal error</b>:  Uncaught Error: mysqli object is already closed in /var/www/html/src/lib/db_connect.php:27
-Stack trace:
-#0 /var/www/html/src/lib/db_connect.php(27): mysqli-&gt;set_charset('utf8')
-#1 /var/www/html/src/lib/set_login.php(3): Database::getConnection()
-#2 {main}
-thrown in <b>/var/www/html/src/lib/db_connect.php</b> on line <b>27</b>
-<br />
-```
-
-Provare ad eseguire il seguente comando da console `mysql` (_come utente `root`_) all'interno del container database:
-
-```sql
-GRANT ALL PRIVILEGES on my_territoriciampino.* To territoriciampino;
-```
+> **Q**: I am on Windows and `Generating optimized autoload files` is taking too long  
+> **A**: Add the project folder to Windows Defender (or your antivirus of choice) exclusions
 
 ### Maintenance mode
 
