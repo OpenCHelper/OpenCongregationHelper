@@ -29,6 +29,21 @@ class TerritoryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
 
+    public static function getModelLabel(): string
+    {
+        return 'territorio';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'territori';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Reparto territori';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

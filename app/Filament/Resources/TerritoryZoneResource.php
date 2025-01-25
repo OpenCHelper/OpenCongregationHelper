@@ -22,6 +22,21 @@ class TerritoryZoneResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
 
+    public static function getModelLabel(): string
+    {
+        return 'zona';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'zone';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Reparto territori';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

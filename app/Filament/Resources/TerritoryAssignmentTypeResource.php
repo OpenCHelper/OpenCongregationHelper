@@ -18,9 +18,22 @@ class TerritoryAssignmentTypeResource extends Resource
 {
     protected static ?string $model = TerritoryAssignmentType::class;
 
-    protected static ?string $navigationGroup = 'Gestione assegnazioni';
-    protected static ?string $navigationLabel = "Assignment Types";
     protected static ?string $navigationIcon = 'heroicon-o-document';
+
+    public static function getModelLabel(): string
+    {
+        return 'tipo assegnazione';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'tipi assegnazione';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Reparto territori';
+    }
 
     public static function form(Form $form): Form
     {
