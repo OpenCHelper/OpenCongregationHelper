@@ -18,9 +18,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Dotswan\MapPicker\Fields\Map;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Set;
+use Filament\Pages\SubNavigationPosition;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Filament\Resources\Pages\Page;
 
 
 class TerritoryResource extends Resource
@@ -29,6 +31,8 @@ class TerritoryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
     protected static ?int $navigationSort = 0;
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
 
     public static function getModelLabel(): string
     {
@@ -279,7 +283,15 @@ class TerritoryResource extends Resource
             'create' => Pages\CreateTerritory::route('/create'),
             'edit' => Pages\EditTerritory::route('/{record}/edit'),
             'view' => Pages\ViewTerritory::route('/{record}'),
+            'assignments' => Pages\ManageTerritoryAssignments::route('/{record}/assignments'),
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ManageTerritoryAssignments::class,
+        ]);
     }
 
     public static function getEloquentQuery(): Builder
