@@ -17,7 +17,7 @@ class TerritoryAssignmentTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
+            'name' => "Campaign " . $this->faker->word(),
             'description' => $this->faker->sentence(),
             'short_name' => $this->faker->regexify('[A-Z]{3}'),
             'created_by' => 1,
