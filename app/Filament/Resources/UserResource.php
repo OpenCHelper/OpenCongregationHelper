@@ -66,11 +66,11 @@ class UserResource extends Resource
                     ->default(false)
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('two_factor_confirmed_at')
-                    ->label('2FA confirmed?')
-                    ->default(false)
-                    ->boolean()
-                    ->sortable(),
+                // Tables\Columns\IconColumn::make('two_factor_confirmed_at')
+                //     ->label('2FA confirmed?')
+                //     ->default(false)
+                //     ->boolean()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
