@@ -64,7 +64,8 @@ class TerritoryResource extends Resource
                             ->required()
                             ->relationship(name: 'territoryZone', titleAttribute: 'name')
                             ->preload()
-                            ->searchable(),
+                            ->searchable()
+                            ->createOptionForm(fn(Form $form) => TerritoryZoneResource::form($form)),
                         Forms\Components\Toggle::make('is_commercial')
                             // ->inline(false)
                             ->onIcon('heroicon-o-building-storefront')
