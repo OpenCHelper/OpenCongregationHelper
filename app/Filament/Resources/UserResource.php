@@ -19,6 +19,20 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-m-users';
     protected static ?string $tenantOwnershipRelationshipName = 'teams';
+    
+    public static function getModelLabel(): string
+    {
+        return 'utente';
+    }
+    public static function getPluralModelLabel(): string
+    {
+        return 'utenti';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Amministrazione';
+    }
 
     public static function form(Form $form): Form
     {
