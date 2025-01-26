@@ -11,6 +11,7 @@ use Illuminate\Support\Arr;
 
 use App\Models\Territory;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Illuminate\Support\Facades\Log;
 
 class TerritoryGlobalMap extends MapWidget
 {
@@ -23,6 +24,7 @@ class TerritoryGlobalMap extends MapWidget
 
     public string $defaultView = 'zone';
     public string $activeTileLayer = 'OpenStreetMap';
+    public string $shownTerritoryTypes = 'residential';
 
     // More layers on https://leaflet-extras.github.io/leaflet-providers/preview/
     public static function getTileLayers(): array
@@ -93,6 +95,16 @@ class TerritoryGlobalMap extends MapWidget
                     ->label('Impostazioni mappa')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->form([
+                        Components\Select::make('territoryType')
+                            ->required()
+                            ->default($this->getShownTerritoryTypes())
+                            ->label('Tipologia di territori')
+                            ->options([
+                                "residential" => "Residenziali",
+                                "commercial" => "Commerciali",
+                                "both" => "Entrambi",
+                            ])
+                            ->selectablePlaceholder(false),
                         Components\Select::make('mapType')
                             ->required()
                             ->default($this->getActiveTileLayer())
@@ -114,6 +126,10 @@ class TerritoryGlobalMap extends MapWidget
                             ->selectablePlaceholder(false)
                     ])
                     ->action(function (array $data, self $livewire) {
+                        $this->setShownTerritoryTypes($data['territoryType']);
+                        $this->setActiveTileLayer($data['mapType']);
+                        $this->setDefaultView($data['visualizationType']);
+
                         $tileLayers = TerritoryGlobalMap::getTileLayers();
                         $mapType = $tileLayers['urls'][$data['mapType']];
                         $mapOptions = $tileLayers['options'][$data['mapType']];
@@ -124,15 +140,20 @@ class TerritoryGlobalMap extends MapWidget
                         $this->js(<<<JS
                             L.tileLayer.wms("$mapType", $mapOptions).addTo(window.filamentMaps['app.filament.widgets.territory-global-map']);
                         JS);
-                        $this->setActiveTileLayer($data['mapType']);
-                        
-                        if ($data['visualizationType'] !== $this->getDefaultView()) {
-                            $this->setDefaultView($data['visualizationType']);
 
-                            foreach ($this->getPolygones() as $polygone) {
-                                $livewire->updatePolygone($polygone);
-                            }
+                        Log::info("Total Polygones (before purge): " . count($this->polygones));
+                        foreach ($livewire->polygones as $polygone) {
+                            Log::info("Removing polygone " . $polygone["id"]);
+                            $livewire->removePolygone($polygone["id"]);
                         }
+                        $livewire->dispatch('$refresh');
+
+                        // Re-render polygones
+                        foreach ($this->getPolygones() as $polygone) {
+                            Log::info("Adding polygone " . $polygone->toArray()["id"]);
+                            $livewire->addPolygone($polygone);
+                        }
+                        Log::info("Total Polygones (after purge): " . count($this->polygones));
 
                         $livewire->dispatch('refreshComponent');
                     }),
@@ -155,7 +176,19 @@ class TerritoryGlobalMap extends MapWidget
     
     public function getPolygones(): array
     {
-        $territories = Territory::with('territoryZone')->where('geojson', '!=', null)->get();
+        $territories = Territory::with('territoryZone')
+            ->where('geojson', '!=', null)
+            ->where(function ($query) {
+                Log::info("Shown territory types: " . $this->getShownTerritoryTypes());
+                if ($this->getShownTerritoryTypes() === 'residential') {
+                    $query->where('is_commercial', '=', false);
+                } elseif ($this->getShownTerritoryTypes() === 'commercial') {
+                    $query->where('is_commercial', '=', true);
+                }
+            })
+            ->get();
+
+        Log::info("Total territories: " . count($territories));
 
         $viewType = $this->getDefaultView();
 
@@ -238,5 +271,17 @@ class TerritoryGlobalMap extends MapWidget
     public function setActiveTileLayer($name)
     {
         $this->activeTileLayer = $name;
+    }
+
+    public function getShownTerritoryTypes()
+    {
+        return $this->shownTerritoryTypes;
+    }
+    public function setShownTerritoryTypes(string $types)
+    {
+        if (!in_array($types, ['residential', 'commercial', 'both'])) {
+            throw new \Exception("Invalid territory type '$types'", 1);
+        }
+        $this->shownTerritoryTypes = $types;
     }
 }
