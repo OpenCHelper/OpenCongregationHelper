@@ -107,6 +107,14 @@ class TerritoryAssignmentTypeResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TernaryFilter::make('valid_until')
+                    ->default(false)
+                    ->nullable()
+                    ->boolean()
+                    ->label('Stato campagna')
+                    ->placeholder('Qualsiasi')
+                    ->trueLabel('Terminata')
+                    ->falseLabel('In corso'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
