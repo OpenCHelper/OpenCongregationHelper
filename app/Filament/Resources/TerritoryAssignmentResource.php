@@ -19,6 +19,9 @@ class TerritoryAssignmentResource extends Resource
     protected static ?string $model = TerritoryAssignment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    // Hide the resource from the navigation panel
+    protected static bool $shouldRegisterNavigation = false;
     
     public static function getModelLabel(): string
     {
