@@ -18,16 +18,17 @@ class TerritoryAssignmentTypeResource extends Resource
 {
     protected static ?string $model = TerritoryAssignmentType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document';
+    protected static ?string $navigationIcon = 'heroicon-o-envelope-open';
+    protected static ?int $navigationSort = 3;
 
     public static function getModelLabel(): string
     {
-        return 'tipo assegnazione';
+        return 'campagna';
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'tipi assegnazione';
+        return 'campagne';
     }
 
     public static function getNavigationGroup(): ?string

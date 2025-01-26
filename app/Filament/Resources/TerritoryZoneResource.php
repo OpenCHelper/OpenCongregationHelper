@@ -21,6 +21,7 @@ class TerritoryZoneResource extends Resource
     protected static ?string $model = TerritoryZone::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
+    protected static ?int $navigationSort = 1;
 
     public static function getModelLabel(): string
     {
