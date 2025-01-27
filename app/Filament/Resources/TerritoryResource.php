@@ -290,6 +290,7 @@ class TerritoryResource extends Resource
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
+            Pages\ViewTerritory::class,
             Pages\ManageTerritoryAssignments::class,
         ]);
     }
