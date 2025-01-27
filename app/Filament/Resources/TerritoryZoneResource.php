@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
+use Filament\Resources\Pages\Page;
 
 class TerritoryZoneResource extends Resource
 {
@@ -87,6 +88,15 @@ class TerritoryZoneResource extends Resource
         ];
     }
 
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewTerritoryZone::class,
+            Pages\ManageZoneTerritories::class,
+        ]);
+    }
+
+
     public static function getPages(): array
     {
         return [
@@ -94,6 +104,7 @@ class TerritoryZoneResource extends Resource
             'create' => Pages\CreateTerritoryZone::route('/create'),
             'view' => Pages\ViewTerritoryZone::route('/{record}'),
             'edit' => Pages\EditTerritoryZone::route('/{record}/edit'),
+            'territories' => Pages\ManageZoneTerritories::route('/{record}/territories'),
         ];
     }
 }

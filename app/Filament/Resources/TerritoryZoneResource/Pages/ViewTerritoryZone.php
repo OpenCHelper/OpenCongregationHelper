@@ -12,6 +12,11 @@ class ViewTerritoryZone extends ViewRecord
 {
     protected static string $resource = TerritoryZoneResource::class;
 
+    public static function getNavigationLabel(): string
+    {
+        return 'Zona';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
