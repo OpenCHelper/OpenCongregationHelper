@@ -95,16 +95,16 @@ class TerritoryGlobalMap extends MapWidget
                     ->label('Impostazioni mappa')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->form([
-                        Components\Select::make('territoryType')
-                            ->required()
-                            ->default($this->getShownTerritoryTypes())
-                            ->label('Tipologia di territori')
-                            ->options([
-                                "residential" => "Residenziali",
-                                "commercial" => "Commerciali",
-                                "both" => "Entrambi",
-                            ])
-                            ->selectablePlaceholder(false),
+                        // Components\Select::make('territoryType')
+                        //     ->required()
+                        //     ->default($this->getShownTerritoryTypes())
+                        //     ->label('Tipologia di territori')
+                        //     ->options([
+                        //         "residential" => "Residenziali",
+                        //         "commercial" => "Commerciali",
+                        //         "both" => "Entrambi",
+                        //     ])
+                        //     ->selectablePlaceholder(false),
                         Components\Select::make('mapType')
                             ->required()
                             ->default($this->getActiveTileLayer())
@@ -126,7 +126,7 @@ class TerritoryGlobalMap extends MapWidget
                             ->selectablePlaceholder(false)
                     ])
                     ->action(function (array $data, self $livewire) {
-                        $this->setShownTerritoryTypes($data['territoryType']);
+                        // $this->setShownTerritoryTypes($data['territoryType']);
                         $this->setActiveTileLayer($data['mapType']);
                         $this->setDefaultView($data['visualizationType']);
 
