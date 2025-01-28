@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TerritoryAssignmentTypeResource\Pages;
 use App\Filament\Resources\TerritoryAssignmentTypeResource\RelationManagers;
 use App\Models\TerritoryAssignmentType;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,6 +14,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TerritoryAssignmentTypeResource extends Resource
 {
@@ -77,6 +79,26 @@ class TerritoryAssignmentTypeResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('campaign_status')
+                    ->state(function (TerritoryAssignmentType $record): string {
+                        $valid_until = new Carbon($record->valid_until);
+                        Log::info("Carbon: '" . $valid_until . "' - Difference: '" . $valid_until->diffInDays(now()) . "'");
+
+                        $status = match (true) {
+                            $valid_until->diffInDays(now()) >= 0 => 'terminated',
+                            $valid_until->diffInDays(now()) >= -3 => 'almost_expired',
+                            $valid_until->diffInDays(now()) >= -7 => 'is_expiring',
+                            default => 'active',
+                        };
+                        return $status;
+                    })
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'active' => 'success',
+                        'is_expiring' => 'warning',
+                        'almost_expired' => 'danger',
+                        'terminated' => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('short_name')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('creator.name')
@@ -107,14 +129,14 @@ class TerritoryAssignmentTypeResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
-                Tables\Filters\TernaryFilter::make('valid_until')
-                    ->default(false)
-                    ->nullable()
-                    ->boolean()
-                    ->label('Stato campagna')
-                    ->placeholder('Qualsiasi')
-                    ->trueLabel('Terminata')
-                    ->falseLabel('In corso'),
+                // Tables\Filters\TernaryFilter::make('valid_until')
+                //     ->default(false)
+                //     ->nullable()
+                //     ->boolean()
+                //     ->label('Stato campagna')
+                //     ->placeholder('Qualsiasi')
+                //     ->trueLabel('Terminata')
+                //     ->falseLabel('In corso'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
