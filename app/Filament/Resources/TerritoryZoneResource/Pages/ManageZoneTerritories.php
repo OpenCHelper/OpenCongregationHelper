@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Livewire\Livewire;
 
 class ManageZoneTerritories extends ManageRelatedRecords
 {
@@ -24,6 +25,12 @@ class ManageZoneTerritories extends ManageRelatedRecords
     public static function getNavigationLabel(): string
     {
         return 'Territori';
+    }
+
+    // Source: https://github.com/filamentphp/filament/discussions/10168#discussioncomment-10923902
+    public static function getNavigationBadge(): ?string
+    {
+        return Livewire::current()->getRecord()->territories->count();
     }
 
     public function form(Form $form): Form

@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Livewire\Livewire;
 
 class ManageTerritoryAssignments extends ManageRelatedRecords
 {
@@ -29,6 +30,12 @@ class ManageTerritoryAssignments extends ManageRelatedRecords
     public function form(Form $form): Form
     {
         return TerritoryAssignmentResource::form($form);
+    }
+
+    // Source: https://github.com/filamentphp/filament/discussions/10168#discussioncomment-10923902
+    public static function getNavigationBadge(): ?string
+    {
+        return Livewire::current()->getRecord()->assignments->count();
     }
 
     public function table(Table $table): Table
