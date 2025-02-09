@@ -93,6 +93,7 @@ class TerritoryAssignmentTypeResource extends Resource
                         return $status;
                     })
                     ->badge()
+                    ->sortable(['valid_until'])
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'is_expiring' => 'warning',
