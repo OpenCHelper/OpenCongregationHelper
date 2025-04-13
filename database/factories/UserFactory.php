@@ -49,6 +49,13 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function virtual(): static
+    {
+        return $this->state(fn () => [
+            'can_login' => false,
+        ]);
+    }
+
     /**
      * Indicate that the user should have a personal team.
      */

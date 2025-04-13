@@ -38,17 +38,29 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('password')
-                    ->password()
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Section::make('Dati personali')
+                    ->description('Le informazioni di base dell\'utente.')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                        ]),
+                Forms\Components\Section::make('Informazioni di accesso')
+                    ->schema([
+                        Forms\Components\Checkbox::make('can_login')
+                            ->live()
+                            ->label('Permetti accesso')
+                            ->helperText('Seleziona per permettere all\'utente di accedere al sistema.'),
+                        Forms\Components\TextInput::make('password')
+                            ->disabled(fn (Forms\Get $get) => $get('can_login') === false) 
+                            ->password()
+                            ->required(fn (Forms\Get $get) => $get('can_login') === false)
+                            ->maxLength(255),
+                    ]),
             ]);
     }
 
@@ -66,6 +78,10 @@ class UserResource extends Resource
                     ->default(false)
                     ->boolean()
                     ->sortable(),
+                Tables\Columns\IconColumn::make('can_login')
+                    ->label('Accesso abilitato?')
+                    ->boolean()
+                    ->sortable(),
                 // Tables\Columns\IconColumn::make('two_factor_confirmed_at')
                 //     ->label('2FA confirmed?')
                 //     ->default(false)
@@ -81,7 +97,11 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TernaryFilter::make('can_login')
+                    ->label('Accesso abilitato?')
+                    ->placeholder('Tutti')
+                    ->trueLabel('Abilitato')
+                    ->falseLabel('Disabilitato'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

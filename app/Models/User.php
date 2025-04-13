@@ -75,7 +75,7 @@ class User extends Authenticatable implements HasTenants, MustVerifyEmail, Filam
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->can_login;
     }
 
     public function getTenants(Panel $panel): Collection
@@ -91,5 +91,10 @@ class User extends Authenticatable implements HasTenants, MustVerifyEmail, Filam
     public function teams(): HasMany
     {
         return $this->hasMany(Team::class);
+    }
+
+    public function isVirtual(): bool
+    {
+        return !$this->can_login;
     }
 }
