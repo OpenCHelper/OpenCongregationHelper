@@ -44,7 +44,7 @@ class ManageTerritoryAssignments extends ManageRelatedRecords
             ->heading('Storico uscite')
             // ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('assignee.name')
+                Tables\Columns\TextColumn::make('assignee.full_name')
                     ->label('Assignee')
                     ->searchable()
                     ->sortable(),

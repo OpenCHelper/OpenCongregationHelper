@@ -177,7 +177,7 @@ class TerritoryResource extends Resource
                 Tables\Columns\TextColumn::make('currentAssignment')
                     ->state(function (Territory $record): ?string {
                         $assignment = $record->currentAssignment();
-                        return $assignment->assignee->name ?? null;
+                        return $assignment->assignee->full_name ?? null;
                     })
                     ->label('Assegnazione attuale')
                     ->default('')
@@ -217,7 +217,7 @@ class TerritoryResource extends Resource
                         ->form([
                             Forms\Components\Select::make('assignee_id')
                                 ->label('Assegnato a')
-                                ->options(User::query()->pluck('name', 'id'))
+                                ->options(User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
                                 ->searchable()
                                 ->required(),
                             Forms\Components\Select::make('assignment_type')

@@ -68,7 +68,7 @@ class TerritoryAssignmentTypeResource extends Resource
                     ->disabled()
                     ->hiddenOn(['create', 'edit'])
                     ->default(Auth::id())
-                    ->relationship(name: 'creator', titleAttribute: 'name')
+                    ->relationship(name: 'creator', titleAttribute: 'full_name')
                     ->preload(),
             ]);
     }
@@ -102,7 +102,7 @@ class TerritoryAssignmentTypeResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('short_name')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('creator.name')
+                Tables\Columns\TextColumn::make('creator.full_name')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable()

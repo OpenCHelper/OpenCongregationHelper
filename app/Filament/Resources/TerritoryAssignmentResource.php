@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TerritoryAssignmentResource\Pages;
 use App\Filament\Resources\TerritoryAssignmentResource\RelationManagers;
 use App\Models\TerritoryAssignment;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -56,7 +57,7 @@ class TerritoryAssignmentResource extends Resource
                             ->searchable()
                             ->disabledOn('edit', 'view')
                             ->required()
-                            ->relationship(name: 'assignee', titleAttribute: 'name')
+                            ->relationship(name: 'assignee', titleAttribute: 'full_name')
                             ->preload(),
                     ]),
                 Forms\Components\Section::make('Informazioni principali')
@@ -86,7 +87,7 @@ class TerritoryAssignmentResource extends Resource
                             ->default(Auth::id())
                             ->disabled()
                             ->hiddenOn('create')
-                            ->relationship(name: 'creator', titleAttribute: 'name')
+                            ->relationship(name: 'creator', titleAttribute: 'full_name')
                             ->preload(),
                     ]),
             ]);
@@ -99,7 +100,7 @@ class TerritoryAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('territory.name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('assignee.name')
+                Tables\Columns\TextColumn::make('assignee.full_name')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date_start')
@@ -111,7 +112,7 @@ class TerritoryAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('assignmentType.name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('creator.name')
+                Tables\Columns\TextColumn::make('creator.full_name')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')

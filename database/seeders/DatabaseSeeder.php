@@ -30,7 +30,9 @@ class DatabaseSeeder extends Seeder
             }
     
             User::factory()->create([
-                'name' => $initial_root_username,
+                'first_name' => explode(' ', $initial_root_username, 2)[0],
+                'last_name' => explode(' ', $initial_root_username, 2)[1] ?? '',
+                'can_login' => true,
                 'email' => $initial_root_usermail,
                 'password' => Hash::make($initial_root_password),
             ]);

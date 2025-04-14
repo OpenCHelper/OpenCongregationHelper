@@ -39,7 +39,7 @@ trait HasAssignmentDelete
             ->form([
                 Forms\Components\Select::make('assignee_id')
                     ->label('Assegnato a')
-                    ->options(Models\User::query()->pluck('name', 'id'))
+                    ->options(Models\User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
                     ->searchable()
                     ->disabled()
                     ->required(),

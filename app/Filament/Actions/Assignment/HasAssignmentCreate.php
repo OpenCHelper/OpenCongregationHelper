@@ -26,7 +26,7 @@ trait HasAssignmentCreate
             ->form([
                 Forms\Components\Select::make('assignee_id')
                     ->label('Assegnato a')
-                    ->options(Models\User::query()->pluck('name', 'id'))
+                    ->options(Models\User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
                     ->searchable()
                     ->required(),
                 Forms\Components\Select::make('assignment_type')

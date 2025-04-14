@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,8 +17,9 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Models\Contracts\HasTenants;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
+use Filament\Models\Contracts\HasName;
 
-class User extends Authenticatable implements HasTenants, MustVerifyEmail, FilamentUser
+class User extends Authenticatable implements HasTenants, HasName, MustVerifyEmail, FilamentUser
 {
     use HasApiTokens;
 
@@ -34,9 +36,11 @@ class User extends Authenticatable implements HasTenants, MustVerifyEmail, Filam
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'can_login',
     ];
 
     /**
@@ -71,6 +75,35 @@ class User extends Authenticatable implements HasTenants, MustVerifyEmail, Filam
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getFullName(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    public function fullName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getFullName(),
+        );
+    }
+
+    /**
+     * Fallback for Filament to allow easier migration from `name` to `fullName`.
+     * 
+     * @deprecated Use `fullName` or `getFullName()` instead.
+     */
+    public function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getFullName(),
+        );
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->getFullName();
     }
 
     public function canAccessPanel(Panel $panel): bool
