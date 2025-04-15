@@ -130,4 +130,9 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     {
         return !$this->can_login;
     }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(TerritoryAssignment::class, 'assignee_id');
+    }
 }

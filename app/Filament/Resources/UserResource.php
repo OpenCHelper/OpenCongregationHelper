@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\Pages\Page;
 
 class UserResource extends Resource
 {
@@ -131,6 +132,15 @@ class UserResource extends Resource
         ];
     }
 
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewUser::class,
+            Pages\ManageUserAssignments::class,
+        ]);
+    }
+
+
     public static function getPages(): array
     {
         return [
@@ -138,6 +148,7 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
+            'assignments' => Pages\ManageUserAssignments::route('/{record}/assignments'),
         ];
     }
 }
