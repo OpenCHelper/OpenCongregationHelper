@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
@@ -54,10 +55,14 @@ class TerritoryAssignmentResource extends Resource
                             ->required()
                             ->preload(),
                         Forms\Components\Select::make('assignee_id')
-                            ->searchable()
+                            ->searchable(['first_name', 'last_name'])
                             ->disabledOn('edit', 'view')
                             ->required()
-                            ->relationship(name: 'assignee', titleAttribute: 'full_name')
+                            ->relationship(
+                                name: 'assignee',
+                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('first_name')->orderBy('last_name'),
+                            )
+                            ->getOptionLabelFromRecordUsing(fn (Model $record) => $record->full_name)
                             ->preload(),
                     ]),
                 Forms\Components\Section::make('Informazioni principali')
@@ -87,7 +92,11 @@ class TerritoryAssignmentResource extends Resource
                             ->default(Auth::id())
                             ->disabled()
                             ->hiddenOn('create')
-                            ->relationship(name: 'creator', titleAttribute: 'full_name')
+                            ->relationship(
+                                name: 'creator',
+                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('first_name')->orderBy('last_name'),
+                            )
+                            ->getOptionLabelFromRecordUsing(fn (Model $record) => $record->full_name)
                             ->preload(),
                     ]),
             ]);
@@ -101,19 +110,20 @@ class TerritoryAssignmentResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assignee.full_name')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(['first_name', 'last_name'])
+                    ->sortable(['first_name', 'last_name']),
                 Tables\Columns\TextColumn::make('date_start')
                     ->dateTime("d/m/Y H:i")
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date_end')
                     ->dateTime("d/m/Y H:i")
+                    ->placeholder('(in lavorazione)')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assignmentType.name')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('creator.full_name')
-                    ->sortable()
+                    ->sortable(['first_name', 'last_name'])
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -132,7 +142,6 @@ class TerritoryAssignmentResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\TernaryFilter::make('date_end')
                     ->label('Stato assegnazione')
-                    ->default(false)
                     ->nullable()
                     ->placeholder('Tutti gli stati')
                     ->trueLabel('Restituito')
