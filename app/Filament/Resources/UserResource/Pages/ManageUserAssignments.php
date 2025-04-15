@@ -10,6 +10,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Log;
 use Livewire\Livewire;
 
 class ManageUserAssignments extends ManageRelatedRecords
@@ -38,6 +39,13 @@ class ManageUserAssignments extends ManageRelatedRecords
 
     public function table(Table $table): Table
     {
-        return TerritoryAssignmentResource::table($table);
+        $inherited_table = TerritoryAssignmentResource::table($table);
+
+        // Remove the "assignee.full_name" column from the inherited table,
+        // since it would always be the same as the current user.
+        $inherited_table->getColumn('assignee.full_name')->hidden();
+
+        return $inherited_table
+            ->defaultSort('date_start', 'desc');
     }
 }
