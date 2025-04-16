@@ -8778,16 +8778,16 @@
         },
         {
             "name": "webbingbrasil/filament-maps",
-            "version": "v3.0.0-beta.2",
+            "version": "v3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webbingbrasil/filament-maps.git",
-                "reference": "568db65d74e962b5b185a34695476eae82c097b7"
+                "reference": "5a2cb84e1c05f3609e2b5acf57e6c7818831987e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webbingbrasil/filament-maps/zipball/568db65d74e962b5b185a34695476eae82c097b7",
-                "reference": "568db65d74e962b5b185a34695476eae82c097b7",
+                "url": "https://api.github.com/repos/webbingbrasil/filament-maps/zipball/5a2cb84e1c05f3609e2b5acf57e6c7818831987e",
+                "reference": "5a2cb84e1c05f3609e2b5acf57e6c7818831987e",
                 "shasum": ""
             },
             "require": {
@@ -8830,9 +8830,9 @@
             ],
             "support": {
                 "issues": "https://github.com/webbingbrasil/filament-maps/issues",
-                "source": "https://github.com/webbingbrasil/filament-maps/tree/v3.0.0-beta.2"
+                "source": "https://github.com/webbingbrasil/filament-maps/tree/v3.0.0"
             },
-            "time": "2024-04-03T12:11:19+00:00"
+            "time": "2025-03-24T14:11:17+00:00"
         },
         {
             "name": "webmozart/assert",
