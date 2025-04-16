@@ -176,8 +176,7 @@ class TerritoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('currentAssignment')
                     ->state(function (Territory $record): ?string {
-                        $assignment = $record->currentAssignment();
-                        return $assignment->assignee->full_name ?? null;
+                        return $record->currentAssignment()->assignee->full_name ?? null;
                     })
                     ->label('Assegnazione attuale')
                     ->default('')
