@@ -166,10 +166,10 @@ class TerritoryResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(isIndividual: true),
                 Tables\Columns\TextColumn::make('territoryZone.name')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(isIndividual: true),
                 Tables\Columns\IconColumn::make('is_commercial')
                     ->boolean()
                     ->label('Commerciale?')
@@ -181,7 +181,7 @@ class TerritoryResource extends Resource
                     ->label('Assegnazione attuale')
                     ->default('')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
