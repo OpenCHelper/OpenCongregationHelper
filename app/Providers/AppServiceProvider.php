@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 
+use App\Models\User;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -27,6 +31,12 @@ class AppServiceProvider extends ServiceProvider
         // locally.
         // https://laraveldaily.com/lesson/laravel-eloquent-expert/model-fillable-guarded/
         Model::shouldBeStrict(! app()->isProduction()); 
+
+        Gate::define('view-logs', function (User $user) {
+            return $user->hasRole('super_admin')
+                ? Response::allow()
+                : Response::denyWithStatus(404);
+        });
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch

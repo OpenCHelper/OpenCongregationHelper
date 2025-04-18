@@ -33,4 +33,8 @@ return [
      * Allow set custom logs page class.
      */
     'page_class' => Logs::class,
+
+    'permissions' => [
+        'view_logs' => 'view-logs',
+    ],
 ];
