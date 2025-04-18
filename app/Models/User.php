@@ -18,10 +18,13 @@ use Filament\Models\Contracts\HasTenants;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\HasName;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements HasTenants, HasName, MustVerifyEmail, FilamentUser
 {
     use HasApiTokens;
+
+    use HasRoles;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;

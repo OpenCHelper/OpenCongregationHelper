@@ -61,10 +61,20 @@ class UserResource extends Resource
                             ->label('Permetti accesso')
                             ->helperText('Seleziona per permettere all\'utente di accedere al sistema.'),
                         Forms\Components\TextInput::make('password')
-                            ->disabled(fn (Forms\Get $get) => $get('can_login') === false) 
+                            ->hiddenOn('view')
+                            ->disabled(fn (Forms\Get $get) => $get('can_login') === false)
                             ->password()
                             ->required(fn (Forms\Get $get) => $get('can_login'))
                             ->maxLength(255),
+                        
+                        // Using Select Component
+                        Forms\Components\Select::make('roles')
+                            ->hidden(fn (Forms\Get $get) => $get('can_login') === false)
+                            ->disabled(fn (Forms\Get $get) => $get('can_login') === false)
+                            ->relationship('roles', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable(),
                     ]),
             ]);
     }

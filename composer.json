@@ -15,6 +15,7 @@
         "php": "^8.2",
         "awcodes/filament-versions": "^2.0",
         "bezhansalleh/filament-language-switch": "^3.1",
+        "bezhansalleh/filament-shield": "^3.3",
         "discoverydesign/filament-gaze": "^1.1",
         "dotswan/filament-map-picker": "^1.7",
         "filament/filament": "^3.2",
