@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\Pages\Page;
+use Filament\Support\Enums\FontFamily;
 
 class UserResource extends Resource
 {
@@ -66,8 +67,6 @@ class UserResource extends Resource
                             ->password()
                             ->required(fn (Forms\Get $get) => $get('can_login'))
                             ->maxLength(255),
-                        
-                        // Using Select Component
                         Forms\Components\Select::make('roles')
                             ->hidden(fn (Forms\Get $get) => $get('can_login') === false)
                             ->disabled(fn (Forms\Get $get) => $get('can_login') === false)
@@ -94,7 +93,18 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->copyable()
+                    ->icon('heroicon-m-envelope')
+                    ->fontFamily(FontFamily::Mono)
                     ->searchable(),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Ruolo')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->expandableLimitedList()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
                 Tables\Columns\IconColumn::make('email_verified_at')
                     ->label('Email verified?')
                     ->default(false)
@@ -104,11 +114,6 @@ class UserResource extends Resource
                     ->label('Accesso abilitato?')
                     ->boolean()
                     ->sortable(),
-                // Tables\Columns\IconColumn::make('two_factor_confirmed_at')
-                //     ->label('2FA confirmed?')
-                //     ->default(false)
-                //     ->boolean()
-                //     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
