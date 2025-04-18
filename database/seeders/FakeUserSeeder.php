@@ -15,7 +15,8 @@ class FakeUserSeeder extends Seeder
     {
         // Create the Admin user
         User::factory()->create([
-            'name' => 'Admin',
+            'first_name' => 'Admin',
+            'last_name' => 'User',
             'email' => 'test@example.com',
             'password' => Hash::make('password'),
         ]);
