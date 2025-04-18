@@ -122,6 +122,9 @@ jobs:
           
           printf '\nRunning fake data seeders...\n'
           remote_artisan -v -- db:seed --class=FakeDataSeeder --no-interaction --no-ansi | sed 's/^/  | /'
+
+          printf '\nSetting Super Admin user...\n'
+          remote_artisan -v -- shield:super-admin --user=1 --panel=app --no-interaction --no-ansi | sed 's/^/  | /'
         
           printf '\n\n'
 
