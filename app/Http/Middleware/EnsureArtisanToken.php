@@ -22,6 +22,11 @@ class EnsureArtisanToken
         if ($request->header('X-Artisan-Token-Bypass') === "true" && config('app.env') === 'local') {
             return $next($request);
         }
+
+        if (!File::exists(storage_path('framework/.artisan-token'))) {
+            Log::error("Path to .artisan-token file does not exist. Please create it and add a token (" . storage_path('framework/.artisan-token') .").");
+            return response()->json(['error' => 'Token not setup, access unavailable.'], 401);
+        }
         
         if ($token !== File::get(storage_path('framework/.artisan-token'))) {
             Log::error("Unauthorized request to artisan API by {$request->ip()} with token ".json_encode($token)." and command ".json_encode($request->route('command'))." (params=".json_encode($request->route('params')).")");
