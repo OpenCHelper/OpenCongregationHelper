@@ -6,11 +6,11 @@ use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
 
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +32,22 @@ class AppServiceProvider extends ServiceProvider
         // https://laraveldaily.com/lesson/laravel-eloquent-expert/model-fillable-guarded/
         Model::shouldBeStrict(! app()->isProduction()); 
 
+        if ($this->app->environment('local')) {
+            Event::listen('*', function ($event, array $data) {
+                if (
+                    $event == 'Illuminate\\Log\\Events\\MessageLogged'
+                    || str_starts_with($event, 'composing:')
+                    || str_starts_with($event, 'creating:')
+                ) {
+                    return;
+                }
+                
+                Log::debug("Event fired: '$event'", /* [
+                    'data' => $data,
+                ] */);
+            });
+        }
+    
         Gate::define('view-logs', function (User $user) {
             return $user->hasRole('super_admin')
                 ? Response::allow()
