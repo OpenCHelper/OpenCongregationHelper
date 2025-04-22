@@ -79,7 +79,7 @@ class AppPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make(),
                 FilamentLogManager::make(),
                 EnvironmentIndicatorPlugin::make()
-                ->color(fn () => match (app()->environment()) {
+                    ->color(fn () => match (app()->environment()) {
                         'local' => Color::Blue,             # 1. Local development machine
                         'testing' => Color::Amber,          # 2. First stage (nightly)
                         'staging', 'uat' => Color::Orange,  # 3. Pre-production
