@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArtisanCommandController;
 use App\Http\Controllers\ArtisanQueueController;
+use App\Http\Controllers\ArtisanScheduledController;
 use App\Http\Middleware\EnsureArtisanToken;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,8 @@ Route::domain(
     // Queue processing
     Route::post('/queue/process', ArtisanQueueController::class)
         ->name('queue.process');
+    
+    // Cron (scheduled) jobs processing
+    Route::post('/schedule/process', ArtisanScheduledController::class)
+        ->name('schedule.process');
 })->name('artisan.');
