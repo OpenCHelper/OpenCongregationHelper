@@ -12,6 +12,10 @@ use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Event;
 
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Auth;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -62,6 +66,22 @@ class AppServiceProvider extends ServiceProvider
                     'it' => asset('vendor/blade-flags/language-it.svg'),
                 ])
             ;
+        });
+
+        // Set default timezone for DateTimePicker
+        DateTimePicker::configureUsing(function (DateTimePicker $component): void {
+            $component->timezone(Auth::user()?->timezone ?? config('app.timezone'));
+        });
+
+        // Set default timezone for TextColumn for datetime attibutes
+        TextColumn::configureUsing(function (TextColumn $component): void {
+            if (in_array($component->getName(), [
+                'created_at', 'updated_at', 'published_at', 'email_verified_at',
+                'deleted_at', 'last_login_at', 'last_activity_at', 'last_seen_at',
+                'date_start', 'date_end',
+            ])) {
+                $component->timezone(Auth::user()?->timezone ?? config('app.timezone'));
+            }
         });
     }
 }
