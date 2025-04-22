@@ -107,6 +107,12 @@ class AppPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+
+        if (app()->environment(["local", "testing"])) {
+            $panel->plugins([
+                \TomatoPHP\FilamentArtisan\FilamentArtisanPlugin::make(),
+            ]);
+        }
         
         // Dynamically add registration views based on the fortify
         // configuration file.
