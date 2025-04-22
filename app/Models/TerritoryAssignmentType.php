@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Observers\TerritoryAssignmentTypeObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ObservedBy(TerritoryAssignmentTypeObserver::class)]
 class TerritoryAssignmentType extends Model
 {
     /** @use HasFactory<\Database\Factories\TerritoryAssignmentTypeFactory> */
