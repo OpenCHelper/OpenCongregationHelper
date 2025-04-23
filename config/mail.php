@@ -82,7 +82,7 @@ return [
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
-                'smtp',
+                'nativemailfx',
                 'log',
             ],
         ],
