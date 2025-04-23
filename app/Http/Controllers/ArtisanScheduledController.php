@@ -23,7 +23,7 @@ class ArtisanScheduledController extends Controller
         ];
         
         try {
-            Log::info('Executing Artisan command "schedule:run" with params: ' . json_encode($params));
+            // Log::info('Executing Artisan command "schedule:run" with params: ' . json_encode($params));
             $exitCode = Artisan::call("schedule:run", $params);
         } catch (\Exception $e) {
             Log::error('Error executing Artisan command "schedule:run" with params: ' . json_encode($params) . ' - ' . $e->getMessage());
@@ -36,9 +36,9 @@ class ArtisanScheduledController extends Controller
 
         $output = Artisan::output();
 
-        Log::info('Artisan command output: ' . PHP_EOL . implode("\n", array_map(function ($line) {
-            return '    | ' . $line;
-        }, explode("\n", $output))));
+        // Log::info('Artisan command output: ' . PHP_EOL . implode("\n", array_map(function ($line) {
+        //     return '    | ' . $line;
+        // }, explode("\n", $output))));
 
         return response()->json(array(
             'success' => true,
