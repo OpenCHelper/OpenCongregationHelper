@@ -38,26 +38,12 @@ class AppServiceProvider extends ServiceProvider
         // https://laraveldaily.com/lesson/laravel-eloquent-expert/model-fillable-guarded/
         Model::shouldBeStrict(! app()->isProduction()); 
         
+        // Add a custom mail transport that uses the native mail() function
         Mail::extend('nativemailfx', function (array $config = []) {
             return new NativeMailFxTransport(/* ... */);
         });
-
-        if ($this->app->environment('local')) {
-            Event::listen('*', function ($event, array $data) {
-                if (
-                    $event == 'Illuminate\\Log\\Events\\MessageLogged'
-                    || str_starts_with($event, 'composing:')
-                    || str_starts_with($event, 'creating:')
-                ) {
-                    return;
-                }
-                
-                Log::debug("Event fired: '$event'", /* [
-                    'data' => $data,
-                ] */);
-            });
-        }
     
+        // Configure the gate to only allow super_admins to view logs
         Gate::define('view-logs', function (User $user) {
             return $user->hasRole('super_admin')
                 ? Response::allow()
