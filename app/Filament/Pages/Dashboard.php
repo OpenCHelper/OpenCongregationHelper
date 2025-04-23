@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TerritoryGlobalMap;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Forms\Form;
@@ -18,6 +19,7 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     public function getWidgets(): array {
         return [
+            StatsOverview::class,
             TerritoryGlobalMap::class,
         ];
     }
