@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Event;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\NativeMailFxTransport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
         // locally.
         // https://laraveldaily.com/lesson/laravel-eloquent-expert/model-fillable-guarded/
         Model::shouldBeStrict(! app()->isProduction()); 
+        
+        Mail::extend('nativemailfx', function (array $config = []) {
+            return new NativeMailFxTransport(/* ... */);
+        });
 
         if ($this->app->environment('local')) {
             Event::listen('*', function ($event, array $data) {

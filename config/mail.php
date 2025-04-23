@@ -95,6 +95,10 @@ return [
             ],
         ],
 
+        'nativemailfx' => [
+            'transport' => 'nativemailfx',
+        ],
+
     ],
 
     /*
