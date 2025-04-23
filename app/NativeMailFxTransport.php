@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\Address;
@@ -33,13 +34,9 @@ class NativeMailFxTransport extends AbstractTransport
 
         $from = implode(',', collect($email->getFrom())->map(fn (Address $email) => $email->toString())->all());
         $to = implode(',', collect($email->getTo())->map(fn (Address $email) => $email->toString())->all());
-        $headers = implode("\r\n", [
-            'MIME-Version: 1.0',
-            'Content-type:text/html;charset=UTF-8',
-            'From: ' . $from,
-        ]);
+        $headers = $email->getPreparedHeaders()->toString();
 
-        Log::debug('Sending email', [
+        Log::debug('Sending email using mail() function', [
             'from' => $from,
             'to' => $to,
             'subject' => $email->getSubject(),
@@ -48,7 +45,9 @@ class NativeMailFxTransport extends AbstractTransport
             'headers' => $headers,
         ]);
 
-        mail($to, $email->getSubject(), $email->getHtmlBody(), $headers);
+        if (!mail($to, $email->getSubject(), $email->getHtmlBody(), $headers)) {
+            throw new TransportException('Failed to send email using mail() function');
+        }
     }
 
     /**
