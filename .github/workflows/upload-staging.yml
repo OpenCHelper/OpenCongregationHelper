@@ -60,7 +60,7 @@ jobs:
         run: npm run build --if-present && rm -rf node_modules
       
       - name: "FTP Deploy"
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           protocol: ftp
           server: ${{ secrets.FTP_SERVER_QA }}
