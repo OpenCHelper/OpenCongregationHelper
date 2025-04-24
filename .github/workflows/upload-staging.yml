@@ -51,7 +51,7 @@ jobs:
           fail-fast: true
 
       - name: Install Composer dependencies
-        run: composer install --no-ansi --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
+        run: composer install --no-ansi --no-interaction --no-dev --no-plugins --no-progress --no-scripts --optimize-autoloader
 
       - name: Install NodeJS dependencies
         run: npm ci
