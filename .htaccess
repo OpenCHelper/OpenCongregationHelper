@@ -1,4 +1,5 @@
 # Set default PHP version to 8.2 (http://it.help.altervista.org/w/Configurazione_personalizzata_(.htaccess)#Direttive_disponibili_nei_file_.htaccess)
+# # av:php5-engine
 AddHandler av-php82 .php
 
 <IfModule mod_rewrite.c>
