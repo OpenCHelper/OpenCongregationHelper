@@ -29,6 +29,7 @@
         "phpoffice/phpspreadsheet": "^1.29",
         "pxlrbt/filament-environment-indicator": "^2.1",
         "stephenjude/filament-jetstream": "^0.0.15",
+        "tapp/filament-maillog": "^1.0",
         "tomatophp/filament-artisan": "^1.1",
         "webbingbrasil/filament-maps": "^v3.0.0-beta"
     },

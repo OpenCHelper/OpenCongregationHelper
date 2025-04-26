@@ -37,6 +37,7 @@ use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use Awcodes\FilamentVersions\VersionsPlugin;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Tapp\FilamentMailLog\FilamentMailLogPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -92,6 +93,7 @@ class AppPanelProvider extends PanelProvider
                     ->items([
                         new AppVersionProvider(),
                     ]),
+                FilamentMailLogPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,
