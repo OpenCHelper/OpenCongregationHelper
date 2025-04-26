@@ -58,7 +58,44 @@ jobs:
       
       - name: Run build
         run: npm run build --if-present && rm -rf node_modules
-      
+
+      - name: Clear remote cache before uploading
+        env:
+          FTP_SERVER_URL: ${{ secrets.FTP_SERVER_QA }}
+        run: |
+          set -e
+          set -o pipefail
+          set -o nounset
+
+          export ARTISAN_BASE_URL="https://artisan.${FTP_SERVER_URL##ftp.}";
+
+          [[ ! -x "scripts/remote_artisan.sh" ]] && chmod +x scripts/remote_artisan.sh
+
+          function remote_artisan () { 
+            scripts/remote_artisan.sh                                 \
+              --base-url "$ARTISAN_BASE_URL"                          \
+              --ftp-hostname "${{ secrets.FTP_SERVER_QA }}"         \
+              --ftp-username "${{ secrets.FTP_USERNAME_QA }}"       \
+              --ftp-password "${{ secrets.FTP_PASSWORD_QA }}"       \
+              "$@"
+          }
+
+          printf "Using Artisan base URL %s\n\n" "$ARTISAN_BASE_URL"
+
+          printf "Test Artisan endpoint:\n"
+          remote_artisan -- test-endpoint positional-arg --keyword-arg | sed 's/^/  | /'
+          printf '\n\n'
+
+          # ------------------------- Environment -------------------------
+          printf "Current environment:\n"
+          remote_artisan -- config:show app.env --no-interaction --no-ansi | sed 's/^/  | /'
+
+          printf '\n\n'
+          
+          # -------------------------     Clear Cache     -------------------------
+          printf '\nClear optimizations...\n'
+          remote_artisan -- optimize:clear --no-interaction --no-ansi | sed 's/^/  | /'
+
       - name: FTP Deploy (application)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
