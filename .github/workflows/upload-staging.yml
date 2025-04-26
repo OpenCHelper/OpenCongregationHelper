@@ -59,7 +59,7 @@ jobs:
       - name: Run build
         run: npm run build --if-present && rm -rf node_modules
       
-      - name: "FTP Deploy"
+      - name: FTP Deploy (application)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           protocol: ftp
@@ -67,6 +67,9 @@ jobs:
           username: ${{ secrets.FTP_USERNAME_QA }}
           password: ${{ secrets.FTP_PASSWORD_QA }}
           local-dir: ./
+          server-dir: ./
+          state-name: .ftp-deploy-sync-state__application.json
+          log-level: verbose
           exclude: |
             **/.git*
             **/.git*/**
@@ -79,7 +82,26 @@ jobs:
             docker-compose.yml
             Dockerfile
             *.sql
-                  
+
+            vendor
+            vendor/**
+            **/node_modules/**
+
+      # Separate FTP deploy so that if it fails, the application is still deployed
+      # and the vendor folder can be deployed later.
+      - name: FTP Deploy (vendor)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          protocol: ftp
+          server: ${{ secrets.FTP_SERVER_QA }}
+          username: ${{ secrets.FTP_USERNAME_QA }}
+          password: ${{ secrets.FTP_PASSWORD_QA }}
+          local-dir: ./vendor/
+          server-dir: ./vendor/
+          state-name: ../.ftp-deploy-sync-state__vendor.json
+          log-level: verbose
+          timeout: 120000
+
       - name: Run Artisan commands
         env:
           FTP_SERVER_URL: ${{ secrets.FTP_SERVER_QA }}
