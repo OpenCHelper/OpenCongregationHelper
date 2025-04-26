@@ -20,6 +20,7 @@
         "dotswan/filament-map-picker": "^1.7",
         "filament/filament": "^3.2",
         "filipfonal/filament-log-manager": "^2.0",
+        "flowframe/laravel-trend": "*",
         "laravel/framework": "^11.9",
         "laravel/jetstream": "^4.2|^5.0",
         "laravel/sanctum": "^4.0",
