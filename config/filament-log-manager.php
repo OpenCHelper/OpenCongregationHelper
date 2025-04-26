@@ -1,6 +1,6 @@
 <?php
 
-use FilipFonal\FilamentLogManager\Pages\Logs;
+use App\Filament\Pages\Logs;
 
 return [
     /**

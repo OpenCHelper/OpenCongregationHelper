@@ -229,7 +229,7 @@ return [
     */
     'navigation' => [
         'show-only-commands-showing' => true,
-        'group' => 'Settings',
+        'group' => 'Developer',
         'icon' => 'heroicon-o-command-line',
     ]
 ];
