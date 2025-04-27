@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TerritoryAssignmentResource extends Resource
 {
@@ -23,7 +24,7 @@ class TerritoryAssignmentResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     // Hide the resource from the navigation panel
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
     
     public static function getModelLabel(): string
     {
@@ -172,9 +173,29 @@ class TerritoryAssignmentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+        $query = parent::getEloquentQuery()
+        ->where(function ($query) {
+            // If the user is not an admin, filter the query to only show their own assignments
+            if (!Auth::user()->can('view_any_territory::assignment')) {
+                $query->whereHas('assignee', function ($query) {
+                    return $query->where('id', Auth::user()->id);
+                });
+            }
+        })
+        ->withoutGlobalScopes([
+            SoftDeletingScope::class,
+        ]);
+
+        // Log the generated SQL query for debugging
+        Log::info('Generated SQL query:', [
+            'query' => $query->toSql(),
+        ]);
+        return $query;
+    }
+
+    public static function canAccess(): bool
+    {
+        // Allow access to the resource only if the user has the 'view_any_territory::assignment' permission
+        return Auth::user()->can('view_territory::assignment') || parent::canAccess();
     }
 }
