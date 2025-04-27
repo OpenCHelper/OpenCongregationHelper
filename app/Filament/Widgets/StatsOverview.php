@@ -18,7 +18,6 @@ class StatsOverview extends BaseWidget
         $trend = Trend::query(
             TerritoryAssignment::query()
                 ->with('territory')
-                ->where('date_start', '>=', now()->subDays(30))
         )
             ->dateColumn('date_start')
             ->between(now()->subDays(365), now())
@@ -28,13 +27,9 @@ class StatsOverview extends BaseWidget
         return [
             Stat::make('Territori', Territory::count())
                 ->description('Numero totale di territori'),
-            Stat::make('Media assegnazioni', '192.1k')
-                ->description('Media assegnazioni globale negli ultimi 365 giorni')
-                // ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->chart($trend->map(function ($item) {
-                    return (float) $item->aggregate;
-                })->toArray()),
-    
+            Stat::make('Durata media assegnazioni mensili', round($trend->average('aggregate'), 2) . ' giorni')
+                ->description('(ultimi 365 giorni)')
+                ->chart($trend->map(fn ($item) => (float) $item->aggregate)->toArray()),
         ];
     }
 }
