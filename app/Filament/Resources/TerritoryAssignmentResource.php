@@ -174,17 +174,15 @@ class TerritoryAssignmentResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()
-        ->where(function ($query) {
-            // If the user is not an admin, filter the query to only show their own assignments
-            if (!Auth::user()->can('view_any_territory::assignment')) {
-                $query->whereHas('assignee', function ($query) {
+            ->whereHas('assignee', function ($query) {
+                // If the user cannot see all assignments, filter by the user's ID
+                if (!Auth::user()->can('view_any_territory::assignment')) {
                     return $query->where('id', Auth::user()->id);
-                });
-            }
-        })
-        ->withoutGlobalScopes([
-            SoftDeletingScope::class,
-        ]);
+                }
+            })
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
 
         // Log the generated SQL query for debugging
         Log::info('Generated SQL query:', [
