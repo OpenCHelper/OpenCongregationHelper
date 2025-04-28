@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components;
 use Filament\Resources\Pages\ViewRecord;
+use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 class ViewUser extends ViewRecord
 {
@@ -20,6 +21,9 @@ class ViewUser extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Impersonate::make()
+                ->record($this->getRecord())
+                ->redirectTo('/'),
             Actions\EditAction::make(),
             Actions\DeleteAction::make(),
         ];

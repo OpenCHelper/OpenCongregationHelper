@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\FontFamily;
+use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
 class UserResource extends Resource
 {
@@ -131,6 +132,9 @@ class UserResource extends Resource
                     ->falseLabel('Disabilitato'),
             ])
             ->actions([
+                Impersonate::make()
+                    ->requiresConfirmation()
+                    ->redirectTo('/'),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
