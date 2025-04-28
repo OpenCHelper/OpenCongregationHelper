@@ -149,6 +149,10 @@ class TerritoryAssignmentResource extends Resource
                     ->placeholder('Tutti gli stati')
                     ->trueLabel('Restituito')
                     ->falseLabel('In lavorazione'),
+                Tables\Filters\Filter::make('assignee')
+                    ->label('Solo le mie assegnazioni')
+                    ->query(fn (Builder $query) => $query->where('assignee_id', Auth::user()->id))
+                    ->hidden(!Auth::user()->can('view_any_territory::assignment')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
