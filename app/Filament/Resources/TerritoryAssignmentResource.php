@@ -144,12 +144,12 @@ class TerritoryAssignmentResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\TernaryFilter::make('date_end')
                     ->label('Stato assegnazione')
+                    ->default(false)
                     ->nullable()
                     ->placeholder('Tutti gli stati')
                     ->trueLabel('Restituito')
                     ->falseLabel('In lavorazione'),
             ])
-            ->persistFiltersInSession()
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
