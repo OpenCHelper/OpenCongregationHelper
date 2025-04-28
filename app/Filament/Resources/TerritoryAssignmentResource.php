@@ -111,6 +111,7 @@ class TerritoryAssignmentResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assignee.full_name')
+                    ->hidden(!Auth::user()->can('view_any_territory::assignment'))
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(['first_name', 'last_name']),
                 Tables\Columns\TextColumn::make('date_start')
