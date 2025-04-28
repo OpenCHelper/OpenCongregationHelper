@@ -7,6 +7,7 @@ use App\Filament\Resources\TerritoryZoneResource\RelationManagers;
 use App\Models\TerritoryZone;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Filament\Forms;
+use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
 use Filament\Resources\Pages\Page;
+use Filament\Tables\Columns\SpatieTagsColumn;
+use Spatie\Tags\Tag;
 
 class TerritoryZoneResource extends Resource
 {
@@ -52,6 +55,12 @@ class TerritoryZoneResource extends Resource
                     ->required()
                     ->maxLength(50),
                 Forms\Components\ColorPicker::make('color'),
+                SpatieTagsInput::make('tags')
+                    ->type('zones')
+                    ->nestedRecursiveRules([
+                        'min:3',
+                        'max:255',
+                    ]),
             ]);
     }
 
@@ -67,9 +76,18 @@ class TerritoryZoneResource extends Resource
                     ->counts('territories')
                     ->label('Totale territori')
                     ->sortable(),
+                SpatieTagsColumn::make('tags')
+                    ->type('zones'),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('tags')
+                    ->multiple()
+                    ->options(Tag::getWithType('zones')->pluck('name', 'name'))
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when($data['values'], function (Builder $query, $data): Builder {
+                            return $query->withAnyTags(array_values($data), 'zones');
+                        });
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

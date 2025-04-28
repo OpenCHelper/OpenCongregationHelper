@@ -16,6 +16,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Dotswan\MapPicker\Fields\Map;
+use Filament\Forms\Components\SpatieTagsInput;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Set;
 use Filament\Pages\SubNavigationPosition;
@@ -23,7 +24,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Pages\Page;
-
+use Filament\Tables\Columns\SpatieTagsColumn;
+use Spatie\Tags\Tag;
 
 class TerritoryResource extends Resource
 {
@@ -154,6 +156,8 @@ class TerritoryResource extends Resource
                         Forms\Components\Textarea::make('notes')
                             ->helperText('Inserisci eventuali note utili per la lavorazione del territorio')
                             ->columnSpanFull(),
+                        SpatieTagsInput::make('tags')
+                            ->type('territories'),
                     ]),
             ]);
     }
@@ -182,6 +186,13 @@ class TerritoryResource extends Resource
                     ->default('')
                     ->sortable()
                     ->searchable(false),
+                SpatieTagsColumn::make('tags')
+                    // ->searchable(isIndividual: true, query: function (Builder $query, string $search): Builder {
+                    //     return $query->when($search, function (Builder $query, $search): Builder {
+                    //         return $query->withAnyTags($search, 'territories');
+                    //     });
+                    // })
+                    ->type('territories'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -200,6 +211,14 @@ class TerritoryResource extends Resource
                     ->placeholder('Qualsiasi')
                     ->trueLabel('Commerciale')
                     ->falseLabel('Residenziale'),
+                Tables\Filters\SelectFilter::make('tags')
+                    ->multiple()
+                    ->options(Tag::getWithType('territories')->pluck('name', 'name'))
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when($data['values'], function (Builder $query, $data): Builder {
+                            return $query->withAnyTags(array_values($data), 'territories');
+                        });
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

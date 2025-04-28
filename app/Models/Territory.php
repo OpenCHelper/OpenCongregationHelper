@@ -12,12 +12,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\Log;
+use Spatie\Tags\HasTags;
 
 class Territory extends Model
 {
     /** @use HasFactory<\Database\Factories\TerritoryFactory> */
     use HasFactory;
     use SoftDeletes;
+
+    use HasTags;
 
     use HasParentSoftDeletable;
 
