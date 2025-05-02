@@ -1,8 +1,10 @@
 <?php
 
+use App\Jobs\DetectStaleAssignments;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,6 +24,19 @@ return Application::configure(basePath: dirname(__DIR__))
             for more information.
         */
         $middleware->trustProxies(at: '*');
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        // Schedule tasks here
+        $schedule->job(DetectStaleAssignments::class)
+            ->weeklyOn(1, '12:00')
+            ->withoutOverlapping()
+            // ->onFailure(function () {
+            //     // Handle failure
+            // })
+            // ->onSuccess(function () {
+            //     // Handle success
+            // });
+            ;
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
