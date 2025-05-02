@@ -1,179 +1,72 @@
 name: 'registro-territori'
 
-#  _    _     _                        
-# | |  | |   | |                       
-# | |  | |__ | |_   _ ____   ____  ___ 
-#  \ \/ / _ \| | | | |    \ / _  )/___)
-#   \  / |_| | | |_| | | | ( (/ /|___ |
-#    \/ \___/|_|\____|_|_|_|\____|___/ 
-# Docker automatically creates a new volume and allows data persistence
-volumes:
-  db_volume: {}
-  npm_cache: {}
-
-#     _                      _                 
-#    | |                    (_)                
-#     \ \   ____  ____ _   _ _  ____ ____  ___ 
-#      \ \ / _  )/ ___) | | | |/ ___) _  )/___)
-#  _____) | (/ /| |    \ V /| ( (__( (/ /|___ |
-# (______/ \____)_|     \_/ |_|\____)____|___/ 
 services:
-  application:
-    container_name: php-apache
-    depends_on:
-      database:
-        condition: service_healthy
-        restart: true
-    healthcheck:
-      test: |
-        timeout 10 curl --silent --fail http://localhost:80/up > /dev/null || exit 1
-      interval: 30s
-      timeout: 120s
-      retries: 4
-      start_period: 1m30s
-      start_interval: 30s
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - APACHE_RUN_USER=${DOCKER_APACHE_USER:-www-data}
-        - APACHE_RUN_GROUP=${DOCKER_APACHE_GROUP:-www-data}
-        - APACHE_RUN_UID=${DOCKER_APACHE_UID:-1000}
-    user: "${DOCKER_APACHE_USER:-www-data}:${DOCKER_APACHE_GROUP:-www-data}"
-    environment:
-      - npm_config_cache=~/npm-cache
-    command: |
-      bash -c "
-        set -o errexit
-        set -o pipefail
+    laravel.test:
+        build:
+            context: ./docker/8.2
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.2/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - mysql
+    mysql:
+        image: 'mysql/mysql-server:8.0'
+        ports:
+            - '${FORWARD_DB_PORT:-3306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            - 'sail-mysql:/var/lib/mysql'
+            - './docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+    phpmyadmin:
+        depends_on:
+          - mysql
+        image: phpmyadmin/phpmyadmin
+        environment:
+          PMA_HOST: mysql
+          PMA_PORT: 3306
+          # PMA_ARBITRARY: 1
+        restart: always
+        ports:
+          - 8090:80
+        networks:
+          - sail
+        attach: false
 
-        # Fix Composer error: `fatal: detected dubious ownership in repository at '/var/www/html'`
-        git config --global --add safe.directory /var/www/html
-
-        # Install Composer dependencies
-        (
-          printf -- '-----------------   Composer    -----------------\\n'
-          composer install --no-interaction --no-progress || exit 1
-        )
-
-        # Install NPM dependencies
-        (
-          printf -- '-----------------     NPM       -----------------\\n'
-          npm install --no-audit --no-fund --no-progress || exit 2
-        )
-
-        # Run Laravel Database migrations
-        (
-          printf -- '-----------------     Laravel     -----------------\\n'
-          php artisan migrate || exit 10
-        )
-
-        # Start Vite server for Hot Module Replacement
-        (
-          printf -- '----------------- Resources (HMR) -----------------\\n'
-          npm run --silent dev -- --host --port 3000
-        ) & pid_vite=$!
-
-        sleep 10
-
-        # Start Apache web server
-        (
-          printf -- '\\n----------------- Apache + PHP -----------------\\n\\n'
-          apache2ctl -k start -c 'ServerName localhost' -D FOREGROUND
-        ) & pid_apache=$!
-        
-        wait
-      "
-    volumes:
-      - ./:/var/www/html/    # Bind mount
-      # - npm_cache:~/npm-cache
-      # - ./storage/logs/:/var/www/html/storage/logs/:rw
-      # - ./database/:/var/www/html/database/:rw
-    ports:
-      - 8080:80
-      - 443:443
-      - 3000:3000
-    networks:
-      - nw-application
-    develop:
-      watch:
-        # - path: ./
-        #   action: sync
-        #   target: /var/www/html/
-        #   ignore:
-        #     # Ignore dependency files
-        #     - package.json
-        #     - package-lock.json
-        #     - composer.json
-        #     - composer.lock
-        #     # Ignore Docker files
-        #     - docker-compose.yml
-        #     - Dockerfile
-        #     - .dockerignore
-        #     # Ignore mounted directories
-        #     - storage/logs/
-        #     - database/
-        - path: ./docker-compose.yml
-          action: rebuild
-        - path: ./Dockerfile
-          action: rebuild
-        # - path: package.json
-        #   action: rebuild
-        # - path: composer.json
-        #   action: rebuild
-  database:
-    container_name: mysql
-    image: mysql:5.7
-    restart: always
-    healthcheck:
-      test: |
-        mysql --connect-timeout=5 -u root \
-          --batch --disable-column-names \
-          --execute='SELECT version()' \
-        || exit 1
-      interval: 2s        # Run the healthcheck every 2 seconds
-      timeout: 60s
-      retries: 30
-      start_period: 30s   # Give the database some time to start
-      start_interval: 5s
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME} # ................ So you don't have to use root, but you can if you like
-      MYSQL_PASSWORD: ${DB_PASSWORD} # ............ You can use whatever password you like
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
-      # MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} # .. Password for root access
-    ports:
-      - 3306:3306 # Syntax: `<Port exposed>:< MySQL Port running inside container>`
-    expose:
-      - 3306 # This documents the presence of exposed ports
-    volumes:
-      - db_volume:/var/lib/mysql
-    networks:
-      - nw-phpmyadmin
-      - nw-application
-
-  phpmyadmin:
-    container_name: pma
-    depends_on:
-      - database
-    image: phpmyadmin/phpmyadmin
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      # MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD
-    restart: always
-    ports:
-      - 8090:80
-    networks:
-      - nw-phpmyadmin
-    attach: false
-
-#  ______                              _          
-# |  ___ \       _                    | |         
-# | |   | | ____| |_ _ _ _  ___   ____| |  _  ___ 
-# | |   | |/ _  )  _) | | |/ _ \ / ___) | / )/___)
-# | |   | ( (/ /| |_| | | | |_| | |   | |< (|___ |
-# |_|   |_|\____)\___)____|\___/|_|   |_| \_|___/ 
 networks:
-  nw-phpmyadmin: {}
-  nw-application: {}
+    sail:
+        driver: bridge
+volumes:
+    sail-mysql:
+        driver: local
