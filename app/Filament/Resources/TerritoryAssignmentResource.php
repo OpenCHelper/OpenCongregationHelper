@@ -94,6 +94,7 @@ class TerritoryAssignmentResource extends Resource
                             ->placeholder('Nessuna descrizione disponibile'),
                         Infolists\Components\TextEntry::make('territory.notes')
                             ->label('Note')
+                            ->icon('heroicon-o-document-text')
                             ->columnSpanFull()
                             ->visible(fn (Model $record) => $record->territory->notes != null)
                             ->placeholder('Nessuna nota disponibile'),
@@ -103,14 +104,19 @@ class TerritoryAssignmentResource extends Resource
                     ->columns(2)
                     ->schema([
                         Infolists\Components\TextEntry::make('assignee.full_name')
+                            ->icon('heroicon-o-user')
                             ->label('Assegnato a'),
                         Infolists\Components\TextEntry::make('assignmentType.name')
+                            ->icon('heroicon-o-envelope-open')
                             ->label('Tipo di assegnazione'),
                         Infolists\Components\TextEntry::make('started_at')
+                            ->icon('heroicon-o-calendar')
                             ->sinceTooltip()
                             ->label('Inizio assegnazione'),
                         Infolists\Components\TextEntry::make('ended_at')
+                            ->icon('heroicon-o-calendar')
                             ->sinceTooltip()
+                            ->visible(fn (Model $record) => $record->ended_at != null)
                             ->label('Fine assegnazione')
                             ->placeholder('(in lavorazione)'),
                     ]),
