@@ -17,6 +17,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
+use Dotswan\MapPicker\Infolists\MapEntry;
+
 class TerritoryAssignmentResource extends Resource
 {
     protected static ?string $model = TerritoryAssignment::class;
@@ -41,6 +45,77 @@ class TerritoryAssignmentResource extends Resource
         return 'Reparto territori';
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make('Informazioni territorio')
+                    ->description('Informazioni principali relative all\'assegnazione del territorio.')
+                    ->columns(2)
+                    ->schema([
+                        Infolists\Components\TextEntry::make('territory.name')
+                            ->label('Territorio'),
+                        Infolists\Components\TextEntry::make('territory.territoryZone.name')
+                            ->label('Zona'),
+                        // MapEntry::make('location')
+                        //     ->label('Mappa')
+                        //     ->columnSpanFull()
+
+                        //     // State Management
+                        //     ->state(function ($record): array {
+                        //         $territory = $record->territory;
+                        //         $geojson = json_decode(strip_tags($territory->geojson ?? ''));
+                        //         $location = [
+                        //             'geojson' => $geojson,
+                        //         ];
+                        //         if ($territory->geojson ?? null != null && $geojson !== null) {
+                        //             $location['lat'] = -1;
+                        //             $location['lng'] = -1;
+                        //         }
+
+                        //         return $location;
+                        //     })
+                            
+                        //     // Controls
+                        //     ->showFullscreenControl(true)
+                        //     ->showZoomControl(true)
+
+                        //     // GeoMan Integration (if needed for viewing)
+                        //     ->geoMan(true)
+                        //     ->geoManEditable(false),
+                        Infolists\Components\ImageEntry::make('territory.image_path')
+                            ->label('Immagine')
+                            ->visible(fn (Model $record) => $record->territory->image_path != null)
+                            ->columnSpanFull(),
+                        Infolists\Components\TextEntry::make('territory.description')
+                            ->label('Descrizione')
+                            ->columnSpanFull()
+                            ->visible(fn (Model $record) => $record->territory->description != null)
+                            ->placeholder('Nessuna descrizione disponibile'),
+                        Infolists\Components\TextEntry::make('territory.notes')
+                            ->label('Note')
+                            ->columnSpanFull()
+                            ->visible(fn (Model $record) => $record->territory->notes != null)
+                            ->placeholder('Nessuna nota disponibile'),
+                    ]),
+                Infolists\Components\Section::make('Informazioni assegnazione')
+                    ->description('Informazioni principali relative all\'assegnazione del territorio.')
+                    ->columns(2)
+                    ->schema([
+                        Infolists\Components\TextEntry::make('assignee.full_name')
+                            ->label('Assegnato a'),
+                        Infolists\Components\TextEntry::make('assignmentType.name')
+                            ->label('Tipo di assegnazione'),
+                        Infolists\Components\TextEntry::make('started_at')
+                            ->sinceTooltip()
+                            ->label('Inizio assegnazione'),
+                        Infolists\Components\TextEntry::make('ended_at')
+                            ->sinceTooltip()
+                            ->label('Fine assegnazione')
+                            ->placeholder('(in lavorazione)'),
+                    ]),
+            ]);
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -106,6 +181,7 @@ class TerritoryAssignmentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Model $record): string => TerritoryAssignmentResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('territory.name')
                     ->searchable()
@@ -173,6 +249,7 @@ class TerritoryAssignmentResource extends Resource
     {
         return [
             'index' => Pages\ManageTerritoryAssignments::route('/'),
+            'view' => Pages\ViewTerritoryAssignment::route('/{record}'),
         ];
     }
 
