@@ -2,11 +2,11 @@
 
 namespace App\Observers;
 
-use App\Filament\Resources\TerritoryAssignmentResource;
 use App\Models\TerritoryAssignment;
-use Filament\Notifications\Actions\Action;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
+
+use App\Notifications\TerritoryAssignedNotification;
+use App\Notifications\TerritoryReturnedNotification;
 
 class TerritoryAssignmentObserver
 {
@@ -19,19 +19,7 @@ class TerritoryAssignmentObserver
             'territory_assignment' => $territoryAssignment,
         ]);
         
-        Notification::make()
-            ->title('Territorio assegnato')
-            ->body('Ti è stato assegnato un nuovo territorio.')
-            ->icon('heroicon-o-map')
-            ->actions([
-                Action::make('view')
-                    ->icon('heroicon-o-eye')
-                    ->url(TerritoryAssignmentResource::getUrl('view', [
-                        'record' => $territoryAssignment->id,
-                    ]))
-                    ->label('Vedi'),
-            ])
-            ->sendToDatabase($territoryAssignment->assignee);
+        $territoryAssignment->assignee->notify(new TerritoryAssignedNotification($territoryAssignment));
     }
 
     /**
@@ -44,11 +32,7 @@ class TerritoryAssignmentObserver
         ]);
         
         if ($territoryAssignment->isDirty('ended_at') && $territoryAssignment->ended_at !== null) {
-            Notification::make()
-                ->title('Territorio riconsegnato')
-                ->body('Il tuo territorio è stato riconsegnato.')
-                ->icon('heroicon-o-inbox-arrow-down')
-                ->sendToDatabase($territoryAssignment->assignee);
+            $territoryAssignment->assignee->notify(new TerritoryReturnedNotification($territoryAssignment));
         }
     }
 

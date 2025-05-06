@@ -4,7 +4,8 @@ namespace App\Observers;
 
 use App\Models\TerritoryAssignmentType;
 use App\Models\User;
-use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\CampaignCreatedNotification;
 
 class TerritoryAssignmentTypeObserver
 {
@@ -13,12 +14,7 @@ class TerritoryAssignmentTypeObserver
      */
     public function created(TerritoryAssignmentType $territoryAssignmentType): void
     {
-        Notification::make()
-            ->title('Nuova campagna!')
-            ->body('E\' stata creata una nuova campagna: ' . $territoryAssignmentType->name)
-            ->icon('heroicon-o-megaphone')
-            ->actions([])
-            ->sendToDatabase(User::all());
+        Notification::send(User::all(), new CampaignCreatedNotification($territoryAssignmentType));
     }
 
     /**
