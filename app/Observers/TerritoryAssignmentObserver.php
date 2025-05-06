@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Filament\Resources\TerritoryResource;
+use App\Filament\Resources\TerritoryAssignmentResource;
 use App\Models\TerritoryAssignment;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
@@ -26,8 +26,8 @@ class TerritoryAssignmentObserver
             ->actions([
                 Action::make('view')
                     ->icon('heroicon-o-eye')
-                    ->url(TerritoryResource::getUrl('view', [
-                        'record' => $territoryAssignment->territory_id,
+                    ->url(TerritoryAssignmentResource::getUrl('view', [
+                        'record' => $territoryAssignment->id,
                     ]))
                     ->label('Vedi'),
             ])

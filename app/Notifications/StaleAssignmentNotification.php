@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Notifications\Actions\Action as FilamentAction;
-use App\Filament\Resources\TerritoryResource;
+use App\Filament\Resources\TerritoryAssignmentResource;
 use App\Models\TerritoryAssignment;
 
 class StaleAssignmentNotification extends Notification
@@ -49,8 +49,8 @@ class StaleAssignmentNotification extends Notification
             ->greeting('Ciao ' . $notifiable->name . ',')
             ->line('il territorio ' . $this->assignment->with("territory")->firstOrFail()->territory->name . ' risulta assegnato a te da ' . round($this->assignment->started_at->diffInDays(Carbon::now(), absolute: true)) . ' giorni.')
             ->line('Se lo hai terminato, ricordati di riconsegnarlo.')
-            ->action('Vedi territorio', TerritoryResource::getUrl('view', [
-                'record' => $this->assignment->territory_id,
+            ->action('Vedi territorio', TerritoryAssignmentResource::getUrl('view', [
+                'record' => $this->assignment->id,
             ]))
             ->line('Ti ringraziamo per il tuo impegno!');
     }
@@ -79,8 +79,8 @@ class StaleAssignmentNotification extends Notification
             ->actions([
                 FilamentAction::make('view')
                     ->icon('heroicon-o-eye')
-                    ->url(TerritoryResource::getUrl('view', [
-                        'record' => $this->assignment->territory_id,
+                    ->url(TerritoryAssignmentResource::getUrl('view', [
+                        'record' => $this->assignment->id,
                     ]))
                     ->label('Vedi'),
             ])
