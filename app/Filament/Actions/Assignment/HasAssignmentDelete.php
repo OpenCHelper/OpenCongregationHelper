@@ -21,7 +21,7 @@ trait HasAssignmentDelete
             ->color('primary')
             ->visible(function (Models\Territory $record): bool {
                 $assignment = $record->currentAssignment();
-                return $assignment !== null && $assignment->date_end === null;
+                return $assignment !== null && $assignment->ended_at === null;
             })
             ->mountUsing(function (Forms\ComponentContainer $form, Models\Territory $record) {
                 $last_assignment = $record
@@ -55,12 +55,12 @@ trait HasAssignmentDelete
                     $last_assignment = $record->currentAssignment();
 
                     // Skip if the last assignment is not null
-                    if ($last_assignment === null || $last_assignment->date_end !== null) {
+                    if ($last_assignment === null || $last_assignment->ended_at !== null) {
                         Log::warning("Skipping record {$record->id} because it does not has an active assignment");
                         return;
                     }
                     
-                    $last_assignment->date_end = now();
+                    $last_assignment->ended_at = now();
                     $last_assignment->push();
                 } catch (\Exception $e) {
                     Log::error('Errore durante la terminazione dell\'assegnazione del territorio: ' . $e->getMessage());

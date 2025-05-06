@@ -21,7 +21,7 @@ trait HasAssignmentCreate
             ->color('primary')
             ->visible(function (Models\Territory $record): bool {
                 $assignment = $record->currentAssignment();
-                return $assignment === null || $assignment->date_end !== null;
+                return $assignment === null || $assignment->ended_at !== null;
             })
             ->form([
                 Forms\Components\Select::make('assignee_id')

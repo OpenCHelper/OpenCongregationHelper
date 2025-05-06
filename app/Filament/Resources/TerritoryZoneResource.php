@@ -61,6 +61,17 @@ class TerritoryZoneResource extends Resource
                         'min:3',
                         'max:255',
                     ]),
+                // Forms\Components\TagsInput::make('asd')
+                //     ->suggestions([
+                //         'tag1',
+                //         'tag2',
+                //         'tag3',
+                //     ])
+                //     ->nestedRecursiveRules([
+                //         'min:3',
+                //         'max:255',
+                //     ])
+                //     ->label('Tags'),
             ]);
     }
 

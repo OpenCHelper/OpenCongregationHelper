@@ -75,11 +75,11 @@ class TerritoryAssignmentResource extends Resource
                             ->disabledOn('edit', 'view')
                             ->relationship('assignmentType', 'name')
                             ->preload(),
-                        Forms\Components\DateTimePicker::make('date_start')
+                        Forms\Components\DateTimePicker::make('started_at')
                             ->default(now())
                             ->required()
                             ->columnSpan(1),
-                        Forms\Components\DateTimePicker::make('date_end')
+                        Forms\Components\DateTimePicker::make('ended_at')
                             ->columnSpan(1),
                     ]),
                 Forms\Components\Section::make('Informazioni aggiuntive')
@@ -114,10 +114,10 @@ class TerritoryAssignmentResource extends Resource
                     ->hidden(!Auth::user()->can('view_any_territory::assignment'))
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(['first_name', 'last_name']),
-                Tables\Columns\TextColumn::make('date_start')
+                Tables\Columns\TextColumn::make('started_at')
                     ->dateTime("d/m/Y H:i")
                     ->sortable(),
-                Tables\Columns\TextColumn::make('date_end')
+                Tables\Columns\TextColumn::make('ended_at')
                     ->dateTime("d/m/Y H:i")
                     ->placeholder('(in lavorazione)')
                     ->sortable(),
@@ -142,7 +142,7 @@ class TerritoryAssignmentResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
-                Tables\Filters\TernaryFilter::make('date_end')
+                Tables\Filters\TernaryFilter::make('ended_at')
                     ->label('Stato assegnazione')
                     ->default(false)
                     ->nullable()

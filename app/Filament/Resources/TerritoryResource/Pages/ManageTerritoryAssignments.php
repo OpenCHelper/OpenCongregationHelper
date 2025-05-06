@@ -36,6 +36,6 @@ class ManageTerritoryAssignments extends ManageRelatedRecords
     public function table(Table $table): Table
     {
         return TerritoryAssignmentResource::table($table)
-            ->defaultSort('date_start', 'desc');
+            ->defaultSort('started_at', 'desc');
     }
 }

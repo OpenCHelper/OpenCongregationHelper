@@ -232,7 +232,7 @@ class TerritoryGlobalMap extends MapWidget
                     case 'status':
                         $currentAssignment = $territory->currentAssignment();
 
-                        if ($currentAssignment === null || $currentAssignment->date_end !== null) {
+                        if ($currentAssignment === null || $currentAssignment->ended_at !== null) {
                             $polygonOptions['color'] = 'red';
                         } else {
                             $polygonOptions['color'] = 'green';

@@ -65,7 +65,7 @@ class Territory extends Model
 
     public function currentAssignment() {
         $assignments = $this->assignments()->getResults()->reject(function($assignment) {
-            return !is_null($assignment->date_end);
+            return !is_null($assignment->ended_at);
         });
 
         if ($assignments->count() > 1) {

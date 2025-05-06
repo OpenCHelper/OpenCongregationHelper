@@ -47,7 +47,7 @@ class StaleAssignmentNotification extends Notification
         return (new MailMessage)
             ->subject('Avviso territorio in scadenza')
             ->greeting('Ciao ' . $notifiable->name . ',')
-            ->line('il territorio ' . $this->assignment->with("territory")->firstOrFail()->territory->name . ' risulta assegnato a te da ' . round($this->assignment->date_start->diffInDays(Carbon::now(), absolute: true)) . ' giorni.')
+            ->line('il territorio ' . $this->assignment->with("territory")->firstOrFail()->territory->name . ' risulta assegnato a te da ' . round($this->assignment->started_at->diffInDays(Carbon::now(), absolute: true)) . ' giorni.')
             ->line('Se lo hai terminato, ricordati di riconsegnarlo.')
             ->action('Vedi territorio', TerritoryResource::getUrl('view', [
                 'record' => $this->assignment->territory_id,
@@ -69,7 +69,7 @@ class StaleAssignmentNotification extends Notification
 
     public function toDatabase(User $notifiable): array
     {
-        $diffDays = round(Carbon::now()->diffInDays($this->assignment->date_start, absolute: true));
+        $diffDays = round(Carbon::now()->diffInDays($this->assignment->started_at, absolute: true));
 
         return FilamentNotification::make()
             ->title('Territorio fuori da ' . $diffDays . ' giorni')

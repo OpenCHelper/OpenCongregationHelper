@@ -55,10 +55,10 @@ class DetectStaleAssignments implements ShouldQueue, ShouldBeUnique
     {
         Log::info('DetectStaleAssignments job started.');
         
-        $assignments = TerritoryAssignment::where('date_end', null)->get();
+        $assignments = TerritoryAssignment::where('ended_at', null)->get();
 
         foreach ($assignments as $assignment) {
-            $elapsedTime = Carbon::now()->diffInDays($assignment->date_start);
+            $elapsedTime = Carbon::now()->diffInDays($assignment->started_at);
 
             // Date is in the future
             if ($elapsedTime > 0) {

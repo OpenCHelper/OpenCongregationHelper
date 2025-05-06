@@ -43,7 +43,7 @@ class TerritoryAssignmentObserver
             'territory_assignment' => $territoryAssignment,
         ]);
         
-        if ($territoryAssignment->isDirty('date_end') && $territoryAssignment->date_end !== null) {
+        if ($territoryAssignment->isDirty('ended_at') && $territoryAssignment->ended_at !== null) {
             Notification::make()
                 ->title('Territorio riconsegnato')
                 ->body('Il tuo territorio è stato riconsegnato.')

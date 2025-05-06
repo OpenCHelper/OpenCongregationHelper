@@ -70,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
             if (in_array($component->getName(), [
                 'created_at', 'updated_at', 'published_at', 'email_verified_at',
                 'deleted_at', 'last_login_at', 'last_activity_at', 'last_seen_at',
-                'date_start', 'date_end',
+                'started_at', 'ended_at',
             ])) {
                 $component->timezone(Auth::user()?->timezone ?? config('app.timezone'));
             }

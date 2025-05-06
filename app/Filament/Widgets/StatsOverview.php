@@ -19,10 +19,10 @@ class StatsOverview extends BaseWidget
             TerritoryAssignment::query()
                 ->with('territory')
         )
-            ->dateColumn('date_start')
+            ->dateColumn('started_at')
             ->between(now()->subDays(365), now())
             ->perMonth()
-            ->average('DATEDIFF(date_end, date_start)');
+            ->average('DATEDIFF(ended_at, started_at)');
 
         return [
             Stat::make('Territori', Territory::count())

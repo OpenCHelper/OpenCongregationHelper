@@ -46,6 +46,6 @@ class ManageUserAssignments extends ManageRelatedRecords
         $inherited_table->getColumn('assignee.full_name')->hidden();
 
         return $inherited_table
-            ->defaultSort('date_start', 'desc');
+            ->defaultSort('started_at', 'desc');
     }
 }

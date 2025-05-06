@@ -23,8 +23,8 @@ class TerritoryAssignment extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'date_start',
-        'date_end',
+        'started_at',
+        'ended_at',
         'notes',
         'assignee_id',
         'territory_id',
@@ -63,7 +63,7 @@ class TerritoryAssignment extends Model
     public function creator(): HasOne {
         return $this->hasOne(User::class, 'id', 'created_by');
     }
-    
+
     /**
      * Get the attributes that should be cast.
      *
@@ -72,9 +72,8 @@ class TerritoryAssignment extends Model
     protected function casts(): array
     {
         return [
-            'data_uscita' => 'datetime',
-            'data_rientro' => 'datetime',
-            'eliminato' => 'boolean',
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
         ];
     }
 }

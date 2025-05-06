@@ -246,7 +246,7 @@ class TerritoryResource extends Resource
                         ->action(function (Collection $records, array $data): void {
                             foreach ($records as $record) {
                                 // Skip if the last assignment is not null
-                                if ($record->currentAssignment() !== null && $record->currentAssignment()->date_end === null) {
+                                if ($record->currentAssignment() !== null && $record->currentAssignment()->ended_at === null) {
                                     Log::warning("Skipping record {$record->id} because it has an active assignment");
                                     continue;
                                 }
@@ -270,13 +270,13 @@ class TerritoryResource extends Resource
                         ->action(function (Collection $records, array $data): void {
                             foreach ($records as $record) {
                                 // Skip if the last assignment is not null
-                                if ($record->currentAssignment() === null || $record->currentAssignment()->date_end !== null) {
+                                if ($record->currentAssignment() === null || $record->currentAssignment()->ended_at !== null) {
                                     Log::warning("Skipping record {$record->id} because it does not has an active assignment");
                                     continue;
                                 }
 
                                 $record->currentAssignment()->update([
-                                    'date_end' => now(),
+                                    'ended_at' => now(),
                                 ]);
                             }
                         })
