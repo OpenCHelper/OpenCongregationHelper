@@ -2,11 +2,10 @@ name: Upload to Altervista (TEST environment)
 
 on:
   push:
-    branches: [v2]
   workflow_dispatch: # Manually trigger a workflow run
 
 # Limit the number of concurrent jobs to prevent overloading the server
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
