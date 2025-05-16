@@ -2,6 +2,8 @@ name: Upload to Altervista (TEST environment)
 
 on:
   push:
+    branches:
+      - main
   workflow_dispatch: # Manually trigger a workflow run
 
 # Limit the number of concurrent jobs to prevent overloading the server
