@@ -30,6 +30,7 @@
         "outhebox/blade-flags": "^1.5",
         "phpoffice/phpspreadsheet": "^1.29",
         "pxlrbt/filament-environment-indicator": "^2.1",
+        "rmsramos/activitylog": "^1.0",
         "stechstudio/filament-impersonate": "^3.16",
         "stephenjude/filament-jetstream": "^0.0.15",
         "tapp/filament-maillog": "^1.0",

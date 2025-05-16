@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\NativeMailFxTransport;
 
+use App\Policies\ActivityPolicy;
+use Spatie\Activitylog\Models\Activity;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -49,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
                 ? Response::allow()
                 : Response::denyWithStatus(404);
         });
+        Gate::policy(Activity::class, ActivityPolicy::class);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch

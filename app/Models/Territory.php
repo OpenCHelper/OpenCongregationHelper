@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\Log;
 use Spatie\Tags\HasTags;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 class Territory extends Model
 {
     /** @use HasFactory<\Database\Factories\TerritoryFactory> */
@@ -23,6 +26,15 @@ class Territory extends Model
     use HasTags;
 
     use HasParentSoftDeletable;
+
+    use LogsActivity;
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty()
+            ->logOnly(['name', 'description', 'geojson', 'notes', ]);
+    }
 
     /**
      * The attributes that are mass assignable.

@@ -38,6 +38,7 @@ use Awcodes\FilamentVersions\VersionsPlugin;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
+use Rmsramos\Activitylog\ActivitylogPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -94,6 +95,7 @@ class AppPanelProvider extends PanelProvider
                         new AppVersionProvider(),
                     ]),
                 FilamentMailLogPlugin::make(),
+                ActivitylogPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,

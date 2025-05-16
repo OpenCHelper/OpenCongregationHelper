@@ -20,6 +20,9 @@ use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\HasName;
 use Spatie\Permission\Traits\HasRoles;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 class User extends Authenticatable implements HasTenants, HasName, MustVerifyEmail, FilamentUser
 {
     use HasApiTokens;
@@ -32,6 +35,14 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     use HasTeams;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use LogsActivity;
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty()
+            ->logOnly(['first_name', 'last_name', 'email', ]);
+    }
 
     /**
      * The attributes that are mass assignable.

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Tags\HasTags;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 class TerritoryZone extends Model
 {
     /** @use HasFactory<\Database\Factories\TerritoryZoneFactory> */
@@ -15,6 +18,14 @@ class TerritoryZone extends Model
     use SoftDeletes;
 
     use HasTags;
+    use LogsActivity;
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty()
+            ->logFillable();
+    }
 
     /**
      * The attributes that are mass assignable.

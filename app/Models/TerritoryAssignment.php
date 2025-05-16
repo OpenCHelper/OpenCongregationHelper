@@ -10,12 +10,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 #[ObservedBy(TerritoryAssignmentObserver::class)]
 class TerritoryAssignment extends Model
 {
     /** @use HasFactory<\Database\Factories\TerritoryAssignmentFactory> */
     use HasFactory;
     use SoftDeletes;
+    use LogsActivity;
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty()
+            ->logFillable();
+    }
 
     /**
      * The attributes that are mass assignable.
