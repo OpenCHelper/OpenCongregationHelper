@@ -55,11 +55,11 @@ class TerritoryResource extends Resource
     {
         return $form
             ->schema([
-                GazeBanner::make()
-                    ->lock()
-                    ->columnSpanFull()
-                    // ->canTakeControl(fn() => auth()->user()->isAdmin())
-                    ->hiddenOn(['create', 'view']),
+                // GazeBanner::make()
+                //     ->lock()
+                //     ->columnSpanFull()
+                //     // ->canTakeControl(fn() => auth()->user()->isAdmin())
+                //     ->hiddenOn(['create', 'view']),
                 Forms\Components\Section::make('Informazioni fondamentali')
                     ->description('Informazioni necessarie per l\'identificazione del territorio')
                     ->columns(2)
@@ -85,12 +85,17 @@ class TerritoryResource extends Resource
                                     ->icon('heroicon-o-photo')
                                     ->schema([
                                         Forms\Components\FileUpload::make('image_path')
-                                            ->extraAttributes(['style' => 'min-height: 320px;'])
+                                            ->extraAttributes(['style' => 'min-height: 150px;'])
                                             ->image()
                                             ->panelLayout('integrated')
                                             ->imageEditor()
                                             ->openable()
-                                            ->previewable(),
+                                            ->downloadable()
+                                            ->previewable()
+                                            ->moveFiles()
+                                            ->disk('local')
+                                            ->visibility('private')
+                                            ->directory('territories'),
                                     ]),
                                 Forms\Components\Tabs\Tab::make('TabMap')
                                     ->label('Mappa')

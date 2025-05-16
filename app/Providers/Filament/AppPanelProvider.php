@@ -82,7 +82,7 @@ class AppPanelProvider extends PanelProvider
                 EnvironmentIndicatorPlugin::make()
                     ->color(fn () => match (app()->environment()) {
                         'local' => Color::Blue,             # 1. Local development machine
-                        'testing' => Color::Amber,          # 2. First stage (nightly)
+                        'nightly' => Color::Amber,          # 2. First stage (nightly)
                         'staging', 'uat' => Color::Orange,  # 3. Pre-production
                         'production' => Color::Red,         # 4. Production
                         default => Color::Fuchsia,          # (unknown)
@@ -110,7 +110,7 @@ class AppPanelProvider extends PanelProvider
                 Authenticate::class,
             ]);
 
-        if (app()->environment(["local", "testing"])) {
+        if (app()->environment(["local", "nightly"])) {
             $panel->plugins([
                 \TomatoPHP\FilamentArtisan\FilamentArtisanPlugin::make(),
             ]);

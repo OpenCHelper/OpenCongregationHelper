@@ -46,11 +46,11 @@ class TerritoryZoneResource extends Resource
     {
         return $form
             ->schema([
-                GazeBanner::make()
-                    ->lock()
-                    ->columnSpanFull()
-                    // ->canTakeControl(fn() => auth()->user()->isAdmin())
-                    ->hiddenOn(['create', 'view']),
+                // GazeBanner::make()
+                //     ->lock()
+                //     ->columnSpanFull()
+                //     // ->canTakeControl(fn() => auth()->user()->isAdmin())
+                //     ->hiddenOn(['create', 'view']),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(50),
