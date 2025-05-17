@@ -59,6 +59,11 @@ class TerritoryResource extends Resource
         return parent::getGlobalSearchEloquentQuery()->with(['territoryZone', 'tags']);
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'description', 'territoryZone.name', 'notes', 'tags.name'];
+    }
+
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         $tags = $record->tagsWithType('territories');
