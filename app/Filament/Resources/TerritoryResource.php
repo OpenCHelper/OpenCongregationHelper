@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Spatie\Tags\Tag;
+use Illuminate\Contracts\Support\Htmlable;
 
 class TerritoryResource extends Resource
 {
@@ -49,6 +50,28 @@ class TerritoryResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return 'Reparto territori';
+    }
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['territoryZone', 'tags']);
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $tags = $record->tagsWithType('territories');
+
+        return [
+            ...($record->description ? ['Description' => $record->description] : []),
+            ...(!$tags->isEmpty() ? ['Tags' => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
+        ];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    {
+        return $record->name . ' (' . $record->territoryZone->name . ')';
     }
 
     public static function form(Form $form): Form

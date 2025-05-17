@@ -27,6 +27,22 @@ class TerritoryZoneResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-map';
     protected static ?int $navigationSort = 1;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['tags']);
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        $tags = $record->tagsWithType('territories');
+
+        return [
+            ...(!$tags->isEmpty() ? ['Tags' => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
+        ];
+    }
+
     public static function getModelLabel(): string
     {
         return 'zona';

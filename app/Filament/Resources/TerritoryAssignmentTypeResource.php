@@ -11,10 +11,12 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Model;
 
 class TerritoryAssignmentTypeResource extends Resource
 {
@@ -22,6 +24,26 @@ class TerritoryAssignmentTypeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-envelope-open';
     protected static ?int $navigationSort = 3;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with([]);
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    {
+        return $record->name . ($record->short_name ? ' (' . $record->short_name . ')' : '');
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            ...($record->description ? ['Description' => $record->description] : []),
+            ...($record->valid_until ? ['Validity' => $record->valid_from . ' - ' . $record->valid_until] : []),
+        ];
+    }
 
     public static function getModelLabel(): string
     {

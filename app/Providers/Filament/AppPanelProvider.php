@@ -40,6 +40,8 @@ use Illuminate\Support\Facades\Auth;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
 
+use Filament\Support\Enums\Platform;
+
 class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -57,6 +59,12 @@ class AppPanelProvider extends PanelProvider
             ])
             ->unsavedChangesAlerts()
             ->databaseNotifications()
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
+                Platform::Windows, Platform::Linux => 'CTRL+K',
+                Platform::Mac => '⌘K',
+                default => null,
+            })
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Profile')
