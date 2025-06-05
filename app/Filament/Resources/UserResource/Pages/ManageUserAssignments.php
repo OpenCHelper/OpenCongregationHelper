@@ -23,7 +23,7 @@ class ManageUserAssignments extends ManageRelatedRecords
 
     public static function getNavigationLabel(): string
     {
-        return 'Assegnazioni';
+        return __('filament-pages.manage_user_assignments');
     }
 
     // Source: https://github.com/filamentphp/filament/discussions/10168#discussioncomment-10923902

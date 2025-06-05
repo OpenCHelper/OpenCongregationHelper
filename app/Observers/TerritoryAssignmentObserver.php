@@ -18,7 +18,11 @@ class TerritoryAssignmentObserver
         Log::info('TerritoryAssignment created', [
             'territory_assignment' => $territoryAssignment,
         ]);
+
+        Log::info("User preferred locale: " . $territoryAssignment->assignee->preferredLocale());
         
+        // Carica la relazione territory prima di inviare la notifica
+        $territoryAssignment->load('territory');
         $territoryAssignment->assignee->notify(new TerritoryAssignedNotification($territoryAssignment));
     }
 
@@ -32,6 +36,8 @@ class TerritoryAssignmentObserver
         ]);
         
         if ($territoryAssignment->isDirty('ended_at') && $territoryAssignment->ended_at !== null) {
+            // Carica la relazione territory prima di inviare la notifica
+            $territoryAssignment->load('territory');
             $territoryAssignment->assignee->notify(new TerritoryReturnedNotification($territoryAssignment));
         }
     }

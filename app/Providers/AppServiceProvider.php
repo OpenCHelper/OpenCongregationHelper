@@ -20,6 +20,7 @@ use App\NativeMailFxTransport;
 
 use App\Policies\ActivityPolicy;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Translatable\Facades\Translatable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,14 +56,36 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Activity::class, ActivityPolicy::class);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            $flags = collect(config('app.available_locales'))->mapWithKeys(function ($longName, $shortName) {
+                return [$shortName => asset("vendor/blade-flags/language-{$shortName}.svg")];
+            })->toArray();
+
             $switch
-                ->locales(['en','it']) // also accepts a closure
-                ->flags([
-                    'en' => asset('vendor/blade-flags/language-en.svg'),
-                    'it' => asset('vendor/blade-flags/language-it.svg'),
-                ])
+                ->locales(array_keys($flags))
+                ->flags($flags)
             ;
         });
+        
+        // Register a fallback for missing translations (eg. when using laravel-tags)
+        Translatable::fallback(
+            fallbackAny: true,
+            missingKeyCallback: function (
+               Model $model, 
+               string $translationKey, 
+               string $locale, 
+               string $fallbackTranslation, 
+               string $fallbackLocale,
+            ) {
+                Log::warning('Some translation key is missing from an eloquent model', [
+                   'key' => $translationKey,
+                   'locale' => $locale,
+                   'fallback_locale' => $fallbackLocale,
+                   'fallback_translation' => $fallbackTranslation,
+                   'model_id' => $model->id,
+                   'model_class' => get_class($model), 
+                ]);
+            }
+        );
 
         // Set default timezone for DateTimePicker
         DateTimePicker::configureUsing(function (DateTimePicker $component): void {

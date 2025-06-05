@@ -25,10 +25,10 @@ class StatsOverview extends BaseWidget
             ->average('DATEDIFF(ended_at, started_at)');
 
         return [
-            Stat::make('Territori', Territory::count())
-                ->description('Numero totale di territori'),
-            Stat::make('Durata media assegnazioni mensili', round($trend->average('aggregate'), 2) . ' giorni')
-                ->description('(ultimi 365 giorni)')
+            Stat::make(__('filament-resources.stats_widget.territories'), Territory::count())
+                ->description(__('filament-resources.stats_widget.total_territories_description')),
+            Stat::make(__('filament-resources.stats_widget.average_assignment_duration'), round($trend->average('aggregate'), 2) . ' ' . __('filament-resources.stats_widget.days'))
+                ->description(__('filament-resources.stats_widget.last_365_days'))
                 ->chart($trend->map(fn ($item) => (float) $item->aggregate)->toArray()),
         ];
     }

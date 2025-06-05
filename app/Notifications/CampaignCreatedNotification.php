@@ -43,10 +43,10 @@ class CampaignCreatedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Nuova campagna!')
-            ->greeting('Ciao ' . $notifiable->name . ',')
-            ->line('E\' stata creata una nuova campagna: ' . $this->assignmentType->name)
-            ->line('Ti ringraziamo per il tuo impegno!');
+            ->subject(__('filament-resources.mailables.campaign_created_subject'))
+            ->greeting(__('filament-resources.mailables.greeting', ['name' => $notifiable->name]))
+            ->line(__('filament-resources.mailables.campaign_created_body', ['campaign' => $this->assignmentType->name]))
+            ->line(__('filament-resources.mailables.thank_you'));
     }
 
     /**
@@ -64,8 +64,8 @@ class CampaignCreatedNotification extends Notification
     public function toDatabase(User $notifiable): array
     {
         return FilamentNotification::make()
-            ->title('Nuova campagna!')
-            ->body('E\' stata creata una nuova campagna: ' . $this->assignmentType->name)
+            ->title(__('filament-resources.database_notifications.campaign_created_title'))
+            ->body(__('filament-resources.database_notifications.campaign_created_body', ['campaign' => $this->assignmentType->name]))
             ->icon('heroicon-o-megaphone')
             ->actions([])
             ->getDatabaseMessage();

@@ -9,7 +9,7 @@ class MailLogResource extends BaseMailLogResource
 {
     public static function getNavigationGroup(): ?string
     {
-        return 'Developer';
+        return __('filament-resources.navigation_groups.developer');
     }
 
     public static function canAccess(): bool

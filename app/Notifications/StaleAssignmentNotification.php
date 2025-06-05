@@ -45,14 +45,17 @@ class StaleAssignmentNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Avviso territorio in scadenza')
-            ->greeting('Ciao ' . $notifiable->name . ',')
-            ->line('il territorio ' . $this->assignment->with("territory")->firstOrFail()->territory->name . ' risulta assegnato a te da ' . round($this->assignment->started_at->diffInDays(Carbon::now(), absolute: true)) . ' giorni.')
-            ->line('Se lo hai terminato, ricordati di riconsegnarlo.')
-            ->action('Vedi territorio', TerritoryAssignmentResource::getUrl('view', [
+            ->subject(__('filament-resources.mailables.stale_assignment_subject'))
+            ->greeting(__('filament-resources.mailables.greeting', ['name' => $notifiable->name]))
+            ->line(__('filament-resources.mailables.stale_assignment_body', [
+                'territory' => $this->assignment->with("territory")->firstOrFail()->territory->name,
+                'days' => round($this->assignment->started_at->diffInDays(Carbon::now(), absolute: true))
+            ]))
+            ->line(__('filament-resources.mailables.remember_to_return_if_finished'))
+            ->action(__('filament-resources.mailables.view_territory'), TerritoryAssignmentResource::getUrl('view', [
                 'record' => $this->assignment->id,
             ]))
-            ->line('Ti ringraziamo per il tuo impegno!');
+            ->line(__('filament-resources.mailables.thank_you'));
     }
 
     /**
@@ -72,8 +75,8 @@ class StaleAssignmentNotification extends Notification
         $diffDays = round(Carbon::now()->diffInDays($this->assignment->started_at, absolute: true));
 
         return FilamentNotification::make()
-            ->title('Territorio fuori da ' . $diffDays . ' giorni')
-            ->body('Se lo hai terminato, ricordati di riconsegnarlo.')
+            ->title(__('filament-resources.database_notifications.stale_assignment_title', ['days' => $diffDays]))
+            ->body(__('filament-resources.database_notifications.stale_assignment_body'))
             ->icon('heroicon-o-map')
             ->warning()
             ->actions([
@@ -82,7 +85,7 @@ class StaleAssignmentNotification extends Notification
                     ->url(TerritoryAssignmentResource::getUrl('view', [
                         'record' => $this->assignment->id,
                     ]))
-                    ->label('Vedi'),
+                    ->label(__('filament-resources.database_notifications.action_view')),
             ])
             ->getDatabaseMessage();
     }

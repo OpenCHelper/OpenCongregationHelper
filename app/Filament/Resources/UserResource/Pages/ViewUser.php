@@ -15,7 +15,7 @@ class ViewUser extends ViewRecord
 
     public static function getNavigationLabel(): string
     {
-        return 'Utente';
+        return __('filament-pages.view_user');
     }
 
     protected function getHeaderActions(): array

@@ -26,49 +26,54 @@ class UserResource extends Resource
     
     public static function getModelLabel(): string
     {
-        return 'utente';
+        return __('filament-resources.user.model_label');
     }
     public static function getPluralModelLabel(): string
     {
-        return 'utenti';
+        return __('filament-resources.user.plural_model_label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Amministrazione';
+        return __('filament-resources.user.navigation_group');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Dati personali')
-                    ->description('Le informazioni di base dell\'utente.')
+                Forms\Components\Section::make(__('filament-resources.user.section_personal_data'))
+                    ->description(__('filament-resources.user.section_personal_data_description'))
                     ->schema([
                         Forms\Components\TextInput::make('first_name')
+                            ->label(__('filament-resources.user.field_first_name'))
                             ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('last_name')
+                            ->label(__('filament-resources.user.field_last_name'))
                             ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('email')
+                            ->label(__('filament-resources.user.field_email'))
                             ->email()
                             ->required()
                             ->maxLength(255),
                         ]),
-                Forms\Components\Section::make('Informazioni di accesso')
+                Forms\Components\Section::make(__('filament-resources.user.section_login_info'))
                     ->schema([
                         Forms\Components\Checkbox::make('can_login')
                             ->live()
-                            ->label('Permetti accesso')
-                            ->helperText('Seleziona per permettere all\'utente di accedere al sistema.'),
+                            ->label(__('filament-resources.user.field_can_login'))
+                            ->helperText(__('filament-resources.user.field_can_login_helper')),
                         Forms\Components\TextInput::make('password')
+                            ->label(__('filament-resources.user.field_password'))
                             ->hiddenOn('view')
                             ->disabled(fn (Forms\Get $get) => $get('can_login') === false)
                             ->password()
                             ->required(fn (Forms\Get $get) => $get('can_login'))
                             ->maxLength(255),
                         Forms\Components\Select::make('roles')
+                            ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Forms\Get $get) => $get('can_login') === false)
                             ->disabled(fn (Forms\Get $get) => $get('can_login') === false)
                             ->relationship('roles', 'name')
@@ -85,20 +90,21 @@ class UserResource extends Resource
             ->recordUrl(fn (Model $record): string => UserResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('first_name')
-                    ->label('Nome')
+                    ->label(__('filament-resources.user.column_first_name'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('last_name')
-                    ->label('Cognome')
+                    ->label(__('filament-resources.user.column_last_name'))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->label(__('filament-resources.user.column_email'))
                     ->copyable()
                     ->icon('heroicon-m-envelope')
                     ->fontFamily(FontFamily::Mono)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')
-                    ->label('Ruolo')
+                    ->label(__('filament-resources.user.column_role'))
                     ->badge()
                     ->listWithLineBreaks()
                     ->limitList(3)
@@ -107,29 +113,31 @@ class UserResource extends Resource
                     ->searchable()
                     ->toggleable(),
                 Tables\Columns\IconColumn::make('email_verified_at')
-                    ->label('Email verified?')
+                    ->label(__('filament-resources.user.column_email_verified'))
                     ->default(false)
                     ->boolean()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('can_login')
-                    ->label('Accesso abilitato?')
+                    ->label(__('filament-resources.user.column_access_enabled'))
                     ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('filament-resources.user.column_created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('filament-resources.user.column_updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('can_login')
-                    ->label('Accesso abilitato?')
-                    ->placeholder('Tutti')
-                    ->trueLabel('Abilitato')
-                    ->falseLabel('Disabilitato'),
+                    ->label(__('filament-resources.user.filter_access_enabled'))
+                    ->placeholder(__('filament-resources.user.filter_access_enabled_all'))
+                    ->trueLabel(__('filament-resources.user.filter_access_enabled_enabled'))
+                    ->falseLabel(__('filament-resources.user.filter_access_enabled_disabled')),
             ])
             ->actions([
                 Impersonate::make()

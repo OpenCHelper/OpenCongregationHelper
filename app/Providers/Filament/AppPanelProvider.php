@@ -67,7 +67,7 @@ class AppPanelProvider extends PanelProvider
             })
             ->userMenuItems([
                 MenuItem::make()
-                    ->label('Profile')
+                    ->label(fn() => __('filament-resources.user_profile.menu_label'))
                     ->icon('heroicon-o-user-circle')
                     ->url(fn () => $this->shouldRegisterMenuItem()
                         ? url(EditProfile::getUrl())

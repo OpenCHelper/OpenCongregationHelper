@@ -1,16 +1,16 @@
 <x-form-section submit="updateTeamName">
     <x-slot name="title">
-        {{ __('Team Name') }}
+        {{ __('teams.update_team_name.title') }}
     </x-slot>
 
     <x-slot name="description">
-        {{ __('The team\'s name and owner information.') }}
+        {{ __('teams.update_team_name.description') }}
     </x-slot>
 
     <x-slot name="form">
         <!-- Team Owner Information -->
         <div class="col-span-6">
-            <x-label value="{{ __('Team Owner') }}" />
+            <x-label value="{{ __('teams.update_team_name.team_owner') }}" />
 
             <div class="flex items-center mt-2">
                 <img class="size-12 rounded-full object-cover" src="{{ $team->owner->profile_photo_url }}" alt="{{ $team->owner->name }}">
@@ -24,7 +24,7 @@
 
         <!-- Team Name -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="name" value="{{ __('Team Name') }}" />
+            <x-label for="name" value="{{ __('teams.update_team_name.team_name') }}" />
 
             <x-input id="name"
                         type="text"
@@ -39,11 +39,11 @@
     @if (Gate::check('update', $team))
         <x-slot name="actions">
             <x-action-message class="me-3" on="saved">
-                {{ __('Saved.') }}
+                {{ __('teams.update_team_name.saved') }}
             </x-action-message>
 
             <x-button>
-                {{ __('Save') }}
+                {{ __('teams.update_team_name.save') }}
             </x-button>
         </x-slot>
     @endif

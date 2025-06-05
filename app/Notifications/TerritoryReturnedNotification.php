@@ -43,13 +43,13 @@ class TerritoryReturnedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Territorio ' . $this->assignment->territory->name . ' riconsegnato')
-            ->greeting('Ciao ' . $notifiable->name . ',')
-            ->line('Il territorio ' . $this->assignment->territory->name . ' è stato riconsegnato.')
-            ->action('Vedi dettagli', TerritoryAssignmentResource::getUrl('view', [
+            ->subject(__('filament-resources.mailables.territory_returned_subject', ['territory' => $this->assignment->territory->name]))
+            ->greeting(__('filament-resources.mailables.greeting', ['name' => $notifiable->name]))
+            ->line(__('filament-resources.mailables.territory_returned_body', ['territory' => $this->assignment->territory->name]))
+            ->action(__('filament-resources.mailables.view_details'), TerritoryAssignmentResource::getUrl('view', [
                 'record' => $this->assignment->id,
             ]))
-            ->line('Ti ringraziamo per il tuo impegno!');
+            ->line(__('filament-resources.mailables.thank_you'));
     }
 
     /**
@@ -67,8 +67,8 @@ class TerritoryReturnedNotification extends Notification
     public function toDatabase(object $notifiable): array
     {
         return FilamentNotification::make()
-            ->title('Territorio ' . $this->assignment->territory->name . ' riconsegnato')
-            ->body('Il tuo territorio è stato riconsegnato.')
+            ->title(__('filament-resources.database_notifications.territory_returned_title', ['territory' => $this->assignment->territory->name]))
+            ->body(__('filament-resources.database_notifications.territory_returned_body'))
             ->icon('heroicon-o-inbox-arrow-down')
             ->getDatabaseMessage();
     }

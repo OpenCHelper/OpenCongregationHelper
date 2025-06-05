@@ -14,7 +14,7 @@ class ViewTerritoryZone extends ViewRecord
 
     public static function getNavigationLabel(): string
     {
-        return 'Zona';
+        return __('filament-pages.view_territory_zone');
     }
 
     protected function getHeaderActions(): array

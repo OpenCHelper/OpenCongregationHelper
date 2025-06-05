@@ -19,7 +19,7 @@ class ManageTerritoryAssignments extends ManageRelatedRecords
 
     public static function getNavigationLabel(): string
     {
-        return 'Storico uscite';
+        return __('filament-pages.manage_territory_assignments');
     }
 
     public function form(Form $form): Form

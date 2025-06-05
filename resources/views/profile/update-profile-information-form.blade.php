@@ -1,10 +1,10 @@
 <x-form-section submit="updateProfileInformation">
     <x-slot name="title">
-        {{ __('Profile Information') }}
+        {{ __('profile.update_profile_information.title') }}
     </x-slot>
 
     <x-slot name="description">
-        {{ __('Update your account\'s profile information and email address.') }}
+        {{ __('profile.update_profile_information.description') }}
     </x-slot>
 
     <x-slot name="form">
@@ -24,7 +24,7 @@
                                     reader.readAsDataURL($refs.photo.files[0]);
                             " />
 
-                <x-label for="photo" value="{{ __('Photo') }}" />
+                <x-label for="photo" value="{{ __('profile.update_profile_information.photo_label') }}" />
 
                 <!-- Current Profile Photo -->
                 <div class="mt-2" x-show="! photoPreview">
@@ -39,12 +39,12 @@
                 </div>
 
                 <x-secondary-button class="mt-2 me-2" type="button" x-on:click.prevent="$refs.photo.click()">
-                    {{ __('Select A New Photo') }}
+                    {{ __('profile.update_profile_information.select_new_photo') }}
                 </x-secondary-button>
 
                 @if ($this->user->profile_photo_path)
                     <x-secondary-button type="button" class="mt-2" wire:click="deleteProfilePhoto">
-                        {{ __('Remove Photo') }}
+                        {{ __('profile.update_profile_information.remove_photo') }}
                     </x-secondary-button>
                 @endif
 
@@ -54,49 +54,66 @@
 
         <!-- First Name -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="first_name" value="{{ __('First name') }}" />
+            <x-label for="first_name" value="{{ __('profile.update_profile_information.first_name') }}" />
             <x-input id="first_name" type="text" class="mt-1 block w-full" wire:model="state.first_name" required autocomplete="given-name" />
             <x-input-error for="first_name" class="mt-2" />
         </div>
 
         <!-- Last Name -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="last_name" value="{{ __('Last name') }}" />
+            <x-label for="last_name" value="{{ __('profile.update_profile_information.last_name') }}" />
             <x-input id="last_name" type="text" class="mt-1 block w-full" wire:model="state.last_name" required autocomplete="family-name" />
             <x-input-error for="last_name" class="mt-2" />
         </div>
 
         <!-- Email -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="email" value="{{ __('Email') }}" />
+            <x-label for="email" value="{{ __('profile.update_profile_information.email') }}" />
             <x-input id="email" type="email" class="mt-1 block w-full" wire:model="state.email" required autocomplete="username" />
             <x-input-error for="email" class="mt-2" />
 
             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()) && ! $this->user->hasVerifiedEmail())
                 <p class="text-sm mt-2 dark:text-white">
-                    {{ __('Your email address is unverified.') }}
+                    {{ __('profile.update_profile_information.email_unverified') }}
 
                     <button type="button" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" wire:click.prevent="sendEmailVerification">
-                        {{ __('Click here to re-send the verification email.') }}
+                        {{ __('profile.update_profile_information.resend_verification') }}
                     </button>
                 </p>
 
                 @if ($this->verificationLinkSent)
                     <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                        {{ __('A new verification link has been sent to your email address.') }}
+                        {{ __('profile.update_profile_information.verification_sent') }}
                     </p>
                 @endif
             @endif
+        </div>
+
+        <!-- User preferred locale -->
+        <div class="col-span-6 sm:col-span-4">
+            <x-label for="locale" value="{{ __('profile.update_profile_information.preferred_language') }}" />
+            
+            <select id="locale" class="mt-1 block w-full" wire:model="state.locale">
+                <option value="">{{ __('profile.update_profile_information.select_language') }}</option>
+                @foreach (config('app.available_locales') as $localeShort => $localeLong)
+                    <option 
+                        value="{{ $localeShort }}" 
+                        @selected($localeShort == $this->user->locale)
+                    >{{ $localeLong }} ({{ $localeShort }})</option>
+                @endforeach
+            </select>
+
+            <x-input-error for="locale" class="mt-2" />
         </div>
     </x-slot>
 
     <x-slot name="actions">
         <x-action-message class="me-3" on="saved">
-            {{ __('Saved.') }}
+            {{ __('profile.update_profile_information.saved') }}
         </x-action-message>
 
         <x-button wire:loading.attr="disabled" wire:target="photo">
-            {{ __('Save') }}
+            {{ __('profile.update_profile_information.save') }}
         </x-button>
     </x-slot>
 </x-form-section>

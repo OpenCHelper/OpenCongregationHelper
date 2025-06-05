@@ -15,7 +15,7 @@ class ViewTerritory extends ViewRecord
 
     public static function getNavigationLabel(): string
     {
-        return 'Territorio';
+        return __('filament-pages.view_territory');
     }
 
     protected function getHeaderActions(): array

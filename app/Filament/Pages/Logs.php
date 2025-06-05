@@ -8,6 +8,6 @@ class Logs extends BaseLogsPage
 {
     public static function getNavigationGroup(): ?string
     {
-        return config('filament-log-manager.navigation_group') ? 'Developer' : null;
+        return config('filament-log-manager.navigation_group') ? __('filament-resources.navigation_groups.developer') : null;
     }
 }

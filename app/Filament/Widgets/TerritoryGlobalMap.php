@@ -87,12 +87,12 @@ class TerritoryGlobalMap extends MapWidget
         $this
             ->actions([
                 Actions\CenterMapAction::make()
-                    ->centerOnUserPosition(label: "Tu sei qui")
+                    ->centerOnUserPosition(label: __('filament-widgets.territory_global_map.center_on_user_position'))
                     ->zoom(13)
-                    ->label('Centra su posizione'),
+                    ->label(__('filament-widgets.territory_global_map.center_on_position')),
                 Actions\FullscreenAction::make(),
                 Actions\Action::make('form')
-                    ->label('Impostazioni mappa')
+                    ->label(__('filament-widgets.territory_global_map.map_settings'))
                     ->icon('heroicon-o-cog-6-tooth')
                     ->form([
                         // Components\Select::make('territoryType')
@@ -108,7 +108,7 @@ class TerritoryGlobalMap extends MapWidget
                         Components\Select::make('mapType')
                             ->required()
                             ->default($this->getActiveTileLayer())
-                            ->label('Stile mappa')
+                            ->label(__('filament-widgets.territory_global_map.map_style'))
                             ->options(function () {
                                 $tileLayers = TerritoryGlobalMap::getTileLayers();
                                 
@@ -215,7 +215,7 @@ class TerritoryGlobalMap extends MapWidget
                         <a href='" . htmlspecialchars(TerritoryResource::getUrl('view', [
                             'record' => $territory->id,
                             ])) . "'>
-                            Vai al territorio
+                            " . __('filament-widgets.territory_global_map.go_to_territory') . "
                         </a>
                     </p>
                 ";

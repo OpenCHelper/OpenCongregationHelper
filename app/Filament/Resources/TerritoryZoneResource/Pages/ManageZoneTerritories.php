@@ -24,7 +24,7 @@ class ManageZoneTerritories extends ManageRelatedRecords
 
     public static function getNavigationLabel(): string
     {
-        return 'Territori';
+        return __('filament-pages.manage_zone_territories');
     }
 
     // Source: https://github.com/filamentphp/filament/discussions/10168#discussioncomment-10923902

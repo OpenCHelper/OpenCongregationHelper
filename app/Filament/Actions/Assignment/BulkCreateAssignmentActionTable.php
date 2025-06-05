@@ -18,16 +18,16 @@ class BulkCreateAssignmentActionTable extends Action
  
         $this
             ->icon('heroicon-o-plus')
-            ->label('Assegna territorio')
+            ->label(__('filament-resources.territory_assignment.action_assign_territory'))
             ->color('primary')
             ->form([
                 Forms\Components\Select::make('assignee_id')
-                    ->label('Assegnato a')
+                    ->label(__('filament-resources.territory_assignment.action_assigned_to'))
                     ->options(Models\User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
                     ->searchable()
                     ->required(),
                 Forms\Components\Select::make('assignment_type')
-                    ->label('Tipo di assegnazione')
+                    ->label(__('filament-resources.territory_assignment.field_assignment_type'))
                     ->options(Models\TerritoryAssignmentType::query()->pluck('name', 'id'))
                     ->required(),
             ])
@@ -61,16 +61,16 @@ class BulkCreateAssignmentActionTable extends Action
             ->successNotification(function (Notification $notification): Notification {
                 return $notification
                     ->success()
-                    ->title('Territori assegnati')
-                    ->body('Tutti i territori sono stati assegnati con successo.');
+                    ->title(__('filament-resources.database_notifications.territories_assigned_success_title'))
+                    ->body(__('filament-resources.database_notifications.territories_assigned_success_body'));
             })
             ->failureNotification(function (Notification $notification): Notification {
                 return $notification
                     ->error()
-                    ->title('Errore durante l\'assegnazione')
-                    ->body('Si è verificato un errore durante l\'assegnazione dei territori.');
+                    ->title(__('filament-resources.database_notifications.assignment_error_title'))
+                    ->body(__('filament-resources.database_notifications.assignment_error_body'));
             })
-            ->modalHeading('Crea nuova assegnazione massiva')
-            ->modalSubmitAction(fn (StaticAction $action) => $action->label('Crea'));
+            ->modalHeading(__('filament-resources.database_notifications.create_bulk_assignment_modal'))
+            ->modalSubmitAction(fn (StaticAction $action) => $action->label(__('filament-resources.territory_assignment.action_create')));
     }
 }

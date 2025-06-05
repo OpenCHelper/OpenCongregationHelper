@@ -32,31 +32,31 @@ class TerritoryAssignmentResource extends Resource
     
     public static function getModelLabel(): string
     {
-        return 'assegnazione';
+        return __('filament-resources.territory_assignment.model_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'assegnazioni';
+        return __('filament-resources.territory_assignment.plural_model_label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Reparto territori';
+        return __('filament-resources.territory_assignment.navigation_group');
     }
 
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
             ->schema([
-                Infolists\Components\Section::make('Informazioni territorio')
-                    ->description('Informazioni principali relative all\'assegnazione del territorio.')
+                Infolists\Components\Section::make(__('filament-resources.territory_assignment.section_territory_info'))
+                    ->description(__('filament-resources.territory_assignment.section_territory_info_description'))
                     ->columns(2)
                     ->schema([
                         Infolists\Components\TextEntry::make('territory.name')
-                            ->label('Territorio'),
+                            ->label(__('filament-resources.territory_assignment.info_territory')),
                         Infolists\Components\TextEntry::make('territory.territoryZone.name')
-                            ->label('Zona'),
+                            ->label(__('filament-resources.territory_assignment.info_zone')),
                         // MapEntry::make('location')
                         //     ->label('Mappa')
                         //     ->columnSpanFull()
@@ -84,41 +84,41 @@ class TerritoryAssignmentResource extends Resource
                         //     ->geoMan(true)
                         //     ->geoManEditable(false),
                         Infolists\Components\ImageEntry::make('territory.image_path')
-                            ->label('Immagine')
+                            ->label(__('filament-resources.territory.field_image'))
                             ->visible(fn (Model $record) => $record->territory->image_path != null)
                             ->columnSpanFull(),
                         Infolists\Components\TextEntry::make('territory.description')
-                            ->label('Descrizione')
+                            ->label(__('filament-resources.territory_assignment.info_description'))
                             ->columnSpanFull()
                             ->visible(fn (Model $record) => $record->territory->description != null)
-                            ->placeholder('Nessuna descrizione disponibile'),
+                            ->placeholder(__('filament-resources.territory_assignment.info_description_placeholder')),
                         Infolists\Components\TextEntry::make('territory.notes')
-                            ->label('Note')
+                            ->label(__('filament-resources.territory_assignment.info_notes'))
                             ->icon('heroicon-o-document-text')
                             ->columnSpanFull()
                             ->visible(fn (Model $record) => $record->territory->notes != null)
-                            ->placeholder('Nessuna nota disponibile'),
+                            ->placeholder(__('filament-resources.territory_assignment.info_notes_placeholder')),
                     ]),
-                Infolists\Components\Section::make('Informazioni assegnazione')
-                    ->description('Informazioni principali relative all\'assegnazione del territorio.')
+                Infolists\Components\Section::make(__('filament-resources.territory_assignment.section_assignment_info'))
+                    ->description(__('filament-resources.territory_assignment.section_assignment_info_description'))
                     ->columns(2)
                     ->schema([
                         Infolists\Components\TextEntry::make('assignee.full_name')
                             ->icon('heroicon-o-user')
-                            ->label('Assegnato a'),
+                            ->label(__('filament-resources.territory_assignment.info_assignee')),
                         Infolists\Components\TextEntry::make('assignmentType.name')
                             ->icon('heroicon-o-envelope-open')
-                            ->label('Tipo di assegnazione'),
+                            ->label(__('filament-resources.territory_assignment.info_assignment_type')),
                         Infolists\Components\TextEntry::make('started_at')
                             ->icon('heroicon-o-calendar')
                             ->sinceTooltip()
-                            ->label('Inizio assegnazione'),
+                            ->label(__('filament-resources.territory_assignment.info_start_assignment')),
                         Infolists\Components\TextEntry::make('ended_at')
                             ->icon('heroicon-o-calendar')
                             ->sinceTooltip()
                             ->visible(fn (Model $record) => $record->ended_at != null)
-                            ->label('Fine assegnazione')
-                            ->placeholder('(in lavorazione)'),
+                            ->label(__('filament-resources.territory_assignment.info_end_assignment'))
+                            ->placeholder(__('filament-resources.territory_assignment.info_end_assignment_placeholder')),
                     ]),
             ]);
     }
@@ -126,17 +126,19 @@ class TerritoryAssignmentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Informazioni base')
+                Forms\Components\Section::make(__('filament-resources.territory_assignment.section_base_info'))
                     ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         Forms\Components\Select::make('territory_id')
+                            ->label(__('filament-resources.territory_assignment.field_territory'))
                             ->searchable()
                             ->disabledOn('edit', 'view')
                             ->relationship('territory', 'name')
                             ->required()
                             ->preload(),
                         Forms\Components\Select::make('assignee_id')
+                            ->label(__('filament-resources.territory_assignment.field_assignee'))
                             ->searchable(['first_name', 'last_name'])
                             ->disabledOn('edit', 'view')
                             ->required()
@@ -147,30 +149,34 @@ class TerritoryAssignmentResource extends Resource
                             ->getOptionLabelFromRecordUsing(fn (Model $record) => $record->full_name)
                             ->preload(),
                     ]),
-                Forms\Components\Section::make('Informazioni principali')
+                Forms\Components\Section::make(__('filament-resources.territory_assignment.section_main_info'))
                     ->columns(2)
                     ->schema([
                         Forms\Components\Select::make('territory_assignment_type_id')
+                            ->label(__('filament-resources.territory_assignment.field_assignment_type'))
                             ->required()
                             ->searchable()
                             ->disabledOn('edit', 'view')
                             ->relationship('assignmentType', 'name')
                             ->preload(),
                         Forms\Components\DateTimePicker::make('started_at')
+                            ->label(__('filament-resources.territory_assignment.field_started_at'))
                             ->default(now())
                             ->required()
                             ->columnSpan(1),
                         Forms\Components\DateTimePicker::make('ended_at')
+                            ->label(__('filament-resources.territory_assignment.field_ended_at'))
                             ->columnSpan(1),
                     ]),
-                Forms\Components\Section::make('Informazioni aggiuntive')
-                    ->description('Eventuali note o informazioni aggiuntive utili alla lavorazione.')
+                Forms\Components\Section::make(__('filament-resources.territory_assignment.section_additional_info'))
+                    ->description(__('filament-resources.territory_assignment.section_additional_info_description'))
                     ->columnSpanFull()
                     ->schema([
                         Forms\Components\Textarea::make('notes')
-                            ->label('Eventuali note')
+                            ->label(__('filament-resources.territory_assignment.field_notes'))
                             ->columnSpanFull(),
                         Forms\Components\Select::make('created_by')
+                            ->label(__('filament-resources.territory_assignment.field_creator'))
                             ->default(Auth::id())
                             ->disabled()
                             ->hiddenOn('create')
@@ -190,34 +196,43 @@ class TerritoryAssignmentResource extends Resource
             ->recordUrl(fn (Model $record): string => TerritoryAssignmentResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('territory.name')
+                    ->label(__('filament-resources.territory_assignment.column_territory'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assignee.full_name')
+                    ->label(__('filament-resources.territory_assignment.column_assignee'))
                     ->hidden(!Auth::user()->can('view_any_territory::assignment'))
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(['first_name', 'last_name']),
                 Tables\Columns\TextColumn::make('started_at')
+                    ->label(__('filament-resources.territory_assignment.column_started_at'))
                     ->dateTime("d/m/Y H:i")
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ended_at')
+                    ->label(__('filament-resources.territory_assignment.column_ended_at'))
                     ->dateTime("d/m/Y H:i")
-                    ->placeholder('(in lavorazione)')
+                    ->placeholder(__('filament-resources.territory_assignment.column_ended_at_placeholder'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assignmentType.name')
+                    ->label(__('filament-resources.territory_assignment.column_assignment_type'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('creator.full_name')
+                    ->label(__('filament-resources.territory_assignment.column_creator'))
                     ->sortable(['first_name', 'last_name'])
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('filament-resources.territory_assignment.column_created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('filament-resources.territory_assignment.column_updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('deleted_at')
+                    ->label(__('filament-resources.territory_assignment.column_deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -225,14 +240,14 @@ class TerritoryAssignmentResource extends Resource
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
                 Tables\Filters\TernaryFilter::make('ended_at')
-                    ->label('Stato assegnazione')
+                    ->label(__('filament-resources.territory_assignment.filter_assignment_status'))
                     ->default(false)
                     ->nullable()
-                    ->placeholder('Tutti gli stati')
-                    ->trueLabel('Restituito')
-                    ->falseLabel('In lavorazione'),
+                    ->placeholder(__('filament-resources.territory_assignment.filter_assignment_status_all'))
+                    ->trueLabel(__('filament-resources.territory_assignment.filter_assignment_status_returned'))
+                    ->falseLabel(__('filament-resources.territory_assignment.filter_assignment_status_in_progress')),
                 Tables\Filters\Filter::make('assignee')
-                    ->label('Solo le mie assegnazioni')
+                    ->label(__('filament-resources.territory_assignment.filter_my_assignments_only'))
                     ->query(fn (Builder $query) => $query->where('assignee_id', Auth::user()->id))
                     ->hidden(!Auth::user()->can('view_any_territory::assignment')),
             ])

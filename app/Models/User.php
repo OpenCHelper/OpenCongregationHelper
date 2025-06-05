@@ -19,11 +19,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\HasName;
 use Spatie\Permission\Traits\HasRoles;
-
+use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
-class User extends Authenticatable implements HasTenants, HasName, MustVerifyEmail, FilamentUser
+class User extends Authenticatable implements HasTenants, HasName, MustVerifyEmail, FilamentUser , HasLocalePreference
 {
     use HasApiTokens;
 
@@ -45,6 +46,16 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     }
 
     /**
+     * Disable the email verification requirement.
+     * 
+     * This is only a workaround for quicker development.
+     * In production, you should implement proper email verification.
+     */
+    public function hasVerifiedEmail() {
+        return true;
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -55,6 +66,7 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
         'email',
         'password',
         'can_login',
+        'locale',
     ];
 
     /**
@@ -148,5 +160,21 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     public function assignments(): HasMany
     {
         return $this->hasMany(TerritoryAssignment::class, 'assignee_id');
+    }
+
+    /**
+     * Get the user's preferred locale.
+     */
+    public function preferredLocale(): string
+    {
+        Log::debug('User preferred locale', [
+            'user' => $this->fullName,
+            '$this->locale' => $this->locale, 
+            'app()->getLocale()' => app()->getLocale(),
+            'config("app.locale")' => config('app.locale'),
+            'config("app.fallback_locale")' => config('app.fallback_locale'),
+            'env("APP_LOCALE")' => env('APP_LOCALE', 'unknown'),
+        ]);
+        return $this->locale ?? app()->getLocale();
     }
 }

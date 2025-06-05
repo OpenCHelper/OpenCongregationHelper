@@ -39,17 +39,17 @@ class TerritoryResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return 'territorio';
+        return __('filament-resources.territory.model_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'territori';
+        return __('filament-resources.territory.plural_model_label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Reparto territori';
+        return __('filament-resources.territory.navigation_group');
     }
 
     protected static ?string $recordTitleAttribute = 'name';
@@ -69,8 +69,8 @@ class TerritoryResource extends Resource
         $tags = $record->tagsWithType('territories');
 
         return [
-            ...($record->description ? ['Description' => $record->description] : []),
-            ...(!$tags->isEmpty() ? ['Tags' => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
+            ...($record->description ? [__('filament-resources.global_search_results.description') => $record->description] : []),
+            ...(!$tags->isEmpty() ? [__('filament-resources.global_search_results.tags') => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
         ];
     }
 
@@ -88,19 +88,22 @@ class TerritoryResource extends Resource
                 //     ->columnSpanFull()
                 //     // ->canTakeControl(fn() => auth()->user()->isAdmin())
                 //     ->hiddenOn(['create', 'view']),
-                Forms\Components\Section::make('Informazioni fondamentali')
-                    ->description('Informazioni necessarie per l\'identificazione del territorio')
+                Forms\Components\Section::make(__('filament-resources.territory.section_fundamental_info'))
+                    ->description(__('filament-resources.territory.section_fundamental_info_description'))
                     ->columns(2)
                     ->schema([
                         Forms\Components\TextInput::make('name')
+                            ->label(__('filament-resources.territory.field_name'))
                             ->required(),
                         Forms\Components\Select::make('territory_zone_id')
+                            ->label(__('filament-resources.territory.field_territory_zone'))
                             ->required()
                             ->relationship(name: 'territoryZone', titleAttribute: 'name')
                             ->preload()
                             ->searchable()
                             ->createOptionForm(fn(Form $form) => TerritoryZoneResource::form($form)),
                         Forms\Components\Toggle::make('is_commercial')
+                            ->label(__('filament-resources.territory.field_is_commercial'))
                             // ->inline(false)
                             ->onIcon('heroicon-o-building-storefront')
                             ->offIcon('heroicon-o-home'),
@@ -109,7 +112,7 @@ class TerritoryResource extends Resource
                             ->contained(false)
                             ->tabs([
                                 Forms\Components\Tabs\Tab::make('TabImage')
-                                    ->label('Immagine')
+                                    ->label(__('filament-resources.territory.tab_image'))
                                     ->icon('heroicon-o-photo')
                                     ->schema([
                                         Forms\Components\FileUpload::make('image_path')
@@ -126,11 +129,11 @@ class TerritoryResource extends Resource
                                             ->directory('territories'),
                                     ]),
                                 Forms\Components\Tabs\Tab::make('TabMap')
-                                    ->label('Mappa')
+                                    ->label(__('filament-resources.territory.tab_map'))
                                     ->icon('heroicon-o-map')
                                     ->schema([
                                         Map::make('location')
-                                            ->label('Location')
+                                            ->label(__('filament-resources.territory.field_location'))
                                             ->columnSpanFull()
                                             ->extraStyles(['style' => 'min-height: 50vh', 'border-radius: 8px'])
                                             ->dehydrated(false)
@@ -162,7 +165,7 @@ class TerritoryResource extends Resource
                                             ->clickable(false) //click to move marker
                                             ->drawMarker(false)
                                             ->drawPolygon($form->getOperation() !== 'view')
-                                            ->drawPolyline(false)
+                                            ->drawPolyline(true)
                                             ->drawCircle(false)
                                             ->drawCircleMarker(false)
                                             ->dragMode(false)
@@ -180,16 +183,18 @@ class TerritoryResource extends Resource
                                 return $record?->geojson ? 2 : 1;
                             })
                     ]),
-                Forms\Components\Section::make('Informazioni aggiuntive')
-                    ->description('Informazioni utili in fase di lavorazione e/o gestione del territorio')
+                Forms\Components\Section::make(__('filament-resources.territory.section_additional_info'))
+                    ->description(__('filament-resources.territory.section_additional_info_description'))
                     ->columns(1)
                     ->schema([
                         // Forms\Components\TextInput::make('dimensione')
                         //     ->numeric(),
                         Forms\Components\Textarea::make('notes')
-                            ->helperText('Inserisci eventuali note utili per la lavorazione del territorio')
+                            ->label(__('filament-resources.territory.field_notes'))
+                            ->helperText(__('filament-resources.territory.field_notes_helper'))
                             ->columnSpanFull(),
                         SpatieTagsInput::make('tags')
+                            ->label(__('filament-resources.territory.field_tags'))
                             ->type('territories'),
                     ]),
             ]);
@@ -202,24 +207,27 @@ class TerritoryResource extends Resource
             ->recordUrl(fn (Model $record): string => TerritoryResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label(__('filament-resources.territory.column_name'))
                     ->sortable()
                     ->searchable(isIndividual: true),
                 Tables\Columns\TextColumn::make('territoryZone.name')
+                    ->label(__('filament-resources.territory.column_zone'))
                     ->sortable()
                     ->searchable(isIndividual: true),
                 Tables\Columns\IconColumn::make('is_commercial')
+                    ->label(__('filament-resources.territory.column_commercial'))
                     ->boolean()
-                    ->label('Commerciale?')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('currentAssignment')
                     ->state(function (Territory $record): ?string {
                         return $record->currentAssignment()->assignee->full_name ?? null;
                     })
-                    ->label('Assegnazione attuale')
+                    ->label(__('filament-resources.territory.column_current_assignment'))
                     ->default('')
                     ->sortable()
                     ->searchable(false),
                 SpatieTagsColumn::make('tags')
+                    ->label(__('filament-resources.territory.column_tags'))
                     // ->searchable(isIndividual: true, query: function (Builder $query, string $search): Builder {
                     //     return $query->when($search, function (Builder $query, $search): Builder {
                     //         return $query->withAnyTags($search, 'territories');
@@ -227,10 +235,12 @@ class TerritoryResource extends Resource
                     // })
                     ->type('territories'),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('filament-resources.territory.column_created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('filament-resources.territory.column_updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -240,11 +250,12 @@ class TerritoryResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_commercial')
                     ->nullable()
                     ->boolean()
-                    ->label('Tipo territorio')
-                    ->placeholder('Qualsiasi')
-                    ->trueLabel('Commerciale')
-                    ->falseLabel('Residenziale'),
+                    ->label(__('filament-resources.territory.filter_territory_type'))
+                    ->placeholder(__('filament-resources.territory.filter_territory_type_any'))
+                    ->trueLabel(__('filament-resources.territory.filter_territory_type_commercial'))
+                    ->falseLabel(__('filament-resources.territory.filter_territory_type_residential')),
                 Tables\Filters\SelectFilter::make('tags')
+                    ->label(__('filament-resources.territory.filter_tags'))
                     ->multiple()
                     ->options(Tag::getWithType('territories')->pluck('name', 'name'))
                     ->query(function (Builder $query, array $data): Builder {
@@ -263,16 +274,16 @@ class TerritoryResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\BulkAction::make('create_assignment_bulk')
-                        ->label('Assegna massivamente')
+                        ->label(__('filament-resources.territory.action_assign_massively'))
                         ->icon('heroicon-o-document-arrow-up')
                         ->form([
                             Forms\Components\Select::make('assignee_id')
-                                ->label('Assegnato a')
+                                ->label(__('filament-resources.territory_assignment.action_assigned_to'))
                                 ->options(User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
                                 ->searchable()
                                 ->required(),
                             Forms\Components\Select::make('assignment_type')
-                                ->label('Tipo di assegnazione')
+                                ->label(__('filament-resources.territory_assignment.field_assignment_type'))
                                 ->options(TerritoryAssignmentType::query()->pluck('name', 'id'))
                                 ->required(),
                         ])
@@ -297,7 +308,7 @@ class TerritoryResource extends Resource
                     // AssignmentActions\BulkCreateAssignmentActionTable::make('create_assignment_bulk')
                     //     ->deselectRecordsAfterCompletion(),
                     Tables\Actions\BulkAction::make('cancel_assignment_bulk')
-                        ->label('Termina assegnazioni')
+                        ->label(__('filament-resources.territory.action_end_assignments'))
                         ->icon('heroicon-o-document-arrow-down')
                         ->requiresConfirmation()
                         ->action(function (Collection $records, array $data): void {
@@ -308,14 +319,17 @@ class TerritoryResource extends Resource
                                     continue;
                                 }
 
-                                $record->currentAssignment()->update([
+                                $currentAssignment = $record->currentAssignment();
+                                // Carica la relazione territory prima dell'update per evitare lazy loading errors
+                                $currentAssignment->load('territory');
+                                $currentAssignment->update([
                                     'ended_at' => now(),
                                 ]);
                             }
                         })
                         ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make()
-                    ->deselectRecordsAfterCompletion(),
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

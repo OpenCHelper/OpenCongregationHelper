@@ -15,9 +15,9 @@ trait HasAssignmentDelete
  
         $this
             ->icon('heroicon-o-archive-box-arrow-down')
-            ->label('Termina assegnazione')
-            ->modalHeading('Termina assegnazione')
-            ->modalSubmitAction(fn (StaticAction $action) => $action->label('Termina'))
+            ->label(__('filament-resources.territory_assignment.action_end_assignment'))
+            ->modalHeading(__('filament-resources.database_notifications.end_assignment_modal'))
+            ->modalSubmitAction(fn (StaticAction $action) => $action->label(__('filament-resources.territory_assignment.action_end')))
             ->color('primary')
             ->visible(function (Models\Territory $record): bool {
                 $assignment = $record->currentAssignment();
@@ -38,13 +38,13 @@ trait HasAssignmentDelete
             })
             ->form([
                 Forms\Components\Select::make('assignee_id')
-                    ->label('Assegnato a')
+                    ->label(__('filament-resources.territory_assignment.action_assigned_to'))
                     ->options(Models\User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
                     ->searchable()
                     ->disabled()
                     ->required(),
                 Forms\Components\Select::make('assignment_type')
-                    ->label('Tipo di assegnazione')
+                    ->label(__('filament-resources.territory_assignment.field_assignment_type'))
                     ->options(Models\TerritoryAssignmentType::query()->pluck('name', 'id'))
                     ->disabled()
                     ->required(),
@@ -60,6 +60,8 @@ trait HasAssignmentDelete
                         return;
                     }
                     
+                    // Carica la relazione territory prima dell'update per evitare lazy loading errors
+                    $last_assignment->load('territory');
                     $last_assignment->ended_at = now();
                     $last_assignment->push();
                 } catch (\Exception $e) {
@@ -75,14 +77,14 @@ trait HasAssignmentDelete
             ->successNotification(function (Notification $notification): Notification {
                 return $notification
                     ->success()
-                    ->title('Territorio rientrato')
-                    ->body('Il territorio è rientrato con successo.');
+                    ->title(__('filament-resources.database_notifications.territory_returned_success_title'))
+                    ->body(__('filament-resources.database_notifications.territory_returned_success_body'));
             })
             ->failureNotification(function (Notification $notification): Notification {
                 return $notification
                     ->error()
-                    ->title('Errore durante l\'assegnazione')
-                    ->body('Si è verificato un errore durante il rientro del territorio.');
+                    ->title(__('filament-resources.database_notifications.assignment_error_title'))
+                    ->body(__('filament-resources.database_notifications.territory_return_error_body'));
             });
     }
 }

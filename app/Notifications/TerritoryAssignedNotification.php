@@ -43,14 +43,14 @@ class TerritoryAssignedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Territorio ' . $this->assignment->territory->name . ' assegnato')
-            ->greeting('Ciao ' . $notifiable->name . ',')
-            ->line('Ti è stato assegnato il territorio ' . $this->assignment->territory->name . '.')
-            ->line('Ricordati di consegnarlo una volta percorso.')
-            ->action('Vedi dettagli', TerritoryAssignmentResource::getUrl('view', [
+            ->subject(__('filament-resources.mailables.territory_assigned_subject', ['territory' => $this->assignment->territory->name]))
+            ->greeting(__('filament-resources.mailables.greeting', ['name' => $notifiable->name]))
+            ->line(__('filament-resources.mailables.territory_assigned_body', ['territory' => $this->assignment->territory->name]))
+            ->line(__('filament-resources.mailables.remember_to_return'))
+            ->action(__('filament-resources.mailables.view_details'), TerritoryAssignmentResource::getUrl('view', [
                 'record' => $this->assignment->id,
             ]))
-            ->line('Ti ringraziamo per il tuo impegno!');
+            ->line(__('filament-resources.mailables.thank_you'));
     }
 
     /**
@@ -68,8 +68,8 @@ class TerritoryAssignedNotification extends Notification
     public function toDatabase(User $notifiable): array
     {
         return FilamentNotification::make()
-            ->title('Territorio ' . $this->assignment->territory->name . ' assegnato')
-            ->body('Ti è stato assegnato il territorio ' . $this->assignment->territory->name . '.')
+            ->title(__('filament-resources.database_notifications.territory_assigned_title', ['territory' => $this->assignment->territory->name]))
+            ->body(__('filament-resources.database_notifications.territory_assigned_body', ['territory' => $this->assignment->territory->name]))
             ->icon('heroicon-o-map')
             ->actions([
                 FilamentAction::make('view')
@@ -77,7 +77,7 @@ class TerritoryAssignedNotification extends Notification
                     ->url(TerritoryAssignmentResource::getUrl('view', [
                         'record' => $this->assignment->id,
                     ]))
-                    ->label('Vedi'),
+                    ->label(__('filament-resources.database_notifications.action_view')),
             ])
             ->getDatabaseMessage();
     }

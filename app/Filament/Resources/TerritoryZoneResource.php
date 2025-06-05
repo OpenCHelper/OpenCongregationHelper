@@ -39,23 +39,23 @@ class TerritoryZoneResource extends Resource
         $tags = $record->tagsWithType('territories');
 
         return [
-            ...(!$tags->isEmpty() ? ['Tags' => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
+            ...(!$tags->isEmpty() ? [__('filament-resources.global_search_results.tags') => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
         ];
     }
 
     public static function getModelLabel(): string
     {
-        return 'zona';
+        return __('filament-resources.territory_zone.model_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'zone';
+        return __('filament-resources.territory_zone.plural_model_label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Reparto territori';
+        return __('filament-resources.territory_zone.navigation_group');
     }
 
     public static function form(Form $form): Form
@@ -68,10 +68,13 @@ class TerritoryZoneResource extends Resource
                 //     // ->canTakeControl(fn() => auth()->user()->isAdmin())
                 //     ->hiddenOn(['create', 'view']),
                 Forms\Components\TextInput::make('name')
+                    ->label(__('filament-resources.territory_zone.field_name'))
                     ->required()
                     ->maxLength(50),
-                Forms\Components\ColorPicker::make('color'),
+                Forms\Components\ColorPicker::make('color')
+                    ->label(__('filament-resources.territory_zone.field_color')),
                 SpatieTagsInput::make('tags')
+                    ->label(__('filament-resources.territory_zone.field_tags'))
                     ->type('zones')
                     ->nestedRecursiveRules([
                         'min:3',
@@ -97,17 +100,20 @@ class TerritoryZoneResource extends Resource
             ->recordUrl(fn (Model $record): string => TerritoryZoneResource::getUrl('view', ['record' => $record]))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label(__('filament-resources.territory_zone.column_name'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('territories_count')
                     ->counts('territories')
-                    ->label('Totale territori')
+                    ->label(__('filament-resources.territory_zone.column_territories_count'))
                     ->sortable(),
                 SpatieTagsColumn::make('tags')
+                    ->label(__('filament-resources.territory_zone.column_tags'))
                     ->type('zones'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('tags')
+                    ->label(__('filament-resources.territory_zone.filter_tags'))
                     ->multiple()
                     ->options(Tag::getWithType('zones')->pluck('name', 'name'))
                     ->query(function (Builder $query, array $data): Builder {
