@@ -179,7 +179,7 @@ class TerritoryGlobalMap extends MapWidget
         $territories = Territory::with('territoryZone')
             ->where('geojson', '!=', null)
             ->where(function ($query) {
-                Log::info("Shown territory types: " . $this->getShownTerritoryTypes());
+                // Log::info("Shown territory types: " . $this->getShownTerritoryTypes());
                 if ($this->getShownTerritoryTypes() === 'residential') {
                     $query->where('is_commercial', '=', false);
                 } elseif ($this->getShownTerritoryTypes() === 'commercial') {
@@ -188,7 +188,7 @@ class TerritoryGlobalMap extends MapWidget
             })
             ->get();
 
-        Log::info("Total territories: " . count($territories));
+        // Log::info("Total territories: " . count($territories));
 
         $viewType = $this->getDefaultView();
 
