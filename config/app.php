@@ -88,7 +88,7 @@ return [
     'available_locales' => [
         'en' => 'English',
         'it' => 'Italiano',
-        // 'es' => 'Español',
+        'es' => 'Español',
         // 'fr' => 'Français',
         // 'de' => 'Deutsch',
         // 'pt' => 'Português',
