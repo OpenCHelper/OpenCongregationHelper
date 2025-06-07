@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TagType;
 use App\Filament\Resources\TerritoryZoneResource\Pages;
 use App\Filament\Resources\TerritoryZoneResource\RelationManagers;
 use App\Models\TerritoryZone;
@@ -36,7 +37,7 @@ class TerritoryZoneResource extends Resource
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
-        $tags = $record->tagsWithType('territories');
+        $tags = $record->tagsWithType(TagType::TERRITORIES->value);
 
         return [
             ...(!$tags->isEmpty() ? [__('filament-resources.global_search_results.tags') => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
@@ -75,7 +76,7 @@ class TerritoryZoneResource extends Resource
                     ->label(__('filament-resources.territory_zone.field_color')),
                 SpatieTagsInput::make('tags')
                     ->label(__('filament-resources.territory_zone.field_tags'))
-                    ->type('zones')
+                    ->type(TagType::ZONES->value)
                     ->nestedRecursiveRules([
                         'min:3',
                         'max:255',
@@ -109,16 +110,16 @@ class TerritoryZoneResource extends Resource
                     ->sortable(),
                 SpatieTagsColumn::make('tags')
                     ->label(__('filament-resources.territory_zone.column_tags'))
-                    ->type('zones'),
+                    ->type(TagType::ZONES->value),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('tags')
                     ->label(__('filament-resources.territory_zone.filter_tags'))
                     ->multiple()
-                    ->options(Tag::getWithType('zones')->pluck('name', 'name'))
+                    ->options(Tag::getWithType(TagType::ZONES->value)->pluck('name', 'name'))
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when($data['values'], function (Builder $query, $data): Builder {
-                            return $query->withAnyTags(array_values($data), 'zones');
+                            return $query->withAnyTags(array_values($data), TagType::ZONES->value);
                         });
                     }),
             ])

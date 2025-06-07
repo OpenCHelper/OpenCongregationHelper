@@ -19,6 +19,7 @@ class FakeDataSeeder extends Seeder
 
         $this->call([
             FakeUserSeeder::class,
+            FakeTagSeeder::class,
             FakeTerritorySeeder::class,
             FakeTerritoryAssignmentSeeder::class,
         ]);

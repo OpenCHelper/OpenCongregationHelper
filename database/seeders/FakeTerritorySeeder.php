@@ -24,21 +24,21 @@ class FakeTerritorySeeder extends Seeder
         $users = User::all();
         $territoryZones = TerritoryZone::factory(3)->withColor()->hasTerritories(3, fn () => [
             'is_commercial' => $faker->boolean(25),
-        ])->create();
+        ])->withTags()->create();
 
         Territory::factory(3)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
-        ])->withImage()->create();
+        ])->withImage()->withTags()->create();
         
         Territory::factory(5)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
-        ])->withMap()->create();
+        ])->withMap()->withTags()->create();
 
         Territory::factory(2)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
         ])->isCommercial()->withImage()->create();
 
-        Territory::factory(4)->for($territoryZones->random())->state(fn () => [
+        Territory::factory(2)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
         ])->isCommercial()->withMap()->create();
 

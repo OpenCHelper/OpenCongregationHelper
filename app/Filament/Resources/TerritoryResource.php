@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TagType;
 use App\Filament\Actions\Assignment as AssignmentActions;
 use App\Filament\Resources\TerritoryResource\Pages;
 use App\Models\Territory;
@@ -66,7 +67,7 @@ class TerritoryResource extends Resource
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
-        $tags = $record->tagsWithType('territories');
+        $tags = $record->tagsWithType(TagType::TERRITORIES->value);
 
         return [
             ...($record->description ? [__('filament-resources.global_search_results.description') => $record->description] : []),
@@ -195,7 +196,7 @@ class TerritoryResource extends Resource
                             ->columnSpanFull(),
                         SpatieTagsInput::make('tags')
                             ->label(__('filament-resources.territory.field_tags'))
-                            ->type('territories'),
+                            ->type(TagType::TERRITORIES->value),
                     ]),
             ]);
     }
@@ -230,10 +231,10 @@ class TerritoryResource extends Resource
                     ->label(__('filament-resources.territory.column_tags'))
                     // ->searchable(isIndividual: true, query: function (Builder $query, string $search): Builder {
                     //     return $query->when($search, function (Builder $query, $search): Builder {
-                    //         return $query->withAnyTags($search, 'territories');
+                    //         return $query->withAnyTags($search, TagType::TERRITORIES->value);
                     //     });
                     // })
-                    ->type('territories'),
+                    ->type(TagType::TERRITORIES->value),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('filament-resources.territory.column_created_at'))
                     ->dateTime()
@@ -257,10 +258,10 @@ class TerritoryResource extends Resource
                 Tables\Filters\SelectFilter::make('tags')
                     ->label(__('filament-resources.territory.filter_tags'))
                     ->multiple()
-                    ->options(Tag::getWithType('territories')->pluck('name', 'name'))
+                    ->options(Tag::getWithType(TagType::TERRITORIES->value)->pluck('name', 'name'))
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when($data['values'], function (Builder $query, $data): Builder {
-                            return $query->withAnyTags(array_values($data), 'territories');
+                            return $query->withAnyTags(array_values($data), TagType::TERRITORIES->value);
                         });
                     }),
             ])

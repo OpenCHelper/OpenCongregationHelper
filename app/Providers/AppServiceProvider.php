@@ -19,7 +19,9 @@ use Illuminate\Support\Facades\Mail;
 use App\NativeMailFxTransport;
 
 use App\Policies\ActivityPolicy;
+use App\Policies\TagPolicy;
 use Spatie\Activitylog\Models\Activity;
+use App\Models\Tag;
 use Spatie\Translatable\Facades\Translatable;
 
 class AppServiceProvider extends ServiceProvider
@@ -54,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
                 : Response::denyWithStatus(404);
         });
         Gate::policy(Activity::class, ActivityPolicy::class);
+        Gate::policy(Tag::class, TagPolicy::class);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $flags = collect(config('app.available_locales'))->mapWithKeys(function ($longName, $shortName) {

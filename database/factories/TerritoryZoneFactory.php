@@ -30,4 +30,14 @@ class TerritoryZoneFactory extends Factory
             'color' => $this->faker->hexColor(),
         ]);
     }
+
+    public function withTags(int $count = 1): self
+    {
+        // Attach a random tag to the territory
+        return $this->afterCreating(function ($territory) {
+            for ($i = 0; $i < $count; $i++) {
+                $territory->attachTag(\Spatie\Tags\Tag::getWithType("zones")->random());
+            }
+        });
+    }
 }
