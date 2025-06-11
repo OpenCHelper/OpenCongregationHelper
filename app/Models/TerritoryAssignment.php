@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Observers\TerritoryAssignmentObserver;
+use App\Traits\HasSharedUrl;
+use App\Traits\HasGuestViewPage;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +22,15 @@ class TerritoryAssignment extends Model
     use HasFactory;
     use SoftDeletes;
     use LogsActivity;
+
+    use HasSharedUrl;
+    use HasGuestViewPage;
+    
+    /**
+     * Override the guest page route to use the correct path
+     * for TerritoryAssignment (called `SharedAssignment` in the guest panel).
+     */
+    protected ?string $guestPageRoute = '/guest/shared-assignment';
     
     public function getActivitylogOptions(): LogOptions
     {

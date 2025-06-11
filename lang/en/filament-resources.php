@@ -172,6 +172,40 @@ return [
         'action_end_assignment' => 'End Assignment',
         'action_create' => 'Create',
         'action_end' => 'End',
+        'action_copy' => [
+            'label' => 'Share',
+            'tooltip' => 'Copy to clipboard the shareable URL for this assignment',
+            'notifications' => [
+                'success' => [
+                    'title' => 'URL copied to clipboard',
+                    'body' => 'You can now share this URL with others.',
+                    'actions' => [
+                        'view' => [
+                            'label' => 'View in new tab',
+                        ],
+                    ],
+                ],
+                'failure' => [
+                    'title' => 'Failed to copy URL',
+                    'body' => 'Please try again later.',
+                ],
+            ],
+        ],
+        'share_modal' => [
+            'title' => 'Share Assignment',
+            'description' => 'Share this assignment with others through a public link.',
+            'url_label' => 'Sharing URL',
+            'copy_button' => 'Copy URL',
+            'stop_sharing' => 'Stop Sharing',
+            'close' => 'Close',
+            'open_in_new_tab' => 'Open in new tab',
+            'stop_sharing_confirm_title' => 'Confirm Stop Sharing',
+            'stop_sharing_confirm_description' => 'Are you sure you want to stop sharing? This link will no longer be accessible.',
+            'stop_sharing_success' => 'Sharing stopped successfully',
+        ],
+        'action_group' => [
+            'label' => 'Actions',
+        ],
     ],
     'campaign' => [
         'model_label' => 'campaign',
@@ -234,5 +268,9 @@ return [
     ],
     'navigation_groups' => [
         'developer' => 'Developer',
+    ],
+    'shared_resource' => [
+        'details_title' => ':ResourceType details',
+        'shared_view_description' => 'Shared view for this :resourceType',
     ],
 ];

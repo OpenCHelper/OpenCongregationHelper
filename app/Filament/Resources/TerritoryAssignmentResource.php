@@ -68,9 +68,6 @@ class TerritoryAssignmentResource extends Resource
                                 $territory = $record->territory;
                                 $geojson = json_decode(strip_tags($territory->geojson ?? ''));
 
-                                Log::info('GeoJSON:', [
-                                    'geojson' => $geojson,
-                                ]);
                                 $location = [
                                     'geojson' => $geojson,
                                 ];
@@ -103,7 +100,9 @@ class TerritoryAssignmentResource extends Resource
                             ->deleteLayer(false)
                             ->rotateMode(false)
                         ,
-                        Infolists\Components\TextEntry::make('territory.geojson'),
+                        Infolists\Components\TextEntry::make('territory.geojson')
+                            ->label("GeoJSON")
+                            ->placeholder('NULL'),
                         Infolists\Components\ImageEntry::make('territory.image_path')
                             ->label(__('filament-resources.territory.field_image'))
                             ->visible(fn (Model $record) => $record->territory->image_path != null)
@@ -308,16 +307,6 @@ class TerritoryAssignmentResource extends Resource
                 SoftDeletingScope::class,
             ]);
 
-        // Log the generated SQL query for debugging
-        Log::info('Generated SQL query:', [
-            'query' => $query->toSql(),
-        ]);
         return $query;
-    }
-
-    public static function canAccess(): bool
-    {
-        // Allow access to the resource only if the user has the 'view_any_territory::assignment' permission
-        return Auth::user()->can('view_territory::assignment') || parent::canAccess();
     }
 }

@@ -9,3 +9,9 @@
     justify-content: space-evenly !important;
     margin-bottom: 10px !important;
 }
+
+/* Override for `Webbingbrasil\FilamentMaps\Resources\MapResource\Pages\CreateMap`
+*/
+div[x-ref="map"] {
+    z-index: 0 !important;
+}

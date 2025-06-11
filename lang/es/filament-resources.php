@@ -172,6 +172,40 @@ return [
         'action_end_assignment' => 'Terminar Asignación',
         'action_create' => 'Crear',
         'action_end' => 'Terminar',
+        'action_copy' => [
+            'label' => 'Compartir',
+            'tooltip' => 'Copiar al portapapeles la URL compartible para esta asignación',
+            'notifications' => [
+                'success' => [
+                    'title' => 'URL copiada al portapapeles',
+                    'body' => 'Ahora puedes compartir esta URL con otros.',
+                    'actions' => [
+                        'view' => [
+                            'label' => 'Ver en nueva pestaña',
+                        ],
+                    ],
+                ],
+                'failure' => [
+                    'title' => 'Error al copiar URL',
+                    'body' => 'Por favor, inténtalo de nuevo más tarde.',
+                ],
+            ],
+        ],
+        'share_modal' => [
+            'title' => 'Compartir Asignación',
+            'description' => 'Comparte esta asignación con otros a través de un enlace público.',
+            'url_label' => 'URL para compartir',
+            'copy_button' => 'Copiar URL',
+            'stop_sharing' => 'Detener Compartir',
+            'close' => 'Cerrar',
+            'open_in_new_tab' => 'Abrir en nueva pestaña',
+            'stop_sharing_confirm_title' => 'Confirmar Detener Compartir',
+            'stop_sharing_confirm_description' => '¿Estás seguro de que quieres detener el compartir? Este enlace ya no será accesible.',
+            'stop_sharing_success' => 'Compartir detenido exitosamente',
+        ],
+        'action_group' => [
+            'label' => 'Acciones',
+        ],
     ],
     'campaign' => [
         'model_label' => 'campaña',
@@ -234,5 +268,9 @@ return [
     ],
     'navigation_groups' => [
         'developer' => 'Desarrollador',
+    ],
+    'shared_resource' => [
+        'details_title' => 'Detalles de :resourceType',
+        'shared_view_description' => 'Vista compartida por esta :resourceType',
     ],
 ];

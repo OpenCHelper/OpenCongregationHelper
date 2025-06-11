@@ -6,6 +6,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Jetstream\Features;
 
@@ -31,23 +32,24 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName(),
             'can_login' => true,
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'email_verified_at' => null,
             'password' => static::$password ??= Hash::make('password'),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'remember_token' => Str::random(10),
             'profile_photo_path' => null,
             'current_team_id' => null,
+            'locale' => fake()->randomElement(array_keys(config('app.available_locales', ['en' => 'English']))),
         ];
     }
 
     /**
      * Indicate that the model's email address should be unverified.
      */
-    public function unverified(): static
+    public function verified(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'email_verified_at' => now(),
         ]);
     }
 
@@ -76,7 +78,13 @@ class UserFactory extends Factory
                 ])
                 ->when(is_callable($callback), $callback),
             'ownedTeams'
-        );
+        )->afterCreating(function (User $user) {
+            // Set the current team to the first owned team (personal team)
+            if ($user->ownedTeams->isNotEmpty()) {
+                $user->current_team_id = $user->ownedTeams->first()->id;
+                $user->save();
+            }
+        });
     }
 
     public function withPassword(string $password): static

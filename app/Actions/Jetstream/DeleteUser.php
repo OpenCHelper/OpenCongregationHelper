@@ -35,10 +35,21 @@ class DeleteUser implements DeletesUsers
      */
     protected function deleteTeams(User $user): void
     {
-        $user->teams()->detach();
+        /*
+            Commenting this line because it causes the following error when trying to delete the user:
+                Call to undefined method Illuminate\Database\Eloquent\Relations\HasMany::detach()
 
+            This happens because Jetstream's `HasTeams` trait uses a `BelongsToMany` relationship for teams, while
+            the `User` model's `teams()` method is defined as a `HasMany` relationship. 
+        */
+        // $user->teams()->detach();
+
+        // Delete all teams owned by the user
         $user->ownedTeams->each(function (Team $team) {
             $this->deletesTeams->delete($team);
         });
+        
+        // Note: This application uses teams primarily for ownership, not membership
+        // If team memberships were needed, you would handle them here with a BelongsToMany relationship
     }
 }

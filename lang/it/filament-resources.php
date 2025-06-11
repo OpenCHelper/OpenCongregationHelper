@@ -172,6 +172,40 @@ return [
         'action_end_assignment' => 'Termina assegnazione',
         'action_create' => 'Crea',
         'action_end' => 'Termina',
+        'action_copy' => [
+            'label' => 'Condividi',
+            'tooltip' => 'Copia negli appunti l\'URL condivisibile per questa assegnazione',
+            'notifications' => [
+                'success' => [
+                    'title' => 'URL copiato negli appunti',
+                    'body' => 'Ora puoi condividere questo URL con altri.',
+                    'actions' => [
+                        'view' => [
+                            'label' => 'Visualizza in una nuova scheda',
+                        ],
+                    ],
+                ],
+                'failure' => [
+                    'title' => 'Impossibile copiare l\'URL',
+                    'body' => 'Riprova più tardi.',
+                ],
+            ],
+        ],
+        'share_modal' => [
+            'title' => 'Condividi Assegnazione',
+            'description' => 'Condividi questa assegnazione con altri tramite un link pubblico.',
+            'url_label' => 'URL di condivisione',
+            'copy_button' => 'Copia URL',
+            'stop_sharing' => 'Interrompi condivisione',
+            'close' => 'Chiudi',
+            'open_in_new_tab' => 'Apri in una nuova scheda',
+            'stop_sharing_confirm_title' => 'Conferma interruzione condivisione',
+            'stop_sharing_confirm_description' => 'Sei sicuro di voler interrompere la condivisione? Il link non sarà più accessibile.',
+            'stop_sharing_success' => 'Condivisione interrotta con successo',
+        ],
+        'action_group' => [
+            'label' => 'Azioni',
+        ],
     ],
     'campaign' => [
         'model_label' => 'campagna',
@@ -234,5 +268,9 @@ return [
     ],
     'navigation_groups' => [
         'developer' => 'Developer',
+    ],
+    'shared_resource' => [
+        'details_title' => 'Dettagli :resourceType',
+        'shared_view_description' => 'Vista condivisa per questa :resourceType',
     ],
 ];

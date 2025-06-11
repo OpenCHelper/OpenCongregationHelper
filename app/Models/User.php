@@ -46,16 +46,6 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     }
 
     /**
-     * Disable the email verification requirement.
-     * 
-     * This is only a workaround for quicker development.
-     * In production, you should implement proper email verification.
-     */
-    public function hasVerifiedEmail() {
-        return true;
-    }
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

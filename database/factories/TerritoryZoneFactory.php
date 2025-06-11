@@ -34,7 +34,7 @@ class TerritoryZoneFactory extends Factory
     public function withTags(int $count = 1): self
     {
         // Attach a random tag to the territory
-        return $this->afterCreating(function ($territory) {
+        return $this->afterCreating(function ($territory) use ($count) {
             for ($i = 0; $i < $count; $i++) {
                 $territory->attachTag(\Spatie\Tags\Tag::getWithType("zones")->random());
             }

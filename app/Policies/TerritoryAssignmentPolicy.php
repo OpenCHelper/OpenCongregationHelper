@@ -13,16 +13,24 @@ class TerritoryAssignmentPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
+        if (!$user) {
+            return true;
+        }
+        
         return $user->can('view_any_territory::assignment');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, TerritoryAssignment $territoryAssignment): bool
+    public function view(?User $user, TerritoryAssignment $territoryAssignment): bool
     {
+        if (!$user) {
+            return true;
+        }
+        
         return $user->can('view_territory::assignment');
     }
 

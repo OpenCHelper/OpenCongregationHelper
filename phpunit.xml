@@ -28,5 +28,10 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        
+        <!-- 
+            Hardcoded variables to override the default values in the .env.example file.
+        -->
+        <env name="DB_HOST" value="mysql"/>
     </php>
 </phpunit>

@@ -15,12 +15,6 @@ class TerritoryAssignmentObserver
      */
     public function created(TerritoryAssignment $territoryAssignment): void
     {
-        Log::info('TerritoryAssignment created', [
-            'territory_assignment' => $territoryAssignment,
-        ]);
-
-        Log::info("User preferred locale: " . $territoryAssignment->assignee->preferredLocale());
-        
         // Carica la relazione territory prima di inviare la notifica
         $territoryAssignment->load('territory');
         $territoryAssignment->assignee->notify(new TerritoryAssignedNotification($territoryAssignment));
@@ -31,14 +25,15 @@ class TerritoryAssignmentObserver
      */         
     public function updated(TerritoryAssignment $territoryAssignment): void
     {
-        Log::info('TerritoryAssignment updated', [
-            'territory_assignment' => $territoryAssignment,
-        ]);
-        
-        if ($territoryAssignment->isDirty('ended_at') && $territoryAssignment->ended_at !== null) {
+        if ($territoryAssignment->wasChanged('ended_at') && $territoryAssignment->ended_at !== null) {
             // Carica la relazione territory prima di inviare la notifica
             $territoryAssignment->load('territory');
             $territoryAssignment->assignee->notify(new TerritoryReturnedNotification($territoryAssignment));
+            
+            // Remove shared URL when assignment ends
+            if ($territoryAssignment->shared) {
+                $territoryAssignment->shared->delete();
+            }
         }
     }
 
@@ -47,7 +42,10 @@ class TerritoryAssignmentObserver
      */
     public function deleted(TerritoryAssignment $territoryAssignment): void
     {
-        //
+        // Remove shared URL when assignment is deleted
+        if ($territoryAssignment->shared) {
+            $territoryAssignment->shared->delete();
+        }
     }
 
     /**
@@ -63,6 +61,9 @@ class TerritoryAssignmentObserver
      */
     public function forceDeleted(TerritoryAssignment $territoryAssignment): void
     {
-        //
+        // Remove shared URL when assignment is force deleted
+        if ($territoryAssignment->shared) {
+            $territoryAssignment->shared->delete();
+        }
     }
 }

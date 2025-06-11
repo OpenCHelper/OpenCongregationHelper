@@ -52,7 +52,7 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->login()
             ->passwordReset()
-            ->emailVerification()
+            ->emailVerification(isRequired: false)
             ->viteTheme('resources/css/app.css')
             ->colors([
                 'primary' => Color::Gray,

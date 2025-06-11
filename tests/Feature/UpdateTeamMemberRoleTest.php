@@ -3,6 +3,7 @@
 use App\Models\User;
 use Laravel\Jetstream\Http\Livewire\TeamMemberManager;
 use Livewire\Livewire;
+use Laravel\Jetstream\Features;
 
 test('team member roles can be updated', function () {
     $this->actingAs($user = User::factory()->withPersonalTeam()->create());
@@ -19,7 +20,7 @@ test('team member roles can be updated', function () {
     expect($otherUser->fresh()->hasTeamRole(
         $user->currentTeam->fresh(), 'editor'
     ))->toBeTrue();
-});
+})->skip(fn () => !Features::hasTeamFeatures(), 'Team support is not enabled.');
 
 test('only team owner can update team member roles', function () {
     $user = User::factory()->withPersonalTeam()->create();
@@ -39,4 +40,4 @@ test('only team owner can update team member roles', function () {
     expect($otherUser->fresh()->hasTeamRole(
         $user->currentTeam->fresh(), 'admin'
     ))->toBeTrue();
-});
+})->skip(fn () => !Features::hasTeamFeatures(), 'Team support is not enabled.');
