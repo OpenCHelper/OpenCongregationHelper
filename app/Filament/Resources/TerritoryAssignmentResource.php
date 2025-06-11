@@ -57,32 +57,53 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.info_territory')),
                         Infolists\Components\TextEntry::make('territory.territoryZone.name')
                             ->label(__('filament-resources.territory_assignment.info_zone')),
-                        // MapEntry::make('location')
-                        //     ->label('Mappa')
-                        //     ->columnSpanFull()
+                        MapEntry::make('location')
+                            ->label(__('filament-resources.territory_assignment.info_location'))
+                            ->extraStyles(['style' => 'min-height: 50vh', 'border-radius: 8px'])
+                            ->columnSpanFull()
+                            ->defaultLocation(latitude: 41.902782, longitude: 12.496366)
+                            // ->zoom(10)
+                            // State Management
+                            ->state(function ($record): array {
+                                $territory = $record->territory;
+                                $geojson = json_decode(strip_tags($territory->geojson ?? ''));
 
-                        //     // State Management
-                        //     ->state(function ($record): array {
-                        //         $territory = $record->territory;
-                        //         $geojson = json_decode(strip_tags($territory->geojson ?? ''));
-                        //         $location = [
-                        //             'geojson' => $geojson,
-                        //         ];
-                        //         if ($territory->geojson ?? null != null && $geojson !== null) {
-                        //             $location['lat'] = -1;
-                        //             $location['lng'] = -1;
-                        //         }
+                                Log::info('GeoJSON:', [
+                                    'geojson' => $geojson,
+                                ]);
+                                $location = [
+                                    'geojson' => $geojson,
+                                ];
+                                if ($territory->geojson ?? null != null && $geojson !== null) {
+                                    $location['lat'] = -1;
+                                    $location['lng'] = -1;
+                                }
 
-                        //         return $location;
-                        //     })
-                            
-                        //     // Controls
-                        //     ->showFullscreenControl(true)
-                        //     ->showZoomControl(true)
+                                return $location;
+                            })
 
-                        //     // GeoMan Integration (if needed for viewing)
-                        //     ->geoMan(true)
-                        //     ->geoManEditable(false),
+                            // Controls
+                            // ->showFullscreenControl(true)
+                            ->showZoomControl(true)
+                            ->showMarker(false)
+                            ->showFullscreenControl()
+
+                            // // GeoMan Integration (if needed for viewing)
+                            ->geoMan(true)
+                            ->geoManEditable(false) // Usually false for infolist view
+                            ->drawCircle(false)
+                            ->drawPolygon(false)
+                            ->drawRectangle(false)
+                            ->drawMarker(false)
+                            ->drawPolyline(false)
+                            ->drawText(false)
+                            ->editPolygon(false)
+                            ->dragMode(false)
+                            ->cutPolygon(false)
+                            ->deleteLayer(false)
+                            ->rotateMode(false)
+                        ,
+                        Infolists\Components\TextEntry::make('territory.geojson'),
                         Infolists\Components\ImageEntry::make('territory.image_path')
                             ->label(__('filament-resources.territory.field_image'))
                             ->visible(fn (Model $record) => $record->territory->image_path != null)

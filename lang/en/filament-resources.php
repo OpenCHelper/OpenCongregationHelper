@@ -142,6 +142,7 @@ return [
         'field_creator' => 'Created By',
         'info_territory' => 'Territory',
         'info_zone' => 'Zone',
+        'info_location' => 'Map',
         'info_description' => 'Description',
         'info_description_placeholder' => 'No description available',
         'info_notes' => 'Notes',

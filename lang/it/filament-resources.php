@@ -142,6 +142,7 @@ return [
         'field_creator' => 'Creato da',
         'info_territory' => 'Territorio',
         'info_zone' => 'Zona',
+        'info_location' => 'Mappa',
         'info_description' => 'Descrizione',
         'info_description_placeholder' => 'Nessuna descrizione disponibile',
         'info_notes' => 'Note',
