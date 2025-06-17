@@ -20,14 +20,14 @@ trait HasAssignmentDelete
             ->modalSubmitAction(fn (StaticAction $action) => $action->label(__('filament-resources.territory_assignment.action_end')))
             ->color('primary')
             ->visible(function (Models\Territory $record): bool {
-                $assignment = $record->currentAssignment();
+                $assignment = $record->currentAssignment;
                 return $assignment !== null && $assignment->ended_at === null;
             })
             ->mountUsing(function (Forms\ComponentContainer $form, Models\Territory $record) {
-                $last_assignment = $record
-                    ->currentAssignment()
-                    ->with('assignee', 'assignmentType')
-                ->first();
+                $last_assignment = $record->currentAssignmentRelation;
+                if ($last_assignment) {
+                    $last_assignment->load('assignee', 'assignmentType');
+                }
 
                 Log::info('Last assignment: ' . $last_assignment);
 
@@ -52,7 +52,7 @@ trait HasAssignmentDelete
             ->requiresConfirmation()
             ->action(function (Models\Territory $record, array $data): void {
                 try{
-                    $last_assignment = $record->currentAssignment();
+                    $last_assignment = $record->currentAssignment;
 
                     // Skip if the last assignment is not null
                     if ($last_assignment === null || $last_assignment->ended_at !== null) {

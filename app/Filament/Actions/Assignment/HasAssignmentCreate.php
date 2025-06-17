@@ -20,7 +20,7 @@ trait HasAssignmentCreate
             ->label(__('filament-resources.territory_assignment.action_assign_territory'))
             ->color('primary')
             ->visible(function (Models\Territory $record): bool {
-                $assignment = $record->currentAssignment();
+                $assignment = $record->currentAssignment;
                 return $assignment === null || $assignment->ended_at !== null;
             })
             ->form([

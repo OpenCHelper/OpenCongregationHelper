@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms\Components\SpatieTagsInput;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Filament\Forms\Set;
 use Filament\Pages\SubNavigationPosition;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,8 +27,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Columns\SpatieTagsColumn;
+use Filament\Tables\Grouping\Group;
 use Spatie\Tags\Tag;
 use Illuminate\Contracts\Support\Htmlable;
+use Carbon\Carbon;
 
 class TerritoryResource extends Resource
 {
@@ -204,6 +207,13 @@ class TerritoryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->groups([
+                Group::make('territoryZone.name')
+                    ->label(ucfirst(__('filament-resources.territory_zone.model_label')))
+                    ->getTitleFromRecordUsing(fn (Territory $record): string => $record->territoryZone->name . " (" . $record->territoryZone->loadMissing("territories")->territories->count() . ")" ?? '')
+                    ->getDescriptionFromRecordUsing(fn (Territory $record): string => $record->territoryZone->description ?? '')
+                    ->collapsible(),
+            ])
             ->striped()
             ->recordUrl(fn (Model $record): string => TerritoryResource::getUrl('view', ['record' => $record]))
             ->columns([
@@ -219,13 +229,75 @@ class TerritoryResource extends Resource
                     ->label(__('filament-resources.territory.column_commercial'))
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('currentAssignment')
-                    ->state(function (Territory $record): ?string {
-                        return $record->currentAssignment()->assignee->full_name ?? null;
-                    })
+                Tables\Columns\TextColumn::make('currentAssignment.assignee.full_name')
                     ->label(__('filament-resources.territory.column_current_assignment'))
                     ->default('')
-                    ->sortable()
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query
+                            ->leftJoin('territory_assignments as current_assignments', function ($join) {
+                                $join->on('territories.id', '=', 'current_assignments.territory_id')
+                                     ->whereNull('current_assignments.ended_at');
+                            })
+                            ->leftJoin('users as current_assignees', 'current_assignments.assignee_id', '=', 'current_assignees.id')
+                            ->orderBy('current_assignees.first_name', $direction)
+                            ->orderBy('current_assignees.last_name', $direction)
+                            ->select('territories.*');
+                    })
+                    ->searchable(false),
+                Tables\Columns\TextColumn::make('assignmentDuration')
+                    ->state(function (Territory $record): ?string {
+                        $currentAssignment = $record->currentAssignment;
+                        
+                        // Se c'è un'assegnazione attiva
+                        if ($currentAssignment && $currentAssignment->ended_at === null) {
+                            $startDate = Carbon::parse($currentAssignment->started_at);
+                            $now = Carbon::now();
+                            $diffInDays = round($startDate->diffInDays($now));
+                            
+                            if ($diffInDays == 0) {
+                                return __('filament-resources.territory.assignment_duration_today');
+                            } else {
+                                return trans_choice('filament-resources.territory.assignment_duration_day', $diffInDays, ['count' => $diffInDays]);
+                            }
+                        }
+                        
+                        // Se non c'è assegnazione attiva, cerca l'ultima assegnazione terminata
+                        $lastAssignment = $record->assignments()
+                            ->whereNotNull('ended_at')
+                            ->orderBy('ended_at', 'desc')
+                            ->first();
+                            
+                        if ($lastAssignment) {
+                            $endDate = Carbon::parse($lastAssignment->ended_at);
+                            $now = Carbon::now();
+                            $diffInDays = round($endDate->diffInDays($now));
+                            
+                            if ($diffInDays == 0) {
+                                return __('filament-resources.territory.assignment_ended_today');
+                            } else {
+                                return trans_choice('filament-resources.territory.assignment_ended_day_ago', $diffInDays, ['count' => $diffInDays]);
+                            }
+                        }
+                        
+                        return null;
+                    })
+                    ->label(__('filament-resources.territory.column_assignment_duration'))
+                    ->placeholder(__('filament-resources.territory.assignment_duration_not_assigned'))
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query
+                            ->leftJoin('territory_assignments as duration_assignments', function ($join) {
+                                $join->on('territories.id', '=', 'duration_assignments.territory_id')
+                                     ->whereNull('duration_assignments.ended_at');
+                            })
+                            ->orderByRaw("
+                                CASE 
+                                    WHEN duration_assignments.started_at IS NOT NULL 
+                                    THEN DATEDIFF(NOW(), duration_assignments.started_at)
+                                    ELSE NULL
+                                END {$direction}
+                            ")
+                            ->select('territories.*');
+                    })
                     ->searchable(false),
                 SpatieTagsColumn::make('tags')
                     ->label(__('filament-resources.territory.column_tags'))
@@ -248,13 +320,17 @@ class TerritoryResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
-                Tables\Filters\TernaryFilter::make('is_commercial')
+                Tables\Filters\TernaryFilter::make('assignment_status')
                     ->nullable()
-                    ->boolean()
-                    ->label(__('filament-resources.territory.filter_territory_type'))
-                    ->placeholder(__('filament-resources.territory.filter_territory_type_any'))
-                    ->trueLabel(__('filament-resources.territory.filter_territory_type_commercial'))
-                    ->falseLabel(__('filament-resources.territory.filter_territory_type_residential')),
+                    ->label(__('filament-resources.territory.filter_assignment_status'))
+                    ->placeholder(__('filament-resources.territory.status_all'))
+                    ->trueLabel(__('filament-resources.territory.status_assigned'))
+                    ->falseLabel(__('filament-resources.territory.status_unassigned'))
+                    ->queries(
+                        true: fn (Builder $query) => $query->assigned(),
+                        false: fn (Builder $query) => $query->unassigned(),
+                        blank: fn (Builder $query) => $query,
+                    ),
                 Tables\Filters\SelectFilter::make('tags')
                     ->label(__('filament-resources.territory.filter_tags'))
                     ->multiple()
@@ -291,7 +367,7 @@ class TerritoryResource extends Resource
                         ->action(function (Collection $records, array $data): void {
                             foreach ($records as $record) {
                                 // Skip if the last assignment is not null
-                                if ($record->currentAssignment() !== null && $record->currentAssignment()->ended_at === null) {
+                                if ($record->currentAssignment !== null && $record->currentAssignment->ended_at === null) {
                                     Log::warning("Skipping record {$record->id} because it has an active assignment");
                                     continue;
                                 }
@@ -315,12 +391,12 @@ class TerritoryResource extends Resource
                         ->action(function (Collection $records, array $data): void {
                             foreach ($records as $record) {
                                 // Skip if the last assignment is not null
-                                if ($record->currentAssignment() === null || $record->currentAssignment()->ended_at !== null) {
+                                if ($record->currentAssignment === null || $record->currentAssignment->ended_at !== null) {
                                     Log::warning("Skipping record {$record->id} because it does not has an active assignment");
                                     continue;
                                 }
 
-                                $currentAssignment = $record->currentAssignment();
+                                $currentAssignment = $record->currentAssignment;
                                 // Carica la relazione territory prima dell'update per evitare lazy loading errors
                                 $currentAssignment->load('territory');
                                 $currentAssignment->update([
@@ -364,6 +440,7 @@ class TerritoryResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with(['currentAssignment.assignee'])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

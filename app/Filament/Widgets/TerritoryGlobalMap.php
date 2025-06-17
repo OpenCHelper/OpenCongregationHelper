@@ -176,7 +176,7 @@ class TerritoryGlobalMap extends MapWidget
     
     public function getPolygones(): array
     {
-        $territories = Territory::with('territoryZone')
+        $territories = Territory::with(['territoryZone', 'currentAssignment'])
             ->where('geojson', '!=', null)
             ->where(function ($query) {
                 // Log::info("Shown territory types: " . $this->getShownTerritoryTypes());
@@ -230,7 +230,7 @@ class TerritoryGlobalMap extends MapWidget
                         break;
                     
                     case 'status':
-                        $currentAssignment = $territory->currentAssignment();
+                        $currentAssignment = $territory->currentAssignment;
 
                         if ($currentAssignment === null || $currentAssignment->ended_at !== null) {
                             $polygonOptions['color'] = 'red';

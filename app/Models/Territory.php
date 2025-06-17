@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\HasParentSoftDeletable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -75,17 +76,50 @@ class Territory extends Model
         return $this->hasMany(TerritoryAssignment::class);
     }
 
-    public function currentAssignment() {
-        $assignments = $this->assignments()->getResults()->reject(function($assignment) {
-            return !is_null($assignment->ended_at);
-        });
-
-        if ($assignments->count() > 1) {
-            throw new \Exception('Multiple current assignments found');
-        }
-
-        return $assignments->first();
+    /**
+     * Get the current active assignment for this territory.
+     */
+    public function currentAssignment(): HasOne {
+        return $this->hasOne(TerritoryAssignment::class)
+            ->whereNull('ended_at')
+            ->latest('started_at');
     }
+
+    /**
+     * Get the current assignee directly through the assignment.
+     */
+    public function currentAssignee(): HasOneThrough {
+        return $this->hasOneThrough(
+            \App\Models\User::class,
+            TerritoryAssignment::class,
+            'territory_id',    // Foreign key on territory_assignments table
+            'id',              // Foreign key on users table
+            'id',              // Local key on territories table
+            'assignee_id'      // Local key on territory_assignments table
+        )->whereNull('territory_assignments.ended_at')
+         ->latest('territory_assignments.started_at');
+    }
+
+    /**
+     * Scope a query to only include assigned territories.
+     */
+    public function scopeAssigned(Builder $query): void
+    {
+        $query->whereHas('assignments', function ($query) {
+            $query->whereNull('ended_at');
+        });
+    }
+    
+    /**
+     * Scope a query to only include unassigned territories.
+     */
+    public function scopeUnassigned(Builder $query): void
+    {
+        $query->whereDoesntHave('assignments', function ($query) {
+            $query->whereNull('ended_at');
+        });
+    }
+    
 
     public function geojson(): Attribute
     {
