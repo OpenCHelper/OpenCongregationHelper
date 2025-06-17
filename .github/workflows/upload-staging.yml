@@ -65,7 +65,7 @@ jobs:
       - name: Create git detail files
         run: |
           echo "${{ github.sha }}" > .git-commit-hash
-          echo "ref: ${{ github.ref_name }}" > .git-branch-name
+          echo "ref: ${{ github.ref }}" > .git-branch-name
 
       - name: FTP Deploy (application)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
