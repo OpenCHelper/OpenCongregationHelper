@@ -22,6 +22,8 @@ use App\Policies\ActivityPolicy;
 use App\Policies\TagPolicy;
 use Spatie\Activitylog\Models\Activity;
 use App\Models\Tag;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 use Spatie\Translatable\Facades\Translatable;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,7 +44,11 @@ class AppServiceProvider extends ServiceProvider
         // Tell Eloquent to be strict about the data types it expects 
         // locally.
         // https://laraveldaily.com/lesson/laravel-eloquent-expert/model-fillable-guarded/
-        Model::shouldBeStrict(! app()->isProduction()); 
+        Model::shouldBeStrict(! app()->isProduction());
+
+        FilamentAsset::register([
+            Js::make('filament-sidebar-fix', __DIR__ . '/../../resources/js/filament-sidebar-fix.js')
+        ]);
         
         // Add a custom mail transport that uses the native mail() function
         Mail::extend('nativemailfx', function (array $config = []) {
