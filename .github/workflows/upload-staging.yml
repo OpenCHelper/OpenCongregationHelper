@@ -62,6 +62,11 @@ jobs:
           php artisan filament:asset
           php artisan vendor:publish --tag=filament-assets --force
           
+      - name: Create git detail files
+        run: |
+          echo "${{ github.sha }}" > .git-commit-hash
+          echo "ref: ${{ github.ref_name }}" > .git-branch-name
+
       - name: FTP Deploy (application)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -77,6 +82,8 @@ jobs:
             **/.git*
             **/.git*/**
             .vscode/
+            !.git-commit-hash
+            !.git-branch-name
 
             *.env
             .env*

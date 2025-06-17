@@ -15,6 +15,10 @@ return [
 
     'name' => env('APP_NAME', 'Registro Territori'),
     'version' => env('APP_VERSION', json_decode(file_get_contents(base_path('./composer.json')))->version),
+    'version_info' => [
+        'branch_file' => env('APP_VERSION_BRANCH_FILE', '.git/HEAD'),
+        'commit_file' => env('APP_VERSION_COMMIT_FILE'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

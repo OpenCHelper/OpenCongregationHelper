@@ -10,8 +10,20 @@
     margin-bottom: 10px !important;
 }
 
-/* Override for `Webbingbrasil\FilamentMaps\Resources\MapResource\Pages\CreateMap`
-*/
+/* Override for `Webbingbrasil\FilamentMaps\Resources\MapResource\Pages\CreateMap` */
 div[x-ref="map"] {
     z-index: 0 !important;
+}
+
+/*
+    ------------ Override for `FilamentVersions` ------------ 
+
+    This is necessary to ensure that the FilamentVersions wraps its contents correctly
+    in case of long version names (for example `{version} ({branch}#{commit})`).
+*/
+div.filament-versions-nav-widget > ul > li {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 100%;
 }
