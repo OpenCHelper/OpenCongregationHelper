@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
-use App\Models\TerritoryAssignmentType;
+use App\Models\Campaign;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,16 +20,16 @@ class FakeTerritoryAssignmentSeeder extends Seeder
         $users = User::all();
         $territories = Territory::all();
 
-        $territoryAssignmentTypes = TerritoryAssignmentType::factory(3)->create();
+        $campaigns = Campaign::factory(3)->create();
 
         TerritoryAssignment::factory(3)
             // ->for($territories->random())
             // ->for($users->random(), 'assignee')
-            // ->has($territoryAssignmentTypes->random())
+            // ->has($campaigns->random())
             ->state(fn () => [
                 'assignee_id' => $users->random()->id,
                 'territory_id' => $territories->random()->id,
-                'territory_assignment_type_id' => $territoryAssignmentTypes->random()->id,
+                'campaign_id' => $campaigns->random()->id,
                 // 'assigned_to' => $users->random()->id,
                 'created_by' => $users->random()->id,
             ])->create();

@@ -50,7 +50,7 @@ class TerritoryAssignment extends Model
         'notes',
         'assignee_id',
         'territory_id',
-        'territory_assignment_type_id',
+        'campaign_id',
         'created_by',
     ];
 
@@ -76,10 +76,10 @@ class TerritoryAssignment extends Model
     }
 
     // /**
-    //  * Get the CampaignType associated with the territory.
+    //  * Get the Campaign associated with the territory.
     //  */
-    public function assignmentType(): BelongsTo {
-        return $this->belongsTo(TerritoryAssignmentType::class, 'territory_assignment_type_id');
+    public function campaign(): BelongsTo {
+        return $this->belongsTo(Campaign::class);
     }
 
     public function creator(): HasOne {

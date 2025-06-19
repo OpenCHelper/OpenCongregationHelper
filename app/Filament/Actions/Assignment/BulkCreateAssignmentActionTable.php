@@ -28,7 +28,7 @@ class BulkCreateAssignmentActionTable extends Action
                     ->required(),
                 Forms\Components\Select::make('assignment_type')
                     ->label(__('filament-resources.territory_assignment.field_assignment_type'))
-                    ->options(Models\TerritoryAssignmentType::query()->pluck('name', 'id'))
+                    ->options(Models\Campaign::query()->pluck('name', 'id'))
                     ->required(),
             ])
             ->action(function (Collection $records, array $data): void {
@@ -43,7 +43,7 @@ class BulkCreateAssignmentActionTable extends Action
                         $record->assignments()->create([
                             'assignee_id' => $data['assignee_id'],
                             'territory_id' => $record->id,
-                            'territory_assignment_type_id' => $data['assignment_type'],
+                            'campaign_id' => $data['assignment_type'],
                             'created_by' => Auth::id(),
                         ]);
                         $record->save();

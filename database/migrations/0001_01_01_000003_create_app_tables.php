@@ -3,7 +3,7 @@
 use App\Models\TerritoryZone;
 use App\Models\User;
 use App\Models\Territory;
-use App\Models\TerritoryAssignmentType;
+use App\Models\Campaign;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -80,7 +80,7 @@ return new class extends Migration
             // Delete the record if either the user or territory get deleted
             $table->foreignIdFor(User::class, 'assignee_id')->comment('User the territory has been assigned to')->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Territory::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(TerritoryAssignmentType::class)->comment('Assignment Type')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('territory_assignment_type_id')->comment('Territory assignment type')->nullable()->constrained('territory_assignment_types')->nullOnDelete();
 
             $table->foreignIdFor(User::class, 'created_by')->comment('User who created the record')->nullable()->constrained()->nullOnDelete();
 

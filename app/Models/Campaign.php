@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Observers\TerritoryAssignmentTypeObserver;
+use App\Observers\CampaignObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,10 +13,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
-#[ObservedBy(TerritoryAssignmentTypeObserver::class)]
-class TerritoryAssignmentType extends Model
+#[ObservedBy(CampaignObserver::class)]
+class Campaign extends Model
 {
-    /** @use HasFactory<\Database\Factories\TerritoryAssignmentTypeFactory> */
+    /** @use HasFactory<\Database\Factories\CampaignFactory> */
     use HasFactory;
     use SoftDeletes;
     use LogsActivity;

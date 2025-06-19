@@ -6,7 +6,7 @@ use App\Enums\TagType;
 use App\Filament\Actions\Assignment as AssignmentActions;
 use App\Filament\Resources\TerritoryResource\Pages;
 use App\Models\Territory;
-use App\Models\TerritoryAssignmentType;
+use App\Models\Campaign;
 use App\Models\User;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Filament\Forms;
@@ -361,7 +361,7 @@ class TerritoryResource extends Resource
                                 ->required(),
                             Forms\Components\Select::make('assignment_type')
                                 ->label(__('filament-resources.territory_assignment.field_assignment_type'))
-                                ->options(TerritoryAssignmentType::query()->pluck('name', 'id'))
+                                ->options(Campaign::query()->pluck('name', 'id'))
                                 ->required(),
                         ])
                         ->action(function (Collection $records, array $data): void {
@@ -375,7 +375,7 @@ class TerritoryResource extends Resource
                                 $record->assignments()->create([
                                     'assignee_id' => $data['assignee_id'],
                                     'territory_id' => $record->id,
-                                    'territory_assignment_type_id' => $data['assignment_type'],
+                                    'campaign_id' => $data['assignment_type'],
                                     'created_by' => Auth::id(),
                                 ]);
                                 $record->save();

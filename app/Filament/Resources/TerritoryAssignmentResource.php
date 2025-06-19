@@ -126,7 +126,7 @@ class TerritoryAssignmentResource extends Resource
                         Infolists\Components\TextEntry::make('assignee.full_name')
                             ->icon('heroicon-o-user')
                             ->label(__('filament-resources.territory_assignment.info_assignee')),
-                        Infolists\Components\TextEntry::make('assignmentType.name')
+                        Infolists\Components\TextEntry::make('campaign.name')
                             ->icon('heroicon-o-envelope-open')
                             ->label(__('filament-resources.territory_assignment.info_assignment_type')),
                         Infolists\Components\TextEntry::make('started_at')
@@ -172,12 +172,12 @@ class TerritoryAssignmentResource extends Resource
                 Forms\Components\Section::make(__('filament-resources.territory_assignment.section_main_info'))
                     ->columns(2)
                     ->schema([
-                        Forms\Components\Select::make('territory_assignment_type_id')
+                        Forms\Components\Select::make('campaign_id')
                             ->label(__('filament-resources.territory_assignment.field_assignment_type'))
                             ->required()
                             ->searchable()
                             ->disabledOn('edit', 'view')
-                            ->relationship('assignmentType', 'name')
+                            ->relationship('campaign', 'name')
                             ->preload(),
                         Forms\Components\DateTimePicker::make('started_at')
                             ->label(__('filament-resources.territory_assignment.field_started_at'))
@@ -233,7 +233,7 @@ class TerritoryAssignmentResource extends Resource
                     ->dateTime("d/m/Y H:i")
                     ->placeholder(__('filament-resources.territory_assignment.column_ended_at_placeholder'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('assignmentType.name')
+                Tables\Columns\TextColumn::make('campaign.name')
                     ->label(__('filament-resources.territory_assignment.column_assignment_type'))
                     ->searchable()
                     ->sortable(),

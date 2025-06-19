@@ -26,14 +26,14 @@ trait HasAssignmentDelete
             ->mountUsing(function (Forms\ComponentContainer $form, Models\Territory $record) {
                 $last_assignment = $record->currentAssignmentRelation;
                 if ($last_assignment) {
-                    $last_assignment->load('assignee', 'assignmentType');
+                    $last_assignment->load('assignee', 'campaign');
                 }
 
                 Log::info('Last assignment: ' . $last_assignment);
 
                 return $form->fill([
                     'assignee_id' => $last_assignment->assignee->id,
-                    'assignment_type' => $last_assignment->assignmentType->id,
+                    'assignment_type' => $last_assignment->campaign->id,
                 ]);
             })
             ->form([
@@ -45,7 +45,7 @@ trait HasAssignmentDelete
                     ->required(),
                 Forms\Components\Select::make('assignment_type')
                     ->label(__('filament-resources.territory_assignment.field_assignment_type'))
-                    ->options(Models\TerritoryAssignmentType::query()->pluck('name', 'id'))
+                    ->options(Models\Campaign::query()->pluck('name', 'id'))
                     ->disabled()
                     ->required(),
             ])

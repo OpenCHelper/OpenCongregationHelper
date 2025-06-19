@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TerritoryAssignmentTypeResource\Pages;
-use App\Filament\Resources\TerritoryAssignmentTypeResource\RelationManagers;
-use App\Models\TerritoryAssignmentType;
+use App\Filament\Resources\CampaignResource\Pages;
+use App\Filament\Resources\CampaignResource\RelationManagers;
+use App\Models\Campaign;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -18,9 +18,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 
-class TerritoryAssignmentTypeResource extends Resource
+class CampaignResource extends Resource
 {
-    protected static ?string $model = TerritoryAssignmentType::class;
+    protected static ?string $model = Campaign::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-envelope-open';
     protected static ?int $navigationSort = 3;
@@ -111,7 +111,7 @@ class TerritoryAssignmentTypeResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('campaign_status')
                     ->label(__('filament-resources.campaign.column_campaign_status'))
-                    ->state(function (TerritoryAssignmentType $record): string {
+                    ->state(function (Campaign $record): string {
                         $valid_until = new Carbon($record->valid_until);
                         Log::info("Carbon: '" . $valid_until . "' - Difference: '" . $valid_until->diffInDays(now()) . "'");
 
@@ -200,7 +200,7 @@ class TerritoryAssignmentTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageTerritoryAssignmentTypes::route('/'),
+            'index' => Pages\ManageCampaigns::route('/'),
         ];
     }
 
