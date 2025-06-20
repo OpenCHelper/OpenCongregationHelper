@@ -184,10 +184,17 @@ class AppPanelProvider extends PanelProvider
 
     public function shouldRegisterMenuItem(): bool
     {
-        $hasVerifiedEmail = Auth::user()?->hasVerifiedEmail();
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+        
+        $hasVerifiedEmail = $user->email_verified_at !== null;
 
+        // Allow the profile page to be accessible even to users without a verified email
+        // when tenancy is NOT enabled.
         return Filament::hasTenancy()
             ? $hasVerifiedEmail && Filament::getTenant()
-            : $hasVerifiedEmail;
+            : true;
     }
 }
