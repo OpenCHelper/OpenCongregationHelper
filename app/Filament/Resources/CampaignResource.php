@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\CampaignStatus;
 use App\Filament\Resources\CampaignResource\Pages;
 use App\Filament\Resources\CampaignResource\RelationManagers;
 use App\Models\Campaign;
-use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,7 +15,6 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 
 class CampaignResource extends Resource
@@ -85,19 +84,25 @@ class CampaignResource extends Resource
                         Forms\Components\DateTimePicker::make('valid_from')
                             ->label(__('filament-resources.campaign.field_valid_from'))
                             ->columnSpan(1)
-                            ->format('Y-m-d H:i:s'),
+                            ->format('Y-m-d H:i:s')
+                            ->requiredWith('valid_until'),
                         Forms\Components\DateTimePicker::make('valid_until')
                             ->label(__('filament-resources.campaign.field_valid_until'))
                             ->requiredWith('valid_from')
                             ->columnSpan(1)
-                            ->format('Y-m-d H:i:s'),
+                            ->format('Y-m-d H:i:s')
+                            ->after('valid_from'),
                     ]),
                 Forms\Components\Select::make('created_by')
                     ->label(__('filament-resources.campaign.field_created_by'))
                     ->disabled()
-                    ->hiddenOn(['create', 'edit'])
+                    ->hiddenOn(['create'])
                     ->default(Auth::id())
-                    ->relationship(name: 'creator', titleAttribute: 'full_name')
+                    ->relationship(
+                        name: 'creator',
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('first_name')->orderBy('last_name'),
+                    )
+                    ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->first_name} {$record->last_name}")
                     ->preload(),
             ]);
     }
@@ -111,26 +116,10 @@ class CampaignResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('campaign_status')
                     ->label(__('filament-resources.campaign.column_campaign_status'))
-                    ->state(function (Campaign $record): string {
-                        $valid_until = new Carbon($record->valid_until);
-                        Log::info("Carbon: '" . $valid_until . "' - Difference: '" . $valid_until->diffInDays(now()) . "'");
-
-                        $status = match (true) {
-                            $valid_until->diffInDays(now()) >= 0 => __('filament-resources.campaign.status_terminated'),
-                            $valid_until->diffInDays(now()) >= -3 => __('filament-resources.campaign.status_almost_expired'),
-                            $valid_until->diffInDays(now()) >= -7 => __('filament-resources.campaign.status_is_expiring'),
-                            default => __('filament-resources.campaign.status_active'),
-                        };
-                        return $status;
-                    })
+                    ->state(fn (Campaign $record): string => CampaignStatus::fromCampaign($record)->getLabel())
                     ->badge()
                     ->sortable(['valid_until'])
-                    ->color(fn (string $state): string => match ($state) {
-                        __('filament-resources.campaign.status_active') => 'success',
-                        __('filament-resources.campaign.status_is_expiring') => 'warning',
-                        __('filament-resources.campaign.status_almost_expired') => 'danger',
-                        __('filament-resources.campaign.status_terminated') => 'gray',
-                    }),
+                    ->color(fn (Campaign $record): string => CampaignStatus::fromCampaign($record)->getColor()),
                 Tables\Columns\TextColumn::make('short_name')
                     ->label(__('filament-resources.campaign.column_short_name'))
                     ->sortable(),

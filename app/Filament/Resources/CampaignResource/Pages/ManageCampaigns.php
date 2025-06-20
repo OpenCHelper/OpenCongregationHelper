@@ -5,6 +5,7 @@ namespace App\Filament\Resources\CampaignResource\Pages;
 use App\Filament\Resources\CampaignResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
+use Illuminate\Support\Facades\Auth;
 
 class ManageCampaigns extends ManageRecords
 {
@@ -13,7 +14,13 @@ class ManageCampaigns extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->mutateFormDataUsing(function (array $data): array {
+                    if (!isset($data['created_by']) || $data['created_by'] === null) {
+                        $data['created_by'] = Auth::id();
+                    }
+                    return $data;
+                }),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CampaignStatus;
 use App\Observers\CampaignObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -43,8 +44,37 @@ class Campaign extends Model
         'valid_until',
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'valid_from' => 'datetime',
+            'valid_until' => 'datetime',
+        ];
+    }
+
     public function creator(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'created_by');
+    }
+
+    /**
+     * Check if the campaign is terminated.
+     */
+    public function isTerminated(): bool
+    {
+        return CampaignStatus::fromCampaign($this) === CampaignStatus::TERMINATED;
+    }
+
+    /**
+     * Get the campaign status.
+     */
+    public function getStatus(): CampaignStatus
+    {
+        return CampaignStatus::fromCampaign($this);
     }
 }

@@ -128,7 +128,8 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.info_assignee')),
                         Infolists\Components\TextEntry::make('campaign.name')
                             ->icon('heroicon-o-envelope-open')
-                            ->label(__('filament-resources.territory_assignment.info_assignment_type')),
+                            ->label(__('filament-resources.territory_assignment.info_campaign'))
+                            ->placeholder(__('filament-resources.territory_assignment.info_campaign_placeholder')),
                         Infolists\Components\TextEntry::make('started_at')
                             ->icon('heroicon-o-calendar')
                             ->sinceTooltip()
@@ -173,11 +174,17 @@ class TerritoryAssignmentResource extends Resource
                     ->columns(2)
                     ->schema([
                         Forms\Components\Select::make('campaign_id')
-                            ->label(__('filament-resources.territory_assignment.field_assignment_type'))
-                            ->required()
+                            ->label(__('filament-resources.territory_assignment.field_campaign'))
                             ->searchable()
                             ->disabledOn('edit', 'view')
-                            ->relationship('campaign', 'name')
+                            ->relationship('campaign', 'name', function ($query) {
+                                return $query->where(function ($q) {
+                                    $q->whereNull('valid_until')
+                                      ->orWhere('valid_until', '>', now());
+                                });
+                            })
+                            ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign'))
+                            ->rule(new \App\Rules\NotTerminatedCampaign())
                             ->preload(),
                         Forms\Components\DateTimePicker::make('started_at')
                             ->label(__('filament-resources.territory_assignment.field_started_at'))
@@ -234,7 +241,8 @@ class TerritoryAssignmentResource extends Resource
                     ->placeholder(__('filament-resources.territory_assignment.column_ended_at_placeholder'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('campaign.name')
-                    ->label(__('filament-resources.territory_assignment.column_assignment_type'))
+                    ->label(__('filament-resources.territory_assignment.column_campaign'))
+                    ->placeholder(__('filament-resources.territory_assignment.column_campaign_placeholder'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('creator.full_name')

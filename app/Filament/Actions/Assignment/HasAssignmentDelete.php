@@ -33,7 +33,7 @@ trait HasAssignmentDelete
 
                 return $form->fill([
                     'assignee_id' => $last_assignment->assignee->id,
-                    'assignment_type' => $last_assignment->campaign->id,
+                    'campaign_id' => $last_assignment->campaign->id,
                 ]);
             })
             ->form([
@@ -43,11 +43,10 @@ trait HasAssignmentDelete
                     ->searchable()
                     ->disabled()
                     ->required(),
-                Forms\Components\Select::make('assignment_type')
-                    ->label(__('filament-resources.territory_assignment.field_assignment_type'))
+                Forms\Components\Select::make('campaign_id')
+                    ->label(__('filament-resources.territory_assignment.field_campaign'))
                     ->options(Models\Campaign::query()->pluck('name', 'id'))
-                    ->disabled()
-                    ->required(),
+                    ->disabled(),
             ])
             ->requiresConfirmation()
             ->action(function (Models\Territory $record, array $data): void {

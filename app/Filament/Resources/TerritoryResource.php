@@ -11,6 +11,7 @@ use App\Models\User;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -359,12 +360,27 @@ class TerritoryResource extends Resource
                                 ->options(User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
                                 ->searchable()
                                 ->required(),
-                            Forms\Components\Select::make('assignment_type')
-                                ->label(__('filament-resources.territory_assignment.field_assignment_type'))
-                                ->options(Campaign::query()->pluck('name', 'id'))
-                                ->required(),
+                            Forms\Components\Select::make('campaign_id')
+                                ->label(__('filament-resources.territory_assignment.field_campaign'))
+                                ->options(Campaign::query()
+                                    ->where(function ($query) {
+                                        $query->whereNull('valid_until')
+                                              ->orWhere('valid_until', '>', now());
+                                    })
+                                    ->pluck('name', 'id'))
+                                ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
                         ])
                         ->action(function (Collection $records, array $data): void {
+                            // Check if campaign is terminated
+                            if ($data['campaign_id'] && Campaign::find($data['campaign_id'])?->isTerminated()) {
+                                Notification::make()
+                                    ->error()
+                                    ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
+                                    ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
+                                    ->send();
+                                return;
+                            }
+
                             foreach ($records as $record) {
                                 // Skip if the last assignment is not null
                                 if ($record->currentAssignment !== null && $record->currentAssignment->ended_at === null) {
@@ -375,7 +391,7 @@ class TerritoryResource extends Resource
                                 $record->assignments()->create([
                                     'assignee_id' => $data['assignee_id'],
                                     'territory_id' => $record->id,
-                                    'campaign_id' => $data['assignment_type'],
+                                    'campaign_id' => $data['campaign_id'] ?? null,
                                     'created_by' => Auth::id(),
                                 ]);
                                 $record->save();

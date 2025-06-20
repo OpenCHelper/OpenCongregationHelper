@@ -192,4 +192,21 @@ return [
 
     'attributes' => [],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Campaign Validation Messages
+    |--------------------------------------------------------------------------
+    |
+    | The following language lines are used for campaign-specific validation
+    | messages.
+    |
+    */
+
+    'campaign' => [
+        'valid_from_required_with' => 'Il campo data inizio è obbligatorio quando è specificata la data fine.',
+        'valid_until_required_with' => 'Il campo data fine è obbligatorio quando è specificata la data inizio.',
+        'valid_until_after' => 'La data fine deve essere successiva alla data inizio.',
+        'not_terminated' => 'Non è possibile assegnare territori a una campagna terminata.',
+    ],
+
 ];

@@ -5,10 +5,21 @@ namespace App\Observers;
 use App\Models\Campaign;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Auth;
 use App\Notifications\CampaignCreatedNotification;
 
 class CampaignObserver
 {
+    /**
+     * Handle the Campaign "creating" event.
+     */
+    public function creating(Campaign $campaign): void
+    {
+        if (!$campaign->created_by && Auth::check()) {
+            $campaign->created_by = Auth::id();
+        }
+    }
+
     /**
      * Handle the Campaign "created" event.
      */
