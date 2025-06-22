@@ -100,9 +100,6 @@ class TerritoryAssignmentResource extends Resource
                             ->deleteLayer(false)
                             ->rotateMode(false)
                         ,
-                        Infolists\Components\TextEntry::make('territory.geojson')
-                            ->label("GeoJSON")
-                            ->placeholder('NULL'),
                         Infolists\Components\ImageEntry::make('territory.image_path')
                             ->label(__('filament-resources.territory.field_image'))
                             ->visible(fn (Model $record) => $record->territory->image_path != null)
