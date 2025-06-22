@@ -61,6 +61,7 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.info_location'))
                             ->extraStyles(['style' => 'min-height: 50vh', 'border-radius: 8px'])
                             ->columnSpanFull()
+                            ->visible(fn (Model $record) => $record->territory->geojson != null)
                             ->defaultLocation(latitude: 41.902782, longitude: 12.496366)
                             // ->zoom(10)
                             // State Management
