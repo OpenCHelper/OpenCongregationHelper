@@ -113,7 +113,6 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.info_notes'))
                             ->icon('heroicon-o-document-text')
                             ->columnSpanFull()
-                            ->visible(fn (Model $record) => $record->territory->notes != null)
                             ->placeholder(__('filament-resources.territory_assignment.info_notes_placeholder')),
                     ]),
                 Infolists\Components\Section::make(__('filament-resources.territory_assignment.section_assignment_info'))
