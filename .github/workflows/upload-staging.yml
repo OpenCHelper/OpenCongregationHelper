@@ -168,7 +168,6 @@ jobs:
             optimize:clear
             filament:clear-cached-components
             filament:optimize-clear
-            filament:asset
 
             # Now cache individually the configuration, routes, and views (instead of `optimize`, which does all but does not show anything)
             config:cache
