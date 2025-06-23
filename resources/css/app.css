@@ -10,9 +10,18 @@
     margin-bottom: 10px !important;
 }
 
-/* Override for `Webbingbrasil\FilamentMaps\Resources\MapResource\Pages\CreateMap` */
+/* 
+   ------------ Override for `Dotswan\MapPicker` ------------
+
+   Fix some styling issues with the components.
+*/
 div[x-ref="map"] {
     z-index: 0 !important;
+}
+
+/* Hide the Geoman controls from the infolist entry */
+.fi-in-entry-wrp div[x-ref="map"] > .leaflet-control-container > div > .leaflet-pm-toolbar.leaflet-pm-draw.leaflet-bar.leaflet-control {
+    display: none !important;
 }
 
 /*
