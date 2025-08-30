@@ -3,11 +3,9 @@
 ![Laravel](https://img.shields.io/badge/laravel-%23FF2D20.svg?style=for-the-badge&logo=laravel&logoColor=white)
 [<img alt="Deployed with FTP Deploy Action" src="https://img.shields.io/badge/Deployed With-FTP DEPLOY ACTION-%3CCOLOR%3E?style=for-the-badge&color=blue">](https://github.com/SamKirkland/FTP-Deploy-Action)
 
-**Gestionale dei territori** per la congregazione di **Ciampino**.
+## Support
 
-## Supporto
-
-Per ottenere supporto è preferibile [**aprire un Issue**](https://github.com/LukeSavefrogs/registro-territori/issues) nel tab corrispondente o in alternativa [inviare una mail](mailto:lucasalvarani99@gmail.com?subject=TerritoriCiampino).
+To receive support and/or propose new features please open an issue.
 
 ## Changelog
 
