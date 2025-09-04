@@ -190,7 +190,14 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'contactForm.type' => 'tipo contatto',
+        'contactForm.name' => 'nome',
+        'contactForm.phone_number' => 'numero di telefono',
+        'contactForm.address' => 'indirizzo',
+        'contactForm.notes' => 'note',
+        'contactForm.is_primary' => 'contatto principale',
+    ],
 
     /*
     |--------------------------------------------------------------------------

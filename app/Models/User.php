@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ContactType;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,7 +43,7 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     {
         return LogOptions::defaults()
             ->logOnlyDirty()
-            ->logOnly(['first_name', 'last_name', 'email', ]);
+            ->logOnly(['first_name', 'last_name', 'email']);
     }
 
     /**
@@ -150,6 +151,21 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     public function assignments(): HasMany
     {
         return $this->hasMany(TerritoryAssignment::class, 'assignee_id');
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class);
+    }
+
+    public function primaryContact(): HasMany
+    {
+        return $this->hasMany(Contact::class)->where('is_primary', true);
+    }
+
+    public function emergencyContacts(): HasMany
+    {
+        return $this->hasMany(Contact::class)->where('type', ContactType::EMERGENCY);
     }
 
     /**

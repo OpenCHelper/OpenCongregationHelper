@@ -155,7 +155,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            \App\Filament\Resources\UserResource\RelationManagers\ContactsRelationManager::class,
         ];
     }
 

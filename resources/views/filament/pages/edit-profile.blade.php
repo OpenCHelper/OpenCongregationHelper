@@ -3,6 +3,12 @@
         @livewire(Laravel\Jetstream\Http\Livewire\UpdateProfileInformationForm::class)
 
         <x-section-border/>
+
+        <div class="mt-10 sm:mt-0">
+            @livewire('profile-contacts')
+        </div>
+
+        <x-section-border/>
     @endif
 
     @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
