@@ -21,6 +21,14 @@ return [
         'saved' => 'Guardado.',
         'save' => 'Guardar',
     ],
+    'root_user_protection' => [
+        'generic_field_disabled' => 'Este campo no puede ser editado para el usuario root en entornos que no son de producción.',
+        'password_change_not_allowed' => 'Los cambios de contraseña no están permitidos para el usuario root en entornos que no son de producción.',
+        'account_deletion_not_allowed' => 'El usuario root no puede ser eliminado bajo ninguna circunstancia.',
+        'edit_action_disabled' => 'La edición no está permitida para el usuario root en entornos que no son de producción.',
+        'bulk_delete_partial_success' => ':deleted usuario(s) eliminado(s) exitosamente. El usuario root fue excluido y no pudo ser eliminado.',
+        'bulk_delete_only_root_selected' => 'No se pueden eliminar los usuario(s) seleccionado(s). El usuario root no puede ser eliminado bajo ninguna circunstancia.',
+    ],
     'update_password' => [
         'title' => 'Actualizar Contraseña',
         'description' => 'Asegúrate de que tu cuenta use una contraseña larga y aleatoria para mantenerte seguro.',

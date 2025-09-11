@@ -17,16 +17,37 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input): void
     {
-        Validator::make($input, [
+        // If this is a protected root user, filter out restricted fields
+        if ($user->isRootUserProtected()) {
+            unset($input['email']);
+        }
+
+        $validationRules = [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'photo' => ['nullable', 'mimes:jpg,jpeg,png', 'max:1024'],
             'locale' => ['nullable', 'string', Rule::in(array_keys(config('app.available_locales')))],
-        ])->validateWithBag('updateProfileInformation');
+        ];
+
+        // Only validate email for non-protected root users
+        if (!$user->isRootUserProtected()) {
+            $validationRules['email'] = ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)];
+        }
+
+        Validator::make($input, $validationRules)->validateWithBag('updateProfileInformation');
 
         if (isset($input['photo'])) {
             $user->updateProfilePhoto($input['photo']);
+        }
+
+        // For protected root users, only update allowed fields
+        if ($user->isRootUserProtected()) {
+            $user->forceFill([
+                'first_name' => $input['first_name'],
+                'last_name' => $input['last_name'],
+                'locale' => $input['locale'] ?? $user->locale,
+            ])->save();
+            return;
         }
 
         if ($input['email'] !== $user->email &&

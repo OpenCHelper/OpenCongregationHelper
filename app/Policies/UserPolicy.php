@@ -58,10 +58,16 @@ class UserPolicy
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\User  $model
      * @return bool
      */
-    public function delete(User $user): bool
+    public function delete(User $user, User $model): bool
     {
+        // Root user can never be deleted
+        if ($model->isRootUser()) {
+            return false;
+        }
+        
         return $user->can('delete_user');
     }
 
@@ -80,10 +86,16 @@ class UserPolicy
      * Determine whether the user can permanently delete.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\User  $model
      * @return bool
      */
-    public function forceDelete(User $user): bool
+    public function forceDelete(User $user, User $model): bool
     {
+        // Root user can never be deleted
+        if ($model->isRootUser()) {
+            return false;
+        }
+        
         return $user->can('force_delete_user');
     }
 

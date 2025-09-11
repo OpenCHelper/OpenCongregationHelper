@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\FontFamily;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -57,29 +58,52 @@ class UserResource extends Resource
                             ->label(__('filament-resources.user.field_email'))
                             ->email()
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->disabled(fn (?User $record) => $record?->isRootUserProtected())
+                            ->helperText(fn (?User $record) => $record?->isRootUserProtected() 
+                                ? __('profile.root_user_protection.generic_field_disabled')
+                                : null
+                            ),
                         ]),
                 Forms\Components\Section::make(__('filament-resources.user.section_login_info'))
                     ->schema([
                         Forms\Components\Checkbox::make('can_login')
                             ->live()
                             ->label(__('filament-resources.user.field_can_login'))
-                            ->helperText(__('filament-resources.user.field_can_login_helper')),
+                            ->helperText(fn (?User $record) => $record?->isRootUserProtected() 
+                                ? __('profile.root_user_protection.generic_field_disabled')
+                                : __('filament-resources.user.field_can_login_helper')
+                            )
+                            ->disabled(fn (?User $record) => $record?->isRootUserProtected()),
                         Forms\Components\TextInput::make('password')
                             ->label(__('filament-resources.user.field_password'))
                             ->hiddenOn('view')
-                            ->disabled(fn (Forms\Get $get) => $get('can_login') === false)
+                            ->disabled(fn (Forms\Get $get, ?User $record) => 
+                                $get('can_login') === false || $record?->isRootUserProtected()
+                            )
                             ->password()
-                            ->required(fn (Forms\Get $get) => $get('can_login'))
-                            ->maxLength(255),
+                            ->required(fn (Forms\Get $get, ?User $record) => 
+                                $get('can_login') && !$record?->isRootUserProtected()
+                            )
+                            ->maxLength(255)
+                            ->helperText(fn (?User $record) => $record?->isRootUserProtected() 
+                                ? __('profile.root_user_protection.password_change_not_allowed')
+                                : null
+                            ),
                         Forms\Components\Select::make('roles')
                             ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Forms\Get $get) => $get('can_login') === false)
-                            ->disabled(fn (Forms\Get $get) => $get('can_login') === false)
+                            ->disabled(fn (Forms\Get $get, ?User $record) => 
+                                $get('can_login') === false || $record?->isRootUserProtected()
+                            )
                             ->relationship('roles', 'name')
                             ->multiple()
                             ->preload()
-                            ->searchable(),
+                            ->searchable()
+                            ->helperText(fn (?User $record) => $record?->isRootUserProtected() 
+                                ? __('profile.root_user_protection.generic_field_disabled')
+                                : null
+                            ),
                     ]),
             ]);
     }
@@ -143,11 +167,53 @@ class UserResource extends Resource
                 Impersonate::make()
                     ->requiresConfirmation()
                     ->redirectTo('/'),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->disabled(function (User $record) {
+                        $currentUser = Auth::user();
+                        return $record->isRootUserProtected() && 
+                               !($currentUser instanceof User && $currentUser->isRootUser());
+                    })
+                    ->tooltip(function (User $record) {
+                        $currentUser = Auth::user();
+                        return $record->isRootUserProtected() && 
+                               !($currentUser instanceof User && $currentUser->isRootUser())
+                            ? __('profile.root_user_protection.edit_action_disabled')
+                            : null;
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()->deselectRecordsAfterCompletion(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function ($records) {
+                            // Check if root user is in the selection
+                            $hasRootUser = $records->contains(fn (User $record) => $record->isRootUser());
+                            
+                            // Filter out root user before deletion (root user can never be deleted)
+                            $recordsToDelete = $records->filter(fn (User $record) => !$record->isRootUser());
+                            $deletedCount = 0;
+                            
+                            if ($recordsToDelete->isNotEmpty()) {
+                                $recordsToDelete->each->delete();
+                                $deletedCount = $recordsToDelete->count();
+                            }
+                            
+                            // Provide appropriate feedback based on the situation
+                            if ($hasRootUser && $deletedCount > 0) {
+                                // Some users deleted, but root user was excluded
+                                \Filament\Notifications\Notification::make()
+                                    ->warning()
+                                    ->title(__('profile.root_user_protection.bulk_delete_partial_success', ['deleted' => $deletedCount]))
+                                    ->send();
+                            } elseif ($hasRootUser && $deletedCount === 0) {
+                                // Only root user was selected
+                                \Filament\Notifications\Notification::make()
+                                    ->danger()
+                                    ->title(__('profile.root_user_protection.bulk_delete_only_root_selected'))
+                                    ->send();
+                            }
+                            // If no root user was involved, let Filament show the default success message
+                        }),
                 ]),
             ]);
     }

@@ -18,6 +18,13 @@ class UpdateUserPassword implements UpdatesUserPasswords
      */
     public function update(User $user, array $input): void
     {
+        // Prevent password updates for protected root users
+        if ($user->isRootUserProtected()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'current_password' => [__('profile.root_user_protection.password_change_not_allowed')],
+            ])->errorBag('updatePassword');
+        }
+
         Validator::make($input, [
             'current_password' => ['required', 'string', 'current_password:web'],
             'password' => $this->passwordRules(),

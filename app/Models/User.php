@@ -24,7 +24,10 @@ use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use App\Observers\UserObserver;
 
+#[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements HasTenants, HasName, MustVerifyEmail, FilamentUser , HasLocalePreference
 {
     use HasApiTokens;
@@ -121,6 +124,110 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     public function getFilamentName(): string
     {
         return $this->getFullName();
+    }
+
+    /**
+     * Check if this user is the root user (user with ID 1).
+     */
+    public function isRootUser(): bool
+    {
+        return $this->exists && $this->id === 1;
+    }
+
+    /**
+     * Check if the root user's login information should be protected.
+     * Only protects in non-production environments.
+     */
+    public function isRootUserProtected(): bool
+    {
+        return $this->isRootUser() && !app()->environment('production');
+    }
+
+    /**
+     * Check if this user can be deleted.
+     * Root user can NEVER be deleted in any environment.
+     */
+    public function canBeDeleted(): bool
+    {
+        return !$this->isRootUser();
+    }
+
+    /**
+     * Override role assignment methods to protect root user.
+     */
+    public function assignRole(...$roles): static
+    {
+        if ($this->isRootUserProtected()) {
+            // Silently ignore role assignments for protected root user
+            return $this;
+        }
+
+        return parent::assignRole(...$roles);
+    }
+
+    /**
+     * Override role removal methods to protect root user.
+     */
+    public function removeRole($role): static
+    {
+        if ($this->isRootUserProtected()) {
+            // Silently ignore role removals for protected root user
+            return $this;
+        }
+
+        return parent::removeRole($role);
+    }
+
+    /**
+     * Override role syncing to protect root user.
+     */
+    public function syncRoles(...$roles): static
+    {
+        if ($this->isRootUserProtected()) {
+            // Silently ignore role syncing for protected root user
+            return $this;
+        }
+
+        return parent::syncRoles(...$roles);
+    }
+
+    /**
+     * Override permission assignment to protect root user.
+     */
+    public function givePermissionTo(...$permissions): static
+    {
+        if ($this->isRootUserProtected()) {
+            // Silently ignore permission assignments for protected root user
+            return $this;
+        }
+
+        return parent::givePermissionTo(...$permissions);
+    }
+
+    /**
+     * Override permission revocation to protect root user.
+     */
+    public function revokePermissionTo($permission): static
+    {
+        if ($this->isRootUserProtected()) {
+            // Silently ignore permission revocations for protected root user
+            return $this;
+        }
+
+        return parent::revokePermissionTo($permission);
+    }
+
+    /**
+     * Override permission syncing to protect root user.
+     */
+    public function syncPermissions(...$permissions): static
+    {
+        if ($this->isRootUserProtected()) {
+            // Silently ignore permission syncing for protected root user
+            return $this;
+        }
+
+        return parent::syncPermissions(...$permissions);
     }
 
     public function canAccessPanel(Panel $panel): bool

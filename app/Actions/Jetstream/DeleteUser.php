@@ -22,6 +22,11 @@ class DeleteUser implements DeletesUsers
      */
     public function delete(User $user): void
     {
+        // Prevent deletion of root user under any circumstances
+        if ($user->isRootUser()) {
+            throw new \Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
+        }
+
         DB::transaction(function () use ($user) {
             $this->deleteTeams($user);
             $user->deleteProfilePhoto();
