@@ -7,7 +7,8 @@ use App\Observers\CampaignObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -76,5 +77,65 @@ class Campaign extends Model
     public function getStatus(): CampaignStatus
     {
         return CampaignStatus::fromCampaign($this);
+    }
+
+    /**
+     * Get all the assignments for the campaign.
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(TerritoryAssignment::class);
+    }
+
+    /**
+     * Get all the territories that have been assigned to the campaign.
+     */
+    public function territories(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Territory::class,
+            TerritoryAssignment::class,
+            'campaign_id', // Foreign key on TerritoryAssignment table...
+            'id', // Foreign key on Territory table...
+            'id', // Local key on Campaign table...
+            'territory_id' // Local key on TerritoryAssignment table...
+        );
+    }
+
+    public function assignees(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            User::class,
+            TerritoryAssignment::class,
+            'campaign_id', // Foreign key on TerritoryAssignment table...
+            'id', // Foreign key on User table...
+            'id', // Local key on Campaign table...
+            'assignee_id' // Local key on TerritoryAssignment table...
+        );
+    }
+
+    /**
+     * Scope a query to include campaigns that are active.
+     */
+    public function scopeWithActive($query)
+    {
+        return $query->orWhere(function ($q) {
+            $q->whereNull('valid_until')
+                ->orWhere('valid_until', '>', now());
+        })->where(function ($q) {
+            $q->whereNull('valid_from')
+                ->orWhere('valid_from', '<=', now());
+        });
+    }
+
+    /**
+     * Scope a query to include campaigns that are expired.
+     */
+    public function scopeWithExpired($query)
+    {
+        return $query->orWhere(function ($q) {
+            $q->whereNotNull('valid_until')
+                ->where('valid_until', '<', now());
+        });
     }
 }

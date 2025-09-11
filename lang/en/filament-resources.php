@@ -122,6 +122,7 @@ return [
         'status_assigned' => 'Assigned',
         'status_unassigned' => 'Unassigned',
         'filter_assignment_status' => 'Assignment Status',
+        'filter_no_campaign' => 'No Campaign',
     ],
     'territory_zone' => [
         'model_label' => 'zone',
@@ -252,6 +253,48 @@ return [
         'status_almost_expired' => 'Almost Expired',
         'status_terminated' => 'Terminated',
         'filter_trashed' => 'Trashed Items',
+        
+        // Campaign Overview Widget
+        'widget_remaining_days' => 'Remaining days',
+        'widget_completion_status' => 'Completion status',
+        'widget_valid_until' => 'Valid until :date',
+        'widget_no_end_date' => 'No end date',
+        'widget_campaign_expired' => 'Campaign has expired :days days ago.',
+        'widget_days_remaining' => 'Still :days days remaining.',
+        'widget_warning_25_percent' => 'Less than 25% of the time remains, but only :percentage% of the territories have been assigned.',
+        'widget_warning_50_percent' => 'Less than 50% of the time remains, but only :percentage% of the territories have been assigned.',
+        'widget_warning_75_percent' => 'Less than 75% of the time remains, but only :percentage% of the territories have been assigned.',
+        
+        // Campaign Assignments Chart Widget
+        'widget_assignments_chart_heading' => 'Assignment status overview',
+        'widget_assignments_chart_description' => 'Overview of the assignment status of territories in this campaign.',
+        'widget_assignments_chart_dataset_label' => 'Assignments status',
+        'widget_assignments_chart_to_be_assigned' => 'To be assigned',
+        'widget_assignments_chart_in_progress' => 'In progress',
+        'widget_assignments_chart_completed' => 'Completed',
+        
+        // Campaign Assignments Relation Manager
+        'assignments_relation_description' => 'All territory assignments for this campaign.',
+        'manage_assignments_title' => 'Manage assignments',
+        
+        // Campaign Assignment Creation Wizard
+        'assignments_create_modal_heading' => 'Create new assignment',
+        'assignments_create_modal_description' => 'Create a new assignment for campaign ":campaign"',
+        'assignments_create_step_details' => 'Assignment Details',
+        'assignments_create_step_additional' => 'Additional Information',
+        'assignments_create_step_additional_description' => 'Optional notes and end date',
+        'assignments_create_step_review' => 'Review',
+        'assignments_create_step_review_description' => 'Review the assignment before creating',
+        
+        // Campaign Assignment Bulk Actions
+        'bulk_action_terminate_assignments' => 'Terminate assignments',
+        'bulk_action_terminate_assignments_modal_heading' => 'Terminate selected assignments',
+        'bulk_action_terminate_assignments_modal_description' => 'Are you sure you want to terminate the selected assignments? This action cannot be undone.',
+        'bulk_action_terminate_assignments_submit' => 'Terminate',
+        'bulk_action_terminate_success_title' => 'Assignments terminated',
+        'bulk_action_terminate_success_body' => 'Successfully terminated :count assignment(s). :skipped assignment(s) were already terminated.',
+        'bulk_action_terminate_warning_title' => 'No assignments terminated',
+        'bulk_action_terminate_warning_body' => 'All selected assignments were already terminated.',
     ],
     'user' => [
         'model_label' => 'user',

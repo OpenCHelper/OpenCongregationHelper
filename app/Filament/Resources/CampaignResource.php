@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Enums\CampaignStatus;
 use App\Filament\Resources\CampaignResource\Pages;
-use App\Filament\Resources\CampaignResource\RelationManagers;
 use App\Models\Campaign;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -16,6 +15,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Resources\Pages\Page;
+use Filament\Pages\SubNavigationPosition;
 
 class CampaignResource extends Resource
 {
@@ -23,6 +24,7 @@ class CampaignResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-envelope-open';
     protected static ?int $navigationSort = 3;
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -186,11 +188,28 @@ class CampaignResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageCampaigns::route('/'),
+            'index' => Pages\ListCampaigns::route('/'),
+            'view' => Pages\ViewCampaign::route('/{record}'),
+            'assignments' => Pages\ManageCampaignAssignments::route('/{record}/assignments'),
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewCampaign::class,
+            Pages\ManageCampaignAssignments::class,
+        ]);
     }
 
     public static function getEloquentQuery(): Builder

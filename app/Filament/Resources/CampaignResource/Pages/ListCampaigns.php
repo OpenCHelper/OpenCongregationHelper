@@ -4,10 +4,10 @@ namespace App\Filament\Resources\CampaignResource\Pages;
 
 use App\Filament\Resources\CampaignResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 
-class ManageCampaigns extends ManageRecords
+class ListCampaigns extends ListRecords
 {
     protected static string $resource = CampaignResource::class;
 
@@ -23,4 +23,5 @@ class ManageCampaigns extends ManageRecords
                 }),
         ];
     }
+
 }

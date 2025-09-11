@@ -214,6 +214,30 @@ class TerritoryResource extends Resource
                     ->getTitleFromRecordUsing(fn (Territory $record): string => $record->territoryZone->name . " (" . $record->territoryZone->loadMissing("territories")->territories->count() . ")" ?? '')
                     ->getDescriptionFromRecordUsing(fn (Territory $record): string => $record->territoryZone->description ?? '')
                     ->collapsible(),
+                Group::make('currentAssignment.campaign.name')
+                    ->label(ucfirst(__('filament-resources.campaign.model_label')))
+                    ->getTitleFromRecordUsing(function (Territory $record): string {
+                        /** @var Campaign $campaign */
+                        $campaign = $record->currentAssignment?->campaign;
+                        if ($campaign) {
+                            $territoriesCount = $campaign->assignments()->count();
+                            return $campaign->name . " ({$territoriesCount})";
+                        }
+                        
+                        $territoriesCount = Territory::unassigned()
+                            ->count();
+                        return __('filament-resources.territory.filter_no_campaign') . " ({$territoriesCount})";
+                    })
+                    ->orderQueryUsing(function (Builder $query, string $direction): Builder {
+                        return $query->leftJoin('territory_assignments as campaign_assignments', function ($join) {
+                                $join->on('territories.id', '=', 'campaign_assignments.territory_id')
+                                     ->whereNull('campaign_assignments.ended_at');
+                            })
+                            ->leftJoin('campaigns', 'campaign_assignments.campaign_id', '=', 'campaigns.id')
+                            ->orderByRaw("COALESCE(campaigns.name, 'zzz_no_campaign') {$direction}")
+                            ->select('territories.*');
+                    })
+                    ->collapsible(),
             ])
             ->striped()
             ->recordUrl(fn (Model $record): string => TerritoryResource::getUrl('view', ['record' => $record]))

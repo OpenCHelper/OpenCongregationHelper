@@ -122,6 +122,7 @@ return [
         'status_assigned' => 'Asignados',
         'status_unassigned' => 'Sin asignar',
         'filter_assignment_status' => 'Estado de Asignación',
+        'filter_no_campaign' => 'Sin campaña',
     ],
     'territory_zone' => [
         'model_label' => 'zona',
@@ -252,6 +253,49 @@ return [
         'status_almost_expired' => 'Casi Expirada',
         'status_terminated' => 'Terminada',
         'filter_trashed' => 'Elementos Eliminados',
+        
+        // Campaign Overview Widget
+        'widget_remaining_days' => 'Días restantes',
+        'widget_completion_status' => 'Estado de finalización',
+        'widget_valid_until' => 'Válida hasta :date',
+        'widget_no_end_date' => 'Sin fecha de vencimiento',
+        'widget_campaign_expired' => 'La campaña expiró hace :days días.',
+        'widget_days_remaining' => 'Aún quedan :days días.',
+        'widget_warning_25_percent' => 'Queda menos del 25% del tiempo, pero solo el :percentage% de los territorios han sido asignados.',
+        'widget_warning_50_percent' => 'Queda menos del 50% del tiempo, pero solo el :percentage% de los territorios han sido asignados.',
+        'widget_warning_75_percent' => 'Queda menos del 75% del tiempo, pero solo el :percentage% de los territorios han sido asignados.',
+        
+        // Campaign Assignments Chart Widget
+        'widget_assignments_chart_heading' => 'Resumen del estado de asignaciones',
+        'widget_assignments_chart_description' => 'Resumen del estado de asignaciones de territorios en esta campaña.',
+        'widget_assignments_chart_dataset_label' => 'Estado de asignaciones',
+        'widget_assignments_chart_to_be_assigned' => 'Por asignar',
+        'widget_assignments_chart_in_progress' => 'En progreso',
+        'widget_assignments_chart_completed' => 'Completados',
+        
+        // Campaign Assignments Relation Manager
+        'assignments_relation_description' => 'Todas las asignaciones de territorios para esta campaña.',
+        'manage_assignments_title' => 'Gestionar asignaciones',
+        
+        // Campaign Assignment Creation Wizard
+                // Campaign Assignment Creation Wizard
+        'assignments_create_modal_heading' => 'Crear nueva asignación',
+        'assignments_create_modal_description' => 'Crear una nueva asignación de territorio para la campaña ":campaign"',
+        'assignments_create_step_details' => 'Detalles de Asignación',
+        'assignments_create_step_additional' => 'Información Adicional',
+        'assignments_create_step_additional_description' => 'Notas opcionales y fecha de finalización',
+        'assignments_create_step_review' => 'Revisión',
+        'assignments_create_step_review_description' => 'Revisa la asignación antes de crearla',
+        
+        // Campaign Assignment Bulk Actions
+        'bulk_action_terminate_assignments' => 'Terminar asignaciones',
+        'bulk_action_terminate_assignments_modal_heading' => 'Terminar asignaciones seleccionadas',
+        'bulk_action_terminate_assignments_modal_description' => '¿Estás seguro de que quieres terminar las asignaciones seleccionadas? Esta acción no se puede deshacer.',
+        'bulk_action_terminate_assignments_submit' => 'Terminar',
+        'bulk_action_terminate_success_title' => 'Asignaciones terminadas',
+        'bulk_action_terminate_success_body' => 'Se terminaron con éxito :count asignación/es. :skipped asignación/es ya estaban terminadas.',
+        'bulk_action_terminate_warning_title' => 'No se terminó ninguna asignación',
+        'bulk_action_terminate_warning_body' => 'Todas las asignaciones seleccionadas ya estaban terminadas.',
     ],
     'user' => [
         'model_label' => 'usuario',
