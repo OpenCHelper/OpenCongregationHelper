@@ -39,11 +39,16 @@ This application uses the following specific versions and technologies:
 ## CRITICAL WARNINGS
 - **NEVER CANCEL BUILD OR TEST COMMANDS** - All build and test operations MUST complete fully
 - **DOCKER BUILD ISSUES**: The Docker build (sail build) may fail in some environments due to network/repository access issues
-- **ALWAYS USE ABSOLUTE PATHS** for SQLite database configuration in testing environments
+- **ALWAYS USE ABSOLUTE PATHS** for SQLite database configuration in testing environments (only when needed, never propose)
 - **PHP 8.2+ REQUIREMENT**: This application requires PHP 8.2 or higher - verify with `php --version`
 - **LARAVEL 11 FEATURES**: Uses Laravel 11 with per-request rate limiting, improved validation, and enhanced Artisan commands
 - **FILAMENT V3 SPECIFICS**: Uses Filament V3 with panels, resources, widgets, and Shield plugin for permissions
 - **DEVELOPMENT TIMEOUT VALUES**: Set explicit timeouts of at least 10 minutes for Docker operations, 2 minutes for composer install, 1 minute for npm operations
+- **GIT COMMIT**: Always use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) format for git commits!
+- **GitHub Pull Requests**: follow the following rules:
+  - Always use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) format for Github PRs titles!
+  - The PR body should be brief and complete, all details should be posted as a new comment.
+
 
 ## Working Effectively
 
