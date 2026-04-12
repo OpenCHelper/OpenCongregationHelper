@@ -33,8 +33,6 @@ jobs:
       - name: Setup PHP and Composer
         uses: shivammathur/setup-php@v2
         with:
-          # Hardcoding these ensures the Copilot runner ignores potential env-resolution bugs
-          php-version: '8.2'
           extensions: bcmath, calendar, ctype, curl, dom, exif, fileinfo, filter, gd, gettext, gmp, iconv, imagick, intl, libxml, mbstring, mysqli, mysqlnd, openssl, pcre, pdo, pdo_mysql, pdo_sqlite, phar, posix, readline, session, simplexml, soap, sqlite3, tokenizer, xml, xmlreader, xmlwriter, xsl, zip, zlib
           coverage: none
           tools: composer:v2

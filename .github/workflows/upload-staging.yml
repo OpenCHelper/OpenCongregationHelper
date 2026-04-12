@@ -14,7 +14,6 @@ concurrency:
 # Recreate Altervista PHP environment (using the `phpinfo()` output)
 env:
   node_version: '20.x'
-  php_version: '8.2'
   php_extensions: >-
     bcmath,calendar,ctype,curl,date,dom,exif,fileinfo,filter
     ,gd,gettext,gmp,hash,iconv,imagick,intl,json,libxml,mbstring
@@ -44,7 +43,6 @@ jobs:
       - name: Setup PHP and Composer
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ env.php_version }}
           extensions: ${{ env.php_extensions }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
