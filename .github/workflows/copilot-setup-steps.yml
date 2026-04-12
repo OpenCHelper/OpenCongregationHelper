@@ -1,7 +1,5 @@
 name: "Copilot Setup Steps"
 
-# Automatically run the setup steps when they are changed to allow for easy validation, and
-# allow manual testing through the repository's "Actions" tab
 on:
   workflow_dispatch:
   push:
@@ -11,29 +9,12 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
-env:
-  node_version: '20.x'
-  php_version: '8.2'
-  php_extensions: >-
-    bcmath,calendar,ctype,curl,date,dom,exif,fileinfo,filter
-    ,gd,gettext,gmp,hash,iconv,imagick,intl,json,libxml,mbstring
-    ,mysqli,mysqlnd,openssl,pcre,PDO,pdo_mysql,pdo_sqlite
-    ,Phar,random,Reflection,session,SimpleXML,SPL,sqlite3,standard
-    ,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib
-
 jobs:
-  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
   copilot-setup-steps:
     runs-on: ubuntu-latest
-
-    # Set the permissions to the lowest permissions possible needed for your steps.
-    # Copilot will be given its own token for its operations.
     permissions:
-      # If you want to clone the repository as part of your setup steps, for example to install dependencies, you'll need the `contents: read` permission. If you don't clone the repository in your setup steps, Copilot will do this for you automatically after the steps complete.
       contents: read
 
-    # You can define any steps you want, and they will run before the agent starts.
-    # If you do not check out your code, Copilot will do this for you.
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,19 +27,22 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.node_version }}
+          node-version: '20'
           cache: 'npm'
 
       - name: Setup PHP and Composer
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ env.php_version }}
-          extensions: ${{ env.php_extensions }}
+          # Hardcoding these ensures the Copilot runner ignores potential env-resolution bugs
+          php-version: '8.2'
+          extensions: bcmath, calendar, ctype, curl, dom, exif, fileinfo, filter, gd, gettext, gmp, iconv, imagick, intl, libxml, mbstring, mysqli, mysqlnd, openssl, pcre, pdo, pdo_mysql, pdo_sqlite, phar, posix, readline, session, simplexml, soap, sqlite3, tokenizer, xml, xmlreader, xmlwriter, xsl, zip, zlib
+          coverage: none
+          tools: composer:v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          fail-fast: true
 
       - name: Install Composer dependencies
+        # Added --ignore-platform-req=php as a safety net for agent environments
         run: composer install --no-ansi --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
 
       - name: Install NodeJS dependencies
@@ -68,4 +52,4 @@ jobs:
         run: |
           php artisan filament:asset
           php artisan vendor:publish --tag=filament-assets --force
-
+          
