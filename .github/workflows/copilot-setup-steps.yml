@@ -9,17 +9,21 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
+env:
+  # Comma-separated list of external domains to reroute through the local nginx
+  # reverse proxy. In the future this may be changed to a `vars.*` variable.
+  COPILOT_REROUTE_DOMAINS: "cdn.jsdelivr.net,cdnjs.cloudflare.com,unpkg.com,fonts.bunny.net,ui-avatars.com,tile.openstreetmap.org,tile.openstreetmap.fr,tile.opentopomap.org,tiles.stadiamaps.com,basemaps.cartocdn.com"
+
 jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install packages
         run: sudo apt-get update && sudo apt-get install -y jq lftp
@@ -45,9 +49,95 @@ jobs:
 
       - name: Install NodeJS dependencies
         run: npm ci
-      
+
+      - name: Setup Laravel app configuration
+        run: |
+          if [ ! -f .env.example ]; then
+            echo "Step failed: .env.example not found in project root. Ensure the repository includes .env.example for Laravel configuration."
+            exit 1
+          fi
+
+          app_url="http://localhost:8000"
+          database_path="$(pwd)/database/database.sqlite"
+
+          # Setup default app configuration
+          if [[ ! -f .env ]]; then
+            cp .env.example .env
+          fi
+
+          if grep -q '^APP_URL=' .env; then
+            sed -i "s|^APP_URL=.*|APP_URL=${app_url}|g" .env
+          else
+            echo "APP_URL=${app_url}" >> .env
+          fi
+
+          if grep -q '^ASSET_URL=' .env; then
+            sed -i "s|^ASSET_URL=.*|ASSET_URL=${app_url}|g" .env
+          else
+            echo "ASSET_URL=${app_url}" >> .env
+          fi
+
+          # - Switch to SQLite (MySQL is not available in the runner environment)
+          # - Switch session and cache drivers to file/array to avoid DB dependency at boot
+          sed -i -r \
+              -e "s|^DB_CONNECTION=.*?(#.*)?$|DB_CONNECTION=sqlite \\1|g" \
+              -e "s|^DB_DATABASE=.*?(#.*)?$|DB_DATABASE=${database_path}\\1|g" \
+              -e "s|^SESSION_DRIVER=.*?(#.*)?$|SESSION_DRIVER=file \\1|g" \
+              -e "s|^CACHE_STORE=.*?(#.*)?$|CACHE_STORE=file \\1|g" \
+              -e '/^DB_HOST=/d' \
+              -e '/^DB_PORT=/d' \
+              -e '/^DB_USERNAME=/d' \
+              -e '/^DB_PASSWORD=/d' \
+              -e '/^DB_ROOT_PASSWORD=/d' \
+              .env
+          
+          touch "${database_path}"
+
       - name: Run build
         run: |
+          # Generate a real application key (the .env.example ships with a placeholder)
+          php artisan key:generate --force
+          php artisan migrate --force
+
           php artisan filament:asset
           php artisan vendor:publish --tag=filament-assets --force
           
+          npm run build
+
+      - name: Export Playwright MCP allowed origins
+        run: |
+          echo "PLAYWRIGHT_MCP_ALLOWED_ORIGINS=${{env.COPILOT_REROUTE_DOMAINS}},http://localhost:8000,http://127.0.0.1:8000" >> "$GITHUB_ENV"
+          echo "PLAYWRIGHT_MCP_ALLOWED_HOSTS=${{env.COPILOT_REROUTE_DOMAINS}},http://localhost:8000,http://127.0.0.1:8000" >> "$GITHUB_ENV"
+      
+      - name: Set summary
+        env:
+          PLAYWRIGHT_MCP_ALLOWED_ORIGINS: ${{ env.PLAYWRIGHT_MCP_ALLOWED_ORIGINS }}
+          PLAYWRIGHT_MCP_ALLOWED_HOSTS: ${{ env.PLAYWRIGHT_MCP_ALLOWED_HOSTS }}
+        run: |
+          (
+            echo "## Copilot Setup Summary"
+            echo ""
+            echo "- Laravel application configured:"
+            echo '  ```env'
+            sed 's/^/  /' .env
+            echo '  ```'
+            echo ""
+            echo "- Playwright MCP allowed origins set to: \`${PLAYWRIGHT_MCP_ALLOWED_ORIGINS}\`"
+            echo "- Playwright MCP allowed hosts set to: \`${PLAYWRIGHT_MCP_ALLOWED_HOSTS}\`"
+
+            echo "### Environment information"
+            echo '```'
+            echo "$ php --version"
+            php --version
+            echo ""
+            echo "$ php --modules"
+            php --modules
+            echo ""
+            echo "$ php artisan --version"
+            php artisan --version
+            echo ""
+            echo "$ php artisan about"
+            php artisan about
+            echo '```'
+            echo ""
+          ) >> "$GITHUB_STEP_SUMMARY"
