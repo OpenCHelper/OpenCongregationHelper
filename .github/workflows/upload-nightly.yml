@@ -125,7 +125,11 @@ jobs:
           [[ ! -x "scripts/remote_artisan.sh" ]] && chmod +x scripts/remote_artisan.sh
 
           function remote_artisan () {
-            echo "\$ $*" >> "${ARTISAN_COMMANDS_LOG:-/dev/null}"
+            if [[ "$1" == "--" ]]; then
+              echo "\$ ${*:2}" >> "${ARTISAN_COMMANDS_LOG:-/dev/null}"
+            else
+              echo "\$ $*" >> "${ARTISAN_COMMANDS_LOG:-/dev/null}"
+            fi
             scripts/remote_artisan.sh                                 \
               --base-url "$ARTISAN_BASE_URL"                          \
               --ftp-hostname "${{ secrets.FTP_SERVER_TEST }}"         \
