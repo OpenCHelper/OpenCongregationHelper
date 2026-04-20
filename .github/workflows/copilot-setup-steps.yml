@@ -39,7 +39,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Composer dependencies
-        # Added --ignore-platform-req=php as a safety net for agent environments
         run: composer install --no-ansi --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
 
       - name: Install NodeJS dependencies
@@ -101,15 +100,6 @@ jobs:
           
           npm run build
 
-      # - name: Export Playwright MCP allowed origins
-      #   env:
-      #     # Comma-separated list of external domains to reroute through the local nginx
-      #     # reverse proxy. In the future this may be changed to a `vars.*` variable.
-      #     COPILOT_REROUTE_DOMAINS: "cdn.jsdelivr.net,cdnjs.cloudflare.com,unpkg.com,fonts.bunny.net,ui-avatars.com,tile.openstreetmap.org,tile.openstreetmap.fr,tile.opentopomap.org,tiles.stadiamaps.com,basemaps.cartocdn.com"
-      #   run: |
-      #     echo "PLAYWRIGHT_MCP_ALLOWED_ORIGINS=${{env.COPILOT_REROUTE_DOMAINS}},http://localhost:8000,http://127.0.0.1:8000" >> "$GITHUB_ENV"
-      #     echo "PLAYWRIGHT_MCP_ALLOWED_HOSTS=${{env.COPILOT_REROUTE_DOMAINS}},http://localhost:8000,http://127.0.0.1:8000" >> "$GITHUB_ENV"
-      
       - name: Set summary
         env:
           PLAYWRIGHT_MCP_ALLOWED_ORIGINS: ${{ env.PLAYWRIGHT_MCP_ALLOWED_ORIGINS }}
