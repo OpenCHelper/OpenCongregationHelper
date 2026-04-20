@@ -118,7 +118,7 @@ main () {
 
     # Generate a random token if none is provided
     if [[ -z "$token" ]]; then
-      token="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 64)"
+      token="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 64)"
     fi
     curl_opts+=(-H "X-Artisan-Token: ${token}")
 
