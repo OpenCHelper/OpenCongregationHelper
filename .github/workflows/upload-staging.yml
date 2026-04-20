@@ -111,6 +111,7 @@ jobs:
           timeout: 120000
 
       - name: Run Artisan commands
+        id: run-artisan
         env:
           FTP_SERVER_URL: ${{ secrets.FTP_SERVER_QA }}
         run: |
@@ -119,16 +120,23 @@ jobs:
           set -o nounset
 
           export ARTISAN_BASE_URL="https://artisan.${FTP_SERVER_URL##ftp.}";
+          export ARTISAN_COMMANDS_LOG="/tmp/artisan-commands-output.txt"
 
           [[ ! -x "scripts/remote_artisan.sh" ]] && chmod +x scripts/remote_artisan.sh
 
-          function remote_artisan () { 
+          function remote_artisan () {
+            if [[ "$1" == "--" ]]; then
+              echo "\$ ${*:2}" >> "${ARTISAN_COMMANDS_LOG:-/dev/null}"
+            else
+              echo "\$ $*" >> "${ARTISAN_COMMANDS_LOG:-/dev/null}"
+            fi
             scripts/remote_artisan.sh                                 \
               --base-url "$ARTISAN_BASE_URL"                          \
               --ftp-hostname "${{ secrets.FTP_SERVER_QA }}"         \
               --ftp-username "${{ secrets.FTP_USERNAME_QA }}"       \
               --ftp-password "${{ secrets.FTP_PASSWORD_QA }}"       \
-              "$@"
+              "$@" | tee -a "${ARTISAN_COMMANDS_LOG:-/dev/null}"
+            echo "" >> "${ARTISAN_COMMANDS_LOG:-/dev/null}"
           }
 
           printf "Using Artisan base URL %s\n\n" "$ARTISAN_BASE_URL"
@@ -145,7 +153,8 @@ jobs:
 
           # ------------------------- Environment -------------------------
           printf "Current environment:\n"
-          remote_artisan -- config:show app.env --no-interaction --no-ansi | sed 's/^/  | /'
+          environment=$(remote_artisan -- config:show app.env --no-interaction --no-ansi)
+          echo "$environment" | sed 's/^/  | /'
 
           printf '\n\n'
           # -------------------------     Clear Cache     -------------------------
@@ -182,3 +191,28 @@ jobs:
             remote_artisan -- "$command" --no-interaction --no-ansi | sed 's/^/  | /'
             printf '\n'
           done
+
+          echo "Artisan commands execution completed. Output logged to ${ARTISAN_COMMANDS_LOG}."
+          # Set the step output to the log file path so it can be used in the summary
+          echo "artisan_logfile=${ARTISAN_COMMANDS_LOG}" >> "$GITHUB_OUTPUT"
+          echo "artisan_url=${ARTISAN_BASE_URL}" >> "$GITHUB_OUTPUT"
+          echo "app_environment=$(echo "$environment" | sed -r 's/^.*?\.+//; s/^\s*//; s/\s*$//; /^\s*$/d')" >> "$GITHUB_OUTPUT"
+
+      - name: Set summary
+        env:
+          ARTISAN_LOG_FILE: ${{ steps.run-artisan.outputs.artisan_logfile }}
+          ARTISAN_BASE_URL: ${{ steps.run-artisan.outputs.artisan_url }}
+        run: |
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ## Deployment Summary
+          - **Commit**: \`${{ github.sha }}\`
+          - **Branch**: \`${{ github.ref }}\`
+          - **Environment**: \`${{ steps.run-artisan.outputs.app_environment }}\`
+
+          ### Artisan Commands Execution
+          - **Base URL**: \`${ARTISAN_BASE_URL}\`
+          - **Log**: [View Output]($ARTISAN_LOG_FILE)
+          \`\`\`plaintext
+          $(cat "$ARTISAN_LOG_FILE")
+          \`\`\`
+          EOF
