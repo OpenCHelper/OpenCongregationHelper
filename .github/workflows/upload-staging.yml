@@ -203,16 +203,26 @@ jobs:
           ARTISAN_LOG_FILE: ${{ steps.run-artisan.outputs.artisan_logfile }}
           ARTISAN_BASE_URL: ${{ steps.run-artisan.outputs.artisan_url }}
         run: |
+          github_sha_hash=${{ github.sha }}
+          github_sha_short="${github_sha_hash:0:7}"
+
           cat <<EOF >> $GITHUB_STEP_SUMMARY
           ## Deployment Summary
-          - **Commit**: \`${{ github.sha }}\`
-          - **Branch**: \`${{ github.ref }}\`
+
+          ### Deployment details
+          - **Commit**: \`${github_sha_short}\` (\`${github_sha_hash}\`)
+          - **Branch**: \`${{ github.ref_name }}\`
           - **Environment**: \`${{ steps.run-artisan.outputs.app_environment }}\`
 
           ### Artisan Commands Execution
           - **Base URL**: \`${ARTISAN_BASE_URL}\`
-          - **Log**: [View Output]($ARTISAN_LOG_FILE)
+
+          <details>
+          <summary>View full Artisan output</summary>
+
           \`\`\`plaintext
-          $(cat "$ARTISAN_LOG_FILE")
+          $(cat "$ARTISAN_LOG_FILE" | sed 's/^/  /')
           \`\`\`
+
+          </details>
           EOF
