@@ -36,6 +36,30 @@ This application uses the following specific versions and technologies:
 - **Laravel IDE Helper**: Enhanced IDE support for Laravel
 - **Docker**: Containerized development with PHP 8.2, MySQL, Redis
 
+## UI Changes — Mandatory Screenshot Requirement
+
+**Whenever you make changes or additions to the UI** (Blade views, Livewire components, Filament resources/pages/widgets, CSS, or any visual element), you **MUST** take a Playwright screenshot of the affected page(s) and post it as a comment on the PR.
+
+### How to take a screenshot
+
+1. **Start the Laravel development server** (if not already running):
+   ```bash
+   php artisan serve --host=0.0.0.0 --port=8000 &
+   sleep 2
+   ```
+
+2. **Use the Playwright MCP tools** to navigate to the relevant page(s) and take a screenshot:
+   - Log in as the super admin user (`$INITIAL_ROOT_USERMAIL` / `$INITIAL_ROOT_PASSWORD`) when the page requires authentication.
+   - Navigate to the relevant URL (e.g. `http://localhost:8000/app` for the Filament admin panel).
+   - Take a full-page screenshot with `playwright-browser_take_screenshot`.
+
+3. **Post the screenshot as a PR comment**, including:
+   - A brief description of what changed.
+   - The screenshot embedded inline (`![Screenshot](…)`).
+
+> [!IMPORTANT]
+> This step is **not optional**. If Playwright is unavailable or the server cannot start, explicitly mention it in the PR comment so reviewers are aware.
+
 ## CRITICAL WARNINGS
 - **NEVER CANCEL BUILD OR TEST COMMANDS** - All build and test operations MUST complete fully
 - **DOCKER BUILD ISSUES**: The Docker build (sail build) may fail in some environments due to network/repository access issues
