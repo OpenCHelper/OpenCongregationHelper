@@ -111,6 +111,7 @@ jobs:
           timeout: 120000
                   
       - name: Run Artisan commands
+        id: run-artisan
         env:
           FTP_SERVER_URL: ${{ secrets.FTP_SERVER_TEST }}
         run: |
@@ -202,14 +203,14 @@ jobs:
 
       - name: Set summary
         env:
-          ARTISAN_LOG_FILE: ${{ steps.run_artisan_commands.outputs.artisan_logfile }}
-          ARTISAN_BASE_URL: ${{ steps.run_artisan_commands.outputs.artisan_url }}
+          ARTISAN_LOG_FILE: ${{ steps.run-artisan.outputs.artisan_logfile }}
+          ARTISAN_BASE_URL: ${{ steps.run-artisan.outputs.artisan_url }}
         run: |
           cat <<EOF >> $GITHUB_STEP_SUMMARY
           ## Deployment Summary
-          - **Commit**: ${{ github.sha }}
-          - **Branch**: ${{ github.ref }}
-          - **Environment**: ${{ steps.run_artisan_commands.outputs.app_environment }}
+          - **Commit**: \`${{ github.sha }}\`
+          - **Branch**: \`${{ github.ref }}\`
+          - **Environment**: \`${{ steps.run-artisan.outputs.app_environment }}\`
 
           ### Artisan Commands Execution
           - **Base URL**: \`${ARTISAN_BASE_URL}\`
