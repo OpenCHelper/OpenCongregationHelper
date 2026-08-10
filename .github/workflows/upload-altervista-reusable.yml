@@ -74,10 +74,11 @@ jobs:
 
       - name: Install packages
         run: |
-          curl --version && curl --help
+          curl --version && curl --help all
           
           sudo apt-get update \
-            && sudo apt-get install -y jq lftp curl
+            && sudo apt-get install -y jq lftp curl \
+            && sudo apt-get update -y curl
           
           curl --version && curl --help
 
