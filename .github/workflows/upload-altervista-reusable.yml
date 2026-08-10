@@ -65,6 +65,8 @@ jobs:
 
       - name: Get Artisan required data
         id: artisan-required-data
+        env:
+          FTP_SERVER_URL: ${{ secrets.ftp_server }}
         run: |
           echo "artisan-base-url='https://artisan.${FTP_SERVER_URL##ftp.}'" >> "$GITHUB_OUTPUT"
           echo "artisan-log-file='/tmp/artisan-commands-output.txt'" >> "$GITHUB_OUTPUT"
@@ -172,8 +174,6 @@ jobs:
       - name: Find remote environment
         id: remote-env-raw
         uses: ./.github/actions/altervista-artisan-action
-        env:
-          FTP_SERVER_URL: ${{ secrets.ftp_server }}
         with:
           url: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
           ftp-hostname: ${{ secrets.ftp_server }}
@@ -199,8 +199,6 @@ jobs:
 
       - name: Run Artisan commands
         uses: ./.github/actions/altervista-artisan-action
-        env:
-          FTP_SERVER_URL: ${{ secrets.ftp_server }}
         with:
           url: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
           ftp-hostname: ${{ secrets.ftp_server }}
@@ -221,8 +219,6 @@ jobs:
       - name: Run Artisan commands
         id: run-artisan
         uses: ./.github/actions/altervista-artisan-action
-        env:
-          FTP_SERVER_URL: ${{ secrets.ftp_server }}
         with:
           url: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
           ftp-hostname: ${{ secrets.ftp_server }}
