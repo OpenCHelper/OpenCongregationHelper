@@ -78,7 +78,7 @@ jobs:
           
           sudo apt-get update \
             && sudo apt-get install -y jq lftp curl \
-            && sudo apt-get update curl
+            && sudo apt-get upgrade -y curl
           
           curl --version && curl --help
 
