@@ -179,7 +179,7 @@ jobs:
           ftp-hostname: ${{ secrets.ftp_server }}
           ftp-username: ${{ secrets.ftp_username }}
           ftp-password: ${{ secrets.ftp_password }}
-          log-file: /tmp/artisan-commands-output.txt
+          log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           commands: "config:show app.env"
 
       - name: "Parse raw artisan response (config:show app.env)"
@@ -206,7 +206,7 @@ jobs:
           ftp-hostname: ${{ secrets.ftp_server }}
           ftp-username: ${{ secrets.ftp_username }}
           ftp-password: ${{ secrets.ftp_password }}
-          log-file: /tmp/artisan-commands-output.txt
+          log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           verbose: true
           commands: |
             # ------------------------- Test Artisan endpoint -------------------------
@@ -228,7 +228,7 @@ jobs:
           ftp-hostname: ${{ secrets.ftp_server }}
           ftp-username: ${{ secrets.ftp_username }}
           ftp-password: ${{ secrets.ftp_password }}
-          log-file: /tmp/artisan-commands-output.txt
+          log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           verbose: true
           commands: |
             # ------------------------- Migrations / Seeder -------------------------
@@ -255,7 +255,7 @@ jobs:
 
       - name: Set summary
         env:
-          ARTISAN_LOG_FILE: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
+          ARTISAN_LOG_FILE: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           ARTISAN_BASE_URL: ${{ steps.run-artisan.outputs.artisan_url }}
         run: |
           declare -r github_sha_hash=${{ github.sha }}
