@@ -136,7 +136,7 @@ main () {
         fi
     fi
     
-    if ! response="$([[ "$_verbose" == true ]] && set -x; curl -skL "${artisan_base_url}/api/execute" \
+    if ! response="$([[ "$_verbose" == true ]] && set -x; curl --fail-with-body -skL "${artisan_base_url}/api/execute" \
       -X POST --data "{\"command\": $(jq --raw-input <<< "$command"), \"params\": $(jq --raw-input <<< "$*")}" \
       "${curl_opts[@]}"
     )"; then
