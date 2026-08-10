@@ -181,6 +181,7 @@ jobs:
           ftp-password: ${{ secrets.ftp_password }}
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           commands: "config:show app.env"
+          verbose: true
 
       - name: "Parse raw artisan response (config:show app.env)"
         id: parse-environment
