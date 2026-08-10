@@ -51,6 +51,7 @@ runs:
         FTP_SERVER_URL: ${{ inputs.ftp-hostname }}
         FTP_SERVER_USERNAME: ${{ inputs.ftp-username }}
         FTP_SERVER_PASSWORD: ${{ inputs.ftp-password }}
+        VERBOSE_MODE: ${{ inputs.verbose }}
       run: |
         set -e
         set -o pipefail
@@ -62,17 +63,25 @@ runs:
         trap 'rm -f "$TEMPORARY_OUTPUT_LOG"' EXIT
 
         function remote_artisan () {
+          local -a script_args=(
+            --base-url "$ARTISAN_BASE_URL"
+            --ftp-hostname "${FTP_SERVER_URL}"
+            --ftp-username "${FTP_SERVER_USERNAME}"
+            --ftp-password "${FTP_SERVER_PASSWORD}"
+          )
+
+          if [[ "${VERBOSE_MODE:-false}" == "true" ]]; then
+            script_args+=(--verbose)
+          fi
+
           if [[ "$1" == '--' ]]; then
             echo "\$ ${*:2}" >> "${TEMPORARY_OUTPUT_LOG}"
           else
             echo "\$ $*" >> "${TEMPORARY_OUTPUT_LOG}"
           fi
-          scripts/remote_artisan.sh                                 \
-            --base-url "$ARTISAN_BASE_URL"                          \
-            --ftp-hostname "${FTP_SERVER_URL}"              \
-            --ftp-username "${FTP_SERVER_USERNAME}"            \
-            --ftp-password "${FTP_SERVER_PASSWORD}"            \
-            "$@" | tee -a "${TEMPORARY_OUTPUT_LOG}"
+
+          scripts/remote_artisan.sh "${script_args[@]}" "$@" \
+            | tee -a "${TEMPORARY_OUTPUT_LOG}"
           echo "" >> "${TEMPORARY_OUTPUT_LOG}"
         }
 
