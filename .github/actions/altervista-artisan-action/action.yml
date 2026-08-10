@@ -86,7 +86,7 @@ runs:
         done < <(sed -r \
           -e '/^\s*(#|$)/d' \
           -e 's/^\s*|\s*$//g' \
-          -e 's/^((php )?artisan)?' <<< "$ARTISAN_COMMANDS"
+          -e 's/^((php )?artisan )?//' <<< "$ARTISAN_COMMANDS"
         )
 
         echo "::notice title='Execution completed'::Artisan commands execution completed."
