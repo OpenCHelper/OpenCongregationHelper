@@ -1,0 +1,31 @@
+name: "Clear Laravel cache via FTP"
+description: "Clear Laravel cache via FTP"
+inputs:
+  ftp-hostname:
+    description: "The hostname to connect to via FTP"
+    required: true
+  ftp-username:
+    description: "The username to use when connecting via FTP"
+    required: true
+  ftp-password:
+    description: "The password to use when connecting via FTP"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Clear Bootstrap Cache
+      shell: bash
+      id: run-commands
+      env:
+        FTP_SERVER_URL: ${{ inputs.ftp-hostname }}
+        FTP_SERVER_USERNAME: ${{ inputs.ftp-username }}
+        FTP_SERVER_PASSWORD: ${{ inputs.ftp-password }}
+      run: |
+        set -e
+        set -o pipefail
+        set -o nounset
+
+        # -------------------------     Clear Bootstrap Cache     -------------------------
+        printf '\nClearing bootstrap cache contents...\n'
+        lftp -c "set ftp:ssl-allow no; open -u ${FTP_SERVER_USERNAME},${FTP_SERVER_PASSWORD} ${FTP_SERVER_URL}; cd bootstrap/cache; glob -a --exist * && glob -a rm -rf *"
+        printf '\n\n'

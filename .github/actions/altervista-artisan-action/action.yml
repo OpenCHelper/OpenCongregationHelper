@@ -1,0 +1,107 @@
+name: "Remote artisan"
+description: "Run an artisan command on a remote endpoint"
+inputs:
+  commands: # id of input
+    description: "A newline-separated list of artisan commands to execute (`php artisan` will be stripped if preceding the commands)"
+    required: true
+  url:
+    description: "The URL where the Artisan handler is listening"
+    required: true
+  ftp-hostname:
+    description: "The hostname to connect to via FTP"
+    required: true
+  ftp-username:
+    description: "The username to use when connecting via FTP"
+    required: true
+  ftp-password:
+    description: "The password to use when connecting via FTP"
+    required: true
+  log-file:
+    required: false
+    default: ""
+  verbose:
+    required: false
+    default: false
+outputs:
+  output:
+    description: "The output of the command"
+    value: ${{ steps.run-commands.outputs.artisan-output }}
+  remote-url:
+    description: "The URL the Artisan commands have been executed on."
+    value: ${{ steps.run-commands.outputs.artisan-url }}
+  log-file:
+    description: "The log file where the command output has been logged, if specified in the inputs."
+    value: ${{ steps.run-commands.outputs.artisan-logfile }}
+runs:
+  using: "composite"
+  steps:
+    - name: Set GitHub Path
+      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+
+    - name: Run Artisan commands
+      shell: bash
+      id: run-commands
+      env:
+        ARTISAN_BASE_URL: ${{ inputs.url }}
+        ARTISAN_COMMANDS: ${{ inputs.commands }}
+        ARTISAN_COMMANDS_LOG: ${{ inputs.log-file }}
+        FTP_SERVER_URL: ${{ inputs.ftp-hostname }}
+        FTP_SERVER_USERNAME: ${{ inputs.ftp-username }}
+        FTP_SERVER_PASSWORD: ${{ inputs.ftp-password }}
+      run: |
+        set -e
+        set -o pipefail
+        set -o nounset
+
+        [[ ! -x 'scripts/remote_artisan.sh' ]] && chmod +x scripts/remote_artisan.sh
+
+        declare -r TEMPORARY_OUTPUT_LOG="$(mktemp)"
+        trap 'rm -f "$TEMPORARY_OUTPUT_LOG"' EXIT
+
+        function remote_artisan () {
+          if [[ "$1" == '--' ]]; then
+            echo "\$ ${*:2}" >> "${TEMPORARY_OUTPUT_LOG}"
+          else
+            echo "\$ $*" >> "${TEMPORARY_OUTPUT_LOG}"
+          fi
+          scripts/remote_artisan.sh                                 \
+            --base-url "$ARTISAN_BASE_URL"                          \
+            --ftp-hostname "${FTP_SERVER_URL}"              \
+            --ftp-username "${FTP_SERVER_USERNAME}"            \
+            --ftp-password "${FTP_SERVER_PASSWORD}"            \
+            "$@" | tee -a "${TEMPORARY_OUTPUT_LOG}"
+          echo "" >> "${TEMPORARY_OUTPUT_LOG}"
+        }
+
+        printf "::notice::Using Artisan base URL %s\n\n" "$ARTISAN_BASE_URL"
+
+        while read -r command; do
+          printf ">>> $ artisan %s\n" "$command"
+          remote_artisan -- "$command" --no-interaction --no-ansi \
+            | sed 's/^/  | /'
+          printf '\n'
+        done < <(sed -r \
+          -e '/^\s*(#|$)/d' \
+          -e 's/^\s*|\s*$//g' \
+          -e 's/^((php )?artisan)?' <<< "$ARTISAN_COMMANDS"
+        )
+
+        echo "::notice title='Execution completed'::Artisan commands execution completed."
+        if [[ -n "${ARTISAN_COMMANDS_LOG:-}" ]]; then
+          cp -p "$TEMPORARY_OUTPUT_LOG" "$ARTISAN_COMMANDS_LOG"
+          echo "::notice::Output logged to ${ARTISAN_COMMANDS_LOG}."
+        fi
+
+        # Set the step output to the log file path so it can be used in the summary
+        {
+          delimiter="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 64)"
+          echo "artisan-output=${delimiter}"
+          cat "$TEMPORARY_OUTPUT_LOG"
+          echo
+          echo "$delimiter"
+        } >> "$GITHUB_OUTPUT"
+        echo "artisan-logfile=${ARTISAN_COMMANDS_LOG}" >> "$GITHUB_OUTPUT"
+        echo "artisan-url=${ARTISAN_BASE_URL}" >> "$GITHUB_OUTPUT"
