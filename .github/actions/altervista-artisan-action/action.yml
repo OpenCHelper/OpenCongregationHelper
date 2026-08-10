@@ -107,7 +107,7 @@ runs:
         # Set the step output to the log file path so it can be used in the summary
         {
           delimiter="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 64)" || true
-          echo "artisan-output<<'${delimiter}'"
+          echo "artisan-output<<${delimiter}"
           cat "$TEMPORARY_OUTPUT_LOG"
           echo
           echo "$delimiter"
