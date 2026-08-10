@@ -197,7 +197,7 @@ jobs:
           echo "ORIGINAL:"
           sed 's/^/\t | /' <<< "$RAW_ENVIRONMENT"
 
-          parsed_environment="$(sed -r 's/^.*?\.+//; s/^\s*//; s/\s*$//; /^\s*$/d' <<< "$RAW_ENVIRONMENT")"
+          parsed_environment="$(sed -r '1d; s/^.*?\.+//; s/^\s*//; s/\s*$//; /^\s*$/d' <<< "$RAW_ENVIRONMENT")"
           echo "PARSED:"
           sed 's/^/\t | /' <<< "$parsed_environment"
 
