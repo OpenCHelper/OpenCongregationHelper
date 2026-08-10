@@ -19,8 +19,6 @@ jobs:
     uses: ./.github/workflows/upload-altervista-reusable.yml
     with:
       label: PRE-PRODUCTION
-      reset-database: false
-      seed-dummy-data: false
       setup-root-user: false
     secrets:
       ftp_server: ${{ secrets.FTP_SERVER_QA }}
