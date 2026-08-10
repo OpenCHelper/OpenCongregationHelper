@@ -19,7 +19,8 @@
                 "yzhang.markdown-all-in-one",
                 "DavidAnson.vscode-markdownlint",
                 "bmewburn.vscode-intelephense-client",
-                "timonwong.shellcheck"
+                "timonwong.shellcheck",
+                "github.vscode-github-actions"
             ],
             "settings": {}
         }
