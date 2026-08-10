@@ -68,8 +68,8 @@ jobs:
         env:
           FTP_SERVER_URL: ${{ secrets.ftp_server }}
         run: |
-          echo "artisan-base-url='https://artisan.${FTP_SERVER_URL##ftp.}'" >> "$GITHUB_OUTPUT"
-          echo "artisan-log-file='/tmp/artisan-commands-output.txt'" >> "$GITHUB_OUTPUT"
+          echo "artisan-base-url=https://artisan.${FTP_SERVER_URL##ftp.}" >> "$GITHUB_OUTPUT"
+          echo "artisan-log-file=/tmp/artisan-commands-output.txt" >> "$GITHUB_OUTPUT"
 
       - name: Install packages
         run: sudo apt-get update && sudo apt-get install -y jq lftp

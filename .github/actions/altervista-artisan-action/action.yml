@@ -85,7 +85,7 @@ runs:
           echo "" >> "${TEMPORARY_OUTPUT_LOG}"
         }
 
-        printf "::notice::Using Artisan base URL %s\n\n" "$ARTISAN_BASE_URL"
+        printf "::notice::Using Artisan base URL '%s'\n\n" "$ARTISAN_BASE_URL"
 
         while read -r command; do
           printf ">>> $ artisan %s\n" "$command"
