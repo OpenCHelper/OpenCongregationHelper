@@ -3,7 +3,7 @@ name: Upload to Altervista (PRE-PRODUCTION environment)
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+**'
+      - "v[0-9]+.[0-9]+.[0-9]+**"
   workflow_dispatch: # Manually trigger a workflow run
 
 permissions:
@@ -18,11 +18,10 @@ jobs:
   upload:
     uses: ./.github/workflows/upload-altervista-reusable.yml
     with:
-      environment_label: PRE-PRODUCTION
-      composer_no_dev: true
-      fresh_migration: false
-      run_fake_data_seeder: false
-      run_super_admin_setup: false
+      label: PRE-PRODUCTION
+      reset-database: false
+      seed-dummy-data: false
+      setup-root-user: false
     secrets:
       ftp_server: ${{ secrets.FTP_SERVER_QA }}
       ftp_username: ${{ secrets.FTP_USERNAME_QA }}

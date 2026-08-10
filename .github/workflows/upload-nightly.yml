@@ -18,11 +18,11 @@ jobs:
   upload:
     uses: ./.github/workflows/upload-altervista-reusable.yml
     with:
-      environment_label: TEST
-      composer_no_dev: false
-      fresh_migration: true
-      run_fake_data_seeder: true
-      run_super_admin_setup: true
+      label: TEST
+      reset-database: true
+      seed-dummy-data: true
+      setup-root-user: true
+      install-dev-dependencies: true
     secrets:
       ftp_server: ${{ secrets.FTP_SERVER_TEST }}
       ftp_username: ${{ secrets.FTP_USERNAME_TEST }}

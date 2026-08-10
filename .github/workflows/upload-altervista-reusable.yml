@@ -3,27 +3,28 @@ name: Upload to Altervista (Reusable)
 on:
   workflow_call:
     inputs:
-      environment_label:
+      label:
         description: Human-friendly target environment label shown in the job summary.
-        required: true
+        required: false
+        default: "unknown"
         type: string
-      composer_no_dev:
-        description: Install Composer dependencies with --no-dev.
+      install-dev-dependencies:
+        description: Install Composer devevelopment dependencies.
         required: false
         default: false
         type: boolean
-      fresh_migration:
-        description: Use migrate:fresh --seed instead of migrate --seed.
+      reset-database:
+        description: Discard any existing data in the database during the migration.
         required: false
         default: false
         type: boolean
-      run_fake_data_seeder:
-        description: Run db:seed --class=FakeDataSeeder after migration.
+      seed-dummy-data:
+        description: Seed dummy data into the database.
         required: false
         default: false
         type: boolean
-      run_super_admin_setup:
-        description: Run shield:super-admin for user 1 on panel app.
+      setup-root-user:
+        description: "Run `shield:super-admin` for user with ID=1 on the `app` panel."
         required: false
         default: false
         type: boolean
@@ -50,7 +51,7 @@ env:
 
 jobs:
   upload:
-    name: Upload to Altervista (${{ inputs.environment_label }})
+    name: Upload to Altervista (${{ inputs.label }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
     defaults:
@@ -99,7 +100,7 @@ jobs:
             --optimize-autoloader
           )
 
-          if [[ '${{ inputs.composer_no_dev }}' == 'true' ]]; then
+          if [[ '${{ inputs.install-dev-dependencies }}' == 'false' ]]; then
             composer_args+=(--no-dev)
           fi
 
@@ -229,10 +230,10 @@ jobs:
           verbose: true
           commands: |
             # ------------------------- Migrations / Seeder -------------------------
-            artisan ${{ case(inputs.fresh_migration == 'false', 'migrate', 'migrate:fresh') }} --seed
+            artisan ${{ case(inputs.reset-database == 'false', 'migrate', 'migrate:fresh') }} --seed
 
-            ${{ inputs.run_fake_data_seeder == 'false'    && '# ' }} artisan db:seed --class=FakeDataSeeder
-            ${{ inputs.run_super_admin_setup == 'false'   && '# ' }} artisan shield:super-admin --user=1 --panel=app
+            ${{ inputs.seed-dummy-data == 'false' && '# ' }} artisan db:seed --class=FakeDataSeeder
+            ${{ inputs.setup-root-user == 'false' && '# ' }} artisan shield:super-admin --user=1 --panel=app
 
             # ------------------------- Optimizations -------------------------
             # First clear all previous optimizations
@@ -264,7 +265,7 @@ jobs:
           ### Deployment details
           - **Commit**: \`${github_sha_short}\` (\`${github_sha_hash}\`)
           - **Branch**: \`${{ github.ref_name }}\`
-          - **Target**: \`${{ inputs.environment_label }}\`
+          - **Target**: \`${{ inputs.label }}\`
           - **Environment**: \`${{ steps.parse-environment.outputs.app_environment }}\`
 
           ### Artisan Commands Execution
