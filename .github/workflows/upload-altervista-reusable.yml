@@ -211,7 +211,6 @@ jobs:
           ftp-username: ${{ secrets.ftp_username }}
           ftp-password: ${{ secrets.ftp_password }}
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
-          verbose: true
           commands: |
             # ------------------------- Test Artisan endpoint -------------------------
             php artisan test-endpoint positional-arg --keyword-arg
@@ -231,7 +230,6 @@ jobs:
           ftp-username: ${{ secrets.ftp_username }}
           ftp-password: ${{ secrets.ftp_password }}
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
-          verbose: true
           commands: |
             # ------------------------- Migrations / Seeder -------------------------
             artisan ${{ case(inputs.reset-database == 'false', 'migrate', 'migrate:fresh') }} --seed
@@ -258,7 +256,7 @@ jobs:
       - name: Set summary
         env:
           ARTISAN_LOG_FILE: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
-          ARTISAN_BASE_URL: ${{ steps.run-artisan.outputs.artisan_url }}
+          ARTISAN_BASE_URL: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
         run: |
           declare -r github_sha_hash=${{ github.sha }}
           declare -r github_sha_short="${github_sha_hash:0:7}"
@@ -278,9 +276,9 @@ jobs:
           <details>
           <summary>View full Artisan output</summary>
 
-          \`\`\`plaintext
+            \`\`\`plaintext
           $(cat "$ARTISAN_LOG_FILE" | sed 's/^/  /')
-          \`\`\`
+            \`\`\`
 
           </details>
           EOF
