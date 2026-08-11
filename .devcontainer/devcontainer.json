@@ -30,21 +30,25 @@
     },
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "moby": false
+        }
     },
     "remoteUser": "sail",
     "postCreateCommand": {
         "fixPermissions": "chown -R 1000:1000 /var/www/html 2>/dev/null || true",
         "setupBashrc": "echo 'alias sail=\"[ -f sail ] && sh sail || sh vendor/bin/sail\"' >> ~/.bashrc && echo \"alias artisan='php artisan'\" >> ~/.bashrc"
     },
-
     // Forward these ports automatically
-    "forwardPorts": [80, "phpmyadmin:80", "mailpit:80"],
+    "forwardPorts": [
+        80,
+        "phpmyadmin:80",
+        "mailpit:80"
+    ],
     "otherPortsAttributes": {
         // Default behavior for unlisted ports
         "onAutoForward": "notify"
     },
-
     // Stop the containers when the dev container is closed
     "shutdownAction": "stopCompose"
 }
