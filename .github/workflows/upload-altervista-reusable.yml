@@ -75,7 +75,7 @@ jobs:
       - name: Install packages
         run: |
           curl --version && curl --help all
-          
+
           sudo apt-get update \
             && sudo apt-get install -y jq lftp
 
@@ -236,8 +236,8 @@ jobs:
             # ------------------------- Migrations / Seeder -------------------------
             artisan ${{ case(inputs.reset-database == 'false', 'migrate', 'migrate:fresh') }} --seed
 
-            ${{ inputs.seed-dummy-data == 'false' && '# ' }} artisan db:seed --class=FakeDataSeeder
-            ${{ inputs.setup-root-user == 'false' && '# ' }} artisan shield:super-admin --user=1 --panel=app
+            ${{ !inputs.seed-dummy-data && '# ' }} artisan db:seed --class=FakeDataSeeder
+            ${{ !inputs.setup-root-user && '# ' }} artisan shield:super-admin --user=1 --panel=app
 
             # ------------------------- Optimizations -------------------------
             # First clear all previous optimizations
