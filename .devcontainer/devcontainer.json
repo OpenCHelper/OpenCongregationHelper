@@ -23,7 +23,8 @@
                 "github.vscode-github-actions",
                 "cjhowe7.laravel-blade",
                 "foxundermoon.shell-format",
-                "IronGeek.vscode-env"
+                "IronGeek.vscode-env",
+                "EditorConfig.EditorConfig"
             ],
             "settings": {}
         }
