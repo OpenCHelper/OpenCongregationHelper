@@ -36,7 +36,7 @@
     "remoteUser": "sail",
     "postCreateCommand": {
         "fixPermissions": "chown -R 1000:1000 /var/www/html 2>/dev/null || true",
-        "setupBashrc": "echo 'alias sail=\"[ -f sail ] && sh sail || sh vendor/bin/sail\"' >> ~/.bashrc && echo \"alias artisan='php artisan'\" >> ~/.bashrc"
+        "setupBashrc": "echo \"alias artisan='php artisan'\" >> ~/.bashrc"
     },
     // Forward these ports automatically
     "forwardPorts": [
