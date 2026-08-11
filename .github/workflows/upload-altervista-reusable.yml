@@ -236,8 +236,8 @@ jobs:
             # ------------------------- Migrations / Seeder -------------------------
             artisan ${{ case(inputs.reset-database == 'false', 'migrate', 'migrate:fresh') }} --seed
 
-            ${{ !inputs.seed-dummy-data && '# ' }} artisan db:seed --class=FakeDataSeeder
-            ${{ !inputs.setup-root-user && '# ' }} artisan shield:super-admin --user=1 --panel=app
+            ${{ case(inputs.seed-dummy-data, '', '# ') }} artisan db:seed --class=FakeDataSeeder
+            ${{ case(inputs.setup-root-user, '', '# ') }} artisan shield:super-admin --user=1 --panel=app
 
             # ------------------------- Optimizations -------------------------
             # First clear all previous optimizations
