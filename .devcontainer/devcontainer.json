@@ -20,7 +20,10 @@
                 "DavidAnson.vscode-markdownlint",
                 "bmewburn.vscode-intelephense-client",
                 "timonwong.shellcheck",
-                "github.vscode-github-actions"
+                "github.vscode-github-actions",
+                "cjhowe7.laravel-blade",
+                "foxundermoon.shell-format",
+                "IronGeek.vscode-env"
             ],
             "settings": {}
         }
