@@ -18,10 +18,6 @@ Homestead.yaml
 auth.json
 npm-debug.log
 yarn-error.log
-/.fleet
-/.idea
-/.vscode
-/.zed
 
 # Laravel IDE Helper (https://arunas.dev/how-to-improve-intellisense-for-laravel/)
 _ide_helper.php
