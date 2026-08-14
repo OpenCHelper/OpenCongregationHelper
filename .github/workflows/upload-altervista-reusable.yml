@@ -60,7 +60,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -80,7 +80,7 @@ jobs:
             && sudo apt-get install -y jq lftp
 
       - name: Setup NodeJS
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.node_version }}
           cache: npm
@@ -125,7 +125,7 @@ jobs:
           echo "ref: ${{ github.ref }}" > .git-branch-name
 
       - name: FTP Deploy (application)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           protocol: ftp
           server: ${{ secrets.ftp_server }}
@@ -157,7 +157,7 @@ jobs:
       # Separate FTP deploy so that if it fails, the application is still deployed
       # and the vendor folder can be deployed later.
       - name: FTP Deploy (vendor)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           protocol: ftp
           server: ${{ secrets.ftp_server }}
