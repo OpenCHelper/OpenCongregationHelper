@@ -2,6 +2,20 @@
 
 namespace App\Livewire;
 
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\IconEntry;
 use App\Enums\ContactType;
 use App\Models\Contact;
 use App\Models\User;
@@ -9,17 +23,10 @@ use App\Models\User;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms;
-use Filament\Forms\Form;
 
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists;
-use Filament\Infolists\Infolist;
-
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -29,8 +36,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
-class ProfileContacts extends Component implements HasForms, HasTable, HasInfolists
+class ProfileContacts extends Component implements HasForms, HasTable, HasInfolists, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms, InteractsWithTable, InteractsWithInfolists;
 
     public ?array $data = [];
@@ -63,11 +71,11 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
                     ->trueColor('warning')
                     ->falseColor('gray'),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
-                    ->infolist($this->getContactInfolist()),
+                    ->schema($this->getContactInfolist()),
                 EditAction::make()
-                    ->form($this->getFormSchema())
+                    ->schema($this->getFormSchema())
                     ->using(function (array $data, Contact $record): Contact {
                         // If this contact is set as primary, unset any other primary contacts
                         if ($data['is_primary']) {
@@ -82,13 +90,13 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
                         return $record;
                     })
                     ->successNotification(
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->success()
                             ->title(__('profile.contacts.contact_saved'))
                     ),
                 DeleteAction::make()
                     ->successNotification(
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->success()
                             ->title(__('profile.contacts.contact_deleted'))
                     ),
@@ -97,7 +105,7 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
                 Action::make('create')
                     ->label(__('profile.contacts.add_contact'))
                     ->icon('heroicon-o-plus')
-                    ->form($this->getFormSchema())
+                    ->schema($this->getFormSchema())
                     ->action(function (array $data): void {
                         // If this contact is set as primary, unset any other primary contacts
                         // if ($data['is_primary']) {
@@ -114,7 +122,7 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
                         $this->form->model($contact)->saveRelationships();
                     })
                     ->successNotification(
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->success()
                             ->title(__('profile.contacts.contact_saved'))
                     ),
@@ -125,7 +133,7 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
                 Action::make('create')
                     ->label(__('profile.contacts.add_contact'))
                     ->icon('heroicon-o-plus')
-                    ->form($this->getFormSchema())
+                    ->schema($this->getFormSchema())
                     ->action(function (array $data): void {
                         // If this contact is set as primary, unset any other primary contacts
                         // if ($data['is_primary']) {
@@ -142,7 +150,7 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
                         $this->form->model($contact)->saveRelationships();
                     })
                     ->successNotification(
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->success()
                             ->title(__('profile.contacts.contact_saved'))
                     ),
@@ -157,42 +165,42 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
             ->orderBy('type');
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema($this->getFormSchema())
+        return $schema
+            ->components($this->getFormSchema())
             ->statePath('data');
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema($this->getContactInfolist());
+        return $schema
+            ->components($this->getContactInfolist());
     }
 
     protected function getFormSchema(): array
     {
         return [
-            Forms\Components\Select::make('type')
+            Select::make('type')
                 ->label(__('profile.contacts.type'))
                 ->options(ContactType::class)
                 ->required(),
-            Forms\Components\Toggle::make('is_primary')
+            Toggle::make('is_primary')
                 ->label(__('profile.contacts.is_primary'))
                 ->default(false),
-            Forms\Components\TextInput::make('name')
+            TextInput::make('name')
                 ->label(__('profile.contacts.name'))
                 ->prefixIcon('heroicon-o-user')
                 ->required(),
-            Forms\Components\TextInput::make('phone_number')
+            TextInput::make('phone_number')
                 ->label(__('profile.contacts.phone_number'))
                 ->prefixIcon('heroicon-o-phone')
                 ->requiredWithout('address'),
-            Forms\Components\TextInput::make('address')
+            TextInput::make('address')
                 ->label(__('profile.contacts.address'))
                 ->prefixIcon('heroicon-o-map-pin')
                 ->requiredWithout('phone_number'),
-            Forms\Components\Textarea::make('notes')
+            Textarea::make('notes')
                 ->label(__('profile.contacts.notes'))
                 ->placeholder('Notes...')
                 ->columnSpanFull(),
@@ -202,21 +210,21 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
     protected function getContactInfolist(): array
     {
         return [
-            Infolists\Components\TextEntry::make('type')
+            TextEntry::make('type')
                 ->label(__('profile.contacts.type'))
                 ->badge(),
-            Infolists\Components\IconEntry::make('is_primary')
+            IconEntry::make('is_primary')
                 ->boolean()
                 ->label(__('profile.contacts.is_primary')),
-            Infolists\Components\TextEntry::make('name')
+            TextEntry::make('name')
                 ->label(__('profile.contacts.name'))
                 ->icon('heroicon-o-user'),
-            Infolists\Components\TextEntry::make('phone_number')
+            TextEntry::make('phone_number')
                 ->label(__('profile.contacts.phone_number'))
                 ->icon('heroicon-o-phone')
                 ->visible(fn (Contact $record) => !empty($record->phone_number))
                 ->suffixAction(
-                    Infolists\Components\Actions\Action::make('call')
+                    Action::make('call')
                         ->icon('heroicon-o-phone-arrow-up-right')
                         ->label(__('profile.contacts.call'))
                         ->url(
@@ -224,12 +232,12 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
                             shouldOpenInNewTab: false
                         )
                 ),
-            Infolists\Components\TextEntry::make('address')
+            TextEntry::make('address')
                 ->label(__('profile.contacts.address'))
                 ->icon('heroicon-o-map-pin')
                 ->visible(fn (Contact $record) => !empty($record->address))
                 ->suffixAction(
-                    Infolists\Components\Actions\Action::make('open_maps')
+                    Action::make('open_maps')
                         ->icon('heroicon-o-map')
                         ->label(__('profile.contacts.open_maps'))
                         ->url(
@@ -237,7 +245,7 @@ class ProfileContacts extends Component implements HasForms, HasTable, HasInfoli
                             shouldOpenInNewTab: true
                         )
                 ),
-            Infolists\Components\TextEntry::make('notes')
+            TextEntry::make('notes')
                 ->label(__('profile.contacts.notes'))
                 ->visible(fn (Contact $record) => !empty($record->notes))
                 ->icon('heroicon-o-document-text')

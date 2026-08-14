@@ -4,6 +4,11 @@
 [<img alt="Deployed with FTP Deploy Action" src="https://img.shields.io/badge/Deployed With-FTP DEPLOY ACTION-%3CCOLOR%3E?style=for-the-badge&color=blue">](https://github.com/SamKirkland/FTP-Deploy-Action)
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/LukeSavefrogs/registro-territori)
 
+## Tech stack
+
+- Laravel 12
+- Filament 4
+
 ## Support
 
 To receive support and/or propose new features please open an issue.
@@ -83,15 +88,11 @@ The preferred way of developing is by using **Docker Compose** to build the cont
 
 ### Altervista
 
-#### Features
-
-- 💾 Disk space: 3.072 MB (shared between file system and database)
-- 🔒 HTTPS: Yes
-- Traffic: 30 GB / month
-- Subdomain: `{username}.altervista.org`
-- PHP versions:
-  - 5.6 (_deprecated_)
-  - 7.3 (_deprecated_)
-  - 8.0
-  - 8.2
-- 👨🏼‍💻 Shell access: No
+| Feature | Details |
+| --- | --- |
+| Disk space | 3.072 MB (shared between file system and database) |
+| HTTPS | Yes |
+| Traffic | 30 GB / month |
+| Subdomain | `{username}.altervista.org` |
+| PHP versions | 8.2<br/>8.0<br/>~~7.3~~ (_deprecated_)<br/>~~5.6~~ (_deprecated_) |
+| Shell access | No |

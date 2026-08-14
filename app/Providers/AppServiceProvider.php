@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // 
+        //
     }
 
     /**
@@ -41,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Tell Eloquent to be strict about the data types it expects 
+        // Tell Eloquent to be strict about the data types it expects
         // locally.
         // https://laraveldaily.com/lesson/laravel-eloquent-expert/model-fillable-guarded/
         Model::shouldBeStrict(! app()->isProduction());
@@ -49,12 +49,12 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Js::make('filament-sidebar-fix', __DIR__ . '/../../resources/js/filament-sidebar-fix.js')
         ]);
-        
+
         // Add a custom mail transport that uses the native mail() function
         Mail::extend('nativemailfx', function (array $config = []) {
             return new NativeMailFxTransport(/* ... */);
         });
-    
+
         // Configure the gate to only allow super_admins to view logs
         Gate::define('view-logs', function (User $user) {
             return $user->hasRole('super_admin')
@@ -74,15 +74,15 @@ class AppServiceProvider extends ServiceProvider
                 ->flags($flags)
             ;
         });
-        
+
         // Register a fallback for missing translations (eg. when using laravel-tags)
         Translatable::fallback(
             fallbackAny: true,
             missingKeyCallback: function (
-               Model $model, 
-               string $translationKey, 
-               string $locale, 
-               string $fallbackTranslation, 
+               Model $model,
+               string $translationKey,
+               string $locale,
+               string $fallbackTranslation,
                string $fallbackLocale,
             ) {
                 Log::warning('Some translation key is missing from an eloquent model', [
@@ -91,7 +91,7 @@ class AppServiceProvider extends ServiceProvider
                    'fallback_locale' => $fallbackLocale,
                    'fallback_translation' => $fallbackTranslation,
                    'model_id' => $model->id,
-                   'model_class' => get_class($model), 
+                   'model_class' => get_class($model),
                 ]);
             }
         );

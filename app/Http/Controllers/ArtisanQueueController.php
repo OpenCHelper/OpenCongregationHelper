@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 
@@ -39,8 +42,8 @@ class ArtisanQueueController extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Response
      */
     public function __invoke()
     {
@@ -94,7 +97,7 @@ class ArtisanQueueController extends Controller
         try {
             // Log::info('Executing Artisan command: queue:work with params: ' . json_encode($params));
             $exitCode = Artisan::call("queue:work", $params);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error executing Artisan command: queue:work with params: ' . json_encode($params) . ' - ' . $e->getMessage());
             return response()->json([
                 'success' => false,

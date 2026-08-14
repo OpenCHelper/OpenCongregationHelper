@@ -21,7 +21,7 @@ class Tag extends SpatieTag
      */
     public function territories(): MorphToMany
     {
-        return $this->morphedByMany(\App\Models\Territory::class, 'taggable');
+        return $this->morphedByMany(Territory::class, 'taggable');
     }
 
     /**
@@ -29,7 +29,7 @@ class Tag extends SpatieTag
      */
     public function territoryZones(): MorphToMany
     {
-        return $this->morphedByMany(\App\Models\TerritoryZone::class, 'taggable');
+        return $this->morphedByMany(TerritoryZone::class, 'taggable');
     }
 
     /**

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 
@@ -11,8 +14,8 @@ class ArtisanScheduledController extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Response
      */
     public function __invoke()
     {
@@ -25,7 +28,7 @@ class ArtisanScheduledController extends Controller
         try {
             // Log::info('Executing Artisan command "schedule:run" with params: ' . json_encode($params));
             $exitCode = Artisan::call("schedule:run", $params);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error executing Artisan command "schedule:run" with params: ' . json_encode($params) . ' - ' . $e->getMessage());
             return response()->json([
                 'success' => false,

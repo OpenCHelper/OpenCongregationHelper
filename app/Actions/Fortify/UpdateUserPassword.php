@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +21,7 @@ class UpdateUserPassword implements UpdatesUserPasswords
     {
         // Prevent password updates for protected root users
         if ($user->isRootUserProtected()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'current_password' => [__('profile.root_user_protection.password_change_not_allowed')],
             ])->errorBag('updatePassword');
         }

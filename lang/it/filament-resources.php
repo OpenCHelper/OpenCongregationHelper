@@ -41,6 +41,10 @@ return [
         'territory_assigned_body' => 'Ti è stato assegnato il territorio :territory.',
         'territory_returned_title' => 'Territorio :territory riconsegnato',
         'territory_returned_body' => 'Il tuo territorio è stato riconsegnato.',
+        'territory_returned_success_title' => 'Territorio riconsegnato con successo',
+        'territory_returned_success_body' => 'Il territorio è stato riconsegnato con successo.',
+        'territory_returned_error_title' => 'Errore durante la riconsegna',
+        'territory_returned_error_body' => 'Si è verificato un errore durante la riconsegna del territorio.',
         'stale_assignment_title' => 'Territorio fuori da :days giorni',
         'stale_assignment_body' => 'Se lo hai terminato, ricordati di riconsegnarlo.',
         'campaign_created_title' => 'Nuova campagna!',
@@ -123,6 +127,10 @@ return [
         'status_unassigned' => 'Non assegnati',
         'filter_assignment_status' => 'Stato assegnazione',
         'filter_no_campaign' => 'Nessuna campagna',
+        'filter_map' => 'Stato mappa interattiva',
+        'filter_map_any' => 'Qualsiasi',
+        'filter_map_available' => 'Disponibile',
+        'filter_map_unavailable' => 'Non disponibile',
     ],
     'territory_zone' => [
         'model_label' => 'zona',
@@ -253,7 +261,7 @@ return [
         'status_almost_expired' => 'Quasi scaduta',
         'status_terminated' => 'Terminata',
         'filter_trashed' => 'Elementi eliminati',
-        
+
         // Campaign Overview Widget
         'widget_remaining_days' => 'Giorni rimanenti',
         'widget_completion_status' => 'Stato di completamento',
@@ -264,7 +272,7 @@ return [
         'widget_warning_25_percent' => 'Rimane meno del 25% del tempo, ma solo il :percentage% dei territori è stato assegnato.',
         'widget_warning_50_percent' => 'Rimane meno del 50% del tempo, ma solo il :percentage% dei territori è stato assegnato.',
         'widget_warning_75_percent' => 'Rimane meno del 75% del tempo, ma solo il :percentage% dei territori è stato assegnato.',
-        
+
         // Campaign Assignments Chart Widget
         'widget_assignments_chart_heading' => 'Panoramica dello stato delle assegnazioni',
         'widget_assignments_chart_description' => 'Panoramica dello stato delle assegnazioni dei territori in questa campagna.',
@@ -272,11 +280,11 @@ return [
         'widget_assignments_chart_to_be_assigned' => 'Da assegnare',
         'widget_assignments_chart_in_progress' => 'In corso',
         'widget_assignments_chart_completed' => 'Completati',
-        
+
         // Campaign Assignments Relation Manager
         'assignments_relation_description' => 'Tutte le assegnazioni di territori per questa campagna.',
         'manage_assignments_title' => 'Gestisci assegnazioni',
-        
+
         // Campaign Assignment Creation Wizard
                 // Campaign Assignment Creation Wizard
         'assignments_create_modal_heading' => 'Crea nuova assegnazione',
@@ -286,7 +294,7 @@ return [
         'assignments_create_step_additional_description' => 'Note opzionali e data di fine',
         'assignments_create_step_review' => 'Revisione',
         'assignments_create_step_review_description' => 'Rivedi l\'assegnazione prima di crearla',
-        
+
         // Campaign Assignment Bulk Actions
         'bulk_action_terminate_assignments' => 'Termina assegnazioni',
         'bulk_action_terminate_assignments_modal_heading' => 'Termina le assegnazioni selezionate',

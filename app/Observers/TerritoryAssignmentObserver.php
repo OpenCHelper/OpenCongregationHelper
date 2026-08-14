@@ -22,14 +22,14 @@ class TerritoryAssignmentObserver
 
     /**
      * Handle the TerritoryAssignment "updated" event.
-     */         
+     */
     public function updated(TerritoryAssignment $territoryAssignment): void
     {
         if ($territoryAssignment->wasChanged('ended_at') && $territoryAssignment->ended_at !== null) {
             // Carica la relazione territory prima di inviare la notifica
-            $territoryAssignment->load('territory');
+            $territoryAssignment->load(['territory', 'shared']);
             $territoryAssignment->assignee->notify(new TerritoryReturnedNotification($territoryAssignment));
-            
+
             // Remove shared URL when assignment ends
             if ($territoryAssignment->shared) {
                 $territoryAssignment->shared->delete();

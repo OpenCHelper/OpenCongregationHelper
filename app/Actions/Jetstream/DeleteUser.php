@@ -2,6 +2,7 @@
 
 namespace App\Actions\Jetstream;
 
+use Exception;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,7 @@ class DeleteUser implements DeletesUsers
     {
         // Prevent deletion of root user under any circumstances
         if ($user->isRootUser()) {
-            throw new \Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
+            throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
         }
 
         DB::transaction(function () use ($user) {
@@ -53,7 +54,7 @@ class DeleteUser implements DeletesUsers
         $user->ownedTeams->each(function (Team $team) {
             $this->deletesTeams->delete($team);
         });
-        
+
         // Note: This application uses teams primarily for ownership, not membership
         // If team memberships were needed, you would handle them here with a BelongsToMany relationship
     }

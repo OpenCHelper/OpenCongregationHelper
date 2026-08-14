@@ -2,11 +2,12 @@
 
 namespace App\Filament\Guest\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Panel;
 use App\Models\SharedUrl;
 use App\Models\TerritoryAssignment;
-use App\Filament\Resources\TerritoryAssignmentResource;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use Filament\Pages\Page;
-use Filament\Infolists\Infolist;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Illuminate\Database\Eloquent\Model;
@@ -15,9 +16,9 @@ class ViewSharedAssignment extends Page implements HasInfolists
 {
     use InteractsWithInfolists;
 
-    protected static ?string $navigationIcon = 'heroicon-o-share';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-share';
     
-    protected static string $view = 'filament.guest.pages.view-shared-assignment';
+    protected string $view = 'filament.guest.pages.view-shared-assignment';
     
     protected static bool $shouldRegisterNavigation = false;
 
@@ -40,12 +41,12 @@ class ViewSharedAssignment extends Page implements HasInfolists
         return ucfirst(__('filament-resources.territory_assignment.model_label') . ': ' . $this->assignment->territory->name);
     }
 
-    public function assignmentInfolist(Infolist $infolist): Infolist
+    public function assignmentInfolist(Schema $schema): Schema
     {
-        return TerritoryAssignmentResource::infolist($infolist)->record($this->assignment);
+        return TerritoryAssignmentResource::infolist($schema)->record($this->assignment);
     }
 
-    public static function getRoutePath(): string
+    public static function getRoutePath(Panel $panel): string
     {
         return '/shared-assignment/{record}';
     }

@@ -34,7 +34,7 @@ use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Jetstream;
 use \FilipFonal\FilamentLogManager\FilamentLogManager;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
-use Awcodes\FilamentVersions\VersionsPlugin;
+use Awcodes\Versions\VersionsPlugin;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
@@ -122,10 +122,10 @@ class AppPanelProvider extends PanelProvider
 
         if (app()->environment(["local", "nightly"])) {
             $panel->plugins([
-                \TomatoPHP\FilamentArtisan\FilamentArtisanPlugin::make(),
+                // \TomatoPHP\FilamentArtisan\FilamentArtisanPlugin::make(),
             ]);
         }
-        
+
         // Dynamically add registration views based on the fortify
         // configuration file.
         if (FortifyFeatures::enabled(FortifyFeatures::registration())) {
@@ -188,7 +188,7 @@ class AppPanelProvider extends PanelProvider
         if (!$user) {
             return false;
         }
-        
+
         $hasVerifiedEmail = $user->email_verified_at !== null;
 
         // Allow the profile page to be accessible even to users without a verified email

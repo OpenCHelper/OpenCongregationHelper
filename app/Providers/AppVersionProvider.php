@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use Awcodes\FilamentVersions\Providers\Contracts\VersionProvider;
+use DateTimeZone;
+use Awcodes\Versions\Providers\Contracts\VersionProvider;
 
 class AppVersionProvider implements VersionProvider
 {
@@ -52,7 +53,7 @@ class AppVersionProvider implements VersionProvider
     {
         $branch_file = config('app.version_info.branch_file') ?: '.git/HEAD';
 
-        if (empty($branch_file) || ! is_string($branch_file) || ! file_exists(base_path($branch_file)) || ! is_readable(base_path($branch_file))) {
+        if (! is_string($branch_file) || ! file_exists(base_path($branch_file)) || ! is_readable(base_path($branch_file))) {
             return null;
         }
 
@@ -121,7 +122,7 @@ class AppVersionProvider implements VersionProvider
         }
 
         $date_time = date_create_immutable('@'.$last_modified_at);
-        $timezone = new \DateTimeZone(config('app.timezone', 'UTC'));
+        $timezone = new DateTimeZone(config('app.timezone', 'UTC'));
         $date_time = $date_time ? $date_time->setTimezone($timezone) : false;
 
         return $date_time !== false ? $date_time->format('Y-m-d H:i:s') : null;

@@ -1,116 +1,75 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
-use App\Models\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\TerritoryAssignment;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TerritoryAssignmentPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(?User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        if (!$user) {
-            return true;
-        }
-        
-        return $user->can('view_any_territory::assignment');
+        return $authUser->can('ViewAny:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(?User $user, TerritoryAssignment $territoryAssignment): bool
+    public function view(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        if (!$user) {
-            return true;
-        }
-        
-        return $user->can('view_territory::assignment');
+        return $authUser->can('View:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->can('create_territory::assignment');
+        return $authUser->can('Create:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, TerritoryAssignment $territoryAssignment): bool
+    public function update(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        return $user->can('update_territory::assignment');
+        return $authUser->can('Update:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, TerritoryAssignment $territoryAssignment): bool
+    public function delete(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        return $user->can('delete_territory::assignment');
+        return $authUser->can('Delete:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can bulk delete.
-     */
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->can('delete_any_territory::assignment');
+        return $authUser->can('DeleteAny:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, TerritoryAssignment $territoryAssignment): bool
+    public function restore(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        return $user->can('force_delete_territory::assignment');
+        return $authUser->can('Restore:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        return $user->can('force_delete_any_territory::assignment');
+        return $authUser->can('ForceDelete:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can restore.
-     */
-    public function restore(User $user, TerritoryAssignment $territoryAssignment): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_territory::assignment');
+        return $authUser->can('ForceDeleteAny:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can bulk restore.
-     */
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_any_territory::assignment');
+        return $authUser->can('RestoreAny:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can replicate.
-     */
-    public function replicate(User $user, TerritoryAssignment $territoryAssignment): bool
+    public function replicate(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        return $user->can('replicate_territory::assignment');
+        return $authUser->can('Replicate:TerritoryAssignment');
     }
 
-    /**
-     * Determine whether the user can reorder.
-     */
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->can('reorder_territory::assignment');
+        return $authUser->can('Reorder:TerritoryAssignment');
     }
+
 }

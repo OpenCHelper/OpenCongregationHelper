@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\TerritoryFactory;
 use App\HasParentSoftDeletable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,7 @@ use Spatie\Activitylog\LogOptions;
 
 class Territory extends Model
 {
-    /** @use HasFactory<\Database\Factories\TerritoryFactory> */
+    /** @use HasFactory<TerritoryFactory> */
     use HasFactory;
     use SoftDeletes;
 
@@ -90,7 +91,7 @@ class Territory extends Model
      */
     public function currentAssignee(): HasOneThrough {
         return $this->hasOneThrough(
-            \App\Models\User::class,
+            User::class,
             TerritoryAssignment::class,
             'territory_id',    // Foreign key on territory_assignments table
             'id',              // Foreign key on users table

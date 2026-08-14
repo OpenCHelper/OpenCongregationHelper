@@ -20,7 +20,7 @@ class FakeTerritorySeeder extends Seeder
     public function run(): void
     {
         $faker = app(Faker::class);
-        
+
         $users = User::all();
         $territoryZones = TerritoryZone::factory(3)->withColor()->hasTerritories(3, fn () => [
             'is_commercial' => $faker->boolean(25),
@@ -29,7 +29,7 @@ class FakeTerritorySeeder extends Seeder
         Territory::factory(3)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
         ])->withImage()->withTags()->create();
-        
+
         Territory::factory(5)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
         ])->withMap()->withTags()->create();
@@ -41,6 +41,12 @@ class FakeTerritorySeeder extends Seeder
         Territory::factory(2)->for($territoryZones->random())->state(fn () => [
             'created_by' => $users->random()->id,
         ])->isCommercial()->withMap()->create();
+
+        for ($i=0; $i < 5; $i++) {
+            Territory::factory(2)->for($territoryZones->random())->state(fn() => [
+                'created_by' => $users->random()->id,
+            ])->withMap()->create();
+        }
 
         // Create territories with both image and map (test)
         Territory::factory(2)->for($territoryZones->random())->state(fn () => [

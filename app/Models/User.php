@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use App\Enums\ContactType;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -34,7 +35,7 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
 
     use HasRoles;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
     use HasProfilePhoto;
     use HasTeams;

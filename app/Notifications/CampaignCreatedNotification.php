@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 
 use App\Models\User;
 use App\Models\Campaign;
-use App\Filament\Resources\CampaignResource;
+use App\Filament\Resources\Campaigns\CampaignResource;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Notifications\Actions\Action as FilamentAction;
 

@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use Carbon\Carbon;
 use App\Models\Campaign;
 
 enum CampaignStatus: string
@@ -31,7 +32,7 @@ enum CampaignStatus: string
         };
     }
 
-    public static function fromValidUntil(?\Carbon\Carbon $validUntil): self
+    public static function fromValidUntil(?Carbon $validUntil): self
     {
         if (!$validUntil) {
             return self::ACTIVE;
@@ -53,6 +54,6 @@ enum CampaignStatus: string
 
     public static function fromCampaign(Campaign $campaign): self
     {
-        return self::fromValidUntil($campaign->valid_until ? \Carbon\Carbon::parse($campaign->valid_until) : null);
+        return self::fromValidUntil($campaign->valid_until ? Carbon::parse($campaign->valid_until) : null);
     }
 }

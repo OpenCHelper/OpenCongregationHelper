@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 import laravel, { refreshPaths } from 'laravel-vite-plugin'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-    server: { 
+    server: {
         hmr: {
             host: 'localhost',
         },
@@ -24,5 +25,6 @@ export default defineConfig({
                 'app/Tables/Columns/**',
             ],
         }),
+        tailwindcss(),
     ],
 })

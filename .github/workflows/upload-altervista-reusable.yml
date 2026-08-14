@@ -253,6 +253,9 @@ jobs:
             artisan filament:cache-components
             artisan filament:optimize
 
+            # Interrupt sub-minute tasks (if any) - https://laravel.com/docs/12.x/scheduling#interrupting-sub-minute-tasks
+            artisan schedule:interrupt
+
       - name: Set summary
         env:
           ARTISAN_LOG_FILE: ${{ steps.artisan-required-data.outputs.artisan-log-file }}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
@@ -40,7 +41,7 @@ class ArtisanCommandController extends Controller
 
         try {
             $exitCode = Artisan::call("$command $params");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error executing Artisan command: ' . $command . ' with params: ' . json_encode($params) . ' - ' . $e->getMessage());
             return response()->json([
                 'success' => false,

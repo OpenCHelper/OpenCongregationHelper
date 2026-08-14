@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\TerritoryAssignmentFactory;
 use App\Observers\TerritoryAssignmentObserver;
 use App\Traits\HasSharedUrl;
 use App\Traits\HasGuestViewPage;
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
@@ -18,20 +18,20 @@ use Spatie\Activitylog\LogOptions;
 #[ObservedBy(TerritoryAssignmentObserver::class)]
 class TerritoryAssignment extends Model
 {
-    /** @use HasFactory<\Database\Factories\TerritoryAssignmentFactory> */
+    /** @use HasFactory<TerritoryAssignmentFactory> */
     use HasFactory;
     use SoftDeletes;
     use LogsActivity;
 
     use HasSharedUrl;
     use HasGuestViewPage;
-    
+
     /**
      * Override the guest page route to use the correct path
      * for TerritoryAssignment (called `SharedAssignment` in the guest panel).
      */
     protected ?string $guestPageRoute = '/guest/shared-assignment';
-    
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -64,8 +64,8 @@ class TerritoryAssignment extends Model
     /**
      * Get the Assignee associated with the territory.
      */
-    public function assignee(): HasOne {
-        return $this->hasOne(User::class, 'id', 'assignee_id');
+    public function assignee(): BelongsTo {
+        return $this->belongsTo(User::class, 'assignee_id');
     }
 
     // /**
@@ -82,8 +82,8 @@ class TerritoryAssignment extends Model
         return $this->belongsTo(Campaign::class);
     }
 
-    public function creator(): HasOne {
-        return $this->hasOne(User::class, 'id', 'created_by');
+    public function creator(): BelongsTo {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**

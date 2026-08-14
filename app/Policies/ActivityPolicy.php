@@ -1,66 +1,75 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Activitylog\Models\Activity;
-use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ActivityPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    use HandlesAuthorization;
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return false;
+        return $authUser->can('ViewAny:Activity');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Activity $activity): bool
+    public function view(AuthUser $authUser, Activity $activity): bool
     {
-        return false;
+        return $authUser->can('View:Activity');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return false;
+        return $authUser->can('Create:Activity');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Activity $activity): bool
+    public function update(AuthUser $authUser, Activity $activity): bool
     {
-        return false;
+        return $authUser->can('Update:Activity');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Activity $activity): bool
+    public function delete(AuthUser $authUser, Activity $activity): bool
     {
-        return false;
+        return $authUser->can('Delete:Activity');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Activity $activity): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return false;
+        return $authUser->can('DeleteAny:Activity');
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Activity $activity): bool
+    public function restore(AuthUser $authUser, Activity $activity): bool
     {
-        return false;
+        return $authUser->can('Restore:Activity');
     }
+
+    public function forceDelete(AuthUser $authUser, Activity $activity): bool
+    {
+        return $authUser->can('ForceDelete:Activity');
+    }
+
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:Activity');
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:Activity');
+    }
+
+    public function replicate(AuthUser $authUser, Activity $activity): bool
+    {
+        return $authUser->can('Replicate:Activity');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:Activity');
+    }
+
 }

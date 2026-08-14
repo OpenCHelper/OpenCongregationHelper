@@ -54,7 +54,7 @@ class DetectStaleAssignments implements ShouldQueue, ShouldBeUnique
     public function handle(): void
     {
         Log::info('DetectStaleAssignments job started.');
-        
+
         $assignments = TerritoryAssignment::where('ended_at', null)->get();
 
         foreach ($assignments as $assignment) {

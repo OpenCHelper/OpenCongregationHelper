@@ -1,18 +1,18 @@
 <?php
 
+use App\Filament\Resources\MailLogs\MailLogResource;
+
 return [
     'amazon-ses' => [
         'configuration-set' => null,
     ],
 
     'resources' => [
-        'MaiLogResource' => \App\Filament\Resources\MailLogResource::class,
+        'MailLogResource' => MailLogResource::class,
     ],
 
     'navigation' => [
-        'group' => 'Developer',
         'maillog' => [
-            'label' => 'Mail Log',
             'register' => true,
             'sort' => 1,
             'icon' => 'heroicon-o-rectangle-stack',
@@ -22,5 +22,17 @@ return [
     'sort' => [
         'column' => 'created_at',
         'direction' => 'desc',
+    ],
+
+    'tenancy' => [
+        'enabled' => env('FILAMENT_MAILLOG_TENANCY_ENABLED', false),
+        'model' => null,
+        'relationship_name' => env('FILAMENT_MAILLOG_TENANCY_RELATIONSHIP_NAME', null),
+        'column' => env('FILAMENT_MAILLOG_TENANCY_COLUMN', null),
+        'foreign_key' => [
+            'on_delete' => env('FILAMENT_MAILLOG_TENANCY_ON_DELETE', 'cascade'),
+            'on_update' => env('FILAMENT_MAILLOG_TENANCY_ON_UPDATE', 'cascade'),
+        ],
+        'auto_assign' => env('FILAMENT_MAILLOG_TENANCY_AUTO_ASSIGN', true),
     ],
 ];

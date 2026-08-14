@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 
 use App\Models\User;
 use App\Models\TerritoryAssignment;
-use App\Filament\Resources\TerritoryAssignmentResource;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Notifications\Actions\Action as FilamentAction;
 

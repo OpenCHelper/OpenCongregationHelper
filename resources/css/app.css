@@ -1,7 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@tailwind variants;
+@import 'tailwindcss';
+@import '../../vendor/filament/filament/resources/css/theme.css';
 
 /*
    ------------ Override for `Dotswan\MapPicker` ------------
@@ -13,8 +11,29 @@ div[x-ref="map"] {
 }
 
 /* Hide the Geoman controls from the infolist entry */
-.fi-in-entry-wrp div[x-ref="map"]>.leaflet-control-container>div>.leaflet-pm-toolbar.leaflet-pm-draw.leaflet-bar.leaflet-control {
+.fi-in-entry-wrp div[x-ref="map"] .leaflet-pm-toolbar.leaflet-pm-draw.leaflet-bar.leaflet-control {
     display: none !important;
+}
+
+/*
+   ------------ Override for `eduardoribeirodev/filament-leaflet` ------------
+
+   Waiting for PR #35 to be merged (https://github.com/eduardoribeirodev/filament-leaflet/pull/35).
+*/
+.leaflet-pane.leaflet-overlay-pane {
+    z-index: 400 !important;
+}
+
+.leaflet-pane.leaflet-shadow-pane {
+    z-index: 500 !important;
+}
+
+.leaflet-pane.leaflet-marker-pane {
+    z-index: 600 !important;
+}
+
+.leaflet-pane.leaflet-tooltip-pane {
+    z-index: 650 !important;
 }
 
 /*

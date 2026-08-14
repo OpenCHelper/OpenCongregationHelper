@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class StatsOverview extends BaseWidget
 {
-    protected static ?string $pollingInterval = '10s';
+    protected ?string $pollingInterval = '10s';
 
     protected function getStats(): array
     {

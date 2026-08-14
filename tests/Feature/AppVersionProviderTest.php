@@ -2,6 +2,7 @@
 
 use App\Providers\AppVersionProvider;
 use Illuminate\Support\Facades\Config;
+use Awcodes\Versions\Providers\Contracts\VersionProvider;
 
 beforeEach(function () {
     // Reset configuration for each test
@@ -32,7 +33,7 @@ describe('AppVersionProvider', function () {
     it('implements VersionProvider interface', function () {
         $provider = new AppVersionProvider;
 
-        expect($provider)->toBeInstanceOf(\Awcodes\FilamentVersions\Providers\Contracts\VersionProvider::class);
+        expect($provider)->toBeInstanceOf(VersionProvider::class);
     });
 
     it('returns correct name', function () {

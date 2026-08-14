@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use Exception;
 use App\Models\User;
 
 class UserObserver
@@ -54,7 +55,7 @@ class UserObserver
     {
         // Prevent deletion of root user under any circumstances
         if ($user->isRootUser()) {
-            throw new \Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
+            throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
         }
         
         return true;

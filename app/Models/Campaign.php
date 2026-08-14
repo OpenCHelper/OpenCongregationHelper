@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CampaignFactory;
 use App\Enums\CampaignStatus;
 use App\Observers\CampaignObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -18,7 +19,7 @@ use Spatie\Activitylog\LogOptions;
 #[ObservedBy(CampaignObserver::class)]
 class Campaign extends Model
 {
-    /** @use HasFactory<\Database\Factories\CampaignFactory> */
+    /** @use HasFactory<CampaignFactory> */
     use HasFactory;
     use SoftDeletes;
     use LogsActivity;

@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
+use Filament\Auth\Events\Registered;
 use App\Models\Team;
-use Filament\Events\Auth\Registered;
 use Laravel\Jetstream\Features;
 
 class CreatePersonalTeam

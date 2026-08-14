@@ -2,9 +2,15 @@
 
 namespace App\Filament\Guest\Pages;
 
+use App\Models\TerritoryAssignment;
+use App\Models\Territory;
+use Filament\Schemas\Schema;
+use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
+use App\Filament\Resources\Territories\TerritoryResource;
+use Filament\Panel;
 use App\Models\SharedUrl;
 use Filament\Pages\Page;
-use Filament\Infolists\Infolist;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Illuminate\Database\Eloquent\Model;
@@ -22,9 +28,9 @@ class ViewSharedResource extends Page implements HasInfolists
 {
     use InteractsWithInfolists;
 
-    protected static ?string $navigationIcon = 'heroicon-o-share';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-share';
     
-    protected static string $view = 'filament.guest.pages.view-shared-resource';
+    protected string $view = 'filament.guest.pages.view-shared-resource';
     
     protected static bool $shouldRegisterNavigation = false;
 
@@ -48,9 +54,9 @@ class ViewSharedResource extends Page implements HasInfolists
     {
         // Get the translated model label based on the shareable resource type
         return match (get_class($this->shareableResource)) {
-            \App\Models\TerritoryAssignment::class => 
+            TerritoryAssignment::class => 
                 __('filament-resources.territory_assignment.model_label'),
-            \App\Models\Territory::class => 
+            Territory::class => 
                 __('filament-resources.territory.model_label'),
             default => strtolower(class_basename($this->shareableResource))
         };
@@ -69,31 +75,31 @@ class ViewSharedResource extends Page implements HasInfolists
         }
 
         return match (get_class($this->shareableResource)) {
-            \App\Models\TerritoryAssignment::class => 
+            TerritoryAssignment::class => 
                 Str::ucfirst(__('filament-resources.territory_assignment.model_label') . ': ' . $this->shareableResource->territory->name),
-            \App\Models\Territory::class => 
+            Territory::class => 
                 Str::ucfirst(__('filament-resources.territory.model_label') . ': ' . $this->shareableResource->name),
             default => ucfirst($this->resourceType) . ' details'
         };
     }
 
-    public function resourceInfolist(Infolist $infolist): Infolist
+    public function resourceInfolist(Schema $schema): Schema
     {
-        return $this->getResourceInfolist($infolist)->record($this->shareableResource);
+        return $this->getResourceInfolist($schema)->record($this->shareableResource);
     }
 
-    protected function getResourceInfolist(Infolist $infolist): Infolist
+    protected function getResourceInfolist(Schema $schema): Schema
     {
         // Try to get the resource class and use its infolist
         $resourceClass = $this->getResourceClass();
         
         if ($resourceClass && method_exists($resourceClass, 'infolist')) {
-            return $resourceClass::infolist($infolist);
+            return $resourceClass::infolist($schema);
         }
 
         // Fallback to a basic infolist
-        return $infolist->schema([
-            \Filament\Infolists\Components\TextEntry::make('id')
+        return $schema->components([
+            TextEntry::make('id')
                 ->label('ID'),
         ]);
     }
@@ -107,13 +113,13 @@ class ViewSharedResource extends Page implements HasInfolists
     protected function getResourceClass(): ?string
     {
         return match (get_class($this->shareableResource)) {
-            \App\Models\TerritoryAssignment::class => \App\Filament\Resources\TerritoryAssignmentResource::class,
-            \App\Models\Territory::class => \App\Filament\Resources\TerritoryResource::class,
+            TerritoryAssignment::class => TerritoryAssignmentResource::class,
+            Territory::class => TerritoryResource::class,
             default => null
         };
     }
 
-    public static function getRoutePath(): string
+    public static function getRoutePath(Panel $panel): string
     {
         return '/shared-resource/{record}';
     }

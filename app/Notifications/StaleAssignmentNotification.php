@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use Filament\Actions\Action;
 use App\Models\User;
 
 use Illuminate\Bus\Queueable;
@@ -11,8 +12,7 @@ use Illuminate\Notifications\Notification;
 
 use Illuminate\Support\Carbon;
 use Filament\Notifications\Notification as FilamentNotification;
-use Filament\Notifications\Actions\Action as FilamentAction;
-use App\Filament\Resources\TerritoryAssignmentResource;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\TerritoryAssignment;
 
 class StaleAssignmentNotification extends Notification
@@ -80,7 +80,7 @@ class StaleAssignmentNotification extends Notification
             ->icon('heroicon-o-map')
             ->warning()
             ->actions([
-                FilamentAction::make('view')
+                Action::make('view')
                     ->icon('heroicon-o-eye')
                     ->url(TerritoryAssignmentResource::getUrl('view', [
                         'record' => $this->assignment->id,

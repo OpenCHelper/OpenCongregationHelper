@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use Filament\Actions\Action;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -9,9 +10,8 @@ use Illuminate\Notifications\Notification;
 
 use App\Models\User;
 use App\Models\TerritoryAssignment;
-use App\Filament\Resources\TerritoryAssignmentResource;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use Filament\Notifications\Notification as FilamentNotification;
-use Filament\Notifications\Actions\Action as FilamentAction;
 
 class TerritoryAssignedNotification extends Notification
 {
@@ -72,7 +72,7 @@ class TerritoryAssignedNotification extends Notification
             ->body(__('filament-resources.database_notifications.territory_assigned_body', ['territory' => $this->assignment->territory->name]))
             ->icon('heroicon-o-map')
             ->actions([
-                FilamentAction::make('view')
+                Action::make('view')
                     ->icon('heroicon-o-eye')
                     ->url(TerritoryAssignmentResource::getUrl('view', [
                         'record' => $this->assignment->id,
