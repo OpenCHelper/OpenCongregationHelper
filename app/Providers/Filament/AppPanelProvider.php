@@ -42,11 +42,15 @@ use Tapp\FilamentMailLog\FilamentMailLogPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
 
 use Filament\Support\Enums\Platform;
+use Hammadzafar05\FilamentMobilePreset\FilamentMobilePresetPlugin;
+use Detection\MobileDetect;
 
 class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $detect = new MobileDetect();
+
         $panel
             ->default()
             ->id('app')
@@ -113,6 +117,9 @@ class AppPanelProvider extends PanelProvider
                     ]),
                 FilamentMailLogPlugin::make(),
                 ActivitylogPlugin::make(),
+                FilamentMobilePresetPlugin::make()
+                    ->stackedTables(false)
+                    ->slideOverModals($detect->isMobile()),
             ])
             ->middleware([
                 EncryptCookies::class,
