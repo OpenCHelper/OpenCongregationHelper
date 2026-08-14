@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 @import '../../vendor/filament/filament/resources/css/theme.css';
 
+.versions-nav-widget>ul>li {
+    width: 100%;
+}
+
 /*
    ------------ Override for `Dotswan\MapPicker` ------------
 
