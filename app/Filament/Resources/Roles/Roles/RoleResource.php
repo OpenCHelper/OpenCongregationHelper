@@ -41,6 +41,18 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament-resources.user.navigation_group');
+    }
+
+    #[Override]
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
+
+
     #[Override]
     public static function form(Schema $schema): Schema
     {
