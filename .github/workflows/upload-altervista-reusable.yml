@@ -111,7 +111,7 @@ jobs:
           npm run build --if-present && rm -rf node_modules
 
           chmod -R 775 storage
-          php artisan optimize:clear
+          php artisan optimize:clear --except=cache || true
           php artisan storage:link --force
 
           php artisan filament:asset
