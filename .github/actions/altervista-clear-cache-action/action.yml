@@ -13,6 +13,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Install packages
+      shell: bash
+      run: |
+        sudo apt-get update \
+          && sudo apt-get install -y lftp
+
     - name: Clear Bootstrap Cache
       shell: bash
       id: run-commands
@@ -35,7 +41,7 @@ runs:
 
           cd bootstrap/cache  || exit 0
           glob -a --exist *   || exit 0
-          
+
           glob -a rm -rf *
         EOF
 

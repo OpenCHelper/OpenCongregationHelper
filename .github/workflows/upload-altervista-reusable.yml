@@ -72,13 +72,6 @@ jobs:
           echo "artisan-base-url=https://artisan.${FTP_SERVER_URL##ftp.}" >> "$GITHUB_OUTPUT"
           echo "artisan-log-file=/tmp/artisan-commands-output.txt" >> "$GITHUB_OUTPUT"
 
-      - name: Install packages
-        run: |
-          curl --version && curl --help all
-
-          sudo apt-get update \
-            && sudo apt-get install -y jq lftp
-
       - name: Setup NodeJS
         uses: actions/setup-node@v7
         with:
