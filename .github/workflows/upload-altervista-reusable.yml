@@ -119,6 +119,7 @@ jobs:
 
       - name: FTP Deploy (application)
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        timeout-minutes: 150 # Max 2-5 hours
         with:
           protocol: ftp
           server: ${{ secrets.ftp_server }}
@@ -128,6 +129,7 @@ jobs:
           server-dir: ./
           state-name: .ftp-deploy-sync-state__application.json
           log-level: verbose
+          timeout: 0 # disable timeout at the action level, use the one at step level
           exclude: |
             **/.git*
             **/.git*/**
@@ -151,6 +153,7 @@ jobs:
       # and the vendor folder can be deployed later.
       - name: FTP Deploy (vendor)
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        timeout-minutes: 150 # Max 2-5 hours
         with:
           protocol: ftp
           server: ${{ secrets.ftp_server }}
@@ -160,7 +163,7 @@ jobs:
           server-dir: ./vendor/
           state-name: ../.ftp-deploy-sync-state__vendor.json
           log-level: verbose
-          timeout: 120000
+          timeout: 0
 
       - name: Clear cache
         uses: ./.github/actions/altervista-clear-cache-action
