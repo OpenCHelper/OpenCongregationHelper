@@ -28,6 +28,11 @@ on:
         required: false
         default: false
         type: boolean
+      delete-remote-contents:
+        description: "Delete the contents of the remote folder before starting the upload via FTP"
+        required: false
+        default: false
+        type: boolean
     secrets:
       ftp_server:
         required: true
@@ -169,6 +174,7 @@ jobs:
           state-name: ../.ftp-deploy-sync-state__vendor.json
           log-level: verbose
           timeout: 0
+          dangerous-clean-slate: ${{ inputs.delete-remote-contents }}
 
       - name: Clear cache
         uses: ./.github/actions/altervista-clear-cache-action
