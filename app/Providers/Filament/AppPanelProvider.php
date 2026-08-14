@@ -35,6 +35,7 @@ use Laravel\Jetstream\Jetstream;
 use \FilipFonal\FilamentLogManager\FilamentLogManager;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use Awcodes\Versions\VersionsPlugin;
+use Filament\Navigation\NavigationGroup;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
@@ -84,6 +85,14 @@ class AppPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+            ])
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label(fn(): string => __('filament-resources.territory.navigation_group')),
+                NavigationGroup::make()
+                    ->label(fn(): string => __('filament-resources.user.navigation_group')),
+                NavigationGroup::make()
+                    ->label(fn(): string => __('filament-resources.navigation_groups.developer')),
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
