@@ -85,14 +85,14 @@ class AppServiceProvider extends ServiceProvider
                string $fallbackTranslation,
                string $fallbackLocale,
             ) {
-                Log::warning('Some translation key is missing from an eloquent model', [
-                   'key' => $translationKey,
-                   'locale' => $locale,
-                   'fallback_locale' => $fallbackLocale,
-                   'fallback_translation' => $fallbackTranslation,
-                   'model_id' => $model->id,
-                   'model_class' => get_class($model),
-                ]);
+                // Log::warning('Some translation key is missing from an eloquent model', [
+                //    'key' => $translationKey,
+                //    'locale' => $locale,
+                //    'fallback_locale' => $fallbackLocale,
+                //    'fallback_translation' => $fallbackTranslation,
+                //    'model_id' => $model->id,
+                //    'model_class' => get_class($model),
+                // ]);
             }
         );
 
