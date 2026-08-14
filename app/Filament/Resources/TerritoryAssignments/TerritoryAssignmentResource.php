@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Auth;
 
 use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
+use Override;
 
 class TerritoryAssignmentResource extends Resource
 {
@@ -58,6 +59,12 @@ class TerritoryAssignmentResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return __('filament-resources.territory_assignment.navigation_group');
+    }
+
+    #[Override]
+    public static function getNavigationSort(): ?int
+    {
+        return 10;
     }
 
     public static function infolist(Schema $schema): Schema
