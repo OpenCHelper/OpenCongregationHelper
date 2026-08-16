@@ -62,6 +62,7 @@ class TerritoryResource extends Resource
     protected static ?string $model = Territory::class;
 
     protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedMapPin;
+    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::MapPin;
     protected static ?int $navigationSort = 0;
     protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

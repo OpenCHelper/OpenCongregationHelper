@@ -39,6 +39,7 @@ class TerritoryZoneResource extends Resource
     protected static ?string $model = TerritoryZone::class;
 
     protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedMap;
+    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::Map;
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';

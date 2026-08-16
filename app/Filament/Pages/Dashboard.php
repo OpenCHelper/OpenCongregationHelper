@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Log;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
-    // protected static ?string $navigationIcon = Heroicon::OutlinedDocumentText;
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedHome;
+    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::Home;
 
     // protected static string $view = 'filament.pages.dashboard';
 

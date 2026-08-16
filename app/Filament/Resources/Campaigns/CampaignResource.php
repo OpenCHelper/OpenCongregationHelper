@@ -43,6 +43,7 @@ class CampaignResource extends Resource
     protected static ?string $model = Campaign::class;
 
     protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedEnvelopeOpen;
+    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::EnvelopeOpen;
     protected static ?int $navigationSort = 3;
     protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

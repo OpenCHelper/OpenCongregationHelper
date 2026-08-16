@@ -43,6 +43,7 @@ class TerritoryAssignmentResource extends Resource
     protected static ?string $model = TerritoryAssignment::class;
 
     protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::RectangleStack;
 
     // Hide the resource from the navigation panel
     protected static bool $shouldRegisterNavigation = true;
