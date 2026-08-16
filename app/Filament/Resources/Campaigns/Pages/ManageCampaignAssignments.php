@@ -25,6 +25,7 @@ use App\Models\User;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
@@ -41,7 +42,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
 
     protected static string $relationship = 'assignments';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function getNavigationLabel(): string
     {
@@ -66,13 +67,13 @@ class ManageCampaignAssignments extends ManageRelatedRecords
     public function table(Table $table): Table
     {
         $inherited_table = TerritoryAssignmentResource::table($table);
-        
+
         // Hide the campaign column since we're already in the campaign context
         $campaignColumn = $inherited_table->getColumn('campaign.name');
         if ($campaignColumn) {
             $campaignColumn->hidden();
         }
-        
+
         return $inherited_table
             ->defaultSort('started_at', 'desc')
             ->heading(ucfirst(__('filament-resources.territory_assignment.plural_model_label')))
@@ -144,8 +145,8 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                         Placeholder::make('territory_review')
                                             ->label(__('filament-resources.territory_assignment.field_territory'))
                                             ->columns(1)
-                                            ->content(fn (Get $get) => $get('territory_id') 
-                                                ? Territory::find($get('territory_id'))->name 
+                                            ->content(fn (Get $get) => $get('territory_id')
+                                                ? Territory::find($get('territory_id'))->name
                                                 : ''),
                                         DatePicker::make('started_at')
                                             ->label(__('filament-resources.territory_assignment.field_started_at'))
@@ -167,7 +168,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                 BulkActionGroup::make([
                     BulkAction::make('terminate_assignments')
                         ->label(__('filament-resources.campaign.bulk_action_terminate_assignments'))
-                        ->icon('heroicon-o-archive-box-arrow-down')
+                        ->icon(Heroicon::OutlinedArchiveBoxArrowDown)
                         ->color('warning')
                         ->requiresConfirmation()
                         ->modalHeading(__('filament-resources.campaign.bulk_action_terminate_assignments_modal_heading'))
@@ -176,7 +177,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                         ->action(function (Collection $records): void {
                             $terminatedCount = 0;
                             $skippedCount = 0;
-                            
+
                             foreach ($records as $assignment) {
                                 // Skip if assignment is already terminated
                                 if ($assignment->ended_at !== null) {
@@ -184,7 +185,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                     Log::warning("Skipping assignment {$assignment->id} because it is already terminated");
                                     continue;
                                 }
-                                
+
                                 try {
                                     $assignment->update([
                                         'ended_at' => now(),
@@ -194,7 +195,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                     Log::error('Error terminating assignment ' . $assignment->id . ': ' . $e->getMessage());
                                 }
                             }
-                            
+
                             // Show success notification
                             if ($terminatedCount > 0) {
                                 Notification::make()
@@ -214,7 +215,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                             }
                         })
                         ->deselectRecordsAfterCompletion(),
-                    
+
                     // Keep existing bulk actions from TerritoryAssignmentResource
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),

@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Icons\Heroicon;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use Illuminate\Support\Facades\Auth;
 
@@ -40,7 +41,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-m-users';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::Users;
     protected static ?string $tenantOwnershipRelationshipName = 'teams';
 
     public static function getModelLabel(): string
@@ -142,7 +143,7 @@ class UserResource extends Resource
                 TextColumn::make('email')
                     ->label(__('filament-resources.user.column_email'))
                     ->copyable()
-                    ->icon('heroicon-m-envelope')
+                    ->icon(Heroicon::Envelope)
                     ->fontFamily(FontFamily::Mono)
                     ->searchable(),
                 TextColumn::make('roles.name')

@@ -6,6 +6,7 @@ use Filament\Schemas\Schema;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Livewire\Livewire;
 
@@ -15,7 +16,7 @@ class ManageTerritoryAssignments extends ManageRelatedRecords
 
     protected static string $relationship = 'assignments';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function getNavigationLabel(): string
     {

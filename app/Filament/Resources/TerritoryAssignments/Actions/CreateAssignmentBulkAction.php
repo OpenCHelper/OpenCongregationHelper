@@ -9,6 +9,7 @@ use Exception;
 use App\Models;
 use Filament\Forms;
 use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +21,7 @@ class CreateAssignmentBulkAction extends Action
         parent::setUp();
 
         $this
-            ->icon('heroicon-o-plus')
+            ->icon(Heroicon::OutlinedPlus)
             ->label(__('filament-resources.territory_assignment.action_assign_territory'))
             ->color('primary')
             ->schema([

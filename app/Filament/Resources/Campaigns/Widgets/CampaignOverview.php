@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Campaigns\Widgets;
 
 use App\Models\Campaign;
 use App\Models\Territory;
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
@@ -51,12 +52,12 @@ class CampaignOverview extends BaseWidget
             Stat::make(__('filament-resources.campaign.widget_remaining_days'), fn () => $campaign_remaining_days === null ? '∞' : max(0, round($campaign_remaining_days)))
                 ->description($this->record->valid_until ? __('filament-resources.campaign.widget_valid_until', ['date' => $this->record->valid_until->toDateString()]) : __('filament-resources.campaign.widget_no_end_date'))
                 ->color($this->record->valid_until && $this->record->valid_until->isPast() ? 'danger' : 'success')
-                ->icon('heroicon-o-calendar-days'),
+                ->icon(Heroicon::OutlinedCalendarDays),
             Stat::make(__('filament-resources.campaign.widget_completion_status'), fn () => Number::percentage($campaign_percentage))
                 ->description($description ?? '')
                 ->descriptionIcon($icon ?? '')
                 ->color($color)
-                ->icon('heroicon-o-flag'),
+                ->icon(Heroicon::OutlinedFlag),
         ];
     }
 }

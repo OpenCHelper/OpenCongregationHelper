@@ -35,13 +35,14 @@ use Illuminate\Support\Facades\Auth;
 
 use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
+use Filament\Support\Icons\Heroicon;
 use Override;
 
 class TerritoryAssignmentResource extends Resource
 {
     protected static ?string $model = TerritoryAssignment::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     // Hide the resource from the navigation panel
     protected static bool $shouldRegisterNavigation = true;
@@ -136,7 +137,7 @@ class TerritoryAssignmentResource extends Resource
                             ->placeholder(__('filament-resources.territory_assignment.info_description_placeholder')),
                         TextEntry::make('territory.notes')
                             ->label(__('filament-resources.territory_assignment.info_notes'))
-                            ->icon('heroicon-o-document-text')
+                            ->icon(Heroicon::OutlinedDocumentText)
                             ->columnSpanFull()
                             ->placeholder(__('filament-resources.territory_assignment.info_notes_placeholder')),
                     ]),
@@ -145,18 +146,18 @@ class TerritoryAssignmentResource extends Resource
                     ->columns(2)
                     ->schema([
                         TextEntry::make('assignee.full_name')
-                            ->icon('heroicon-o-user')
+                            ->icon(Heroicon::OutlinedUser)
                             ->label(__('filament-resources.territory_assignment.info_assignee')),
                         TextEntry::make('campaign.name')
-                            ->icon('heroicon-o-envelope-open')
+                            ->icon(Heroicon::OutlinedEnvelopeOpen)
                             ->label(__('filament-resources.territory_assignment.info_campaign'))
                             ->placeholder(__('filament-resources.territory_assignment.info_campaign_placeholder')),
                         TextEntry::make('started_at')
-                            ->icon('heroicon-o-calendar')
+                            ->icon(Heroicon::OutlinedCalendar)
                             ->sinceTooltip()
                             ->label(__('filament-resources.territory_assignment.info_start_assignment')),
                         TextEntry::make('ended_at')
-                            ->icon('heroicon-o-calendar')
+                            ->icon(Heroicon::OutlinedCalendar)
                             ->sinceTooltip()
                             ->visible(fn (Model $record) => $record->ended_at != null)
                             ->label(__('filament-resources.territory_assignment.info_end_assignment'))

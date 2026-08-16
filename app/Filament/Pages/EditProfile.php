@@ -3,10 +3,11 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 
 class EditProfile extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-circle';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedUserCircle;
 
     protected string $view = 'filament.pages.edit-profile';
 

@@ -55,15 +55,15 @@ use Filament\Tables\Grouping\Group;
 use Spatie\Tags\Tag;
 use Illuminate\Contracts\Support\Htmlable;
 use Carbon\Carbon;
+use Filament\Support\Icons\Heroicon;
 
 class TerritoryResource extends Resource
 {
     protected static ?string $model = Territory::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedMapPin;
     protected static ?int $navigationSort = 0;
     protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
-
 
     public static function getModelLabel(): string
     {
@@ -133,15 +133,15 @@ class TerritoryResource extends Resource
                         Toggle::make('is_commercial')
                             ->label(__('filament-resources.territory.field_is_commercial'))
                             // ->inline(false)
-                            ->onIcon('heroicon-o-building-storefront')
-                            ->offIcon('heroicon-o-home'),
+                            ->onIcon(Heroicon::OutlinedBuildingStorefront)
+                            ->offIcon(Heroicon::OutlinedHome),
                         Tabs::make('Tabs')
                             ->columnSpanFull()
                             ->contained(false)
                             ->tabs([
                                 Tab::make('TabImage')
                                     ->label(__('filament-resources.territory.tab_image'))
-                                    ->icon('heroicon-o-photo')
+                                    ->icon(Heroicon::OutlinedPhoto)
                                     ->schema([
                                         FileUpload::make('image_path')
                                             ->extraAttributes(['style' => 'min-height: 150px;'])
@@ -158,7 +158,7 @@ class TerritoryResource extends Resource
                                     ]),
                                 Tab::make('TabMap')
                                     ->label(__('filament-resources.territory.tab_map'))
-                                    ->icon('heroicon-o-map')
+                                    ->icon(Heroicon::OutlinedMap)
                                     ->schema([
                                         Map::make('location')
                                             ->label(__('filament-resources.territory.field_location'))
@@ -408,7 +408,7 @@ class TerritoryResource extends Resource
                 BulkActionGroup::make([
                     BulkAction::make('create_assignment_bulk')
                         ->label(__('filament-resources.territory.action_assign_massively'))
-                        ->icon('heroicon-o-document-arrow-up')
+                        ->icon(Heroicon::OutlinedDocumentArrowUp)
                         ->schema([
                             Select::make('assignee_id')
                                 ->label(__('filament-resources.territory_assignment.action_assigned_to'))
@@ -457,7 +457,7 @@ class TerritoryResource extends Resource
                     //     ->deselectRecordsAfterCompletion(),
                     BulkAction::make('cancel_assignment_bulk')
                         ->label(__('filament-resources.territory.action_end_assignments'))
-                        ->icon('heroicon-o-document-arrow-down')
+                        ->icon(Heroicon::OutlinedDocumentArrowDown)
                         ->requiresConfirmation()
                         ->action(function (Collection $records, array $data): void {
                             foreach ($records as $record) {

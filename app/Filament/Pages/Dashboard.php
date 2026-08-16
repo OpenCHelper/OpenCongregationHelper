@@ -9,11 +9,12 @@ use Filament\Forms\Form;
 use Filament\Forms\Components;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Get;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Log;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
-    // protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    // protected static ?string $navigationIcon = Heroicon::OutlinedDocumentText;
 
     // protected static string $view = 'filament.pages.dashboard';
 

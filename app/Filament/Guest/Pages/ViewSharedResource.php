@@ -13,25 +13,26 @@ use App\Models\SharedUrl;
 use Filament\Pages\Page;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
  * Generic page to view shared resources.
- * 
+ *
  * This page is used to display resources shared via a unique URL that
  * do not have the `HasGuestViewPage` trait.
- * 
+ *
  * @see \App\Traits\HasGuestViewPage
  */
 class ViewSharedResource extends Page implements HasInfolists
 {
     use InteractsWithInfolists;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-share';
-    
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedShare;
+
     protected string $view = 'filament.guest.pages.view-shared-resource';
-    
+
     protected static bool $shouldRegisterNavigation = false;
 
     public SharedUrl $sharedUrl;
@@ -41,11 +42,11 @@ class ViewSharedResource extends Page implements HasInfolists
     public function mount(string $record): void
     {
         $this->sharedUrl = SharedUrl::where('uid', $record)->firstOrFail();
-        
+
         if (!$this->sharedUrl->shareable) {
             abort(404, 'Shareable resource not found.');
         }
-        
+
         $this->shareableResource = $this->sharedUrl->shareable;
         $this->resourceType = $this->getResourceModelLabel();
     }
@@ -54,9 +55,9 @@ class ViewSharedResource extends Page implements HasInfolists
     {
         // Get the translated model label based on the shareable resource type
         return match (get_class($this->shareableResource)) {
-            TerritoryAssignment::class => 
+            TerritoryAssignment::class =>
                 __('filament-resources.territory_assignment.model_label'),
-            Territory::class => 
+            Territory::class =>
                 __('filament-resources.territory.model_label'),
             default => strtolower(class_basename($this->shareableResource))
         };
@@ -75,9 +76,9 @@ class ViewSharedResource extends Page implements HasInfolists
         }
 
         return match (get_class($this->shareableResource)) {
-            TerritoryAssignment::class => 
+            TerritoryAssignment::class =>
                 Str::ucfirst(__('filament-resources.territory_assignment.model_label') . ': ' . $this->shareableResource->territory->name),
-            Territory::class => 
+            Territory::class =>
                 Str::ucfirst(__('filament-resources.territory.model_label') . ': ' . $this->shareableResource->name),
             default => ucfirst($this->resourceType) . ' details'
         };
@@ -92,7 +93,7 @@ class ViewSharedResource extends Page implements HasInfolists
     {
         // Try to get the resource class and use its infolist
         $resourceClass = $this->getResourceClass();
-        
+
         if ($resourceClass && method_exists($resourceClass, 'infolist')) {
             return $resourceClass::infolist($schema);
         }
@@ -106,7 +107,7 @@ class ViewSharedResource extends Page implements HasInfolists
 
     /**
      * Get the resource class based on the shareable resource type.
-     * 
+     *
      * This method returns the appropriate resource class for the shared resource,
      * allowing us to use the Filament resources for displaying details.
      */

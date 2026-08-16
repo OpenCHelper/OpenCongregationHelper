@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\TerritoryAssignment;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use Filament\Notifications\Notification as FilamentNotification;
+use Filament\Support\Icons\Heroicon;
 
 class TerritoryAssignedNotification extends Notification
 {
@@ -70,10 +71,10 @@ class TerritoryAssignedNotification extends Notification
         return FilamentNotification::make()
             ->title(__('filament-resources.database_notifications.territory_assigned_title', ['territory' => $this->assignment->territory->name]))
             ->body(__('filament-resources.database_notifications.territory_assigned_body', ['territory' => $this->assignment->territory->name]))
-            ->icon('heroicon-o-map')
+            ->icon(Heroicon::OutlinedMap)
             ->actions([
                 Action::make('view')
-                    ->icon('heroicon-o-eye')
+                    ->icon(Heroicon::OutlinedEye)
                     ->url(TerritoryAssignmentResource::getUrl('view', [
                         'record' => $this->assignment->id,
                     ]))

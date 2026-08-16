@@ -11,6 +11,7 @@ use Exception;
 use App\Models;
 use Filament\Forms;
 use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Log;
 
 class ReturnAssignmentAction extends Action
@@ -20,7 +21,7 @@ class ReturnAssignmentAction extends Action
         parent::setUp();
 
         $this
-            ->icon('heroicon-o-archive-box-arrow-down')
+            ->icon(Heroicon::OutlinedArchiveBoxArrowDown)
             ->label(__('filament-resources.territory_assignment.action_end_assignment'))
             ->modalHeading(__('filament-resources.database_notifications.end_assignment_modal'))
             ->modalSubmitAction(fn(Action $action) => $action->label(__('filament-resources.territory_assignment.action_end')))

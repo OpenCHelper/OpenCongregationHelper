@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
 use Filament\Notifications\Notification as FilamentNotification;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\TerritoryAssignment;
+use Filament\Support\Icons\Heroicon;
 
 class StaleAssignmentNotification extends Notification
 {
@@ -77,11 +78,11 @@ class StaleAssignmentNotification extends Notification
         return FilamentNotification::make()
             ->title(__('filament-resources.database_notifications.stale_assignment_title', ['days' => $diffDays]))
             ->body(__('filament-resources.database_notifications.stale_assignment_body'))
-            ->icon('heroicon-o-map')
+            ->icon(Heroicon::OutlinedMap)
             ->warning()
             ->actions([
                 Action::make('view')
-                    ->icon('heroicon-o-eye')
+                    ->icon(Heroicon::OutlinedEye)
                     ->url(TerritoryAssignmentResource::getUrl('view', [
                         'record' => $this->assignment->id,
                     ]))
@@ -89,6 +90,6 @@ class StaleAssignmentNotification extends Notification
             ])
             ->getDatabaseMessage();
     }
-    
-    
+
+
 }

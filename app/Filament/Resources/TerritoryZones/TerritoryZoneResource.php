@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Log;
 use Filament\Resources\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Spatie\Tags\Tag;
 
@@ -37,7 +38,7 @@ class TerritoryZoneResource extends Resource
 {
     protected static ?string $model = TerritoryZone::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedMap;
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';

@@ -44,6 +44,7 @@ use Rmsramos\Activitylog\ActivitylogPlugin;
 use Filament\Support\Enums\Platform;
 use Hammadzafar05\FilamentMobilePreset\FilamentMobilePresetPlugin;
 use Detection\MobileDetect;
+use Filament\Support\Icons\Heroicon;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -73,7 +74,7 @@ class AppPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label(fn() => __('filament-resources.user_profile.menu_label'))
-                    ->icon('heroicon-o-user-circle')
+                    ->icon(Heroicon::OutlinedUserCircle)
                     ->url(fn () => $this->shouldRegisterMenuItem()
                         ? url(EditProfile::getUrl())
                         : url($panel->getPath())),
@@ -152,7 +153,7 @@ class AppPanelProvider extends PanelProvider
             $panel->userMenuItems([
                 MenuItem::make()
                     ->label('API Tokens')
-                    ->icon('heroicon-o-key')
+                    ->icon(Heroicon::OutlinedKey)
                     ->url(fn () => $this->shouldRegisterMenuItem()
                         ? url(ApiTokens::getUrl())
                         : url($panel->getPath())),
@@ -167,7 +168,7 @@ class AppPanelProvider extends PanelProvider
                 ->userMenuItems([
                     MenuItem::make()
                         ->label(fn () => __('Team Settings'))
-                        ->icon('heroicon-o-cog-6-tooth')
+                        ->icon(Heroicon::OutlinedCog6Tooth)
                         ->url(fn () => $this->shouldRegisterMenuItem()
                             ? url(EditTeam::getUrl())
                             : url($panel->getPath())),

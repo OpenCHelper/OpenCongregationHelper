@@ -12,6 +12,7 @@ use App\Models\Campaign;
 use App\Filament\Resources\Campaigns\CampaignResource;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Notifications\Actions\Action as FilamentAction;
+use Filament\Support\Icons\Heroicon;
 
 class CampaignCreatedNotification extends Notification
 {
@@ -66,7 +67,7 @@ class CampaignCreatedNotification extends Notification
         return FilamentNotification::make()
             ->title(__('filament-resources.database_notifications.campaign_created_title'))
             ->body(__('filament-resources.database_notifications.campaign_created_body', ['campaign' => $this->campaign->name]))
-            ->icon('heroicon-o-megaphone')
+            ->icon(Heroicon::OutlinedMegaphone)
             ->actions([])
             ->getDatabaseMessage();
     }

@@ -12,6 +12,7 @@ use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Log;
 
 class ViewTerritoryAssignment extends ViewRecord
@@ -26,7 +27,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ->color('primary')
                     ->label(__('filament-resources.territory_assignment.action_copy.label'))
                     ->tooltip(__('filament-resources.territory_assignment.action_copy.tooltip'))
-                    ->icon('heroicon-o-share')
+                    ->icon(Heroicon::OutlinedShare)
                     ->modalHeading(__('filament-resources.territory_assignment.share_modal.title'))
                     ->modalDescription(__('filament-resources.territory_assignment.share_modal.description'))
                     ->modalSubmitAction(false)
@@ -43,7 +44,7 @@ class ViewTerritoryAssignment extends ViewRecord
                                     ->readonly()
                                     ->suffixActions([
                                         Action::make('copy_url_suffix')
-                                            ->icon('heroicon-o-clipboard-document')
+                                            ->icon(Heroicon::OutlinedClipboardDocument)
                                             ->tooltip(__('filament-resources.territory_assignment.share_modal.copy_button'))
                                             ->action(function ($action, $livewire, $get) {
                                                 $url = $get('share_url');
@@ -85,7 +86,7 @@ class ViewTerritoryAssignment extends ViewRecord
                                                     ->body(__('filament-resources.territory_assignment.action_copy.notifications.success.body'))
                                                     ->success()
                                                     ->duration(2000)
-                                                    ->icon('heroicon-o-clipboard-document-check')
+                                                    ->icon(Heroicon::OutlinedClipboardDocumentCheck)
                                             ),
                                     ]),
                             ])
@@ -95,7 +96,7 @@ class ViewTerritoryAssignment extends ViewRecord
                             ->requiresConfirmation()
                             ->cancelParentActions()
                             ->label(__('filament-resources.territory_assignment.share_modal.stop_sharing'))
-                            ->icon('heroicon-o-no-symbol')
+                            ->icon(Heroicon::NoSymbol)
                             ->color('danger')
                             ->modalHeading(__('filament-resources.territory_assignment.share_modal.stop_sharing_confirm_title'))
                             ->modalDescription(__('filament-resources.territory_assignment.share_modal.stop_sharing_confirm_description'))
@@ -117,7 +118,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ]),
             ])
             ->label(__('filament-resources.territory_assignment.action_group.label'))
-            ->icon('heroicon-m-ellipsis-vertical')
+            ->icon(Heroicon::EllipsisVertical)
             ->size(Size::Small)
             ->color('gray')
             ->button(),

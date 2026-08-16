@@ -25,6 +25,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Tag;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -33,7 +34,7 @@ class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedTag;
     protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'name';
@@ -93,7 +94,7 @@ class TagResource extends Resource
 
         foreach ($availableLocales as $locale => $localeName) {
             $isRequired = $locale === config('app.fallback_locale', 'en');
-            
+
             $tabs[] = Tab::make($locale)
                 ->icon(new HtmlString(
                     '<img src="' . asset("vendor/blade-flags/language-{$locale}.svg") . '" alt="' . $localeName . '" class="h-5 w-5 inline-block mr-2" />'
@@ -110,7 +111,7 @@ class TagResource extends Resource
                                 return;
                             }
                             $slug = Str::slug($state);
-                            
+
                             // If this is the main language (fallback), set slug for all languages
                             if ($locale === config('app.fallback_locale', 'en')) {
                                 foreach (array_keys($availableLocales) as $availableLocale) {
@@ -142,7 +143,7 @@ class TagResource extends Resource
                     ->columnSpanFull()
                     ->activeTab(function () use ($tabs) {
                         // Workaround for Filament's Tabs component to set the active tab based on the current locale
-                        // This assumes that the tab IDs are suffixed with the locale, e.g., '-en-tab', '-fr-tab' 
+                        // This assumes that the tab IDs are suffixed with the locale, e.g., '-en-tab', '-fr-tab'
                         // (as generated in generateLanguageTabs).
                         return collect($tabs)->search(
                             fn (Tab $tab) => Str::endsWith($tab->getId(), app()->getLocale() . '-tab')

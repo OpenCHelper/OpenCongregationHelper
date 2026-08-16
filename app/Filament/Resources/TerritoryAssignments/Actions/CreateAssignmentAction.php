@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Campaign;
 use Exception;
 use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -19,7 +20,7 @@ class CreateAssignmentAction extends Action
         parent::setUp();
 
         $this
-            ->icon('heroicon-o-plus')
+            ->icon(Heroicon::OutlinedPlus)
             ->label(__('filament-resources.territory_assignment.action_assign_territory'))
             ->color('primary')
             ->visible(function (Territory $record): bool {

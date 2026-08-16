@@ -23,6 +23,7 @@ use App\Models\Contact;
 use Filament\Forms;
 use Filament\Infolists;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
@@ -54,14 +55,14 @@ class ContactsRelationManager extends RelationManager
                     ->label(__('profile.contacts.is_primary')),
                 TextEntry::make('name')
                     ->label(__('profile.contacts.name'))
-                    ->icon('heroicon-o-user'),
+                    ->icon(Heroicon::OutlinedUser),
                 TextEntry::make('phone_number')
                     ->label(__('profile.contacts.phone_number'))
-                    ->icon('heroicon-o-phone')
+                    ->icon(Heroicon::OutlinedPhone)
                     ->visible(fn (Contact $record) => !empty($record->phone_number))
                     ->suffixAction(
                         Action::make('call')
-                            ->icon('heroicon-o-phone-arrow-up-right')
+                            ->icon(Heroicon::OutlinedPhoneArrowUpRight)
                             ->label(__('profile.contacts.call'))
                             ->url(
                                 fn (Contact $record): string => 'tel:' . $record->phone_number,
@@ -70,11 +71,11 @@ class ContactsRelationManager extends RelationManager
                     ),
                 TextEntry::make('address')
                     ->label(__('profile.contacts.address'))
-                    ->icon('heroicon-o-map-pin')
+                    ->icon(Heroicon::OutlinedMapPin)
                     ->visible(fn (Contact $record) => !empty($record->address))
                     ->suffixAction(
                         Action::make('open_maps')
-                            ->icon('heroicon-o-map')
+                            ->icon(Heroicon::OutlinedMap)
                             ->label(__('profile.contacts.open_maps'))
                             ->url(
                                 fn (Contact $record): string => 'https://www.google.com/maps/search/' . urlencode($record->address),
@@ -84,7 +85,7 @@ class ContactsRelationManager extends RelationManager
                 TextEntry::make('notes')
                     ->label(__('profile.contacts.notes'))
                     ->visible(fn (Contact $record) => !empty($record->notes))
-                    ->icon('heroicon-o-document-text')
+                    ->icon(Heroicon::OutlinedDocumentText)
                     ->columnSpanFull(),
             ]);
     }
@@ -102,15 +103,15 @@ class ContactsRelationManager extends RelationManager
                     ->default(false),
                 TextInput::make('name')
                     ->label(__('profile.contacts.name'))
-                    ->prefixIcon('heroicon-o-user')
+                    ->prefixIcon(Heroicon::OutlinedUser)
                     ->required(),
                 TextInput::make('phone_number')
                     ->label(__('profile.contacts.phone_number'))
-                    ->prefixIcon('heroicon-o-phone')
+                    ->prefixIcon(Heroicon::OutlinedPhone)
                     ->requiredWithout('address'),
                 TextInput::make('address')
                     ->label(__('profile.contacts.address'))
-                    ->prefixIcon('heroicon-o-map-pin')
+                    ->prefixIcon(Heroicon::OutlinedMapPin)
                     ->requiredWithout('phone_number'),
                 Textarea::make('notes')
                     ->label(__('profile.contacts.notes'))
@@ -130,8 +131,8 @@ class ContactsRelationManager extends RelationManager
                 IconColumn::make('is_primary')
                     ->label(__('profile.contacts.is_primary'))
                     ->boolean()
-                    ->trueIcon('heroicon-s-star')
-                    ->falseIcon('heroicon-o-star')
+                    ->trueIcon(Heroicon::Star)
+                    ->falseIcon(Heroicon::OutlinedStar)
                     ->trueColor('warning')
                     ->falseColor('gray'),
             ])

@@ -12,6 +12,7 @@ use App\Models\TerritoryAssignment;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Notifications\Actions\Action as FilamentAction;
+use Filament\Support\Icons\Heroicon;
 
 class TerritoryReturnedNotification extends Notification
 {
@@ -69,7 +70,7 @@ class TerritoryReturnedNotification extends Notification
         return FilamentNotification::make()
             ->title(__('filament-resources.database_notifications.territory_returned_title', ['territory' => $this->assignment->territory->name]))
             ->body(__('filament-resources.database_notifications.territory_returned_body'))
-            ->icon('heroicon-o-inbox-arrow-down')
+            ->icon(Heroicon::OutlinedInboxArrowDown)
             ->getDatabaseMessage();
     }
 }
