@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TerritoryZones;
 
+use App\Enums\NavigationGroup;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ColorPicker;
@@ -32,7 +33,9 @@ use Illuminate\Support\Facades\Log;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieTagsColumn;
+use Override;
 use Spatie\Tags\Tag;
+use UnitEnum;
 
 class TerritoryZoneResource extends Resource
 {
@@ -68,9 +71,10 @@ class TerritoryZoneResource extends Resource
         return __('filament-resources.territory_zone.plural_model_label');
     }
 
-    public static function getNavigationGroup(): ?string
+    #[Override]
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('filament-resources.territory_zone.navigation_group');
+        return NavigationGroup::Territories;
     }
 
     public static function form(Schema $schema): Schema

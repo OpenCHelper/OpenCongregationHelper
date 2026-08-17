@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Enums\NavigationGroup as EnumsNavigationGroup;
 use App\Filament\Pages\ApiTokens;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\Pages\CreateTeam;
@@ -91,14 +92,7 @@ class AppPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
             ])
-            ->navigationGroups([
-                NavigationGroup::make()
-                    ->label(fn(): string => __('filament-resources.territory.navigation_group')),
-                NavigationGroup::make()
-                    ->label(fn(): string => __('filament-resources.user.navigation_group')),
-                NavigationGroup::make()
-                    ->label(fn(): string => __('filament-resources.navigation_groups.developer')),
-            ])
+            ->navigationGroups(array_map(static fn(EnumsNavigationGroup $el) => $el->name, EnumsNavigationGroup::cases()))
             ->plugins([
                 FilamentShieldPlugin::make(),
                 FilamentLogManager::make(),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Territories;
 
+use App\Enums\NavigationGroup;
 use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
@@ -56,6 +57,8 @@ use Spatie\Tags\Tag;
 use Illuminate\Contracts\Support\Htmlable;
 use Carbon\Carbon;
 use Filament\Support\Icons\Heroicon;
+use Override;
+use UnitEnum;
 
 class TerritoryResource extends Resource
 {
@@ -76,9 +79,10 @@ class TerritoryResource extends Resource
         return __('filament-resources.territory.plural_model_label');
     }
 
-    public static function getNavigationGroup(): ?string
+    #[Override]
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('filament-resources.territory.navigation_group');
+        return NavigationGroup::Territories;
     }
 
     protected static ?string $recordTitleAttribute = 'name';

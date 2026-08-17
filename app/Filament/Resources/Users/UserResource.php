@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Enums\NavigationGroup;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -36,6 +37,8 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use Illuminate\Support\Facades\Auth;
+use Override;
+use UnitEnum;
 
 class UserResource extends Resource
 {
@@ -54,9 +57,10 @@ class UserResource extends Resource
         return __('filament-resources.user.plural_model_label');
     }
 
-    public static function getNavigationGroup(): ?string
+    #[Override]
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('filament-resources.user.navigation_group');
+        return NavigationGroup::Administration;
     }
 
     public static function form(Schema $schema): Schema

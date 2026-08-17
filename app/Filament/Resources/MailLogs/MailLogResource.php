@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MailLogs;
 
+use App\Enums\NavigationGroup;
 use Illuminate\Support\Facades\Auth;
 use \Tapp\FilamentMailLog\Resources\MailLogResource as BaseMailLogResource;
 
@@ -9,7 +10,7 @@ class MailLogResource extends BaseMailLogResource
 {
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-resources.navigation_groups.developer');
+        return NavigationGroup::Developer->name;
     }
 
     public static function canAccess(): bool

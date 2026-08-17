@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TerritoryAssignments;
 
+use App\Enums\NavigationGroup;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -37,6 +38,7 @@ use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
 use Filament\Support\Icons\Heroicon;
 use Override;
+use UnitEnum;
 
 class TerritoryAssignmentResource extends Resource
 {
@@ -58,9 +60,10 @@ class TerritoryAssignmentResource extends Resource
         return __('filament-resources.territory_assignment.plural_model_label');
     }
 
-    public static function getNavigationGroup(): ?string
+    #[Override]
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('filament-resources.territory_assignment.navigation_group');
+        return NavigationGroup::Territories;
     }
 
     #[Override]

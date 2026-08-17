@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tags;
 
+use App\Enums\NavigationGroup;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Set;
@@ -29,6 +30,8 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use UnitEnum;
+use Override;
 
 class TagResource extends Resource
 {
@@ -78,9 +81,10 @@ class TagResource extends Resource
         return __('filament-resources.tag.plural_model_label');
     }
 
-    public static function getNavigationGroup(): ?string
+    #[Override]
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('filament-resources.tag.navigation_group');
+        return NavigationGroup::Administration;
     }
 
     /**

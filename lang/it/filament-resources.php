@@ -65,7 +65,6 @@ return [
         'navigation_label' => 'Tag',
         'model_label' => 'Tag',
         'plural_model_label' => 'Tag',
-        'navigation_group' => 'Amministrazione',
         'field_name' => 'Nome',
         'field_slug' => 'Slug',
         'field_type' => 'Tipo',
@@ -87,7 +86,6 @@ return [
     'territory' => [
         'model_label' => 'territorio',
         'plural_model_label' => 'territori',
-        'navigation_group' => 'Reparto territori',
         'section_fundamental_info' => 'Informazioni fondamentali',
         'section_fundamental_info_description' => 'Informazioni necessarie per l\'identificazione del territorio',
         'section_additional_info' => 'Informazioni aggiuntive',
@@ -135,7 +133,6 @@ return [
     'territory_zone' => [
         'model_label' => 'zona',
         'plural_model_label' => 'zone',
-        'navigation_group' => 'Reparto territori',
         'field_name' => 'Nome',
         'field_color' => 'Colore',
         'field_tags' => 'Tag',
@@ -147,7 +144,6 @@ return [
     'territory_assignment' => [
         'model_label' => 'assegnazione',
         'plural_model_label' => 'assegnazioni',
-        'navigation_group' => 'Reparto territori',
         'section_territory_info' => 'Informazioni territorio',
         'section_territory_info_description' => 'Informazioni principali relative all\'assegnazione del territorio.',
         'section_assignment_info' => 'Informazioni assegnazione',
@@ -236,7 +232,6 @@ return [
     'campaign' => [
         'model_label' => 'campagna',
         'plural_model_label' => 'campagne',
-        'navigation_group' => 'Reparto territori',
         'section_validity_dates' => 'Date di validità',
         'section_validity_dates_description' => 'Imposta l\'intervallo di date in cui questo tipo di assegnazione è valido (predefinito è sempre)',
         'field_name' => 'Nome',
@@ -308,7 +303,6 @@ return [
     'user' => [
         'model_label' => 'utente',
         'plural_model_label' => 'utenti',
-        'navigation_group' => 'Amministrazione',
         'section_personal_data' => 'Dati personali',
         'section_personal_data_description' => 'Le informazioni di base dell\'utente.',
         'section_login_info' => 'Informazioni di accesso',
@@ -331,12 +325,6 @@ return [
         'filter_access_enabled_all' => 'Tutti',
         'filter_access_enabled_enabled' => 'Abilitato',
         'filter_access_enabled_disabled' => 'Disabilitato',
-    ],
-    'role' => [
-        'navigation_group' => 'Amministrazione',
-    ],
-    'navigation_groups' => [
-        'developer' => 'Developer',
     ],
     'shared_resource' => [
         'details_title' => 'Dettagli :resourceType',

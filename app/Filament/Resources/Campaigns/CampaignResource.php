@@ -24,6 +24,7 @@ use App\Filament\Resources\Campaigns\Pages\ListCampaigns;
 use App\Filament\Resources\Campaigns\Pages\ViewCampaign;
 use App\Filament\Resources\Campaigns\Pages\ManageCampaignAssignments;
 use App\Enums\CampaignStatus;
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\CampaignResource\Pages;
 use App\Models\Campaign;
 use Filament\Forms;
@@ -37,6 +38,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Override;
+use UnitEnum;
 
 class CampaignResource extends Resource
 {
@@ -77,9 +80,10 @@ class CampaignResource extends Resource
         return __('filament-resources.campaign.plural_model_label');
     }
 
-    public static function getNavigationGroup(): ?string
+    #[Override]
+    public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return __('filament-resources.campaign.navigation_group');
+        return NavigationGroup::Territories;
     }
 
     public static function form(Schema $schema): Schema

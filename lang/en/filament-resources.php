@@ -65,7 +65,6 @@ return [
         'navigation_label' => 'Tags',
         'model_label' => 'Tag',
         'plural_model_label' => 'Tags',
-        'navigation_group' => 'Administration',
         'field_name' => 'Name',
         'field_slug' => 'Slug',
         'field_type' => 'Type',
@@ -87,7 +86,6 @@ return [
     'territory' => [
         'model_label' => 'territory',
         'plural_model_label' => 'territories',
-        'navigation_group' => 'Territory Department',
         'section_fundamental_info' => 'Fundamental Information',
         'section_fundamental_info_description' => 'Information necessary for territory identification',
         'section_additional_info' => 'Additional Information',
@@ -135,7 +133,6 @@ return [
     'territory_zone' => [
         'model_label' => 'zone',
         'plural_model_label' => 'zones',
-        'navigation_group' => 'Territory Department',
         'field_name' => 'Name',
         'field_color' => 'Color',
         'field_tags' => 'Tags',
@@ -147,7 +144,6 @@ return [
     'territory_assignment' => [
         'model_label' => 'assignment',
         'plural_model_label' => 'assignments',
-        'navigation_group' => 'Territory Department',
         'section_territory_info' => 'Territory Information',
         'section_territory_info_description' => 'Main information related to territory assignment.',
         'section_assignment_info' => 'Assignment Information',
@@ -236,7 +232,6 @@ return [
     'campaign' => [
         'model_label' => 'campaign',
         'plural_model_label' => 'campaigns',
-        'navigation_group' => 'Territory Department',
         'section_validity_dates' => 'Validity dates',
         'section_validity_dates_description' => 'Set the date range for when this assignment type is valid (default is always)',
         'field_name' => 'Name',
@@ -307,7 +302,6 @@ return [
     'user' => [
         'model_label' => 'user',
         'plural_model_label' => 'users',
-        'navigation_group' => 'Administration',
         'section_personal_data' => 'Personal Data',
         'section_personal_data_description' => 'Basic user information.',
         'section_login_info' => 'Login Information',
@@ -330,12 +324,6 @@ return [
         'filter_access_enabled_all' => 'All',
         'filter_access_enabled_enabled' => 'Enabled',
         'filter_access_enabled_disabled' => 'Disabled',
-    ],
-    'role' => [
-        'navigation_group' => 'Administration',
-    ],
-    'navigation_groups' => [
-        'developer' => 'Developer',
     ],
     'shared_resource' => [
         'details_title' => ':ResourceType details',

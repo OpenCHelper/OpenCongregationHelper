@@ -65,7 +65,6 @@ return [
         'navigation_label' => 'Etiquetas',
         'model_label' => 'Etiqueta',
         'plural_model_label' => 'Etiquetas',
-        'navigation_group' => 'Administración',
         'field_name' => 'Nombre',
         'field_slug' => 'Slug',
         'field_type' => 'Tipo',
@@ -87,7 +86,6 @@ return [
     'territory' => [
         'model_label' => 'territorio',
         'plural_model_label' => 'territorios',
-        'navigation_group' => 'Departamento de Territorios',
         'section_fundamental_info' => 'Información Fundamental',
         'section_fundamental_info_description' => 'Información necesaria para la identificación del territorio',
         'section_additional_info' => 'Información Adicional',
@@ -135,7 +133,6 @@ return [
     'territory_zone' => [
         'model_label' => 'zona',
         'plural_model_label' => 'zonas',
-        'navigation_group' => 'Departamento de Territorios',
         'field_name' => 'Nombre',
         'field_color' => 'Color',
         'field_tags' => 'Etiquetas',
@@ -147,7 +144,6 @@ return [
     'territory_assignment' => [
         'model_label' => 'asignación',
         'plural_model_label' => 'asignaciones',
-        'navigation_group' => 'Departamento de Territorios',
         'section_territory_info' => 'Información del Territorio',
         'section_territory_info_description' => 'Información principal relacionada con la asignación del territorio.',
         'section_assignment_info' => 'Información de Asignación',
@@ -236,7 +232,6 @@ return [
     'campaign' => [
         'model_label' => 'campaña',
         'plural_model_label' => 'campañas',
-        'navigation_group' => 'Departamento de Territorios',
         'section_validity_dates' => 'Fechas de validez',
         'section_validity_dates_description' => 'Establece el rango de fechas para cuando este tipo de asignación es válido (por defecto es siempre)',
         'field_name' => 'Nombre',
@@ -308,7 +303,6 @@ return [
     'user' => [
         'model_label' => 'usuario',
         'plural_model_label' => 'usuarios',
-        'navigation_group' => 'Administración',
         'section_personal_data' => 'Datos Personales',
         'section_personal_data_description' => 'Información básica del usuario.',
         'section_login_info' => 'Información de Acceso',
@@ -331,12 +325,6 @@ return [
         'filter_access_enabled_all' => 'Todos',
         'filter_access_enabled_enabled' => 'Habilitado',
         'filter_access_enabled_disabled' => 'Deshabilitado',
-    ],
-    'role' => [
-        'navigation_group' => 'Administración',
-    ],
-    'navigation_groups' => [
-        'developer' => 'Desarrollador',
     ],
     'shared_resource' => [
         'details_title' => 'Detalles de :resourceType',
