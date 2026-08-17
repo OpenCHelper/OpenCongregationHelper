@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Activitylogs;
 
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use \Rmsramos\Activitylog\Resources\Activitylog\ActivitylogResource as BaseActivitylogResource;
 
 class ActivitylogResource extends BaseActivitylogResource

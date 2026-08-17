@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\MailLogs;
 
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use \Tapp\FilamentMailLog\Resources\MailLogResource as BaseMailLogResource;
 
 class MailLogResource extends BaseMailLogResource
