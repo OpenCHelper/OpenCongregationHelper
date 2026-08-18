@@ -15,6 +15,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  linter:
+    uses: ./.github/workflows/run-linter.yml
+
   upload:
     uses: ./.github/workflows/upload-altervista-reusable.yml
     with:

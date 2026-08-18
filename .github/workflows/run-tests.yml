@@ -3,6 +3,7 @@ name: Run tests
 on:
   push:
   workflow_dispatch: # Manually trigger a workflow run
+  workflow_call:
 
 env:
   php_extensions: >-
@@ -42,7 +43,7 @@ jobs:
       - name: Prepare Laravel environment
         run: |
           set -e
-          
+
           cp .env.example .env
 
           # Print environment variables for debugging
@@ -50,13 +51,13 @@ jobs:
           sed 's/^/    | /' < .env
 
           php artisan key:generate --force
-        
+
       - name: Build application
         run: |
           ./vendor/bin/sail up -d --build \
             && ./vendor/bin/sail npm install \
             && ./vendor/bin/sail npm run build
-          
+
       - name: Run tests (with coverage)
         run: |
           ./vendor/bin/sail test --parallel --drop-databases --coverage

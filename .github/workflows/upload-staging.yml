@@ -15,6 +15,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  tests:
+    uses: ./.github/workflows/run-tests.yml
+  linter:
+    uses: ./.github/workflows/run-linter.yml
   upload:
     uses: ./.github/workflows/upload-altervista-reusable.yml
     with:
@@ -24,3 +28,6 @@ jobs:
       ftp_server: ${{ secrets.FTP_SERVER_QA }}
       ftp_username: ${{ secrets.FTP_USERNAME_QA }}
       ftp_password: ${{ secrets.FTP_PASSWORD_QA }}
+    needs:
+      - tests
+      - linter
