@@ -142,7 +142,7 @@ jobs:
           local-dir: ./
           server-dir: ./
           state-name: .ftp-deploy-sync-state__application.json
-          log-level: ${{ case(inputs.verbose, 'verbose', 'standard')}}
+          log-level: ${{ case(inputs.verbose, 'verbose', 'minimal')}}
           timeout: 0 # disable timeout at the action level, use the one at step level
           exclude: |
             **/.git*
@@ -176,7 +176,7 @@ jobs:
           local-dir: ./vendor/
           server-dir: ./vendor/
           state-name: ../.ftp-deploy-sync-state__vendor.json
-          log-level: ${{ case(inputs.verbose, 'verbose', 'standard')}}
+          log-level: ${{ case(inputs.verbose, 'verbose', 'minimal')}}
           timeout: 0
           dangerous-clean-slate: ${{ inputs.delete-remote-contents }}
 
