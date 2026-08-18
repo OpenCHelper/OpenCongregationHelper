@@ -29,10 +29,6 @@ class EditTerritory extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         if (isset($data['image_path'], $data['image_file'])) {
-            Log::error('Image path and image file cannot be set at the same time', [
-                'image_path' => $data['image_path'],
-                'image_file' => $data['image_file'],
-            ]);
             throw new Exception("Form 'image_path' and 'image_file' cannot be set at the same time");
         }
         Log::info('Mutating form data before save', [
