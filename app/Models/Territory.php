@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\HasParentSoftDeletable;
+use App\Observers\TerritoryObserver;
 use Database\Factories\TerritoryFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +19,7 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Tags\HasTags;
 
+#[ObservedBy(TerritoryObserver::class)]
 class Territory extends Model
 {
     /** @use HasFactory<TerritoryFactory> */

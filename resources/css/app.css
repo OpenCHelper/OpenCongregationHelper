@@ -5,6 +5,13 @@
     width: 100%;
 }
 
+#territory-image-preview:has(.no-image-set) {
+    align-items: center;
+    min-height: 150px;
+    display: flex;
+    justify-content: center;
+}
+
 /*
    ------------ Override for `Dotswan\MapPicker` ------------
 

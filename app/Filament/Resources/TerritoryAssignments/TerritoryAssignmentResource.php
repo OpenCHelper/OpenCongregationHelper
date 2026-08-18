@@ -25,6 +25,8 @@ use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -84,54 +86,76 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.info_territory')),
                         TextEntry::make('territory.territoryZone.name')
                             ->label(__('filament-resources.territory_assignment.info_zone')),
-                        MapEntry::make('map')
-                            ->label(__('filament-resources.territory_assignment.info_location'))
-                            ->id('assignment-map')
-                            ->state(null)
+                        Tabs::make('Tabs')
                             ->columnSpanFull()
-                            ->visible(fn (TerritoryAssignment $record) => $record->territory->geojson != null)
-                            ->fitBounds()
-                            ->zoom(10)
-                            ->recenterTimeout(null)
-                            ->mapDraggable(true)
-                            ->mapZoomable(true)
-                            ->fullscreenControl()
-                            ->tileLayersUrl([
-                                'Street Map' => TileLayer::OpenStreetMap,
-                                'Google Streets' => TileLayer::GoogleStreets,
-                                'Google Satellite' => TileLayer::GoogleSatellite,
-                                'Google Hybrid' => TileLayer::GoogleHybrid,
-                            ])
-                            ->shapes(function ($record): array {
-                                $territory = $record->territory;
-                                $geojson = json_decode($territory->geojson, true);
+                            ->hidden(fn (Model $record) => is_null($record->territory->image_path) && is_null($record->territory->geojson))
+                            ->tabs([
+                                Tab::make('TabMap')
+                                    ->label(__('filament-resources.territory.tab_map'))
+                                    ->icon(Heroicon::OutlinedMap)
+                                    ->visible(fn (TerritoryAssignment $record) => $record->territory->geojson != null)
+                                    ->schema([
+                                        MapEntry::make('map')
+                                        ->hiddenLabel()
+                                        ->label(__('filament-resources.territory_assignment.info_location'))
+                                        ->id('assignment-map')
+                                        ->state(null)
+                                        ->columnSpanFull()
+                                        ->visible(fn (TerritoryAssignment $record) => $record->territory->geojson != null)
+                                        ->fitBounds()
+                                        // ->zoom(10)
+                                        ->recenterTimeout(null)
+                                        ->mapDraggable(true)
+                                        ->mapZoomable(true)
+                                        ->fullscreenControl()
+                                        ->tileLayersUrl([
+                                            'Street Map' => TileLayer::OpenStreetMap,
+                                            'Google Streets' => TileLayer::GoogleStreets,
+                                            'Google Satellite' => TileLayer::GoogleSatellite,
+                                            'Google Hybrid' => TileLayer::GoogleHybrid,
+                                        ])
+                                        ->shapes(function ($record): array {
+                                            $territory = $record->territory;
+                                            $geojson = json_decode($territory->geojson, true);
 
-                                $polygons = [];
-                                foreach ($geojson['features'] as $feature) {
-                                    if ($feature['geometry']['type'] != 'Polygon') {
-                                        continue;
-                                    }
+                                            $polygons = [];
+                                            foreach ($geojson['features'] as $feature) {
+                                                if ($feature['geometry']['type'] != 'Polygon') {
+                                                    continue;
+                                                }
 
-                                    // The first two elements are longitude and latitude, but we need latitude and longitude
-                                    // Swap all the coordinates
-                                    $coords_lat_long = array_map(function ($coord) {
-                                        return array_map(function ($c) {
-                                            return [$c[1], $c[0]];
-                                        }, $coord);
-                                    }, $feature['geometry']['coordinates']);
+                                                // The first two elements are longitude and latitude, but we need latitude and longitude
+                                                // Swap all the coordinates
+                                                $coords_lat_long = array_map(function ($coord) {
+                                                    return array_map(function ($c) {
+                                                        return [$c[1], $c[0]];
+                                                    }, $coord);
+                                                }, $feature['geometry']['coordinates']);
 
-                                    $popup = '';
-                                    $polygons[] = Polygon::make($coords_lat_long)
-                                        ->fillColor($territory->territoryZone->color)
-                                        ->fillOpacity(0.3);
-                                }
+                                                $popup = '';
+                                                $polygons[] = Polygon::make($coords_lat_long)
+                                                    ->fillColor($territory->territoryZone->color)
+                                                    ->fillOpacity(0.3);
+                                            }
 
-                                return $polygons;
-                            }),
-                        ImageEntry::make('territory.image_path')
-                            ->label(__('filament-resources.territory.field_image'))
-                            ->visible(fn (Model $record) => $record->territory->image_path != null)
-                            ->columnSpanFull(),
+                                            return $polygons;
+                                        }),
+                                    ]),
+                            Tab::make('TabImage')
+                                ->label(__('filament-resources.territory.tab_image'))
+                                ->icon(Heroicon::OutlinedPhoto)
+                                ->visible(fn(Model $record) => $record->territory->image_path != null)
+                                ->schema([
+                                    ImageEntry::make('territory.image_path')
+                                        ->visibility('private')
+                                        ->imageHeight('auto')
+                                        ->imageWidth('100%')
+                                        ->hiddenLabel()
+                                        ->visible(fn(Model $record) => $record->territory->image_path != null)
+                                        ->columnSpanFull(),
+                                ]),
+
+                        ]),
                         TextEntry::make('territory.description')
                             ->label(__('filament-resources.territory_assignment.info_description'))
                             ->columnSpanFull()

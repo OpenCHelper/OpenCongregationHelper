@@ -29,6 +29,7 @@ use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
@@ -36,6 +37,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -54,6 +56,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Override;
 use Spatie\Tags\Tag;
 use UnitEnum;
@@ -143,24 +149,115 @@ class TerritoryResource extends Resource
                             ->offIcon(Heroicon::OutlinedHome),
                         Tabs::make('Tabs')
                             ->columnSpanFull()
-                            ->contained(false)
+                            // ->contained(false)
                             ->tabs([
                                 Tab::make('TabImage')
                                     ->label(__('filament-resources.territory.tab_image'))
                                     ->icon(Heroicon::OutlinedPhoto)
                                     ->schema([
-                                        FileUpload::make('image_path')
-                                            ->extraAttributes(['style' => 'min-height: 150px;'])
+                                        TextEntry::make('image_preview')
+                                            ->hiddenLabel()
+                                            ->columnSpanFull()
+                                            ->extraAttributes([
+                                                'id' => 'territory-image-preview',
+                                                'style' => 'min-height: 150px;'
+                                            ])
+                                            // ->id('territory-image-preview')
+                                            ->default(new HtmlString(
+                                                '<div class="no-image-set">' . __('filament-resources.territory.missing_image') . '</div>'
+                                            ))
+                                            ->state(function (Get $get) {
+                                                $file = $get('image_file');
+                                                $url = $get('image_path');
+
+                                                Log::info('Previewing image', [
+                                                    'tempFile' => $file,
+                                                    'URI' => $url,
+                                                ]);
+                                                if ($file instanceof TemporaryUploadedFile) {
+                                                    return new HtmlString(
+                                                        '<img src="'.e($file->temporaryUrl()).'" class="rounded-lg">'
+                                                    );
+                                                }
+
+                                                if (! filled($url)) {
+                                                    return null;
+                                                }
+
+                                                // Local path
+                                                if (! Str::of($url)->isMatch('/^https?:\/\//')) {
+                                                    Log::debug('Trying to resolve URL from storage', [
+                                                        'URL' => $url,
+                                                        'storage' => Storage::disk('local')->temporaryUrl($url,
+                                                            now()->plus(minutes: 5)
+                                                        ),
+                                                    ]);
+
+                                                    $url = Storage::disk('local')->temporaryUrl(
+                                                        $url,
+                                                        now()->plus(minutes: 5)
+                                                    );
+                                                }
+                                                Log::debug('Trying to resolve URL as absolute URL', [
+                                                    'URL' => $url,
+                                                ]);
+
+                                                return new HtmlString(
+                                                    '<img src="'.e($url).'" class="rounded-lg">'
+                                                );
+                                            })
+                                            ->live(),
+
+                                        TextInput::make('image_path')
+                                            ->label('Image from URL')
+                                            ->url()
+                                            ->autocomplete(false)
+                                            ->live()
+                                            ->copyable()
+                                            ->hiddenOn(['view'])
+                                            ->disabled(fn ($get) => filled($get('image_file')))
+                                            ->afterStateUpdated(function ($state, $set) {
+                                                Log::info('Image URL state update', ['state' => $state]);
+                                                if (filled($state)) {
+                                                    $set('image_file', null);
+                                                }
+                                            }),
+                                        TextEntry::make('image_separator')
+                                            ->hiddenLabel()
+                                            ->state('— or —')
+                                            ->hiddenOn(['view'])
+                                            ->extraAttributes([
+                                                'class' => 'flex items-center justify-center h-full',
+                                            ]),
+                                        FileUpload::make('image_file')
+                                            ->label('Image from file')
                                             ->image()
                                             ->panelLayout('integrated')
                                             ->imageEditor()
                                             ->openable()
                                             ->downloadable()
-                                            ->previewable()
+                                            ->previewable(false)
                                             ->moveFiles()
                                             ->disk('local')
                                             ->visibility('private')
-                                            ->directory('territories'),
+                                            ->directory('territories')
+                                            ->live()
+                                            ->hiddenOn(['view'])
+                                            ->dehydrated()
+                                            ->disabled(fn ($get) => filled($get('image_path')))
+                                            ->afterStateUpdated(function ($state, $set) {
+                                                Log::info('FileUpload state update', ['state' => $state]);
+                                                if (filled($state) && ! $state instanceof TemporaryUploadedFile) {
+                                                    $set('image_path', $state);
+                                                }
+                                                if ($state == null) {
+                                                    $set('image_path', null);
+                                                }
+                                            })
+                                            ->partiallyRenderComponentsAfterStateUpdated([
+                                                'image_path',
+                                                'image_preview',
+                                            ]),
                                     ]),
                                 Tab::make('TabMap')
                                     ->label(__('filament-resources.territory.tab_map'))

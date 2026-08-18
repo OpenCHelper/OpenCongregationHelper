@@ -32,11 +32,11 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasLocalePreference, HasName, HasTenants, MustVerifyEmail
 {
     use HasApiTokens;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
     use HasProfilePhoto;
-
     use HasRoles;
     use HasTeams;
     use LogsActivity;
