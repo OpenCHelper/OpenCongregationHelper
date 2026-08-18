@@ -72,7 +72,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
         }
 
         return $inherited_table
-            ->modifyQueryUsing(fn(Builder $query) => $query
+            ->modifyQueryUsing(fn (Builder $query) => $query
                 ->withoutGlobalScopes([
                     SoftDeletingScope::class,
                 ])
@@ -227,5 +227,4 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                 ]),
             ]);
     }
-
 }
