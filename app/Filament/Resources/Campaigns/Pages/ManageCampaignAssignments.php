@@ -14,9 +14,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Components\Section;
@@ -72,6 +72,11 @@ class ManageCampaignAssignments extends ManageRelatedRecords
         }
 
         return $inherited_table
+            ->modifyQueryUsing(fn(Builder $query) => $query
+                ->withoutGlobalScopes([
+                    SoftDeletingScope::class,
+                ])
+            )
             ->defaultSort('started_at', 'desc')
             ->heading(ucfirst(__('filament-resources.territory_assignment.plural_model_label')))
             ->description(__('filament-resources.campaign.assignments_relation_description'))
@@ -130,30 +135,30 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                 Section::make()
                                     ->columns(2)
                                     ->schema([
-                                        Placeholder::make('review_campaign_name')
+                                        TextEntry::make('review_campaign_name')
                                             ->label(__('filament-resources.campaign.field_name'))
                                             ->columns(1)
-                                            ->content($this->getRecord()->name),
-                                        Placeholder::make('review_assignee')
+                                            ->state($this->getRecord()->name),
+                                        TextEntry::make('review_assignee')
                                             ->label(__('filament-resources.territory_assignment.field_assignee'))
                                             ->columns(1)
-                                            ->content(fn (Get $get) => $get('assignee_id')
+                                            ->state(fn (Get $get) => $get('assignee_id')
                                                 ? User::find($get('assignee_id'))->full_name
                                                 : ''),
-                                        Placeholder::make('territory_review')
+                                        TextEntry::make('territory_review')
                                             ->label(__('filament-resources.territory_assignment.field_territory'))
                                             ->columns(1)
-                                            ->content(fn (Get $get) => $get('territory_id')
+                                            ->state(fn (Get $get) => $get('territory_id')
                                                 ? Territory::find($get('territory_id'))->name
                                                 : ''),
                                         DatePicker::make('started_at')
                                             ->label(__('filament-resources.territory_assignment.field_started_at'))
                                             ->columns(1)
                                             ->disabled(),
-                                        Placeholder::make('review_notes')
+                                        TextEntry::make('review_notes')
                                             ->label(__('filament-resources.territory_assignment.field_notes'))
                                             ->columnSpanFull()
-                                            ->content(fn (Get $get) => $get('notes') ?: new HtmlString(
+                                            ->state(fn (Get $get) => $get('notes') ?: new HtmlString(
                                                 '<span class="text-gray-500 italic">'
                                                 .__('filament-resources.territory_assignment.info_notes_placeholder')
                                                 .'</span>'
@@ -223,11 +228,4 @@ class ManageCampaignAssignments extends ManageRelatedRecords
             ]);
     }
 
-    protected function getTableQuery(): Builder
-    {
-        return parent::getTableQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
 }
