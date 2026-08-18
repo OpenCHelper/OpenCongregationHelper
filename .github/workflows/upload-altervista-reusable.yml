@@ -33,6 +33,11 @@ on:
         required: false
         default: false
         type: boolean
+      verbose:
+        description: "Increase the overall verbosity of the logging"
+        required: false
+        default: false
+        type: boolean
     secrets:
       ftp_server:
         required: true
@@ -138,7 +143,7 @@ jobs:
           local-dir: ./
           server-dir: ./
           state-name: .ftp-deploy-sync-state__application.json
-          log-level: verbose
+          log-level: ${{ case(inputs.verbose, 'verbose', 'standard')}}
           timeout: 0 # disable timeout at the action level, use the one at step level
           exclude: |
             **/.git*
@@ -172,7 +177,7 @@ jobs:
           local-dir: ./vendor/
           server-dir: ./vendor/
           state-name: ../.ftp-deploy-sync-state__vendor.json
-          log-level: verbose
+          log-level: ${{ case(inputs.verbose, 'verbose', 'standard')}}
           timeout: 0
           dangerous-clean-slate: ${{ inputs.delete-remote-contents }}
 
