@@ -63,7 +63,6 @@ jobs:
   upload:
     name: Upload to Altervista (${{ inputs.label }})
     runs-on: ubuntu-latest
-    timeout-minutes: 300
     defaults:
       run:
         shell: bash
@@ -168,7 +167,7 @@ jobs:
       # and the vendor folder can be deployed later.
       - name: FTP Deploy (vendor)
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
-        timeout-minutes: 150 # Max 2-5 hours
+        timeout-minutes: 300 # Max 5 hours
         with:
           protocol: ftp
           server: ${{ secrets.ftp_server }}
