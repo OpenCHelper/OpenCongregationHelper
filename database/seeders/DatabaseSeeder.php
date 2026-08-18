@@ -17,18 +17,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Log::info("Seeding the database with initial data...");
+        Log::info('Seeding the database with initial data...');
 
         // Initialize root access user
         if (User::count() === 0) {
             $initial_root_username = env('INITIAL_ROOT_USERNAME', null);
             $initial_root_usermail = env('INITIAL_ROOT_USERMAIL', null);
             $initial_root_password = env('INITIAL_ROOT_PASSWORD', null);
-    
+
             if (is_null($initial_root_username) || is_null($initial_root_password) || is_null($initial_root_usermail)) {
                 throw new \Exception('Please set the INITIAL_ROOT_USERNAME, INITIAL_ROOT_USERMAIL, and INITIAL_ROOT_PASSWORD environment variables.');
             }
-    
+
             User::factory()->create([
                 'first_name' => explode(' ', $initial_root_username, 2)[0],
                 'last_name' => explode(' ', $initial_root_username, 2)[1] ?? '',

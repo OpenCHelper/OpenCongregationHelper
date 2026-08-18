@@ -4,13 +4,16 @@ namespace App\Providers\Filament;
 
 use App\Enums\NavigationGroup as EnumsNavigationGroup;
 use App\Filament\Pages\ApiTokens;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\Pages\CreateTeam;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\EditTeam;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
 use App\Providers\AppVersionProvider;
+use Awcodes\Versions\VersionsPlugin;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Detection\MobileDetect;
+use DiscoveryDesign\FilamentGaze\FilamentGazePlugin;
 use Filament\Events\TenantSet;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -20,38 +23,34 @@ use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Platform;
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets;
+use FilipFonal\FilamentLogManager\FilamentLogManager;
+use Hammadzafar05\FilamentMobilePreset\FilamentMobilePresetPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Event;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Laravel\Fortify\Fortify;
-use Laravel\Fortify\Features as FortifyFeatures;
-use Laravel\Jetstream\Features;
-use Laravel\Jetstream\Jetstream;
-use \FilipFonal\FilamentLogManager\FilamentLogManager;
-use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
-use Awcodes\Versions\VersionsPlugin;
-use Filament\Navigation\NavigationGroup;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Tapp\FilamentMailLog\FilamentMailLogPlugin;
+use Illuminate\Support\Facades\Event;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Fortify\Features as FortifyFeatures;
+use Laravel\Fortify\Fortify;
+use Laravel\Jetstream\Features;
+use Laravel\Jetstream\Jetstream;
+use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
-
-use Filament\Support\Enums\Platform;
-use Hammadzafar05\FilamentMobilePreset\FilamentMobilePresetPlugin;
-use Detection\MobileDetect;
-use Filament\Support\Icons\Heroicon;
+use Tapp\FilamentMailLog\FilamentMailLogPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $detect = new MobileDetect();
+        $detect = new MobileDetect;
 
         $panel
             ->default()
@@ -74,7 +73,7 @@ class AppPanelProvider extends PanelProvider
             })
             ->userMenuItems([
                 MenuItem::make()
-                    ->label(fn() => __('filament-resources.user_profile.menu_label'))
+                    ->label(fn () => __('filament-resources.user_profile.menu_label'))
                     ->icon(Heroicon::OutlinedUserCircle)
                     ->url(fn () => $this->shouldRegisterMenuItem()
                         ? url(EditProfile::getUrl())
@@ -92,23 +91,23 @@ class AppPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
             ])
-            ->navigationGroups(array_map(static fn(EnumsNavigationGroup $el) => $el->name, EnumsNavigationGroup::cases()))
+            ->navigationGroups(array_map(static fn (EnumsNavigationGroup $el) => $el->name, EnumsNavigationGroup::cases()))
             ->plugins([
                 FilamentShieldPlugin::make(),
                 FilamentLogManager::make(),
                 EnvironmentIndicatorPlugin::make()
                     ->color(fn () => match (app()->environment()) {
-                        'local' => Color::Blue,             # 1. Local development machine
-                        'nightly' => Color::Amber,          # 2. First stage (nightly)
-                        'staging', 'uat' => Color::Orange,  # 3. Pre-production
-                        'production' => Color::Red,         # 4. Production
-                        default => Color::Fuchsia,          # (unknown)
+                        'local' => Color::Blue,             // 1. Local development machine
+                        'nightly' => Color::Amber,          // 2. First stage (nightly)
+                        'staging', 'uat' => Color::Orange,  // 3. Pre-production
+                        'production' => Color::Red,         // 4. Production
+                        default => Color::Fuchsia,          // (unknown)
                     }),
-                \DiscoveryDesign\FilamentGaze\FilamentGazePlugin::make(),
+                FilamentGazePlugin::make(),
                 VersionsPlugin::make()
-                    ->hasDefaults(App::environment() !== "production")
+                    ->hasDefaults(App::environment() !== 'production')
                     ->items([
-                        new AppVersionProvider(),
+                        new AppVersionProvider,
                     ]),
                 FilamentMailLogPlugin::make(),
                 ActivitylogPlugin::make(),
@@ -131,7 +130,7 @@ class AppPanelProvider extends PanelProvider
                 Authenticate::class,
             ]);
 
-        if (app()->environment(["local", "nightly"])) {
+        if (app()->environment(['local', 'nightly'])) {
             $panel->plugins([
                 // \TomatoPHP\FilamentArtisan\FilamentArtisanPlugin::make(),
             ]);
@@ -196,7 +195,7 @@ class AppPanelProvider extends PanelProvider
     public function shouldRegisterMenuItem(): bool
     {
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 

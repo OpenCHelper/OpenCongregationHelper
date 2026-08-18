@@ -19,9 +19,9 @@ test('profile information can be updated', function () {
 
     Livewire::test(UpdateProfileInformationForm::class)
         ->set('state', [
-            'first_name' => 'Test First Name', 
-            'last_name' => 'Test Last Name', 
-            'email' => 'test@example.com'
+            'first_name' => 'Test First Name',
+            'last_name' => 'Test Last Name',
+            'email' => 'test@example.com',
         ])
         ->call('updateProfileInformation');
 

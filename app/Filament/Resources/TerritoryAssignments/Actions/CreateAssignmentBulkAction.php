@@ -1,13 +1,12 @@
 <?php
+
 namespace App\Filament\Resources\TerritoryAssignments\Actions;
 
+use App\Models\Campaign;
+use App\Models\User;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use App\Models\User;
-use App\Models\Campaign;
-use Exception;
-use App\Models;
-use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
@@ -35,13 +34,13 @@ class CreateAssignmentBulkAction extends Action
                     ->options(Campaign::query()
                         ->where(function ($query) {
                             $query->whereNull('valid_until')
-                                  ->orWhere('valid_until', '>', now());
+                                ->orWhere('valid_until', '>', now());
                         })
                         ->pluck('name', 'id'))
                     ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
             ])
             ->action(function (Collection $records, array $data): void {
-                try{
+                try {
                     // Check if campaign is terminated
                     if ($data['campaign_id'] && Campaign::find($data['campaign_id'])?->isTerminated()) {
                         $this->halt();
@@ -51,6 +50,7 @@ class CreateAssignmentBulkAction extends Action
                             ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
                             ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
                             ->send();
+
                         return;
                     }
 
@@ -58,6 +58,7 @@ class CreateAssignmentBulkAction extends Action
                         // Skip if the last assignment is not null
                         if ($record->currentAssignment !== null && $record->currentAssignment->ended_at === null) {
                             Log::warning("Skipping record {$record->id} because it has an active assignment");
+
                             continue;
                         }
 
@@ -70,9 +71,10 @@ class CreateAssignmentBulkAction extends Action
                         $record->save();
                     }
                 } catch (Exception $e) {
-                    Log::error('Errore durante l\'assegnazione del territorio: ' . $e->getMessage());
+                    Log::error('Errore durante l\'assegnazione del territorio: '.$e->getMessage());
                     $this->halt();
                     $this->failure();
+
                     return;
                 }
 

@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
 use Spatie\Tags\Tag;
 
 class FakeTagSeeder extends Seeder
@@ -14,6 +12,6 @@ class FakeTagSeeder extends Seeder
      */
     public function run(): void
     {
-        Tag::factory()->count(8)->create();        
+        Tag::factory()->count(8)->create();
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Tenancy\RegisterTenant;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 
 class CreateTeam extends RegisterTenant

@@ -4,7 +4,7 @@ namespace App\Enums;
 
 /**
  * The tag types used in the application.
- * 
+ *
  * @see https://spatie.be/docs/laravel-tags/v4/advanced-usage/using-types
  */
 enum TagType: string

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use DateTimeZone;
 use Awcodes\Versions\Providers\Contracts\VersionProvider;
+use DateTimeZone;
 
 class AppVersionProvider implements VersionProvider
 {

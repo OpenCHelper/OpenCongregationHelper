@@ -13,7 +13,7 @@ use Symfony\Component\Mime\MessageConverter;
  * Some shared hosting services provide a working mail() function, but
  * don't support manually configuring SMTP servers nor give access to
  * the shell to run a sendmail command.
- * 
+ *
  * This transport uses the mail() function to send emails.
  */
 class NativeMailFxTransport extends AbstractTransport
@@ -21,7 +21,8 @@ class NativeMailFxTransport extends AbstractTransport
     /**
      * Create a new transport instance.
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
@@ -45,7 +46,7 @@ class NativeMailFxTransport extends AbstractTransport
             'headers' => $headers,
         ]);
 
-        if (!mail($to, $email->getSubject(), $email->getHtmlBody(), $headers)) {
+        if (! mail($to, $email->getSubject(), $email->getHtmlBody(), $headers)) {
             throw new TransportException('Failed to send email using mail() function');
         }
     }

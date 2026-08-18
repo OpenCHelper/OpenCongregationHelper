@@ -4,7 +4,7 @@ namespace App\Traits;
 
 /**
  * Trait to provide a specific guest view page route for shareable resources.
- * 
+ *
  * If not used, by default a generic guest page route will be generated.
  */
 trait HasGuestViewPage
@@ -20,8 +20,8 @@ trait HasGuestViewPage
      */
     public function getGuestPageRoute(): string
     {
-        return property_exists($this, 'guestPageRoute') && isset($this->guestPageRoute) 
-            ? $this->guestPageRoute 
+        return property_exists($this, 'guestPageRoute') && isset($this->guestPageRoute)
+            ? $this->guestPageRoute
             : $this->getDefaultGuestPageRoute();
     }
 
@@ -30,6 +30,6 @@ trait HasGuestViewPage
      */
     protected function getDefaultGuestPageRoute(): string
     {
-        return "/guest/shared-" . str(class_basename($this))->kebab();
+        return '/guest/shared-'.str(class_basename($this))->kebab();
     }
 }

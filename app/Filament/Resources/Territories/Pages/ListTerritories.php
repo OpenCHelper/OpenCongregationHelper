@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Territories\Pages;
 
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions\CreateAction;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\Territory;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 

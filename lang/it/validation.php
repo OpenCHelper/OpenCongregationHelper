@@ -144,7 +144,7 @@ return [
     'required_with_all' => 'Il campo :attribute è obbligatorio quando :values sono presenti.',
     'required_without' => 'Il campo :attribute è obbligatorio quando :values non è presente.',
     'required_without_all' => 'Il campo :attribute è obbligatorio quando nessuno dei :values è presente.',
-    'same' => 'Il campo :attribute e :other devono corrispondere.', 
+    'same' => 'Il campo :attribute e :other devono corrispondere.',
     'size' => [
         'array' => 'Il campo :attribute deve contenere :size elementi.',
         'file' => 'Il campo :attribute deve essere di :size kilobyte.',
@@ -160,7 +160,6 @@ return [
     'url' => 'Il campo :attribute deve essere un URL valido.',
     'ulid' => 'Il campo :attribute deve essere un ULID valido.',
     'uuid' => 'Il campo :attribute deve essere un UUID valido.',
-
 
     /*
     |--------------------------------------------------------------------------

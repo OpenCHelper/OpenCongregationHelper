@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Log::debug("Running migration '" . basename(__FILE__) . "' with options: '" . json_encode(Schema::getConnection()->getConfig()) . "'");
+        Log::debug("Running migration '".basename(__FILE__)."' with options: '".json_encode(Schema::getConnection()->getConfig())."'");
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();

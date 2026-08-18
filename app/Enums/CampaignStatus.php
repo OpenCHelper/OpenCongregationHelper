@@ -2,8 +2,8 @@
 
 namespace App\Enums;
 
-use Carbon\Carbon;
 use App\Models\Campaign;
+use Carbon\Carbon;
 
 enum CampaignStatus: string
 {
@@ -34,7 +34,7 @@ enum CampaignStatus: string
 
     public static function fromValidUntil(?Carbon $validUntil): self
     {
-        if (!$validUntil) {
+        if (! $validUntil) {
             return self::ACTIVE;
         }
 

@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use Spatie\Tags\Tag as SpatieTag;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
-
-use App\Models\Taggable;
+use Spatie\Tags\Tag as SpatieTag;
 
 /**
  * Tag model for polymorphic tagging.

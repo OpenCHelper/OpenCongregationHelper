@@ -1,8 +1,8 @@
 <?php
 
 use App\Providers\AppVersionProvider;
-use Illuminate\Support\Facades\Config;
 use Awcodes\Versions\Providers\Contracts\VersionProvider;
+use Illuminate\Support\Facades\Config;
 
 beforeEach(function () {
     // Reset configuration for each test

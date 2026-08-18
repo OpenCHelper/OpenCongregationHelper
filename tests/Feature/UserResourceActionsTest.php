@@ -11,26 +11,28 @@ class UserResourceActionsTest extends TestCase
     use RefreshDatabase;
 
     private User $rootUser;
+
     private User $regularUser;
+
     private User $adminUser;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create the root user (ID = 1)
         $this->rootUser = User::factory()->create([
             'id' => 1,
             'email' => 'root@example.com',
             'can_login' => true,
         ]);
-        
+
         // Create a regular user
         $this->regularUser = User::factory()->create([
             'email' => 'user@example.com',
             'can_login' => true,
         ]);
-        
+
         // Create another user that will act as admin
         $this->adminUser = User::factory()->create([
             'email' => 'admin@example.com',
@@ -43,7 +45,7 @@ class UserResourceActionsTest extends TestCase
     {
         // Login as any user (including root)
         $this->actingAs($this->adminUser);
-        
+
         // Test that the delete action would always be disabled for root user
         $this->assertTrue($this->rootUser->isRootUser());
         $this->assertFalse($this->rootUser->canBeDeleted());
@@ -54,7 +56,7 @@ class UserResourceActionsTest extends TestCase
     {
         // Login as admin user (not root)
         $this->actingAs($this->adminUser);
-        
+
         // Test that the edit action would be disabled
         $this->assertTrue($this->rootUser->isRootUserProtected());
         $this->assertFalse($this->adminUser->isRootUser());
@@ -65,7 +67,7 @@ class UserResourceActionsTest extends TestCase
     {
         // Login as root user
         $this->actingAs($this->rootUser);
-        
+
         // Test that the edit action would be enabled
         $this->assertTrue($this->rootUser->isRootUserProtected());
         $this->assertTrue($this->rootUser->isRootUser());
@@ -76,7 +78,7 @@ class UserResourceActionsTest extends TestCase
     {
         // Login as admin user
         $this->actingAs($this->adminUser);
-        
+
         // Test that regular user actions are always enabled
         $this->assertFalse($this->regularUser->isRootUserProtected());
     }

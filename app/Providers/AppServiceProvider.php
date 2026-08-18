@@ -2,28 +2,24 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use BezhanSalleh\LanguageSwitch\LanguageSwitch;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
-
+use App\Models\Tag;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Event;
-
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use App\NativeMailFxTransport;
-
 use App\Policies\ActivityPolicy;
 use App\Policies\TagPolicy;
-use Spatie\Activitylog\Models\Activity;
-use App\Models\Tag;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\ServiceProvider;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Translatable\Facades\Translatable;
 
 class AppServiceProvider extends ServiceProvider
@@ -47,12 +43,12 @@ class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict(! app()->isProduction());
 
         FilamentAsset::register([
-            Js::make('filament-sidebar-fix', __DIR__ . '/../../resources/js/filament-sidebar-fix.js')
+            Js::make('filament-sidebar-fix', __DIR__.'/../../resources/js/filament-sidebar-fix.js'),
         ]);
 
         // Add a custom mail transport that uses the native mail() function
         Mail::extend('nativemailfx', function (array $config = []) {
-            return new NativeMailFxTransport(/* ... */);
+            return new NativeMailFxTransport/* ... */;
         });
 
         // Configure the gate to only allow super_admins to view logs
@@ -71,19 +67,18 @@ class AppServiceProvider extends ServiceProvider
 
             $switch
                 ->locales(array_keys($flags))
-                ->flags($flags)
-            ;
+                ->flags($flags);
         });
 
         // Register a fallback for missing translations (eg. when using laravel-tags)
         Translatable::fallback(
             fallbackAny: true,
             missingKeyCallback: function (
-               Model $model,
-               string $translationKey,
-               string $locale,
-               string $fallbackTranslation,
-               string $fallbackLocale,
+                Model $model,
+                string $translationKey,
+                string $locale,
+                string $fallbackTranslation,
+                string $fallbackLocale,
             ) {
                 // Log::warning('Some translation key is missing from an eloquent model', [
                 //    'key' => $translationKey,

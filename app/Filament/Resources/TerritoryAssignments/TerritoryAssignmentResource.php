@@ -3,40 +3,39 @@
 namespace App\Filament\Resources\TerritoryAssignments;
 
 use App\Enums\NavigationGroup;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Forms\Components\Select;
-use App\Rules\NotTerminatedCampaign;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Models\TerritoryAssignment;
+use App\Rules\NotTerminatedCampaign;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
+use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
+use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
-
-use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
-use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
-use Filament\Support\Icons\Heroicon;
 use Override;
 use UnitEnum;
 
@@ -44,8 +43,9 @@ class TerritoryAssignmentResource extends Resource
 {
     protected static ?string $model = TerritoryAssignment::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
-    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::RectangleStack;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::RectangleStack;
 
     // Hide the resource from the navigation panel
     protected static bool $shouldRegisterNavigation = true;
@@ -86,7 +86,7 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.info_zone')),
                         MapEntry::make('map')
                             ->label(__('filament-resources.territory_assignment.info_location'))
-                            ->id("assignment-map")
+                            ->id('assignment-map')
                             ->state(null)
                             ->columnSpanFull()
                             ->visible(fn (TerritoryAssignment $record) => $record->territory->geojson != null)
@@ -107,8 +107,8 @@ class TerritoryAssignmentResource extends Resource
                                 $geojson = json_decode($territory->geojson, true);
 
                                 $polygons = [];
-                                foreach ($geojson["features"] as $feature) {
-                                    if ($feature["geometry"]["type"] != "Polygon") {
+                                foreach ($geojson['features'] as $feature) {
+                                    if ($feature['geometry']['type'] != 'Polygon') {
                                         continue;
                                     }
 
@@ -118,18 +118,16 @@ class TerritoryAssignmentResource extends Resource
                                         return array_map(function ($c) {
                                             return [$c[1], $c[0]];
                                         }, $coord);
-                                    }, $feature["geometry"]["coordinates"]);
+                                    }, $feature['geometry']['coordinates']);
 
-                                    $popup = "";
+                                    $popup = '';
                                     $polygons[] = Polygon::make($coords_lat_long)
                                         ->fillColor($territory->territoryZone->color)
-                                        ->fillOpacity(0.3)
-                                    ;
+                                        ->fillOpacity(0.3);
                                 }
 
                                 return $polygons;
-                            })
-                        ,
+                            }),
                         ImageEntry::make('territory.image_path')
                             ->label(__('filament-resources.territory.field_image'))
                             ->visible(fn (Model $record) => $record->territory->image_path != null)
@@ -169,6 +167,7 @@ class TerritoryAssignmentResource extends Resource
                     ]),
             ]);
     }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -212,11 +211,11 @@ class TerritoryAssignmentResource extends Resource
                             ->relationship('campaign', 'name', function ($query) {
                                 return $query->where(function ($q) {
                                     $q->whereNull('valid_until')
-                                      ->orWhere('valid_until', '>', now());
+                                        ->orWhere('valid_until', '>', now());
                                 });
                             })
                             ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign'))
-                            ->rule(new NotTerminatedCampaign())
+                            ->rule(new NotTerminatedCampaign)
                             ->preload(),
                         DateTimePicker::make('started_at')
                             ->label(__('filament-resources.territory_assignment.field_started_at'))
@@ -260,16 +259,16 @@ class TerritoryAssignmentResource extends Resource
                     ->sortable(),
                 TextColumn::make('assignee.full_name')
                     ->label(__('filament-resources.territory_assignment.column_assignee'))
-                    ->hidden(!Auth::user()->can('view_any_territory::assignment'))
+                    ->hidden(! Auth::user()->can('view_any_territory::assignment'))
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(['first_name', 'last_name']),
                 TextColumn::make('started_at')
                     ->label(__('filament-resources.territory_assignment.column_started_at'))
-                    ->dateTime("d/m/Y H:i")
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
                 TextColumn::make('ended_at')
                     ->label(__('filament-resources.territory_assignment.column_ended_at'))
-                    ->dateTime("d/m/Y H:i")
+                    ->dateTime('d/m/Y H:i')
                     ->placeholder(__('filament-resources.territory_assignment.column_ended_at_placeholder'))
                     ->sortable(),
                 TextColumn::make('campaign.name')
@@ -309,7 +308,7 @@ class TerritoryAssignmentResource extends Resource
                 Filter::make('assignee')
                     ->label(__('filament-resources.territory_assignment.filter_my_assignments_only'))
                     ->query(fn (Builder $query) => $query->where('assignee_id', Auth::user()->id))
-                    ->hidden(!Auth::user()->can('view_any_territory::assignment')),
+                    ->hidden(! Auth::user()->can('view_any_territory::assignment')),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -339,7 +338,7 @@ class TerritoryAssignmentResource extends Resource
         $query = parent::getEloquentQuery()
             ->whereHas('assignee', function ($query) {
                 // If the user cannot see all assignments, filter by the user's ID
-                if (!Auth::user()->can('view_any_territory::assignment')) {
+                if (! Auth::user()->can('view_any_territory::assignment')) {
                     return $query->where('id', Auth::user()->id);
                 }
             })

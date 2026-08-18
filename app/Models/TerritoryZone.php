@@ -7,20 +7,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Tags\HasTags;
-
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Tags\HasTags;
 
 class TerritoryZone extends Model
 {
     /** @use HasFactory<TerritoryZoneFactory> */
     use HasFactory;
-    use SoftDeletes;
 
     use HasTags;
     use LogsActivity;
-    
+    use SoftDeletes;
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

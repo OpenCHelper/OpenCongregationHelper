@@ -1,10 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\TerritoryController;
 use App\Http\Controllers\TerritoryZoneController;
+use App\Models\TerritoryAssignment;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 // Load special routes for the Artisan command execution
 require base_path('routes/api/artisan.php');
@@ -16,8 +17,8 @@ Route::get('/user', function (Request $request) {
 Route::apiResource('territories', TerritoryController::class)->middleware('auth:sanctum');
 Route::apiResource('zones', TerritoryZoneController::class)->middleware('auth:sanctum');
 Route::get('/assignees', function () {
-    return App\Models\User::all();
+    return User::all();
 })->middleware('auth:sanctum');
 Route::get('/assignments', function () {
-    return App\Models\TerritoryAssignment::all();
+    return TerritoryAssignment::all();
 })->middleware('auth:sanctum');

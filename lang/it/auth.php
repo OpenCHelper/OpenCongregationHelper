@@ -12,9 +12,9 @@ return [
     | these language lines according to your application's requirements.
     |
     */
-    
+
     'failed' => 'Queste credenziali non corrispondono ai nostri record.',
     'password' => 'La password fornita è incorretta.',
     'throttle' => 'Troppi tentativi di accesso. Riprova tra :seconds secondi.',
-    
+
 ];

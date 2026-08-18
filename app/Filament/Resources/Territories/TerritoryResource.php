@@ -3,71 +3,72 @@
 namespace App\Filament\Resources\Territories;
 
 use App\Enums\NavigationGroup;
-use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\BulkAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Territories\Pages\ListTerritories;
+use App\Enums\TagType;
 use App\Filament\Resources\Territories\Pages\CreateTerritory;
 use App\Filament\Resources\Territories\Pages\EditTerritory;
-use App\Filament\Resources\Territories\Pages\ViewTerritory;
+use App\Filament\Resources\Territories\Pages\ListTerritories;
 use App\Filament\Resources\Territories\Pages\ManageTerritoryAssignments;
-use App\Enums\TagType;
+use App\Filament\Resources\Territories\Pages\ViewTerritory;
 use App\Filament\Resources\TerritoryAssignments\Actions as AssignmentActions;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
-use App\Models\Territory;
 use App\Models\Campaign;
+use App\Models\Territory;
 use App\Models\User;
+use Carbon\Carbon;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
-use Filament\Forms;
-use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Dotswan\MapPicker\Fields\Map;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieTagsInput;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SpatieTagsColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
-use Filament\Resources\Pages\Page;
-use Filament\Tables\Columns\SpatieTagsColumn;
-use Filament\Tables\Grouping\Group;
-use Spatie\Tags\Tag;
-use Illuminate\Contracts\Support\Htmlable;
-use Carbon\Carbon;
-use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Log;
 use Override;
+use Spatie\Tags\Tag;
 use UnitEnum;
 
 class TerritoryResource extends Resource
 {
     protected static ?string $model = Territory::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedMapPin;
-    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::MapPin;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
+
+    protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::MapPin;
+
     protected static ?int $navigationSort = 0;
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function getModelLabel(): string
     {
@@ -103,13 +104,13 @@ class TerritoryResource extends Resource
 
         return [
             ...($record->description ? [__('filament-resources.global_search_results.description') => $record->description] : []),
-            ...(!$tags->isEmpty() ? [__('filament-resources.global_search_results.tags') => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
+            ...(! $tags->isEmpty() ? [__('filament-resources.global_search_results.tags') => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
         ];
     }
 
-    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
     {
-        return $record->name . ' (' . $record->territoryZone->name . ')';
+        return $record->name.' ('.$record->territoryZone->name.')';
     }
 
     public static function form(Schema $schema): Schema
@@ -134,7 +135,7 @@ class TerritoryResource extends Resource
                             ->relationship(name: 'territoryZone', titleAttribute: 'name')
                             ->preload()
                             ->searchable()
-                            ->createOptionForm(fn(Schema $schema) => TerritoryZoneResource::form($schema)),
+                            ->createOptionForm(fn (Schema $schema) => TerritoryZoneResource::form($schema)),
                         Toggle::make('is_commercial')
                             ->label(__('filament-resources.territory.field_is_commercial'))
                             // ->inline(false)
@@ -171,7 +172,7 @@ class TerritoryResource extends Resource
                                             ->extraStyles(['style' => 'min-height: 50vh', 'border-radius: 8px'])
                                             ->dehydrated(false)
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
-                                                $set('geojson',   json_encode($state['geojson'] ?? ''));
+                                                $set('geojson', json_encode($state['geojson'] ?? ''));
                                             })
                                             ->afterStateHydrated(function ($state, $record, Set $set): void {
                                                 $geojson = json_decode(strip_tags($record->geojson ?? ''));
@@ -195,7 +196,7 @@ class TerritoryResource extends Resource
                                             ->geoManEditable($schema->getOperation() !== 'view')
                                             ->geoManPosition('topleft')
                                             ->rotateMode(false)
-                                            ->clickable(false) //click to move marker
+                                            ->clickable(false) // click to move marker
                                             ->drawMarker(false)
                                             ->drawPolygon($schema->getOperation() !== 'view')
                                             ->drawPolyline($schema->getOperation() !== 'view')
@@ -212,11 +213,11 @@ class TerritoryResource extends Resource
                                         TextInput::make('geojson')
                                             // ->hiddenLabel()
                                             ->readOnly(),
-                                ]),
+                                    ]),
                             ])
                             ->activeTab(function (?Model $record) {
                                 return $record?->geojson ? 2 : 1;
-                            })
+                            }),
                     ]),
                 Section::make(__('filament-resources.territory.section_additional_info'))
                     ->description(__('filament-resources.territory.section_additional_info_description'))
@@ -241,7 +242,7 @@ class TerritoryResource extends Resource
             ->groups([
                 Group::make('territoryZone.name')
                     ->label(ucfirst(__('filament-resources.territory_zone.model_label')))
-                    ->getTitleFromRecordUsing(fn (Territory $record): string => $record->territoryZone->name . " (" . $record->territoryZone->loadMissing("territories")->territories->count() . ")" ?? '')
+                    ->getTitleFromRecordUsing(fn (Territory $record): string => $record->territoryZone->name.' ('.$record->territoryZone->loadMissing('territories')->territories->count().')' ?? '')
                     ->getDescriptionFromRecordUsing(fn (Territory $record): string => $record->territoryZone->description ?? '')
                     ->collapsible(),
                 Group::make('currentAssignment.campaign.name')
@@ -251,18 +252,20 @@ class TerritoryResource extends Resource
                         $campaign = $record->currentAssignment?->campaign;
                         if ($campaign) {
                             $territoriesCount = $campaign->assignments()->count();
-                            return $campaign->name . " ({$territoriesCount})";
+
+                            return $campaign->name." ({$territoriesCount})";
                         }
 
                         $territoriesCount = Territory::unassigned()
                             ->count();
-                        return __('filament-resources.territory.filter_no_campaign') . " ({$territoriesCount})";
+
+                        return __('filament-resources.territory.filter_no_campaign')." ({$territoriesCount})";
                     })
                     ->orderQueryUsing(function (Builder $query, string $direction): Builder {
                         return $query->leftJoin('territory_assignments as campaign_assignments', function ($join) {
-                                $join->on('territories.id', '=', 'campaign_assignments.territory_id')
-                                     ->whereNull('campaign_assignments.ended_at');
-                            })
+                            $join->on('territories.id', '=', 'campaign_assignments.territory_id')
+                                ->whereNull('campaign_assignments.ended_at');
+                        })
                             ->leftJoin('campaigns', 'campaign_assignments.campaign_id', '=', 'campaigns.id')
                             ->orderByRaw("COALESCE(campaigns.name, 'zzz_no_campaign') {$direction}")
                             ->select('territories.*');
@@ -291,7 +294,7 @@ class TerritoryResource extends Resource
                         return $query
                             ->leftJoin('territory_assignments as current_assignments', function ($join) {
                                 $join->on('territories.id', '=', 'current_assignments.territory_id')
-                                     ->whereNull('current_assignments.ended_at');
+                                    ->whereNull('current_assignments.ended_at');
                             })
                             ->leftJoin('users as current_assignees', 'current_assignments.assignee_id', '=', 'current_assignees.id')
                             ->orderBy('current_assignees.first_name', $direction)
@@ -342,7 +345,7 @@ class TerritoryResource extends Resource
                         return $query
                             ->leftJoin('territory_assignments as duration_assignments', function ($join) {
                                 $join->on('territories.id', '=', 'duration_assignments.territory_id')
-                                     ->whereNull('duration_assignments.ended_at');
+                                    ->whereNull('duration_assignments.ended_at');
                             })
                             ->orderByRaw("
                                 CASE
@@ -425,7 +428,7 @@ class TerritoryResource extends Resource
                                 ->options(Campaign::query()
                                     ->where(function ($query) {
                                         $query->whereNull('valid_until')
-                                              ->orWhere('valid_until', '>', now());
+                                            ->orWhere('valid_until', '>', now());
                                     })
                                     ->pluck('name', 'id'))
                                 ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
@@ -438,6 +441,7 @@ class TerritoryResource extends Resource
                                     ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
                                     ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
                                     ->send();
+
                                 return;
                             }
 
@@ -445,6 +449,7 @@ class TerritoryResource extends Resource
                                 // Skip if the last assignment is not null
                                 if ($record->currentAssignment !== null && $record->currentAssignment->ended_at === null) {
                                     Log::warning("Skipping record {$record->id} because it has an active assignment");
+
                                     continue;
                                 }
 
@@ -469,6 +474,7 @@ class TerritoryResource extends Resource
                                 // Skip if the last assignment is not null
                                 if ($record->currentAssignment === null || $record->currentAssignment->ended_at !== null) {
                                     Log::warning("Skipping record {$record->id} because it does not has an active assignment");
+
                                     continue;
                                 }
 

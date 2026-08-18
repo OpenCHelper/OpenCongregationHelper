@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Database\Factories\CampaignFactory;
 use App\Enums\CampaignStatus;
 use App\Observers\CampaignObserver;
+use Database\Factories\CampaignFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,18 +12,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 #[ObservedBy(CampaignObserver::class)]
 class Campaign extends Model
 {
     /** @use HasFactory<CampaignFactory> */
     use HasFactory;
-    use SoftDeletes;
+
     use LogsActivity;
-    
+    use SoftDeletes;
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

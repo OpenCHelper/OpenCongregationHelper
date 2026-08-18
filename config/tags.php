@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Tag;
+
 return [
 
     /*
@@ -11,6 +13,6 @@ return [
     /*
      * The fully qualified class name of the tag model.
      */
-    'tag_model' => \App\Models\Tag::class,
+    'tag_model' => Tag::class,
 
 ];

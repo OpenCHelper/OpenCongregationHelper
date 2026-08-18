@@ -2,19 +2,16 @@
 
 namespace App\Notifications;
 
-use Filament\Actions\Action;
-use App\Models\User;
-
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-
-use Illuminate\Support\Carbon;
-use Filament\Notifications\Notification as FilamentNotification;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\TerritoryAssignment;
+use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Carbon;
 
 class StaleAssignmentNotification extends Notification
 {
@@ -25,8 +22,7 @@ class StaleAssignmentNotification extends Notification
      */
     public function __construct(
         public TerritoryAssignment $assignment
-    )
-    {
+    ) {
         //
     }
 
@@ -49,8 +45,8 @@ class StaleAssignmentNotification extends Notification
             ->subject(__('filament-resources.mailables.stale_assignment_subject'))
             ->greeting(__('filament-resources.mailables.greeting', ['name' => $notifiable->name]))
             ->line(__('filament-resources.mailables.stale_assignment_body', [
-                'territory' => $this->assignment->with("territory")->firstOrFail()->territory->name,
-                'days' => round($this->assignment->started_at->diffInDays(Carbon::now(), absolute: true))
+                'territory' => $this->assignment->with('territory')->firstOrFail()->territory->name,
+                'days' => round($this->assignment->started_at->diffInDays(Carbon::now(), absolute: true)),
             ]))
             ->line(__('filament-resources.mailables.remember_to_return_if_finished'))
             ->action(__('filament-resources.mailables.view_territory'), TerritoryAssignmentResource::getUrl('view', [
@@ -90,6 +86,4 @@ class StaleAssignmentNotification extends Notification
             ])
             ->getDatabaseMessage();
     }
-
-
 }

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class SharedUrl extends Model
 {
@@ -55,7 +55,7 @@ class SharedUrl extends Model
      * @return array<int, string>
      */
     public function uniqueIds(): array
-    { 
+    {
         return [
             'uid',
         ];

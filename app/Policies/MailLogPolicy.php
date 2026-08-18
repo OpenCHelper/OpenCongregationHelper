@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Tapp\FilamentMailLog\Models\MailLog;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class MailLogPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:MailLog');
@@ -71,5 +71,4 @@ class MailLogPolicy
     {
         return $authUser->can('Reorder:MailLog');
     }
-
 }

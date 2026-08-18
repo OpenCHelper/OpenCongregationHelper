@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use Exception;
 use App\Models\User;
+use Exception;
 
 class UserObserver
 {
@@ -24,7 +24,7 @@ class UserObserver
         // Protect root user's critical fields in non-production environments
         if ($user->isRootUserProtected()) {
             $protectedFields = ['email', 'password', 'can_login'];
-            
+
             foreach ($protectedFields as $field) {
                 if ($user->isDirty($field)) {
                     // Restore the original value for protected fields
@@ -57,7 +57,7 @@ class UserObserver
         if ($user->isRootUser()) {
             throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
         }
-        
+
         return true;
     }
 

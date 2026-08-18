@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Campaigns\Widgets;
 
 use App\Models\Campaign;
 use App\Models\Territory;
-use App\Models\TerritoryAssignment;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
 

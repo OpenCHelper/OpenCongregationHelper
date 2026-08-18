@@ -2,14 +2,12 @@
 
 namespace App\Filament\Resources\Territories\Pages;
 
-use Filament\Actions\ActionGroup;
-use Filament\Actions\EditAction;
+use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\TerritoryAssignments\Actions\CreateAssignmentAction;
 use App\Filament\Resources\TerritoryAssignments\Actions\ReturnAssignmentAction;
-use App\Filament\Resources\Territories\TerritoryResource;
-use Filament\Actions;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Contracts\Support\Htmlable;
 
 class ViewTerritory extends ViewRecord
 {

@@ -2,47 +2,47 @@
 
 namespace App\Models;
 
-use Database\Factories\UserFactory;
 use App\Enums\ContactType;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Observers\UserObserver;
+use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Models\Contracts\HasTenants;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
-use Filament\Panel;
-use Filament\Models\Contracts\FilamentUser;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Models\Contracts\HasTenants;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
-use Filament\Models\Contracts\HasName;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Contracts\Translation\HasLocalePreference;
-use Illuminate\Support\Facades\Log;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use App\Observers\UserObserver;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 #[ObservedBy([UserObserver::class])]
-class User extends Authenticatable implements HasTenants, HasName, MustVerifyEmail, FilamentUser , HasLocalePreference
+class User extends Authenticatable implements FilamentUser, HasLocalePreference, HasName, HasTenants, MustVerifyEmail
 {
     use HasApiTokens;
-
-    use HasRoles;
-
     /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use HasProfilePhoto;
+
+    use HasRoles;
     use HasTeams;
+    use LogsActivity;
     use Notifiable;
     use TwoFactorAuthenticatable;
-    use LogsActivity;
-    
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -100,7 +100,7 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
 
     public function getFullName(): string
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name.' '.$this->last_name;
     }
 
     public function fullName(): Attribute
@@ -112,7 +112,7 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
 
     /**
      * Fallback for Filament to allow easier migration from `name` to `fullName`.
-     * 
+     *
      * @deprecated Use `fullName` or `getFullName()` instead.
      */
     public function name(): Attribute
@@ -141,7 +141,7 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
      */
     public function isRootUserProtected(): bool
     {
-        return $this->isRootUser() && !app()->environment('production');
+        return $this->isRootUser() && ! app()->environment('production');
     }
 
     /**
@@ -150,7 +150,7 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
      */
     public function canBeDeleted(): bool
     {
-        return !$this->isRootUser();
+        return ! $this->isRootUser();
     }
 
     public function canAccessPanel(Panel $panel): bool
@@ -175,7 +175,7 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
 
     public function isVirtual(): bool
     {
-        return !$this->can_login;
+        return ! $this->can_login;
     }
 
     public function assignments(): HasMany
@@ -205,12 +205,13 @@ class User extends Authenticatable implements HasTenants, HasName, MustVerifyEma
     {
         Log::debug('User preferred locale', [
             'user' => $this->fullName,
-            '$this->locale' => $this->locale, 
+            '$this->locale' => $this->locale,
             'app()->getLocale()' => app()->getLocale(),
             'config("app.locale")' => config('app.locale'),
             'config("app.fallback_locale")' => config('app.fallback_locale'),
             'env("APP_LOCALE")' => env('APP_LOCALE', 'unknown'),
         ]);
+
         return $this->locale ?? app()->getLocale();
     }
 }

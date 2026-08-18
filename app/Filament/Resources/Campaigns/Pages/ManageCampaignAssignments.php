@@ -2,31 +2,28 @@
 
 namespace App\Filament\Resources\Campaigns\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\CreateAction;
-use Filament\Schemas\Components\Wizard\Step;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Textarea;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Placeholder;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\BulkAction;
-use Exception;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use App\Filament\Resources\Campaigns\CampaignResource;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\Territory;
-use App\Models\TerritoryAssignment;
 use App\Models\User;
-use Filament\Forms;
+use Exception;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
@@ -42,7 +39,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
 
     protected static string $relationship = 'assignments';
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function getNavigationLabel(): string
     {
@@ -82,6 +79,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                 CreateAction::make()
                     ->mutateDataUsing(function (array $data): array {
                         $data['campaign_id'] = $this->getRecord()->id;
+
                         return $data;
                     })
                     ->hidden(fn () => $this->getRecord()->isTerminated())
@@ -157,8 +155,8 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                             ->columnSpanFull()
                                             ->content(fn (Get $get) => $get('notes') ?: new HtmlString(
                                                 '<span class="text-gray-500 italic">'
-                                                . __('filament-resources.territory_assignment.info_notes_placeholder')
-                                                . '</span>'
+                                                .__('filament-resources.territory_assignment.info_notes_placeholder')
+                                                .'</span>'
                                             )),
                                     ]),
                             ]),
@@ -183,6 +181,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                 if ($assignment->ended_at !== null) {
                                     $skippedCount++;
                                     Log::warning("Skipping assignment {$assignment->id} because it is already terminated");
+
                                     continue;
                                 }
 
@@ -192,7 +191,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                     ]);
                                     $terminatedCount++;
                                 } catch (Exception $e) {
-                                    Log::error('Error terminating assignment ' . $assignment->id . ': ' . $e->getMessage());
+                                    Log::error('Error terminating assignment '.$assignment->id.': '.$e->getMessage());
                                 }
                             }
 
@@ -203,7 +202,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                     ->title(__('filament-resources.campaign.bulk_action_terminate_success_title'))
                                     ->body(__('filament-resources.campaign.bulk_action_terminate_success_body', [
                                         'count' => $terminatedCount,
-                                        'skipped' => $skippedCount
+                                        'skipped' => $skippedCount,
                                     ]))
                                     ->send();
                             } else {

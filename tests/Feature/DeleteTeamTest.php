@@ -2,9 +2,9 @@
 
 use App\Models\Team;
 use App\Models\User;
+use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Http\Livewire\DeleteTeamForm;
 use Livewire\Livewire;
-use Laravel\Jetstream\Features;
 
 test('teams can be deleted', function () {
     $this->actingAs($user = User::factory()->withPersonalTeam()->create());
@@ -22,7 +22,7 @@ test('teams can be deleted', function () {
 
     expect($team->fresh())->toBeNull();
     expect($otherUser->fresh()->teams)->toHaveCount(0);
-})->skip(fn () => !Features::hasTeamFeatures(), 'Team support is not enabled.');
+})->skip(fn () => ! Features::hasTeamFeatures(), 'Team support is not enabled.');
 
 test('personal teams cant be deleted', function () {
     $this->actingAs($user = User::factory()->withPersonalTeam()->create());
@@ -32,4 +32,4 @@ test('personal teams cant be deleted', function () {
         ->assertHasErrors(['team']);
 
     expect($user->currentTeam->fresh())->not->toBeNull();
-})->skip(fn () => !Features::hasTeamFeatures(), 'Team support is not enabled.');
+})->skip(fn () => ! Features::hasTeamFeatures(), 'Team support is not enabled.');

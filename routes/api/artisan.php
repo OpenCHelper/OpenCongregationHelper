@@ -7,7 +7,7 @@ use App\Http\Middleware\EnsureArtisanToken;
 use Illuminate\Support\Facades\Route;
 
 Route::domain(
-    'artisan.' . preg_replace("/(^https?:\/\/|:.*$|\/\s*$)/", "", config('app.url'))
+    'artisan.'.preg_replace("/(^https?:\/\/|:.*$|\/\s*$)/", '', config('app.url'))
 )->group(function () {
     // Protected artisan commands
     Route::controller(ArtisanCommandController::class)->middleware(EnsureArtisanToken::class)->group(function () {
@@ -20,7 +20,7 @@ Route::domain(
     // Queue processing
     Route::post('/queue/process', ArtisanQueueController::class)
         ->name('queue.process');
-    
+
     // Cron (scheduled) jobs processing
     Route::post('/schedule/process', ArtisanScheduledController::class)
         ->name('schedule.process');

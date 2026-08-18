@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Activitylogs;
 
 use App\Enums\NavigationGroup;
 use Illuminate\Support\Facades\Auth;
-use \Rmsramos\Activitylog\Resources\Activitylog\ActivitylogResource as BaseActivitylogResource;
+use Rmsramos\Activitylog\Resources\Activitylog\ActivitylogResource as BaseActivitylogResource;
 
 class ActivitylogResource extends BaseActivitylogResource
 {

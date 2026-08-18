@@ -7,7 +7,7 @@ use Filament\Support\Icons\Heroicon;
 
 class EditProfile extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedUserCircle;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedUserCircle;
 
     protected string $view = 'filament.pages.edit-profile';
 

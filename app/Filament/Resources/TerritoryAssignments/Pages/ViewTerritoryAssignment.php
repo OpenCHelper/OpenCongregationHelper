@@ -2,18 +2,15 @@
 
 namespace App\Filament\Resources\TerritoryAssignments\Pages;
 
-use Filament\Actions\ActionGroup;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Support\Enums\Size;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
-use Filament\Forms;
-use Filament\Notifications\Actions\Action as NotificationAction;
+use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Log;
 
 class ViewTerritoryAssignment extends ViewRecord
 {
@@ -40,7 +37,7 @@ class ViewTerritoryAssignment extends ViewRecord
                             ->schema([
                                 TextInput::make('share_url')
                                     ->label(__('filament-resources.territory_assignment.share_modal.url_label'))
-                                    ->visible(fn ($get) => !empty($get('share_url')))
+                                    ->visible(fn ($get) => ! empty($get('share_url')))
                                     ->readonly()
                                     ->suffixActions([
                                         Action::make('copy_url_suffix')
@@ -51,6 +48,7 @@ class ViewTerritoryAssignment extends ViewRecord
 
                                                 if (! $url) {
                                                     $action->halt();
+
                                                     return;
                                                 }
 
@@ -89,7 +87,7 @@ class ViewTerritoryAssignment extends ViewRecord
                                                     ->icon(Heroicon::OutlinedClipboardDocumentCheck)
                                             ),
                                     ]),
-                            ])
+                            ]),
                     ])
                     ->extraModalFooterActions([
                         Action::make('stop_sharing')
@@ -103,6 +101,7 @@ class ViewTerritoryAssignment extends ViewRecord
                             ->action(function ($action) {
                                 if (! $this->record->shared) {
                                     $action->halt();
+
                                     return;
                                 }
 
@@ -117,11 +116,11 @@ class ViewTerritoryAssignment extends ViewRecord
                             ),
                     ]),
             ])
-            ->label(__('filament-resources.territory_assignment.action_group.label'))
-            ->icon(Heroicon::EllipsisVertical)
-            ->size(Size::Small)
-            ->color('gray')
-            ->button(),
+                ->label(__('filament-resources.territory_assignment.action_group.label'))
+                ->icon(Heroicon::EllipsisVertical)
+                ->size(Size::Small)
+                ->color('gray')
+                ->button(),
         ];
     }
 }

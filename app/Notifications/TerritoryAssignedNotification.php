@@ -2,17 +2,15 @@
 
 namespace App\Notifications;
 
-use Filament\Actions\Action;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-
-use App\Models\User;
-use App\Models\TerritoryAssignment;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
+use App\Models\TerritoryAssignment;
+use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class TerritoryAssignedNotification extends Notification
 {
@@ -23,8 +21,7 @@ class TerritoryAssignedNotification extends Notification
      */
     public function __construct(
         public TerritoryAssignment $assignment,
-    )
-    {
+    ) {
         //
     }
 

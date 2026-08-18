@@ -2,13 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Campaign;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
-use App\Models\Campaign;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Faker\Generator as Faker;
 
 class FakeTerritoryAssignmentSeeder extends Seeder
 {

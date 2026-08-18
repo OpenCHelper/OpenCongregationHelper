@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Campaign;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Campaign>
+ * @extends Factory<Campaign>
  */
 class CampaignFactory extends Factory
 {
@@ -17,7 +18,7 @@ class CampaignFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => "Campaign " . $this->faker->word(),
+            'name' => 'Campaign '.$this->faker->word(),
             'description' => $this->faker->sentence(),
             'short_name' => $this->faker->regexify('[A-Z]{3}'),
             'created_by' => 1,

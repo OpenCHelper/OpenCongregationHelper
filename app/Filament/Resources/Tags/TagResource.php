@@ -3,42 +3,41 @@
 namespace App\Filament\Resources\Tags;
 
 use App\Enums\NavigationGroup;
-use Filament\Schemas\Components\Tabs\Tab;
+use App\Enums\TagType;
+use App\Filament\Resources\Tags\Pages\ManageTags;
+use App\Models\Tag;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Tabs;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Tags\Pages\ManageTags;
-use App\Enums\TagType;
-use App\Filament\Resources\TagResource\Pages;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Tag;
-use Filament\Support\Icons\Heroicon;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use UnitEnum;
 use Override;
+use UnitEnum;
 
 class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedTag;
-    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::Tag;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
+
+    protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::Tag;
+
     protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'name';
@@ -58,9 +57,9 @@ class TagResource extends Resource
         return ['name', 'slug', 'type'];
     }
 
-    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
     {
-        return $record->name . ($record->type ? ' (' . $record->type . ')' : '');
+        return $record->name.($record->type ? ' ('.$record->type.')' : '');
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
@@ -90,7 +89,7 @@ class TagResource extends Resource
     /**
      * Generate language tabs for the form, based on available locales.
      *
-     * @return array<\Filament\Schemas\Components\Tabs\Tab>
+     * @return array<Tab>
      */
     protected static function generateLanguageTabs(): array
     {
@@ -102,17 +101,17 @@ class TagResource extends Resource
 
             $tabs[] = Tab::make($locale)
                 ->icon(new HtmlString(
-                    '<img src="' . asset("vendor/blade-flags/language-{$locale}.svg") . '" alt="' . $localeName . '" class="h-5 w-5 inline-block mr-2" />'
+                    '<img src="'.asset("vendor/blade-flags/language-{$locale}.svg").'" alt="'.$localeName.'" class="h-5 w-5 inline-block mr-2" />'
                 ))
-                ->label($localeName . ' (' . $locale . ')')
+                ->label($localeName.' ('.$locale.')')
                 ->schema([
                     TextInput::make("name.{$locale}")
-                        ->label(__('filament-resources.tag.field_name') . " ({$locale})")
+                        ->label(__('filament-resources.tag.field_name')." ({$locale})")
                         ->required($isRequired)
                         ->maxLength(255)
                         ->live(onBlur: true)
                         ->afterStateUpdated(function (string $operation, $state, Set $set) use ($locale, $availableLocales) {
-                            if ($operation !== 'create' || !$state) {
+                            if ($operation !== 'create' || ! $state) {
                                 return;
                             }
                             $slug = Str::slug($state);
@@ -128,7 +127,7 @@ class TagResource extends Resource
                             }
                         }),
                     TextInput::make("slug.{$locale}")
-                        ->label(__('filament-resources.tag.field_slug') . " ({$locale})")
+                        ->label(__('filament-resources.tag.field_slug')." ({$locale})")
                         ->required($isRequired)
                         ->maxLength(255)
                         ->rules(['alpha_dash']),
@@ -151,7 +150,7 @@ class TagResource extends Resource
                         // This assumes that the tab IDs are suffixed with the locale, e.g., '-en-tab', '-fr-tab'
                         // (as generated in generateLanguageTabs).
                         return collect($tabs)->search(
-                            fn (Tab $tab) => Str::endsWith($tab->getId(), app()->getLocale() . '-tab')
+                            fn (Tab $tab) => Str::endsWith($tab->getId(), app()->getLocale().'-tab')
                         ) + 1 ?: 1;
                     })
                     ->tabs($tabs),

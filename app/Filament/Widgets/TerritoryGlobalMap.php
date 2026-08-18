@@ -2,28 +2,20 @@
 
 namespace App\Filament\Widgets;
 
-use Override;
-use Closure;
-
-use EduardoRibeiroDev\FilamentLeaflet\Widgets\MapWidget;
-use EduardoRibeiroDev\FilamentLeaflet\Layers\Marker;
-use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
-use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
-use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Rectangle;
 use App\Models\Territory;
-use EduardoRibeiroDev\FilamentLeaflet\LayerGroups\FeatureGroup;
-use EduardoRibeiroDev\FilamentLeaflet\LayerGroups\LayerGroup;
-use EduardoRibeiroDev\FilamentLeaflet\LayerGroups\MarkerCluster;
-use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Circle;
-use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\CircleMarker;
-use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polyline;
+use Closure;
+use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
+use EduardoRibeiroDev\FilamentLeaflet\Layers\Marker;
+use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
+use EduardoRibeiroDev\FilamentLeaflet\Widgets\MapWidget;
 use Filament\Notifications\Notification;
 use Filament\Support\Colors\Color;
-use Filament\Support\Icons\Heroicon;
+use Override;
 
 class TerritoryGlobalMap extends MapWidget
 {
     protected int|Closure $maxZoom = 18;
+
     protected int|Closure $minZoom = 2;
 
     // Multiple layers
@@ -94,14 +86,14 @@ class TerritoryGlobalMap extends MapWidget
 
         // Log::info("Total territories: " . count($territories));
 
-        $viewType = "zone";
+        $viewType = 'zone';
 
         $polygones = [];
         foreach ($territories as $territory) {
             $geojson = json_decode($territory->geojson, true);
 
-            foreach ($geojson["features"] as $feature) {
-                if ($feature["geometry"]["type"] != "Polygon") {
+            foreach ($geojson['features'] as $feature) {
+                if ($feature['geometry']['type'] != 'Polygon') {
                     continue;
                 }
 
@@ -111,9 +103,9 @@ class TerritoryGlobalMap extends MapWidget
                     return array_map(function ($c) {
                         return [$c[1], $c[0]];
                     }, $coord);
-                }, $feature["geometry"]["coordinates"]);
+                }, $feature['geometry']['coordinates']);
 
-                $popup = "";
+                $popup = '';
 
                 // See https://leafletjs.com/reference.html#polygon-color for the full list of options
                 $polygonOptions = [];
@@ -146,9 +138,9 @@ class TerritoryGlobalMap extends MapWidget
                     ->action(function (Marker $marker) use ($territory) { // Or ->onClick()
                         Notification::make()
                             ->title("Clicked on territory {$territory->name}!")
-                            ->body('ID: ' . $marker->getId())
+                            ->body('ID: '.$marker->getId())
                             ->send();
-                    });;
+                    });
             }
         }
 

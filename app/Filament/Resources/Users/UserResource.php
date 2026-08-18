@@ -3,55 +3,52 @@
 namespace App\Filament\Resources\Users;
 
 use App\Enums\NavigationGroup;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Checkbox;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Notifications\Notification;
-use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
-use App\Filament\Resources\Users\Pages\ViewUser;
-use App\Filament\Resources\Users\Pages\ManageUserAssignments;
-use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\ManageUserAssignments;
+use App\Filament\Resources\Users\Pages\ViewUser;
+use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
 use App\Models\User;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
-use STS\FilamentImpersonate\Actions\Impersonate;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Override;
+use STS\FilamentImpersonate\Actions\Impersonate;
 use UnitEnum;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedUsers;
-    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::Users;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::Users;
+
     protected static ?string $tenantOwnershipRelationshipName = 'teams';
 
     public static function getModelLabel(): string
     {
         return __('filament-resources.user.model_label');
     }
+
     public static function getPluralModelLabel(): string
     {
         return __('filament-resources.user.plural_model_label');
@@ -88,7 +85,7 @@ class UserResource extends Resource
                                 ? __('profile.root_user_protection.generic_field_disabled')
                                 : null
                             ),
-                        ]),
+                    ]),
                 Section::make(__('filament-resources.user.section_login_info'))
                     ->schema([
                         Checkbox::make('can_login')
@@ -102,12 +99,10 @@ class UserResource extends Resource
                         TextInput::make('password')
                             ->label(__('filament-resources.user.field_password'))
                             ->hiddenOn('view')
-                            ->disabled(fn (Get $get, ?User $record) =>
-                                $get('can_login') === false || $record?->isRootUserProtected()
+                            ->disabled(fn (Get $get, ?User $record) => $get('can_login') === false || $record?->isRootUserProtected()
                             )
                             ->password()
-                            ->required(fn (Get $get, ?User $record) =>
-                                $get('can_login') && !$record?->isRootUserProtected()
+                            ->required(fn (Get $get, ?User $record) => $get('can_login') && ! $record?->isRootUserProtected()
                             )
                             ->maxLength(255)
                             ->helperText(fn (?User $record) => $record?->isRootUserProtected()
@@ -117,8 +112,7 @@ class UserResource extends Resource
                         Select::make('roles')
                             ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Get $get) => $get('can_login') === false)
-                            ->disabled(fn (Get $get, ?User $record) =>
-                                $get('can_login') === false || $record?->isRootUserProtected()
+                            ->disabled(fn (Get $get, ?User $record) => $get('can_login') === false || $record?->isRootUserProtected()
                             )
                             ->relationship('roles', 'name')
                             ->multiple()
@@ -194,13 +188,15 @@ class UserResource extends Resource
                 EditAction::make()
                     ->disabled(function (User $record) {
                         $currentUser = Auth::user();
+
                         return $record->isRootUserProtected() &&
-                               !($currentUser instanceof User && $currentUser->isRootUser());
+                               ! ($currentUser instanceof User && $currentUser->isRootUser());
                     })
                     ->tooltip(function (User $record) {
                         $currentUser = Auth::user();
+
                         return $record->isRootUserProtected() &&
-                               !($currentUser instanceof User && $currentUser->isRootUser())
+                               ! ($currentUser instanceof User && $currentUser->isRootUser())
                             ? __('profile.root_user_protection.edit_action_disabled')
                             : null;
                     }),
@@ -214,7 +210,7 @@ class UserResource extends Resource
                             $hasRootUser = $records->contains(fn (User $record) => $record->isRootUser());
 
                             // Filter out root user before deletion (root user can never be deleted)
-                            $recordsToDelete = $records->filter(fn (User $record) => !$record->isRootUser());
+                            $recordsToDelete = $records->filter(fn (User $record) => ! $record->isRootUser());
                             $deletedCount = 0;
 
                             if ($recordsToDelete->isNotEmpty()) {
@@ -256,7 +252,6 @@ class UserResource extends Resource
             ManageUserAssignments::class,
         ]);
     }
-
 
     public static function getPages(): array
     {

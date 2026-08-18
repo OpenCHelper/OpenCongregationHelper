@@ -2,12 +2,9 @@
 
 namespace App\Filament\Resources\TerritoryZones\Pages;
 
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
-use Filament\Actions;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewTerritoryZone extends ViewRecord

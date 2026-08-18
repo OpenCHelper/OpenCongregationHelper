@@ -15,7 +15,7 @@ class FakeDataSeeder extends Seeder
      */
     public function run(): void
     {
-        Log::info("Seeding the database with fake data (for testing)...");
+        Log::info('Seeding the database with fake data (for testing)...');
 
         $this->call([
             FakeUserSeeder::class,

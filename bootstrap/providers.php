@@ -1,9 +1,15 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\Filament\AppPanelProvider;
+use App\Providers\Filament\GuestPanelProvider;
+use App\Providers\FortifyServiceProvider;
+use App\Providers\JetstreamServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\Filament\AppPanelProvider::class,
-    App\Providers\Filament\GuestPanelProvider::class,
-    App\Providers\FortifyServiceProvider::class,
-    App\Providers\JetstreamServiceProvider::class,
+    AppServiceProvider::class,
+    AppPanelProvider::class,
+    GuestPanelProvider::class,
+    FortifyServiceProvider::class,
+    JetstreamServiceProvider::class,
 ];

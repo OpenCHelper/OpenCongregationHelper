@@ -32,8 +32,6 @@ trait HasSharedUrl
      *
      * If a shared URL already exists, it will return that.
      * Otherwise, it will create a new shared URL.
-     *
-     * @return SharedUrl
      */
     public function share(): SharedUrl
     {

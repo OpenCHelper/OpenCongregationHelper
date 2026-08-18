@@ -2,16 +2,13 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
-use Filament\Actions;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use STS\FilamentImpersonate\Actions\Impersonate;
 use Illuminate\Support\Facades\Auth;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 class ViewUser extends ViewRecord
 {
@@ -32,21 +29,24 @@ class ViewUser extends ViewRecord
                 ->disabled(function () {
                     $record = $this->getRecord();
                     $currentUser = Auth::user();
+
                     return $record->isRootUserProtected() &&
-                           !($currentUser instanceof User && $currentUser->isRootUser());
+                           ! ($currentUser instanceof User && $currentUser->isRootUser());
                 })
                 ->tooltip(function () {
                     $record = $this->getRecord();
                     $currentUser = Auth::user();
+
                     return $record->isRootUserProtected() &&
-                           !($currentUser instanceof User && $currentUser->isRootUser())
+                           ! ($currentUser instanceof User && $currentUser->isRootUser())
                         ? __('profile.root_user_protection.edit_action_disabled')
                         : null;
                 }),
             DeleteAction::make()
                 ->visible(function () {
                     $record = $this->getRecord();
-                    return !$record->isRootUser();
+
+                    return ! $record->isRootUser();
                 }),
         ];
     }

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::rename('territory_assignment_types', 'campaigns');
-        
+
         Schema::table('territory_assignments', function (Blueprint $table) {
             $table->renameColumn('territory_assignment_type_id', 'campaign_id');
         });
@@ -26,7 +26,7 @@ return new class extends Migration
         Schema::table('territory_assignments', function (Blueprint $table) {
             $table->renameColumn('campaign_id', 'territory_assignment_type_id');
         });
-        
+
         Schema::rename('campaigns', 'territory_assignment_types');
     }
 };

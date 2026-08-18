@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\TerritoryZones\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListTerritoryZones extends ListRecords

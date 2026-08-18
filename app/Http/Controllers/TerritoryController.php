@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Territory;
 use App\Http\Requests\StoreTerritoryRequest;
 use App\Http\Requests\UpdateTerritoryRequest;
+use App\Models\Territory;
 
 class TerritoryController extends Controller
 {

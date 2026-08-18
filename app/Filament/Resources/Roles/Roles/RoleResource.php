@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Roles\Roles;
 
 use App\Enums\NavigationGroup;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\Pages\ListRoles;
 use App\Filament\Resources\Roles\Pages\ViewRole;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
 use BezhanSalleh\PluginEssentials\Concerns\Resource as Essentials;
@@ -54,7 +54,6 @@ class RoleResource extends Resource
     {
         return 2;
     }
-
 
     #[Override]
     public static function form(Schema $schema): Schema

@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources\Campaigns\Pages;
 
-use Filament\Actions\EditAction;
 use App\Filament\Resources\Campaigns\CampaignResource;
 use App\Filament\Resources\Campaigns\Widgets\CampaignAssignmentsChart;
 use App\Filament\Resources\Campaigns\Widgets\CampaignOverview;
-use Filament\Actions;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewCampaign extends ViewRecord
@@ -31,7 +30,7 @@ class ViewCampaign extends ViewRecord
             CampaignAssignmentsChart::class,
         ];
     }
-    
+
     protected function getHeaderActions(): array
     {
         return [

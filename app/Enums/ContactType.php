@@ -2,10 +2,10 @@
 
 namespace App\Enums;
 
-use Filament\Support\Contracts\HasLabel;
 use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
 
-enum ContactType: string implements HasLabel, HasColor
+enum ContactType: string implements HasColor, HasLabel
 {
     case PERSONAL = 'personal';
     case EMERGENCY = 'emergency';
@@ -19,7 +19,7 @@ enum ContactType: string implements HasLabel, HasColor
 
     public function badgeClass(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PERSONAL => 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100',
             self::EMERGENCY => 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
             self::BUSINESS => 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
@@ -29,7 +29,7 @@ enum ContactType: string implements HasLabel, HasColor
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PERSONAL => __('profile.contacts.types.personal'),
             self::EMERGENCY => __('profile.contacts.types.emergency'),
             self::BUSINESS => __('profile.contacts.types.business'),
@@ -37,9 +37,9 @@ enum ContactType: string implements HasLabel, HasColor
         };
     }
 
-    public function getColor(): string | array | null
+    public function getColor(): string|array|null
     {
-        return match($this) {
+        return match ($this) {
             self::PERSONAL => 'success',
             self::EMERGENCY => 'danger',
             self::BUSINESS => 'warning',

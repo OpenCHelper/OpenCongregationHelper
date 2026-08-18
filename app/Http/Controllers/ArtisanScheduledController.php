@@ -10,11 +10,10 @@ use Illuminate\Support\Facades\Log;
 
 class ArtisanScheduledController extends Controller
 {
-
     /**
      * Handle the incoming request.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return Response
      */
     public function __invoke()
@@ -24,12 +23,13 @@ class ArtisanScheduledController extends Controller
             '--no-ansi' => true,
             // '--quiet' => true,
         ];
-        
+
         try {
             // Log::info('Executing Artisan command "schedule:run" with params: ' . json_encode($params));
-            $exitCode = Artisan::call("schedule:run", $params);
+            $exitCode = Artisan::call('schedule:run', $params);
         } catch (Exception $e) {
-            Log::error('Error executing Artisan command "schedule:run" with params: ' . json_encode($params) . ' - ' . $e->getMessage());
+            Log::error('Error executing Artisan command "schedule:run" with params: '.json_encode($params).' - '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'output' => $e->getMessage(),
@@ -43,10 +43,10 @@ class ArtisanScheduledController extends Controller
         //     return '    | ' . $line;
         // }, explode("\n", $output))));
 
-        return response()->json(array(
+        return response()->json([
             'success' => true,
             'output' => $output,
             'returnCode' => $exitCode,
-        ));
+        ]);
     }
 }

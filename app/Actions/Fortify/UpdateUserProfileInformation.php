@@ -30,7 +30,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
         ];
 
         // Only validate email for non-protected root users
-        if (!$user->isRootUserProtected()) {
+        if (! $user->isRootUserProtected()) {
             $validationRules['email'] = ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)];
         }
 
@@ -47,6 +47,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 'last_name' => $input['last_name'],
                 'locale' => $input['locale'] ?? $user->locale,
             ])->save();
+
             return;
         }
 

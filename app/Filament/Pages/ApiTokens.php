@@ -7,7 +7,7 @@ use Filament\Support\Icons\Heroicon;
 
 class ApiTokens extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedKey;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
     protected string $view = 'filament.pages.api-tokens';
 

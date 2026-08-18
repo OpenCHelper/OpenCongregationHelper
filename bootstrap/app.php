@@ -1,10 +1,12 @@
 <?php
 
 use App\Jobs\DetectStaleAssignments;
+use BladeUI\Icons\Console\CacheCommand;
+use BladeUI\Icons\Console\ClearCommand;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Stringable;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -32,19 +34,18 @@ return Application::configure(basePath: dirname(__DIR__))
             ->weekly()
             ->days([Schedule::MONDAY])
             ->withoutOverlapping()
-            ->onOneServer()
+            ->onOneServer();
         // ->onFailure(function (Stringable $output) {
         //     // Handle failure
         // })
         // ->onSuccess(function (Stringable $output) {
         //     // Handle success
         // });
-    ;
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })
     ->withCommands([
-        \BladeUI\Icons\Console\CacheCommand::class,
-        \BladeUI\Icons\Console\ClearCommand::class,
+        CacheCommand::class,
+        ClearCommand::class,
     ])->create();

@@ -2,16 +2,12 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use Filament\Schemas\Schema;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Log;
 use Livewire\Livewire;
 
 class ManageUserAssignments extends ManageRelatedRecords
@@ -20,7 +16,7 @@ class ManageUserAssignments extends ManageRelatedRecords
 
     protected static string $relationship = 'assignments';
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function getNavigationLabel(): string
     {

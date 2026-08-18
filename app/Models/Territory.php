@@ -2,40 +2,36 @@
 
 namespace App\Models;
 
-use Database\Factories\TerritoryFactory;
 use App\HasParentSoftDeletable;
+use Database\Factories\TerritoryFactory;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Illuminate\Support\Facades\Log;
-use Spatie\Tags\HasTags;
-
-use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Tags\HasTags;
 
 class Territory extends Model
 {
     /** @use HasFactory<TerritoryFactory> */
     use HasFactory;
-    use SoftDeletes;
-
-    use HasTags;
 
     use HasParentSoftDeletable;
-
+    use HasTags;
     use LogsActivity;
-    
+    use SoftDeletes;
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnlyDirty()
-            ->logOnly(['name', 'description', 'geojson', 'notes', ]);
+            ->logOnly(['name', 'description', 'geojson', 'notes']);
     }
 
     /**
@@ -73,14 +69,16 @@ class Territory extends Model
         return $this->belongsTo(TerritoryZone::class);
     }
 
-    public function assignments(): HasMany {
+    public function assignments(): HasMany
+    {
         return $this->hasMany(TerritoryAssignment::class);
     }
 
     /**
      * Get the current active assignment for this territory.
      */
-    public function currentAssignment(): HasOne {
+    public function currentAssignment(): HasOne
+    {
         return $this->hasOne(TerritoryAssignment::class)
             ->whereNull('ended_at')
             ->latest('started_at');
@@ -89,7 +87,8 @@ class Territory extends Model
     /**
      * Get the current assignee directly through the assignment.
      */
-    public function currentAssignee(): HasOneThrough {
+    public function currentAssignee(): HasOneThrough
+    {
         return $this->hasOneThrough(
             User::class,
             TerritoryAssignment::class,
@@ -98,7 +97,7 @@ class Territory extends Model
             'id',              // Local key on territories table
             'assignee_id'      // Local key on territory_assignments table
         )->whereNull('territory_assignments.ended_at')
-         ->latest('territory_assignments.started_at');
+            ->latest('territory_assignments.started_at');
     }
 
     /**
@@ -110,7 +109,7 @@ class Territory extends Model
             $query->whereNull('ended_at');
         });
     }
-    
+
     /**
      * Scope a query to only include unassigned territories.
      */
@@ -120,7 +119,6 @@ class Territory extends Model
             $query->whereNull('ended_at');
         });
     }
-    
 
     public function geojson(): Attribute
     {

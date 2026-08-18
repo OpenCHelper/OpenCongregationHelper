@@ -1,9 +1,8 @@
 <?php
 
+use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
-use App\Models\Territory;
-use App\Models\Campaign;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,7 +22,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->tinyText('color')->nullable()->comment('Optional color code (hex, rgb, etc.)');
-            
+
             $table->foreignIdFor(User::class, 'created_by')->comment('User who created this record')->nullable()->constrained()->nullOnDelete();
 
             $table->timestamps();

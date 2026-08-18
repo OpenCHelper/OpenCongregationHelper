@@ -7,7 +7,6 @@ use App\Models\Territory;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Number;
 
 class CampaignOverview extends BaseWidget
@@ -18,7 +17,7 @@ class CampaignOverview extends BaseWidget
     {
         // Take all assignments into consideration, even unfinished ones.
         $campaign_percentage = $this->record->assignments()->count() * 100 / Territory::count();
-        $campaign_remaining_days = $this->record->valid_until ? - $this->record->valid_until->diffInDays(now(), false) : null;
+        $campaign_remaining_days = $this->record->valid_until ? -$this->record->valid_until->diffInDays(now(), false) : null;
         $campaign_remaining_time_percentage = $this->record->valid_from && $this->record->valid_until
             ? now()->floatDiffInDays($this->record->valid_from) * 100 / $this->record->valid_from->floatDiffInDays($this->record->valid_until)
             : null;

@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Territory;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Spatie\Tags\Tag;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Territory>
+ * @extends Factory<Territory>
  */
 class TerritoryFactory extends Factory
 {
@@ -33,49 +35,49 @@ class TerritoryFactory extends Factory
 
     public function withImage(): self
     {
-        return $this->state(fn(array $state) => [
-            'image_path' => 'https://placehold.co/600x400?text=' . $state['name'],
+        return $this->state(fn (array $state) => [
+            'image_path' => 'https://placehold.co/600x400?text='.$state['name'],
         ]);
     }
 
     public function withMap(): self
     {
         return $this->state(function (array $attributes) {
-            $center_coords = [41.9102088,12.3711913];
-            $random_latitude  = $this->faker->latitude($center_coords[0] - 0.1, $center_coords[0] + 0.1);
+            $center_coords = [41.9102088, 12.3711913];
+            $random_latitude = $this->faker->latitude($center_coords[0] - 0.1, $center_coords[0] + 0.1);
             $random_longitude = $this->faker->longitude($center_coords[1] - 0.1, $center_coords[1] + 0.1);
-    
+
             return [
-                'geojson' => json_encode(array(
+                'geojson' => json_encode([
                     'type' => 'FeatureCollection',
-                    'features' => array(
-                        array(
+                    'features' => [
+                        [
                             'type' => 'Feature',
-                            'properties' => array(
+                            'properties' => [
                                 'name' => 'Territory',
-                            ),
-                            'geometry' => array(
+                            ],
+                            'geometry' => [
                                 'type' => 'Polygon',
-                                'coordinates' => array(
-                                    array(
-                                        array(
+                                'coordinates' => [
+                                    [
+                                        [
                                             $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
                                             $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
-                                        ),
-                                        array(
+                                        ],
+                                        [
                                             $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
                                             $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
-                                        ),
-                                        array(
+                                        ],
+                                        [
                                             $this->faker->longitude($random_longitude - 0.1, $random_longitude + 0.1),
                                             $this->faker->latitude($random_latitude - 0.1, $random_latitude + 0.1),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )),
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ]),
             ];
         });
     }
@@ -85,7 +87,7 @@ class TerritoryFactory extends Factory
         // Attach a random tag to the territory
         return $this->afterCreating(function ($territory) use ($count) {
             for ($i = 0; $i < $count; $i++) {
-                $territory->attachTag(\Spatie\Tags\Tag::getWithType("territories")->random());
+                $territory->attachTag(Tag::getWithType('territories')->random());
             }
         });
     }

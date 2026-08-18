@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TerritoryZone;
 use App\Http\Requests\StoreTerritoryZoneRequest;
 use App\Http\Requests\UpdateTerritoryZoneRequest;
+use App\Models\TerritoryZone;
 
 class TerritoryZoneController extends Controller
 {

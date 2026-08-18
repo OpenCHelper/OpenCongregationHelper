@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-
 use App\Models\TerritoryZone;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Spatie\Tags\Tag;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TerritoryZone>
+ * @extends Factory<TerritoryZone>
  */
 class TerritoryZoneFactory extends Factory
 {
@@ -36,7 +36,7 @@ class TerritoryZoneFactory extends Factory
         // Attach a random tag to the territory
         return $this->afterCreating(function ($territory) use ($count) {
             for ($i = 0; $i < $count; $i++) {
-                $territory->attachTag(\Spatie\Tags\Tag::getWithType("zones")->random());
+                $territory->attachTag(Tag::getWithType('zones')->random());
             }
         });
     }

@@ -3,8 +3,6 @@
 namespace App\Observers;
 
 use App\Models\TerritoryAssignment;
-use Illuminate\Support\Facades\Log;
-
 use App\Notifications\TerritoryAssignedNotification;
 use App\Notifications\TerritoryReturnedNotification;
 

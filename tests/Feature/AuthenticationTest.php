@@ -6,7 +6,7 @@ test('login screen can be rendered', function () {
     $response = $this->get('/login');
 
     $response->assertRedirect('/app/login');
-    
+
     // Follow the redirect and check the final page
     $finalResponse = $this->get('/app/login');
     $finalResponse->assertStatus(200);
@@ -21,7 +21,7 @@ test('users can authenticate using the login screen', function () {
     // Test that authentication works by simulating login
     $this->actingAs($user);
     $this->assertAuthenticated();
-    
+
     // Test that authenticated user can access protected routes
     $response = $this->get('/app');
     // Accept redirect as valid (user might need team assignment)

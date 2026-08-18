@@ -281,7 +281,7 @@ return [
         'manage_assignments_title' => 'Gestisci assegnazioni',
 
         // Campaign Assignment Creation Wizard
-                // Campaign Assignment Creation Wizard
+        // Campaign Assignment Creation Wizard
         'assignments_create_modal_heading' => 'Crea nuova assegnazione',
         'assignments_create_modal_description' => 'Crea una nuova assegnazione di territorio per la campagna ":campaign"',
         'assignments_create_step_details' => 'Dettagli Assegnazione',

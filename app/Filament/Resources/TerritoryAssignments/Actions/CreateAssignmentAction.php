@@ -1,17 +1,17 @@
 <?php
+
 namespace App\Filament\Resources\TerritoryAssignments\Actions;
 
-use Filament\Actions\Action;
-use App\Models\Territory;
-use Filament\Forms\Components\Select;
-use App\Models\User;
 use App\Models\Campaign;
+use App\Models\Territory;
+use App\Models\User;
 use Exception;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
 
 class CreateAssignmentAction extends Action
 {
@@ -25,6 +25,7 @@ class CreateAssignmentAction extends Action
             ->color('primary')
             ->visible(function (Territory $record): bool {
                 $assignment = $record->currentAssignment;
+
                 return $assignment === null || $assignment->ended_at !== null;
             })
             ->schema([
@@ -54,6 +55,7 @@ class CreateAssignmentAction extends Action
                             ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
                             ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
                             ->send();
+
                         return;
                     }
 
@@ -65,9 +67,10 @@ class CreateAssignmentAction extends Action
                     ]);
                     $record->save();
                 } catch (Exception $e) {
-                    Log::error('Errore durante l\'assegnazione del territorio: ' . $e->getMessage());
+                    Log::error('Errore durante l\'assegnazione del territorio: '.$e->getMessage());
                     $this->halt();
                     $this->failure();
+
                     return;
                 }
 
@@ -87,6 +90,6 @@ class CreateAssignmentAction extends Action
                     ->body(__('filament-resources.database_notifications.assignment_error_body'));
             })
             ->modalHeading(__('filament-resources.database_notifications.create_assignment_modal'))
-            ->modalSubmitAction(fn(Action $action) => $action->label(__('filament-resources.territory_assignment.action_create')));
+            ->modalSubmitAction(fn (Action $action) => $action->label(__('filament-resources.territory_assignment.action_create')));
     }
 }

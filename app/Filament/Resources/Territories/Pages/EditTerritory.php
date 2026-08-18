@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Territories\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\Territories\TerritoryResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTerritory extends EditRecord

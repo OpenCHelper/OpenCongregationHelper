@@ -11,13 +11,15 @@ class BulkDeletionFeedbackTest extends TestCase
     use RefreshDatabase;
 
     private User $rootUser;
+
     private User $regularUser1;
+
     private User $regularUser2;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->rootUser = User::factory()->create(['id' => 1]);
         $this->regularUser1 = User::factory()->create();
         $this->regularUser2 = User::factory()->create();
@@ -27,16 +29,16 @@ class BulkDeletionFeedbackTest extends TestCase
     {
         // Simulate the bulk delete action logic
         $records = collect([$this->rootUser, $this->regularUser1, $this->regularUser2]);
-        
+
         // Check if root user is in the selection
         $hasRootUser = $records->contains(fn (User $record) => $record->isRootUser());
         $this->assertTrue($hasRootUser);
-        
+
         // Filter out root user before deletion
-        $recordsToDelete = $records->filter(fn (User $record) => !$record->isRootUser());
+        $recordsToDelete = $records->filter(fn (User $record) => ! $record->isRootUser());
         $this->assertCount(2, $recordsToDelete);
         $this->assertFalse($recordsToDelete->contains($this->rootUser));
-        
+
         // Verify regular users are in the deletion list
         $this->assertTrue($recordsToDelete->contains($this->regularUser1));
         $this->assertTrue($recordsToDelete->contains($this->regularUser2));
@@ -46,14 +48,14 @@ class BulkDeletionFeedbackTest extends TestCase
     {
         // Simulate selecting only the root user
         $records = collect([$this->rootUser]);
-        
+
         $hasRootUser = $records->contains(fn (User $record) => $record->isRootUser());
-        $recordsToDelete = $records->filter(fn (User $record) => !$record->isRootUser());
+        $recordsToDelete = $records->filter(fn (User $record) => ! $record->isRootUser());
         $deletedCount = $recordsToDelete->count();
-        
+
         $this->assertTrue($hasRootUser);
         $this->assertEquals(0, $deletedCount);
-        
+
         // This scenario should show the "only root selected" message
         $this->assertTrue($hasRootUser && $deletedCount === 0);
     }
@@ -62,14 +64,14 @@ class BulkDeletionFeedbackTest extends TestCase
     {
         // Simulate selecting root user and regular users
         $records = collect([$this->rootUser, $this->regularUser1]);
-        
+
         $hasRootUser = $records->contains(fn (User $record) => $record->isRootUser());
-        $recordsToDelete = $records->filter(fn (User $record) => !$record->isRootUser());
+        $recordsToDelete = $records->filter(fn (User $record) => ! $record->isRootUser());
         $deletedCount = $recordsToDelete->count();
-        
+
         $this->assertTrue($hasRootUser);
         $this->assertEquals(1, $deletedCount);
-        
+
         // This scenario should show the "partial success" message
         $this->assertTrue($hasRootUser && $deletedCount > 0);
     }
@@ -78,14 +80,14 @@ class BulkDeletionFeedbackTest extends TestCase
     {
         // Simulate selecting only regular users
         $records = collect([$this->regularUser1, $this->regularUser2]);
-        
+
         $hasRootUser = $records->contains(fn (User $record) => $record->isRootUser());
-        $recordsToDelete = $records->filter(fn (User $record) => !$record->isRootUser());
+        $recordsToDelete = $records->filter(fn (User $record) => ! $record->isRootUser());
         $deletedCount = $recordsToDelete->count();
-        
+
         $this->assertFalse($hasRootUser);
         $this->assertEquals(2, $deletedCount);
-        
+
         // This scenario should let Filament show the default success message
         $this->assertFalse($hasRootUser);
     }

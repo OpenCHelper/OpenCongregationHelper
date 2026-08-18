@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SharedUrl;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
@@ -29,19 +30,19 @@ Route::get('/team-invitations/{invitation}', [TeamInvitationController::class, '
 
 // Share route that redirects to Filament Guest panel
 Route::get('/share/{uuid}', function ($uuid) {
-    $sharedUrl = App\Models\SharedUrl::where('uid', $uuid)->first();
-    
-    if (!$sharedUrl || !$sharedUrl->shareable) {
+    $sharedUrl = SharedUrl::where('uid', $uuid)->first();
+
+    if (! $sharedUrl || ! $sharedUrl->shareable) {
         abort(404, 'Shared resource not found.');
     }
-    
+
     // Check if the shareable model has a guest view page trait
     if (method_exists($sharedUrl->shareable, 'getGuestPageRoute')) {
-        $redirectPath = $sharedUrl->shareable->getGuestPageRoute() . "/{$uuid}";
+        $redirectPath = $sharedUrl->shareable->getGuestPageRoute()."/{$uuid}";
     } else {
         // Use the generic shared resource page as fallback
         $redirectPath = "/guest/shared-resource/{$uuid}";
     }
-    
+
     return redirect($redirectPath);
 })->name('share.redirect');

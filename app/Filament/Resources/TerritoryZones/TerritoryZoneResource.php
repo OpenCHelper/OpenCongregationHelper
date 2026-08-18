@@ -3,36 +3,31 @@
 namespace App\Filament\Resources\TerritoryZones;
 
 use App\Enums\NavigationGroup;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\TerritoryZones\Pages\ViewTerritoryZone;
-use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
-use App\Filament\Resources\TerritoryZones\Pages\ListTerritoryZones;
+use App\Enums\TagType;
 use App\Filament\Resources\TerritoryZones\Pages\CreateTerritoryZone;
 use App\Filament\Resources\TerritoryZones\Pages\EditTerritoryZone;
-use App\Enums\TagType;
-use App\Filament\Resources\TerritoryZoneResource\Pages;
-use App\Filament\Resources\TerritoryZoneResource\RelationManagers;
+use App\Filament\Resources\TerritoryZones\Pages\ListTerritoryZones;
+use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
+use App\Filament\Resources\TerritoryZones\Pages\ViewTerritoryZone;
 use App\Models\TerritoryZone;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\SpatieTagsInput;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\SpatieTagsColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Log;
-use Filament\Resources\Pages\Page;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\SpatieTagsColumn;
 use Override;
 use Spatie\Tags\Tag;
 use UnitEnum;
@@ -41,8 +36,10 @@ class TerritoryZoneResource extends Resource
 {
     protected static ?string $model = TerritoryZone::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedMap;
-    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::Map;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedMap;
+
+    protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::Map;
+
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
@@ -57,7 +54,7 @@ class TerritoryZoneResource extends Resource
         $tags = $record->tagsWithType(TagType::TERRITORIES->value);
 
         return [
-            ...(!$tags->isEmpty() ? [__('filament-resources.global_search_results.tags') => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
+            ...(! $tags->isEmpty() ? [__('filament-resources.global_search_results.tags') => $tags->map(fn ($tag) => $tag->name)->join(',')] : []),
         ];
     }
 
@@ -165,7 +162,6 @@ class TerritoryZoneResource extends Resource
             ManageZoneTerritories::class,
         ]);
     }
-
 
     public static function getPages(): array
     {

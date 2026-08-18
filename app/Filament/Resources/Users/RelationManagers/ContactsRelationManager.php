@@ -2,35 +2,33 @@
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use Illuminate\Database\Eloquent\Model;
-use Filament\Schemas\Schema;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Table;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\CreateAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use App\Enums\ContactType;
 use App\Models\Contact;
-use Filament\Forms;
-use Filament\Infolists;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class ContactsRelationManager extends RelationManager
 {
     protected static string $relationship = 'contacts';
+
     protected static ?string $title = 'Contatti';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
@@ -59,32 +57,32 @@ class ContactsRelationManager extends RelationManager
                 TextEntry::make('phone_number')
                     ->label(__('profile.contacts.phone_number'))
                     ->icon(Heroicon::OutlinedPhone)
-                    ->visible(fn (Contact $record) => !empty($record->phone_number))
+                    ->visible(fn (Contact $record) => ! empty($record->phone_number))
                     ->suffixAction(
                         Action::make('call')
                             ->icon(Heroicon::OutlinedPhoneArrowUpRight)
                             ->label(__('profile.contacts.call'))
                             ->url(
-                                fn (Contact $record): string => 'tel:' . $record->phone_number,
+                                fn (Contact $record): string => 'tel:'.$record->phone_number,
                                 shouldOpenInNewTab: false
                             )
                     ),
                 TextEntry::make('address')
                     ->label(__('profile.contacts.address'))
                     ->icon(Heroicon::OutlinedMapPin)
-                    ->visible(fn (Contact $record) => !empty($record->address))
+                    ->visible(fn (Contact $record) => ! empty($record->address))
                     ->suffixAction(
                         Action::make('open_maps')
                             ->icon(Heroicon::OutlinedMap)
                             ->label(__('profile.contacts.open_maps'))
                             ->url(
-                                fn (Contact $record): string => 'https://www.google.com/maps/search/' . urlencode($record->address),
+                                fn (Contact $record): string => 'https://www.google.com/maps/search/'.urlencode($record->address),
                                 shouldOpenInNewTab: true
                             )
                     ),
                 TextEntry::make('notes')
                     ->label(__('profile.contacts.notes'))
-                    ->visible(fn (Contact $record) => !empty($record->notes))
+                    ->visible(fn (Contact $record) => ! empty($record->notes))
                     ->icon(Heroicon::OutlinedDocumentText)
                     ->columnSpanFull(),
             ]);

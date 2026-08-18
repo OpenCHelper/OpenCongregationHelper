@@ -5,10 +5,9 @@ namespace Database\Seeders;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use Faker\Generator as Faker;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
-use Faker\Generator as Faker;
 
 class FakeTerritorySeeder extends Seeder
 {
@@ -42,8 +41,8 @@ class FakeTerritorySeeder extends Seeder
             'created_by' => $users->random()->id,
         ])->isCommercial()->withMap()->create();
 
-        for ($i=0; $i < 5; $i++) {
-            Territory::factory(2)->for($territoryZones->random())->state(fn() => [
+        for ($i = 0; $i < 5; $i++) {
+            Territory::factory(2)->for($territoryZones->random())->state(fn () => [
                 'created_by' => $users->random()->id,
             ])->withMap()->create();
         }

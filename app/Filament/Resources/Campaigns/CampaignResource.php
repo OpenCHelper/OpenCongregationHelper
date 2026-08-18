@@ -2,42 +2,41 @@
 
 namespace App\Filament\Resources\Campaigns;
 
-use Filament\Pages\Enums\SubNavigationPosition;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
-use App\Filament\Resources\Campaigns\Pages\ListCampaigns;
-use App\Filament\Resources\Campaigns\Pages\ViewCampaign;
-use App\Filament\Resources\Campaigns\Pages\ManageCampaignAssignments;
 use App\Enums\CampaignStatus;
 use App\Enums\NavigationGroup;
-use App\Filament\Resources\CampaignResource\Pages;
+use App\Filament\Resources\Campaigns\Pages\ListCampaigns;
+use App\Filament\Resources\Campaigns\Pages\ManageCampaignAssignments;
+use App\Filament\Resources\Campaigns\Pages\ViewCampaign;
 use App\Models\Campaign;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Resources\Pages\Page;
-use Filament\Support\Icons\Heroicon;
 use Override;
 use UnitEnum;
 
@@ -45,10 +44,13 @@ class CampaignResource extends Resource
 {
     protected static ?string $model = Campaign::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedEnvelopeOpen;
-    protected static string | \BackedEnum | null $activeNavigationIcon = Heroicon::EnvelopeOpen;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelopeOpen;
+
+    protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::EnvelopeOpen;
+
     protected static ?int $navigationSort = 3;
-    protected static ?\Filament\Pages\Enums\SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -57,16 +59,16 @@ class CampaignResource extends Resource
         return parent::getGlobalSearchEloquentQuery()->with([]);
     }
 
-    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
     {
-        return $record->name . ($record->short_name ? ' (' . $record->short_name . ')' : '');
+        return $record->name.($record->short_name ? ' ('.$record->short_name.')' : '');
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
             ...($record->description ? [__('filament-resources.global_search_results.description') => $record->description] : []),
-            ...($record->valid_until ? [__('filament-resources.global_search_results.validity') => $record->valid_from . ' - ' . $record->valid_until] : []),
+            ...($record->valid_until ? [__('filament-resources.global_search_results.validity') => $record->valid_from.' - '.$record->valid_until] : []),
         ];
     }
 
@@ -137,6 +139,9 @@ class CampaignResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->emptyStateActions([
+                CreateAction::make(),
+            ])
             ->columns([
                 TextColumn::make('name')
                     ->label(__('filament-resources.campaign.column_name'))
