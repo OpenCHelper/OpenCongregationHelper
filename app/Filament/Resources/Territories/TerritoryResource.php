@@ -150,9 +150,65 @@ class TerritoryResource extends Resource
                         Tabs::make('Tabs')
                             ->columnSpanFull()
                             // ->contained(false)
+                            ->hidden(fn (Territory $record) => is_null($record->geojson) && is_null($record->image_path))
                             ->tabs([
+                                Tab::make('TabMap')
+                                    ->label(__('filament-resources.territory.tab_map'))
+                                    ->icon(Heroicon::OutlinedMap)
+                                    ->hidden(fn (Territory $record) => $record->geojson == null)
+                                    ->schema([
+                                        Map::make('location')
+                                            ->label(__('filament-resources.territory.field_location'))
+                                            ->columnSpanFull()
+                                            ->extraStyles(['style' => 'min-height: 50vh', 'border-radius: 8px'])
+                                            ->dehydrated(false)
+                                            ->afterStateUpdated(function (Set $set, ?array $state): void {
+                                                $set('geojson', json_encode($state['geojson'] ?? ''));
+                                            })
+                                            ->afterStateHydrated(function ($state, $record, Set $set): void {
+                                                $geojson = json_decode(strip_tags($record->geojson ?? ''));
+                                                $location = [
+                                                    'geojson' => $geojson,
+                                                ];
+                                                if ($record->geojson ?? null != null && $geojson !== null) {
+                                                    $location['lat'] = -1;
+                                                    $location['lng'] = -1;
+                                                }
+
+                                                $set('location', $location);
+                                                $set('geojson', json_encode($geojson ?? ''));
+                                            })
+                                            ->showMarker(false)
+                                            ->showFullscreenControl()
+                                            ->showZoomControl()
+                                            ->draggable()
+                                            ->zoom(15)
+                                            ->showMyLocationButton()
+                                            ->geoMan()
+                                            ->geoManEditable($schema->getOperation() !== 'view')
+                                            ->geoManPosition('topleft')
+                                            ->rotateMode(false)
+                                            ->clickable(false) // click to move marker
+                                            ->drawMarker(false)
+                                            ->drawPolygon($schema->getOperation() !== 'view')
+                                            ->drawPolyline($schema->getOperation() !== 'view')
+                                            ->drawCircle(false)
+                                            ->drawCircleMarker(false)
+                                            ->dragMode(false)
+                                            ->drawText($schema->getOperation() !== 'view')
+                                            ->drawRectangle($schema->getOperation() !== 'view')
+                                            ->cutPolygon($schema->getOperation() !== 'view')
+                                            ->editPolygon($schema->getOperation() !== 'view')
+                                            ->deleteLayer($schema->getOperation() !== 'view')
+                                            ->setColor('#3388ff')
+                                            ->setFilledColor('#cad9ec'),
+                                        TextInput::make('geojson')
+                                            // ->hiddenLabel()
+                                            ->readOnly(),
+                                    ]),
                                 Tab::make('TabImage')
                                     ->label(__('filament-resources.territory.tab_image'))
+                                    ->hidden(fn (Territory $record) => $record->image_path == null)
                                     ->icon(Heroicon::OutlinedPhoto)
                                     ->schema([
                                         TextEntry::make('image_preview')
@@ -160,11 +216,11 @@ class TerritoryResource extends Resource
                                             ->columnSpanFull()
                                             ->extraAttributes([
                                                 'id' => 'territory-image-preview',
-                                                'style' => 'min-height: 150px;'
+                                                'style' => 'min-height: 150px;',
                                             ])
                                             // ->id('territory-image-preview')
                                             ->default(new HtmlString(
-                                                '<div class="no-image-set">' . __('filament-resources.territory.missing_image') . '</div>'
+                                                '<div class="no-image-set">'.__('filament-resources.territory.missing_image').'</div>'
                                             ))
                                             ->state(function (Get $get) {
                                                 $file = $get('image_file');
@@ -188,7 +244,8 @@ class TerritoryResource extends Resource
                                                 if (! Str::of($url)->isMatch('/^https?:\/\//')) {
                                                     Log::debug('Trying to resolve URL from storage', [
                                                         'URL' => $url,
-                                                        'storage' => Storage::disk('local')->temporaryUrl($url,
+                                                        'storage' => Storage::disk('local')->temporaryUrl(
+                                                            $url,
                                                             now()->plus(minutes: 5)
                                                         ),
                                                     ]);
@@ -259,61 +316,9 @@ class TerritoryResource extends Resource
                                                 'image_preview',
                                             ]),
                                     ]),
-                                Tab::make('TabMap')
-                                    ->label(__('filament-resources.territory.tab_map'))
-                                    ->icon(Heroicon::OutlinedMap)
-                                    ->schema([
-                                        Map::make('location')
-                                            ->label(__('filament-resources.territory.field_location'))
-                                            ->columnSpanFull()
-                                            ->extraStyles(['style' => 'min-height: 50vh', 'border-radius: 8px'])
-                                            ->dehydrated(false)
-                                            ->afterStateUpdated(function (Set $set, ?array $state): void {
-                                                $set('geojson', json_encode($state['geojson'] ?? ''));
-                                            })
-                                            ->afterStateHydrated(function ($state, $record, Set $set): void {
-                                                $geojson = json_decode(strip_tags($record->geojson ?? ''));
-                                                $location = [
-                                                    'geojson' => $geojson,
-                                                ];
-                                                if ($record->geojson ?? null != null && $geojson !== null) {
-                                                    $location['lat'] = -1;
-                                                    $location['lng'] = -1;
-                                                }
-
-                                                $set('location', $location);
-                                            })
-                                            ->showMarker(false)
-                                            ->showFullscreenControl()
-                                            ->showZoomControl()
-                                            ->draggable()
-                                            ->zoom(15)
-                                            ->showMyLocationButton()
-                                            ->geoMan()
-                                            ->geoManEditable($schema->getOperation() !== 'view')
-                                            ->geoManPosition('topleft')
-                                            ->rotateMode(false)
-                                            ->clickable(false) // click to move marker
-                                            ->drawMarker(false)
-                                            ->drawPolygon($schema->getOperation() !== 'view')
-                                            ->drawPolyline($schema->getOperation() !== 'view')
-                                            ->drawCircle(false)
-                                            ->drawCircleMarker(false)
-                                            ->dragMode(false)
-                                            ->drawText($schema->getOperation() !== 'view')
-                                            ->drawRectangle($schema->getOperation() !== 'view')
-                                            ->cutPolygon($schema->getOperation() !== 'view')
-                                            ->editPolygon($schema->getOperation() !== 'view')
-                                            ->deleteLayer($schema->getOperation() !== 'view')
-                                            ->setColor('#3388ff')
-                                            ->setFilledColor('#cad9ec'),
-                                        TextInput::make('geojson')
-                                            // ->hiddenLabel()
-                                            ->readOnly(),
-                                    ]),
                             ])
                             ->activeTab(function (?Model $record) {
-                                return $record?->geojson ? 2 : 1;
+                                return $record?->geojson ? 1 : 2;
                             }),
                     ]),
                 Section::make(__('filament-resources.territory.section_additional_info'))
