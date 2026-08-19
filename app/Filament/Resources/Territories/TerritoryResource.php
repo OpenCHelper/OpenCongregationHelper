@@ -336,7 +336,7 @@ class TerritoryResource extends Resource
                                     ]),
                             ])
                             ->activeTab(function (?Model $record) {
-                                return $record?->geojson ? 1 : 2;
+                                return $record?->geojson ? 2 : 1;
                             }),
                     ]),
                 Section::make(__('filament-resources.territory.section_additional_info'))
