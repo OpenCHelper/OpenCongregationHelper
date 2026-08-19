@@ -4,12 +4,20 @@ namespace App\Filament\Imports;
 
 use App\Models\Territory;
 use App\Models\TerritoryZone;
+use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
+use Illuminate\Support\Uri;
 
 class TerritoryImporter extends Importer
 {
@@ -52,7 +60,7 @@ class TerritoryImporter extends Importer
         return new Territory;
     }
 
-    protected function beforeCreate(): Territory
+    protected function beforeCreate(): void
     {
         $record = $this->record;
         $data = $this->data;
@@ -74,15 +82,89 @@ class TerritoryImporter extends Importer
         $record->territory_zone_id = $zone->id;
 
         unset($record->territoryZone);
+    }
 
-        return $record;
+    protected function beforeUpdate(): void
+    {
+        $record = $this->record;
+        $data = $this->data;
+
+        Log::debug('beforeUpdate method', [
+            'record' => $record,
+            'data' => $data,
+        ]);
+        $zone = TerritoryZone::firstOrCreate(
+            ['name' => $data['territoryZone']],
+            [
+                'name' => $data['territoryZone'],
+            ]
+        );
+        Log::debug('Found territory zone', [
+            'requested' => $data['territoryZone'],
+            'found' => $zone,
+        ]);
+        $record->territory_zone_id = $zone->id;
+
+        unset($record->territoryZone);
+    }
+
+    protected function beforeFill(): void
+    {
+        Log::debug('beforeFill method', [
+            'record' => $this->record,
+            'data' => $this->data,
+            'options' => $this->options,
+        ]);
+
+        if (filled($this->data['image_path'] ?? '') && ! $this->options['keep_image_links']) {
+            $image_url = Uri::of($this->data['image_path'] ?? '');
+
+            if (! in_array($image_url->scheme(), ['http', 'https'])) {
+                throw new RowImportFailedException("Unsupported URI schema '".$image_url->scheme()."' for image '$image_url'.");
+            }
+
+            $new_image = 'territories/' . static::generateFilename('local', 'app/private/territories/', '.'.File::extension($image_url->path()));
+            Log::debug('Downloading image...', [
+                'source' => $image_url,
+                'destination' => "app/private/" . $new_image,
+            ]);
+            Http::sink(storage_path("app/private/" . $new_image))->get($image_url->getUri());
+
+            $this->data['image_path'] = $new_image;
+        }
+    }
+
+    private static function generateFilename(string $disk = 'local', string $path = '', string $suffix = '')
+    {
+        $filename = Str::random(40);
+        if (Storage::disk($disk)->exists($path.'/'.$filename.$suffix)) {
+            $filename = static::generateFilename($disk, $path, $suffix);
+        }
+
+        return $filename . $suffix;
     }
 
     public static function getOptionsFormComponents(): array
     {
         return [
             Checkbox::make('updateExisting')
-                ->label('Update existing records'),
+                ->label(__("import.territory.update_existing")),
+            ToggleButtons::make('keep_image_links')
+                ->label(__('import.territory.image_import.label'))
+                ->boolean(
+                    trueLabel: __('import.territory.image_import.store_link'),
+                    falseLabel: __('import.territory.image_import.download_image'),
+                )
+                ->icons([
+                    true => Heroicon::Link,
+                    false => Heroicon::Photo,
+                ])
+                ->colors([
+                    true => 'primary',
+                    false => 'primary',
+                ])
+                ->default(true)
+                ->grouped(),
         ];
     }
 
