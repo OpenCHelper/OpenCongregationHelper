@@ -164,19 +164,28 @@ class TerritoryResource extends Resource
                                             ->dehydrated(false)
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
                                                 $set('geojson', json_encode($state['geojson'] ?? ''));
+
+                                                Log::info('Updated Map', [
+                                                    'state' => $state ?? '',
+                                                    'geojson' => $state['geojson'] ?? '',
+                                                ]);
                                             })
                                             ->afterStateHydrated(function ($state, $record, Set $set): void {
+                                                Log::info('Map hydrated', [
+                                                    'state' => $state,
+                                                    'record_geojson' => $record?->geojson,
+                                                ]);
+
                                                 $geojson = json_decode(strip_tags($record->geojson ?? ''));
                                                 $location = [
                                                     'geojson' => $geojson,
                                                 ];
-                                                if ($record->geojson ?? null != null && $geojson !== null) {
+                                                if ($record->geojson !== null && $geojson !== null) {
                                                     $location['lat'] = -1;
                                                     $location['lng'] = -1;
                                                 }
 
                                                 $set('location', $location);
-                                                $set('geojson', json_encode($geojson ?? ''));
                                             })
                                             ->showMarker(false)
                                             ->showFullscreenControl()
@@ -204,6 +213,16 @@ class TerritoryResource extends Resource
                                             ->setFilledColor('#cad9ec'),
                                         TextInput::make('geojson')
                                             // ->hiddenLabel()
+                                            ->afterStateHydrated(function (
+                                                TextInput $component,
+                                                $state,
+                                                $record,
+                                            ) {
+                                                Log::info('geojson TextInput hydrated', [
+                                                    'state' => $state,
+                                                    'record_geojson' => $record?->geojson,
+                                                ]);
+                                            })
                                             ->readOnly(),
                                     ]),
                                 Tab::make('TabImage')
