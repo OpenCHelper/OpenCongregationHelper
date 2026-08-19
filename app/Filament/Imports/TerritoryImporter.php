@@ -7,10 +7,9 @@ use App\Models\TerritoryZone;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Support\Number;
 use Filament\Forms\Components\Checkbox;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Number;
 
 class TerritoryImporter extends Importer
 {
@@ -24,12 +23,12 @@ class TerritoryImporter extends Importer
                 ->rules(['required', 'max:255']),
             ImportColumn::make('description'),
             ImportColumn::make('image_path')
-                ->helperText("Currently, only absolute URLs are supported.")
+                ->helperText('Currently, only absolute URLs are supported.')
                 ->example('https://yavuzceliker.github.io/sample-images/image-6.jpg'),
             ImportColumn::make('geojson'),
             ImportColumn::make('notes'),
             ImportColumn::make('is_commercial')
-                ->label("Is commercial?")
+                ->label('Is commercial?')
                 ->requiredMapping()
                 ->boolean()
                 ->rules(['required', 'boolean']),
@@ -50,7 +49,7 @@ class TerritoryImporter extends Importer
             ]);
         }
 
-        return new Territory();
+        return new Territory;
     }
 
     protected function beforeCreate(): Territory
@@ -58,9 +57,9 @@ class TerritoryImporter extends Importer
         $record = $this->record;
         $data = $this->data;
 
-        Log::debug("beforeCreate method", [
-            "record" => $record,
-            "data" => $data,
+        Log::debug('beforeCreate method', [
+            'record' => $record,
+            'data' => $data,
         ]);
         $zone = TerritoryZone::firstOrCreate(
             ['name' => $data['territoryZone']],
@@ -68,9 +67,9 @@ class TerritoryImporter extends Importer
                 'name' => $data['territoryZone'],
             ]
         );
-        Log::debug("Found territory zone", [
-            "requested" => $data["territoryZone"],
-            "found" => $zone,
+        Log::debug('Found territory zone', [
+            'requested' => $data['territoryZone'],
+            'found' => $zone,
         ]);
         $record->territory_zone_id = $zone->id;
 
@@ -87,13 +86,12 @@ class TerritoryImporter extends Importer
         ];
     }
 
-
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your territory import has completed and ' . Number::format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your territory import has completed and '.Number::format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . Number::format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.Number::format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;
