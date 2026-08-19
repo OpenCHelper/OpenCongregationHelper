@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\Territories\Pages;
 
+use App\Filament\Imports\TerritoryImporter;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\Territory;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 
 class ListTerritories extends ListRecords
 {
@@ -37,6 +40,9 @@ class ListTerritories extends ListRecords
     {
         return [
             CreateAction::make(),
+            ImportAction::make()
+                ->pluralModelLabel(__('filament-resources.territory.plural_model_label'))
+                ->importer(TerritoryImporter::class)
         ];
     }
 }
