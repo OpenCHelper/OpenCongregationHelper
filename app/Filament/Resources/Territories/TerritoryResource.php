@@ -150,12 +150,12 @@ class TerritoryResource extends Resource
                         Tabs::make('Tabs')
                             ->columnSpanFull()
                             // ->contained(false)
-                            ->hidden(fn (Territory $record) => is_null($record->geojson) && is_null($record->image_path))
+                            ->hidden(fn (?Territory $record) => $schema->getOperation() === 'view' && is_null($record?->geojson) && is_null($record?->image_path))
                             ->tabs([
                                 Tab::make('TabMap')
                                     ->label(__('filament-resources.territory.tab_map'))
                                     ->icon(Heroicon::OutlinedMap)
-                                    ->hidden(fn (Territory $record) => $record->geojson == null)
+                                    ->hidden(fn (?Territory $record) => $schema->getOperation() === 'view' && $record?->geojson == null)
                                     ->schema([
                                         Map::make('location')
                                             ->label(__('filament-resources.territory.field_location'))
@@ -208,7 +208,7 @@ class TerritoryResource extends Resource
                                     ]),
                                 Tab::make('TabImage')
                                     ->label(__('filament-resources.territory.tab_image'))
-                                    ->hidden(fn (Territory $record) => $record->image_path == null)
+                                    ->hidden(fn (?Territory $record) => $schema->getOperation() === 'view' && $record?->image_path == null)
                                     ->icon(Heroicon::OutlinedPhoto)
                                     ->schema([
                                         TextEntry::make('image_preview')
