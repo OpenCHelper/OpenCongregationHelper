@@ -62,50 +62,22 @@ class TerritoryImporter extends Importer
 
     protected function beforeCreate(): void
     {
-        $record = $this->record;
-        $data = $this->data;
+        $this->record->territory_zone_id = TerritoryZone::firstOrCreate(
+            ['name' => $this->data['territoryZone']],
+            ['name' => $this->data['territoryZone']],
+        )->id;
 
-        Log::debug('beforeCreate method', [
-            'record' => $record,
-            'data' => $data,
-        ]);
-        $zone = TerritoryZone::firstOrCreate(
-            ['name' => $data['territoryZone']],
-            [
-                'name' => $data['territoryZone'],
-            ]
-        );
-        Log::debug('Found territory zone', [
-            'requested' => $data['territoryZone'],
-            'found' => $zone,
-        ]);
-        $record->territory_zone_id = $zone->id;
-
-        unset($record->territoryZone);
+        unset($this->record->territoryZone);
     }
 
     protected function beforeUpdate(): void
     {
-        $record = $this->record;
-        $data = $this->data;
+        $this->record->territory_zone_id = TerritoryZone::firstOrCreate(
+            ['name' => $this->data['territoryZone']],
+            ['name' => $this->data['territoryZone']],
+        )->id;
 
-        Log::debug('beforeUpdate method', [
-            'record' => $record,
-            'data' => $data,
-        ]);
-        $zone = TerritoryZone::firstOrCreate(
-            ['name' => $data['territoryZone']],
-            [
-                'name' => $data['territoryZone'],
-            ]
-        );
-        Log::debug('Found territory zone', [
-            'requested' => $data['territoryZone'],
-            'found' => $zone,
-        ]);
-        $record->territory_zone_id = $zone->id;
-
-        unset($record->territoryZone);
+        unset($this->record->territoryZone);
     }
 
     protected function beforeFill(): void
