@@ -218,7 +218,6 @@ class TerritoryResource extends Resource
                                                 'id' => 'territory-image-preview',
                                                 'style' => 'min-height: 150px;',
                                             ])
-                                            // ->id('territory-image-preview')
                                             ->default(new HtmlString(
                                                 '<div class="no-image-set">'.__('filament-resources.territory.missing_image').'</div>'
                                             ))
