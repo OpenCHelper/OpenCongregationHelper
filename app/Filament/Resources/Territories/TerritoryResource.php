@@ -22,6 +22,10 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -531,6 +535,11 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                 ActionGroup::make([
                     AssignmentActions\CreateAssignmentAction::make('create_assignment'),
                     AssignmentActions\ReturnAssignmentAction::make('cancel_assignment'),
+                    ForceDeleteAction::make()
+                        ->visible(fn (Territory $record) => $record->deleted_at !== null),
+                    RestoreAction::make()
+                        ->visible(fn (Territory $record) => $record->deleted_at !== null),
+
                 ]),
             ])
             ->toolbarActions([
@@ -609,6 +618,10 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                         })
                         ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make()
+                        ->deselectRecordsAfterCompletion(),
+                    ForceDeleteBulkAction::make()
+                        ->deselectRecordsAfterCompletion(),
+                    RestoreBulkAction::make()
                         ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
