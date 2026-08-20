@@ -95,12 +95,12 @@ class TerritoryImporter extends Importer
                 throw new RowImportFailedException("Unsupported URI schema '".$image_url->scheme()."' for image '$image_url'.");
             }
 
-            $new_image = 'territories/' . static::generateFilename('local', 'app/private/territories/', '.'.File::extension($image_url->path()));
+            $new_image = 'territories/'.static::generateFilename('local', 'app/private/territories/', '.'.File::extension($image_url->path()));
             Log::debug('Downloading image...', [
                 'source' => $image_url,
-                'destination' => "app/private/" . $new_image,
+                'destination' => 'app/private/'.$new_image,
             ]);
-            Http::sink(storage_path("app/private/" . $new_image))->get($image_url->getUri());
+            Http::sink(storage_path('app/private/'.$new_image))->get($image_url->getUri());
 
             $this->data['image_path'] = $new_image;
         }
@@ -113,14 +113,14 @@ class TerritoryImporter extends Importer
             $filename = static::generateFilename($disk, $path, $suffix);
         }
 
-        return $filename . $suffix;
+        return $filename.$suffix;
     }
 
     public static function getOptionsFormComponents(): array
     {
         return [
             Checkbox::make('updateExisting')
-                ->label(__("import.territory.update_existing")),
+                ->label(__('import.territory.update_existing')),
             ToggleButtons::make('keep_image_links')
                 ->label(__('import.territory.image_import.label'))
                 ->boolean(

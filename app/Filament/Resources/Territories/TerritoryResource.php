@@ -49,6 +49,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -64,7 +65,7 @@ use Override;
 use Spatie\Tags\Tag;
 use UnitEnum;
 
-class TerritoryResource extends Resource
+class TerritoryResource extends Resource implements HasKnowledgeBase
 {
     protected static ?string $model = Territory::class;
 
@@ -180,7 +181,7 @@ class TerritoryResource extends Resource
                                                 $location = [
                                                     'geojson' => $geojson,
                                                 ];
-                                                if ($record->geojson !== null && $geojson !== null) {
+                                                if ($record?->geojson !== null && $geojson !== null) {
                                                     $location['lat'] = -1;
                                                     $location['lng'] = -1;
                                                 }
@@ -628,6 +629,13 @@ class TerritoryResource extends Resource
             'edit' => EditTerritory::route('/{record}/edit'),
             'view' => ViewTerritory::route('/{record}'),
             'assignments' => ManageTerritoryAssignments::route('/{record}/assignments'),
+        ];
+    }
+
+    public static function getDocumentation(): array
+    {
+        return [
+            'territories.introduction',
         ];
     }
 

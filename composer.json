@@ -23,6 +23,7 @@
         "filament/spatie-laravel-tags-plugin": "^4.0",
         "filipfonal/filament-log-manager": "^3.0",
         "flowframe/laravel-trend": "*",
+        "guava/filament-knowledge-base": "^2.1",
         "hammadzafar05/filament-mobile-preset": "^1.0",
         "laravel/framework": "^12.0",
         "laravel/jetstream": "^4.2|^5.0",

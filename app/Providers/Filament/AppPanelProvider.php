@@ -14,6 +14,7 @@ use Awcodes\Versions\VersionsPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Detection\MobileDetect;
 use DiscoveryDesign\FilamentGaze\FilamentGazePlugin;
+use Filament\Enums\GlobalSearchPosition;
 use Filament\Events\TenantSet;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -25,8 +26,10 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Platform;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use FilipFonal\FilamentLogManager\FilamentLogManager;
+use Guava\FilamentKnowledgeBase\Plugins\KnowledgeBaseCompanionPlugin;
 use Hammadzafar05\FilamentMobilePreset\FilamentMobilePresetPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -59,12 +62,13 @@ class AppPanelProvider extends PanelProvider
             ->login()
             ->passwordReset()
             ->emailVerification(isRequired: false)
-            ->viteTheme('resources/css/app.css')
+            ->viteTheme('resources/css/filament/app/theme.css')
             ->colors([
                 'primary' => Color::Gray,
             ])
             ->unsavedChangesAlerts()
             ->databaseNotifications()
+            ->globalSearch(position: GlobalSearchPosition::Topbar)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
                 Platform::Windows, Platform::Linux => 'CTRL+K',
@@ -114,6 +118,12 @@ class AppPanelProvider extends PanelProvider
                 FilamentMobilePresetPlugin::make()
                     ->stackedTables(false)
                     ->slideOverModals($detect->isMobile()),
+                KnowledgeBaseCompanionPlugin::make()
+                    ->knowledgeBasePanelId('knowledge-base')
+                    ->helpMenuRenderHook(PanelsRenderHook::GLOBAL_SEARCH_BEFORE)
+                    ->modalPreviews()
+                    ->modalTitleBreadcrumbs()
+                    ->slideOverPreviews(),
             ])
             ->middleware([
                 EncryptCookies::class,
