@@ -11,6 +11,7 @@ use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Illuminate\Support\Uri;
+use Illuminate\Validation\Rule;
 
 class TerritoryImporter extends Importer
 {
@@ -62,9 +64,15 @@ class TerritoryImporter extends Importer
 
     protected function beforeCreate(): void
     {
+        $zone = $this->data['territoryZone'];
+
+        if (TerritoryZone::where('name', $zone)->exists() && Territory::whereTerritoryZoneId($zone)->whereName($this->data['name'])) {
+            throw new RowImportFailedException("Duplicate territory found with name '".$this->data['name']."' for zone '".$zone."'.");
+        }
+
         $this->record->territory_zone_id = TerritoryZone::firstOrCreate(
-            ['name' => $this->data['territoryZone']],
-            ['name' => $this->data['territoryZone']],
+            ['name' => $zone],
+            ['name' => $zone],
         )->id;
 
         unset($this->record->territoryZone);
