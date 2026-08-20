@@ -108,6 +108,17 @@ class TerritoryImporter extends Importer
             ]);
             Http::sink(storage_path('app/private/'.$new_image))->get($image_url->getUri());
 
+            $mimeType = Storage::mimeType($new_image);
+            Log::debug("Downloaded image", [
+                'source' => $image_url,
+                'destination' => 'app/private/' . $new_image,
+                "mimeType" => $mimeType
+            ]);
+
+            if (!str_starts_with($mimeType, "image/")) {
+                throw new RowImportFailedException("Invalid MIME type '" . $mimeType . "' for image '$image_url'.");
+            }
+
             $this->data['image_path'] = $new_image;
         }
     }
