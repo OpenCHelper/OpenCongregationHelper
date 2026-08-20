@@ -6,3 +6,15 @@
 @plugin "@tailwindcss/typography";
 @source '../../../../vendor/guava/filament-knowledge-base/src/**/*';
 @source '../../../../vendor/guava/filament-knowledge-base/resources/views/**/*';
+
+
+/* Remove the quotes from around the blockquotes */
+article.gu-kb-article.prose blockquote>p {
+    &:first-of-type::before {
+        content: none;
+    }
+
+    &:last-of-type::after {
+        content: none;
+    }
+}
