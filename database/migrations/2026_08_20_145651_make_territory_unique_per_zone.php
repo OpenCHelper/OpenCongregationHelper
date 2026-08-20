@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('territories', function (Blueprint $table) {
-            $table->unique(["name", "territory_zone_id"]);
+            $table->unique(['name', 'territory_zone_id']);
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('territories', function (Blueprint $table) {
-            $table->dropUnique(["name", "territory_zone_id"]);
+            $table->dropUnique(['name', 'territory_zone_id']);
         });
     }
 };

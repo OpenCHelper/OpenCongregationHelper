@@ -11,7 +11,6 @@ use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +18,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Illuminate\Support\Uri;
-use Illuminate\Validation\Rule;
 
 class TerritoryImporter extends Importer
 {
