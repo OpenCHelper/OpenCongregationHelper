@@ -1,9 +1,10 @@
 ---
 type: documentation
 icon: heroicon-o-book-open
+order: -1
 ---
 
-# Getting started
+# OpenCongregationTools
 
 This project aims at having an **Open Source** territory management system for **Jehova's Witnesses**.
 
