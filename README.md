@@ -95,7 +95,6 @@ act --rm --verbose=false \
     -s GITHUB_TOKEN="$(gh auth status &>/dev/null || gh auth login >&2; gh auth token)" \
     --pull=false \
     --rebuild=false \
-    --use-gitignore=false \
     --workflows .github/workflows/upload-nightly.yml \
     --job 'upload' \
     --secret-file .act/.secrets \
