@@ -84,6 +84,32 @@ The preferred way of developing is by using **Docker Compose** to build the cont
     sail npm install && sail npm run dev
     ```
 
+### Run workflows locally
+
+You can run the Github Action workflows locally using [`nektos/act`](https://github.com/nektos/act) (already included in the [DevContainer](./.devcontainer/devcontainer.json)).
+
+For example, to only deploy the application using the nightly workflow:
+
+```shell
+act --rm --verbose=false \
+    -s GITHUB_TOKEN="$(gh auth status &>/dev/null || gh auth login >&2; gh auth token)" \
+    --pull=false \
+    --rebuild=false \
+    --use-gitignore=false \
+    --workflows .github/workflows/upload-nightly.yml \
+    --job 'upload' \
+    --secret-file .act/.secrets \
+    --env-file .act/.env \
+    --var-file .act/.vars \
+    --insecure-secrets
+```
+
+This command will run the `upload` job of the `.github/workflows/upload-nightly.yml` workflow:
+- use [`gh`](https://cli.github.com/) to retrieve a token to authenticate Act against GitHub (_higher quotas and access to private repositories, may be omitted if not needed_).
+- read the [workflow secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) (`${{ secrets.[*] }}`) from `.act/.secrets`
+- read the [workflow environment variables](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#defining-environment-variables-for-a-single-workflow) (`${{ env.[*] }}`) from `.act/.env`
+- read the [workflow configuration variables](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#defining-configuration-variables-for-multiple-workflows) (`${{ vars.[*] }}`) from `.act/.vars`
+
 ## Deploy
 
 ### Altervista

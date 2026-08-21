@@ -142,7 +142,7 @@ jobs:
           local-dir: ./
           server-dir: ./
           state-name: .ftp-deploy-sync-state__application.json
-          log-level: ${{ case(inputs.verbose, 'verbose', 'minimal')}}
+          log-level: ${{ inputs.verbose && 'verbose' || 'minimal' }}
           timeout: 0 # disable timeout at the action level, use the one at step level
           exclude: |
             **/.git*
@@ -176,7 +176,7 @@ jobs:
           local-dir: ./vendor/
           server-dir: ./vendor/
           state-name: ../.ftp-deploy-sync-state__vendor.json
-          log-level: ${{ case(inputs.verbose, 'verbose', 'minimal')}}
+          log-level: ${{ inputs.verbose && 'verbose' || 'minimal' }}
           timeout: 0
           dangerous-clean-slate: ${{ inputs.delete-remote-contents }}
 
@@ -243,10 +243,10 @@ jobs:
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           commands: |
             # ------------------------- Migrations / Seeder -------------------------
-            artisan ${{ case(inputs.reset-database == 'false', 'migrate', 'migrate:fresh') }} --seed
+            artisan ${{ inputs.reset-database && 'migrate:fresh' || 'migrate' }} --seed
 
-            ${{ case(inputs.seed-dummy-data, '', '# ') }} artisan db:seed --class=FakeDataSeeder
-            ${{ case(inputs.setup-root-user, '', '# ') }} artisan shield:super-admin --user=1 --panel=app
+            ${{ inputs.seed-dummy-data && 'artisan db:seed --class=FakeDataSeeder' || '' }}
+            ${{ inputs.setup-root-user && 'artisan shield:super-admin --user=1 --panel=app' || '' }}
 
             # ------------------------- Optimizations -------------------------
             # First clear all previous optimizations
