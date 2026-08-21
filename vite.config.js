@@ -17,6 +17,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/documentation.js',
                 'resources/css/filament/app/theme.css',
                 'resources/css/filament/knowledge-base/theme.css',
             ],
