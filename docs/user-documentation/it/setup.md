@@ -6,7 +6,7 @@ title: Guida al setup
 
 ## Requisiti
 
-- PHP 8.2 o
+- PHP 8.2 o maggiore
 
 ## Configurazione
 
