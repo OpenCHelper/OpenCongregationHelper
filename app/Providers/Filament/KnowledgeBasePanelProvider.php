@@ -37,10 +37,6 @@ class KnowledgeBasePanelProvider extends PanelProvider
                 // Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/KnowledgeBase/Widgets'), for: 'App\Filament\KnowledgeBase\Widgets')
-            ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
-            ])
             ->plugins([
                 KnowledgeBasePlugin::make(base_path('docs/user-documentation')),
             ])
@@ -55,8 +51,6 @@ class KnowledgeBasePanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
+            ->authMiddleware([]);
     }
 }
