@@ -31,7 +31,10 @@
     },
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {}
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {},
+        "ghcr.io/devcontainers-extra/features/act:1": {},
+        "ghcr.io/devcontainers-extra/features/actionlint:1": {}
     },
     "remoteUser": "sail",
     "postCreateCommand": {

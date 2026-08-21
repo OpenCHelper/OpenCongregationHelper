@@ -25,3 +25,4 @@ _ide_helper_models.php
 .phpstorm.meta.php
 
 .playwright-mcp
+.github/workflows/.secrets
