@@ -1,9 +1,8 @@
 ---
 type: documentation
 icon: heroicon-o-puzzle-piece
+title: Setup guide
 ---
-
-# Setup guide
 
 ## Requirements
 

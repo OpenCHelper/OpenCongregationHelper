@@ -13,5 +13,5 @@ The full code can be found on its [official Github repository](https://github.co
 ## How can I contribute?
 
 - Report bugs or suggest features using the [Issues](https://github.com/LukeSavefrogs/registro-territori/issues);
-- If you have the required programming skills, you can contribute by making [PRs](https://github.com/LukeSavefrogs/registro-territori/pulls)
+- If you have the required programming skills, you can contribute by making [Pull Requests](https://github.com/LukeSavefrogs/registro-territori/pulls)
 - Help translate the UI in other languages, or improve existing ones.
