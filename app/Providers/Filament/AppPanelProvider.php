@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Enums\NavigationGroup as EnumsNavigationGroup;
 use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\CreateTeam;
@@ -45,6 +46,7 @@ use Laravel\Fortify\Features as FortifyFeatures;
 use Laravel\Fortify\Fortify;
 use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Jetstream;
+use Octopy\Filament\Palette\PaletteSwitcherPlugin;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
@@ -66,6 +68,7 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Gray,
             ])
+            ->themeSwitcher(false)
             ->unsavedChangesAlerts()
             ->databaseNotifications()
             ->globalSearch(position: GlobalSearchPosition::Topbar)
@@ -124,6 +127,8 @@ class AppPanelProvider extends PanelProvider
                     ->modalPreviews()
                     ->modalTitleBreadcrumbs()
                     ->slideOverPreviews(),
+                FilamentUiSwitcherPlugin::make()
+                    ->withModeSwitcher(),
             ])
             ->middleware([
                 EncryptCookies::class,

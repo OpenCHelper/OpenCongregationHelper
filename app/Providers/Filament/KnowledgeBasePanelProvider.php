@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -19,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Octopy\Filament\Palette\PaletteSwitcherPlugin;
 
 class KnowledgeBasePanelProvider extends PanelProvider
 {
@@ -30,6 +32,7 @@ class KnowledgeBasePanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->themeSwitcher(false)
             ->viteTheme('resources/css/filament/knowledge-base/theme.css')
             ->discoverResources(in: app_path('Filament/KnowledgeBase/Resources'), for: 'App\Filament\KnowledgeBase\Resources')
             ->discoverPages(in: app_path('Filament/KnowledgeBase/Pages'), for: 'App\Filament\KnowledgeBase\Pages')
@@ -39,6 +42,7 @@ class KnowledgeBasePanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/KnowledgeBase/Widgets'), for: 'App\Filament\KnowledgeBase\Widgets')
             ->plugins([
                 KnowledgeBasePlugin::make(base_path('docs/user-documentation')),
+                FilamentUiSwitcherPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,

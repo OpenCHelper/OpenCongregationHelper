@@ -56,3 +56,9 @@ div.filament-versions-nav-widget>ul>li {
     flex-wrap: wrap;
     max-width: 100%;
 }
+
+
+/* Allow the top navbar to scroll horizontally, just in case there are too many items. */
+body>div.fi-topbar-ctn>nav.fi-topbar {
+    overflow-x: auto;
+}

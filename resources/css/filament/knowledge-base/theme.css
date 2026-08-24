@@ -7,6 +7,7 @@
 @source '../../../../vendor/guava/filament-knowledge-base/src/**/*';
 @source '../../../../vendor/guava/filament-knowledge-base/resources/views/**/*';
 
+@source '../../../../vendor/andreia/filament-ui-switcher';
 
 /* Remove the quotes from around the blockquotes */
 article.gu-kb-article.prose blockquote>p {

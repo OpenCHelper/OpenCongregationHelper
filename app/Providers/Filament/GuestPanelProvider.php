@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -26,10 +27,11 @@ class GuestPanelProvider extends PanelProvider
         return $panel
             ->id('guest')
             ->path('guest')
-            ->viteTheme('resources/css/app.css')
+            ->viteTheme('resources/css/filament/guest/theme.css')
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->themeSwitcher(false)
             // ->resources([
             //     // Resources can be added here if needed
             // ])
@@ -42,6 +44,10 @@ class GuestPanelProvider extends PanelProvider
             ->widgets([
                 // Widgets\AccountWidget::class,
                 FilamentInfoWidget::class,
+            ])
+            ->plugins([
+                FilamentUiSwitcherPlugin::make()
+                    ->withModeSwitcher(),
             ])
             ->middleware([
                 EncryptCookies::class,
