@@ -3,27 +3,27 @@
 return [
     'button.aria_label' => 'UI Switcher',
 
-    'modal.heading' => 'Settings',
+    'modal.heading' => 'Impostazioni interfaccia',
 
-    'loading.message' => 'Applying changes...',
+    'loading.message' => 'Sto applicando le modifiche...',
 
-    'reset.button' => 'Reset all',
-    'reset.aria_label' => 'Reset all settings to default',
-    'reset.tooltip' => 'Reset all settings to default',
+    'reset.button' => 'Reset',
+    'reset.aria_label' => 'Porta tutte le configurazioni al loro stato iniziale',
+    'reset.tooltip' => 'Porta tutte le configurazioni al loro stato iniziale',
 
-    'mode.heading' => 'Mode',
+    'mode.heading' => ' Modalità',
 
     'layout.heading' => 'Layout',
-    'layout.sidebar' => 'Sidebar',
-    'layout.compact' => 'Compact',
-    'layout.no_topbar' => 'No Topbar',
-    'layout.topbar' => 'Topbar',
+    'layout.sidebar' => 'Barra laterale',
+    'layout.compact' => 'Compatto',
+    'layout.no_topbar' => 'Nessuna barra superiore',
+    'layout.topbar' => 'Barra superiore',
 
     'color.heading' => 'Colore',
     'color.presets' => 'Preset',
     'color.custom' => 'Personalizzato',
 
     'font.heading' => 'Font',
-    'font.family' => 'Family',
+    'font.family' => 'Famiglia',
     'font.size' => 'Dimensione',
 ];
