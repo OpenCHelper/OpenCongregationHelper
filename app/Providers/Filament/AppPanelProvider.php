@@ -46,7 +46,6 @@ use Laravel\Fortify\Features as FortifyFeatures;
 use Laravel\Fortify\Fortify;
 use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Jetstream;
-use Octopy\Filament\Palette\PaletteSwitcherPlugin;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
