@@ -3,6 +3,9 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
+@source '../../../../vendor/laravel/jetstream/**/*';
+@source '../../../../vendor/awcodes/filament-versions/**/*';
+
 @plugin "@tailwindcss/typography";
 @source '../../../../vendor/guava/filament-knowledge-base/src/**/*';
 @source '../../../../vendor/guava/filament-knowledge-base/resources/views/**/*';
