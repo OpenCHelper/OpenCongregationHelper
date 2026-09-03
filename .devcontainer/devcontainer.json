@@ -27,6 +27,11 @@
                 "EditorConfig.EditorConfig"
             ],
             "settings": {}
+        },
+        "zed": {
+            "extensions": [
+                "laravel-official"
+            ]
         }
     },
     "features": {
