@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "andreia/filament-ui-switcher",
-            "version": "v1.1.0",
+            "version": "v1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/andreia/filament-ui-switcher.git",
-                "reference": "da83d47d14d3555e0f4fe25dfe5bb73346ed2582"
+                "reference": "877fbe668271ee0ea66bfc57531e7ce711e12e82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/andreia/filament-ui-switcher/zipball/da83d47d14d3555e0f4fe25dfe5bb73346ed2582",
-                "reference": "da83d47d14d3555e0f4fe25dfe5bb73346ed2582",
+                "url": "https://api.github.com/repos/andreia/filament-ui-switcher/zipball/877fbe668271ee0ea66bfc57531e7ce711e12e82",
+                "reference": "877fbe668271ee0ea66bfc57531e7ce711e12e82",
                 "shasum": ""
             },
             "require": {
@@ -70,7 +70,7 @@
                 "issues": "https://github.com/andreia/filament-ui-switcher/issues",
                 "source": "https://github.com/andreia/filament-ui-switcher"
             },
-            "time": "2026-04-26T17:41:09+00:00"
+            "time": "2026-09-06T23:58:11+00:00"
         },
         {
             "name": "anourvalar/eloquent-serialize",
@@ -8014,16 +8014,16 @@
         },
         {
             "name": "spatie/laravel-package-tools",
-            "version": "1.93.1",
+            "version": "1.93.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-package-tools.git",
-                "reference": "d5552849801f2642aea710557463234b59ef65eb"
+                "reference": "e927d5b5b05e9fecae098e559e51918aa608ad02"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-package-tools/zipball/d5552849801f2642aea710557463234b59ef65eb",
-                "reference": "d5552849801f2642aea710557463234b59ef65eb",
+                "url": "https://api.github.com/repos/spatie/laravel-package-tools/zipball/e927d5b5b05e9fecae098e559e51918aa608ad02",
+                "reference": "e927d5b5b05e9fecae098e559e51918aa608ad02",
                 "shasum": ""
             },
             "require": {
@@ -8063,7 +8063,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-package-tools/issues",
-                "source": "https://github.com/spatie/laravel-package-tools/tree/1.93.1"
+                "source": "https://github.com/spatie/laravel-package-tools/tree/1.93.2"
             },
             "funding": [
                 {
@@ -8071,7 +8071,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-05-19T14:06:37+00:00"
+            "time": "2026-08-26T09:13:25+00:00"
         },
         {
             "name": "spatie/laravel-permission",
