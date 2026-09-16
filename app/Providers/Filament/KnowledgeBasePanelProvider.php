@@ -6,10 +6,10 @@ use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Guava\FilamentKnowledgeBase\Plugins\KnowledgeBasePlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -38,8 +38,11 @@ class KnowledgeBasePanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/KnowledgeBase/Widgets'), for: 'App\Filament\KnowledgeBase\Widgets')
             ->plugins([
                 KnowledgeBasePlugin::make(base_path('docs/user-documentation')),
-                FilamentUiSwitcherPlugin::make(),
+                FilamentUiSwitcherPlugin::make()
+                    ->iconRenderHook(PanelsRenderHook::GLOBAL_SEARCH_AFTER)
+                    ->withModeSwitcher(),
             ])
+            ->userMenu(false)
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
