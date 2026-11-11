@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Livewire;
 
 class ManageUserAssignments extends ManageRelatedRecords
@@ -26,7 +27,7 @@ class ManageUserAssignments extends ManageRelatedRecords
     // Source: https://github.com/filamentphp/filament/discussions/10168#discussioncomment-10923902
     public static function getNavigationBadge(): ?string
     {
-        return Livewire::current()->getRecord()->assignments->count();
+        return TerritoryAssignmentResource::scopeToVisibleAssignments(Livewire::current()->getRecord()->assignments())->count();
     }
 
     public function form(Schema $schema): Schema
@@ -43,6 +44,7 @@ class ManageUserAssignments extends ManageRelatedRecords
         $inherited_table->getColumn('assignee.full_name')->hidden();
 
         return $inherited_table
+            ->modifyQueryUsing(fn (Builder $query): Builder => TerritoryAssignmentResource::scopeToVisibleAssignments($query))
             ->defaultSort('started_at', 'desc');
     }
 }

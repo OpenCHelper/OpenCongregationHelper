@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Livewire;
 
 class ManageTerritoryAssignments extends ManageRelatedRecords
@@ -31,12 +32,13 @@ class ManageTerritoryAssignments extends ManageRelatedRecords
     // Source: https://github.com/filamentphp/filament/discussions/10168#discussioncomment-10923902
     public static function getNavigationBadge(): ?string
     {
-        return Livewire::current()->getRecord()->assignments->count();
+        return TerritoryAssignmentResource::scopeToVisibleAssignments(Livewire::current()->getRecord()->assignments())->count();
     }
 
     public function table(Table $table): Table
     {
         return TerritoryAssignmentResource::table($table)
+            ->modifyQueryUsing(fn (Builder $query): Builder => TerritoryAssignmentResource::scopeToVisibleAssignments($query))
             ->defaultSort('started_at', 'desc');
     }
 }

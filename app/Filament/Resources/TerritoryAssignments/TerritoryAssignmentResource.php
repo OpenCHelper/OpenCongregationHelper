@@ -39,6 +39,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -384,17 +385,32 @@ class TerritoryAssignmentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()
-            ->whereHas('assignee', function ($query) {
-                // If the user cannot see all assignments, filter by the user's ID
-                if (! static::canViewAllAssignments()) {
-                    return $query->where('id', Auth::user()->id);
-                }
-            })
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+        return static::scopeToVisibleAssignments(
+            parent::getEloquentQuery()
+                ->whereHas('assignee')
+                ->withoutGlobalScopes([
+                    SoftDeletingScope::class,
+                ])
+        );
+    }
 
-        return $query;
+    /**
+     * Restrict the query to the assignments the current user is allowed to see.
+     *
+     * Pages listing assignments through a relationship (e.g. the assignments of
+     * a territory) must apply this too, since they do not use `getEloquentQuery()`.
+     *
+     * @template TQuery of Builder|HasMany
+     *
+     * @param  TQuery  $query
+     * @return TQuery
+     */
+    public static function scopeToVisibleAssignments(Builder|HasMany $query): Builder|HasMany
+    {
+        if (static::canViewAllAssignments()) {
+            return $query;
+        }
+
+        return $query->where('assignee_id', Auth::id());
     }
 }

@@ -50,7 +50,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
 
     public static function getNavigationBadge(): ?string
     {
-        return Livewire::current()->getRecord()->assignments()->count();
+        return TerritoryAssignmentResource::scopeToVisibleAssignments(Livewire::current()->getRecord()->assignments())->count();
     }
 
     public function getTitle(): string|Htmlable
@@ -74,11 +74,11 @@ class ManageCampaignAssignments extends ManageRelatedRecords
         }
 
         return $inherited_table
-            ->modifyQueryUsing(fn (Builder $query) => $query
+            ->modifyQueryUsing(fn (Builder $query) => TerritoryAssignmentResource::scopeToVisibleAssignments($query
                 ->withoutGlobalScopes([
                     SoftDeletingScope::class,
                 ])
-            )
+            ))
             ->defaultSort('started_at', 'desc')
             ->heading(ucfirst(__('filament-resources.territory_assignment.plural_model_label')))
             ->description(__('filament-resources.campaign.assignments_relation_description'))
