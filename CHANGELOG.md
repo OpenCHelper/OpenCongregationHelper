@@ -72,6 +72,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deleting a user leaving their team memberships behind ([#148]).
 - Static analysis (PHPStan) errors in the contacts section of the profile page, caused by an unused form that the
   "add contact" actions also used to save relationships instead of their own form ([#149]).
+- Saving a territory erasing its map, even when only other fields were changed ([#150]).
+- Creating a territory failing, and an image uploaded while creating it not being linked to the territory ([#150]).
+- Assignments in progress failing to save when edited, with "The selected territory is invalid" ([#150]).
+- Global search results being hidden under the top bar on tablets and desktops ([#150]).
 
 ### Security
 
@@ -308,3 +312,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#147]: https://github.com/LukeSavefrogs/registro-territori/pull/147
 [#148]: https://github.com/LukeSavefrogs/registro-territori/pull/148
 [#149]: https://github.com/LukeSavefrogs/registro-territori/pull/149
+[#150]: https://github.com/LukeSavefrogs/registro-territori/pull/150

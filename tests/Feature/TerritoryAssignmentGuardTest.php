@@ -8,6 +8,7 @@ use App\Models\TerritoryZone;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
@@ -75,9 +76,29 @@ test('the edit form shows an error when reopening a returned assignment of an as
     Livewire::test(ManageTerritoryAssignments::class)
         ->filterTable('ended_at', null)
         ->callAction(TestAction::make('edit')->table($returnedAssignment), ['ended_at' => null])
-        ->assertHasFormErrors(['ended_at']);
+        ->assertHasFormErrors(['ended_at'])
+        ->assertHasNoFormErrors(['territory_id']);
 
     expect($returnedAssignment->refresh()->ended_at)->not->toBeNull();
+});
+
+test('an assignment in progress can be edited', function () {
+    $user = User::factory()->create();
+    foreach (['ViewAny:TerritoryAssignment', 'View:TerritoryAssignment', 'Update:TerritoryAssignment'] as $permission) {
+        $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+    $this->actingAs($user);
+
+    $assignment = ($this->assign)();
+
+    Livewire::test(ManageTerritoryAssignments::class)
+        ->callAction(TestAction::make('edit')->table($assignment), ['notes' => 'Second floor done'])
+        ->assertHasNoFormErrors();
+
+    expect($assignment->refresh())
+        ->notes->toBe('Second floor done')
+        ->territory_id->toBe($this->territory->id)
+        ->ended_at->toBeNull();
 });
 
 test('the assignments of a territory can only be listed by users allowed to list all assignments', function () {
@@ -92,4 +113,20 @@ test('the assignments of a territory can only be listed by users allowed to list
     $user->givePermissionTo(Permission::findOrCreate('ViewAny:TerritoryAssignment', 'web'));
 
     expect(ManageAssignmentsOfTerritory::canAccess(['record' => $this->territory]))->toBeTrue();
+});
+
+test('only territories that are not assigned can be picked for a new assignment', function () {
+    $user = User::factory()->create();
+    foreach (['ViewAny:TerritoryAssignment', 'View:TerritoryAssignment', 'Create:TerritoryAssignment'] as $permission) {
+        $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+    $this->actingAs($user);
+
+    ($this->assign)();
+    $unassignedTerritory = Territory::factory()->for(TerritoryZone::factory(), 'territoryZone')->create();
+
+    Livewire::test(ManageTerritoryAssignments::class)
+        ->mountAction('create')
+        ->assertFormFieldExists('territory_id', 'mountedActionSchema0', fn (Select $field): bool => array_key_exists($unassignedTerritory->id, $field->getOptions())
+            && ! array_key_exists($this->territory->id, $field->getOptions()));
 });

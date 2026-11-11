@@ -58,7 +58,14 @@ div.filament-versions-nav-widget>ul>li {
 }
 
 
-/* Allow the top navbar to scroll horizontally, just in case there are too many items. */
-body>div.fi-topbar-ctn>nav.fi-topbar {
-    overflow-x: auto;
+/*
+    Allow the top navbar to scroll horizontally on phones, where its items may not fit.
+
+    Only below Filament's `sm` breakpoint (40rem): from there on the global search results are
+    positioned inside the navbar, and a scrolling navbar would clip them.
+*/
+@media (width < 40rem) {
+    body>div.fi-topbar-ctn>nav.fi-topbar {
+        overflow-x: auto;
+    }
 }

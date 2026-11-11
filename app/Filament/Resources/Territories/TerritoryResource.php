@@ -18,6 +18,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Dotswan\MapPicker\Fields\Map;
+use Exception;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -171,8 +172,19 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->columnSpanFull()
                                             ->extraStyles(['style' => 'min-height: 50vh', 'border-radius: 8px'])
                                             ->dehydrated(false)
-                                            ->afterStateUpdated(function (Set $set, ?array $state): void {
-                                                $set('geojson', json_encode($state['geojson'] ?? ''));
+                                            ->afterStateUpdated(function (Get $get, Set $set, ?array $state): void {
+                                                // The map picker also sends its centre alone (`lat` and `lng`) when it
+                                                // loads or moves: keep the drawn shapes instead of erasing them.
+                                                if (! is_array($state) || ! array_key_exists('geojson', $state)) {
+                                                    $set('location', [
+                                                        ...($state ?? []),
+                                                        'geojson' => json_decode((string) $get('geojson')),
+                                                    ]);
+
+                                                    return;
+                                                }
+
+                                                $set('geojson', json_encode($state['geojson']));
                                             })
                                             ->afterStateHydrated(function ($record, Set $set): void {
                                                 $geojson = json_decode(strip_tags($record->geojson ?? ''));
@@ -646,5 +658,28 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    /**
+     * Store the uploaded image file (`image_file`, a form-only field) as the territory image (`image_path`).
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     *
+     * @throws Exception when both an image URL and an uploaded file are given
+     */
+    public static function mergeUploadedImageIntoFormData(array $data): array
+    {
+        if (isset($data['image_path'], $data['image_file'])) {
+            throw new Exception("Form 'image_path' and 'image_file' cannot be set at the same time");
+        }
+
+        if (isset($data['image_file'])) {
+            $data['image_path'] = $data['image_file'];
+        }
+
+        unset($data['image_file']);
+
+        return $data;
     }
 }

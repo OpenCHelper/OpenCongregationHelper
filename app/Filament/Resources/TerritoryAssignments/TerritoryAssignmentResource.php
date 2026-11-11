@@ -233,9 +233,13 @@ class TerritoryAssignmentResource extends Resource
                             ->relationship(
                                 name: 'territory',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: fn (Builder $query) => $query->doesntHave('assignments', 'and', function ($query) {
-                                    $query->whereNull('ended_at');
-                                })
+                                // Only territories that are not assigned, plus the territory of the assignment
+                                // being edited: otherwise its own value would be rejected as invalid.
+                                modifyQueryUsing: fn (Builder $query, ?TerritoryAssignment $record) => $query->where(
+                                    fn (Builder $query) => $query
+                                        ->doesntHave('assignments', 'and', fn (Builder $query) => $query->whereNull('ended_at'))
+                                        ->when($record?->territory_id, fn (Builder $query, int $territoryId) => $query->orWhere($query->getModel()->getQualifiedKeyName(), $territoryId))
+                                )
                             )
                             ->required()
                             ->preload(),
