@@ -13,25 +13,27 @@ env:
     ,Phar,random,Reflection,session,SimpleXML,SPL,sqlite3,standard
     ,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib
 
+# FilaCheck and Pint only analyse the source code: they need neither the
+# application environment nor the Sail containers.
 jobs:
   run-tests:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup PHP and Composer
         uses: shivammathur/setup-php@v2
         with:
           extensions: ${{ env.php_extensions }}
-          coverage: xdebug
+          coverage: none
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           fail-fast: true
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: vendor
           key: composer-${{ hashFiles('**/composer.lock') }}
@@ -39,24 +41,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-ansi --no-interaction --no-progress --no-scripts --optimize-autoloader
-
-      - name: Prepare Laravel environment
-        run: |
-          set -e
-
-          cp .env.example .env
-
-          # Print environment variables for debugging
-          echo "Environment variables:"
-          sed 's/^/    | /' < .env
-
-          php artisan key:generate --force
-
-      - name: Build application
-        run: |
-          ./vendor/bin/sail up -d --build \
-            && ./vendor/bin/sail npm install \
-            && ./vendor/bin/sail npm run build
 
       - name: Run filacheck
         run: |

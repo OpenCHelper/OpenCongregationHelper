@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Bumped the application version in `composer.json` to `v2.0.0-alpha5`; it was still set to `v2.0.0-alpha3`.
+- Faster CI: the test workflow caches the Sail Docker image layers, rebuilding the image from scratch every 7 days,
+  and builds the frontend assets on the runner with cached npm dependencies. The linter workflow no longer starts the
+  Sail containers ([#145]).
+- Updated the `actions/cache` and `actions/checkout` GitHub Actions to their latest major versions, since the previous
+  ones ran on a deprecated Node.js runtime ([#145]).
 
 ### Fixed
 
@@ -38,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Emails sent through the native `mail()` transport having duplicated `To`/`Subject` headers and no MIME content
   type ([#141]).
 - Intermittent CI failures caused by tests starting before MySQL accepted connections ([#141]).
+- Intermittent CI failures caused by commands running in the Sail container before its user ID was updated to match
+  the runner's ([#145]).
 - Fake data seeder (`FakeDataSeeder`) failing randomly when all the fake tags were created with the same type. Zone
   and territory factories now create a tag of the needed type when none exists ([#144], closes [#123]).
 
@@ -262,3 +269,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#141]: https://github.com/LukeSavefrogs/registro-territori/pull/141
 [#142]: https://github.com/LukeSavefrogs/registro-territori/pull/142
 [#144]: https://github.com/LukeSavefrogs/registro-territori/pull/144
+[#145]: https://github.com/LukeSavefrogs/registro-territori/pull/145
