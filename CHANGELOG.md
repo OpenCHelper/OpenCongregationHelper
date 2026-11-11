@@ -76,6 +76,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Creating a territory failing, and an image uploaded while creating it not being linked to the territory ([#150]).
 - Assignments in progress failing to save when edited, with "The selected territory is invalid" ([#150]).
 - Global search results being hidden under the top bar on tablets and desktops ([#150]).
+- Campaign status showing "Almost Expired" for every campaign with an end date in the future, and never "Expiring".
+  The status now depends on the days left until the end date: "Expiring" with 7 days or less, "Almost Expired" with
+  3 days or less ([#151]).
 
 ### Security
 
@@ -313,3 +316,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#148]: https://github.com/LukeSavefrogs/registro-territori/pull/148
 [#149]: https://github.com/LukeSavefrogs/registro-territori/pull/149
 [#150]: https://github.com/LukeSavefrogs/registro-territori/pull/150
+[#151]: https://github.com/LukeSavefrogs/registro-territori/pull/151

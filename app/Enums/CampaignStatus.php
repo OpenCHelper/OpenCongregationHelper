@@ -32,6 +32,11 @@ enum CampaignStatus: string
         };
     }
 
+    /**
+     * Get the status of a campaign from the days remaining until its end date.
+     *
+     * Campaigns without an end date, or with more than 7 days left, are active.
+     */
     public static function fromValidUntil(?Carbon $validUntil): self
     {
         if (! $validUntil) {
@@ -42,12 +47,11 @@ enum CampaignStatus: string
             return self::TERMINATED;
         }
 
-        $diffInDays = $validUntil->diffInDays(now());
+        $daysRemaining = now()->diffInDays($validUntil);
 
         return match (true) {
-            $diffInDays <= 0 => self::ALMOST_EXPIRED,
-            $diffInDays <= 3 => self::ALMOST_EXPIRED,
-            $diffInDays <= 7 => self::IS_EXPIRING,
+            $daysRemaining <= 3 => self::ALMOST_EXPIRED,
+            $daysRemaining <= 7 => self::IS_EXPIRING,
             default => self::ACTIVE,
         };
     }
