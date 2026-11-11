@@ -16,6 +16,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/guest.css',
                 'resources/js/app.js',
                 'resources/js/documentation.js',
                 'resources/css/filament/app/theme.css',

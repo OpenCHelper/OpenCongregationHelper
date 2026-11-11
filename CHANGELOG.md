@@ -12,6 +12,8 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
 
 ### Added
 
+- Welcome page describing the project scope and its current features, with links to the GitHub repository, the user
+  guide and the login page, and the application version. Available in English, Italian and Spanish ([#142]).
 - Import territories from a CSV file. The import supports name, description, zone, notes, commercial flag, GeoJSON
   polygon and image URL. Images are downloaded into the application storage, only `http`/`https` URLs pointing to an
   `image/*` MIME type are accepted, and rows duplicating an existing territory in the same zone are rejected.
@@ -56,6 +58,8 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
 
 ### Fixed
 
+- Home page returning a server error when frontend assets are built, because `resources/css/guest.css` was missing
+  from the Vite build ([#142]).
 - Stats overview widget failing on SQLite databases ([#137]).
 - `root` user not receiving the `super_admin` role.
 - Wrong `Auth` facade import in the activity log and mail log resources.
@@ -217,3 +221,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#137]: https://github.com/LukeSavefrogs/registro-territori/pull/137
 [#138]: https://github.com/LukeSavefrogs/registro-territori/pull/138
 [#139]: https://github.com/LukeSavefrogs/registro-territori/pull/139
+[#142]: https://github.com/LukeSavefrogs/registro-territori/pull/142

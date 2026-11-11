@@ -19,6 +19,7 @@ return [
         'branch_file' => env('APP_VERSION_BRANCH_FILE', '.git/HEAD'),
         'commit_file' => env('APP_VERSION_COMMIT_FILE'),
     ],
+    'repository_url' => 'https://github.com/LukeSavefrogs/registro-territori',
 
     /*
     |--------------------------------------------------------------------------
