@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 class ArtisanScheduledController extends Controller
 {
@@ -26,6 +27,12 @@ class ArtisanScheduledController extends Controller
 
         try {
             // Log::info('Executing Artisan command "schedule:run" with params: ' . json_encode($params));
+            // This endpoint is called on the `artisan.` subdomain: build the URLs of the
+            // processed jobs (e.g. links in notification emails) from the application URL.
+            $appUrl = rtrim((string) config('app.url'), '/');
+            URL::forceRootUrl($appUrl);
+            URL::forceScheme((string) parse_url($appUrl, PHP_URL_SCHEME) ?: 'https');
+
             $exitCode = Artisan::call('schedule:run', $params);
         } catch (Exception $e) {
             Log::error('Error executing Artisan command "schedule:run" with params: '.json_encode($params).' - '.$e->getMessage());

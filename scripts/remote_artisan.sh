@@ -120,6 +120,11 @@ main () {
     if [[ -z "$token" ]]; then
       token="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 64)"
     fi
+
+    # Hide the token from the GitHub Actions logs (e.g. when `--verbose` traces the curl command)
+    if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+      printf '::add-mask::%s\n' "$token"
+    fi
     curl_opts+=(-H "X-Artisan-Token: ${token}")
 
     if [[ "$bypass_token" == false ]]; then
@@ -136,24 +141,28 @@ main () {
         fi
     fi
     
-    if ! response="$([[ "$_verbose" == true ]] && set -x; curl -skL "${artisan_base_url}/api/execute" \
+    local curl_status=0
+    response="$([[ "$_verbose" == true ]] && set -x; curl -skL "${artisan_base_url}/api/execute" \
       -X POST --data "{\"command\": $(jq --raw-input <<< "$command"), \"params\": $(jq --raw-input <<< "$*")}" \
       "${curl_opts[@]}"
-    )"; then
-      printf "Failed to execute command '%s'\n" "$command" >&2
-      printf "Server response: %s\n" "$response" >&2
-      return 1
-    fi
+    )" || curl_status=$?
 
-    jq -r '.output' <<< "$response"
-
-    # Now remove the token from the server
+    # Always remove the token from the server, even when the command failed,
+    # so that it does not remain valid after the deploy
     if [[ "$bypass_token" == false ]]; then
         if ! lftp -e "set ssl:check-hostname no" -u "$ftp_username,$ftp_password" "$ftp_hostname" <<< "rm '$token_file'"; then
           printf "Failed to remove token from server\n" >&2
           return 1
         fi
     fi
+
+    if (( curl_status != 0 )); then
+      printf "Failed to execute command '%s'\n" "$command" >&2
+      printf "Server response: %s\n" "$response" >&2
+      return 1
+    fi
+
+    jq -r '.output' <<< "$response"
 
     return 0;
 }

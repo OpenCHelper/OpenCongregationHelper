@@ -7,6 +7,7 @@ use App\Traits\HasGuestViewPage;
 use App\Traits\HasSharedUrl;
 use Database\Factories\TerritoryAssignmentFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -87,6 +88,19 @@ class TerritoryAssignment extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Determine whether the given territory has an assignment in progress (not returned yet),
+     * optionally ignoring a specific assignment (e.g. the one being edited).
+     */
+    public static function territoryHasOpenAssignment(int $territoryId, ?int $ignoredAssignmentId = null): bool
+    {
+        return static::query()
+            ->where('territory_id', $territoryId)
+            ->whereNull('ended_at')
+            ->when($ignoredAssignmentId !== null, fn (Builder $query) => $query->whereKeyNot($ignoredAssignmentId))
+            ->exists();
     }
 
     /**

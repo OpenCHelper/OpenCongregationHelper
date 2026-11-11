@@ -6,6 +6,8 @@ use App\Models\TerritoryZone;
 use App\Models\User;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @param  array<string, mixed>  $options
@@ -96,3 +98,77 @@ test('updating existing territories matches both the name and the zone', functio
         ->and($northTerritory->refresh()->notes)->toBe('north')
         ->and(Territory::where('name', 'T-1')->count())->toBe(2);
 });
+
+/**
+ * A valid 1x1 PNG image.
+ */
+function pngImage(): string
+{
+    return base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=');
+}
+
+/**
+ * @return array<string, string>
+ */
+function territoryRowWithImage(string $imageUrl): array
+{
+    return [
+        'name' => 'T-1',
+        'is_commercial' => 'false',
+        'territoryZone' => 'North',
+        'image_path' => $imageUrl,
+    ];
+}
+
+test('images are downloaded into the local disk with the extension of their MIME type', function () {
+    Storage::fake('local');
+    Http::fake(['93.184.216.34/*' => Http::response(pngImage(), 200, ['Content-Type' => 'image/png'])]);
+
+    makeTerritoryImporter(['keep_image_links' => false])(territoryRowWithImage('https://93.184.216.34/images/territory'));
+
+    $imagePath = Territory::where('name', 'T-1')->sole()->image_path;
+
+    expect($imagePath)->toStartWith('territories/')->toEndWith('.png');
+    Storage::disk('local')->assertExists($imagePath);
+    expect(Storage::disk('local')->files('territories'))->toBe([$imagePath]);
+});
+
+test('image links are kept as they are when downloading is disabled', function () {
+    Http::fake();
+
+    makeTerritoryImporter(['keep_image_links' => true])(territoryRowWithImage('https://93.184.216.34/images/territory.png'));
+
+    expect(Territory::where('name', 'T-1')->sole()->image_path)->toBe('https://93.184.216.34/images/territory.png');
+    Http::assertNothingSent();
+});
+
+test('images on private or reserved hosts are not downloaded', function (string $imageUrl) {
+    Storage::fake('local');
+    Http::fake();
+
+    expect(fn () => makeTerritoryImporter(['keep_image_links' => false])(territoryRowWithImage($imageUrl)))
+        ->toThrow(RowImportFailedException::class);
+
+    Http::assertNothingSent();
+    expect(Territory::count())->toBe(0);
+})->with([
+    'loopback' => 'http://127.0.0.1/image.png',
+    'localhost' => 'http://localhost/image.png',
+    'private network' => 'http://192.168.1.10/image.png',
+    'link-local (cloud metadata)' => 'http://169.254.169.254/latest/meta-data',
+]);
+
+test('invalid image downloads are rejected and deleted', function (int $status, string $body) {
+    Storage::fake('local');
+    Http::fake(['93.184.216.34/*' => Http::response($body, $status)]);
+
+    expect(fn () => makeTerritoryImporter(['keep_image_links' => false])(territoryRowWithImage('https://93.184.216.34/image.png')))
+        ->toThrow(RowImportFailedException::class);
+
+    expect(Storage::disk('local')->files('territories'))->toBe([])
+        ->and(Territory::count())->toBe(0);
+})->with([
+    'not an image' => [200, '<html><body>Not an image</body></html>'],
+    'HTTP error' => [404, 'Not found'],
+    'larger than 10 MB' => fn () => [200, pngImage().str_repeat('0', 10 * 1024 * 1024)],
+]);

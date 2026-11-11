@@ -61,11 +61,13 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Override;
 use Spatie\Tags\Tag;
@@ -171,18 +173,8 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->dehydrated(false)
                                             ->afterStateUpdated(function (Set $set, ?array $state): void {
                                                 $set('geojson', json_encode($state['geojson'] ?? ''));
-
-                                                Log::info('Updated Map', [
-                                                    'state' => $state ?? '',
-                                                    'geojson' => $state['geojson'] ?? '',
-                                                ]);
                                             })
-                                            ->afterStateHydrated(function ($state, $record, Set $set): void {
-                                                Log::info('Map hydrated', [
-                                                    'state' => $state,
-                                                    'record_geojson' => $record?->geojson,
-                                                ]);
-
+                                            ->afterStateHydrated(function ($record, Set $set): void {
                                                 $geojson = json_decode(strip_tags($record->geojson ?? ''));
                                                 $location = [
                                                     'geojson' => $geojson,
@@ -219,17 +211,6 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->setColor('#3388ff')
                                             ->setFilledColor('#cad9ec'),
                                         TextInput::make('geojson')
-                                            // ->hiddenLabel()
-                                            ->afterStateHydrated(function (
-                                                TextInput $component,
-                                                $state,
-                                                $record,
-                                            ) {
-                                                Log::info('geojson TextInput hydrated', [
-                                                    'state' => $state,
-                                                    'record_geojson' => $record?->geojson,
-                                                ]);
-                                            })
                                             ->readOnly(),
                                     ]),
                                 Tab::make('TabImage')
@@ -251,10 +232,6 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                                 $file = $get('image_file');
                                                 $url = $get('image_path');
 
-                                                Log::info('Previewing image', [
-                                                    'tempFile' => $file,
-                                                    'URI' => $url,
-                                                ]);
                                                 if ($file instanceof TemporaryUploadedFile) {
                                                     return new HtmlString(
                                                         '<img src="'.e($file->temporaryUrl()).'" class="rounded-lg">'
@@ -267,22 +244,11 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
 
                                                 // Local path
                                                 if (! Str::of($url)->isMatch('/^https?:\/\//')) {
-                                                    Log::debug('Trying to resolve URL from storage', [
-                                                        'URL' => $url,
-                                                        'storage' => Storage::disk('local')->temporaryUrl(
-                                                            $url,
-                                                            now()->plus(minutes: 5)
-                                                        ),
-                                                    ]);
-
                                                     $url = Storage::disk('local')->temporaryUrl(
                                                         $url,
                                                         now()->plus(minutes: 5)
                                                     );
                                                 }
-                                                Log::debug('Trying to resolve URL as absolute URL', [
-                                                    'URL' => $url,
-                                                ]);
 
                                                 return new HtmlString(
                                                     '<img src="'.e($url).'" class="rounded-lg">'
@@ -299,7 +265,6 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->hiddenOn(['view'])
                                             ->disabled(fn ($get) => filled($get('image_file')))
                                             ->afterStateUpdated(function ($state, $set) {
-                                                Log::info('Image URL state update', ['state' => $state]);
                                                 if (filled($state)) {
                                                     $set('image_file', null);
                                                 }
@@ -328,7 +293,6 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->dehydrated()
                                             ->disabled(fn ($get) => filled($get('image_path')))
                                             ->afterStateUpdated(function ($state, $set) {
-                                                Log::info('FileUpload state update', ['state' => $state]);
                                                 if (filled($state) && ! $state instanceof TemporaryUploadedFile) {
                                                     $set('image_path', $state);
                                                 }
@@ -369,7 +333,15 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
             ->groups([
                 Group::make('territoryZone.name')
                     ->label(ucfirst(__('filament-resources.territory_zone.model_label')))
-                    ->getTitleFromRecordUsing(fn (Territory $record): string => $record->territoryZone->name.' ('.$record->territoryZone->loadMissing('territories')->territories->count().')' ?? '')
+                    ->getTitleFromRecordUsing(function (Territory $record): string {
+                        // Count the territories of every zone with a single query per request
+                        $territoriesCountByZone = once(fn () => Territory::query()
+                            ->selectRaw('territory_zone_id, count(*) as aggregate')
+                            ->groupBy('territory_zone_id')
+                            ->pluck('aggregate', 'territory_zone_id'));
+
+                        return $record->territoryZone->name.' ('.($territoriesCountByZone[$record->territory_zone_id] ?? 0).')';
+                    })
                     ->getDescriptionFromRecordUsing(fn (Territory $record): string => $record->territoryZone->description ?? '')
                     ->collapsible(),
                 Group::make('currentAssignment.campaign.name')
@@ -378,13 +350,17 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                         /** @var Campaign $campaign */
                         $campaign = $record->currentAssignment?->campaign;
                         if ($campaign) {
-                            $territoriesCount = $campaign->assignments()->count();
+                            // Count the assignments of every campaign with a single query per request
+                            $assignmentsCountByCampaign = once(fn () => TerritoryAssignment::query()
+                                ->whereNotNull('campaign_id')
+                                ->selectRaw('campaign_id, count(*) as aggregate')
+                                ->groupBy('campaign_id')
+                                ->pluck('aggregate', 'campaign_id'));
 
-                            return $campaign->name." ({$territoriesCount})";
+                            return $campaign->name.' ('.($assignmentsCountByCampaign[$campaign->id] ?? 0).')';
                         }
 
-                        $territoriesCount = Territory::unassigned()
-                            ->count();
+                        $territoriesCount = once(fn (): int => Territory::unassigned()->count());
 
                         return __('filament-resources.territory.filter_no_campaign')." ({$territoriesCount})";
                     })
@@ -446,11 +422,8 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                             }
                         }
 
-                        // Se non c'è assegnazione attiva, cerca l'ultima assegnazione terminata
-                        $lastAssignment = $record->assignments()
-                            ->whereNotNull('ended_at')
-                            ->orderBy('ended_at', 'desc')
-                            ->first();
+                        // Se non c'è assegnazione attiva, usa l'ultima assegnazione terminata (caricata in anticipo)
+                        $lastAssignment = $record->lastReturnedAssignment;
 
                         if ($lastAssignment) {
                             $endDate = Carbon::parse($lastAssignment->ended_at);
@@ -474,13 +447,11 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                 $join->on('territories.id', '=', 'duration_assignments.territory_id')
                                     ->whereNull('duration_assignments.ended_at');
                             })
-                            ->orderByRaw("
-                                CASE
-                                    WHEN duration_assignments.started_at IS NOT NULL
-                                    THEN DATEDIFF(NOW(), duration_assignments.started_at)
-                                    ELSE NULL
-                                END {$direction}
-                            ")
+                            // Portable equivalent of sorting by `DATEDIFF(NOW(), started_at)`: unassigned
+                            // territories count as the shortest duration, and the earlier an open assignment
+                            // started, the longer its duration.
+                            ->orderByRaw('CASE WHEN duration_assignments.started_at IS NULL THEN 0 ELSE 1 END '.($direction === 'desc' ? 'desc' : 'asc'))
+                            ->orderBy('duration_assignments.started_at', $direction === 'desc' ? 'asc' : 'desc')
                             ->select('territories.*');
                     })
                     ->searchable(false),
@@ -553,7 +524,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                         ->schema([
                             Select::make('assignee_id')
                                 ->label(__('filament-resources.territory_assignment.action_assigned_to'))
-                                ->options(User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
+                                ->options(fn (): array => User::getAssigneeOptions())
                                 ->searchable()
                                 ->required(),
                             Select::make('campaign_id')
@@ -581,18 +552,20 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                     continue;
                                 }
 
-                                $record->assignments()->create([
-                                    'assignee_id' => $data['assignee_id'],
-                                    'territory_id' => $record->id,
-                                    'campaign_id' => $data['campaign_id'] ?? null,
-                                    'created_by' => Auth::id(),
-                                ]);
-                                $record->save();
+                                try {
+                                    // The transaction makes the "already assigned" check (see TerritoryAssignmentObserver) atomic
+                                    DB::transaction(fn () => $record->assignments()->create([
+                                        'assignee_id' => $data['assignee_id'],
+                                        'territory_id' => $record->id,
+                                        'campaign_id' => $data['campaign_id'] ?? null,
+                                        'created_by' => Auth::id(),
+                                    ]));
+                                } catch (ValidationException) {
+                                    Log::warning("Skipping record {$record->id} because it has been assigned in the meantime");
+                                }
                             }
                         })
                         ->deselectRecordsAfterCompletion(),
-                    // AssignmentActions\CreateAssignmentBulkAction::make('create_assignment_bulk')
-                    //     ->deselectRecordsAfterCompletion(),
                     BulkAction::make('cancel_assignment_bulk')
                         ->label(__('filament-resources.territory.action_end_assignments'))
                         ->icon(Heroicon::OutlinedDocumentArrowDown)
@@ -669,7 +642,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['currentAssignment.assignee'])
+            ->with(['currentAssignment.assignee', 'lastReturnedAssignment'])
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

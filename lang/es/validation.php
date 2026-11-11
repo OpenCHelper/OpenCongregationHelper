@@ -215,4 +215,8 @@ return [
         'not_terminated' => 'No se pueden asignar territorios a una campaña terminada.',
     ],
 
+    'territory_assignment' => [
+        'already_assigned' => 'Este territorio ya tiene una asignación en curso: devuélvelo antes de asignarlo de nuevo.',
+    ],
+
 ];

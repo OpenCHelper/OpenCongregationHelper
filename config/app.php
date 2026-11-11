@@ -164,4 +164,20 @@ return [
 
     'enable_shared_pii' => (bool) env('ENABLE_SHARED_PII', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Initial Root User
+    |--------------------------------------------------------------------------
+    |
+    | Credentials of the root user created by the database seeder when the
+    | database contains no users yet.
+    |
+    */
+
+    'initial_root_user' => [
+        'name' => env('INITIAL_ROOT_USERNAME'),
+        'email' => env('INITIAL_ROOT_USERMAIL'),
+        'password' => env('INITIAL_ROOT_PASSWORD'),
+    ],
+
 ];

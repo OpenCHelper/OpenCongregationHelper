@@ -32,10 +32,12 @@ test('territories assigned more than once in a campaign are counted once', funct
     $assignedTerritory = Territory::factory()->for($zone, 'territoryZone')->create();
     Territory::factory()->for($zone, 'territoryZone')->create();
 
+    // Past assignments of the same territory (only one assignment can be in progress at a time)
     TerritoryAssignment::factory()->count(3)->create([
         'territory_id' => $assignedTerritory->id,
         'assignee_id' => 1,
         'campaign_id' => $campaign->id,
+        'ended_at' => now(),
     ]);
 
     Livewire::test(CampaignOverview::class, ['record' => $campaign])

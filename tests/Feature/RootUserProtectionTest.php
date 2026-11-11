@@ -112,7 +112,7 @@ it('allows updating all fields for regular users', function () {
 
     $updated = $this->regularUser->fresh();
     expect($updated->email)->toBe('updated@example.com');
-    expect($updated->can_login)->toBe(0);
+    expect($updated->can_login)->toBeFalse();
     expect($updated->first_name)->toBe('Updated Name');
 });
 
@@ -149,5 +149,5 @@ it('allows updating root user fields in production environment', function () {
 
     $updated = $this->rootUser->fresh();
     expect($updated->email)->toBe('production@example.com');
-    expect($updated->can_login)->toBe(0);
+    expect($updated->can_login)->toBeFalse();
 });

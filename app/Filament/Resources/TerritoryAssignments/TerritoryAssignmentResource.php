@@ -7,6 +7,7 @@ use App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Models\TerritoryAssignment;
 use App\Rules\NotTerminatedCampaign;
+use App\Rules\TerritoryNotAlreadyAssigned;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
@@ -28,6 +29,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -266,6 +268,11 @@ class TerritoryAssignmentResource extends Resource
                             ->columnSpan(1),
                         DateTimePicker::make('ended_at')
                             ->label(__('filament-resources.territory_assignment.field_ended_at'))
+                            // Leaving the end date empty requires the territory to have no other assignment in progress
+                            ->rule(fn (?TerritoryAssignment $record, Get $get): TerritoryNotAlreadyAssigned => new TerritoryNotAlreadyAssigned(
+                                territoryId: filled($territoryId = $record?->territory_id ?? $get('territory_id')) ? (int) $territoryId : null,
+                                ignoredAssignmentId: $record?->getKey(),
+                            ))
                             ->columnSpan(1),
                     ]),
                 Section::make(__('filament-resources.territory_assignment.section_additional_info'))

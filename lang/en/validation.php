@@ -215,4 +215,8 @@ return [
         'not_terminated' => 'Cannot assign territories to a terminated campaign.',
     ],
 
+    'territory_assignment' => [
+        'already_assigned' => 'This territory already has an assignment in progress: return it before assigning the territory again.',
+    ],
+
 ];

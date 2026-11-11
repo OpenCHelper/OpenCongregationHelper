@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Bumped the application version in `composer.json` to `v2.0.0-alpha5`; it was still set to `v2.0.0-alpha3`.
+- Notification emails are queued and sent when the queue is processed, instead of during the request. On hosts without
+  a queue worker this requires the cron calling the queue endpoint (`/queue/process`) ([#146]).
+- Users who cannot log in are no longer notified when a campaign is created ([#146]).
+- Assignees are sorted by name when assigning territories ([#146]).
+- The database seeder reads the initial root user through the configuration and no longer depends on development
+  packages ([#146]).
+
+### Removed
+
+- Unused API controller methods, form requests and territory assignment bulk actions ([#146]).
 - Faster CI: the test workflow caches the Sail Docker image layers, rebuilding the image from scratch every 7 days,
   and builds the frontend assets on the runner with cached npm dependencies. The linter workflow no longer starts the
   Sail containers ([#145]).
@@ -47,6 +57,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the runner's ([#145]).
 - Fake data seeder (`FakeDataSeeder`) failing randomly when all the fake tags were created with the same type. Zone
   and territory factories now create a tag of the needed type when none exists ([#144], closes [#123]).
+- Territories having more than one assignment in progress: assigning, reopening or restoring an assignment is now
+  refused when the territory is already assigned ([#146]).
+- Sorting territories by assignment duration failing on databases other than MySQL ([#146]).
+- Links in emails sent through the queue and scheduler endpoints pointing to the `artisan.` subdomain instead of the
+  application URL ([#146]).
+- Territories table running one query per territory for the assignment duration, and loading all the territories of
+  each zone to count them in the group titles ([#146]).
+- Stale assignment detection loading every assignment in progress in memory ([#146]).
+- Database seeding failing with a cached configuration or without development dependencies installed ([#146]).
+- Log files growing quickly because of debug logs written on every render of the territory form ([#146]).
 
 ### Security
 
@@ -62,6 +82,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   submitted token is no longer logged ([#141]).
 - Email bodies, including password reset links, are no longer written to the logs ([#141]).
 - Assign/return territory actions now check the user's permissions ([#141]).
+- The database password is no longer written to the logs when running the migrations ([#146]).
+- Territory import only downloads images from public hosts (also after redirects), with timeouts and a 10 MB size
+  limit, and deletes invalid downloads ([#146]).
+- The deploy workflow masks the temporary Artisan token in the GitHub Actions logs and always removes it from the
+  server, even when a command fails ([#146]).
+- The root `.htaccess` denies all requests when `mod_rewrite` is not available, instead of serving the project files
+  (e.g. `.env`) ([#146]).
 
 ## [2.0.0-alpha5] - 2026-09-16
 
@@ -270,3 +297,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#142]: https://github.com/LukeSavefrogs/registro-territori/pull/142
 [#144]: https://github.com/LukeSavefrogs/registro-territori/pull/144
 [#145]: https://github.com/LukeSavefrogs/registro-territori/pull/145
+[#146]: https://github.com/LukeSavefrogs/registro-territori/pull/146

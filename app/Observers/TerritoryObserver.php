@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Territory;
-use Illuminate\Support\Facades\Log;
 
 class TerritoryObserver
 {
@@ -12,9 +11,7 @@ class TerritoryObserver
      */
     public function created(Territory $territory): void
     {
-        Log::debug('Territory created', [
-            'territory' => $territory,
-        ]);
+        //
     }
 
     /**
@@ -22,9 +19,7 @@ class TerritoryObserver
      */
     public function updated(Territory $territory): void
     {
-        Log::debug('Territory updated', [
-            'territory' => $territory,
-        ]);
+        //
     }
 
     /**

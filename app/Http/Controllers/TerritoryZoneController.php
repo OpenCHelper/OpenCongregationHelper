@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreTerritoryZoneRequest;
-use App\Http\Requests\UpdateTerritoryZoneRequest;
 use App\Models\TerritoryZone;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 
+/**
+ * Read-only API for territory zones.
+ */
 class TerritoryZoneController extends Controller
 {
     /**
      * Display a listing of the resource.
+     *
+     * @return Collection<int, TerritoryZone>
      */
-    public function index()
+    public function index(): Collection
     {
         Gate::authorize('viewAny', TerritoryZone::class);
 
@@ -20,52 +24,12 @@ class TerritoryZoneController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreTerritoryZoneRequest $request)
-    {
-        //
-    }
-
-    /**
      * Display the specified resource.
      */
-    public function show(TerritoryZone $zone)
+    public function show(TerritoryZone $zone): TerritoryZone
     {
         Gate::authorize('view', $zone);
 
         return $zone;
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(TerritoryZone $zone)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateTerritoryZoneRequest $request, TerritoryZone $zone)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(TerritoryZone $zone)
-    {
-        //
     }
 }

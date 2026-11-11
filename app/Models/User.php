@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
@@ -96,12 +95,28 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'can_login' => 'boolean',
         ];
     }
 
     public function getFullName(): string
     {
         return $this->first_name.' '.$this->last_name;
+    }
+
+    /**
+     * Get the users that can be selected as assignees, sorted by name.
+     *
+     * @return array<int, string>
+     */
+    public static function getAssigneeOptions(): array
+    {
+        return static::query()
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get(['id', 'first_name', 'last_name'])
+            ->pluck('full_name', 'id')
+            ->all();
     }
 
     public function fullName(): Attribute
@@ -186,11 +201,6 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
         return $this->belongsToTeam($tenant);
     }
 
-    public function teams(): HasMany
-    {
-        return $this->hasMany(Team::class);
-    }
-
     public function isVirtual(): bool
     {
         return ! $this->can_login;
@@ -221,15 +231,6 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
      */
     public function preferredLocale(): string
     {
-        Log::debug('User preferred locale', [
-            'user' => $this->fullName,
-            '$this->locale' => $this->locale,
-            'app()->getLocale()' => app()->getLocale(),
-            'config("app.locale")' => config('app.locale'),
-            'config("app.fallback_locale")' => config('app.fallback_locale'),
-            'env("APP_LOCALE")' => env('APP_LOCALE', 'unknown'),
-        ]);
-
         return $this->locale ?? app()->getLocale();
     }
 }

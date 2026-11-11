@@ -25,7 +25,8 @@ class CampaignObserver
      */
     public function created(Campaign $campaign): void
     {
-        Notification::send(User::all(), new CampaignCreatedNotification($campaign));
+        // Virtual users (who cannot log in) are not notified
+        Notification::send(User::query()->where('can_login', true)->get(), new CampaignCreatedNotification($campaign));
     }
 
     /**

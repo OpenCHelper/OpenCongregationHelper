@@ -9,10 +9,11 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TerritoryAssignedNotification extends Notification
+class TerritoryAssignedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +35,7 @@ class CreateAssignmentAction extends Action
             ->schema([
                 Select::make('assignee_id')
                     ->label(__('filament-resources.territory_assignment.action_assigned_to'))
-                    ->options(User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
+                    ->options(fn (): array => User::getAssigneeOptions())
                     ->searchable()
                     ->required(),
                 Select::make('campaign_id')
@@ -56,12 +57,13 @@ class CreateAssignmentAction extends Action
                 }
 
                 try {
-                    $record->assignments()->create([
+                    // The transaction makes the "already assigned" check (see TerritoryAssignmentObserver) atomic
+                    DB::transaction(fn () => $record->assignments()->create([
                         'assignee_id' => $data['assignee_id'],
                         'territory_id' => $record->id,
                         'campaign_id' => $data['campaign_id'] ?? null,
                         'created_by' => Auth::id(),
-                    ]);
+                    ]));
                 } catch (Exception $e) {
                     Log::error('Errore durante l\'assegnazione del territorio: '.$e->getMessage());
                     $this->failure();

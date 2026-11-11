@@ -134,13 +134,16 @@ test('users that can list assignments see everyone assignments', function () {
 test('users that cannot list assignments only see their own', function () {
     $user = userWithPermissions(['View:TerritoryAssignment']);
 
+    // Past assignments of the same territory (only one assignment can be in progress at a time)
     $ownAssignment = TerritoryAssignment::factory()->create([
         'territory_id' => $this->territory->id,
         'assignee_id' => $user->id,
+        'ended_at' => now()->subDays(10),
     ]);
     $otherAssignment = TerritoryAssignment::factory()->create([
         'territory_id' => $this->territory->id,
         'assignee_id' => $this->assignee->id,
+        'ended_at' => now()->subDay(),
     ]);
 
     $this->actingAs($user);
@@ -172,4 +175,14 @@ test('campaign assignments cannot be created for an already assigned territory',
         ->assertHasFormErrors(['territory_id']);
 
     expect($this->territory->assignments()->count())->toBe(1);
+});
+
+test('assignee options are sorted by name', function () {
+    User::factory()->create(['first_name' => 'Zeno', 'last_name' => 'Bianchi']);
+    User::factory()->create(['first_name' => 'Anna', 'last_name' => 'Verdi']);
+
+    $names = array_values(User::getAssigneeOptions());
+
+    expect($names)->toBe(collect($names)->sort(SORT_NATURAL | SORT_FLAG_CASE)->values()->all())
+        ->and($names)->toContain('Anna Verdi', 'Zeno Bianchi');
 });

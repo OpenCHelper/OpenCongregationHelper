@@ -88,6 +88,17 @@ class Territory extends Model
     }
 
     /**
+     * Get the most recently returned (ended) assignment for this territory.
+     */
+    public function lastReturnedAssignment(): HasOne
+    {
+        return $this->hasOne(TerritoryAssignment::class)->ofMany(
+            ['ended_at' => 'max'],
+            fn (Builder $query) => $query->whereNotNull('ended_at'),
+        );
+    }
+
+    /**
      * Get the current assignee directly through the assignment.
      */
     public function currentAssignee(): HasOneThrough

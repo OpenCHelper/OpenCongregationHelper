@@ -44,8 +44,6 @@ class ReturnAssignmentAction extends Action
 
                 $last_assignment->load('assignee', 'campaign');
 
-                Log::info('Last assignment: '.$last_assignment);
-
                 return $schema->fill([
                     'assignee_id' => $last_assignment->assignee->id,
                     'campaign_id' => $last_assignment->campaign?->id, // Campaign is optional
@@ -54,13 +52,13 @@ class ReturnAssignmentAction extends Action
             ->schema([
                 Select::make('assignee_id')
                     ->label(__('filament-resources.territory_assignment.action_assigned_to'))
-                    ->options(User::get(['id', 'first_name', 'last_name'])->pluck('full_name', 'id')->toArray())
+                    ->options(fn (): array => User::getAssigneeOptions())
                     ->searchable()
                     ->disabled()
                     ->required(),
                 Select::make('campaign_id')
                     ->label(__('filament-resources.territory_assignment.field_campaign'))
-                    ->options(Campaign::query()->pluck('name', 'id'))
+                    ->options(fn (): array => Campaign::query()->pluck('name', 'id')->all())
                     ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign'))
                     ->nullable()
                     ->disabled()

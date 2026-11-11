@@ -7,7 +7,6 @@ use App\Models\TerritoryAssignment;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
@@ -55,31 +54,14 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
     {
         Log::info('DetectStaleAssignments job started.');
 
-        $assignments = TerritoryAssignment::where('ended_at', null)->get();
+        // An assignment is stale when it has been open for longer than the lowest stale level
+        $staleAfterDays = min(array_keys($this->getStaleLevels()));
 
-        foreach ($assignments as $assignment) {
-            $elapsedTime = Carbon::now()->diffInDays($assignment->started_at);
-
-            // Date is in the future
-            if ($elapsedTime > 0) {
-                continue;
-            }
-
-            // Get the stale level whose key is higher than the elapsed time
-            $staleLevel = collect($this->getStaleLevels())
-                ->sortKeys()
-                ->filter(function ($level, $key) use ($elapsedTime) {
-                    return abs($elapsedTime) > $key;
-                })
-                ->last();
-
-            // No stale level found
-            if ($staleLevel === null) {
-                continue;
-            }
-
-            StaleAssignmentDetected::dispatch($assignment);
-        }
+        TerritoryAssignment::query()
+            ->whereNull('ended_at')
+            ->where('started_at', '<', now()->subDays($staleAfterDays))
+            ->lazyById()
+            ->each(fn (TerritoryAssignment $assignment) => StaleAssignmentDetected::dispatch($assignment));
 
         Log::info('DetectStaleAssignments job completed.');
     }

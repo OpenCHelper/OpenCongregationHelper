@@ -11,16 +11,24 @@ use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Illuminate\Support\Uri;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
+use RuntimeException;
+use Symfony\Component\Mime\MimeTypes;
+use Throwable;
 
 class TerritoryImporter extends Importer
 {
+    /**
+     * The maximum size of an image downloaded during the import, in bytes.
+     */
+    private const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+
     protected static ?string $model = Territory::class;
 
     public static function getColumns(): array
@@ -97,49 +105,106 @@ class TerritoryImporter extends Importer
 
     protected function beforeFill(): void
     {
-        Log::debug('beforeFill method', [
-            'record' => $this->record,
-            'data' => $this->data,
-            'options' => $this->options,
-        ]);
-
-        if (filled($this->data['image_path'] ?? '') && ! $this->options['keep_image_links']) {
-            $image_url = Uri::of($this->data['image_path'] ?? '');
-
-            if (! in_array($image_url->scheme(), ['http', 'https'])) {
-                throw new RowImportFailedException("Unsupported URI schema '".$image_url->scheme()."' for image '$image_url'.");
-            }
-
-            $new_image = 'territories/'.static::generateFilename('local', 'app/private/territories/', '.'.File::extension($image_url->path()));
-            Log::debug('Downloading image...', [
-                'source' => $image_url,
-                'destination' => 'app/private/'.$new_image,
-            ]);
-            Http::sink(storage_path('app/private/'.$new_image))->get($image_url->getUri());
-
-            $mimeType = Storage::mimeType($new_image);
-            Log::debug('Downloaded image', [
-                'source' => $image_url,
-                'destination' => 'app/private/'.$new_image,
-                'mimeType' => $mimeType,
-            ]);
-
-            if (! str_starts_with($mimeType, 'image/')) {
-                throw new RowImportFailedException("Invalid MIME type '".$mimeType."' for URL '$image_url'.");
-            }
-
-            $this->data['image_path'] = $new_image;
+        if (filled($this->data['image_path'] ?? null) && ! ($this->options['keep_image_links'] ?? true)) {
+            $this->data['image_path'] = $this->downloadImage((string) $this->data['image_path']);
         }
     }
 
-    private static function generateFilename(string $disk = 'local', string $path = '', string $suffix = '')
+    /**
+     * Download the image at the given URL into the application storage.
+     *
+     * @return string The path of the downloaded image on the `local` disk.
+     *
+     * @throws RowImportFailedException When the image cannot be downloaded or is not valid.
+     */
+    private function downloadImage(string $url): string
     {
-        $filename = Str::random(40);
-        if (Storage::disk($disk)->exists($path.'/'.$filename.$suffix)) {
-            $filename = static::generateFilename($disk, $path, $suffix);
+        $uri = Uri::of($url);
+
+        if (! in_array($uri->scheme(), ['http', 'https'], true)) {
+            throw new RowImportFailedException("Unsupported URI schema '{$uri->scheme()}' for image '{$url}'.");
         }
 
-        return $filename.$suffix;
+        static::ensurePublicHost((string) $uri->host(), $url);
+
+        $disk = Storage::disk('local');
+        $disk->makeDirectory('territories');
+        $downloadPath = 'territories/'.Str::random(40).'.download';
+
+        try {
+            $response = Http::connectTimeout(10)
+                ->timeout(30)
+                ->withOptions([
+                    // Abort as soon as the server announces a file that is too large
+                    'on_headers' => function (ResponseInterface $response): void {
+                        if ((int) $response->getHeaderLine('Content-Length') > self::MAX_IMAGE_SIZE) {
+                            throw new RuntimeException('the image is larger than '.Number::fileSize(self::MAX_IMAGE_SIZE));
+                        }
+                    },
+                    // Redirects must not lead to private hosts either
+                    'allow_redirects' => [
+                        'max' => 5,
+                        'protocols' => ['http', 'https'],
+                        'on_redirect' => fn ($request, $response, UriInterface $redirectUri) => static::ensurePublicHost($redirectUri->getHost(), $url),
+                    ],
+                ])
+                ->sink($disk->path($downloadPath))
+                ->get($url);
+        } catch (Throwable $exception) {
+            $disk->delete($downloadPath);
+
+            throw new RowImportFailedException("Unable to download image '{$url}': {$exception->getMessage()}");
+        }
+
+        try {
+            if ($response->failed()) {
+                throw new RowImportFailedException("Unable to download image '{$url}': HTTP status {$response->status()}.");
+            }
+
+            if ($disk->size($downloadPath) > self::MAX_IMAGE_SIZE) {
+                throw new RowImportFailedException("Image '{$url}' is larger than ".Number::fileSize(self::MAX_IMAGE_SIZE).'.');
+            }
+
+            $mimeType = (string) $disk->mimeType($downloadPath);
+
+            if (! str_starts_with($mimeType, 'image/')) {
+                throw new RowImportFailedException("Invalid MIME type '{$mimeType}' for URL '{$url}'.");
+            }
+        } catch (RowImportFailedException $exception) {
+            $disk->delete($downloadPath);
+
+            throw $exception;
+        }
+
+        $extension = MimeTypes::getDefault()->getExtensions($mimeType)[0] ?? 'img';
+        $imagePath = 'territories/'.Str::random(40).'.'.$extension;
+        $disk->move($downloadPath, $imagePath);
+
+        return $imagePath;
+    }
+
+    /**
+     * Ensure that the given host does not point to a private, loopback or reserved address,
+     * so that the import cannot be used to reach internal services.
+     *
+     * @throws RowImportFailedException
+     */
+    private static function ensurePublicHost(string $host, string $url): void
+    {
+        $host = trim($host, '[]');
+        $addresses = filter_var($host, FILTER_VALIDATE_IP) !== false
+            ? [$host]
+            : (gethostbynamel($host) ?: []);
+
+        if ($addresses === []) {
+            throw new RowImportFailedException("Unable to resolve the host of image '{$url}'.");
+        }
+
+        foreach ($addresses as $address) {
+            if (filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                throw new RowImportFailedException("Image '{$url}' points to a private or reserved address.");
+            }
+        }
     }
 
     public static function getOptionsFormComponents(): array
