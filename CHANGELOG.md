@@ -14,6 +14,53 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
 
 - Welcome page describing the project scope and its current features, with links to the GitHub repository, the user
   guide and the login page, and the application version. Available in English, Italian and Spanish ([#142]).
+- `ENABLE_SHARED_PII` environment variable to show personal data (assignee name and territory notes) on publicly
+  shared assignment pages, where it is now hidden by default ([#141]).
+
+### Changed
+
+- Bumped the application version in `composer.json` to `v2.0.0-alpha5`; it was still set to `v2.0.0-alpha3`.
+
+### Fixed
+
+- Home page returning a server error when frontend assets are built, because `resources/css/guest.css` was missing
+  from the Vite build ([#142]).
+- Publicly shared assignment pages returning a server error when frontend assets are built, because the guest panel
+  theme (`resources/css/filament/guest/theme.css`) was missing from the Vite build ([#141]).
+- Error notifications of the assign/return territory actions never being shown ([#141]).
+- Users allowed to list all assignments only seeing their own, because of an outdated permission name. The Shield
+  seeder now uses the current permission names ([#141]).
+- Already assigned territories being offered when adding an assignment to a campaign ([#141]).
+- Campaign filters returning wrong results when combined with other conditions ([#141]).
+- Campaign overview widget failing when there are no territories, exceeding 100% when a territory was assigned more
+  than once, and always showing the remaining-time warning ([#141]).
+- Stale assignment emails mentioning the wrong territory ([#141]).
+- Territory import rejecting every territory of an existing zone as a duplicate, and "update existing" ignoring the
+  zone ([#141]).
+- Editing a user requiring a new password to be entered ([#141]).
+- Emails sent through the native `mail()` transport having duplicated `To`/`Subject` headers and no MIME content
+  type ([#141]).
+- Intermittent CI failures caused by tests starting before MySQL accepted connections ([#141]).
+
+### Security
+
+- **BREAKING**: The queue and scheduler endpoints used by external cron services (`/queue/process` and
+  `/schedule/process`) required no authentication. They now require an `X-Cron-Token` header matching the new
+  `ARTISAN_CRON_TOKEN` environment variable, and are rate limited ([#141]).
+- Only super administrators can impersonate users, and the `root` user can no longer be impersonated ([#141]).
+- Only super administrators can assign roles, so users can no longer grant themselves the `super_admin` role
+  ([#141]).
+- The API tokens page is only available when the API feature is enabled, the API endpoints now check the user's
+  permissions and the territories and zones API is read-only ([#141]).
+- The token protecting the remote Artisan endpoints is compared in constant time, an empty token is rejected and the
+  submitted token is no longer logged ([#141]).
+- Email bodies, including password reset links, are no longer written to the logs ([#141]).
+- Assign/return territory actions now check the user's permissions ([#141]).
+
+## [2.0.0-alpha5] - 2026-09-16
+
+### Added
+
 - Import territories from a CSV file. The import supports name, description, zone, notes, commercial flag, GeoJSON
   polygon and image URL. Images are downloaded into the application storage, only `http`/`https` URLs pointing to an
   `image/*` MIME type are accepted, and rows duplicating an existing territory in the same zone are rejected.
@@ -35,8 +82,6 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
 - Static analysis with Larastan and FilaCheck.
 - Laravel Boost guidelines and skills for AI-assisted development ([#132]).
 - GitHub Copilot instructions and setup steps ([#110], [#111], [#136], [#138]).
-- `ENABLE_SHARED_PII` environment variable to show personal data (assignee name and territory notes) on publicly
-  shared assignment pages, where it is now hidden by default ([#141]).
 
 ### Changed
 
@@ -51,7 +96,6 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
   22.22.2, and provides default values for `WWWUSER` and `WWWGROUP`.
 - Deployment workflows to Altervista have been merged into a single reusable GitHub Actions workflow, with remote
   Artisan execution extracted into a dedicated action.
-- Bumped the application version in `composer.json` to `v2.0.0-alpha5`; it was still set to `v2.0.0-alpha3`.
 - Updated dependencies.
 
 ### Removed
@@ -61,8 +105,6 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
 
 ### Fixed
 
-- Home page returning a server error when frontend assets are built, because `resources/css/guest.css` was missing
-  from the Vite build ([#142]).
 - Stats overview widget failing on SQLite databases ([#137]).
 - `root` user not receiving the `super_admin` role.
 - Wrong `Auth` facade import in the activity log and mail log resources.
@@ -72,38 +114,10 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
 - Missing styles on guest pages and broken UI styles.
 - Documentation panel not being reachable.
 - Wrong values in the example environment file ([#107]).
-- Publicly shared assignment pages returning a server error when frontend assets are built, because the guest panel
-  theme (`resources/css/filament/guest/theme.css`) was missing from the Vite build ([#141]).
-- Error notifications of the assign/return territory actions never being shown ([#141]).
-- Users allowed to list all assignments only seeing their own, because of an outdated permission name. The Shield
-  seeder now uses the current permission names ([#141]).
-- Already assigned territories being offered when adding an assignment to a campaign ([#141]).
-- Campaign filters returning wrong results when combined with other conditions ([#141]).
-- Campaign overview widget failing when there are no territories, exceeding 100% when a territory was assigned more
-  than once, and always showing the remaining-time warning ([#141]).
-- Stale assignment emails mentioning the wrong territory ([#141]).
-- Territory import rejecting every territory of an existing zone as a duplicate, and "update existing" ignoring the
-  zone ([#141]).
-- Editing a user requiring a new password to be entered ([#141]).
-- Emails sent through the native `mail()` transport having duplicated `To`/`Subject` headers and no MIME content
-  type ([#141]).
-- Intermittent CI failures caused by tests starting before MySQL accepted connections ([#141]).
 
 ### Security
 
 - Updated Livewire to 3.6.4 ([#106]), fixing a remote code execution vulnerability (CVE-2025-54068).
-- **BREAKING**: The queue and scheduler endpoints used by external cron services (`/queue/process` and
-  `/schedule/process`) required no authentication. They now require an `X-Cron-Token` header matching the new
-  `ARTISAN_CRON_TOKEN` environment variable, and are rate limited ([#141]).
-- Only super administrators can impersonate users, and the `root` user can no longer be impersonated ([#141]).
-- Only super administrators can assign roles, so users can no longer grant themselves the `super_admin` role
-  ([#141]).
-- The API tokens page is only available when the API feature is enabled, the API endpoints now check the user's
-  permissions and the territories and zones API is read-only ([#141]).
-- The token protecting the remote Artisan endpoints is compared in constant time, an empty token is rejected and the
-  submitted token is no longer logged ([#141]).
-- Email bodies, including password reset links, are no longer written to the logs ([#141]).
-- Assign/return territory actions now check the user's permissions ([#141]).
 
 ## [2.0.0-alpha4] - 2025-06-23
 
@@ -211,11 +225,6 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 - The API can only be used by authenticated users.
 - Uploaded territory images are stored on a private disk ([#69], closes [#70]).
 
-[unreleased]: https://github.com/LukeSavefrogs/registro-territori/compare/v2.0.0-alpha4...HEAD
-[2.0.0-alpha4]: https://github.com/LukeSavefrogs/registro-territori/compare/v2.0.0-alpha3...v2.0.0-alpha4
-[2.0.0-alpha3]: https://github.com/LukeSavefrogs/registro-territori/compare/v2.0.0-alpha2...v2.0.0-alpha3
-[2.0.0-alpha2]: https://github.com/LukeSavefrogs/registro-territori/compare/v2.0.0-alpha1...v2.0.0-alpha2
-[2.0.0-alpha1]: https://github.com/LukeSavefrogs/registro-territori/releases/tag/v2.0.0-alpha1
 [v1-branch]: https://github.com/LukeSavefrogs/registro-territori/tree/v1
 
 [#35]: https://github.com/LukeSavefrogs/registro-territori/pull/35
