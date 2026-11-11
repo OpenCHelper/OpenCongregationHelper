@@ -9,6 +9,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -95,4 +96,29 @@ test('the territory assignments page lists every assignment for users allowed to
         // Show both the returned and the in progress assignments
         ->filterTable('ended_at', null)
         ->assertCanSeeTableRecords($assignments);
+});
+
+test('an assignment can be returned from the page of its terminated campaign', function () {
+    $campaign = Campaign::factory()->create([
+        'valid_from' => now()->subDays(10),
+        'valid_until' => now()->addDay(),
+    ]);
+    $assignment = TerritoryAssignment::factory()->create([
+        'territory_id' => $this->territory->id,
+        'assignee_id' => $this->assignee->id,
+        'campaign_id' => $campaign->id,
+        'ended_at' => null,
+    ]);
+    $campaign->update(['valid_until' => now()->subDay()]);
+    $returnedAt = now()->startOfMinute();
+
+    actingAsUserAllowedTo(['View:Campaign', 'ViewAny:Campaign', 'ViewAny:TerritoryAssignment', 'Update:TerritoryAssignment']);
+
+    Livewire::test(ManageCampaignAssignments::class, ['record' => $campaign->id])
+        ->callAction(TestAction::make('edit')->table($assignment), ['ended_at' => $returnedAt])
+        ->assertHasNoFormErrors();
+
+    expect($assignment->refresh())
+        ->campaign_id->toBe($campaign->id)
+        ->ended_at->toEqual($returnedAt);
 });

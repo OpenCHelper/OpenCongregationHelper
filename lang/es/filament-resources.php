@@ -52,8 +52,6 @@ return [
         'assignment_success_body' => 'El territorio ha sido asignado exitosamente.',
         'assignment_error_title' => 'Error de asignación',
         'assignment_error_body' => 'Ocurrió un error durante la asignación del territorio.',
-        'assignment_terminated_campaign_title' => 'No se puede asignar a campaña terminada',
-        'assignment_terminated_campaign_body' => 'La campaña seleccionada ha terminado y no se pueden asignar territorios a ella.',
         'territories_assigned_success_title' => 'Territorios asignados',
         'territories_assigned_success_body' => 'Los territorios han sido asignados exitosamente.',
         'create_assignment_modal' => 'Crear nueva asignación',

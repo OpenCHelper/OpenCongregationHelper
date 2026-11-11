@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `filipfonal/filament-log-manager` does not support Filament 5. Log entries are listed in a table with level tabs,
   a date filter and stack traces, and log files can still be cleared, but no longer downloaded.
 
+### Fixed
+
+- Assignments of a terminated campaign failing to save when edited, for example to return the territory, with "The
+  selected campaign is invalid" and "Cannot assign territories to a terminated campaign". A terminated campaign is
+  now refused only when an assignment is linked to it, and this is enforced for every assignment saved, not only
+  those saved from the forms ([#104]).
+
 ## [2.0.0-alpha6] - 2026-11-11
 
 ### Added
@@ -311,6 +318,7 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#100]: https://github.com/LukeSavefrogs/registro-territori/pull/100
 [#101]: https://github.com/LukeSavefrogs/registro-territori/pull/101
 [#103]: https://github.com/LukeSavefrogs/registro-territori/pull/103
+[#104]: https://github.com/LukeSavefrogs/registro-territori/issues/104
 [#106]: https://github.com/LukeSavefrogs/registro-territori/pull/106
 [#107]: https://github.com/LukeSavefrogs/registro-territori/pull/107
 [#110]: https://github.com/LukeSavefrogs/registro-territori/pull/110

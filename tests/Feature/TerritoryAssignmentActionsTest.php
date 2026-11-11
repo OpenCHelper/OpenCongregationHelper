@@ -69,6 +69,25 @@ test('assigning a territory to a terminated campaign is refused', function () {
     expect($this->territory->assignments()->count())->toBe(0);
 });
 
+test('assigning territories in bulk to a terminated campaign is refused', function () {
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Create:TerritoryAssignment']));
+
+    $terminatedCampaign = Campaign::factory()->create([
+        'valid_from' => now()->subDays(10),
+        'valid_until' => now()->subDay(),
+    ]);
+
+    Livewire::test(ListTerritories::class)
+        ->selectTableRecords([$this->territory])
+        ->callAction(TestAction::make('create_assignment_bulk')->table()->bulk(), [
+            'assignee_id' => $this->assignee->id,
+            'campaign_id' => $terminatedCampaign->id,
+        ])
+        ->assertHasFormErrors(['campaign_id']);
+
+    expect($this->territory->assignments()->count())->toBe(0);
+});
+
 test('a failure notification is shown when the assignment cannot be saved', function () {
     $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Create:TerritoryAssignment']));
 

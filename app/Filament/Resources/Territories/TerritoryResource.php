@@ -36,7 +36,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Notifications\Notification;
 use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -545,17 +544,6 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                 ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
                         ])
                         ->action(function (Collection $records, array $data): void {
-                            // Check if campaign is terminated
-                            if ($data['campaign_id'] && Campaign::find($data['campaign_id'])?->isTerminated()) {
-                                Notification::make()
-                                    ->danger()
-                                    ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
-                                    ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
-                                    ->send();
-
-                                return;
-                            }
-
                             foreach ($records as $record) {
                                 // Skip if the last assignment is not null
                                 if ($record->currentAssignment !== null && $record->currentAssignment->ended_at === null) {
@@ -572,8 +560,9 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                         'campaign_id' => $data['campaign_id'] ?? null,
                                         'created_by' => Auth::id(),
                                     ]));
-                                } catch (ValidationException) {
-                                    Log::warning("Skipping record {$record->id} because it has been assigned in the meantime");
+                                } catch (ValidationException $exception) {
+                                    // Rejected by TerritoryAssignmentObserver (e.g. the territory has been assigned in the meantime)
+                                    Log::warning("Skipping record {$record->id}: {$exception->getMessage()}");
                                 }
                             }
                         })

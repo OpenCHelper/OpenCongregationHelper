@@ -53,8 +53,6 @@ return [
         'assignment_success_body' => 'Il territorio è stato assegnato con successo.',
         'assignment_error_title' => 'Errore durante l\'assegnazione',
         'assignment_error_body' => 'Si è verificato un errore durante l\'assegnazione del territorio.',
-        'assignment_terminated_campaign_title' => 'Impossibile assegnare a campagna terminata',
-        'assignment_terminated_campaign_body' => 'La campagna selezionata è terminata e non è possibile assegnare territori ad essa.',
         'territories_assigned_success_title' => 'Territori assegnati',
         'territories_assigned_success_body' => 'I territori sono stati assegnati con successo.',
         'create_assignment_modal' => 'Crea nuova assegnazione',

@@ -44,18 +44,6 @@ class CreateAssignmentAction extends Action
                     ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
             ])
             ->action(function (Territory $record, array $data): void {
-                // Check if campaign is terminated
-                if (filled($data['campaign_id'] ?? null) && Campaign::find($data['campaign_id'])?->isTerminated()) {
-                    Notification::make()
-                        ->danger()
-                        ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
-                        ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
-                        ->send();
-
-                    // Keep the modal open, so that a different campaign can be selected
-                    $this->halt();
-                }
-
                 try {
                     // The transaction makes the "already assigned" check (see TerritoryAssignmentObserver) atomic
                     DB::transaction(fn () => $record->assignments()->create([

@@ -262,9 +262,21 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.field_campaign'))
                             ->searchable()
                             ->disabledOn('edit', 'view')
-                            ->relationship('campaign', 'name', fn (Builder $query) => $query->notTerminated())
+                            ->relationship(
+                                name: 'campaign',
+                                titleAttribute: 'name',
+                                // Only campaigns that are not terminated, plus the campaign of the assignment being
+                                // edited: otherwise an assignment of a terminated campaign could not be saved anymore.
+                                modifyQueryUsing: fn (Builder $query, ?TerritoryAssignment $record) => $query->where(
+                                    fn (Builder $query) => $query
+                                        ->notTerminated()
+                                        ->when($record?->campaign_id, fn (Builder $query, int $campaignId) => $query->orWhere($query->getModel()->getQualifiedKeyName(), $campaignId))
+                                )
+                            )
                             ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign'))
-                            ->rule(new NotTerminatedCampaign)
+                            ->rule(fn (?TerritoryAssignment $record): NotTerminatedCampaign => new NotTerminatedCampaign(
+                                ignoredCampaignId: $record?->campaign_id,
+                            ))
                             ->preload(),
                         DateTimePicker::make('started_at')
                             ->label(__('filament-resources.territory_assignment.field_started_at'))

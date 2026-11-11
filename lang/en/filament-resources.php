@@ -52,8 +52,6 @@ return [
         'assignment_success_body' => 'The territory has been assigned successfully.',
         'assignment_error_title' => 'Assignment error',
         'assignment_error_body' => 'An error occurred during territory assignment.',
-        'assignment_terminated_campaign_title' => 'Cannot assign to terminated campaign',
-        'assignment_terminated_campaign_body' => 'The selected campaign has ended and territories cannot be assigned to it.',
         'territories_assigned_success_title' => 'Territories assigned',
         'territories_assigned_success_body' => 'The territories have been assigned successfully.',
         'create_assignment_modal' => 'Create new assignment',

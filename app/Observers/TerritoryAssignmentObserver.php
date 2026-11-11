@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Models\Campaign;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Notifications\TerritoryAssignedNotification;
@@ -15,6 +16,7 @@ class TerritoryAssignmentObserver
      */
     public function creating(TerritoryAssignment $territoryAssignment): void
     {
+        $this->ensureCampaignIsNotTerminated($territoryAssignment);
         $this->ensureTerritoryIsNotAlreadyAssigned($territoryAssignment);
     }
 
@@ -23,6 +25,11 @@ class TerritoryAssignmentObserver
      */
     public function updating(TerritoryAssignment $territoryAssignment): void
     {
+        // Only a new campaign is checked: an assignment can still be edited (e.g. returned) after its campaign has ended
+        if ($territoryAssignment->isDirty('campaign_id')) {
+            $this->ensureCampaignIsNotTerminated($territoryAssignment);
+        }
+
         if ($territoryAssignment->isDirty(['ended_at', 'territory_id'])) {
             $this->ensureTerritoryIsNotAlreadyAssigned($territoryAssignment);
         }
@@ -34,6 +41,24 @@ class TerritoryAssignmentObserver
     public function restoring(TerritoryAssignment $territoryAssignment): void
     {
         $this->ensureTerritoryIsNotAlreadyAssigned($territoryAssignment);
+    }
+
+    /**
+     * An assignment cannot be linked to a terminated campaign.
+     *
+     * @throws ValidationException
+     */
+    private function ensureCampaignIsNotTerminated(TerritoryAssignment $territoryAssignment): void
+    {
+        if ($territoryAssignment->campaign_id === null) {
+            return;
+        }
+
+        if (Campaign::find($territoryAssignment->campaign_id)?->isTerminated()) {
+            throw ValidationException::withMessages([
+                'campaign_id' => __('validation.campaign.not_terminated'),
+            ]);
+        }
     }
 
     /**
