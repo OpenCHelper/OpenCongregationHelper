@@ -38,14 +38,7 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
     use InteractsWithActions;
     use InteractsWithForms, InteractsWithInfolists, InteractsWithTable;
 
-    public ?array $data = [];
-
     public ?Contact $editingContact = null;
-
-    public function mount()
-    {
-        $this->form->fill();
-    }
 
     public function table(Table $table): Table
     {
@@ -105,7 +98,7 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
                     ->label(__('profile.contacts.add_contact'))
                     ->icon(Heroicon::OutlinedPlus)
                     ->schema($this->getFormSchema())
-                    ->action(function (array $data): void {
+                    ->action(function (array $data, Schema $schema): void {
                         // If this contact is set as primary, unset any other primary contacts
                         // if ($data['is_primary']) {
                         //     /** @var User $user */
@@ -117,8 +110,8 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
                         $user = Auth::user();
                         $contact = $user->contacts()->create($data);
 
-                        // Save the relationships from the form to the post after it is created.
-                        $this->form->model($contact)->saveRelationships();
+                        // Save the relationships of the action form to the created contact
+                        $schema->model($contact)->saveRelationships();
                     })
                     ->successNotification(
                         Notification::make()
@@ -133,7 +126,7 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
                     ->label(__('profile.contacts.add_contact'))
                     ->icon(Heroicon::OutlinedPlus)
                     ->schema($this->getFormSchema())
-                    ->action(function (array $data): void {
+                    ->action(function (array $data, Schema $schema): void {
                         // If this contact is set as primary, unset any other primary contacts
                         // if ($data['is_primary']) {
                         //     /** @var User $user */
@@ -145,8 +138,8 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
                         $user = Auth::user();
                         $contact = $user->contacts()->create($data);
 
-                        // Save the relationships from the form to the post after it is created.
-                        $this->form->model($contact)->saveRelationships();
+                        // Save the relationships of the action form to the created contact
+                        $schema->model($contact)->saveRelationships();
                     })
                     ->successNotification(
                         Notification::make()
@@ -162,13 +155,6 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
             ->where('user_id', Auth::id())
             ->orderBy('is_primary', 'desc')
             ->orderBy('type');
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components($this->getFormSchema())
-            ->statePath('data');
     }
 
     public function infolist(Schema $schema): Schema

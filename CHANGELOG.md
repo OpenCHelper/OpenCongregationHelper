@@ -70,6 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Altervista deploys skipping the post-deploy Artisan commands (migrations and cache optimisations), because the
   token mask was written into the command output ([#147]).
 - Deleting a user leaving their team memberships behind ([#148]).
+- Static analysis (PHPStan) errors in the contacts section of the profile page, caused by an unused form that the
+  "add contact" actions also used to save relationships instead of their own form ([#149]).
 
 ### Security
 
@@ -305,3 +307,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#146]: https://github.com/LukeSavefrogs/registro-territori/pull/146
 [#147]: https://github.com/LukeSavefrogs/registro-territori/pull/147
 [#148]: https://github.com/LukeSavefrogs/registro-territori/pull/148
+[#149]: https://github.com/LukeSavefrogs/registro-territori/pull/149
