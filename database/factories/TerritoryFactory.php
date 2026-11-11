@@ -2,9 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\TagType;
 use App\Models\Territory;
+use Database\Factories\Spatie\Tags\TagFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Spatie\Tags\Tag;
 
 /**
  * @extends Factory<Territory>
@@ -82,12 +83,14 @@ class TerritoryFactory extends Factory
         });
     }
 
+    /**
+     * Attach random tags of the `territories` type, creating one if none exists yet.
+     */
     public function withTags(int $count = 1): self
     {
-        // Attach a random tag to the territory
-        return $this->afterCreating(function ($territory) use ($count) {
+        return $this->afterCreating(function (Territory $territory) use ($count): void {
             for ($i = 0; $i < $count; $i++) {
-                $territory->attachTag(Tag::getWithType('territories')->random());
+                $territory->attachTag(TagFactory::randomOfType(TagType::TERRITORIES));
             }
         });
     }

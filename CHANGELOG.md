@@ -38,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Emails sent through the native `mail()` transport having duplicated `To`/`Subject` headers and no MIME content
   type ([#141]).
 - Intermittent CI failures caused by tests starting before MySQL accepted connections ([#141]).
+- Fake data seeder (`FakeDataSeeder`) failing randomly when all the fake tags were created with the same type. Zone
+  and territory factories now create a tag of the needed type when none exists ([#144], closes [#123]).
 
 ### Security
 
@@ -249,6 +251,7 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#116]: https://github.com/LukeSavefrogs/registro-territori/pull/116
 [#120]: https://github.com/LukeSavefrogs/registro-territori/pull/120
 [#122]: https://github.com/LukeSavefrogs/registro-territori/pull/122
+[#123]: https://github.com/LukeSavefrogs/registro-territori/issues/123
 [#132]: https://github.com/LukeSavefrogs/registro-territori/pull/132
 [#134]: https://github.com/LukeSavefrogs/registro-territori/pull/134
 [#135]: https://github.com/LukeSavefrogs/registro-territori/pull/135
@@ -258,3 +261,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#139]: https://github.com/LukeSavefrogs/registro-territori/pull/139
 [#141]: https://github.com/LukeSavefrogs/registro-territori/pull/141
 [#142]: https://github.com/LukeSavefrogs/registro-territori/pull/142
+[#144]: https://github.com/LukeSavefrogs/registro-territori/pull/144

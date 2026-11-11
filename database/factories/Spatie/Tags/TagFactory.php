@@ -35,4 +35,28 @@ class TagFactory extends Factory
             'updated_at' => now(),
         ];
     }
+
+    /**
+     * Indicate that the tag has the given type.
+     */
+    public function ofType(TagType $type): self
+    {
+        return $this->state(fn (): array => [
+            'type' => $type->value,
+        ]);
+    }
+
+    /**
+     * Get a random existing tag of the given type, creating one if none exists yet.
+     */
+    public static function randomOfType(TagType $type): Tag
+    {
+        $tags = Tag::getWithType($type->value);
+
+        if ($tags->isEmpty()) {
+            return static::new()->ofType($type)->create();
+        }
+
+        return $tags->random();
+    }
 }
