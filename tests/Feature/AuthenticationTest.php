@@ -2,6 +2,14 @@
 
 use App\Models\User;
 
+beforeEach(function () {
+    // Render the real assets when they are built (as in CI), so that entries missing
+    // from the Vite build are caught, and fake them otherwise (e.g. on a fresh clone)
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+});
+
 test('login screen can be rendered', function () {
     $response = $this->get('/login');
 

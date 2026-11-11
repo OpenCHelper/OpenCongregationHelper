@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Vite;
 use Tests\TestCase;
 
 /*
@@ -47,4 +48,13 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Whether Vite can serve the frontend assets: built with `npm run build`
+ * (as in CI) or served by the development server.
+ */
+function frontendAssetsAreAvailable(): bool
+{
+    return Vite::isRunningHot() || Vite::manifestHash() !== null;
 }

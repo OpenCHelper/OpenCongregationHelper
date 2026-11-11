@@ -29,7 +29,7 @@ beforeEach(function () {
 test('shared assignment pages render with the built frontend assets', function () {
     $this->get('/guest/shared-assignment/'.$this->sharedUrl->uid)
         ->assertOk();
-});
+})->skip(fn (): bool => ! frontendAssetsAreAvailable(), 'The frontend assets are not built, run `npm run build`.');
 
 test('shared assignment pages hide personal data by default', function () {
     $this->withoutVite();

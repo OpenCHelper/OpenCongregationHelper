@@ -4,6 +4,11 @@ use App\Models\User;
 use Laravel\Jetstream\Http\Livewire\UpdateProfileInformationForm;
 use Livewire\Livewire;
 
+beforeEach(function () {
+    // The user with ID 1 is the root user, whose email and password cannot be changed
+    User::factory()->create(['id' => 1]);
+});
+
 test('current profile information is available', function () {
     $this->actingAs($user = User::factory()->create());
 

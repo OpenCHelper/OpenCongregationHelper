@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Jetstream\Http\Livewire\UpdatePasswordForm;
 use Livewire\Livewire;
 
+beforeEach(function () {
+    // The user with ID 1 is the root user, whose email and password cannot be changed
+    User::factory()->create(['id' => 1]);
+});
+
 test('password can be updated', function () {
     $this->actingAs($user = User::factory()->create(['id' => 999]));
 
