@@ -222,8 +222,6 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 - The API can only be used by authenticated users.
 - Uploaded territory images are stored on a private disk ([#69], closes [#70]).
 
-[v1-branch]: https://github.com/LukeSavefrogs/registro-territori/tree/v1
-
 [#35]: https://github.com/LukeSavefrogs/registro-territori/pull/35
 [#45]: https://github.com/LukeSavefrogs/registro-territori/issues/45
 [#53]: https://github.com/LukeSavefrogs/registro-territori/issues/53
