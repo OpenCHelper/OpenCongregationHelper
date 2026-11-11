@@ -49,6 +49,7 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
   22.22.2, and provides default values for `WWWUSER` and `WWWGROUP`.
 - Deployment workflows to Altervista have been merged into a single reusable GitHub Actions workflow, with remote
   Artisan execution extracted into a dedicated action.
+- Bumped the application version in `composer.json` to `v2.0.0-alpha5`; it was still set to `v2.0.0-alpha3`.
 - Updated dependencies.
 
 ### Removed
