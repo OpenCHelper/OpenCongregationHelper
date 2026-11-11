@@ -5,213 +5,215 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.3.12] - 2024-07-15
+This changelog starts with the Laravel rewrite of the application (v2.0.0).
+The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-branch] branch.
+
+## [Unreleased]
+
+### Added
+
+- Import territories from a CSV file. The import supports name, description, zone, notes, commercial flag, GeoJSON
+  polygon and image URL. Images are downloaded into the application storage, only `http`/`https` URLs pointing to an
+  `image/*` MIME type are accepted, and rows duplicating an existing territory in the same zone are rejected.
+- Upload a territory image from a URL, as an alternative to uploading a file.
+- In-app user documentation (knowledge base) at `/knowledge-base`, available in English and Italian and readable
+  without logging in.
+- UI switcher that lets each user customize font, accent color, layout, font size and density.
+- Bottom navigation bar on mobile devices.
+- Highlighted (solid) navigation icon for the active page.
+- Emergency contacts (phone number and/or address) for users, editable by each user from the profile page and by
+  administrators from the "Users" menu ([#116]).
+- Campaign details page with an overview widget, an assignments chart and a page to manage and bulk-terminate the
+  campaign assignments. The territories table can now be grouped by campaign assignment ([#120]).
+- Date and time of the last commit next to the version in the sidebar ([#135]).
+- Protection of the `root` user on non-production environments: its email, password and roles can no longer be
+  changed by anyone, including the `root` user itself ([#122]).
+- `.php-version` file as the single source of truth for the PHP version used by CI and tooling ([#134]).
+- Dev Container configuration for local development.
+- Static analysis with Larastan and FilaCheck.
+- Laravel Boost guidelines and skills for AI-assisted development ([#132]).
+- GitHub Copilot instructions and setup steps ([#110], [#111], [#136], [#138]).
 
 ### Changed
 
-- Aggiunto avvertimento in caso sia presente una nota nel dettaglio territorio in modo da richiamare l'attenzione alla sua lettura.
+- **BREAKING**: Upgraded to Laravel 12 and Filament 4 ([#139]). Filament resources now follow the Filament 4
+  directory structure (e.g. `app/Filament/Resources/Territories/TerritoryResource.php`).
+- The dashboard global map now uses `eduardoribeirodev/filament-leaflet` instead of `webbingbrasil/filament-maps`
+  ([#139]).
+- **BREAKING**: Territory names must be unique within their zone.
+- Reorganized the sidebar navigation: groups have been reordered, roles are now in the same group as users and
+  assignments are listed last in their group.
+- The local development environment (Laravel Sail) now uses Node.js 24, to work around a regression in Node.js
+  22.22.2, and provides default values for `WWWUSER` and `WWWGROUP`.
+- Deployment workflows to Altervista have been merged into a single reusable GitHub Actions workflow, with remote
+  Artisan execution extracted into a dedicated action.
+- Updated dependencies.
 
 ### Removed
 
-- Rimosso pulsante FAB (Floating Action Button) per la modifica dell'assegnazione. Rimpiazzato dal già esistente corrispettivo raggiungibile dal menu a tendina in alto a destra.
-
-## [v1.3.11] - 2024-07-15
-
-### Changed
-
-- Come richiesto nel dettaglio territorio ora la nota viene mostrata per intero, senza dover prima cliccare su un pulsante.
-
-## [v1.3.10] - 2024-03-19
-
-### Changed
-
-- Ora cliccando su un settore del grafico a torta la tabella risultante conterrà ID territorio e zona nel caso di territori "dentro" (durante la campagna sia da assegnare che completati), mentre ID territorio e assegnazione nel caso di territori "fuori" (durante la campagna sia da far rientrare che in lavorazione).
-
-## [v1.3.9] - 2024-03-18
-
-### Changed
-
-- Ora cliccando su un settore del grafico a torta la tabella risultante conterrà ID territorio e zona (non più ID e assegnazione).
+- Artisan commands panel (`tomatophp/filament-artisan`), not compatible with Filament 4 ([#139]).
+- `stephenjude/filament-jetstream` dependency, not compatible with Filament 4 ([#139]).
 
 ### Fixed
 
-- Ora il titolo della pagina della lista dei territori viene aggiornato correttamente all'applicazione dei filtri.
-
-## [v1.3.8] - 2024-03-18
-
-### Added
-
-- Ora quando la lista dei territori rileva che la navigazione precedente proviene da un dettaglio territorio o dalla lista stessa, vengono ripristinati i filtri e l'ordinamento impostati in precedenza. Inoltre, viene effettuato uno "scroll" fino alla riga che aveva causato la navigazione precedente. Risolve issue [#23](https://github.com/LukeSavefrogs/registro-territori/issues/23).
-
-## [v1.3.7] - 2024-03-18
-
-### Fixed
-
-**Home**:
-
-- Ora durante la campagna eventuali territori percorsi nella stessa campagna dell'anno precedente (es. un territorio percorso durante la commemorazione 2023 che viene rilavorato per la prima volta durante la commemorazione 2024) figurano correttamente come "Da lavorare" e non più come "Completati".
-- Corretto bug sporadico che causava la visualizzazione doppia della tabella nel dialog quando si cliccava su una sezione del grafico a torta e poi si cliccava su un'altra diversa.
-- Ora durante la percorrenza "classica" i territori "da far rientrare" non figurano più come dentro, ma come fuori.
-
-## [v1.3.6] - 2024-03-11
-
-### Changed
-
-- Corretta regressione per cui i nomi dell'ultima assegnazione nella lista territori comparivano per intero. Ora inoltre è possibile cercare tramite il filtro anche se il nome è troncato (è possibile cercare `Rossi` anche se nella tabella viene mostrato come `Ros.`).
-
-## [v1.3.5] - 2024-03-11
-
-### Added
-
-- Aggiunta API per creare/modificare/eliminare utenti. Alla creazione di un utente, quest'ultimo riceve una mail di notifica.
-- Ora nel dettaglio territorio viene mostrata l'ora di uscita/riconsegna del territorio.
-
-### Changed
-
-- Rinominati campi del grafico a torta della pagina Home. Ora `Dentro` viene mostrato come `Completati`, `Fuori` come `In lavorazione` e `Non assegnati` come `Da lavorare`.
-
-**Database:**
-
-- Ora la connessione al database è parametrizzata in modo da usare il database corretto anche su altri domini Altervista.
-- Cambiato tipo dei campi `data_uscita` e `data_rientro` da `DATE` a `DATETIME` in modo da permettere il salvataggio dell'orario.
-
-### Removed
-
-- Rimossa possibilità di modificare data di uscita di un territorio per evitare problemi di consistenza di dati.
-
-### Fixed
-
-- In seguito alla modifica sul campo del DB nella pagina "Lista Territori" potevano esserci territori con stato `-0gg`. Ora invece viene preso solo il valore assoluto e viene restituito errore se dovessero essere trovati territori con un numero negativo come stato.
-- In seguito alla modifica dei campi `data_uscita` e `data_rientro` sul database, la chiamata per restituire la lista di assegnazioni non restituiva quelle avvenute entro N ore (dove N è la differenza di Timezone).
-
-**Database:**
-
-- Corretto **bug di compatibilità** causato dall'upgrade di MySQL (sul server di test) dalla versione 5.6 alla 8.0. Questa modifica prepara il terreno per l'upgrade di MySQL anche sul server di produzione.
-
-## [v1.3.4.4] - 2023-08-14
-
-### Fixed
-
-- Corretto bug all'interno della pagina statistiche per colpa del quale non era possibile cambiare il periodo di percorrenza di analisi. Risolve issue [#26](https://github.com/LukeSavefrogs/registro-territori/issues/26)
-
-## [v1.3.4.3] - 2023-08-14
-
-### Added
-
-- Aggiunta [icona](https://web.dev/learn/pwa/installation/#ios-and-ipados-installation) per la PWA su iOS.
-
-## [v1.3.4.2] - 2023-08-13
-
-### Added
-
-- Aggiunto pulsante per l'installazione della PWA nella home page.
-
-### Fixed
-
-- Ora l'installazione della PWA funziona correttamente.
-
-## [v1.3.4.1] - 2023-08-13
-
-### Added
-
-- Aggiunte shortcut al `manifest.json`
-
-### Changed
-
-- Modificati campi `name` e `description` nel `manifest.json`
-
-## [v1.3.4] - 2023-08-13
-
-### Added
-
-- Aggiunta la possibilità di modificare Email, Nome e Cognome del proprio utente all'interno della pagina "Impostazioni utente".
-
-### Removed
-
-- Rimosse dipendenze locali in favore dei CDN.
-
-### Changed
-
-- Ora nella sidebar oltre a nome e cognome dell'utente loggato viene mostrata anche la sua email.
-- Aggiornata dipendenza `MaterializeCSS` alla versione `1.2.2`.
-- Scarica Material Icons da CDN anziché da locale.
-
-### Fixed
-
-- Corretto bug per cui nel grafico nella home page figurava una **campagna errata** in caso l'ultima uscita (con campagna diversa da quella corretta) fosse stata eliminata.
-
-## [v1.3.3] - 2023-08-11
-
-### Added
-
-- Nuovo widget nella home page per mostrare le assegnazioni più recenti. Risolve issue [#5](https://github.com/LukeSavefrogs/registro-territori/issues/5)
-
-## [v1.3.2.2] - 2023-08-10
-
-### Removed
-
-- Rimosso `console.log` lasciato erroneamente in fase di debug durante le modifiche alla Home.
-
-## [v1.3.2.1] - 2023-08-10
-
-### Changed
-
-- Ora le percentuali vengono sempre mostrate sul grafico a torta nella homepage, anche in caso di testo che esce dal bordo del settore. Migliora issue [#16](https://github.com/LukeSavefrogs/registro-territori/issues/16).
-- Aggiunta variabile `$APP_VERSION` nel file `index.php` per poter gestire centralmente la versione.
-
-## [v1.3.2] - 2023-08-10
-
-### Added
-
-- Aggiunte percentuali fisse sul grafico a torta nella home page. Risolve issue [#16](https://github.com/LukeSavefrogs/registro-territori/issues/16).
-
-### Changed
-
-- Ora se si rimane con il cursore sopra un settore del grafico a torta nella home, questo verrà messo in risalto espandendosi leggermente.
-
-### Removed
-
-- Rimossi tooltip presenti di default su `Chart.js` dal grafico a torta nella home page.
-
-## [v1.3.1] - 2023-08-10
-
-### Changed
-
-- Il grafico nella home page ora è racchiuso in una `card`, risultando più pulito e ordinato anche su schermi più grandi.
-- Cambiato leggermente lo stile del titolo del grafico a torta nella Home (titolo diviso in titolo+sottotitolo).
-- Aggiornata dipendenza `Chart.js` alla versione `4.3.3`.
-
-### Fixed
-
-- Risolto bug per cui la selezione della tipologia di campagna in fase di creazione di una nuova assegnazione tramite `select` falliva casualmente. Risolve issue [#11](https://github.com/LukeSavefrogs/registro-territori/issues/11).
-
-## [v1.3.0] - 2023-08-10
-
-### Added
-
-- Aggiunto nuovo settore "Da far rientrare" al **grafico a torta** nella **Home**.
-- Adesso dopo aver cliccato su una voce della tabella territori nella **Home**  (_mostrata cliccando su un settore del grafico a torta_) si verrà reindirizzati alla pagina di dettaglio del territorio corrispondente. Risolve issue [#4](https://github.com/LukeSavefrogs/registro-territori/issues/4).
-- Automatizzate release tramite [GitHub Actions](https://github.com/LukeSavefrogs/registro-territori/actions/workflows/upload.yml).
-
-### Changed
-
-- Modificato titolo della tabella nella Home da "Dettaglio territori {settore}" (_es. `Dettaglio territori non assegnati`_) a "Territori {settore}" (_es. `Territori non assegnati`_).
+- Stats overview widget failing on SQLite databases ([#137]).
+- `root` user not receiving the `super_admin` role.
+- Wrong `Auth` facade import in the activity log and mail log resources.
+- Application version overflowing out of the sidebar.
+- Creating a territory overwriting its image path.
+- Territory form tabs hidden outside of the view page, and image tab not selected when no map is available.
+- Missing styles on guest pages and broken UI styles.
+- Documentation panel not being reachable.
+- Wrong values in the example environment file ([#107]).
 
 ### Security
 
-- Rimosso bug che avrebbe permesso di fare injection di codice JS all'interno della home tramite il nome dell'assegnazione.
+- Updated Livewire to 3.6.4 ([#106]), fixing a remote code execution vulnerability (CVE-2025-54068).
 
-## [v1.2.0] - ????-??-??
+## [2.0.0-alpha4] - 2025-06-23
+
+### Fixed
+
+- Map edit controls shown on read-only territory assignment views ([#103]).
+
+## [2.0.0-alpha3] - 2025-06-22
 
 ### Added
 
-- Aggiunta schermata di **modifica** delle **assegnazioni** passate
+- Git branch and commit shown in the sidebar ([#96]). On systems without `git`, they can be read from the files
+  pointed to by the new `APP_VERSION_BRANCH_FILE` (defaults to `.git/HEAD`) and `APP_VERSION_COMMIT_FILE` (defaults to
+  `.git/refs/heads/{branch}`) environment variables.
 
 ### Changed
 
-- Modificato **export** Excel. Ora vengono esportate solo le **assegnazioni più recenti** di un'anno dalla data odierna
-- Corretti **bug** minori
+- **BREAKING**: Renamed `TerritoryAssignmentType` to `Campaign` ([#99], closes [#98]).
+- Campaigns are now optional when assigning a territory, and no campaign is selected by default ([#100]).
+- Campaign validity dates are now inclusive ([#100]).
+- The creator of a campaign is now always recorded ([#100]).
+- The territory map in the assignment details is shown only when the territory has one.
 
-**Database:**
+### Fixed
 
-- Modificato **nome campagna**: `Campagna Assemblea` -> `Campagna Congresso`
+- Territories could be assigned to terminated campaigns ([#100]).
+- Sidebar not starting closed on mobile devices ([#94]).
+- "User profile" page not reachable by users without a verified email ([#101]).
+- Raw GeoJSON shown among the territory assignment details.
+- Territory notes hidden from the assignment details when empty.
+
+## [2.0.0-alpha2] - 2025-06-17
+
+### Added
+
+- Support for multiple languages, with English, Italian and Spanish translations ([#78]).
+- Tag manager to create and organize tags for territories and zones, with per-type tabs, usage counters and
+  translations ([#79]).
+- Territory map in the territory assignment details ([#77]).
+- Share the details of a territory assignment through a public link, viewable without logging in ([#80]).
+- Current and past status column in the territories table, and tabs to filter commercial territories ([#93]).
+
+### Fixed
+
+- Sorting territories by assignee ([#93]).
+
+## [2.0.0-alpha1] - 2025-05-17
+
+Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel Jetstream ([#35]).
+
+### Added
+
+- Administration panel at `/app`, with login through Laravel Jetstream and Fortify.
+- Territories management: creation, editing and deletion, image, notes, commercial flag, filters and a read-only view
+  page.
+- Territory polygon drawing and editing on an OpenStreetMap map, with selectable tile layers.
+- Territory zones with a custom color and a list of their territories. Zones can also be created directly from the
+  territory form.
+- Territory assignments: assign and return territories, one at a time or in bulk, from both the territory page and
+  the territories table, with full assignment history and a details page.
+- Campaigns (named "assignment types" at the time) with validity dates, status badge, status filter and sorting.
+- Dashboard with a global map of all territories, colored by zone or by assignment status, remembering the selected
+  tile layer.
+- Dashboard overview widget with the total number of territories and the average assignment duration over the last
+  12 months.
+- Users management, with first and last name, read-only view page and the registry of territories assigned to each
+  user.
+- Virtual users, which can be assigned territories but cannot log in.
+- Roles and permissions management through Filament Shield, with policies for all resources (closes [#45]). Users
+  allowed to view only their own assignments see just those.
+- Impersonation of other users.
+- Tags for territories and zones.
+- Global search across territories, zones and campaigns, matching name, description, zone, notes and tags.
+- Activity log of user actions ([#71]).
+- In-app notifications when an assignment starts or ends ([#53]), when a campaign is created, and when an assignment
+  has been out for more than 60, 90, 120 or 150 days (closes [#56]).
+- Language switcher (Italian and English).
+- Warning when leaving a page with unsaved changes.
+- Live indicator of other users viewing or editing the same territory or zone (`discoverydesign/filament-gaze`).
+- Application logs and sent emails viewers.
+- Environment indicator on non-production environments.
+- Application version in the sidebar.
+- Mail transport based on PHP's native `mail()` function, used as the primary mailer with failover.
+- Token-protected HTTP API to run Artisan commands, the queue worker and scheduled jobs on hosts without shell access
+  (closes [#57]), and an Artisan commands panel on test environments.
+- Configurable database table prefix (`DB_PREFIX`) and engine (`DB_ENGINE`).
+- Local development environment based on Laravel Sail, with Mailpit, database seeders and factories.
+- Automated deployment to the Altervista staging and nightly environments through GitHub Actions, including database
+  migrations and optimizations on the remote server.
+
+### Changed
+
+- **BREAKING**: Rewrote the database structure from scratch. It is not compatible with the v1 database.
+- Renamed the `testing` environment to `nightly` ([#69]).
+
+### Removed
+
+- **BREAKING**: Legacy v1 source code, including the third-party plugins previously committed to the repository.
+- User self-registration: new users can only be created by an administrator.
+- Teams and two-factor authentication.
+
+### Security
+
+- HTTPS is enforced everywhere except in local development.
+- The API can only be used by authenticated users.
+- Uploaded territory images are stored on a private disk ([#69], closes [#70]).
+
+[unreleased]: https://github.com/LukeSavefrogs/registro-territori/compare/v2.0.0-alpha4...HEAD
+[2.0.0-alpha4]: https://github.com/LukeSavefrogs/registro-territori/compare/v2.0.0-alpha3...v2.0.0-alpha4
+[2.0.0-alpha3]: https://github.com/LukeSavefrogs/registro-territori/compare/v2.0.0-alpha2...v2.0.0-alpha3
+[2.0.0-alpha2]: https://github.com/LukeSavefrogs/registro-territori/compare/v2.0.0-alpha1...v2.0.0-alpha2
+[2.0.0-alpha1]: https://github.com/LukeSavefrogs/registro-territori/releases/tag/v2.0.0-alpha1
+[v1-branch]: https://github.com/LukeSavefrogs/registro-territori/tree/v1
+
+[#35]: https://github.com/LukeSavefrogs/registro-territori/pull/35
+[#45]: https://github.com/LukeSavefrogs/registro-territori/issues/45
+[#53]: https://github.com/LukeSavefrogs/registro-territori/issues/53
+[#56]: https://github.com/LukeSavefrogs/registro-territori/issues/56
+[#57]: https://github.com/LukeSavefrogs/registro-territori/issues/57
+[#69]: https://github.com/LukeSavefrogs/registro-territori/pull/69
+[#70]: https://github.com/LukeSavefrogs/registro-territori/issues/70
+[#71]: https://github.com/LukeSavefrogs/registro-territori/pull/71
+[#77]: https://github.com/LukeSavefrogs/registro-territori/pull/77
+[#78]: https://github.com/LukeSavefrogs/registro-territori/pull/78
+[#79]: https://github.com/LukeSavefrogs/registro-territori/pull/79
+[#80]: https://github.com/LukeSavefrogs/registro-territori/pull/80
+[#93]: https://github.com/LukeSavefrogs/registro-territori/pull/93
+[#94]: https://github.com/LukeSavefrogs/registro-territori/pull/94
+[#96]: https://github.com/LukeSavefrogs/registro-territori/pull/96
+[#98]: https://github.com/LukeSavefrogs/registro-territori/issues/98
+[#99]: https://github.com/LukeSavefrogs/registro-territori/pull/99
+[#100]: https://github.com/LukeSavefrogs/registro-territori/pull/100
+[#101]: https://github.com/LukeSavefrogs/registro-territori/pull/101
+[#103]: https://github.com/LukeSavefrogs/registro-territori/pull/103
+[#106]: https://github.com/LukeSavefrogs/registro-territori/pull/106
+[#107]: https://github.com/LukeSavefrogs/registro-territori/pull/107
+[#110]: https://github.com/LukeSavefrogs/registro-territori/pull/110
+[#111]: https://github.com/LukeSavefrogs/registro-territori/pull/111
+[#116]: https://github.com/LukeSavefrogs/registro-territori/pull/116
+[#120]: https://github.com/LukeSavefrogs/registro-territori/pull/120
+[#122]: https://github.com/LukeSavefrogs/registro-territori/pull/122
+[#132]: https://github.com/LukeSavefrogs/registro-territori/pull/132
+[#134]: https://github.com/LukeSavefrogs/registro-territori/pull/134
+[#135]: https://github.com/LukeSavefrogs/registro-territori/pull/135
+[#136]: https://github.com/LukeSavefrogs/registro-territori/pull/136
+[#137]: https://github.com/LukeSavefrogs/registro-territori/pull/137
+[#138]: https://github.com/LukeSavefrogs/registro-territori/pull/138
+[#139]: https://github.com/LukeSavefrogs/registro-territori/pull/139
