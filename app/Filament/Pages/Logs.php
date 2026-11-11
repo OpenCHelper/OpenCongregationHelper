@@ -2,15 +2,20 @@
 
 namespace App\Filament\Pages;
 
-use App\Enums\NavigationGroup;
-use FilipFonal\FilamentLogManager\Pages\Logs as BaseLogsPage;
+use AchyutN\FilamentLogViewer\LogTable;
 use Override;
 
-class Logs extends BaseLogsPage
+/**
+ * Log viewer page of `achyutn/filament-log-viewer`.
+ *
+ * The plugin stores its navigation label the first time it is read, so the label would stay in the language of the
+ * request that read it first: this page translates it on every request instead.
+ */
+class Logs extends LogTable
 {
     #[Override]
-    public static function getNavigationGroup(): ?string
+    public static function getNavigationLabel(): string
     {
-        return config('filament-log-manager.navigation_group') ? NavigationGroup::Developer->name : null;
+        return __('filament-log-viewer::log.navigation.label');
     }
 }

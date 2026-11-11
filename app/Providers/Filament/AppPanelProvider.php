@@ -2,12 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use AchyutN\FilamentLogViewer\FilamentLogViewer;
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Enums\NavigationGroup as EnumsNavigationGroup;
 use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\CreateTeam;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\EditTeam;
+use App\Filament\Pages\Logs;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
 use App\Providers\AppVersionProvider;
@@ -29,7 +31,6 @@ use Filament\Support\Enums\Platform;
 use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
-use FilipFonal\FilamentLogManager\FilamentLogManager;
 use Guava\FilamentKnowledgeBase\Plugins\KnowledgeBaseCompanionPlugin;
 use Hammadzafar05\FilamentMobilePreset\FilamentMobilePresetPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -41,6 +42,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Fortify\Features as FortifyFeatures;
 use Laravel\Fortify\Fortify;
@@ -100,7 +102,11 @@ class AppPanelProvider extends PanelProvider
             ->navigationGroups(array_map(static fn (EnumsNavigationGroup $el) => $el->name, EnumsNavigationGroup::cases()))
             ->plugins([
                 FilamentShieldPlugin::make(),
-                FilamentLogManager::make(),
+                FilamentLogViewer::make()
+                    ->pageClass(Logs::class)
+                    ->authorize(fn (): bool => Gate::allows('view-logs'))
+                    ->navigationGroup(EnumsNavigationGroup::Developer->name)
+                    ->navigationIcon(Heroicon::OutlinedServer),
                 EnvironmentIndicatorPlugin::make()
                     ->color(fn () => match (app()->environment()) {
                         'local' => Color::Blue,             // 1. Local development machine

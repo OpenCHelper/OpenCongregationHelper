@@ -153,6 +153,6 @@ test('the territory form loads the script that shows the map as soon as its tab 
         ->assertOk()
         ->assertSeeInOrder([
             FilamentAsset::getScriptSrc('filament-map-picker-fix'),
-            '/livewire/livewire',
+            '/livewire.js',
         ], escape: false);
 });

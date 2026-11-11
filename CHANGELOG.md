@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded to Filament 5 and Livewire 4, together with the Filament plugins (among them the knowledge base, now at
+  version 3, and the activity log, now at version 4).
+- The **Logs** page (Developer group, super administrators only) now uses `achyutn/filament-log-viewer`, since
+  `filipfonal/filament-log-manager` does not support Filament 5. Log entries are listed in a table with level tabs,
+  a date filter and stack traces, and log files can still be cleared, but no longer downloaded.
+
 ## [2.0.0-alpha6] - 2026-11-11
 
 ### Added

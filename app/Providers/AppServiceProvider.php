@@ -7,6 +7,7 @@ use App\Models\User;
 use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
 use App\Policies\TagPolicy;
+use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Assets\Js;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Translatable\Facades\Translatable;
 
@@ -70,6 +72,10 @@ class AppServiceProvider extends ServiceProvider
                 ->locales(array_keys($flags))
                 ->flags($flags);
         });
+
+        // Apply the language chosen by the user to Livewire requests too: Filament builds the page schemas while
+        // the components are hydrated, before Livewire restores their locale, so they used the default locale.
+        Livewire::addPersistentMiddleware([SwitchLanguageLocale::class]);
 
         // Register a fallback for missing translations (eg. when using laravel-tags)
         Translatable::fallback(

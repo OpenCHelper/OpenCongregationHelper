@@ -7,7 +7,8 @@
 ## Tech stack
 
 - Laravel 12
-- Filament 4
+- Filament 5
+- Livewire 4
 
 ## Support
 
