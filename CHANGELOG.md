@@ -79,6 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Campaign status showing "Almost Expired" for every campaign with an end date in the future, and never "Expiring".
   The status now depends on the days left until the end date: "Expiring" with 7 days or less, "Almost Expired" with
   3 days or less ([#151]).
+- Territory map staying a grey box, without tiles nor polygon, after switching from the image tab to the map tab,
+  until the whole map was scrolled into view. A map below the bottom of the screen when the page loaded (e.g. on
+  phones) had the same problem. The map now shows as soon as part of it is visible.
 
 ### Security
 

@@ -2,10 +2,12 @@
 
 use App\Filament\Resources\Territories\Pages\CreateTerritory;
 use App\Filament\Resources\Territories\Pages\EditTerritory;
+use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -136,4 +138,21 @@ test('an image uploaded while creating a territory becomes its image', function 
 
     expect($territory->image_path)->toStartWith('territories/');
     Storage::disk('local')->assertExists($territory->image_path);
+});
+
+test('the territory form loads the script that shows the map as soon as its tab is opened', function () {
+    $this->withoutVite();
+
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create([
+        'geojson' => null,
+        'image_path' => 'https://example.com/territory.png',
+    ]);
+
+    // The script wraps the map picker before Alpine starts, so it must come before Livewire's script
+    $this->get(TerritoryResource::getUrl('edit', ['record' => $territory]))
+        ->assertOk()
+        ->assertSeeInOrder([
+            FilamentAsset::getScriptSrc('filament-map-picker-fix'),
+            '/livewire/livewire',
+        ], escape: false);
 });

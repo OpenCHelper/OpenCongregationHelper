@@ -44,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
 
         FilamentAsset::register([
             Js::make('filament-sidebar-fix', __DIR__.'/../../resources/js/filament-sidebar-fix.js'),
+            Js::make('filament-map-picker-fix', __DIR__.'/../../resources/js/filament-map-picker-fix.js'),
         ]);
 
         // Add a custom mail transport that uses the native mail() function
