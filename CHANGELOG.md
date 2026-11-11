@@ -69,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Log files growing quickly because of debug logs written on every render of the territory form ([#146]).
 - Altervista deploys skipping the post-deploy Artisan commands (migrations and cache optimisations), because the
   token mask was written into the command output ([#147]).
-- Deleting a user leaving their team memberships behind.
+- Deleting a user leaving their team memberships behind ([#148]).
 
 ### Security
 
@@ -93,7 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The root `.htaccess` denies all requests when `mod_rewrite` is not available, instead of serving the project files
   (e.g. `.env`) ([#146]).
 - The assignments shown on the territory, campaign and user pages are filtered like the assignments list, so users
-  who cannot list every assignment only see their own, without relying on the page permissions alone.
+  who cannot list every assignment only see their own, without relying on the page permissions alone ([#148]).
 
 ## [2.0.0-alpha5] - 2026-09-16
 
@@ -304,3 +304,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#145]: https://github.com/LukeSavefrogs/registro-territori/pull/145
 [#146]: https://github.com/LukeSavefrogs/registro-territori/pull/146
 [#147]: https://github.com/LukeSavefrogs/registro-territori/pull/147
+[#148]: https://github.com/LukeSavefrogs/registro-territori/pull/148
