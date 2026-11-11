@@ -1,0 +1,46 @@
+---
+type: documentation
+icon: heroicon-o-megaphone
+title: Organizzare una campagna
+order: 2
+---
+
+Questa guida mostra come organizzare un'attività speciale, ad esempio la distribuzione degli inviti per la
+Commemorazione, e come seguirla fino alla fine.
+
+## Prima della campagna
+
+1. Apri **Campagne → Nuovo**.
+2. Inserisci un **Nome** chiaro (es. *Campagna inviti per la Commemorazione*), un **Nome breve** e un **Colore**.
+3. Imposta **Valida da** e **Valida fino a** sul primo e sull'ultimo giorno della campagna, poi clicca **Crea**.
+
+Tutti gli utenti che possono accedere ricevono una notifica della nuova campagna.
+
+## Assegnare i territori
+
+Puoi collegare i territori alla campagna in due modi:
+
+- dall'elenco **Territori**: filtra i territori **Non assegnati**, selezionali e usa **Assegna massivamente**, scegliendo
+  la campagna nel campo **Campagna**;
+- dalla pagina della campagna: apri la scheda **Assegnazioni** e crea una nuova assegnazione.
+
+Vedi [Campagne](../assignments/campaigns) per i dettagli.
+
+## Durante la campagna
+
+Apri la pagina della campagna ogni pochi giorni:
+
+- **Giorni rimanenti** indica quanto tempo resta;
+- **Stato di completamento** indica la percentuale di territori assegnati durante la campagna, e ti avvisa quando il
+  lavoro è in ritardo;
+- il grafico **Panoramica dello stato delle assegnazioni** mostra quanti territori sono ancora da assegnare, in corso e
+  completati.
+
+Nell'elenco **Territori**, **Raggruppa per → Campagna** mostra i territori che si stanno lavorando per la campagna.
+
+## Alla fine della campagna
+
+1. Apri la scheda **Assegnazioni** della campagna.
+2. Seleziona le assegnazioni ancora in corso e usa **Termina assegnazioni** per riconsegnarle tutte insieme.
+
+Dalla data di fine lo stato della campagna diventa **Terminata** e non è più possibile assegnarle territori.

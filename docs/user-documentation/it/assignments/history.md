@@ -1,0 +1,55 @@
+---
+type: documentation
+icon: heroicon-o-clock
+title: Storico delle assegnazioni
+order: 2
+---
+
+Ogni assegnazione, in corso o riconsegnata, viene conservata. Le trovi:
+
+- in **Assegnazioni** nella barra laterale, per tutti i territori;
+- nella scheda **Storico uscite** di un territorio;
+- nella scheda **Assegnazioni** di un utente;
+- nella scheda **Assegnazioni** di una campagna.
+
+![Elenco delle assegnazioni](/docs/user-documentation/it/assignments/assets/assignments-list.webp)
+
+La tabella mostra il **Territorio**, l'**Assegnatario**, le date **Iniziato il** e **Terminato il** (*(in lavorazione)*
+se non ancora riconsegnato) e la **Campagna**.
+
+## Filtri
+
+Di default vengono mostrate solo le assegnazioni **in lavorazione**. Apri i filtri per cambiarlo:
+
+- **Stato assegnazione**: *Tutti gli stati*, *Restituito* o *In lavorazione*;
+- **Solo le mie assegnazioni**: solo i territori assegnati a te;
+- **Record eliminati**: mostra anche le assegnazioni eliminate.
+
+![Filtri delle assegnazioni](/docs/user-documentation/it/assignments/assets/assignments-filters.webp)
+
+## Dettagli dell'assegnazione
+
+Clicca una riga per aprire l'assegnazione. La pagina mostra:
+
+- **Informazioni territorio**: territorio, zona, mappa e immagine, descrizione e note;
+- **Informazioni assegnazione**: assegnatario, campagna, inizio e fine dell'assegnazione.
+
+![Dettagli dell'assegnazione](/docs/user-documentation/it/assignments/assets/assignment-view.webp)
+
+Dal menu **Azioni** puoi condividere l'assegnazione con un link pubblico (vedi
+[Condividere un'assegnazione](sharing)).
+
+## Correggere un'assegnazione
+
+Clicca **Modifica** su una riga per cambiare il territorio, l'assegnatario, la campagna, le date di inizio e fine, le
+note o chi l'ha creata. Impostando la **Data fine** il territorio viene riconsegnato.
+
+![Modifica di un'assegnazione](/docs/user-documentation/it/assignments/assets/assignment-edit.webp)
+
+**Elimina** sposta un'assegnazione nel cestino, da cui può essere ripristinata. Le assegnazioni eliminate non vengono
+considerate nello storico e nelle statistiche.
+
+## Chi vede cosa
+
+Gli utenti autorizzati a vedere tutte le assegnazioni vedono tutto quanto descritto sopra. Gli altri (es. i
+proclamatori) vedono solo **le proprie assegnazioni**, ovunque vengano elencate.

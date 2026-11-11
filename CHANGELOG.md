@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   guide and the login page, and the application version. Available in English, Italian and Spanish ([#142]).
 - `ENABLE_SHARED_PII` environment variable to show personal data (assignee name and territory notes) on publicly
   shared assignment pages, where it is now hidden by default ([#141]).
+- User guide covering every feature of the application, in English and Italian, with screenshots and step-by-step
+  guides: basics (login, interface, dashboard, profile, notifications), territories (list, creation, map drawing,
+  import, zones), assignments (assigning and returning, history, sharing, campaigns), administration (users, roles
+  and permissions, tags) and walkthroughs for the first setup, campaigns and publishers. The setup guide now
+  covers the installation, all the main settings and the scheduled tasks. Tests check that every page renders and
+  that its links and images exist.
 
 ### Changed
 

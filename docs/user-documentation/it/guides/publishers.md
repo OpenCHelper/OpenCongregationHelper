@@ -1,0 +1,38 @@
+---
+type: documentation
+icon: heroicon-o-user
+title: Guida per i proclamatori
+order: 3
+---
+
+Se hai ricevuto un account per vedere i tuoi territori, ecco cosa ti serve sapere. A seconda dei permessi concessi dalla
+tua congregazione, alcune voci del menu potrebbero non esserci.
+
+![L'applicazione vista da un proclamatore](/docs/user-documentation/it/administration/assets/impersonation.webp)
+
+## Trovare i tuoi territori
+
+- L'elenco **Territori** mostra tutti i territori, con chi li sta lavorando. Clicca un territorio per vederne la mappa o
+  l'immagine.
+- Le **notifiche** (icona a campanella) ti avvisano quando ti viene assegnato un territorio e ti ricordano quando lo hai
+  da molto tempo. Le ricevi anche via email.
+
+## Usare la mappa
+
+Nella pagina del territorio, la scheda **Mappa** mostra i confini del territorio su una mappa interattiva: aumenta lo
+zoom per leggere i nomi delle vie e usa il pulsante **schermo intero** per vederla meglio sullo smartphone.
+
+## Riconsegnare un territorio
+
+Quando hai finito, avvisa chi gestisce i territori, oppure clicca **Termina assegnazione** nella pagina del territorio
+se il tuo ruolo lo permette.
+
+## Tenere aggiornati i tuoi dati
+
+Dal tuo [profilo](../basics/profile) puoi cambiare la password, scegliere la lingua delle email e aggiungere un contatto
+di emergenza.
+
+## Usarla dallo smartphone
+
+L'applicazione funziona nel browser del telefono: apri il suo indirizzo, accedi e usa la barra in basso per spostarti
+tra le pagine. Dal menu del browser puoi aggiungerla alla schermata Home per aprirla come un'app.

@@ -1,0 +1,36 @@
+---
+type: documentation
+icon: heroicon-o-tag
+title: Tag
+order: 3
+---
+
+I tag sono brevi etichette che aiutano a descrivere e trovare territori e zone, ad esempio *Condomini*, *Solo citofono*
+o *Nord*. Apri **Amministrazione → Tag** per gestirli; il numero accanto alla voce di menu è il totale dei tag.
+
+![Elenco dei tag](/docs/user-documentation/it/administration/assets/tags.webp)
+
+Esistono due **tipi** di tag, mostrati con colori diversi:
+
+- **Territori**: usati nel modulo dei territori e nel filtro **Tag** dell'elenco dei territori;
+- **Zone**: usati nel modulo e nel filtro delle zone.
+
+La colonna **Utilizzi** indica quanti territori o zone usano ciascun tag. Usa il filtro **Filtra per Tipo** per vedere
+un solo tipo.
+
+## Creare e modificare i tag
+
+I tag vengono creati automaticamente quando ne scrivi uno nuovo nel modulo di un territorio o di una zona. Da questa
+pagina puoi anche:
+
+1. Cliccare **Nuovo** (o **Modifica** su un tag esistente).
+2. Compilare **Nome** e **Slug** (una versione semplificata del nome, es. `condomini`) per ogni lingua, usando le schede
+   delle lingue. Così il tag viene mostrato nella lingua di ogni utente.
+3. Scegliere il **Tipo** e, se vuoi, un numero di **Ordine** per ordinare i tag.
+4. Cliccare **Crea** (o **Salva modifiche**).
+
+![Modulo del tag](/docs/user-documentation/it/administration/assets/tag-form.webp)
+
+## Eliminare i tag
+
+Un tag può essere eliminato solo se nessun territorio o zona lo usa: prima rimuovilo da questi.
