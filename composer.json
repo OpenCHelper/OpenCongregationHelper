@@ -1,6 +1,6 @@
 {
     "name": "lukesavefrogs/registro-territori",
-    "version": "v2.0.0-alpha5",
+    "version": "v2.0.0-alpha6",
     "type": "project",
     "description": "Gestionale dei territori per la congregazione di Ciampino.",
     "keywords": ["laravel", "framework"],
