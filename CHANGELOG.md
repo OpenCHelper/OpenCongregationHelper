@@ -67,6 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stale assignment detection loading every assignment in progress in memory ([#146]).
 - Database seeding failing with a cached configuration or without development dependencies installed ([#146]).
 - Log files growing quickly because of debug logs written on every render of the territory form ([#146]).
+- Altervista deploys skipping the post-deploy Artisan commands (migrations and cache optimisations), because the
+  token mask was written into the command output ([#147]).
 
 ### Security
 
@@ -298,3 +300,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#144]: https://github.com/LukeSavefrogs/registro-territori/pull/144
 [#145]: https://github.com/LukeSavefrogs/registro-territori/pull/145
 [#146]: https://github.com/LukeSavefrogs/registro-territori/pull/146
+[#147]: https://github.com/LukeSavefrogs/registro-territori/pull/147

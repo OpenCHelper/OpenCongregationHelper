@@ -121,9 +121,10 @@ main () {
       token="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 64)"
     fi
 
-    # Hide the token from the GitHub Actions logs (e.g. when `--verbose` traces the curl command)
+    # Hide the token from the GitHub Actions logs (e.g. when `--verbose` traces the curl command).
+    # Written to stderr: stdout is the command output, which callers capture and parse.
     if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
-      printf '::add-mask::%s\n' "$token"
+      printf '::add-mask::%s\n' "$token" >&2
     fi
     curl_opts+=(-H "X-Artisan-Token: ${token}")
 
