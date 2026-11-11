@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTerritoryRequest;
 use App\Http\Requests\UpdateTerritoryRequest;
 use App\Models\Territory;
+use Illuminate\Support\Facades\Gate;
 
 class TerritoryController extends Controller
 {
@@ -13,6 +14,8 @@ class TerritoryController extends Controller
      */
     public function index()
     {
+        Gate::authorize('viewAny', Territory::class);
+
         return Territory::all();
     }
 
@@ -37,6 +40,8 @@ class TerritoryController extends Controller
      */
     public function show(Territory $territory)
     {
+        Gate::authorize('view', $territory);
+
         return $territory;
     }
 

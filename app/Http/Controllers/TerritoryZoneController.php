@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTerritoryZoneRequest;
 use App\Http\Requests\UpdateTerritoryZoneRequest;
 use App\Models\TerritoryZone;
+use Illuminate\Support\Facades\Gate;
 
 class TerritoryZoneController extends Controller
 {
@@ -13,6 +14,8 @@ class TerritoryZoneController extends Controller
      */
     public function index()
     {
+        Gate::authorize('viewAny', TerritoryZone::class);
+
         return TerritoryZone::all();
     }
 
@@ -37,6 +40,8 @@ class TerritoryZoneController extends Controller
      */
     public function show(TerritoryZone $zone)
     {
+        Gate::authorize('view', $zone);
+
         return $zone;
     }
 

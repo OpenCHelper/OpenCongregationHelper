@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Campaigns\Pages;
 use App\Filament\Resources\Campaigns\CampaignResource;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\Territory;
+use App\Models\TerritoryAssignment;
 use App\Models\User;
 use Exception;
 use Filament\Actions\BulkAction;
@@ -29,6 +30,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Livewire\Livewire;
@@ -101,7 +103,8 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                 Select::make('territory_id')
                                     ->label(__('filament-resources.territory_assignment.field_territory'))
                                     ->columns(1)
-                                    ->relationship('territory', 'name')
+                                    // Prevent assigning a territory that is already assigned
+                                    ->relationship('territory', 'name', fn (Builder $query) => $query->unassigned())
                                     ->searchable()
                                     ->preload()
                                     ->required(),
@@ -177,15 +180,16 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                         ->modalHeading(__('filament-resources.campaign.bulk_action_terminate_assignments_modal_heading'))
                         ->modalDescription(__('filament-resources.campaign.bulk_action_terminate_assignments_modal_description'))
                         ->modalSubmitActionLabel(__('filament-resources.campaign.bulk_action_terminate_assignments_submit'))
+                        ->authorize(fn (): bool => Gate::allows('update', new TerritoryAssignment))
                         ->action(function (Collection $records): void {
                             $terminatedCount = 0;
                             $skippedCount = 0;
 
                             foreach ($records as $assignment) {
-                                // Skip if assignment is already terminated
-                                if ($assignment->ended_at !== null) {
+                                // Skip if assignment is already terminated or cannot be updated by the user
+                                if ($assignment->ended_at !== null || Gate::denies('update', $assignment)) {
                                     $skippedCount++;
-                                    Log::warning("Skipping assignment {$assignment->id} because it is already terminated");
+                                    Log::warning("Skipping assignment {$assignment->id} because it is already terminated or cannot be updated");
 
                                     continue;
                                 }

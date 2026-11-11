@@ -45,7 +45,7 @@ class StaleAssignmentNotification extends Notification
             ->subject(__('filament-resources.mailables.stale_assignment_subject'))
             ->greeting(__('filament-resources.mailables.greeting', ['name' => $notifiable->name]))
             ->line(__('filament-resources.mailables.stale_assignment_body', [
-                'territory' => $this->assignment->with('territory')->firstOrFail()->territory->name,
+                'territory' => $this->assignment->loadMissing('territory')->territory->name,
                 'days' => round($this->assignment->started_at->diffInDays(Carbon::now(), absolute: true)),
             ]))
             ->line(__('filament-resources.mailables.remember_to_return_if_finished'))

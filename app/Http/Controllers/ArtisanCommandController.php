@@ -16,6 +16,16 @@ class ArtisanCommandController extends Controller
     {
         $command = $command ?? $request->input('command');
         $params = $request->input('params');
+
+        if (! is_string($command) || (! is_null($params) && ! is_string($params))) {
+            return response()->json([
+                'success' => false,
+                'output' => "The 'command' and 'params' fields must be strings.",
+                'returnCode' => -1,
+            ], status: 422);
+        }
+
+        $params = (string) $params;
         Log::info("Executing Artisan command: '$command' with params: ".$params);
 
         if ($command == 'test-endpoint') {

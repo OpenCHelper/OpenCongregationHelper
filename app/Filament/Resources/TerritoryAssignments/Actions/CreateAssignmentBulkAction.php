@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TerritoryAssignments\Actions;
 
 use App\Models\Campaign;
+use App\Models\TerritoryAssignment;
 use App\Models\User;
 use Exception;
 use Filament\Actions\Action;
@@ -11,6 +12,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class CreateAssignmentBulkAction extends Action
@@ -23,6 +25,7 @@ class CreateAssignmentBulkAction extends Action
             ->icon(Heroicon::OutlinedPlus)
             ->label(__('filament-resources.territory_assignment.action_assign_territory'))
             ->color('primary')
+            ->authorize(fn (): bool => Gate::allows('create', TerritoryAssignment::class))
             ->schema([
                 Select::make('assignee_id')
                     ->label(__('filament-resources.territory_assignment.action_assigned_to'))
@@ -31,29 +34,23 @@ class CreateAssignmentBulkAction extends Action
                     ->required(),
                 Select::make('campaign_id')
                     ->label(__('filament-resources.territory_assignment.field_campaign'))
-                    ->options(Campaign::query()
-                        ->where(function ($query) {
-                            $query->whereNull('valid_until')
-                                ->orWhere('valid_until', '>', now());
-                        })
-                        ->pluck('name', 'id'))
+                    ->options(fn (): array => Campaign::query()->notTerminated()->pluck('name', 'id')->all())
                     ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
             ])
             ->action(function (Collection $records, array $data): void {
+                // Check if campaign is terminated
+                if (filled($data['campaign_id'] ?? null) && Campaign::find($data['campaign_id'])?->isTerminated()) {
+                    Notification::make()
+                        ->danger()
+                        ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
+                        ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
+                        ->send();
+
+                    // Keep the modal open, so that a different campaign can be selected
+                    $this->halt();
+                }
+
                 try {
-                    // Check if campaign is terminated
-                    if ($data['campaign_id'] && Campaign::find($data['campaign_id'])?->isTerminated()) {
-                        $this->halt();
-                        $this->failure();
-                        Notification::make()
-                            ->error()
-                            ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
-                            ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
-                            ->send();
-
-                        return;
-                    }
-
                     foreach ($records as $record) {
                         // Skip if the last assignment is not null
                         if ($record->currentAssignment !== null && $record->currentAssignment->ended_at === null) {
@@ -68,11 +65,9 @@ class CreateAssignmentBulkAction extends Action
                             'campaign_id' => $data['campaign_id'] ?? null,
                             'created_by' => Auth::id(),
                         ]);
-                        $record->save();
                     }
                 } catch (Exception $e) {
                     Log::error('Errore durante l\'assegnazione del territorio: '.$e->getMessage());
-                    $this->halt();
                     $this->failure();
 
                     return;
@@ -89,7 +84,7 @@ class CreateAssignmentBulkAction extends Action
             })
             ->failureNotification(function (Notification $notification): Notification {
                 return $notification
-                    ->error()
+                    ->danger()
                     ->title(__('filament-resources.database_notifications.assignment_error_title'))
                     ->body(__('filament-resources.database_notifications.assignment_error_body'));
             })

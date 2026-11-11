@@ -58,6 +58,25 @@ jobs:
             && ./vendor/bin/sail npm install \
             && ./vendor/bin/sail npm run build
 
+      # The MySQL container is reported as started (and its socket-based
+      # healthcheck can already pass) while its init scripts still run on a
+      # temporary server without networking: wait until it accepts TCP
+      # connections, like the tests do, to avoid "Connection refused" errors.
+      - name: Wait for MySQL
+        run: |
+          for attempt in $(seq 1 60); do
+            if ./vendor/bin/sail exec -T mysql sh -c 'mysqladmin ping --silent --host=127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD"' > /dev/null 2>&1; then
+              echo "MySQL is accepting TCP connections (attempt ${attempt})."
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          echo "::error::MySQL did not accept TCP connections within 120 seconds."
+          ./vendor/bin/sail logs mysql
+          exit 1
+
       - name: Run tests (with coverage)
         run: |
           ./vendor/bin/sail test --parallel --drop-databases --coverage

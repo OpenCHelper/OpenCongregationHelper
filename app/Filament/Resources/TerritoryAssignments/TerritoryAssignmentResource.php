@@ -18,6 +18,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Override;
 use UnitEnum;
 
@@ -72,6 +74,25 @@ class TerritoryAssignmentResource extends Resource
     public static function getNavigationSort(): ?int
     {
         return 10;
+    }
+
+    /**
+     * Users allowed to list all the assignments see everyone's assignments,
+     * the others only see their own (e.g. when opening a notification link).
+     */
+    public static function canViewAllAssignments(): bool
+    {
+        return Gate::allows('viewAny', TerritoryAssignment::class);
+    }
+
+    /**
+     * Personal data (assignee name, notes) is hidden on publicly shared pages
+     * unless explicitly enabled through the `ENABLE_SHARED_PII` env variable.
+     */
+    public static function shouldHidePersonalData(): bool
+    {
+        return Filament::getCurrentPanel()?->getId() === 'guest'
+            && ! config('app.enable_shared_pii');
     }
 
     public static function infolist(Schema $schema): Schema
@@ -165,6 +186,7 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.info_notes'))
                             ->icon(Heroicon::OutlinedDocumentText)
                             ->columnSpanFull()
+                            ->hidden(fn (): bool => static::shouldHidePersonalData())
                             ->placeholder(__('filament-resources.territory_assignment.info_notes_placeholder')),
                     ]),
                 Section::make(__('filament-resources.territory_assignment.section_assignment_info'))
@@ -173,6 +195,7 @@ class TerritoryAssignmentResource extends Resource
                     ->schema([
                         TextEntry::make('assignee.full_name')
                             ->icon(Heroicon::OutlinedUser)
+                            ->hidden(fn (): bool => static::shouldHidePersonalData())
                             ->label(__('filament-resources.territory_assignment.info_assignee')),
                         TextEntry::make('campaign.name')
                             ->icon(Heroicon::OutlinedEnvelopeOpen)
@@ -232,12 +255,7 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.field_campaign'))
                             ->searchable()
                             ->disabledOn('edit', 'view')
-                            ->relationship('campaign', 'name', function ($query) {
-                                return $query->where(function ($q) {
-                                    $q->whereNull('valid_until')
-                                        ->orWhere('valid_until', '>', now());
-                                });
-                            })
+                            ->relationship('campaign', 'name', fn (Builder $query) => $query->notTerminated())
                             ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign'))
                             ->rule(new NotTerminatedCampaign)
                             ->preload(),
@@ -283,7 +301,7 @@ class TerritoryAssignmentResource extends Resource
                     ->sortable(),
                 TextColumn::make('assignee.full_name')
                     ->label(__('filament-resources.territory_assignment.column_assignee'))
-                    ->hidden(! Auth::user()->can('view_any_territory::assignment'))
+                    ->hidden(! static::canViewAllAssignments())
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(['first_name', 'last_name']),
                 TextColumn::make('started_at')
@@ -332,7 +350,7 @@ class TerritoryAssignmentResource extends Resource
                 Filter::make('assignee')
                     ->label(__('filament-resources.territory_assignment.filter_my_assignments_only'))
                     ->query(fn (Builder $query) => $query->where('assignee_id', Auth::user()->id))
-                    ->hidden(! Auth::user()->can('view_any_territory::assignment')),
+                    ->hidden(! static::canViewAllAssignments()),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -362,7 +380,7 @@ class TerritoryAssignmentResource extends Resource
         $query = parent::getEloquentQuery()
             ->whereHas('assignee', function ($query) {
                 // If the user cannot see all assignments, filter by the user's ID
-                if (! Auth::user()->can('view_any_territory::assignment')) {
+                if (! static::canViewAllAssignments()) {
                     return $query->where('id', Auth::user()->id);
                 }
             })

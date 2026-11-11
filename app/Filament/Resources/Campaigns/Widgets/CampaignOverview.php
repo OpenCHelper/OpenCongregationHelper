@@ -15,11 +15,20 @@ class CampaignOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        // Take all assignments into consideration, even unfinished ones.
-        $campaign_percentage = $this->record->assignments()->count() * 100 / Territory::count();
-        $campaign_remaining_days = $this->record->valid_until ? -$this->record->valid_until->diffInDays(now(), false) : null;
-        $campaign_remaining_time_percentage = $this->record->valid_from && $this->record->valid_until
-            ? now()->floatDiffInDays($this->record->valid_from) * 100 / $this->record->valid_from->floatDiffInDays($this->record->valid_until)
+        // Take all assignments into consideration, even unfinished ones, but count
+        // each territory once (a territory may be assigned more than once).
+        $territories_count = Territory::count();
+        $assigned_territories_count = $this->record->assignments()->distinct()->count('territory_id');
+        $campaign_percentage = $territories_count > 0 ? $assigned_territories_count * 100 / $territories_count : 0;
+
+        $campaign_remaining_days = $this->record->valid_until ? now()->diffInDays($this->record->valid_until) : null;
+
+        // Percentage of the campaign duration that still remains (Carbon 3 differences are signed)
+        $campaign_duration_days = $this->record->valid_from && $this->record->valid_until
+            ? $this->record->valid_from->diffInDays($this->record->valid_until)
+            : null;
+        $campaign_remaining_time_percentage = $campaign_duration_days > 0
+            ? $campaign_remaining_days * 100 / $campaign_duration_days
             : null;
 
         $color = 'success';
@@ -31,7 +40,7 @@ class CampaignOverview extends BaseWidget
                 $icon = 'heroicon-s-x-circle';
             }
         } elseif ($campaign_remaining_days !== null) {
-            $description = __('filament-resources.campaign.widget_days_remaining', ['days' => $campaign_remaining_days]);
+            $description = __('filament-resources.campaign.widget_days_remaining', ['days' => round($campaign_remaining_days)]);
 
             if ($campaign_remaining_time_percentage !== null) {
                 if ($campaign_remaining_time_percentage < 25 && $campaign_percentage < 25) {

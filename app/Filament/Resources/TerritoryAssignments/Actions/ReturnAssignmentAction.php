@@ -11,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class ReturnAssignmentAction extends Action
@@ -25,6 +26,11 @@ class ReturnAssignmentAction extends Action
             ->modalHeading(__('filament-resources.database_notifications.end_assignment_modal'))
             ->modalSubmitAction(fn (Action $action) => $action->label(__('filament-resources.territory_assignment.action_end')))
             ->color('primary')
+            ->authorize(function (Territory $record): bool {
+                $assignment = $record->currentAssignment;
+
+                return $assignment !== null && Gate::allows('update', $assignment);
+            })
             ->visible(function (Territory $record): bool {
                 $assignment = $record->currentAssignment;
 
@@ -62,23 +68,22 @@ class ReturnAssignmentAction extends Action
             ])
             ->requiresConfirmation()
             ->action(function (Territory $record, array $data): void {
+                $last_assignment = $record->currentAssignment;
+
+                // Skip if the last assignment is not null
+                if ($last_assignment === null || $last_assignment->ended_at !== null) {
+                    Log::warning("Skipping record {$record->id} because it does not has an active assignment");
+
+                    return;
+                }
+
                 try {
-                    $last_assignment = $record->currentAssignment;
-
-                    // Skip if the last assignment is not null
-                    if ($last_assignment === null || $last_assignment->ended_at !== null) {
-                        Log::warning("Skipping record {$record->id} because it does not has an active assignment");
-
-                        return;
-                    }
-
                     // Carica la relazione territory prima dell'update per evitare lazy loading errors
                     $last_assignment->load('territory');
                     $last_assignment->ended_at = now();
-                    $last_assignment->push();
+                    $last_assignment->save();
                 } catch (Exception $e) {
                     Log::error('Errore durante la terminazione dell\'assegnazione del territorio: '.$e->getMessage());
-                    $this->halt();
                     $this->failure();
 
                     return;
@@ -95,7 +100,7 @@ class ReturnAssignmentAction extends Action
             })
             ->failureNotification(function (Notification $notification): Notification {
                 return $notification
-                    ->error()
+                    ->danger()
                     ->title(__('filament-resources.database_notifications.territory_returned_error_title'))
                     ->body(__('filament-resources.database_notifications.territory_returned_error_body'));
             });

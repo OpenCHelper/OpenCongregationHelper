@@ -20,6 +20,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/documentation.js',
                 'resources/css/filament/app/theme.css',
+                'resources/css/filament/guest/theme.css',
                 'resources/css/filament/knowledge-base/theme.css',
             ],
             refresh: [

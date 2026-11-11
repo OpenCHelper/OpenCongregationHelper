@@ -35,6 +35,8 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
 - Static analysis with Larastan and FilaCheck.
 - Laravel Boost guidelines and skills for AI-assisted development ([#132]).
 - GitHub Copilot instructions and setup steps ([#110], [#111], [#136], [#138]).
+- `ENABLE_SHARED_PII` environment variable to show personal data (assignee name and territory notes) on publicly
+  shared assignment pages, where it is now hidden by default ([#141]).
 
 ### Changed
 
@@ -70,10 +72,38 @@ The legacy PHP application (v1.x) is maintained separately on the [`v1`][v1-bran
 - Missing styles on guest pages and broken UI styles.
 - Documentation panel not being reachable.
 - Wrong values in the example environment file ([#107]).
+- Publicly shared assignment pages returning a server error when frontend assets are built, because the guest panel
+  theme (`resources/css/filament/guest/theme.css`) was missing from the Vite build ([#141]).
+- Error notifications of the assign/return territory actions never being shown ([#141]).
+- Users allowed to list all assignments only seeing their own, because of an outdated permission name. The Shield
+  seeder now uses the current permission names ([#141]).
+- Already assigned territories being offered when adding an assignment to a campaign ([#141]).
+- Campaign filters returning wrong results when combined with other conditions ([#141]).
+- Campaign overview widget failing when there are no territories, exceeding 100% when a territory was assigned more
+  than once, and always showing the remaining-time warning ([#141]).
+- Stale assignment emails mentioning the wrong territory ([#141]).
+- Territory import rejecting every territory of an existing zone as a duplicate, and "update existing" ignoring the
+  zone ([#141]).
+- Editing a user requiring a new password to be entered ([#141]).
+- Emails sent through the native `mail()` transport having duplicated `To`/`Subject` headers and no MIME content
+  type ([#141]).
+- Intermittent CI failures caused by tests starting before MySQL accepted connections ([#141]).
 
 ### Security
 
 - Updated Livewire to 3.6.4 ([#106]), fixing a remote code execution vulnerability (CVE-2025-54068).
+- **BREAKING**: The queue and scheduler endpoints used by external cron services (`/queue/process` and
+  `/schedule/process`) required no authentication. They now require an `X-Cron-Token` header matching the new
+  `ARTISAN_CRON_TOKEN` environment variable, and are rate limited ([#141]).
+- Only super administrators can impersonate users, and the `root` user can no longer be impersonated ([#141]).
+- Only super administrators can assign roles, so users can no longer grant themselves the `super_admin` role
+  ([#141]).
+- The API tokens page is only available when the API feature is enabled, the API endpoints now check the user's
+  permissions and the territories and zones API is read-only ([#141]).
+- The token protecting the remote Artisan endpoints is compared in constant time, an empty token is rejected and the
+  submitted token is no longer logged ([#141]).
+- Email bodies, including password reset links, are no longer written to the logs ([#141]).
+- Assign/return territory actions now check the user's permissions ([#141]).
 
 ## [2.0.0-alpha4] - 2025-06-23
 
@@ -222,4 +252,5 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#137]: https://github.com/LukeSavefrogs/registro-territori/pull/137
 [#138]: https://github.com/LukeSavefrogs/registro-territori/pull/138
 [#139]: https://github.com/LukeSavefrogs/registro-territori/pull/139
+[#141]: https://github.com/LukeSavefrogs/registro-territori/pull/141
 [#142]: https://github.com/LukeSavefrogs/registro-territori/pull/142

@@ -60,6 +60,17 @@ class UserResource extends Resource
         return NavigationGroup::Administration;
     }
 
+    /**
+     * Only super administrators can assign roles, to prevent privilege escalation
+     * (e.g. a user granting themselves the `super_admin` role).
+     */
+    public static function canManageRoles(): bool
+    {
+        $currentUser = Auth::user();
+
+        return $currentUser instanceof User && $currentUser->hasRole('super_admin');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -102,8 +113,9 @@ class UserResource extends Resource
                             ->disabled(fn (Get $get, ?User $record) => $get('can_login') === false || $record?->isRootUserProtected()
                             )
                             ->password()
-                            ->required(fn (Get $get, ?User $record) => $get('can_login') && ! $record?->isRootUserProtected()
-                            )
+                            // Only required when creating a user: on edit, an empty value keeps the current password
+                            ->required(fn (string $operation, Get $get): bool => $operation === 'create' && (bool) $get('can_login'))
+                            ->dehydrated(fn (?string $state): bool => filled($state))
                             ->maxLength(255)
                             ->helperText(fn (?User $record) => $record?->isRootUserProtected()
                                 ? __('profile.root_user_protection.password_change_not_allowed')
@@ -112,7 +124,9 @@ class UserResource extends Resource
                         Select::make('roles')
                             ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Get $get) => $get('can_login') === false)
-                            ->disabled(fn (Get $get, ?User $record) => $get('can_login') === false || $record?->isRootUserProtected()
+                            ->disabled(fn (Get $get, ?User $record) => $get('can_login') === false
+                                || $record?->isRootUserProtected()
+                                || ! static::canManageRoles()
                             )
                             ->relationship('roles', 'name')
                             ->multiple()

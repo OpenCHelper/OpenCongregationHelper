@@ -13,6 +13,7 @@ use App\Filament\Resources\TerritoryAssignments\Actions as AssignmentActions;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
 use App\Models\Campaign;
 use App\Models\Territory;
+use App\Models\TerritoryAssignment;
 use App\Models\User;
 use Carbon\Carbon;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
@@ -60,6 +61,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -547,6 +549,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                     BulkAction::make('create_assignment_bulk')
                         ->label(__('filament-resources.territory.action_assign_massively'))
                         ->icon(Heroicon::OutlinedDocumentArrowUp)
+                        ->authorize(fn (): bool => Gate::allows('create', TerritoryAssignment::class))
                         ->schema([
                             Select::make('assignee_id')
                                 ->label(__('filament-resources.territory_assignment.action_assigned_to'))
@@ -555,19 +558,14 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                 ->required(),
                             Select::make('campaign_id')
                                 ->label(__('filament-resources.territory_assignment.field_campaign'))
-                                ->options(Campaign::query()
-                                    ->where(function ($query) {
-                                        $query->whereNull('valid_until')
-                                            ->orWhere('valid_until', '>', now());
-                                    })
-                                    ->pluck('name', 'id'))
+                                ->options(fn (): array => Campaign::query()->notTerminated()->pluck('name', 'id')->all())
                                 ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
                         ])
                         ->action(function (Collection $records, array $data): void {
                             // Check if campaign is terminated
                             if ($data['campaign_id'] && Campaign::find($data['campaign_id'])?->isTerminated()) {
                                 Notification::make()
-                                    ->error()
+                                    ->danger()
                                     ->title(__('filament-resources.database_notifications.assignment_terminated_campaign_title'))
                                     ->body(__('filament-resources.database_notifications.assignment_terminated_campaign_body'))
                                     ->send();
@@ -598,6 +596,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                     BulkAction::make('cancel_assignment_bulk')
                         ->label(__('filament-resources.territory.action_end_assignments'))
                         ->icon(Heroicon::OutlinedDocumentArrowDown)
+                        ->authorize(fn (): bool => Gate::allows('update', new TerritoryAssignment))
                         ->requiresConfirmation()
                         ->action(function (Collection $records, array $data): void {
                             foreach ($records as $record) {
@@ -609,6 +608,13 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                 }
 
                                 $currentAssignment = $record->currentAssignment;
+
+                                if (Gate::denies('update', $currentAssignment)) {
+                                    Log::warning("Skipping record {$record->id} because the user cannot update its assignment");
+
+                                    continue;
+                                }
+
                                 // Carica la relazione territory prima dell'update per evitare lazy loading errors
                                 $currentAssignment->load('territory');
                                 $currentAssignment->update([

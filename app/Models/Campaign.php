@@ -6,6 +6,7 @@ use App\Enums\CampaignStatus;
 use App\Observers\CampaignObserver;
 use Database\Factories\CampaignFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -116,27 +117,36 @@ class Campaign extends Model
     }
 
     /**
-     * Scope a query to include campaigns that are active.
+     * Scope a query to only include campaigns that are not terminated
+     * (i.e. without an end date or ending in the future).
      */
-    public function scopeWithActive($query)
+    public function scopeNotTerminated(Builder $query): void
     {
-        return $query->orWhere(function ($q) {
-            $q->whereNull('valid_until')
+        $query->where(function (Builder $query) {
+            $query->whereNull('valid_until')
                 ->orWhere('valid_until', '>', now());
-        })->where(function ($q) {
-            $q->whereNull('valid_from')
-                ->orWhere('valid_from', '<=', now());
         });
     }
 
     /**
-     * Scope a query to include campaigns that are expired.
+     * Scope a query to only include campaigns that are active
+     * (already started and not terminated).
      */
-    public function scopeWithExpired($query)
+    public function scopeWithActive(Builder $query): void
     {
-        return $query->orWhere(function ($q) {
-            $q->whereNotNull('valid_until')
-                ->where('valid_until', '<', now());
-        });
+        $query->notTerminated()
+            ->where(function (Builder $query) {
+                $query->whereNull('valid_from')
+                    ->orWhere('valid_from', '<=', now());
+            });
+    }
+
+    /**
+     * Scope a query to only include campaigns that are expired.
+     */
+    public function scopeWithExpired(Builder $query): void
+    {
+        $query->whereNotNull('valid_until')
+            ->where('valid_until', '<', now());
     }
 }

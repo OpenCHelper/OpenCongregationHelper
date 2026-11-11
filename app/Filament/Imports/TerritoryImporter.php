@@ -52,9 +52,15 @@ class TerritoryImporter extends Importer
     public function resolveRecord(): Territory
     {
         if ($this->options['updateExisting'] ?? false) {
-            return Territory::firstOrNew([
-                'name' => $this->data['name'],
-            ]);
+            $zone = TerritoryZone::where('name', $this->data['territoryZone'] ?? null)->first();
+
+            // Territory names are unique per zone, so the zone is part of the lookup
+            if ($zone) {
+                return Territory::firstOrNew([
+                    'name' => $this->data['name'],
+                    'territory_zone_id' => $zone->id,
+                ]);
+            }
         }
 
         return new Territory;
@@ -62,16 +68,19 @@ class TerritoryImporter extends Importer
 
     protected function beforeCreate(): void
     {
-        $zone = $this->data['territoryZone'];
+        $zoneName = $this->data['territoryZone'];
+        $zone = TerritoryZone::firstOrCreate(['name' => $zoneName]);
 
-        if (TerritoryZone::where('name', $zone)->exists() && Territory::whereTerritoryZoneId($zone)->whereName($this->data['name'])) {
-            throw new RowImportFailedException("Duplicate territory found with name '".$this->data['name']."' for zone '".$zone."'.");
+        $isDuplicate = Territory::withTrashed()
+            ->where('territory_zone_id', $zone->id)
+            ->where('name', $this->data['name'])
+            ->exists();
+
+        if ($isDuplicate) {
+            throw new RowImportFailedException("Duplicate territory found with name '".$this->data['name']."' for zone '".$zoneName."'.");
         }
 
-        $this->record->territory_zone_id = TerritoryZone::firstOrCreate(
-            ['name' => $zone],
-            ['name' => $zone],
-        )->id;
+        $this->record->territory_zone_id = $zone->id;
 
         unset($this->record->territoryZone);
     }

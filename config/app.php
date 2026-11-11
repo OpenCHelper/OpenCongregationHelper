@@ -139,4 +139,29 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Artisan Cron Token
+    |--------------------------------------------------------------------------
+    |
+    | Secret that external cron services must send in the `X-Cron-Token`
+    | header to trigger the queue and scheduler endpoints. When empty,
+    | those endpoints reject every request.
+    |
+    */
+
+    'artisan_cron_token' => env('ARTISAN_CRON_TOKEN'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Personal Data On Shared Pages
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, publicly shared pages (guest panel) also display personal
+    | data such as the assignee's full name and the territory notes.
+    |
+    */
+
+    'enable_shared_pii' => (bool) env('ENABLE_SHARED_PII', false),
+
 ];

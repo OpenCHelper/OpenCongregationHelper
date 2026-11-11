@@ -20,6 +20,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Lab404\Impersonate\Services\ImpersonateManager;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
@@ -155,7 +156,24 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->can_login;
+        // Virtual users cannot log in, but administrators can still impersonate them.
+        return (bool) $this->can_login || app(ImpersonateManager::class)->isImpersonating();
+    }
+
+    /**
+     * Only super administrators can impersonate other users.
+     */
+    public function canImpersonate(): bool
+    {
+        return $this->hasRole('super_admin');
+    }
+
+    /**
+     * Every user (virtual ones included) can be impersonated, except the root user.
+     */
+    public function canBeImpersonated(): bool
+    {
+        return ! $this->isRootUser();
     }
 
     public function getTenants(Panel $panel): Collection
