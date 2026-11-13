@@ -18,6 +18,17 @@ To receive support and/or propose new features please open an issue.
 
 For the full list of changes, please read the [**Changelog**](CHANGELOG.md).
 
+## Alternatives
+
+If Registro Territori does not fit the needs of your congregation, these are valid alternatives:
+
+| Application | Type | Territories |
+| --- | --- | --- |
+| [Territory Helper](https://territoryhelper.com) | Web app, with a companion mobile app for the publishers | Dedicated to territories: maps, heat maps and assignment statistics, campaigns, S-13 forms, and publishers requesting and returning their territories from their own account |
+| [Hourglass](https://www.hourglass-app.com) | Web app, with the *Hourglass Time* mobile app for the publishers | One of the features of a complete congregation management application (field service groups, reports, schedules...) |
+| [NW Publisher](https://nwscheduler.com) | Mobile app, companion of the *New World Scheduler* congregation software | Territories are managed in New World Scheduler; publishers see the ones assigned to them, to the congregation or to their field service group, request new ones and mark them as completed |
+| [Organized](https://github.com/sws2apps/organized-app) | Open source (MIT) Progressive Web App, for desktop and mobile | Congregation management application (schedules, reports, publisher records...): territory management is under development ([sws2apps/organized-app#5523](https://github.com/sws2apps/organized-app/pull/5523)) |
+
 ## Development
 
 The preferred way of developing is by using **Docker Compose** to build the containers that will be used to develop the application locally. If you don't want to use Docker, then it's up to you.
