@@ -8,5 +8,32 @@ return [
             'store_link' => 'Lascia link',
             'download_image' => 'Salva una copia',
         ],
+        'columns' => [
+            'name' => 'Nome',
+            'description' => 'Descrizione',
+            'image_path' => 'Immagine',
+            'image_path_helper' => 'Al momento sono supportati solo URL assoluti.',
+            'geojson' => 'GeoJSON',
+            'notes' => 'Note',
+            'is_commercial' => 'Commerciale?',
+            'territory_zone' => 'Zona',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'L\'importazione dei territori è stata completata: :count riga importata.|L\'importazione dei territori è stata completata: :count righe importate.',
+                'failed_rows' => ':count riga non è stata importata.|:count righe non sono state importate.',
+            ],
+        ],
+        'errors' => [
+            'duplicate' => 'Esiste già un territorio chiamato ":name" nella zona ":zone".',
+            'image_unsupported_scheme' => 'Schema URI ":scheme" non supportato per l\'immagine ":url".',
+            'image_larger_than' => 'l\'immagine è più grande di :size',
+            'image_download_failed' => 'Impossibile scaricare l\'immagine ":url": :reason',
+            'image_http_error' => 'Impossibile scaricare l\'immagine ":url": stato HTTP :status.',
+            'image_too_large' => 'L\'immagine ":url" è più grande di :size.',
+            'image_invalid_mime_type' => 'Tipo MIME ":mime_type" non valido per l\'immagine ":url".',
+            'image_unresolvable_host' => 'Impossibile risolvere l\'host dell\'immagine ":url".',
+            'image_private_host' => 'L\'immagine ":url" punta a un indirizzo privato o riservato.',
+        ],
     ],
 ];

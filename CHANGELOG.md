@@ -59,6 +59,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The result of a territory import (the body of its notification and the reasons of the failed rows, also in the
+  downloadable CSV) being in English, and the rest of it in the default language of the application instead of the
+  one of the user who started the import. All the importer texts are now translated, column labels included, and
+  rendered in the preferred language of that user ([#165]).
 - Dashboard failing to load when a zone with territories on the map has no color ([#34]).
 - Clicking the dashboard map showing debug notifications and zooming the map back out to all the territories ([#34]).
 - Zone names shown as HTML in the layers menu of the dashboard map ([#34]).
@@ -402,4 +406,5 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#150]: https://github.com/LukeSavefrogs/registro-territori/pull/150
 [#151]: https://github.com/LukeSavefrogs/registro-territori/pull/151
 [#157]: https://github.com/LukeSavefrogs/registro-territori/pull/157
+[#165]: https://github.com/LukeSavefrogs/registro-territori/pull/165
 [#166]: https://github.com/LukeSavefrogs/registro-territori/pull/166

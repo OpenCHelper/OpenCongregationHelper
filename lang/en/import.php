@@ -8,5 +8,32 @@ return [
             'store_link' => 'Keep link',
             'download_image' => 'Save copy',
         ],
+        'columns' => [
+            'name' => 'Name',
+            'description' => 'Description',
+            'image_path' => 'Image',
+            'image_path_helper' => 'Currently, only absolute URLs are supported.',
+            'geojson' => 'GeoJSON',
+            'notes' => 'Notes',
+            'is_commercial' => 'Commercial?',
+            'territory_zone' => 'Zone',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'Your territory import has completed: :count row imported.|Your territory import has completed: :count rows imported.',
+                'failed_rows' => ':count row failed to import.|:count rows failed to import.',
+            ],
+        ],
+        'errors' => [
+            'duplicate' => 'A territory named ":name" already exists in the zone ":zone".',
+            'image_unsupported_scheme' => 'Unsupported URI scheme ":scheme" for the image ":url".',
+            'image_larger_than' => 'the image is larger than :size',
+            'image_download_failed' => 'Unable to download the image ":url": :reason',
+            'image_http_error' => 'Unable to download the image ":url": HTTP status :status.',
+            'image_too_large' => 'The image ":url" is larger than :size.',
+            'image_invalid_mime_type' => 'Invalid MIME type ":mime_type" for the image ":url".',
+            'image_unresolvable_host' => 'Unable to resolve the host of the image ":url".',
+            'image_private_host' => 'The image ":url" points to a private or reserved address.',
+        ],
     ],
 ];

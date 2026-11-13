@@ -8,5 +8,32 @@ return [
             'store_link' => 'Mantener el enlace',
             'download_image' => 'Guarda una copia',
         ],
+        'columns' => [
+            'name' => 'Nombre',
+            'description' => 'Descripción',
+            'image_path' => 'Imagen',
+            'image_path_helper' => 'Por ahora, solo se admiten URL absolutas.',
+            'geojson' => 'GeoJSON',
+            'notes' => 'Notas',
+            'is_commercial' => '¿Comercial?',
+            'territory_zone' => 'Zona',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'La importación de territorios se ha completado: :count fila importada.|La importación de territorios se ha completado: :count filas importadas.',
+                'failed_rows' => ':count fila no se pudo importar.|:count filas no se pudieron importar.',
+            ],
+        ],
+        'errors' => [
+            'duplicate' => 'Ya existe un territorio llamado ":name" en la zona ":zone".',
+            'image_unsupported_scheme' => 'Esquema URI ":scheme" no admitido para la imagen ":url".',
+            'image_larger_than' => 'la imagen es mayor de :size',
+            'image_download_failed' => 'No se pudo descargar la imagen ":url": :reason',
+            'image_http_error' => 'No se pudo descargar la imagen ":url": estado HTTP :status.',
+            'image_too_large' => 'La imagen ":url" es mayor de :size.',
+            'image_invalid_mime_type' => 'Tipo MIME ":mime_type" no válido para la imagen ":url".',
+            'image_unresolvable_host' => 'No se pudo resolver el host de la imagen ":url".',
+            'image_private_host' => 'La imagen ":url" apunta a una dirección privada o reservada.',
+        ],
     ],
 ];
