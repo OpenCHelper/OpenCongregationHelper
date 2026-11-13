@@ -5,7 +5,7 @@ inputs:
     description: "A newline-separated list of artisan commands to execute (`php artisan` will be stripped if preceding the commands)"
     required: true
   url:
-    description: "The URL where the Artisan handler is listening"
+    description: "The base URL of the application, whose Artisan handler listens on `/api/artisan`"
     required: true
   ftp-hostname:
     description: "The hostname to connect to via FTP"
@@ -16,6 +16,10 @@ inputs:
   ftp-password:
     description: "The password to use when connecting via FTP"
     required: true
+  token-file:
+    description: "Path (relative to the FTP root) of the Artisan token file of the application. Defaults to the one of an application installed in the FTP root."
+    required: false
+    default: ""
   log-file:
     required: false
     default: ""
@@ -54,6 +58,7 @@ runs:
         ARTISAN_BASE_URL: ${{ inputs.url }}
         ARTISAN_COMMANDS: ${{ inputs.commands }}
         ARTISAN_COMMANDS_LOG: ${{ inputs.log-file }}
+        ARTISAN_TOKEN_FILE: ${{ inputs.token-file }}
         FTP_SERVER_URL: ${{ inputs.ftp-hostname }}
         FTP_SERVER_USERNAME: ${{ inputs.ftp-username }}
         FTP_SERVER_PASSWORD: ${{ inputs.ftp-password }}
@@ -78,6 +83,10 @@ runs:
 
           if [[ "${VERBOSE_MODE:-false}" == "true" ]]; then
             script_args+=(--verbose)
+          fi
+
+          if [[ -n "${ARTISAN_TOKEN_FILE:-}" ]]; then
+            script_args+=(--token-file "$ARTISAN_TOKEN_FILE")
           fi
 
           if [[ "$1" == '--' ]]; then

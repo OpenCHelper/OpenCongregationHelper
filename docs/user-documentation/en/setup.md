@@ -59,7 +59,7 @@ INITIAL_ROOT_PASSWORD="password"
 | `APP_URL` | Public URL of the application. Used in emails and in the links of shared assignments. |
 | `APP_LOCALE` | Default language (`en`, `it` or `es`). Each user can then pick their own language. |
 | `APP_TIMEZONE` | Timezone used to display dates. |
-| `DB_PREFIX` / `DB_ENGINE` | Optional table prefix and storage engine, useful on shared databases. |
+| `DB_PREFIX` / `DB_ENGINE` | Optional table prefix and storage engine, useful on shared databases: `db:wipe` and `migrate:fresh` then drop only the tables with this prefix. |
 | `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Name (first and last name separated by a space), email and password of the **root** user, created the first time the database is seeded. |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | How emails are sent. `failover` tries the native PHP `mail()` function first and falls back to the log. |
 | `QUEUE_CONNECTION` | `database` (recommended in production) or `sync` (emails are sent immediately, during the request). |
@@ -110,14 +110,14 @@ Both need something that runs periodically:
 - **With shell access**, run the queue worker (`php artisan queue:work`) and add the Laravel scheduler to the crontab
   (`* * * * * php /path/to/artisan schedule:run`).
 - **Without shell access** (shared hosting), set `ARTISAN_CRON_TOKEN` and configure an external cron service to call
-  these endpoints, which are served on the `artisan.` subdomain of `APP_URL`:
+  these endpoints, which are served under the `/api/artisan` path of `APP_URL`:
 
     ```shell
     # Process the queue (e.g. every 5 minutes)
-    curl -X POST -H "X-Cron-Token: <your token>" https://artisan.territories.example.com/queue/process
+    curl -X POST -H "X-Cron-Token: <your token>" https://territories.example.com/api/artisan/queue/process
 
     # Run the scheduled jobs (e.g. every hour)
-    curl -X POST -H "X-Cron-Token: <your token>" https://artisan.territories.example.com/schedule/process
+    curl -X POST -H "X-Cron-Token: <your token>" https://territories.example.com/api/artisan/schedule/process
     ```
 
   The endpoints are rate limited (10 requests per minute).

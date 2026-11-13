@@ -376,12 +376,15 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                         return __('filament-resources.territory.filter_no_campaign')." ({$territoriesCount})";
                     })
                     ->orderQueryUsing(function (Builder $query, string $direction): Builder {
+                        // Wrapped by the grammar so that it gets the table prefix (`DB_PREFIX`), like the joins
+                        $campaignName = $query->getQuery()->getGrammar()->wrap('campaigns.name');
+
                         return $query->leftJoin('territory_assignments as campaign_assignments', function ($join) {
                             $join->on('territories.id', '=', 'campaign_assignments.territory_id')
                                 ->whereNull('campaign_assignments.ended_at');
                         })
                             ->leftJoin('campaigns', 'campaign_assignments.campaign_id', '=', 'campaigns.id')
-                            ->orderByRaw("COALESCE(campaigns.name, 'zzz_no_campaign') {$direction}")
+                            ->orderByRaw("COALESCE({$campaignName}, 'zzz_no_campaign') ".($direction === 'desc' ? 'desc' : 'asc'))
                             ->select('territories.*');
                     })
                     ->collapsible(),
@@ -461,7 +464,10 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                             // Portable equivalent of sorting by `DATEDIFF(NOW(), started_at)`: unassigned
                             // territories count as the shortest duration, and the earlier an open assignment
                             // started, the longer its duration.
-                            ->orderByRaw('CASE WHEN duration_assignments.started_at IS NULL THEN 0 ELSE 1 END '.($direction === 'desc' ? 'desc' : 'asc'))
+                            ->orderByRaw(
+                                'CASE WHEN '.$query->getQuery()->getGrammar()->wrap('duration_assignments.started_at').' IS NULL THEN 0 ELSE 1 END '
+                                .($direction === 'desc' ? 'desc' : 'asc')
+                            )
                             ->orderBy('duration_assignments.started_at', $direction === 'desc' ? 'asc' : 'desc')
                             ->select('territories.*');
                     })

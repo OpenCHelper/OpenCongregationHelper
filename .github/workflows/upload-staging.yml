@@ -22,12 +22,11 @@ jobs:
   upload:
     uses: ./.github/workflows/upload-altervista-reusable.yml
     with:
+      environment: UAT
       label: PRE-PRODUCTION
       setup-root-user: false
-    secrets:
-      ftp_server: ${{ secrets.FTP_SERVER_QA }}
-      ftp_username: ${{ secrets.FTP_USERNAME_QA }}
-      ftp_password: ${{ secrets.FTP_PASSWORD_QA }}
+    # The FTP credentials are the secrets of the GitHub environment
+    secrets: inherit
     needs:
       - tests
       - linter

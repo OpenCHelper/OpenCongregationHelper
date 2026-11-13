@@ -79,7 +79,7 @@ main () {
                 printf "Usage: %s [options] <command> [params]\n" "$0" >&2
                 printf "Options:\n" >&2
                 printf "  -v, --verbose        Enable verbose output\n" >&2
-                printf "  -b, --base-url       The base URL of the Artisan server\n" >&2
+                printf "  -b, --base-url       The base URL of the application (e.g. https://example.com)\n" >&2
                 printf "  -t, --token          The token to use for authentication\n" >&2
                 printf "  --ftp-hostname       The hostname of the FTP server\n" >&2
                 printf "  --ftp-username       The username to use for FTP authentication\n" >&2
@@ -143,7 +143,7 @@ main () {
     fi
     
     local curl_status=0
-    response="$([[ "$_verbose" == true ]] && set -x; curl -skL "${artisan_base_url}/api/execute" \
+    response="$([[ "$_verbose" == true ]] && set -x; curl -skL "${artisan_base_url%/}/api/artisan/execute" \
       -X POST --data "{\"command\": $(jq --raw-input <<< "$command"), \"params\": $(jq --raw-input <<< "$*")}" \
       "${curl_opts[@]}"
     )" || curl_status=$?

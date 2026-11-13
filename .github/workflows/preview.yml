@@ -1,0 +1,513 @@
+name: PR previews
+
+# Every open PR gets its own preview, like Vercel/Render: https://pr-<N>.<site>.altervista.org, redeployed with fresh
+# dummy data on every push and removed when the PR is closed or merged.
+#
+# All the previews share one Altervista space and database (a dedicated one, or the TEST one: see the README): each one
+# lives in `previews/pr-<N>/` and prefixes its tables with `p<N>_` (`DB_PREFIX`). The release is uploaded through FTP
+# as a single archive and unpacked on the server by the `ftp-archive-deploy` action (`.github/actions/`).
+#
+# Settings of the PREVIEW GitHub environment:
+#   - variables: FTP_SERVER, FTP_USERNAME (the web space; they can be secrets too, but GitHub then hides the URLs of
+#     the previews, which contain them);
+#   - secrets: FTP_PASSWORD, ROOT_PASSWORD (root user of the previews);
+#   - optional secrets: DB_DATABASE, DB_USERNAME, DB_PASSWORD (its database, by default the one of the Altervista
+#     account: `my_<FTP username>`, user `<FTP username>`, no password);
+#   - optional variables: ROOT_EMAIL (default: root@example.com), MAX_PREVIEWS (live previews, default: 5).
+# Repository variables: SPACE_DEFAULT_ENVIRONMENT, SPACE_PHP_HANDLER (the router of the space, shared with TEST).
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+  schedule:
+    # Weekly removal of the previews of PRs that are no longer open (e.g. a failed teardown)
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "deploy/destroy the preview of a PR, or clean up the previews of the PRs no longer open"
+        type: choice
+        options: [deploy, destroy, cleanup]
+        default: deploy
+      pr:
+        description: "PR number (deploy and destroy only)"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+# One run per PR at a time: a new push cancels the deployment in progress, and closing the PR cancels it too.
+concurrency:
+  group: preview-${{ github.event.pull_request.number || inputs.pr || 'cleanup' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Tables of the previews are prefixed with `p<N>_`, which must stay within 6 characters (see `SpaceDeployer`)
+  max_pr_number: 9999
+
+jobs:
+  deploy:
+    name: Deploy preview
+    if: >-
+      (github.event_name == 'pull_request' && github.event.action != 'closed'
+        && github.event.pull_request.head.repo.full_name == github.repository)
+      || (github.event_name == 'workflow_dispatch' && inputs.action == 'deploy')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      pull-requests: write
+    environment:
+      name: PREVIEW
+      url: ${{ steps.resolve.outputs.url }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      FTP_SERVER: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+
+    steps:
+      - name: Resolve the preview
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_PR: ${{ github.event.pull_request.number }}
+          EVENT_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_BRANCH: ${{ github.event.pull_request.head.ref }}
+          INPUT_PR: ${{ inputs.pr }}
+        run: |
+          if [[ -n "$EVENT_PR" ]]; then
+            pr="$EVENT_PR" sha="$EVENT_SHA" branch="$EVENT_BRANCH"
+          else
+            if [[ ! "$INPUT_PR" =~ ^[0-9]+$ ]]; then
+              echo "::error::The 'pr' input must be the number of the PR to deploy."
+              exit 1
+            fi
+
+            pr_details="$(gh pr view "$INPUT_PR" --repo "$GITHUB_REPOSITORY" --json headRefOid,headRefName,state,isCrossRepository)"
+            if [[ "$(jq -r '.state' <<< "$pr_details")" != "OPEN" ]] || [[ "$(jq -r '.isCrossRepository' <<< "$pr_details")" == "true" ]]; then
+              echo "::error::PR #${INPUT_PR} must be open and come from a branch of this repository."
+              exit 1
+            fi
+
+            pr="$INPUT_PR"
+            sha="$(jq -r '.headRefOid' <<< "$pr_details")"
+            branch="$(jq -r '.headRefName' <<< "$pr_details")"
+          fi
+
+          if (( pr > max_pr_number )); then
+            echo "::error::PR numbers above ${max_pr_number} are not supported: the table prefix would be too long."
+            exit 1
+          fi
+
+          if [[ -z "$FTP_SERVER" ]]; then
+            echo "::error::The FTP_SERVER variable of the PREVIEW environment is not set: see the comments at the top of this workflow."
+            exit 1
+          fi
+
+          site="${FTP_SERVER##ftp.}"
+          {
+            echo "pr=${pr}"
+            echo "sha=${sha}"
+            echo "branch=${branch}"
+            echo "slug=pr-${pr}"
+            echo "prefix=p${pr}_"
+            echo "site=${site}"
+            echo "url=https://pr-${pr}.${site}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.resolve.outputs.sha }}
+
+      # On pull requests, the router of the space, shared by all the previews (and by TEST, when the space hosts it
+      # too), is written by the action of the default branch, so that a PR cannot break the other environments by
+      # mistake: dispatch the workflow on a branch to try changes to it. The deployer is versioned instead.
+      - name: Checkout the action of the default branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.repository.default_branch || github.ref }}
+          path: .ftp-archive-deploy-source
+          sparse-checkout: .github/actions/ftp-archive-deploy
+
+      - name: Comment on the PR (deploying)
+        uses: ./.github/actions/preview-comment
+        with:
+          pr: ${{ steps.resolve.outputs.pr }}
+          status: deploying
+          url: ${{ steps.resolve.outputs.url }}
+          sha: ${{ steps.resolve.outputs.sha }}
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install -y jq lftp zip
+
+      - name: Install the router of the space
+        env:
+          SITE: ${{ steps.resolve.outputs.site }}
+          SPACE_DEFAULT_ENVIRONMENT: ${{ vars.SPACE_DEFAULT_ENVIRONMENT }}
+          SPACE_PHP_HANDLER: ${{ vars.SPACE_PHP_HANDLER }}
+        run: |
+          # Shared with the other workflows deploying to the space: the same settings for all of them
+          if [[ -z "$SPACE_DEFAULT_ENVIRONMENT" ]] || [[ -z "$SPACE_PHP_HANDLER" ]]; then
+            echo "::error::Set the SPACE_DEFAULT_ENVIRONMENT (e.g. test) and SPACE_PHP_HANDLER (e.g. av-php82) repository variables: see the README."
+            exit 1
+          fi
+
+          action_dir=.ftp-archive-deploy-source/.github/actions/ftp-archive-deploy
+          if [[ ! -f "${action_dir}/router/root.htaccess" ]]; then
+            # Until the router is merged into the default branch (e.g. in the PR adding it)
+            echo "::warning::The default branch has no router yet: using the one of the PR."
+            action_dir=.github/actions/ftp-archive-deploy
+          fi
+
+          "${action_dir}/deploy.sh" --base-url "https://${SITE}" \
+            --ftp-hostname "$FTP_SERVER" --ftp-username "$FTP_USERNAME" --ftp-password "$FTP_PASSWORD" \
+            --default-environment "$SPACE_DEFAULT_ENVIRONMENT" --php-handler "$SPACE_PHP_HANDLER" \
+            install-router
+
+      - name: Check the server and the number of previews
+        env:
+          SITE: ${{ steps.resolve.outputs.site }}
+          SLUG: ${{ steps.resolve.outputs.slug }}
+          MAX_PREVIEWS: ${{ vars.MAX_PREVIEWS || 5 }}
+        run: |
+          deployer () {
+            .github/actions/ftp-archive-deploy/deploy.sh --base-url "https://${SITE}" \
+              --ftp-hostname "$FTP_SERVER" --ftp-username "$FTP_USERNAME" --ftp-password "$FTP_PASSWORD" "$@"
+          }
+
+          info="$(deployer info)"
+          echo "Server: $(jq -c 'del(.success)' <<< "$info")"
+          if [[ "$(jq -r '.zip' <<< "$info")" != "true" ]]; then
+            echo "::error::The ZipArchive PHP extension is not available on the server."
+            exit 1
+          fi
+
+          previews="$(deployer list | jq -r '.previews[]')"
+          echo "Live previews: ${previews//$'\n'/, }"
+
+          if ! grep -qx "$SLUG" <<< "$previews" && (( $(grep -c . <<< "$previews") >= MAX_PREVIEWS )); then
+            echo "::error::There are already ${MAX_PREVIEWS} live previews (the disk space is limited): close a PR, or raise the MAX_PREVIEWS variable of the PREVIEW environment."
+            exit 1
+          fi
+
+      - name: Build application
+        uses: ./.github/actions/build-application
+        with:
+          install-dev-dependencies: false
+
+      - name: Create the environment file
+        env:
+          PR: ${{ steps.resolve.outputs.pr }}
+          SHA: ${{ steps.resolve.outputs.sha }}
+          BRANCH: ${{ steps.resolve.outputs.branch }}
+          URL: ${{ steps.resolve.outputs.url }}
+          PREFIX: ${{ steps.resolve.outputs.prefix }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          ROOT_EMAIL: ${{ vars.ROOT_EMAIL || 'root@example.com' }}
+          ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+        run: |
+          # By default, the database of the Altervista account: `my_<username>`, user `<username>`, no password (it is
+          # only reachable from the server itself)
+          DB_DATABASE="${DB_DATABASE:-my_${FTP_USERNAME}}"
+          DB_USERNAME="${DB_USERNAME:-${FTP_USERNAME}}"
+
+          # Values are single-quoted, so that they are read literally (no `${...}` interpolation)
+          for name in DB_DATABASE DB_USERNAME DB_PASSWORD ROOT_EMAIL ROOT_PASSWORD; do
+            if [[ "${!name}" == *"'"* ]]; then
+              echo "::error::The value of ${name} cannot contain single quotes."
+              exit 1
+            fi
+          done
+
+          if [[ -z "$ROOT_PASSWORD" ]]; then
+            echo "::error::The ROOT_PASSWORD secret of the PREVIEW environment is not set."
+            exit 1
+          fi
+
+          cat > .env <<EOF
+          APP_NAME='Registro Territori (PR #${PR})'
+          APP_ENV='preview'
+          APP_KEY='$(php artisan key:generate --show --no-ansi)'
+          APP_DEBUG=true
+          APP_URL='${URL}'
+          ASSET_URL='${URL}'
+          APP_VERSION_BRANCH_FILE='.git-branch-name'
+          APP_VERSION_COMMIT_FILE='.git-commit-hash'
+          APP_LOCALE='it'
+          APP_FALLBACK_LOCALE='en'
+          ARTISAN_CRON_TOKEN=
+          LOG_CHANNEL='single'
+          LOG_LEVEL='debug'
+          DB_CONNECTION='mysql'
+          DB_HOST='localhost'
+          DB_PORT=3306
+          DB_DATABASE='${DB_DATABASE}'
+          DB_USERNAME='${DB_USERNAME}'
+          DB_PASSWORD='${DB_PASSWORD}'
+          DB_ENGINE='InnoDB'
+          DB_PREFIX='${PREFIX}'
+          SESSION_DRIVER='database'
+          CACHE_STORE='database'
+          QUEUE_CONNECTION='sync'
+          MAIL_MAILER='log'
+          INITIAL_ROOT_USERNAME='Root User'
+          INITIAL_ROOT_USERMAIL='${ROOT_EMAIL}'
+          INITIAL_ROOT_PASSWORD='${ROOT_PASSWORD}'
+          EOF
+
+          echo "${SHA}" > .git-commit-hash
+          echo "ref: refs/heads/${BRANCH}" > .git-branch-name
+
+      # Upload a single archive, unpacked in batches (each within the PHP time limit of the server), then swapped with
+      # the live preview
+      - name: Upload and unpack the release
+        uses: ./.github/actions/ftp-archive-deploy
+        with:
+          ftp-server: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          ftp-username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          url: https://${{ steps.resolve.outputs.site }}
+          target: ${{ steps.resolve.outputs.slug }}
+
+      # Fresh data on every push: drop the tables of the preview (and only them) before migrating again
+      - name: Drop the database tables of the preview
+        env:
+          SITE: ${{ steps.resolve.outputs.site }}
+          SLUG: ${{ steps.resolve.outputs.slug }}
+        run: |
+          .github/actions/ftp-archive-deploy/deploy.sh --base-url "https://${SITE}" \
+            --ftp-hostname "$FTP_SERVER" --ftp-username "$FTP_USERNAME" --ftp-password "$FTP_PASSWORD" \
+            reset-database "$SLUG" | jq -r '.dropped | length | "Dropped \(.) tables"'
+
+      - name: Migrate and seed the database
+        id: migrate
+        uses: ./.github/actions/altervista-artisan-action
+        with:
+          url: ${{ steps.resolve.outputs.url }}
+          ftp-hostname: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          ftp-username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          token-file: previews/${{ steps.resolve.outputs.slug }}/storage/framework/.artisan-token
+          log-file: ${{ runner.temp }}/artisan-commands-output.txt
+          commands: |
+            # No `optimize:clear` first: the release is built from scratch, and it would fail on the missing cache table
+
+            # The tables were already dropped by the deployer (which works even when the application cannot boot)
+            artisan migrate --seed
+            artisan db:seed --class=FakeDataSeeder
+            artisan shield:super-admin --user=1 --panel=app
+
+            artisan config:cache
+            artisan event:cache
+            artisan route:cache
+            artisan view:cache
+            artisan filament:cache-components
+            artisan filament:optimize
+
+      - name: Check the certificate of the preview
+        env:
+          URL: ${{ steps.resolve.outputs.url }}
+        run: |
+          # The Artisan client does not verify it, but browsers do: the certificate of the site may not cover subdomains
+          status=0
+          curl -sS -o /dev/null --max-time 30 "${URL}/up" || status=$?
+          if (( status == 51 || status == 60 )); then
+            echo "::warning::The HTTPS certificate is not valid for ${URL}: browsers warn before opening the preview."
+          elif (( status != 0 )); then
+            echo "::warning::${URL}/up did not answer (curl exit code ${status})."
+          fi
+
+      # An error 500 without a body means that the request did not reach the application (e.g. a `.htaccess` directive
+      # rejected by the hosting): show what the preview answers, and the end of the log of the application
+      - name: Show the diagnostics of the preview
+        if: failure() && steps.migrate.outcome == 'failure'
+        env:
+          URL: ${{ steps.resolve.outputs.url }}
+          SLUG: ${{ steps.resolve.outputs.slug }}
+        run: |
+          echo "::group::Response of ${URL}/up"
+          # Without `--insecure` first, to show whether the certificate is valid for the subdomain of the preview
+          curl -sS -i --max-time 30 "${URL}/up" || curl -sS -i --insecure --max-time 30 "${URL}/up" || true
+          echo
+          echo "::endgroup::"
+
+          echo "::group::End of the log of the application"
+          lftp -e "set ssl:check-hostname no; cat 'previews/${SLUG}/storage/logs/laravel.log'; bye" \
+            -u "${FTP_USERNAME},${FTP_PASSWORD}" "$FTP_SERVER" 2>&1 | tail -n 100 || true
+          echo "::endgroup::"
+
+      - name: Set summary
+        env:
+          URL: ${{ steps.resolve.outputs.url }}
+          SHA: ${{ steps.resolve.outputs.sha }}
+          BRANCH: ${{ steps.resolve.outputs.branch }}
+          ROOT_EMAIL: ${{ vars.ROOT_EMAIL || 'root@example.com' }}
+        run: |
+          cat <<EOF >> "$GITHUB_STEP_SUMMARY"
+          ## Preview deployed
+
+          - **URL**: ${URL}
+          - **Branch**: \`${BRANCH}\` (\`${SHA:0:7}\`)
+          - **Login**: \`${ROOT_EMAIL}\` (password in the \`ROOT_PASSWORD\` secret of the PREVIEW environment)
+
+          <details>
+          <summary>Artisan output</summary>
+
+          \`\`\`plaintext
+          $(cat "${RUNNER_TEMP}/artisan-commands-output.txt" 2> /dev/null)
+          \`\`\`
+
+          </details>
+          EOF
+
+      - name: Comment on the PR (result)
+        if: always() && steps.resolve.outputs.pr != ''
+        uses: ./.github/actions/preview-comment
+        with:
+          pr: ${{ steps.resolve.outputs.pr }}
+          status: ${{ job.status == 'success' && 'ready' || (job.status == 'cancelled' && 'cancelled' || 'failed') }}
+          url: ${{ steps.resolve.outputs.url }}
+          sha: ${{ steps.resolve.outputs.sha }}
+          login: ${{ vars.ROOT_EMAIL || 'root@example.com' }}
+
+  destroy:
+    name: Remove previews
+    if: >-
+      (github.event_name == 'pull_request' && github.event.action == 'closed'
+        && github.event.pull_request.head.repo.full_name == github.repository)
+      || github.event_name == 'schedule'
+      || (github.event_name == 'workflow_dispatch' && inputs.action != 'deploy')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+    # The secrets of the environment, without recording a deployment
+    environment:
+      name: PREVIEW
+      deployment: false
+    defaults:
+      run:
+        shell: bash
+    env:
+      FTP_SERVER: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+
+    steps:
+      # The scripts of the default branch: the PR may have been merged or its branch deleted
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.repository.default_branch || github.ref }}
+
+      # Until the previews are merged into the default branch (e.g. closing the PR adding them without merging it)
+      - name: Checkout the PR
+        if: hashFiles('.github/actions/ftp-archive-deploy/deploy.sh') == '' && github.event_name == 'pull_request'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install -y jq lftp
+
+      - name: Remove the previews
+        id: remove
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_PR: ${{ github.event.pull_request.number }}
+          INPUT_ACTION: ${{ inputs.action }}
+          INPUT_PR: ${{ inputs.pr }}
+        run: |
+          deployer () {
+            .github/actions/ftp-archive-deploy/deploy.sh --base-url "https://${FTP_SERVER##ftp.}" \
+              --ftp-hostname "$FTP_SERVER" --ftp-username "$FTP_USERNAME" --ftp-password "$FTP_PASSWORD" "$@"
+          }
+
+          listing="$(deployer list)"
+
+          if [[ -n "$EVENT_PR" ]] || [[ "$INPUT_ACTION" == "destroy" ]]; then
+            pr="${EVENT_PR:-$INPUT_PR}"
+            if [[ ! "$pr" =~ ^[0-9]+$ ]]; then
+              echo "::error::The 'pr' input must be the number of the PR whose preview to remove."
+              exit 1
+            fi
+
+            slugs="pr-${pr}"
+            echo "pr=${pr}" >> "$GITHUB_OUTPUT"
+          else
+            # Previews (and leftovers) of the PRs that are no longer open
+            open_slugs="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 1000 --json number --jq '.[] | "pr-\(.number)"')"
+            slugs="$(jq -r '(.previews + (.leftovers | map(sub("\\.(next|old|zip)$"; "")))) | unique | .[]' <<< "$listing" \
+              | grep -vxF -f <(printf '%s\n' "$open_slugs") || true)"
+          fi
+
+          remove_preview () {
+            local slug="$1"
+
+            if jq -e --arg slug "$slug" '.previews | index($slug)' <<< "$listing" > /dev/null; then
+              # Before deleting the files: the connection and the table prefix are read from the `.env` file
+              deployer reset-database "$slug" || return 1
+              deployer deactivate "$slug" > /dev/null || return 1
+            fi
+
+            for variant in old next zip; do
+              deployer delete "$slug" "$variant" > /dev/null || return 1
+            done
+          }
+
+          failed=()
+          for slug in $slugs; do
+            echo "::group::Removing ${slug}"
+            if remove_preview "$slug"; then
+              echo "- Removed \`${slug}\`" >> "$GITHUB_STEP_SUMMARY"
+            else
+              failed+=("$slug")
+              echo "- **Failed** to remove \`${slug}\`" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            echo "::endgroup::"
+          done
+
+          [[ -n "$slugs" ]] || echo "Nothing to remove." >> "$GITHUB_STEP_SUMMARY"
+
+          if (( ${#failed[@]} > 0 )); then
+            echo "::error::Failed to remove: ${failed[*]} (see the logs above)."
+            exit 1
+          fi
+
+      - name: Mark the deployments of the PR as inactive
+        if: steps.remove.outputs.pr != '' && github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: actions/github-script@v8
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        with:
+          script: |
+            const deployments = await github.paginate(github.rest.repos.listDeployments, {
+              ...context.repo,
+              environment: 'PREVIEW',
+              ref: process.env.HEAD_REF,
+            });
+
+            for (const deployment of deployments) {
+              await github.rest.repos.createDeploymentStatus({
+                ...context.repo,
+                deployment_id: deployment.id,
+                state: 'inactive',
+              });
+            }
+
+      - name: Comment on the PR (removed)
+        if: steps.remove.outputs.pr != ''
+        uses: ./.github/actions/preview-comment
+        with:
+          pr: ${{ steps.remove.outputs.pr }}
+          status: removed

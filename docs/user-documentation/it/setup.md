@@ -59,7 +59,7 @@ INITIAL_ROOT_PASSWORD="password"
 | `APP_URL` | Indirizzo pubblico dell'applicazione. Usato nelle email e nei link delle assegnazioni condivise. |
 | `APP_LOCALE` | Lingua predefinita (`en`, `it` o `es`). Ogni utente può poi scegliere la propria lingua. |
 | `APP_TIMEZONE` | Fuso orario usato per mostrare le date. |
-| `DB_PREFIX` / `DB_ENGINE` | Prefisso delle tabelle e motore di archiviazione, facoltativi, utili sui database condivisi. |
+| `DB_PREFIX` / `DB_ENGINE` | Prefisso delle tabelle e motore di archiviazione, facoltativi, utili sui database condivisi: `db:wipe` e `migrate:fresh` eliminano allora solo le tabelle con questo prefisso. |
 | `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Nome (nome e cognome separati da uno spazio), email e password dell'utente **root**, creato la prima volta che il database viene popolato. |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Come vengono inviate le email. `failover` prova prima la funzione nativa `mail()` di PHP e in caso di errore scrive l'email nel log. |
 | `QUEUE_CONNECTION` | `database` (consigliato in produzione) o `sync` (le email vengono inviate subito, durante la richiesta). |
@@ -110,14 +110,14 @@ tempo. Entrambe richiedono qualcosa che venga eseguito periodicamente:
 - **Con accesso alla shell**, avvia il worker della coda (`php artisan queue:work`) e aggiungi lo scheduler di Laravel
   al crontab (`* * * * * php /percorso/di/artisan schedule:run`).
 - **Senza accesso alla shell** (hosting condiviso), imposta `ARTISAN_CRON_TOKEN` e configura un servizio di cron esterno
-  che chiami questi endpoint, raggiungibili sul sottodominio `artisan.` di `APP_URL`:
+  che chiami questi endpoint, raggiungibili sotto il percorso `/api/artisan` di `APP_URL`:
 
     ```shell
     # Elabora la coda (es. ogni 5 minuti)
-    curl -X POST -H "X-Cron-Token: <il tuo token>" https://artisan.territori.example.com/queue/process
+    curl -X POST -H "X-Cron-Token: <il tuo token>" https://territori.example.com/api/artisan/queue/process
 
     # Esegue le attività pianificate (es. ogni ora)
-    curl -X POST -H "X-Cron-Token: <il tuo token>" https://artisan.territori.example.com/schedule/process
+    curl -X POST -H "X-Cron-Token: <il tuo token>" https://territori.example.com/api/artisan/schedule/process
     ```
 
   Gli endpoint hanno un limite di 10 richieste al minuto.

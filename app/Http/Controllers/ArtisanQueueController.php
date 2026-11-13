@@ -95,8 +95,8 @@ class ArtisanQueueController extends Controller
 
         try {
             // Log::info('Executing Artisan command: queue:work with params: ' . json_encode($params));
-            // This endpoint is called on the `artisan.` subdomain: build the URLs of the
-            // processed jobs (e.g. links in notification emails) from the application URL.
+            // This endpoint may be called on a host other than the application URL (e.g. by an external
+            // cron service): build the URLs of the processed jobs (e.g. links in notification emails) from it.
             $appUrl = rtrim((string) config('app.url'), '/');
             URL::forceRootUrl($appUrl);
             URL::forceScheme((string) parse_url($appUrl, PHP_URL_SCHEME) ?: 'https');

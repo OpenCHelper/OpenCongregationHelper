@@ -7,9 +7,8 @@ use App\Http\Middleware\EnsureArtisanToken;
 use App\Http\Middleware\EnsureCronToken;
 use Illuminate\Support\Facades\Route;
 
-Route::domain(
-    'artisan.'.preg_replace("/(^https?:\/\/|:.*$|\/\s*$)/", '', config('app.url'))
-)->name('artisan.')->group(function () {
+// Served under `/api/artisan` on the application host (e.g. `https://example.com/api/artisan/execute`)
+Route::prefix('artisan')->name('artisan.')->group(function () {
     // Protected artisan commands
     Route::controller(ArtisanCommandController::class)->middleware(EnsureArtisanToken::class)->group(function () {
         Route::post('/execute/{command?}', 'execute')

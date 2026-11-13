@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\PrefixAwareWipeCommand;
 use App\Models\Tag;
 use App\Models\User;
 use App\NativeMailFxTransport;
@@ -14,6 +15,7 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -31,7 +33,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // `db:wipe` (also run by `migrate:fresh`) drops only the tables of this installation when the database is
+        // shared (see the command). Extended, not bound: the deferred Artisan provider registers the command later.
+        $this->app->extend(WipeCommand::class, fn (): PrefixAwareWipeCommand => new PrefixAwareWipeCommand);
     }
 
     /**

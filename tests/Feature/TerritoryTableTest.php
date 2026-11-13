@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Resources\Territories\Pages\ListTerritories;
+use App\Models\Campaign;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
@@ -78,6 +79,24 @@ test('zone groups show the number of territories of each zone', function () {
         ->set('tableGrouping', 'territoryZone.name')
         ->assertSee('North (2)')
         ->assertSee('South (1)');
+});
+
+test('campaign groups are sorted by campaign name, with unassigned territories last', function () {
+    $beta = Campaign::factory()->create(['name' => 'Beta']);
+    $alpha = Campaign::factory()->create(['name' => 'Alpha']);
+
+    $unassigned = territoryAssignedSince($this->zone, $this->assignee);
+    $inBeta = territoryAssignedSince($this->zone, $this->assignee, days: 5);
+    $inAlpha = territoryAssignedSince($this->zone, $this->assignee, days: 5);
+
+    $inBeta->currentAssignment->update(['campaign_id' => $beta->id]);
+    $inAlpha->currentAssignment->update(['campaign_id' => $alpha->id]);
+
+    Livewire::test(ListTerritories::class)
+        ->set('tableGrouping', 'currentAssignment.campaign.name')
+        ->assertCanSeeTableRecords([$inAlpha, $inBeta, $unassigned], inOrder: true)
+        ->set('tableGrouping', 'currentAssignment.campaign.name:desc')
+        ->assertCanSeeTableRecords([$unassigned, $inBeta, $inAlpha], inOrder: true);
 });
 
 test('the number of queries does not grow with the number of territories', function () {

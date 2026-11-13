@@ -20,7 +20,15 @@ env:
 
 jobs:
   run-tests:
+    name: Run tests (prefixed=${{ matrix.db-prefix != '' && 'yes' || 'no' }})
     runs-on: ubuntu-latest
+
+    # The PR previews share one database, prefixing their tables with `p<N>_` (`DB_PREFIX`): the suite also runs with
+    # the longest prefix, to catch raw SQL missing the prefix and index names longer than the 64 characters of MySQL.
+    strategy:
+      fail-fast: false
+      matrix:
+        db-prefix: ["", "p9999_"]
 
     steps:
       - name: Checkout code
@@ -54,10 +62,16 @@ jobs:
         run: composer install --no-ansi --no-interaction --no-progress --no-scripts --optimize-autoloader
 
       - name: Prepare Laravel environment
+        env:
+          DB_PREFIX: ${{ matrix.db-prefix }}
         run: |
           set -e
 
           cp .env.example .env
+
+          if [[ -n "$DB_PREFIX" ]]; then
+            sed -i "s/^DB_PREFIX=.*/DB_PREFIX=\"${DB_PREFIX}\"/" .env
+          fi
 
           # Print environment variables for debugging
           echo "Environment variables:"
@@ -145,9 +159,9 @@ jobs:
           ./vendor/bin/sail logs mysql
           exit 1
 
-      - name: Run tests (with coverage)
+      - name: Run tests${{ matrix.db-prefix == '' && ' (with coverage)' || '' }}
         run: |
-          ./vendor/bin/sail test --parallel --drop-databases --coverage
+          ./vendor/bin/sail test --parallel --drop-databases ${{ matrix.db-prefix == '' && '--coverage' || '' }}
 
       - name: Stop application
         continue-on-error: true

@@ -1,0 +1,146 @@
+name: "FTP archive deploy"
+description: >-
+  Deploy a release to a space reachable only through FTP (e.g. Altervista) in minutes instead of hours: upload it as a
+  single archive, unpack it on the server with a bundled PHP deployer, then swap it with the live release at once.
+
+  The deployer (`server/`) installs itself in `_deployer/<version>/` of the space. Every request stays within the PHP
+  execution time limit of the server (a third of it, at most 15 seconds): the unpacking is split over as many requests
+  as needed, and a failed request is retried with a smaller budget.
+
+  Targets: `pr-<N>` deploys to `previews/pr-<N>/`, any other folder name (e.g. `test`) to that folder of the root of the
+  space. With `manage-router`, the action also writes the `.htaccess` of the root of the space (from `router/`), which
+  serves each of them on its own subdomain: `pr-<N>.<site>`, `<folder>.<site>`, and `default-environment` on `<site>`.
+  Every deployment to the same space must then use the same router inputs (e.g. from repository variables).
+
+inputs:
+  ftp-server:
+    description: "Hostname of the FTP server"
+    required: true
+  ftp-username:
+    description: "FTP username"
+    required: true
+  ftp-password:
+    description: "FTP password"
+    required: true
+  url:
+    description: "URL of the root of the space (e.g. `https://example.altervista.org`), where the deployer is reachable"
+    required: true
+  target:
+    description: "Where to deploy: `pr-<N>` (a PR preview) or the folder of an environment (e.g. `test`)"
+    required: true
+  source:
+    description: "Folder of the release to deploy"
+    required: false
+    default: "."
+  keep:
+    description: >-
+      Paths of the live release moved into the new one (one per line), e.g. `.env` (managed on the server),
+      `storage/app`: they replace the copies of the new release
+    required: false
+    default: ""
+  exclude:
+    description: "Additional `zip` patterns of the files to leave out of the archive (one per line)"
+    required: false
+    default: ""
+  manage-router:
+    description: >-
+      Write the router of the space (the `.htaccess` of its root and of `previews/`) before deploying: for spaces
+      hosting several environments, each in its own folder
+    required: false
+    default: "false"
+  default-environment:
+    description: "Router: folder served on the site without subdomain (and `www.`); empty: none (404)"
+    required: false
+    default: ""
+  php-handler:
+    description: "Router: PHP handler of the space (`AddHandler <handler> .php`), e.g. `av-php82` on Altervista"
+    required: false
+    default: ""
+  document-root:
+    description: >-
+      Router: document root inside each environment, which the requests go straight to (`.` for the folder of the
+      environment itself). Empty: `public` (e.g. Laravel)
+    required: false
+    default: ""
+
+outputs:
+  max-execution-time:
+    description: "PHP execution time limit of the server, in seconds (0: none)"
+    value: ${{ steps.deploy.outputs.max-execution-time }}
+  time-budget:
+    description: "Time budget of each request to the deployer, in seconds"
+    value: ${{ steps.deploy.outputs.time-budget }}
+  entries:
+    description: "Number of entries of the archive"
+    value: ${{ steps.deploy.outputs.entries }}
+  duration:
+    description: "Duration of the deployment (upload, unpacking and swap), in seconds"
+    value: ${{ steps.deploy.outputs.duration }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install packages
+      shell: bash
+      run: |
+        missing=()
+        for command in curl jq lftp zip unzip; do
+          command -v "$command" > /dev/null || missing+=("$command")
+        done
+
+        if (( ${#missing[@]} > 0 )); then
+          sudo apt-get update && sudo apt-get install -y "${missing[@]}"
+        fi
+
+    - name: Deploy
+      id: deploy
+      shell: bash
+      env:
+        DEPLOY_SCRIPT: ${{ github.action_path }}/deploy.sh
+        FTP_SERVER: ${{ inputs.ftp-server }}
+        FTP_USERNAME: ${{ inputs.ftp-username }}
+        FTP_PASSWORD: ${{ inputs.ftp-password }}
+        BASE_URL: ${{ inputs.url }}
+        TARGET: ${{ inputs.target }}
+        SOURCE: ${{ inputs.source }}
+        KEEP: ${{ inputs.keep }}
+        EXCLUDE: ${{ inputs.exclude }}
+        MANAGE_ROUTER: ${{ inputs.manage-router }}
+        DEFAULT_ENVIRONMENT: ${{ inputs.default-environment }}
+        PHP_HANDLER: ${{ inputs.php-handler }}
+        DOCUMENT_ROOT: ${{ inputs.document-root }}
+      run: |
+        deployer () {
+          "$DEPLOY_SCRIPT" --base-url "$BASE_URL" \
+            --ftp-hostname "$FTP_SERVER" --ftp-username "$FTP_USERNAME" --ftp-password "$FTP_PASSWORD" "$@"
+        }
+
+        if [[ "$MANAGE_ROUTER" == "true" ]]; then
+          deployer --default-environment "$DEFAULT_ENVIRONMENT" --php-handler "$PHP_HANDLER" \
+            ${DOCUMENT_ROOT:+--document-root "$DOCUMENT_ROOT"} install-router
+        fi
+
+        archive="${RUNNER_TEMP}/ftp-archive-deploy-${TARGET}.zip"
+        exclude_args=()
+        while IFS= read -r pattern; do
+          [[ -n "$pattern" ]] && exclude_args+=(--exclude "$pattern")
+        done <<< "$EXCLUDE"
+        (cd "$SOURCE" && "$DEPLOY_SCRIPT" "${exclude_args[@]}" create-archive "$archive")
+
+        keep_args=()
+        while IFS= read -r path; do
+          path="${path#"${path%%[![:space:]]*}"}"
+          path="${path%"${path##*[![:space:]]}"}"
+          [[ -n "$path" ]] && keep_args+=(--keep "$path")
+        done <<< "$KEEP"
+
+        summary="$(deployer deploy "$TARGET" "$archive" "${keep_args[@]}")"
+        rm -f "$archive"
+
+        echo "$summary" | jq .
+        {
+          echo "max-execution-time=$(jq -r '.max_execution_time' <<< "$summary")"
+          echo "time-budget=$(jq -r '.time_budget' <<< "$summary")"
+          echo "entries=$(jq -r '.entries' <<< "$summary")"
+          echo "duration=$(jq -r '.duration' <<< "$summary")"
+        } >> "$GITHUB_OUTPUT"

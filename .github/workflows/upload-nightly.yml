@@ -21,12 +21,14 @@ jobs:
   upload:
     uses: ./.github/workflows/upload-altervista-reusable.yml
     with:
+      environment: NIGHTLY
       label: TEST
       reset-database: true
       seed-dummy-data: true
       setup-root-user: true
-      install-dev-dependencies: true
-    secrets:
-      ftp_server: ${{ secrets.FTP_SERVER_TEST }}
-      ftp_username: ${{ secrets.FTP_USERNAME_TEST }}
-      ftp_password: ${{ secrets.FTP_PASSWORD_TEST }}
+      install-dev-dependencies: false
+      # The TEST space may also host the PR previews: each environment has its own folder (see the README), and TEST
+      # is deployed as a single archive unpacked on the server
+      environment-folder: test
+    # The FTP credentials are the secrets of the GitHub environment
+    secrets: inherit

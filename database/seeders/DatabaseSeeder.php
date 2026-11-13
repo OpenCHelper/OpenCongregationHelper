@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
      *
      * The values are read through the configuration (not `env()`, which returns
      * `null` once the configuration is cached), and the user is created without
-     * the model factory, which relies on Faker (a development dependency).
+     * the model factory, which relies on Faker.
      */
     private function createRootUser(): void
     {

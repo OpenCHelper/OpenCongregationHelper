@@ -1,8 +1,16 @@
 name: Upload to Altervista (Reusable)
 
+# The FTP credentials come from the GitHub environment given as input (e.g. NIGHTLY, UAT): the `FTP_SERVER` and
+# `FTP_USERNAME` variables (or secrets, but GitHub then hides the URL of the site, which contains them) and the
+# `FTP_PASSWORD` secret. The callers must pass `secrets: inherit`, otherwise the secrets resolve to empty strings.
+
 on:
   workflow_call:
     inputs:
+      environment:
+        description: "GitHub environment holding the FTP credentials of the space (e.g. NIGHTLY, UAT)"
+        required: true
+        type: string
       label:
         description: Human-friendly target environment label shown in the job summary.
         required: false
@@ -38,31 +46,28 @@ on:
         required: false
         default: false
         type: boolean
-    secrets:
-      ftp_server:
-        required: true
-      ftp_username:
-        required: true
-      ftp_password:
-        required: true
+      environment-folder:
+        description: >-
+          Folder of the environment in a space hosting several of them (e.g. `test`, see the README): the release is
+          uploaded as a single archive and unpacked on the server, keeping `.env`, `storage/app` and `storage/logs`.
+          Empty for an application installed in the root of its space, synchronized file by file.
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
 
-# Recreate Altervista PHP environment (using the `phpinfo()` output)
 env:
   node_version: "20.x"
-  php_extensions: >-
-    bcmath,calendar,ctype,curl,date,dom,exif,fileinfo,filter
-    ,gd,gettext,gmp,hash,iconv,imagick,intl,json,libxml,mbstring
-    ,mysqli,mysqlnd,openssl,pcre,PDO,pdo_mysql,pdo_sqlite
-    ,Phar,random,Reflection,session,SimpleXML,SPL,sqlite3,standard
-    ,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib
 
 jobs:
   upload:
     name: Upload to Altervista (${{ inputs.label }})
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
     defaults:
       run:
         shell: bash
@@ -76,55 +81,25 @@ jobs:
       - name: Get Artisan required data
         id: artisan-required-data
         env:
-          FTP_SERVER_URL: ${{ secrets.ftp_server }}
+          FTP_SERVER_URL: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          echo "artisan-base-url=https://artisan.${FTP_SERVER_URL##ftp.}" >> "$GITHUB_OUTPUT"
-          echo "artisan-log-file=/tmp/artisan-commands-output.txt" >> "$GITHUB_OUTPUT"
-
-      - name: Setup NodeJS
-        uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.node_version }}
-          cache: npm
-
-      - name: Setup PHP and Composer
-        uses: shivammathur/setup-php@v2
-        with:
-          extensions: ${{ env.php_extensions }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          fail-fast: true
-
-      - name: Install Composer dependencies
-        run: |
-          composer_args=(
-            --no-ansi
-            --no-interaction
-            --no-plugins
-            --no-progress
-            --no-scripts
-            --optimize-autoloader
-          )
-
-          if [[ '${{ inputs.install-dev-dependencies }}' == 'false' ]]; then
-            composer_args+=(--no-dev)
+          # Secrets missing from the environment (or not inherited by the caller) are empty strings, not errors
+          if [[ -z "$FTP_SERVER_URL" ]] || [[ -z "$FTP_USERNAME" ]] || [[ -z "$FTP_PASSWORD" ]]; then
+            echo "::error::Set the FTP_SERVER and FTP_USERNAME variables and the FTP_PASSWORD secret of the ${ENVIRONMENT} environment (and pass \`secrets: inherit\` to this workflow)."
+            exit 1
           fi
 
-          composer install "${composer_args[@]}"
+          echo "artisan-base-url=https://${FTP_SERVER_URL##ftp.}" >> "$GITHUB_OUTPUT"
+          echo "artisan-log-file=/tmp/artisan-commands-output.txt" >> "$GITHUB_OUTPUT"
 
-      - name: Install NodeJS dependencies
-        run: npm ci
-
-      - name: Run build
-        run: |
-          npm run build --if-present && rm -rf node_modules
-
-          chmod -R 775 storage
-          php artisan optimize:clear --except=cache || true
-          php artisan storage:link --force
-
-          php artisan filament:asset
-          php artisan vendor:publish --tag=filament-assets --force
+      - name: Build application
+        uses: ./.github/actions/build-application
+        with:
+          install-dev-dependencies: ${{ inputs.install-dev-dependencies }}
+          node-version: ${{ env.node_version }}
 
       - name: Create git detail files
         run: |
@@ -132,13 +107,14 @@ jobs:
           echo "ref: ${{ github.ref }}" > .git-branch-name
 
       - name: FTP Deploy (application)
+        if: inputs.environment-folder == ''
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         timeout-minutes: 150 # Max 2-5 hours
         with:
           protocol: ftp
-          server: ${{ secrets.ftp_server }}
-          username: ${{ secrets.ftp_username }}
-          password: ${{ secrets.ftp_password }}
+          server: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
           server-dir: ./
           state-name: .ftp-deploy-sync-state__application.json
@@ -166,13 +142,14 @@ jobs:
       # Separate FTP deploy so that if it fails, the application is still deployed
       # and the vendor folder can be deployed later.
       - name: FTP Deploy (vendor)
+        if: inputs.environment-folder == ''
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         timeout-minutes: 300 # Max 5 hours
         with:
           protocol: ftp
-          server: ${{ secrets.ftp_server }}
-          username: ${{ secrets.ftp_username }}
-          password: ${{ secrets.ftp_password }}
+          server: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./vendor/
           server-dir: ./vendor/
           state-name: ../.ftp-deploy-sync-state__vendor.json
@@ -180,21 +157,58 @@ jobs:
           timeout: 0
           dangerous-clean-slate: ${{ inputs.delete-remote-contents }}
 
+      # The router of the space is shared by every workflow deploying to it (e.g. the PR previews): its settings come
+      # from repository variables, so that they all write the same one
+      - name: Check the settings of the space
+        if: inputs.environment-folder != ''
+        env:
+          SPACE_DEFAULT_ENVIRONMENT: ${{ vars.SPACE_DEFAULT_ENVIRONMENT }}
+          SPACE_PHP_HANDLER: ${{ vars.SPACE_PHP_HANDLER }}
+        run: |
+          if [[ -z "$SPACE_DEFAULT_ENVIRONMENT" ]] || [[ -z "$SPACE_PHP_HANDLER" ]]; then
+            echo "::error::Set the SPACE_DEFAULT_ENVIRONMENT (e.g. test) and SPACE_PHP_HANDLER (e.g. av-php82) repository variables: see the README."
+            exit 1
+          fi
+
+      # Instead of synchronizing ~20k files one by one (hours), upload a single archive (minutes), unpacked on the
+      # server and swapped with the live release at once
+      - name: Deploy as a single archive
+        if: inputs.environment-folder != ''
+        timeout-minutes: 60
+        uses: ./.github/actions/ftp-archive-deploy
+        with:
+          ftp-server: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          ftp-username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          url: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
+          target: ${{ inputs.environment-folder }}
+          # The router of the space (e.g. `<site>` to `test/`, `pr-<N>.<site>` to `previews/`)
+          manage-router: true
+          default-environment: ${{ vars.SPACE_DEFAULT_ENVIRONMENT }}
+          php-handler: ${{ vars.SPACE_PHP_HANDLER }}
+          # `.env` is managed on the server, and the files of the environment survive its releases
+          keep: |
+            .env
+            storage/app
+            storage/logs
+
       - name: Clear cache
+        if: inputs.environment-folder == ''
         uses: ./.github/actions/altervista-clear-cache-action
         with:
-          ftp-hostname: ${{ secrets.ftp_server }}
-          ftp-username: ${{ secrets.ftp_username }}
-          ftp-password: ${{ secrets.ftp_password }}
+          ftp-hostname: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          ftp-username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
 
       - name: Find remote environment
         id: remote-env-raw
         uses: ./.github/actions/altervista-artisan-action
         with:
           url: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
-          ftp-hostname: ${{ secrets.ftp_server }}
-          ftp-username: ${{ secrets.ftp_username }}
-          ftp-password: ${{ secrets.ftp_password }}
+          ftp-hostname: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          ftp-username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          token-file: ${{ inputs.environment-folder != '' && format('{0}/', inputs.environment-folder) || '' }}storage/framework/.artisan-token
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           commands: "config:show app.env"
           verbose: true
@@ -218,9 +232,10 @@ jobs:
         uses: ./.github/actions/altervista-artisan-action
         with:
           url: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
-          ftp-hostname: ${{ secrets.ftp_server }}
-          ftp-username: ${{ secrets.ftp_username }}
-          ftp-password: ${{ secrets.ftp_password }}
+          ftp-hostname: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          ftp-username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          token-file: ${{ inputs.environment-folder != '' && format('{0}/', inputs.environment-folder) || '' }}storage/framework/.artisan-token
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           commands: |
             # ------------------------- Test Artisan endpoint -------------------------
@@ -230,16 +245,19 @@ jobs:
             php artisan config:show app.env
 
             # -------------------------     Clear Cache     -------------------------
-            php artisan optimize:clear
+            # Except the cache store, whose table may not exist before migrating (e.g. after changing `DB_PREFIX`):
+            # it is cleared after the migrations
+            php artisan optimize:clear --except=cache
 
       - name: Run Artisan commands
         id: run-artisan
         uses: ./.github/actions/altervista-artisan-action
         with:
           url: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
-          ftp-hostname: ${{ secrets.ftp_server }}
-          ftp-username: ${{ secrets.ftp_username }}
-          ftp-password: ${{ secrets.ftp_password }}
+          ftp-hostname: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          ftp-username: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          token-file: ${{ inputs.environment-folder != '' && format('{0}/', inputs.environment-folder) || '' }}storage/framework/.artisan-token
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           commands: |
             # ------------------------- Migrations / Seeder -------------------------

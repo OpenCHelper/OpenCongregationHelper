@@ -111,6 +111,7 @@ class AppPanelProvider extends PanelProvider
                     ->color(fn () => match (app()->environment()) {
                         'local' => Color::Blue,             // 1. Local development machine
                         'nightly' => Color::Amber,          // 2. First stage (nightly)
+                        'preview' => Color::Purple,         // 2. Pull request previews
                         'staging', 'uat' => Color::Orange,  // 3. Pre-production
                         'production' => Color::Red,         // 4. Production
                         default => Color::Fuchsia,          // (unknown)

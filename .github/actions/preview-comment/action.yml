@@ -1,0 +1,63 @@
+name: "Preview comment"
+description: "Create or update the comment showing the status of the preview of a PR (needs `pull-requests: write`)"
+inputs:
+  pr:
+    description: "Number of the PR."
+    required: true
+  status:
+    description: "One of: deploying, ready, failed, cancelled, removed."
+    required: true
+  url:
+    description: "URL of the preview."
+    required: false
+    default: ""
+  sha:
+    description: "Deployed commit."
+    required: false
+    default: ""
+  login:
+    description: "Email of the root user of the preview."
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Create or update the preview comment
+      uses: actions/github-script@v8
+      env:
+        PR_NUMBER: ${{ inputs.pr }}
+        PREVIEW_STATUS: ${{ inputs.status }}
+        PREVIEW_URL: ${{ inputs.url }}
+        PREVIEW_SHA: ${{ inputs.sha }}
+        PREVIEW_LOGIN: ${{ inputs.login }}
+      with:
+        script: |
+          const marker = '<!-- preview-deployment -->';
+          const { PR_NUMBER, PREVIEW_STATUS, PREVIEW_URL, PREVIEW_SHA, PREVIEW_LOGIN } = process.env;
+          const issue_number = Number(PR_NUMBER);
+          const commit = PREVIEW_SHA ? `\`${PREVIEW_SHA.slice(0, 7)}\`` : 'the latest commit';
+          const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+          const messages = {
+            deploying: `⏳ Deploying ${commit} to ${PREVIEW_URL}... ([workflow run](${run}))`,
+            ready: [
+              `✅ **Ready**: ${PREVIEW_URL} (${commit})`,
+              '',
+              `Log in as \`${PREVIEW_LOGIN}\`, with the password stored in the \`ROOT_PASSWORD\` secret of the PREVIEW environment.`,
+              'The data is dummy and is reset on every push.',
+            ].join('\n'),
+            failed: `❌ The deployment of ${commit} failed: see the [workflow run](${run}).`,
+            cancelled: `⏹️ The deployment of ${commit} was cancelled (e.g. by a newer push).`,
+            removed: '🗑️ The preview was removed, together with its database tables.',
+          };
+
+          const body = `${marker}\n### Preview\n\n${messages[PREVIEW_STATUS] ?? PREVIEW_STATUS}`;
+
+          const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number });
+          const existing = comments.find((comment) => comment.body?.startsWith(marker));
+
+          if (existing) {
+            await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+          } else {
+            await github.rest.issues.createComment({ ...context.repo, issue_number, body });
+          }

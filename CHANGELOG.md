@@ -7,8 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- PR previews: every PR gets its own preview at `https://pr-<N>.<site>.altervista.org`, redeployed with fresh dummy
+  data on every push and removed when the PR is closed or merged. All the previews share one Altervista space (a
+  dedicated one, or the TEST one) and its database, each one prefixing its tables with `p<N>_` (see the README). A
+  shared `robots.txt` keeps them out of the search engines.
+- Altervista spaces hosting several environments: each one lives in its own folder (`test/`, `previews/`, ...), and the
+  `.htaccess` of the root routes the requests by host (`<site>` to `test/`, `pr-<N>.<site>` to the previews,
+  `<name>.<site>` to `<name>/`).
+
 ### Changed
 
+- **The Artisan endpoints moved from the `artisan.` subdomain to the `/api/artisan` path** of the application (e.g.
+  `https://example.com/api/artisan/queue/process`): update the URLs called by the external cron services.
+- `db:wipe` (also run by `migrate:fresh`) only drops the tables of the installation: those starting with its table
+  prefix (`DB_PREFIX`). Without a prefix, it refuses to run when the database also holds the tables of other
+  installations, instead of dropping them too.
+- **TEST is deployed into the `test/` folder of its space**, without the development dependencies, and its tables are
+  prefixed with `test_`: before merging, move its `.env` file into `test/` and set `DB_PREFIX='test_'` (see the
+  README).
+- TEST is deployed as a single archive, unpacked on the server and swapped with the live release at once (minutes
+  instead of hours, and no more mix of old and new files while uploading), keeping `.env`, `storage/app` and
+  `storage/logs`. The unpacking is split in requests that stay within the PHP execution time limit of the server, and
+  retried when they fail.
+- The deployments use GitHub environments (`NIGHTLY` for TEST, `UAT` for PRE-PRODUCTION, `PREVIEW` for the PR previews),
+  whose secrets share the same names (`FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`): **before merging, create them**
+  with the values of the old `FTP_*_TEST` and `FTP_*_QA` repository secrets.
+- The archive deployments are packaged as the `ftp-archive-deploy` action (`.github/actions/`), used by TEST and the PR
+  previews: it bundles its PHP deployer, installed in `_deployer/<version>/` of the space, and writes the router of the
+  spaces hosting several environments (from the `SPACE_DEFAULT_ENVIRONMENT` and `SPACE_PHP_HANDLER` repository
+  variables), sending each host straight to the `public/` folder of its environment.
+- `fakerphp/faker` is a production dependency, so that the PR previews and TEST can be installed without the
+  development dependencies and still seed dummy data.
 - Upgraded to Filament 5 and Livewire 4, together with the Filament plugins (among them the knowledge base, now at
   version 3, and the activity log, now at version 4).
 - The **Logs** page (Developer group, super administrators only) now uses `achyutn/filament-log-viewer`, since
@@ -17,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Sorting territories by assignment duration, and grouping them by campaign, failing when the tables are prefixed
+  (`DB_PREFIX`).
 - Assignments of a terminated campaign failing to save when edited, for example to return the territory, with "The
   selected campaign is invalid" and "Cannot assign territories to a terminated campaign". A terminated campaign is
   now refused only when an assignment is linked to it, and this is enforced for every assignment saved, not only
