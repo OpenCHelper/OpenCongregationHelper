@@ -106,6 +106,20 @@ jobs:
           echo "${{ github.sha }}" > .git-commit-hash
           echo "ref: ${{ github.ref }}" > .git-branch-name
 
+      # The files never deployed (`.git-ftp-ignore`, also read by the archive deployments), as FTP-Deploy globs
+      - name: Read the files never deployed
+        id: never-deployed
+        if: inputs.environment-folder == ''
+        run: |
+          {
+            echo "app<<EOF_NEVER_DEPLOYED"
+            scripts/git_ftp_ignore_globs.sh .git-ftp-ignore app
+            echo "EOF_NEVER_DEPLOYED"
+            echo "vendor<<EOF_NEVER_DEPLOYED"
+            scripts/git_ftp_ignore_globs.sh .git-ftp-ignore vendor
+            echo "EOF_NEVER_DEPLOYED"
+          } >> "$GITHUB_OUTPUT"
+
       - name: FTP Deploy (application)
         if: inputs.environment-folder == ''
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
@@ -138,6 +152,7 @@ jobs:
             vendor
             vendor/**
             **/node_modules/**
+            ${{ steps.never-deployed.outputs.app }}
 
       # Separate FTP deploy so that if it fails, the application is still deployed
       # and the vendor folder can be deployed later.
@@ -156,6 +171,12 @@ jobs:
           log-level: ${{ inputs.verbose && 'verbose' || 'minimal' }}
           timeout: 0
           dangerous-clean-slate: ${{ inputs.delete-remote-contents }}
+          # FTP-Deploy's default exclusions, plus the tests and documentation of the packages
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            ${{ steps.never-deployed.outputs.vendor }}
 
       # The router of the space is shared by every workflow deploying to it (e.g. the PR previews): its settings come
       # from repository variables, so that they all write the same one
@@ -191,6 +212,8 @@ jobs:
             .env
             storage/app
             storage/logs
+          # A release that changes no Composer package uploads only the autoloader of `vendor/`
+          reuse-vendor: true
 
       - name: Clear cache
         if: inputs.environment-folder == ''
@@ -249,6 +272,52 @@ jobs:
             # it is cleared after the migrations
             php artisan optimize:clear --except=cache
 
+      # `storage:link --force` replaces a link, not a folder: the file sync of PRE-PRODUCTION used to upload the build's
+      # link as a plain folder. It is removed only when it holds nothing but the `.gitignore` of that copy, and never
+      # recursively. Some FTP servers list a link as a folder: a probe file put in `storage/app/public` shows up in
+      # `public/storage` only when it is the link, which is then left alone
+      - name: Replace the public/storage folder with the link
+        env:
+          FTP_SERVER: ${{ vars.FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ vars.FTP_USERNAME || secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FOLDER: ${{ inputs.environment-folder != '' && format('{0}/', inputs.environment-folder) || '' }}
+        run: |
+          command -v lftp > /dev/null || { sudo apt-get update && sudo apt-get install -y lftp; }
+
+          ftp () {
+            LFTP_PASSWORD="$FTP_PASSWORD" lftp --norc \
+              -e 'set ssl:check-hostname no; set net:max-retries 3; set net:reconnect-interval-base 5' \
+              -u "$FTP_USERNAME" --env-password "$FTP_SERVER"
+          }
+
+          link="${FOLDER}public/storage"
+          target="${FOLDER}storage/app/public"
+
+          # `/` after a folder (or a link listed as one), `@` after a link, nothing when it does not exist
+          if [[ "$(ftp <<< "cls -d -F '${link}'" 2> /dev/null || true)" != */ ]]; then
+            echo "${link} is not a folder: storage:link creates (or recreates) the link."
+            exit 0
+          fi
+
+          probe=".storage-link-probe-${GITHUB_RUN_ID:-$$}"
+          probe_file="$(mktemp)"
+          listing="$(ftp <<< "put '${probe_file}' -o '${target}/${probe}'; cls -1 -a -B '${link}/'; rm -f '${target}/${probe}'" 2> /dev/null || true)"
+          rm -f "$probe_file"
+
+          if grep -qxF "$probe" <<< "$listing"; then
+            echo "${link} is already the link (listed as a folder by the server): storage:link recreates it."
+            exit 0
+          fi
+
+          if grep -qvxE '(\.gitignore|\.|\.\.)?' <<< "$listing"; then
+            echo "::warning::${link} is a folder holding other files: move them into ${target} and delete it, so that storage:link can create the link."
+            exit 0
+          fi
+
+          ftp <<< "rm -f '${link}/.gitignore'; rmdir '${link}'"
+          echo "Removed the ${link} folder (a copy of the build's link): storage:link creates the link."
+
       - name: Run Artisan commands
         id: run-artisan
         uses: ./.github/actions/altervista-artisan-action
@@ -265,6 +334,9 @@ jobs:
 
             ${{ inputs.seed-dummy-data && 'artisan db:seed --class=FakeDataSeeder' || '' }}
             ${{ inputs.setup-root-user && 'artisan shield:super-admin --user=1 --panel=app' || '' }}
+
+            # The `public/storage` link is never deployed (the build's one would be uploaded as a plain folder)
+            artisan storage:link --force
 
             # ------------------------- Optimizations -------------------------
             # First clear all previous optimizations

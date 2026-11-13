@@ -110,7 +110,12 @@ final class SpaceDeployer
             'info' => $this->info(),
             'list' => $this->list(),
             'extract' => $this->extract($this->target($input), (int) ($input['offset'] ?? 0), $this->budget($input)),
-            'activate' => $this->activate($this->target($input), $this->keep($input)),
+            'hash' => $this->hash($this->target($input), $this->safeRelativePath((string) ($input['path'] ?? ''))),
+            'activate' => $this->activate(
+                $this->target($input),
+                $this->relativePaths($input, 'keep'),
+                $this->relativePaths($input, 'reuse'),
+            ),
             'deactivate' => $this->deactivate($this->preview($input)),
             'delete' => $this->delete($this->target($input), (string) ($input['variant'] ?? ''), $this->budget($input)),
             'reset-database' => $this->resetDatabase($this->preview($input)),
@@ -158,6 +163,19 @@ final class SpaceDeployer
         natsort($leftovers);
 
         return ['previews' => array_values($previews), 'leftovers' => array_values($leftovers)];
+    }
+
+    /**
+     * The SHA-256 of a file of the live release of a target (e.g. `vendor/composer/installed.json`), or `null` when the
+     * target or the file does not exist: the client compares it with its own copy to know what it can reuse.
+     *
+     * @return array{hash: ?string}
+     */
+    public function hash(string $target, string $path): array
+    {
+        $file = $this->path($target).'/'.$this->safeRelativePath($path);
+
+        return ['hash' => is_file($file) && ! is_link($file) ? hash_file('sha256', $file) : null];
     }
 
     /**
@@ -220,17 +238,22 @@ final class SpaceDeployer
      * Replace the live release of a target with the unpacked one, moving the previous release to `<target>.old` (to be
      * deleted), and delete the archive.
      *
-     * The given paths (e.g. `.env` and `storage/app` for an environment whose files are managed on the server) are
+     * The `keep` paths (e.g. `.env` and `storage/app` for an environment whose files are managed on the server) are
      * moved from the live release into the new one first, replacing the copies of the new release.
+     *
+     * Then, the entries of the `reuse` folders of the live release that the new release lacks are moved into it, while
+     * those it has stay: e.g. the packages of `vendor/`, when the archive carries only `vendor/autoload.php` and
+     * `vendor/composer/` because the packages did not change. Moving them is instant, instead of unpacking them again.
      *
      * Every step can be repeated when a request fails halfway: the paths already moved are no longer in the live
      * release, the live release is no longer there once moved to `.old`, and the release was already activated when
      * there is no `.next` one left.
      *
      * @param  list<string>  $keep
-     * @return array{activated: bool, replaced: bool, kept: list<string>}
+     * @param  list<string>  $reuse
+     * @return array{activated: bool, replaced: bool, kept: list<string>, reused: list<string>}
      */
-    public function activate(string $target, array $keep = []): array
+    public function activate(string $target, array $keep = [], array $reuse = []): array
     {
         $livePath = $this->path($target);
         $releasePath = $this->path($target, 'next');
@@ -240,7 +263,7 @@ final class SpaceDeployer
                 // Already activated by a previous request, whose response was lost
                 $this->deleteArchive($target);
 
-                return ['activated' => false, 'replaced' => false, 'kept' => []];
+                return ['activated' => false, 'replaced' => false, 'kept' => [], 'reused' => []];
             }
 
             throw new RuntimeException("{$target}.next does not exist: unpack the archive first.");
@@ -249,7 +272,7 @@ final class SpaceDeployer
         $kept = [];
 
         foreach ($keep as $path) {
-            $path = $this->safeKeptPath($path);
+            $path = $this->safeRelativePath($path);
 
             if (! file_exists($livePath.'/'.$path) && ! is_link($livePath.'/'.$path)) {
                 continue;
@@ -266,6 +289,34 @@ final class SpaceDeployer
             }
 
             $kept[] = $path;
+        }
+
+        $reused = [];
+
+        foreach ($reuse as $path) {
+            $path = $this->safeRelativePath($path);
+            $liveFolder = $livePath.'/'.$path;
+            $releaseFolder = $releasePath.'/'.$path;
+
+            if (! is_dir($liveFolder) || is_link($liveFolder)) {
+                continue;
+            }
+
+            if (! is_dir($releaseFolder) && ! mkdir($releaseFolder, 0755, true)) {
+                throw new RuntimeException("Cannot create {$path} in {$target}.next.");
+            }
+
+            foreach (array_diff(scandir($liveFolder) ?: [], ['.', '..']) as $name) {
+                if (file_exists($releaseFolder.'/'.$name) || is_link($releaseFolder.'/'.$name)) {
+                    continue;
+                }
+
+                if (! rename($liveFolder.'/'.$name, $releaseFolder.'/'.$name)) {
+                    throw new RuntimeException("Cannot move {$path}/{$name} of {$target} to the new release.");
+                }
+            }
+
+            $reused[] = $path;
         }
 
         $replaced = false;
@@ -288,7 +339,7 @@ final class SpaceDeployer
 
         $this->deleteArchive($target);
 
-        return ['activated' => true, 'replaced' => $replaced, 'kept' => $kept];
+        return ['activated' => true, 'replaced' => $replaced, 'kept' => $kept, 'reused' => $reused];
     }
 
     /**
@@ -459,26 +510,26 @@ final class SpaceDeployer
     }
 
     /**
-     * The validated paths to keep from the live release, when activating a new one.
+     * The validated paths of the live release given in a field of the request (`keep` or `reuse`).
      *
      * @param  array<string, mixed>  $input
      * @return list<string>
      */
-    private function keep(array $input): array
+    private function relativePaths(array $input, string $field): array
     {
-        $keep = $input['keep'] ?? [];
+        $paths = $input[$field] ?? [];
 
-        if (! is_array($keep)) {
-            throw new InvalidArgumentException('The paths to keep must be a list.');
+        if (! is_array($paths)) {
+            throw new InvalidArgumentException("The '{$field}' paths must be a list.");
         }
 
-        return array_values(array_map(function (mixed $path): string {
+        return array_values(array_map(function (mixed $path) use ($field): string {
             if (! is_string($path)) {
-                throw new InvalidArgumentException('The paths to keep must be strings.');
+                throw new InvalidArgumentException("The '{$field}' paths must be strings.");
             }
 
-            return $this->safeKeptPath($path);
-        }, $keep));
+            return $this->safeRelativePath($path);
+        }, $paths));
     }
 
     /**
@@ -529,12 +580,12 @@ final class SpaceDeployer
     }
 
     /**
-     * Refuse paths to keep that point outside of the release folder (or to the whole folder).
+     * Refuse paths of a release that point outside of its folder (or to the whole folder).
      */
-    private function safeKeptPath(string $path): string
+    private function safeRelativePath(string $path): string
     {
         if (! preg_match('#^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$#', $path) || preg_match('#(^|/)\.{1,2}(/|$)#', $path)) {
-            throw new InvalidArgumentException("Invalid path to keep '{$path}'.");
+            throw new InvalidArgumentException("Invalid path '{$path}': it must be inside the release.");
         }
 
         return $path;

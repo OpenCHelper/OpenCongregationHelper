@@ -1,0 +1,56 @@
+# Files and folders never deployed (TEST, PR previews and PRE-PRODUCTION): they are only needed to develop, build or
+# test the application, and would only take space on the server.
+#
+# The format is git-ftp's: one shell glob per line, matched against the whole path relative to the root of the
+# repository, where `*` also matches `/` (so a folder is written `folder/*`). Lines starting with `#` are comments.
+
+# This file
+.git-ftp-ignore
+
+# Development tools, their settings and the tests
+.artifacts/*
+.devcontainer/*
+.github/*
+.vscode/*
+docker/*
+docker-compose.yml
+tests/*
+AGENTS.md
+README.md
+boost.json
+.dockerignore
+.editorconfig
+.gitattributes
+.gitignore
+.markdownlint.json
+.php-version
+.phpunit.result.cache
+.phpstorm.meta.php
+_ide_helper*.php
+phpstan.neon
+phpunit.xml
+
+# Scripts of the CI
+scripts/*
+
+# Front-end sources and their build settings: the assets are compiled into `public/build`
+package.json
+package-lock.json
+vite.config.js
+resources/css/*
+resources/js/*
+
+# The installed packages are listed in `vendor/composer/installed.json`
+composer.lock
+
+# Leftovers of the build: compiled views, and the copy of the `public/storage` link (created on the server instead, by
+# `artisan storage:link`)
+storage/framework/views/*.php
+storage/framework/testing/*
+public/storage
+public/storage/*
+
+# Tests and documentation of the Composer packages
+vendor/*/*/tests/*
+vendor/*/*/docs/*
+vendor/*/*/.github/*

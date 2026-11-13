@@ -275,6 +275,8 @@ jobs:
           ftp-password: ${{ secrets.FTP_PASSWORD }}
           url: https://${{ steps.resolve.outputs.site }}
           target: ${{ steps.resolve.outputs.slug }}
+          # A push that changes no Composer package uploads only the autoloader of `vendor/`
+          reuse-vendor: true
 
       # Fresh data on every push: drop the tables of the preview (and only them) before migrating again
       - name: Drop the database tables of the preview
@@ -303,6 +305,9 @@ jobs:
             artisan migrate --seed
             artisan db:seed --class=FakeDataSeeder
             artisan shield:super-admin --user=1 --panel=app
+
+            # The `public/storage` link is never deployed (the build's one would be uploaded as a plain folder)
+            artisan storage:link --force
 
             artisan config:cache
             artisan event:cache
@@ -465,9 +470,11 @@ jobs:
           }
 
           failed=()
+          removed=()
           for slug in $slugs; do
             echo "::group::Removing ${slug}"
             if remove_preview "$slug"; then
+              removed+=("${slug#pr-}")
               echo "- Removed \`${slug}\`" >> "$GITHUB_STEP_SUMMARY"
             else
               failed+=("$slug")
@@ -478,31 +485,47 @@ jobs:
 
           [[ -n "$slugs" ]] || echo "Nothing to remove." >> "$GITHUB_STEP_SUMMARY"
 
+          # The PRs whose preview is gone, whose deployments are then marked as inactive
+          echo "prs=${removed[*]}" >> "$GITHUB_OUTPUT"
+
           if (( ${#failed[@]} > 0 )); then
             echo "::error::Failed to remove: ${failed[*]} (see the logs above)."
             exit 1
           fi
 
-      - name: Mark the deployments of the PR as inactive
-        if: steps.remove.outputs.pr != '' && github.event_name == 'pull_request'
+      # Also after a manual teardown or a cleanup, which know only the numbers of the PRs: the deployments are recorded
+      # under the branch of the PR, which GitHub still returns once the PR is merged or its branch deleted
+      - name: Mark the deployments of the removed previews as inactive
+        if: ${{ !cancelled() && steps.remove.outputs.prs != '' }}
         continue-on-error: true
         uses: actions/github-script@v8
         env:
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PRS: ${{ steps.remove.outputs.prs }}
         with:
           script: |
-            const deployments = await github.paginate(github.rest.repos.listDeployments, {
-              ...context.repo,
-              environment: 'PREVIEW',
-              ref: process.env.HEAD_REF,
-            });
+            const numbers = process.env.PRS.split(' ').filter(Boolean).map(Number);
 
-            for (const deployment of deployments) {
-              await github.rest.repos.createDeploymentStatus({
-                ...context.repo,
-                deployment_id: deployment.id,
-                state: 'inactive',
-              });
+            for (const number of numbers) {
+              try {
+                const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: number });
+                const deployments = await github.paginate(github.rest.repos.listDeployments, {
+                  ...context.repo,
+                  environment: 'PREVIEW',
+                  ref: pr.head.ref,
+                });
+
+                for (const deployment of deployments) {
+                  await github.rest.repos.createDeploymentStatus({
+                    ...context.repo,
+                    deployment_id: deployment.id,
+                    state: 'inactive',
+                  });
+                }
+
+                core.info(`PR #${number}: ${deployments.length} deployment(s) marked as inactive.`);
+              } catch (error) {
+                core.warning(`PR #${number}: could not mark its deployments as inactive (${error.message}).`);
+              }
             }
 
       - name: Comment on the PR (removed)

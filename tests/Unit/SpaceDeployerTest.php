@@ -197,7 +197,7 @@ test('activating a release replaces the live preview and deletes the archive', f
 
     $this->deployer->extract('pr-7');
 
-    expect($this->deployer->activate('pr-7'))->toBe(['activated' => true, 'replaced' => true, 'kept' => []])
+    expect($this->deployer->activate('pr-7'))->toBe(['activated' => true, 'replaced' => true, 'kept' => [], 'reused' => []])
         ->and(file_get_contents($this->previews.'/pr-7/public/index.php'))->toBe('new')
         ->and(file_get_contents($this->previews.'/pr-7.old/public/index.php'))->toBe('old')
         ->and(file_exists($this->previews.'/pr-7.zip'))->toBeFalse()
@@ -209,7 +209,7 @@ test('environments are deployed to their folder in the root of the space', funct
 
     $this->deployer->extract('test');
 
-    expect($this->deployer->activate('test'))->toBe(['activated' => true, 'replaced' => false, 'kept' => []])
+    expect($this->deployer->activate('test'))->toBe(['activated' => true, 'replaced' => false, 'kept' => [], 'reused' => []])
         ->and(file_get_contents($this->root.'/test/public/index.php'))->toBe('new')
         ->and(file_exists($this->root.'/test.zip'))->toBeFalse();
 });
@@ -229,7 +229,7 @@ test('activating a release keeps the given paths of the live one', function () {
 
     $result = $this->deployer->activate('test', ['.env', 'storage/app', 'storage/logs', 'storage/missing']);
 
-    expect($result)->toBe(['activated' => true, 'replaced' => true, 'kept' => ['.env', 'storage/app', 'storage/logs']])
+    expect($result)->toBe(['activated' => true, 'replaced' => true, 'kept' => ['.env', 'storage/app', 'storage/logs'], 'reused' => []])
         ->and(treeOf($this->root.'/test'))->toBe([
             '.env' => 'APP_KEY=live',
             'public/index.php' => 'new',
@@ -244,9 +244,201 @@ test('activating a release resumes after a request stopped halfway', function ()
     createFiles($this->root.'/test.next', ['.env' => 'APP_KEY=live', 'public/index.php' => 'new']);
     createFiles($this->root.'/test.old', ['public/index.php' => 'old']);
 
-    expect($this->deployer->activate('test', ['.env']))->toBe(['activated' => true, 'replaced' => false, 'kept' => []])
+    expect($this->deployer->activate('test', ['.env']))->toBe(['activated' => true, 'replaced' => false, 'kept' => [], 'reused' => []])
         ->and(treeOf($this->root.'/test'))->toBe(['.env' => 'APP_KEY=live', 'public/index.php' => 'new'])
-        ->and($this->deployer->activate('test', ['.env']))->toBe(['activated' => false, 'replaced' => false, 'kept' => []]);
+        ->and($this->deployer->activate('test', ['.env']))->toBe(['activated' => false, 'replaced' => false, 'kept' => [], 'reused' => []]);
+});
+
+test('activating a release reuses the entries of the live folders that the new release lacks', function () {
+    createFiles($this->root.'/test', [
+        'public/index.php' => 'old',
+        'vendor/autoload.php' => 'old autoloader',
+        'vendor/bin/pest' => 'proxy',
+        'vendor/composer/autoload_classmap.php' => 'old classmap',
+        'vendor/laravel/framework/src/Application.php' => 'framework',
+    ]);
+    createFiles($this->root.'/test.next', [
+        'public/index.php' => 'new',
+        'vendor/autoload.php' => 'new autoloader',
+        'vendor/composer/autoload_classmap.php' => 'new classmap',
+    ]);
+
+    expect($this->deployer->activate('test', [], ['vendor', 'missing']))
+        ->toBe(['activated' => true, 'replaced' => true, 'kept' => [], 'reused' => ['vendor']])
+        // The packages come from the live release, the autoloader from the new one
+        ->and(treeOf($this->root.'/test'))->toBe([
+            'public/index.php' => 'new',
+            'vendor/autoload.php' => 'new autoloader',
+            'vendor/bin/pest' => 'proxy',
+            'vendor/composer/autoload_classmap.php' => 'new classmap',
+            'vendor/laravel/framework/src/Application.php' => 'framework',
+        ])
+        ->and(treeOf($this->root.'/test.old'))->toBe([
+            'public/index.php' => 'old',
+            'vendor/autoload.php' => 'old autoloader',
+            'vendor/composer/autoload_classmap.php' => 'old classmap',
+        ]);
+});
+
+test('reusing a folder resumes after a request stopped halfway', function () {
+    // The previous request moved `vendor/a` into the new release, then stopped
+    createFiles($this->root.'/test', ['public/index.php' => 'old', 'vendor/b/b.php' => 'b']);
+    createFiles($this->root.'/test.next', [
+        'public/index.php' => 'new',
+        'vendor/a/a.php' => 'a',
+        'vendor/autoload.php' => 'new autoloader',
+    ]);
+
+    expect($this->deployer->activate('test', [], ['vendor'])['reused'])->toBe(['vendor'])
+        ->and(treeOf($this->root.'/test'))->toBe([
+            'public/index.php' => 'new',
+            'vendor/a/a.php' => 'a',
+            'vendor/autoload.php' => 'new autoloader',
+            'vendor/b/b.php' => 'b',
+        ]);
+});
+
+test('a folder to reuse that the live release lacks is skipped, e.g. on the first deployment', function () {
+    createFiles($this->previews.'/pr-7.next', ['vendor/autoload.php' => 'new autoloader']);
+
+    expect($this->deployer->activate('pr-7', [], ['vendor']))
+        ->toBe(['activated' => true, 'replaced' => false, 'kept' => [], 'reused' => []])
+        ->and(treeOf($this->previews.'/pr-7'))->toBe(['vendor/autoload.php' => 'new autoloader']);
+});
+
+test('the hash of a file of the live release tells whether its packages can be reused', function () {
+    createFiles($this->root.'/test', ['vendor/composer/installed.json' => '{"packages": []}']);
+
+    expect($this->deployer->handle(['action' => 'hash', 'target' => 'test', 'path' => 'vendor/composer/installed.json']))
+        ->toBe(['hash' => hash('sha256', '{"packages": []}')])
+        ->and($this->deployer->hash('test', 'vendor/composer/missing.json'))->toBe(['hash' => null])
+        // No live release yet
+        ->and($this->deployer->hash('pr-7', 'vendor/composer/installed.json'))->toBe(['hash' => null]);
+});
+
+test('the paths to reuse and to hash must stay inside the release', function (array $input) {
+    $this->deployer->handle(['target' => 'test', ...$input]);
+})->with([
+    'reuse of a parent folder' => [['action' => 'activate', 'reuse' => ['../vendor']]],
+    'reuse not a list' => [['action' => 'activate', 'reuse' => 'vendor']],
+    'hash of a file outside' => [['action' => 'hash', 'path' => '../../etc/passwd']],
+    'hash without a path' => [['action' => 'hash']],
+])->throws(InvalidArgumentException::class);
+
+test('the archive can leave out a folder except some of its paths', function () {
+    createFiles($this->root.'/source', [
+        'app/Models/User.php' => 'user',
+        'vendor/autoload.php' => 'autoloader',
+        'vendor/composer/installed.json' => '{}',
+        'vendor/laravel/framework/src/Application.php' => 'framework',
+    ]);
+
+    exec(
+        'cd '.escapeshellarg($this->root.'/source').' && bash '
+            .escapeshellarg(__DIR__.'/../../.github/actions/ftp-archive-deploy/deploy.sh')
+            ." --exclude 'vendor/*' --include vendor/autoload.php --include vendor/composer create-archive "
+            .escapeshellarg($this->root.'/release.zip').' 2>&1',
+        $output,
+        $exitCode,
+    );
+
+    $archive = new ZipArchive;
+    $archive->open($this->root.'/release.zip');
+    $names = array_map(fn (int $index): string => (string) $archive->getNameIndex($index), range(0, $archive->numFiles - 1));
+    $archive->close();
+
+    expect($exitCode)->toBe(0)
+        ->and($names)->toContain('app/Models/User.php', 'vendor/autoload.php', 'vendor/composer/installed.json')
+        ->not->toContain('vendor/laravel/framework/src/Application.php');
+});
+
+/**
+ * Create the release archive of a folder with the client of the `ftp-archive-deploy` action, returning its entries.
+ *
+ * @return list<string>
+ */
+function archiveEntriesOf(string $source, string $archivePath, string $options): array
+{
+    exec(
+        'cd '.escapeshellarg($source).' && bash '
+            .escapeshellarg(__DIR__.'/../../.github/actions/ftp-archive-deploy/deploy.sh')
+            .' '.$options.' create-archive '.escapeshellarg($archivePath).' 2>&1',
+        $output,
+        $exitCode,
+    );
+
+    expect($exitCode)->toBe(0, implode("\n", $output));
+
+    $archive = new ZipArchive;
+    $archive->open($archivePath);
+    $names = array_map(fn (int $index): string => (string) $archive->getNameIndex($index), range(0, $archive->numFiles - 1));
+    $archive->close();
+
+    return $names;
+}
+
+test('the archive leaves out the paths of a git-ftp ignore file, also among the paths added back', function () {
+    createFiles($this->root.'/source', [
+        '.git-ftp-ignore' => "# Development files\n\nAGENTS.md\r\nscripts/*\nstorage/framework/views/*.php\nvendor/*/*/tests/*\n",
+        'AGENTS.md' => 'agents',
+        'app/Models/User.php' => 'user',
+        'docs/AGENTS.md' => 'not at the root',
+        'scripts/deploy.sh' => 'script',
+        'scripts/nested/run.sh' => 'script',
+        'storage/framework/views/.gitignore' => '*',
+        'storage/framework/views/0a1b2c3d.php' => 'compiled',
+        'vendor/autoload.php' => 'autoloader',
+        'vendor/composer/installed.json' => '{}',
+        'vendor/composer/semver/src/Semver.php' => 'semver',
+        'vendor/composer/semver/tests/SemverTest.php' => 'test',
+        'vendor/laravel/framework/src/Application.php' => 'framework',
+        'vendor/laravel/framework/tests/ApplicationTest.php' => 'test',
+    ]);
+
+    $full = archiveEntriesOf($this->root.'/source', $this->root.'/full.zip', '--exclude-from .git-ftp-ignore');
+    // Reusing the packages of the live release: only the autoloader is added back
+    $reused = archiveEntriesOf(
+        $this->root.'/source',
+        $this->root.'/reused.zip',
+        "--exclude-from .git-ftp-ignore --exclude 'vendor/*' --include vendor/autoload.php --include vendor/composer",
+    );
+
+    expect($full)->toContain(
+        'app/Models/User.php',
+        'docs/AGENTS.md',
+        'storage/framework/views/.gitignore',
+        'vendor/composer/semver/src/Semver.php',
+        'vendor/laravel/framework/src/Application.php',
+    )->and($reused)->toContain('vendor/autoload.php', 'vendor/composer/installed.json', 'vendor/composer/semver/src/Semver.php');
+
+    foreach ([
+        'AGENTS.md',
+        'scripts/deploy.sh',
+        'scripts/nested/run.sh',
+        'storage/framework/views/0a1b2c3d.php',
+        'vendor/composer/semver/tests/SemverTest.php',
+        'vendor/laravel/framework/tests/ApplicationTest.php',
+    ] as $path) {
+        expect($full)->not->toContain($path);
+    }
+
+    expect($reused)->not->toContain('vendor/composer/semver/tests/SemverTest.php')
+        ->and($reused)->not->toContain('vendor/laravel/framework/src/Application.php');
+});
+
+test('a missing ignore file fails the creation of the archive', function () {
+    createFiles($this->root.'/source', ['app/Models/User.php' => 'user']);
+
+    exec(
+        'cd '.escapeshellarg($this->root.'/source').' && bash '
+            .escapeshellarg(__DIR__.'/../../.github/actions/ftp-archive-deploy/deploy.sh')
+            .' --exclude-from .git-ftp-ignore create-archive '.escapeshellarg($this->root.'/release.zip').' 2>&1',
+        $output,
+        $exitCode,
+    );
+
+    expect($exitCode)->not->toBe(0)
+        ->and(implode("\n", $output))->toContain('does not exist');
 });
 
 test('a release cannot be activated before being unpacked', function () {

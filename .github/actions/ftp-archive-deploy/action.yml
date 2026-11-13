@@ -42,6 +42,21 @@ inputs:
     description: "Additional `zip` patterns of the files to leave out of the archive (one per line)"
     required: false
     default: ""
+  exclude-file:
+    description: >-
+      File of the paths to leave out of the archive, relative to `source` (ignored when missing), in git-ftp's
+      `.git-ftp-ignore` format: one shell glob per line, matched against the whole path, where `*` also matches `/` (a
+      folder is written `folder/*`); lines starting with `#` are comments
+    required: false
+    default: ".git-ftp-ignore"
+  reuse-vendor:
+    description: >-
+      Reuse the Composer packages of the live release when they did not change (same `vendor/composer/installed.json`,
+      and same `exclude-file`): the archive carries only `vendor/autoload.php` and `vendor/composer/` (whose autoloader
+      also maps the classes of the application), and the packages are moved from the live release. With most
+      deployments changing no package, it saves uploading and unpacking most of the files
+    required: false
+    default: "false"
   manage-router:
     description: >-
       Write the router of the space (the `.htaccess` of its root and of `previews/`) before deploying: for spaces
@@ -73,6 +88,9 @@ outputs:
   entries:
     description: "Number of entries of the archive"
     value: ${{ steps.deploy.outputs.entries }}
+  reused-vendor:
+    description: "Whether the Composer packages of the live release were reused (`true`/`false`)"
+    value: ${{ steps.deploy.outputs.reused-vendor }}
   duration:
     description: "Duration of the deployment (upload, unpacking and swap), in seconds"
     value: ${{ steps.deploy.outputs.duration }}
@@ -105,6 +123,8 @@ runs:
         SOURCE: ${{ inputs.source }}
         KEEP: ${{ inputs.keep }}
         EXCLUDE: ${{ inputs.exclude }}
+        EXCLUDE_FILE: ${{ inputs.exclude-file }}
+        REUSE_VENDOR: ${{ inputs.reuse-vendor }}
         MANAGE_ROUTER: ${{ inputs.manage-router }}
         DEFAULT_ENVIRONMENT: ${{ inputs.default-environment }}
         PHP_HANDLER: ${{ inputs.php-handler }}
@@ -125,6 +145,39 @@ runs:
         while IFS= read -r pattern; do
           [[ -n "$pattern" ]] && exclude_args+=(--exclude "$pattern")
         done <<< "$EXCLUDE"
+
+        exclude_file=""
+        if [[ -n "$EXCLUDE_FILE" ]] && [[ -f "${SOURCE}/${EXCLUDE_FILE}" ]]; then
+          exclude_file="${SOURCE}/${EXCLUDE_FILE}"
+          exclude_args+=(--exclude-from "$EXCLUDE_FILE")
+        fi
+
+        # Same Composer packages as the live release: only the autoloader is uploaded, the packages are moved from it.
+        # The fingerprint of what `vendor/` holds on the server, its packages and the files left out of it, goes with
+        # the autoloader: changing the files left out uploads the packages again once
+        reuse_args=()
+        reused_vendor=false
+        installed="${SOURCE}/vendor/composer/installed.json"
+        fingerprint="${SOURCE}/vendor/composer/ftp-archive-deploy.fingerprint"
+        if [[ "$REUSE_VENDOR" == "true" ]] && [[ -f "$installed" ]]; then
+          {
+            sha256sum < "$installed"
+            if [[ -n "$exclude_file" ]]; then
+              sha256sum < "$exclude_file"
+            fi
+          } | sha256sum | cut -d ' ' -f 1 > "$fingerprint"
+
+          live_hash="$(deployer hash "$TARGET" vendor/composer/ftp-archive-deploy.fingerprint | jq -r '.hash // empty')"
+          if [[ -n "$live_hash" ]] && [[ "$live_hash" == "$(sha256sum "$fingerprint" | cut -d ' ' -f 1)" ]]; then
+            echo "The Composer packages did not change: reusing the ones of the live release."
+            exclude_args+=(--exclude 'vendor/*' --include vendor/autoload.php --include vendor/composer)
+            reuse_args+=(--reuse vendor)
+            reused_vendor=true
+          else
+            echo "The Composer packages changed (or there is no live release yet): uploading them."
+          fi
+        fi
+
         (cd "$SOURCE" && "$DEPLOY_SCRIPT" "${exclude_args[@]}" create-archive "$archive")
 
         keep_args=()
@@ -134,7 +187,7 @@ runs:
           [[ -n "$path" ]] && keep_args+=(--keep "$path")
         done <<< "$KEEP"
 
-        summary="$(deployer deploy "$TARGET" "$archive" "${keep_args[@]}")"
+        summary="$(deployer deploy "$TARGET" "$archive" "${keep_args[@]}" "${reuse_args[@]}")"
         rm -f "$archive"
 
         echo "$summary" | jq .
@@ -142,5 +195,6 @@ runs:
           echo "max-execution-time=$(jq -r '.max_execution_time' <<< "$summary")"
           echo "time-budget=$(jq -r '.time_budget' <<< "$summary")"
           echo "entries=$(jq -r '.entries' <<< "$summary")"
+          echo "reused-vendor=${reused_vendor}"
           echo "duration=$(jq -r '.duration' <<< "$summary")"
         } >> "$GITHUB_OUTPUT"

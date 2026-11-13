@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Altervista spaces hosting several environments: each one lives in its own folder (`test/`, `previews/`, ...), and the
   `.htaccess` of the root routes the requests by host (`<site>` to `test/`, `pr-<N>.<site>` to the previews,
   `<name>.<site>` to `<name>/`).
+- TEST and preview deployments reuse the Composer packages of the live release when they did not change
+  (`reuse-vendor` input of the `ftp-archive-deploy` action): they upload and unpack about 2,000 files instead of about
+  27,000 ([#157]).
 
 ### Changed
 
@@ -40,6 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   variables), sending each host straight to the `public/` folder of its environment.
 - `fakerphp/faker` is a production dependency, so that the PR previews and TEST can be installed without the
   development dependencies and still seed dummy data.
+- The deployments (TEST, PR previews and PRE-PRODUCTION) leave out the files that only serve to develop, build or test
+  the application, listed in `.git-ftp-ignore` (git-ftp's format), among them the tests and documentation of the
+  Composer packages ([#157]).
 - Upgraded to Filament 5 and Livewire 4, together with the Filament plugins (among them the knowledge base, now at
   version 3, and the activity log, now at version 4).
 - The **Logs** page (Developer group, super administrators only) now uses `achyutn/filament-log-viewer`, since
@@ -48,6 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `public/storage` is now a link on the servers, created by `artisan storage:link` after every deployment: the
+  deployments used to upload the build's link as a plain folder, so the public files of `storage/app/public` were not
+  served. TEST and PRE-PRODUCTION first remove that folder when it holds nothing but the copy's `.gitignore`
+  ([#157]).
 - Sorting territories by assignment duration, and grouping them by campaign, failing when the tables are prefixed
   (`DB_PREFIX`).
 - Assignments of a terminated campaign failing to save when edited, for example to return the territory, with "The
@@ -377,3 +387,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#149]: https://github.com/LukeSavefrogs/registro-territori/pull/149
 [#150]: https://github.com/LukeSavefrogs/registro-territori/pull/150
 [#151]: https://github.com/LukeSavefrogs/registro-territori/pull/151
+[#157]: https://github.com/LukeSavefrogs/registro-territori/pull/157

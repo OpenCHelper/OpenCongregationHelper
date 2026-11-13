@@ -261,6 +261,8 @@ previews, and any other environment of a space reachable only through FTP:
     keep: |                                  # paths of the live release moved into the new one (optional)
       .env
       storage/app
+    reuse-vendor: true                       # reuse the Composer packages when unchanged (optional)
+    exclude-file: .git-ftp-ignore            # files never deployed (optional, this is the default)
     manage-router: true                      # write the router of the space (optional), with:
     default-environment: ${{ vars.SPACE_DEFAULT_ENVIRONMENT }}
     php-handler: ${{ vars.SPACE_PHP_HANDLER }}
@@ -270,6 +272,20 @@ It uploads the release as a single archive, unpacks it on the server with the PH
 and the new release at once. The deployer installs itself in `_deployer/<version>/` of the space (a hash of its files),
 so runs with different versions of the action never get in each other's way. Its time budget, and how long the
 deployment took, are available as outputs.
+
+With `reuse-vendor`, a release whose Composer packages did not change (same `vendor/composer/installed.json` as the
+live release) uploads only `vendor/autoload.php` and `vendor/composer/` (the autoloader, which also maps the classes of
+the application): the packages are moved from the live release instead. That is most of the files of the archive, so
+most deployments upload and unpack about 2,000 files instead of about 27,000.
+
+The files that only serve to develop, build or test the application (the tests, the development tools and their
+settings, the front-end sources, the tests and documentation of the Composer packages...) are never deployed: they are
+listed in [`.git-ftp-ignore`](.git-ftp-ignore), in git-ftp's format (one shell glob per line, matched against the whole
+path, where `*` also matches `/`). The archive deployments read it through the `exclude-file` input, and the file sync
+of PRE-PRODUCTION through [`git_ftp_ignore_globs.sh`](scripts/git_ftp_ignore_globs.sh). `public/storage` is never
+deployed either: every deployment creates the link on the server with `artisan storage:link`. Before that, TEST and
+PRE-PRODUCTION remove a `public/storage` folder left by the old file sync (checked over FTP, and only when it holds
+nothing but the `.gitignore` of the build's copy), since `storage:link` replaces a link, not a folder.
 
 With `manage-router`, the action also writes the router of the space (the `.htaccess` of its root and of `previews/`,
 from the templates of its `router/` folder), sending each host straight to the document root of its environment

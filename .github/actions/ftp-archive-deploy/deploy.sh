@@ -19,11 +19,14 @@
 #   install-router                      Upload the router to the root of the space (never deletes anything)
 #   create-archive <file>               Create the release archive of the current folder (no FTP involved)
 #   deploy <target> <archive>           Upload the archive and replace the live release of the target with it,
-#                                       keeping the `--keep` paths of the live release (e.g. `.env`)
+#                                       keeping the `--keep` paths of the live release (e.g. `.env`) and reusing
+#                                       the `--reuse` folders
+#   hash <target> <path>                SHA-256 of a file of the live release (null when missing), e.g. to know
+#                                       whether its `vendor/` can be reused
 #   info                                Details of the server (PHP limits, ZipArchive, PDO drivers)
 #   list                                Live previews and leftovers of their interrupted deployments
 #   extract <target>                    Unpack the uploaded archive of the target into `<target>.next`
-#   activate <target>                   Replace the live release with `<target>.next` (and `--keep` paths)
+#   activate <target>                   Replace the live release with `<target>.next` (and `--keep`/`--reuse` paths)
 #   deactivate <target>                 Take a live preview offline (moved to `<target>.old`)
 #   delete <target> <variant>           Delete `<target>.<variant>` (next, old or zip)
 #   reset-database <target>             Drop the database tables of a preview (`p<N>_*`)
@@ -33,8 +36,16 @@
 #                                       `/_deployer/<version>/index.php`, installed by this script)
 #   --ftp-hostname, --ftp-username, --ftp-password
 #   --keep <path>                       Path of the live release to keep (repeatable; `deploy` and `activate`)
+#   --reuse <folder>                    Folder of the live release whose entries missing from the new release are
+#                                       moved into it, e.g. `vendor` when the archive carries only its changed parts
+#                                       (repeatable; `deploy` and `activate`)
 #   --exclude <pattern>                 Additional `zip` pattern to leave out of the archive (repeatable;
 #                                       `create-archive`)
+#   --include <path>                    Path added back to the archive after the exclusions, e.g. `vendor/composer`
+#                                       when `vendor/*` is excluded (repeatable; `create-archive`)
+#   --exclude-from <file>               File of paths to leave out of the archive, in git-ftp's `.git-ftp-ignore`
+#                                       format: one shell glob per line, matched against the whole path, `*` also
+#                                       matching `/`; `#` comments (`create-archive`; they also apply to `--include`)
 #   --default-environment <folder>      Router: folder serving the site without subdomain (and `www.`); none: 404
 #   --php-handler <handler>             Router: PHP handler of the space (e.g. `av-php82` on Altervista)
 #   --document-root <folder>            Router: document root inside each environment (default: `public`; `.` for
@@ -62,6 +73,7 @@ declare -r DEPLOYER_PATH="_deployer/${DEPLOYER_VERSION}"
 # Read by the `EXIT` trap, which runs after `main` has returned: not local
 ftp_hostname="" ftp_username="" ftp_password="" token_id="" token_file="" token=""
 base_url="" verbose=false server_budget="" server_time_limit="" default_environment="" php_handler="" document_root="public"
+keep=() reuse=() exclude=() include=() exclude_from=""
 
 remove_token () {
     [[ -n "$token_file" ]] && rm -f "$token_file"
@@ -183,9 +195,11 @@ delete () {
 
 activate () {
     local target="$1"
-    shift
 
-    request "$(jq -cn --arg target "$target" '{action: "activate", target: $target, keep: $ARGS.positional}' --args "$@")"
+    request "$(jq -cn --arg target "$target" \
+        --argjson keep "$(jq -cn '$ARGS.positional' --args "${keep[@]}")" \
+        --argjson reuse "$(jq -cn '$ARGS.positional' --args "${reuse[@]}")" \
+        '{action: "activate", target: $target, keep: $keep, reuse: $reuse}')"
 }
 
 # Read the time budget of the server, to halve it on retries, and show its execution time limit
@@ -287,15 +301,32 @@ install_router () {
 
 create_archive () {
     local archive="$1"
-    shift
+    local -a ignored=()
+    local -a always_excluded=(
+        '.git/*' '*/.git/*' '.github/*' '.ftp-archive-deploy-source/*' '.vscode/*' '.devcontainer/*' '.act/*'
+        'node_modules/*' 'tests/*' 'docker/*' 'storage/logs/*.log'
+        '.env.*' '_ide_helper*.php' '.phpstorm.meta.php' 'docker-compose.yml' '*.sql' 'public/hot'
+        '.ftp-deploy-sync-state*'
+    )
+
+    if [[ -n "$exclude_from" ]]; then
+        if [[ ! -f "$exclude_from" ]]; then
+            printf "The file of the paths to exclude does not exist: '%s'\n" "$exclude_from" >&2
+            return 1
+        fi
+
+        # Read like git-ftp does: comments and blank lines skipped, CRs stripped. Its globs match like the `zip` ones
+        mapfile -t ignored < <(grep -v '^#' "$exclude_from" | tr -d '\r' | awk 'NF')
+    fi
 
     rm -f "$archive"
-    zip -qr "$archive" . \
-        -x '.git/*' '*/.git/*' '.github/*' '.ftp-archive-deploy-source/*' '.vscode/*' '.devcontainer/*' '.act/*' \
-        -x 'node_modules/*' 'tests/*' 'docker/*' 'storage/logs/*.log' \
-        -x '.env.*' '_ide_helper*.php' '.phpstorm.meta.php' 'docker-compose.yml' '*.sql' 'public/hot' \
-        -x '.ftp-deploy-sync-state*' \
-        ${1:+-x "$@"}
+    zip -qr "$archive" . -x "${always_excluded[@]}" ${ignored[0]:+"${ignored[@]}"} ${exclude[0]:+"${exclude[@]}"} \
+        || return 1
+
+    # Added back after the `--exclude` patterns, but never with the files that are always left out
+    if (( ${#include[@]} > 0 )); then
+        zip -qr "$archive" "${include[@]}" -x "${always_excluded[@]}" ${ignored[0]:+"${ignored[@]}"} || return 1
+    fi
 
     printf 'Archive: %s, %s entries\n' "$(du -h "$archive" | cut -f1)" "$(unzip -Z1 "$archive" | wc -l)" >&2
 }
@@ -303,7 +334,6 @@ create_archive () {
 # Upload a release archive and replace the live release of the target with it, printing a JSON summary
 deploy () {
     local target="$1" archive="$2" remote_archive started_at unpacked activated
-    shift 2
     started_at="$(date +%s)"
 
     if [[ "$target" =~ ^pr-[0-9]+$ ]]; then
@@ -324,8 +354,10 @@ deploy () {
     printf 'Unpacking the archive...\n' >&2
     unpacked="$(extract "$target")" || return 1
 
-    printf 'Replacing the live release%s...\n' "$( (( $# > 0 )) && printf ', keeping: %s' "$*")" >&2
-    activated="$(activate "$target" "$@")" || return 1
+    printf 'Replacing the live release%s%s...\n' \
+        "$( (( ${#keep[@]} > 0 )) && printf ', keeping: %s' "${keep[*]}")" \
+        "$( (( ${#reuse[@]} > 0 )) && printf ', reusing: %s' "${reuse[*]}")" >&2
+    activated="$(activate "$target")" || return 1
 
     printf 'Deleting the previous release...\n' >&2
     delete "$target" old > /dev/null || return 1
@@ -340,7 +372,7 @@ deploy () {
         --argjson duration "$(( $(date +%s) - started_at ))" \
         '{success: true, target: $target, deployer_version: $version, max_execution_time: $max_execution_time,
           time_budget: $time_budget, entries: $unpacked.total, replaced: $activated.replaced, kept: $activated.kept,
-          duration: $duration}'
+          reused: $activated.reused, duration: $duration}'
 }
 
 # Check that the given commands are installed (each action only needs some of them)
@@ -357,7 +389,7 @@ require () {
 
 main () {
     local action=""
-    local -a positional=() keep=() exclude=()
+    local -a positional=()
 
     if [[ "${1:-}" == "version" ]]; then
         printf '%s\n' "$DEPLOYER_VERSION"
@@ -372,7 +404,10 @@ main () {
             --ftp-username)     ftp_username="$2"; shift 2 ;;
             --ftp-password)     ftp_password="$2"; shift 2 ;;
             --keep)             keep+=("$2"); shift 2 ;;
+            --reuse)            reuse+=("$2"); shift 2 ;;
             --exclude)          exclude+=("$2"); shift 2 ;;
+            --include)          include+=("$2"); shift 2 ;;
+            --exclude-from)     exclude_from="$2"; shift 2 ;;
             --default-environment) default_environment="$2"; shift 2 ;;
             --php-handler)      php_handler="$2"; shift 2 ;;
             --document-root)    document_root="$2"; shift 2 ;;
@@ -397,7 +432,7 @@ main () {
 
     if [[ "$action" == "create-archive" ]]; then
         require zip unzip || return 1
-        create_archive "${positional[1]:?The path of the archive is required}" "${exclude[@]}"
+        create_archive "${positional[1]:?The path of the archive is required}"
         return
     fi
 
@@ -437,9 +472,13 @@ main () {
     local target="${positional[1]:-}"
 
     case "$action" in
-        deploy)         deploy "$target" "${positional[2]:?The path of the archive is required}" "${keep[@]}" ;;
+        deploy)         deploy "$target" "${positional[2]:?The path of the archive is required}" ;;
         extract)        extract "$target" ;;
-        activate)       activate "$target" "${keep[@]}" ;;
+        activate)       activate "$target" ;;
+        hash)
+            request "$(jq -cn --arg target "$target" --arg path "${positional[2]:?The path of the file is required}" \
+                '{action: "hash", target: $target, path: $path}')"
+        ;;
         delete)         delete "$target" "${positional[2]:-}" ;;
         list)           request '{"action": "list"}' ;;
         deactivate | reset-database)
