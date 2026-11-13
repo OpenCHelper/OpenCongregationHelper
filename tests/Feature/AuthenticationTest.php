@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 beforeEach(function () {
     // Render the real assets when they are built (as in CI), so that entries missing
@@ -43,6 +44,32 @@ test('users cannot authenticate with invalid password', function () {
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
+
+    $this->assertGuest();
+});
+
+test('users are logged in through a valid remember me cookie', function () {
+    $user = User::factory()->create();
+    $guard = Auth::guard('web');
+
+    $this->withCookie(
+        $guard->getRecallerName(),
+        $user->getAuthIdentifier().'|'.$user->getRememberToken().'|'.$guard->hashPasswordForCookie($user->getAuthPassword()),
+    )->get('/')->assertOk();
+
+    $this->assertAuthenticatedAs($user);
+});
+
+test('a stale remember me cookie is ignored instead of crashing the request', function () {
+    $user = User::factory()->create();
+    $guard = Auth::guard('web');
+
+    // The cookie still references the user, but its token no longer matches the stored one
+    // (e.g. the user logged out from another device, which rotates the remember token)
+    $this->withCookie(
+        $guard->getRecallerName(),
+        $user->getAuthIdentifier().'|stale-remember-token|'.$guard->hashPasswordForCookie($user->getAuthPassword()),
+    )->get('/')->assertOk();
 
     $this->assertGuest();
 });

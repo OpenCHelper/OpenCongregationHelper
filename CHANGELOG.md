@@ -64,6 +64,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   selected campaign is invalid" and "Cannot assign territories to a terminated campaign". A terminated campaign is
   now refused only when an assignment is linked to it, and this is enforced for every assignment saved, not only
   those saved from the forms ([#104]).
+- Every page failing with "hash_equals(): Argument #1 ($known_string) must be of type string, null given" for the
+  visitors holding a "remember me" cookie that is no longer valid (for example after logging out from another
+  device), a regression of Laravel 12.69.0 fixed by updating it to 12.69.3. The cookie is ignored again.
 
 ## [2.0.0-alpha6] - 2026-11-11
 
