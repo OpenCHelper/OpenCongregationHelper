@@ -49,9 +49,11 @@ env:
 jobs:
   deploy:
     name: Deploy preview
+    # No secrets in the runs started by Dependabot, as in the PRs from forks: its PRs are deployed manually only
     if: >-
       (github.event_name == 'pull_request' && github.event.action != 'closed'
-        && github.event.pull_request.head.repo.full_name == github.repository)
+        && github.event.pull_request.head.repo.full_name == github.repository
+        && github.actor != 'dependabot[bot]')
       || (github.event_name == 'workflow_dispatch' && inputs.action == 'deploy')
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -384,9 +386,11 @@ jobs:
 
   destroy:
     name: Remove previews
+    # Dependabot closing its PR (e.g. superseded): no secrets, the weekly cleanup removes its preview, if any
     if: >-
       (github.event_name == 'pull_request' && github.event.action == 'closed'
-        && github.event.pull_request.head.repo.full_name == github.repository)
+        && github.event.pull_request.head.repo.full_name == github.repository
+        && github.actor != 'dependabot[bot]')
       || github.event_name == 'schedule'
       || (github.event_name == 'workflow_dispatch' && inputs.action != 'deploy')
     runs-on: ubuntu-latest

@@ -203,7 +203,8 @@ Limits:
   database (a new one fails until a PR is closed);
 - PR numbers up to 9999, so that the longest index names stay within the 64 characters allowed by MySQL (the tests
   also run with the longest prefix, `p9999_`, to catch new ones);
-- PRs from forks get no preview, since GitHub does not share the secrets with them;
+- PRs from forks get no preview, since GitHub does not share the secrets with them; neither do the pushes of Dependabot,
+  for the same reason: deploy their preview by running the workflow manually with the `deploy` action;
 - the previews of PRs that are no longer open (e.g. after a failed removal) are removed every week, or on demand by
   running the workflow manually with the `cleanup` action.
 
