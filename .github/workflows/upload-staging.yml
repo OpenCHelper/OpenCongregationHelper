@@ -9,10 +9,10 @@ on:
 permissions:
   contents: read
 
-# Limit the number of concurrent jobs to prevent overloading the server
+# One deployment at a time, to avoid overloading the server: a newer run cancels the one in progress
 concurrency:
   group: ${{ github.workflow }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   tests:

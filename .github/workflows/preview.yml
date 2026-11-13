@@ -37,10 +37,10 @@ on:
 permissions:
   contents: read
 
-# One run per PR at a time: a new push cancels the deployment in progress, and closing the PR cancels it too.
+# One run per PR at a time: a newer run (a push, closing the PR, a manual run) cancels the one in progress.
 concurrency:
   group: preview-${{ github.event.pull_request.number || inputs.pr || 'cleanup' }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 env:
   # Tables of the previews are prefixed with `p<N>_`, which must stay within 6 characters (see `SpaceDeployer`)
