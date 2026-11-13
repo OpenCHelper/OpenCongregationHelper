@@ -265,7 +265,7 @@ This application uses the following specific versions and technologies:
 5. **Data Export/Import**:
    - Test territory data export functionality via Filament actions
    - Verify assignment report generation
-   - Test Excel/CSV export using PhpSpreadsheet integration
+   - Test the CSV import of territories (`TerritoryImporter`)
 
 ## Common Commands Reference
 

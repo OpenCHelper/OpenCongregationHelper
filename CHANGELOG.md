@@ -56,6 +56,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The **Logs** page (Developer group, super administrators only) now uses `achyutn/filament-log-viewer`, since
   `filipfonal/filament-log-manager` does not support Filament 5. Log entries are listed in a table with level tabs,
   a date filter and stack traces, and log files can still be cleared, but no longer downloaded.
+- Updated the dependencies: the Composer packages within their versions (Laravel 12.72), the impersonation plugin
+  (`stechstudio/filament-impersonate`) to version 5, Vite to version 8 and `laravel-vite-plugin` to version 3. Vite 8
+  needs Node.js 20.19 or newer to build the assets.
+- Composer resolves the dependencies for PHP 8.2 (`config.platform.php`), the version of Altervista and CI, even when
+  updated with a newer PHP.
+
+### Removed
+
+- `phpoffice/phpspreadsheet`, which the application does not use.
 
 ### Fixed
 
@@ -81,6 +90,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   device), a regression of Laravel 12.69.0 fixed by updating it to 12.69.3. The cookie is ignored again.
 - Tags duplicated when saving a territory or a zone with the interface not in English: the Tags page showed the same
   tag twice, and the tag filters did not find it ([#166]).
+
+### Security
+
+- Fixed the security advisories of the dependencies, among them a critical one of Laravel: the API tokens guard could
+  be bypassed with non-string credentials.
 
 ## [2.0.0-alpha6] - 2026-11-11
 

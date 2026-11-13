@@ -34,10 +34,9 @@
         "livewire/livewire": "^4.0",
         "mobiledetect/mobiledetectlib": "^4.11",
         "outhebox/blade-flags": "^1.5",
-        "phpoffice/phpspreadsheet": "^1.29",
         "pxlrbt/filament-environment-indicator": "^3.0",
         "rmsramos/activitylog": "^4.1",
-        "stechstudio/filament-impersonate": "^4.0",
+        "stechstudio/filament-impersonate": "^5.7",
         "tapp/filament-maillog": "^2.0"
     },
     "require-dev": {
@@ -111,6 +110,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.2.0"
         }
     },
     "minimum-stability": "stable",

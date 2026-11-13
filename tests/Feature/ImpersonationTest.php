@@ -4,10 +4,11 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Lab404\Impersonate\Services\ImpersonateManager;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use STS\FilamentImpersonate\Facades\Impersonation;
+use STS\FilamentImpersonate\ImpersonateManager;
 
 beforeEach(function () {
     Filament::setCurrentPanel('app');
@@ -57,7 +58,28 @@ test('virtual users can access the panel only while being impersonated', functio
 
     expect($this->virtualUser->canAccessPanel($panel))->toBeFalse();
 
-    session()->put(app(ImpersonateManager::class)->getSessionKey(), $this->superAdmin->id);
+    session()->put(ImpersonateManager::SESSION_KEY, $this->superAdmin->id);
 
     expect($this->virtualUser->canAccessPanel($panel))->toBeTrue();
+});
+
+test('super administrators can impersonate a virtual user and then leave the impersonation', function () {
+    $this->actingAs($this->superAdmin);
+
+    Livewire::test(ListUsers::class)
+        ->callAction(TestAction::make('impersonate')->table($this->virtualUser))
+        ->assertRedirect('/');
+
+    expect(auth()->id())->toBe($this->virtualUser->id)
+        ->and(Impersonation::isImpersonating())->toBeTrue()
+        ->and(Impersonation::getImpersonatorId())->toBe($this->superAdmin->id);
+
+    $this->get('/app')
+        ->assertSuccessful()
+        ->assertSee(__('filament-impersonate::banner.impersonating'), false);
+
+    $this->get(route('filament-impersonate.leave'))->assertRedirect();
+
+    expect(auth()->id())->toBe($this->superAdmin->id)
+        ->and(Impersonation::isImpersonating())->toBeFalse();
 });
