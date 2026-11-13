@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TEST and preview deployments reuse the Composer packages of the live release when they did not change
   (`reuse-vendor` input of the `ftp-archive-deploy` action): they upload and unpack about 2,000 files instead of about
   27,000 ([#157]).
+- Dashboard map coloring modes, chosen from a menu above the map and remembered for the session: by **zone**, by
+  **current status** (available or not), by **assignment frequency** in the last 12 months (low, medium or frequent)
+  and by **campaign status** (out for another assignment, to be assigned, in progress or worked) for the chosen
+  campaign that is not terminated. A legend under the map lists the colors with the number of territories of each
+  one, and clicking a territory shows its zone, its status and a link to its page (closes [#34]).
 
 ### Changed
 
@@ -54,6 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Dashboard failing to load when a zone with territories on the map has no color ([#34]).
+- Clicking the dashboard map showing debug notifications and zooming the map back out to all the territories ([#34]).
+- Zone names shown as HTML in the layers menu of the dashboard map ([#34]).
 - `public/storage` is now a link on the servers, created by `artisan storage:link` after every deployment: the
   deployments used to upload the build's link as a plain folder, so the public files of `storage/app/public` were not
   served. TEST and PRE-PRODUCTION first remove that folder when it holds nothing but the copy's `.gitignore`
@@ -344,6 +352,7 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 - The API can only be used by authenticated users.
 - Uploaded territory images are stored on a private disk ([#69], closes [#70]).
 
+[#34]: https://github.com/LukeSavefrogs/registro-territori/issues/34
 [#35]: https://github.com/LukeSavefrogs/registro-territori/pull/35
 [#45]: https://github.com/LukeSavefrogs/registro-territori/issues/45
 [#53]: https://github.com/LukeSavefrogs/registro-territori/issues/53
