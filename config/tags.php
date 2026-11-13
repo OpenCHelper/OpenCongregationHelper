@@ -15,4 +15,11 @@ return [
      */
     'tag_model' => Tag::class,
 
+    /*
+     * The locale tag names and slugs are stored and looked up in, whatever the interface
+     * language of the user (see App\Models\Tag::getLocale()). Changing it requires
+     * rewriting the existing tags (see the `store_tag_names_in_a_single_locale` migration).
+     */
+    'locale' => 'en',
+
 ];

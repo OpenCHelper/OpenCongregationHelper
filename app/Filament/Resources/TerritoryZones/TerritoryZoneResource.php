@@ -9,6 +9,7 @@ use App\Filament\Resources\TerritoryZones\Pages\EditTerritoryZone;
 use App\Filament\Resources\TerritoryZones\Pages\ListTerritoryZones;
 use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Filament\Resources\TerritoryZones\Pages\ViewTerritoryZone;
+use App\Models\Tag;
 use App\Models\TerritoryZone;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Filament\Actions\BulkActionGroup;
@@ -29,7 +30,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Override;
-use Spatie\Tags\Tag;
 use UnitEnum;
 
 class TerritoryZoneResource extends Resource

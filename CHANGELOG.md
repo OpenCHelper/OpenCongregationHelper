@@ -75,6 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every page failing with "hash_equals(): Argument #1 ($known_string) must be of type string, null given" for the
   visitors holding a "remember me" cookie that is no longer valid (for example after logging out from another
   device), a regression of Laravel 12.69.0 fixed by updating it to 12.69.3. The cookie is ignored again.
+- Tags duplicated when saving a territory or a zone with the interface not in English: the Tags page showed the same
+  tag twice, and the tag filters did not find it ([#166]).
 
 ## [2.0.0-alpha6] - 2026-11-11
 
@@ -400,3 +402,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#150]: https://github.com/LukeSavefrogs/registro-territori/pull/150
 [#151]: https://github.com/LukeSavefrogs/registro-territori/pull/151
 [#157]: https://github.com/LukeSavefrogs/registro-territori/pull/157
+[#166]: https://github.com/LukeSavefrogs/registro-territori/pull/166

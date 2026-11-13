@@ -12,6 +12,7 @@ use App\Filament\Resources\Territories\Pages\ViewTerritory;
 use App\Filament\Resources\TerritoryAssignments\Actions as AssignmentActions;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
 use App\Models\Campaign;
+use App\Models\Tag;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\User;
@@ -70,7 +71,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Override;
-use Spatie\Tags\Tag;
 use UnitEnum;
 
 class TerritoryResource extends Resource implements HasKnowledgeBase

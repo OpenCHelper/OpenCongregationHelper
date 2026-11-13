@@ -13,8 +13,6 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
@@ -25,7 +23,6 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Override;
 use UnitEnum;
@@ -86,74 +83,30 @@ class TagResource extends Resource
         return NavigationGroup::Administration;
     }
 
-    /**
-     * Generate language tabs for the form, based on available locales.
-     *
-     * @return array<Tab>
-     */
-    protected static function generateLanguageTabs(): array
-    {
-        $availableLocales = config('app.available_locales', []);
-        $tabs = [];
-
-        foreach ($availableLocales as $locale => $localeName) {
-            $isRequired = $locale === config('app.fallback_locale', 'en');
-
-            $tabs[] = Tab::make($locale)
-                ->icon(new HtmlString(
-                    '<img src="'.asset("vendor/blade-flags/language-{$locale}.svg").'" alt="'.$localeName.'" class="h-5 w-5 inline-block mr-2" />'
-                ))
-                ->label($localeName.' ('.$locale.')')
-                ->schema([
-                    TextInput::make("name.{$locale}")
-                        ->label(__('filament-resources.tag.field_name')." ({$locale})")
-                        ->required($isRequired)
-                        ->maxLength(255)
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(function (string $operation, $state, Set $set) use ($locale, $availableLocales) {
-                            if ($operation !== 'create' || ! $state) {
-                                return;
-                            }
-                            $slug = Str::slug($state);
-
-                            // If this is the main language (fallback), set slug for all languages
-                            if ($locale === config('app.fallback_locale', 'en')) {
-                                foreach (array_keys($availableLocales) as $availableLocale) {
-                                    $set("slug.{$availableLocale}", $slug);
-                                }
-                            } else {
-                                // Otherwise, just set for current language
-                                $set("slug.{$locale}", $slug);
-                            }
-                        }),
-                    TextInput::make("slug.{$locale}")
-                        ->label(__('filament-resources.tag.field_slug')." ({$locale})")
-                        ->required($isRequired)
-                        ->maxLength(255)
-                        ->rules(['alpha_dash']),
-                ])->columns(2);
-        }
-
-        return $tabs;
-    }
-
     public static function form(Schema $schema): Schema
     {
-        $tabs = self::generateLanguageTabs();
+        $locale = Tag::getLocale();
 
         return $schema
             ->components([
-                Tabs::make('Translations')
-                    ->columnSpanFull()
-                    ->activeTab(function () use ($tabs) {
-                        // Workaround for Filament's Tabs component to set the active tab based on the current locale
-                        // This assumes that the tab IDs are suffixed with the locale, e.g., '-en-tab', '-fr-tab'
-                        // (as generated in generateLanguageTabs).
-                        return collect($tabs)->search(
-                            fn (Tab $tab) => Str::endsWith($tab->getId(), app()->getLocale().'-tab')
-                        ) + 1 ?: 1;
-                    })
-                    ->tabs($tabs),
+                // Tags are stored in a single locale, whatever the interface language (see Tag::getLocale())
+                TextInput::make("name.{$locale}")
+                    ->label(__('filament-resources.tag.field_name'))
+                    ->required()
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function (string $operation, ?string $state, Set $set) use ($locale): void {
+                        if ($operation !== 'create' || ! $state) {
+                            return;
+                        }
+
+                        $set("slug.{$locale}", Str::slug($state));
+                    }),
+                TextInput::make("slug.{$locale}")
+                    ->label(__('filament-resources.tag.field_slug'))
+                    ->required()
+                    ->maxLength(255)
+                    ->rules(['alpha_dash']),
                 Select::make('type')
                     ->label(__('filament-resources.tag.field_type'))
                     ->options(TagType::getOptions())

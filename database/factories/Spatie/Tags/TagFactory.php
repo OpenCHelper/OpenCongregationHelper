@@ -3,8 +3,8 @@
 namespace Database\Factories\Spatie\Tags;
 
 use App\Enums\TagType;
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Spatie\Tags\Tag;
 
 /**
  * @extends Factory<Tag>
@@ -28,8 +28,8 @@ class TagFactory extends Factory
         $name = 'tag-'.$this->faker->unique()->word();
 
         return [
-            'name' => ['en' => $name],
-            'slug' => ['en' => $name],
+            'name' => [Tag::getLocale() => $name],
+            'slug' => [Tag::getLocale() => $name],
             'type' => $this->faker->randomElement(array_keys(TagType::getOptions())),
             'created_at' => now(),
             'updated_at' => now(),
