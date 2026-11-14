@@ -65,6 +65,7 @@ INITIAL_ROOT_PASSWORD="password"
 | `QUEUE_CONNECTION` | `database` (consigliato in produzione) o `sync` (le email vengono inviate subito, durante la richiesta). |
 | `ARTISAN_CRON_TOKEN` | Segreto richiesto dagli endpoint che elaborano la coda e le attività pianificate. Se vuoto, gli endpoint sono disabilitati. |
 | `ENABLE_SHARED_PII` | Se `true`, la pagina pubblica di un'assegnazione condivisa mostra anche il nome dell'assegnatario e le note del territorio. Predefinito: `false`. |
+| `DEMO_PREFILL_LOGIN_CREDENTIALS` | **Solo per installazioni dimostrative**, con dati fittizi: se `true`, la pagina di accesso è precompilata con le credenziali dell'utente **root**, quindi chiunque può accedere come root. Non attivarla mai su un'installazione con dati reali. Sempre ignorata quando `APP_ENV` è `production`. Predefinito: `false`. |
 | `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | File usati per mostrare il branch e il commit Git nella barra laterale sui server senza `git`. |
 
 ## Installazione

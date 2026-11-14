@@ -6,6 +6,7 @@ use AchyutN\FilamentLogViewer\FilamentLogViewer;
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Enums\NavigationGroup as EnumsNavigationGroup;
 use App\Filament\Pages\ApiTokens;
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\CreateTeam;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\EditTeam;
@@ -62,7 +63,7 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->path('app')
-            ->login()
+            ->login(Login::class)
             ->passwordReset()
             ->emailVerification(isRequired: false)
             ->viteTheme('resources/css/filament/app/theme.css')

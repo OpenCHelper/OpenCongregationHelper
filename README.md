@@ -167,6 +167,11 @@ Every PR opened from a branch of this repository gets its own preview, like on V
 data, and removed (files and database tables) when the PR is closed or merged. A comment on the PR shows its status and
 URL.
 
+The login page of the previews is pre-filled with the credentials of the root user (`DEMO_PREFILL_LOGIN_CREDENTIALS`),
+so that reviewers can test them right away: anyone with the link can log in as root, so the previews MUST hold dummy
+data only, and `ROOT_PASSWORD` must not be reused anywhere else. To do the same on TEST, add
+`DEMO_PREFILL_LOGIN_CREDENTIALS=true` to its `.env` on the server (`test/.env`); it is always ignored in production.
+
 All the previews share one Altervista space, either a dedicated one or the TEST one (see below): each one lives in
 `previews/pr-<N>/` and prefixes its database tables with `p<N>_` (`DB_PREFIX`). Since Altervista only offers FTP, the
 release is uploaded as a single archive and unpacked on the server by the
@@ -189,7 +194,7 @@ The deployments use [GitHub environments](https://docs.github.com/en/actions/how
 | `PREVIEW` | [`preview.yml`](.github/workflows/preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD`, `CRON_JOB_ORG_API_KEY` |
 
 `FTP_SERVER` is the FTP hostname of the space (e.g. `ftp.{username}.altervista.org`), also used to build its URLs,
-`ROOT_PASSWORD` the password of the root user of the previews, and `CRON_JOB_ORG_API_KEY` an API key of cron-job.org
+`ROOT_PASSWORD` the password of the root user of the previews (public, since it is pre-filled on their login page), and `CRON_JOB_ORG_API_KEY` an API key of cron-job.org
 (Console → Settings → API), better dedicated to the previews. `FTP_SERVER` and `FTP_USERNAME` can be secrets too, but
 GitHub then hides every text containing them, like the URLs of the sites (`https://{username}.altervista.org`): the
 deployments get no link, and the logs show `***` instead of the hosts. The environments can also restrict who and what deploys

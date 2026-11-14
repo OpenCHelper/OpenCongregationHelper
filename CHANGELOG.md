@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scheduled tasks and queue of the PR previews, run by cron-job.org every 5 minutes from 8:00 to 22:55 (Rome time),
   Monday to Friday: the previews need the new `CRON_JOB_ORG_API_KEY` secret of the `PREVIEW` environment (see the
   README) ([#171]).
+- Login page of the PR previews pre-filled with the root user's credentials, so reviewers can test right away; the
+  previews are public demos, so save only dummy data there. Other demo installations (e.g. TEST) can enable it with the
+  new `DEMO_PREFILL_LOGIN_CREDENTIALS` setting, always ignored in production ([#173]).
 - Back button at the bottom of the documentation sidebar, leading to the app, or to the welcome page for visitors who
   are not signed in ([#170]).
 
@@ -330,3 +333,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#168]: https://github.com/LukeSavefrogs/registro-territori/pull/168
 [#170]: https://github.com/LukeSavefrogs/registro-territori/pull/170
 [#171]: https://github.com/LukeSavefrogs/registro-territori/pull/171
+[#173]: https://github.com/LukeSavefrogs/registro-territori/pull/173

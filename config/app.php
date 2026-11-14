@@ -180,4 +180,18 @@ return [
         'password' => env('INITIAL_ROOT_PASSWORD'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Demo: Pre-filled Login Credentials
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, the login page is pre-filled with the credentials of the
+    | root user, so that a demo can be tested right away (e.g. PR previews).
+    | It MUST be enabled on demo installations with dummy data only, since
+    | anyone could log in as root. It is always ignored in production.
+    |
+    */
+
+    'demo_prefill_login_credentials' => (bool) env('DEMO_PREFILL_LOGIN_CREDENTIALS', false),
+
 ];

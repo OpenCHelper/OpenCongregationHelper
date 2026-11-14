@@ -13,7 +13,8 @@ name: PR previews
 # Settings of the PREVIEW GitHub environment:
 #   - variables: FTP_SERVER, FTP_USERNAME (the web space; they can be secrets too, but GitHub then hides the URLs of
 #     the previews, which contain them);
-#   - secrets: FTP_PASSWORD, ROOT_PASSWORD (root user of the previews), CRON_JOB_ORG_API_KEY (API key of cron-job.org);
+#   - secrets: FTP_PASSWORD, ROOT_PASSWORD (root user of the previews, pre-filled on their login page, so public: never
+#     reuse a real password), CRON_JOB_ORG_API_KEY (API key of cron-job.org);
 #   - optional secrets: DB_DATABASE, DB_USERNAME, DB_PASSWORD (its database, by default the one of the Altervista
 #     account: `my_<FTP username>`, user `<FTP username>`, no password);
 #   - optional variables: ROOT_EMAIL (default: root@example.com), MAX_PREVIEWS (live previews, default: 5).
@@ -284,6 +285,7 @@ jobs:
           INITIAL_ROOT_USERNAME='Root User'
           INITIAL_ROOT_USERMAIL='${ROOT_EMAIL}'
           INITIAL_ROOT_PASSWORD='${ROOT_PASSWORD}'
+          DEMO_PREFILL_LOGIN_CREDENTIALS=true
           EOF
 
           echo "${SHA}" > .git-commit-hash
@@ -404,7 +406,7 @@ jobs:
 
           - **URL**: ${URL}
           - **Branch**: \`${BRANCH}\` (\`${SHA:0:7}\`)
-          - **Login**: \`${ROOT_EMAIL}\` (password in the \`ROOT_PASSWORD\` secret of the PREVIEW environment)
+          - **Login**: \`${ROOT_EMAIL}\`, pre-filled on the login page (public demo: dummy data only, never real data)
           - **Cron jobs**: scheduler and queue (\`${cron_schedule}\`, ${cron_timezone}), in the \`${CRON_FOLDER}\` folder of cron-job.org
 
           <details>
