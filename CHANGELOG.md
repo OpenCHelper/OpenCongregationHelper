@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its zone, its status and a link to its page ([#164]).
 - **PR previews**: every pull request gets its own preview site at `https://pr-<N>.<site>.altervista.org`, filled with
   dummy data, updated on every push and removed when the pull request is closed (see the README) ([#156]).
+- Back button at the bottom of the documentation sidebar, leading to the app, or to the welcome page for visitors who
+  are not signed in ([#170]).
 
 ### Changed
 
@@ -323,3 +325,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#165]: https://github.com/LukeSavefrogs/registro-territori/pull/165
 [#166]: https://github.com/LukeSavefrogs/registro-territori/pull/166
 [#168]: https://github.com/LukeSavefrogs/registro-territori/pull/168
+[#170]: https://github.com/LukeSavefrogs/registro-territori/pull/170

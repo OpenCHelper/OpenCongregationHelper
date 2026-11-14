@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Resources\Territories\TerritoryResource;
+use App\Models\User;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Symfony\Component\Finder\SplFileInfo;
@@ -121,3 +122,18 @@ test('documentation linked from the territories resource exists in every locale'
             ->toBeTrue("The documentation page [{$documentationId}] linked from the territories resource does not exist.");
     }
 })->with('documentation locales');
+
+test('the back button of the documentation leads visitors to the welcome page', function () {
+    $this->get('/knowledge-base/getting-started')
+        ->assertOk()
+        ->assertSee('href="'.url('/').'"', false)
+        ->assertDontSee('href="'.url('/app').'"', false);
+});
+
+test('the back button of the documentation leads signed-in users to the app', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get('/knowledge-base/getting-started')
+        ->assertOk()
+        ->assertSee('href="'.url('/app').'"', false);
+});
