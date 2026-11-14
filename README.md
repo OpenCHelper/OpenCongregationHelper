@@ -139,8 +139,9 @@ SPACE_PHP_HANDLER=av-php82
 # .act/.secrets
 FTP_PASSWORD=password
 
-# PREVIEW only: password of the root user of the previews
+# PREVIEW only: password of the root user of the previews, and API key of cron-job.org
 ROOT_PASSWORD=MyVerySecretPassword
+CRON_JOB_ORG_API_KEY=MyCronJobOrgApiKey
 ```
 
 To deploy the preview of a PR, run `act workflow_dispatch` with the same options as above, except for
@@ -171,6 +172,13 @@ All the previews share one Altervista space, either a dedicated one or the TEST 
 release is uploaded as a single archive and unpacked on the server by the
 [`ftp-archive-deploy`](#deploying-with-ftp-archive-deploy) action.
 
+Since Altervista has no cron, [cron-job.org](https://cron-job.org) calls the scheduler and the queue endpoints of each
+preview (`/api/artisan/schedule/process` and `/api/artisan/queue/process`) every 5 minutes, from 8:00 to 22:55 (Rome
+time), Monday to Friday. Their jobs live in a folder of their own, `(Preview) PR-<N>`, managed by the
+[`cron-job-org-action`](https://github.com/LukeSavefrogs/cron-job-org-action) action: it creates them on the first
+deployment, updates them on every push (each deployment gets a new `ARTISAN_CRON_TOKEN`), and deletes them together
+with the preview.
+
 The deployments use [GitHub environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
 (Settings → Environments), each with the FTP credentials of its space, under the same names:
 
@@ -178,10 +186,11 @@ The deployments use [GitHub environments](https://docs.github.com/en/actions/how
 | --- | --- | --- | --- |
 | `NIGHTLY` | [`upload-nightly.yml`](.github/workflows/upload-nightly.yml) (TEST, on every push to `main`) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD` |
 | `UAT` | [`upload-staging.yml`](.github/workflows/upload-staging.yml) (PRE-PRODUCTION, on every release tag) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD` |
-| `PREVIEW` | [`preview.yml`](.github/workflows/preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD` |
+| `PREVIEW` | [`preview.yml`](.github/workflows/preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD`, `CRON_JOB_ORG_API_KEY` |
 
-`FTP_SERVER` is the FTP hostname of the space (e.g. `ftp.{username}.altervista.org`), also used to build its URLs, and
-`ROOT_PASSWORD` the password of the root user of the previews. `FTP_SERVER` and `FTP_USERNAME` can be secrets too, but
+`FTP_SERVER` is the FTP hostname of the space (e.g. `ftp.{username}.altervista.org`), also used to build its URLs,
+`ROOT_PASSWORD` the password of the root user of the previews, and `CRON_JOB_ORG_API_KEY` an API key of cron-job.org
+(Console → Settings → API), better dedicated to the previews. `FTP_SERVER` and `FTP_USERNAME` can be secrets too, but
 GitHub then hides every text containing them, like the URLs of the sites (`https://{username}.altervista.org`): the
 deployments get no link, and the logs show `***` instead of the hosts. The environments can also restrict who and what deploys
 (e.g. `UAT` only from release tags, or after an approval).
@@ -217,7 +226,10 @@ Limits:
 - PRs from forks get no preview, since GitHub does not share the secrets with them; neither do the pushes of Dependabot,
   for the same reason: deploy their preview by running the workflow manually with the `deploy` action;
 - the previews of PRs that are no longer open (e.g. after a failed removal) are removed every week, or on demand by
-  running the workflow manually with the `cleanup` action.
+  running the workflow manually with the `cleanup` action, together with their cron jobs;
+- an API key of cron-job.org can send 100 requests a day: each deployment sends 4 of them (5 the first time, to
+  create the folder), and each removal 5, so about 20 pushes a day to the PRs; ask cron-job.org for a higher limit if
+  needed.
 
 #### Hosting the previews on the TEST space
 

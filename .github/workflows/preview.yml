@@ -7,10 +7,13 @@ name: PR previews
 # lives in `previews/pr-<N>/` and prefixes its tables with `p<N>_` (`DB_PREFIX`). The release is uploaded through FTP
 # as a single archive and unpacked on the server by the `ftp-archive-deploy` action (`.github/actions/`).
 #
+# Altervista has no cron: cron-job.org runs the scheduler and the queue of each preview, through the jobs of its own
+# folder, `(Preview) PR-<N>`, created (or updated) on every deployment and deleted with the preview.
+#
 # Settings of the PREVIEW GitHub environment:
 #   - variables: FTP_SERVER, FTP_USERNAME (the web space; they can be secrets too, but GitHub then hides the URLs of
 #     the previews, which contain them);
-#   - secrets: FTP_PASSWORD, ROOT_PASSWORD (root user of the previews);
+#   - secrets: FTP_PASSWORD, ROOT_PASSWORD (root user of the previews), CRON_JOB_ORG_API_KEY (API key of cron-job.org);
 #   - optional secrets: DB_DATABASE, DB_USERNAME, DB_PASSWORD (its database, by default the one of the Altervista
 #     account: `my_<FTP username>`, user `<FTP username>`, no password);
 #   - optional variables: ROOT_EMAIL (default: root@example.com), MAX_PREVIEWS (live previews, default: 5).
@@ -45,6 +48,11 @@ concurrency:
 env:
   # Tables of the previews are prefixed with `p<N>_`, which must stay within 6 characters (see `SpaceDeployer`)
   max_pr_number: 9999
+  # Folder of the cron jobs of each preview on cron-job.org (followed by the number of the PR), and their schedule: every
+  # 5 minutes, from 8:00 to 22:55, Monday to Friday
+  cron_folder_prefix: "(Preview) PR-"
+  cron_schedule: "*/5 8-22 * * 1-5"
+  cron_timezone: Europe/Rome
 
 jobs:
   deploy:
@@ -80,6 +88,7 @@ jobs:
           EVENT_SHA: ${{ github.event.pull_request.head.sha }}
           EVENT_BRANCH: ${{ github.event.pull_request.head.ref }}
           INPUT_PR: ${{ inputs.pr }}
+          CRON_JOB_ORG_API_KEY: ${{ secrets.CRON_JOB_ORG_API_KEY }}
         run: |
           if [[ -n "$EVENT_PR" ]]; then
             pr="$EVENT_PR" sha="$EVENT_SHA" branch="$EVENT_BRANCH"
@@ -107,6 +116,12 @@ jobs:
 
           if [[ -z "$FTP_SERVER" ]]; then
             echo "::error::The FTP_SERVER variable of the PREVIEW environment is not set: see the comments at the top of this workflow."
+            exit 1
+          fi
+
+          # Before the build: the cron jobs are created at the end of the deployment
+          if [[ -z "$CRON_JOB_ORG_API_KEY" ]]; then
+            echo "::error::The CRON_JOB_ORG_API_KEY secret of the PREVIEW environment is not set: see the comments at the top of this workflow."
             exit 1
           fi
 
@@ -203,6 +218,7 @@ jobs:
           install-dev-dependencies: false
 
       - name: Create the environment file
+        id: environment-file
         env:
           PR: ${{ steps.resolve.outputs.pr }}
           SHA: ${{ steps.resolve.outputs.sha }}
@@ -233,6 +249,12 @@ jobs:
             exit 1
           fi
 
+          # Secret sent by the cron jobs of the preview to its scheduler and queue endpoints: a new one on every
+          # deployment, also given to the cron jobs
+          cron_token="$(openssl rand -hex 32)"
+          echo "::add-mask::${cron_token}"
+          echo "cron-token=${cron_token}" >> "$GITHUB_OUTPUT"
+
           cat > .env <<EOF
           APP_NAME='Registro Territori (PR #${PR})'
           APP_ENV='preview'
@@ -244,7 +266,7 @@ jobs:
           APP_VERSION_COMMIT_FILE='.git-commit-hash'
           APP_LOCALE='it'
           APP_FALLBACK_LOCALE='en'
-          ARTISAN_CRON_TOKEN=
+          ARTISAN_CRON_TOKEN='${cron_token}'
           LOG_CHANNEL='single'
           LOG_LEVEL='debug'
           DB_CONNECTION='mysql'
@@ -318,6 +340,25 @@ jobs:
             artisan filament:cache-components
             artisan filament:optimize
 
+      # Once the preview runs with the new token: the jobs of its folder are matched by title, so that every push
+      # updates them (with the new token) instead of creating them again
+      - name: Create the cron jobs of the preview
+        uses: LukeSavefrogs/cron-job-org-action@v2
+        with:
+          api-key: ${{ secrets.CRON_JOB_ORG_API_KEY }}
+          folder: ${{ env.cron_folder_prefix }}${{ steps.resolve.outputs.pr }}
+          base-url: ${{ steps.resolve.outputs.url }}
+          timezone: ${{ env.cron_timezone }}
+          schedule: ${{ env.cron_schedule }}
+          method: POST
+          headers: |
+            X-Cron-Token: ${{ steps.environment-file.outputs.cron-token }}
+          jobs: |
+            - title: Schedule run
+              url: /api/artisan/schedule/process
+            - title: Queue run
+              url: /api/artisan/queue/process
+
       - name: Check the certificate of the preview
         env:
           URL: ${{ steps.resolve.outputs.url }}
@@ -356,6 +397,7 @@ jobs:
           SHA: ${{ steps.resolve.outputs.sha }}
           BRANCH: ${{ steps.resolve.outputs.branch }}
           ROOT_EMAIL: ${{ vars.ROOT_EMAIL || 'root@example.com' }}
+          CRON_FOLDER: ${{ env.cron_folder_prefix }}${{ steps.resolve.outputs.pr }}
         run: |
           cat <<EOF >> "$GITHUB_STEP_SUMMARY"
           ## Preview deployed
@@ -363,6 +405,7 @@ jobs:
           - **URL**: ${URL}
           - **Branch**: \`${BRANCH}\` (\`${SHA:0:7}\`)
           - **Login**: \`${ROOT_EMAIL}\` (password in the \`ROOT_PASSWORD\` secret of the PREVIEW environment)
+          - **Cron jobs**: scheduler and queue (\`${cron_schedule}\`, ${cron_timezone}), in the \`${CRON_FOLDER}\` folder of cron-job.org
 
           <details>
           <summary>Artisan output</summary>
@@ -496,6 +539,48 @@ jobs:
             echo "::error::Failed to remove: ${failed[*]} (see the logs above)."
             exit 1
           fi
+
+      # Even when the files could not be removed: the cron jobs of a PR that is no longer open are useless. The cleanup
+      # removes the folders of every PR that is no longer open, also when the files of its preview are already gone
+      # (e.g. a teardown that failed only on cron-job.org)
+      - name: Find the cron jobs to remove
+        id: cron-folders
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_PR: ${{ github.event.pull_request.number }}
+          INPUT_ACTION: ${{ inputs.action }}
+          INPUT_PR: ${{ inputs.pr }}
+        run: |
+          folders=""
+          exclude=""
+          if [[ -n "$EVENT_PR" ]] || [[ "$INPUT_ACTION" == "destroy" ]]; then
+            pr="${EVENT_PR:-$INPUT_PR}"
+            # An invalid PR number is reported by the removal of the previews
+            if [[ "$pr" =~ ^[0-9]+$ ]]; then
+              folders="${cron_folder_prefix}${pr}"
+            fi
+          else
+            folders="${cron_folder_prefix}*"
+            exclude="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 1000 --json number \
+              | jq -r --arg prefix "$cron_folder_prefix" '.[] | "\($prefix)\(.number)"')"
+          fi
+
+          {
+            echo "folders=${folders}"
+            echo "exclude<<EOF_EXCLUDE"
+            echo "$exclude"
+            echo "EOF_EXCLUDE"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Remove the cron jobs of the previews
+        if: ${{ !cancelled() && steps.cron-folders.outputs.folders != '' }}
+        uses: LukeSavefrogs/cron-job-org-action@v2
+        with:
+          api-key: ${{ secrets.CRON_JOB_ORG_API_KEY }}
+          command: delete
+          folder: ${{ steps.cron-folders.outputs.folders }}
+          exclude: ${{ steps.cron-folders.outputs.exclude }}
 
       # Also after a manual teardown or a cleanup, which know only the numbers of the PRs: the deployments are recorded
       # under the branch of the PR, which GitHub still returns once the PR is merged or its branch deleted

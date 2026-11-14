@@ -48,7 +48,7 @@ runs:
             ].join('\n'),
             failed: `❌ The deployment of ${commit} failed: see the [workflow run](${run}).`,
             cancelled: `⏹️ The deployment of ${commit} was cancelled (e.g. by a newer push).`,
-            removed: '🗑️ The preview was removed, together with its database tables.',
+            removed: '🗑️ The preview was removed, together with its database tables and its cron jobs.',
           };
 
           const body = `${marker}\n### Preview\n\n${messages[PREVIEW_STATUS] ?? PREVIEW_STATUS}`;
