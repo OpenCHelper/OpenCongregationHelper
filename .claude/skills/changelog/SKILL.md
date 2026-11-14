@@ -18,6 +18,7 @@ Add entries to the `CHANGELOG.md` file.
 -   Start with `- ` (hyphen + 1 spaces)
 -   Do NOT repeat the category verb — the heading already says Added/Changed/Fixed, so don't start entries with "Added...", "Fixed...", etc.
 -   Don't link issues if not really needed: they usually can be backtracked by looking at the PR
+-   Version headings are plain brackets (`## [Unreleased]`, `## [2.0.0-alpha6] - 2026-11-11`): never add link definitions for them (e.g. `[Unreleased]: https://.../compare/...`)
 -   End with the PR number and link between parenthesis (if it was part of a PR) and a period: `... ([#123](https://.../123)).`
 
 ## Writing Guidelines
