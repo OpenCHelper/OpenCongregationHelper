@@ -7,6 +7,7 @@ use App\Models\Tag;
 use App\Models\User;
 use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
+use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
@@ -25,6 +26,7 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Translatable\Facades\Translatable;
+use Tapp\FilamentMailLog\Models\MailLog;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -64,7 +66,11 @@ class AppServiceProvider extends ServiceProvider
                 ? Response::allow()
                 : Response::denyWithStatus(404);
         });
+
+        // The policies of models outside `App\Models` are not discovered, and Filament allows everything on a
+        // resource whose model has no policy: without the MailLogPolicy, every user could read the emails sent.
         Gate::policy(Activity::class, ActivityPolicy::class);
+        Gate::policy(MailLog::class, MailLogPolicy::class);
         Gate::policy(Tag::class, TagPolicy::class);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
