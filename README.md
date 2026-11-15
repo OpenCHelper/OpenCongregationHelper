@@ -184,6 +184,11 @@ time), Monday to Friday. Their jobs live in a folder of their own, `(Preview) PR
 deployment, updates them on every push (each deployment gets a new `ARTISAN_CRON_TOKEN`), and deletes them together
 with the preview.
 
+Since the scheduler runs only the tasks due in the minute it is called, every scheduled task (see
+[`bootstrap/app.php`](bootstrap/app.php)) must be due inside that window, on a multiple of 5 minutes, or it never runs on
+the previews: e.g. `DetectStaleAssignments`, which sends the reminders of the territories out for too long, runs every
+Monday at 9:00, Rome time.
+
 The deployments use [GitHub environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
 (Settings → Environments), each with the FTP credentials of its space, under the same names:
 

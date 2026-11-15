@@ -49,10 +49,18 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withSchedule(function (Schedule $schedule): void {
-        // Schedule tasks here
+        /*
+            Altervista has no cron: an external service (cron-job.org) calls
+            the scheduler endpoint (`/api/artisan/schedule/process`), which
+            runs only the tasks due in that very minute. The PR previews
+            are called every 5 minutes, from 8:00 to 22:55 (Rome time),
+            Monday to Friday: every task must be due inside that window, on
+            a multiple of 5 minutes (better on the hour, for services that
+            call it hourly), in an explicit timezone, or it never runs.
+        */
         $schedule->job(new DetectStaleAssignments)
-            ->weekly()
-            ->days([Schedule::MONDAY])
+            ->weeklyOn(Schedule::MONDAY, '09:00')
+            ->timezone('Europe/Rome')
             ->withoutOverlapping()
             ->onOneServer();
         // ->onFailure(function (Stringable $output) {
