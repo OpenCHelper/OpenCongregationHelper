@@ -656,3 +656,95 @@ test('the router refuses invalid settings', function (array $options) {
     'document root outside the environment' => [['--base-url', 'https://example.org', '--document-root', '../etc']],
     'invalid host' => [['--base-url', 'https://exa$mple.org']],
 ]);
+
+/**
+ * Install the router of a space with the client of the `ftp-archive-deploy` action, on a fake FTP server serving the
+ * given folder, returning the FTP commands it received.
+ *
+ * The fake `lftp` runs the `get` and `mirror` commands of the client on the folder: the router is uploaded with
+ * `mirror` and its installed files are read with `get`.
+ *
+ * @return list<string>
+ */
+function installRouterOn(string $space, string $workDir): array
+{
+    $bin = $workDir.'/bin';
+    $log = $workDir.'/ftp-commands.log';
+
+    if (! is_dir($bin)) {
+        mkdir($bin, 0755, true);
+
+        file_put_contents($bin.'/lftp', <<<'BASH'
+            #!/usr/bin/env bash
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                printf '%s\n' "$line" >> "$FAKE_FTP_LOG"
+                eval "set -- $line"
+                case "$1" in
+                    get) [[ -f "${FAKE_FTP_ROOT}/$2" ]] && cp "${FAKE_FTP_ROOT}/$2" "$4" ;;
+                    mirror) cp -r "${@: -2:1}/." "${FAKE_FTP_ROOT}/" ;;
+                esac
+            done
+            exit 0
+            BASH);
+
+        // Required by the client, but not used to install the router
+        file_put_contents($bin.'/curl', "#!/usr/bin/env bash\nexit 1\n");
+        file_put_contents($bin.'/jq', "#!/usr/bin/env bash\nexit 1\n");
+        array_map(fn (string $command): bool => chmod($bin.'/'.$command, 0755), ['lftp', 'curl', 'jq']);
+    }
+
+    if (file_exists($log)) {
+        unlink($log);
+    }
+
+    exec(
+        'PATH='.escapeshellarg($bin).':"$PATH" FAKE_FTP_ROOT='.escapeshellarg($space).' FAKE_FTP_LOG='.escapeshellarg($log)
+            .' bash '.escapeshellarg(__DIR__.'/../../.github/actions/ftp-archive-deploy/deploy.sh')
+            .' --base-url https://example.altervista.org --default-environment test --php-handler av-php82'
+            .' --ftp-hostname ftp.example.org --ftp-username example --ftp-password secret install-router 2>&1',
+        $output,
+        $exitCode,
+    );
+
+    expect($exitCode)->toBe(0, implode("\n", $output));
+
+    return file_exists($log) ? file($log, FILE_IGNORE_NEW_LINES) : [];
+}
+
+/**
+ * Whether the given FTP commands upload the router.
+ *
+ * @param  list<string>  $commands
+ */
+function uploadsRouter(array $commands): bool
+{
+    return collect($commands)->contains(fn (string $command): bool => str_starts_with($command, 'mirror --reverse'));
+}
+
+test('the router is uploaded when the space has none or an outdated one', function () {
+    mkdir($this->root.'/space');
+
+    expect(uploadsRouter(installRouterOn($this->root.'/space', $this->root)))->toBeTrue()
+        ->and(file_get_contents($this->root.'/space/.htaccess'))->toContain('RewriteRule ^(.*)$ test/public/$1 [L]')
+        ->and(file_exists($this->root.'/space/previews/.htaccess'))->toBeTrue()
+        ->and(file_exists($this->root.'/space/previews/robots.txt'))->toBeTrue();
+
+    file_put_contents($this->root.'/space/previews/.htaccess', "# outdated\n");
+
+    expect(uploadsRouter(installRouterOn($this->root.'/space', $this->root)))->toBeTrue()
+        ->and(file_get_contents($this->root.'/space/previews/.htaccess'))->not->toContain('# outdated');
+});
+
+test('the router is not uploaded again when the installed one is up to date', function () {
+    mkdir($this->root.'/space');
+    installRouterOn($this->root.'/space', $this->root);
+
+    // Uploading it again would truncate the `.htaccess` of the space for a moment, failing the requests of a
+    // deployment running at the same time
+    $commands = installRouterOn($this->root.'/space', $this->root);
+
+    expect(uploadsRouter($commands))->toBeFalse()
+        ->and(collect($commands)->map(fn (string $command): string => strtok($command, ' ').' '.strtok(' '))->all())
+        ->toBe(["get '.htaccess'", "get 'previews/.htaccess'", "get 'previews/robots.txt'"]);
+});

@@ -16,7 +16,8 @@
 #   version                             Version of the bundled deployer (its folder in `_deployer/`)
 #   render-router <dir>                 Write the router of a space hosting several environments (`.htaccess` and
 #                                       `previews/.htaccess`) into a local folder (no FTP involved)
-#   install-router                      Upload the router to the root of the space (never deletes anything)
+#   install-router                      Upload the router to the root of the space (never deletes anything), unless the
+#                                       installed one is already up to date
 #   create-archive <file>               Create the release archive of the current folder (no FTP involved)
 #   deploy <target> <archive>           Upload the archive and replace the live release of the target with it,
 #                                       keeping the `--keep` paths of the live release (e.g. `.env`) and reusing
@@ -291,11 +292,36 @@ install_router () {
     folder="$(mktemp -d)"
     render_router "$folder" || status=$?
 
-    if (( status == 0 )); then
+    # Every deployment installs the router, but uploading a `.htaccess` truncates it on the server for a moment, during
+    # which every environment of the space answers with a 404: a deployment running at the same time (e.g. the preview
+    # of another PR) would fail. The router is uploaded only when it differs from the installed one.
+    if (( status == 0 )) && router_is_installed "$folder"; then
+        printf "The router of the space is already up to date\n" >&2
+    elif (( status == 0 )); then
         ftp <<< "mirror --reverse --no-perms --verbose '${folder}' ." || status=$?
     fi
 
     rm -rf "$folder"
+    return "$status"
+}
+
+# Whether the files of the router rendered in the given folder are the ones installed on the server, byte for byte
+router_is_installed () {
+    local folder="$1" installed path status=0
+    local -a commands=()
+
+    installed="$(mktemp -d)"
+
+    while IFS= read -r path; do
+        mkdir -p "${installed}/$(dirname "$path")"
+        commands+=("get '${path}' -o '${installed}/${path}'")
+    done < <(cd "$folder" && find . -type f | sed 's|^\./||' | sort)
+
+    # A file missing on the server is not downloaded, so it makes the comparison fail
+    ftp <<< "$(printf '%s\n' "${commands[@]}")" > /dev/null 2>&1 || true
+    diff -rq "$folder" "$installed" > /dev/null 2>&1 || status=1
+
+    rm -rf "$installed"
     return "$status"
 }
 
