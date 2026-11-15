@@ -53,7 +53,7 @@ The preferred way of developing is by using **Docker Compose** to build the cont
         laravelsail/php82-composer:latest \
         composer install --ignore-platform-reqs
     ```
-2. If not present, create the `.env` file with the same contents as the `.env.example` file.
+2. If not present, create the `.env` file with the same contents as the `.env.example` file, then set `APP_ENV=local`, `APP_DEBUG=true` and `LOG_LEVEL=debug` in it (the example is production-safe).
 3. Build the local images:
     ```shell
     sail build --no-cache

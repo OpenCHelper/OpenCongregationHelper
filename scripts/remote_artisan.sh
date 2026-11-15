@@ -19,7 +19,7 @@ set -o nounset       # Same as `set -u`
 
 main () {
     local artisan_base_url="" command="" response="" \
-        token_file="storage/framework/.artisan-token" token="" bypass_token=false \
+        token_file="storage/framework/.artisan-token" token="" local_token=false \
         ftp_hostname="" ftp_username="" ftp_password=""
     local _verbose=false;
 
@@ -70,9 +70,8 @@ main () {
                 token_file="$2";
                 shift 2;
             ;;
-            --bypass-token)
-                bypass_token=true
-                curl_opts+=(-H "X-Artisan-Token-Bypass: true")
+            --local)
+                local_token=true
                 shift;
             ;;
             -\? | -h |--help)
@@ -85,7 +84,8 @@ main () {
                 printf "  --ftp-username       The username to use for FTP authentication\n" >&2
                 printf "  --ftp-password       The password to use for FTP authentication\n" >&2
                 printf "  --token-file         The file to store the token in\n" >&2
-                printf "  --bypass-token       Bypass token authentication (only in local environment)\n" >&2
+                printf "  --local              Store the token in the token file of the application in this directory (e.g. Sail)\n" >&2
+                printf "                       instead of uploading it through FTP; removed after the command, like on the server\n" >&2
                 return 0;
             ;;
             --)
@@ -128,7 +128,13 @@ main () {
     fi
     curl_opts+=(-H "X-Artisan-Token: ${token}")
 
-    if [[ "$bypass_token" == false ]]; then
+    if [[ "$local_token" == true ]]; then
+        if ! printf '%s' "$token" > "$token_file"; then
+          printf "Failed to store the token in '%s'\n" "$token_file" >&2
+          return 1
+        fi
+        trap "rm -f '$token_file'" EXIT
+    else
         if [[ -z "$ftp_hostname" ]] || [[ -z "$ftp_username" ]] || [[ -z "$ftp_password" ]]; then
           printf "FTP credentials not provided\n" >&2
           return 1
@@ -149,8 +155,8 @@ main () {
     )" || curl_status=$?
 
     # Always remove the token from the server, even when the command failed,
-    # so that it does not remain valid after the deploy
-    if [[ "$bypass_token" == false ]]; then
+    # so that it does not remain valid after the deploy (the local one is removed on exit)
+    if [[ "$local_token" == false ]]; then
         if ! lftp -e "set ssl:check-hostname no" -u "$ftp_username,$ftp_password" "$ftp_hostname" <<< "rm '$token_file'"; then
           printf "Failed to remove token from server\n" >&2
           return 1

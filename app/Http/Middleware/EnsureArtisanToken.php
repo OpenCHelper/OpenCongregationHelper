@@ -17,10 +17,6 @@ class EnsureArtisanToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->header('X-Artisan-Token-Bypass') === 'true' && app()->environment('local')) {
-            return $next($request);
-        }
-
         $tokenFile = storage_path('framework/.artisan-token');
 
         if (! File::exists($tokenFile)) {

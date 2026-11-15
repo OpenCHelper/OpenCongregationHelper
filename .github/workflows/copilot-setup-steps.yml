@@ -71,9 +71,13 @@ jobs:
             echo "ASSET_URL=${app_url}" >> .env
           fi
 
+          # - Switch to the development environment (the .env.example is production-safe)
           # - Switch to SQLite (MySQL is not available in the runner environment)
           # - Switch session and cache drivers to file/array to avoid DB dependency at boot
           sed -i -r \
+              -e "s|^APP_ENV=[^ ]*|APP_ENV=local|g" \
+              -e "s|^APP_DEBUG=[^ ]*|APP_DEBUG=true|g" \
+              -e "s|^LOG_LEVEL=[^ ]*|LOG_LEVEL=debug|g" \
               -e "s|^DB_CONNECTION=.*?(#.*)?$|DB_CONNECTION=sqlite \\1|g" \
               -e "s|^DB_DATABASE=.*?(#.*)?$|DB_DATABASE=${database_path}\\1|g" \
               -e "s|^SESSION_DRIVER=.*?(#.*)?$|SESSION_DRIVER=file \\1|g" \

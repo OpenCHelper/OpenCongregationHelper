@@ -33,5 +33,6 @@
             Hardcoded variables to override the default values in the .env.example file.
         -->
         <env name="DB_HOST" value="mysql"/>
+        <env name="APP_DEBUG" value="true"/>
     </php>
 </phpunit>

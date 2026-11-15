@@ -84,6 +84,25 @@ test('artisan command endpoints accept the token stored in the token file', func
         ->assertJson(['success' => true]);
 });
 
+test('artisan command endpoints cannot be reached without a token, even in the local environment', function () {
+    app()->detectEnvironment(fn () => 'local');
+
+    // The header of the token bypass once allowed in the local environment
+    $this->getJson($this->artisanUrl.'/list', ['X-Artisan-Token-Bypass' => 'true'])
+        ->assertUnauthorized();
+
+    $this->postJson($this->artisanUrl.'/execute/about', [], ['X-Artisan-Token-Bypass' => 'true'])
+        ->assertUnauthorized();
+
+    File::put($this->tokenFile, 'artisan-secret');
+
+    $this->getJson($this->artisanUrl.'/list', ['X-Artisan-Token-Bypass' => 'true'])
+        ->assertUnauthorized();
+
+    $this->getJson($this->artisanUrl.'/list', ['X-Artisan-Token-Bypass' => 'true', 'X-Artisan-Token' => 'wrong'])
+        ->assertUnauthorized();
+});
+
 test('artisan command parameters must be a string', function () {
     File::put($this->tokenFile, 'artisan-secret');
 

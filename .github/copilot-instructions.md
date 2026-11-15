@@ -98,8 +98,11 @@ This application uses the following specific versions and technologies:
    cp .env.example .env
    ```
 
-4. Update the URLs in the `.env` file to match the port the application is running on (`docker-compose.yml` is configured to use port 80):
+4. Switch the `.env` file to the development environment (the example is production-safe) and update the URLs to match the port the application is running on (`docker-compose.yml` is configured to use port 80):
    ```bash
+   APP_ENV=local
+   APP_DEBUG=true
+   LOG_LEVEL=debug
    APP_URL=http://localhost
    ASSET_URL=http://localhost
    ```
@@ -164,8 +167,11 @@ This application uses the following specific versions and technologies:
    php artisan key:generate
    ```
 
-4. Update the URLs in the `.env` file to match the port the application is running on:
+4. Switch the `.env` file to the development environment (the example is production-safe) and update the URLs to match the port the application is running on:
    ```bash
+   APP_ENV=local
+   APP_DEBUG=true
+   LOG_LEVEL=debug
    APP_URL=http://localhost:8000
    ASSET_URL=http://localhost:8000
    ```
