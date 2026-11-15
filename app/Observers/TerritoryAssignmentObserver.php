@@ -12,6 +12,16 @@ use Illuminate\Validation\ValidationException;
 class TerritoryAssignmentObserver
 {
     /**
+     * Handle the TerritoryAssignment "saving" event.
+     */
+    public function saving(TerritoryAssignment $territoryAssignment): void
+    {
+        if ($territoryAssignment->isDirty(['started_at', 'ended_at'])) {
+            $this->ensureAssignmentDoesNotEndBeforeItStarts($territoryAssignment);
+        }
+    }
+
+    /**
      * Handle the TerritoryAssignment "creating" event.
      */
     public function creating(TerritoryAssignment $territoryAssignment): void
@@ -41,6 +51,26 @@ class TerritoryAssignmentObserver
     public function restoring(TerritoryAssignment $territoryAssignment): void
     {
         $this->ensureTerritoryIsNotAlreadyAssigned($territoryAssignment);
+    }
+
+    /**
+     * An assignment cannot be returned before it is assigned.
+     *
+     * A new assignment saved without a start date is skipped: the database sets its start date when inserting it.
+     *
+     * @throws ValidationException
+     */
+    private function ensureAssignmentDoesNotEndBeforeItStarts(TerritoryAssignment $territoryAssignment): void
+    {
+        if ($territoryAssignment->started_at === null || $territoryAssignment->ended_at === null) {
+            return;
+        }
+
+        if ($territoryAssignment->ended_at->lt($territoryAssignment->started_at)) {
+            throw ValidationException::withMessages([
+                'ended_at' => __('validation.territory_assignment.ended_before_started'),
+            ]);
+        }
     }
 
     /**

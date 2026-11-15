@@ -138,6 +138,32 @@ test('users allowed to update assignments can return a territory', function () {
     expect($assignment->refresh()->ended_at)->not->toBeNull();
 });
 
+test('returning territories in bulk skips the assignments that start in the future', function () {
+    // Saved before the start date was validated: it cannot be returned before it starts
+    $futureAssignment = TerritoryAssignment::factory()->create([
+        'territory_id' => $this->territory->id,
+        'assignee_id' => $this->assignee->id,
+        'started_at' => now()->addMonth(),
+        'ended_at' => null,
+    ]);
+    $otherTerritory = Territory::factory()->for($this->territory->territoryZone, 'territoryZone')->create();
+    $assignment = TerritoryAssignment::factory()->create([
+        'territory_id' => $otherTerritory->id,
+        'assignee_id' => $this->assignee->id,
+        'ended_at' => null,
+    ]);
+
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Update:TerritoryAssignment']));
+
+    Livewire::test(ListTerritories::class)
+        ->selectTableRecords([$this->territory, $otherTerritory])
+        ->callAction(TestAction::make('cancel_assignment_bulk')->table()->bulk())
+        ->assertHasNoErrors();
+
+    expect($futureAssignment->refresh()->ended_at)->toBeNull()
+        ->and($assignment->refresh()->ended_at)->not->toBeNull();
+});
+
 test('users that can list assignments see everyone assignments', function () {
     $otherAssignment = TerritoryAssignment::factory()->create([
         'territory_id' => $this->territory->id,

@@ -217,6 +217,9 @@ return [
 
     'territory_assignment' => [
         'already_assigned' => 'This territory already has an assignment in progress: return it before assigning the territory again.',
+        'started_in_future' => 'The start date cannot be in the future.',
+        'ended_in_future' => 'The end date cannot be in the future.',
+        'ended_before_started' => 'The end date cannot be before the start date.',
     ],
 
 ];

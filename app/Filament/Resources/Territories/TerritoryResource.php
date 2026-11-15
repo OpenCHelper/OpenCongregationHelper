@@ -618,9 +618,15 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
 
                                 // Carica la relazione territory prima dell'update per evitare lazy loading errors
                                 $currentAssignment->load('territory');
-                                $currentAssignment->update([
-                                    'ended_at' => now(),
-                                ]);
+
+                                try {
+                                    $currentAssignment->update([
+                                        'ended_at' => now(),
+                                    ]);
+                                } catch (ValidationException $exception) {
+                                    // Rejected by TerritoryAssignmentObserver (e.g. the assignment starts in the future)
+                                    Log::warning("Skipping record {$record->id}: {$exception->getMessage()}");
+                                }
                             }
                         })
                         ->deselectRecordsAfterCompletion(),

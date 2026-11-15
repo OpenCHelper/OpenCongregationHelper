@@ -11,6 +11,7 @@ use App\Rules\NotTerminatedCampaign;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -78,6 +79,30 @@ test('a deleted assignment in progress cannot be restored while another one is i
 
     expect(fn () => $deletedAssignment->restore())->toThrow(ValidationException::class);
     expect($deletedAssignment->refresh()->trashed())->toBeTrue();
+});
+
+test('an assignment cannot end before it starts', function () {
+    expect(fn () => ($this->assign)(['started_at' => now()->subDays(10), 'ended_at' => now()->subDays(20)]))
+        ->toThrow(ValidationException::class, __('validation.territory_assignment.ended_before_started'));
+    expect($this->territory->assignments()->count())->toBe(0);
+
+    $assignment = ($this->assign)(['started_at' => now()->subDays(10)]);
+
+    expect(fn () => $assignment->update(['ended_at' => now()->subDays(20)]))->toThrow(ValidationException::class);
+    expect($assignment->refresh()->ended_at)->toBeNull();
+
+    $assignment->update(['ended_at' => now()->subDays(5)]);
+
+    expect(fn () => $assignment->update(['started_at' => now()->subDays(2)]))->toThrow(ValidationException::class);
+    expect($assignment->refresh()->started_at->isSameDay(now()->subDays(10)))->toBeTrue();
+});
+
+test('an assignment can be returned the moment it starts', function () {
+    $startedAt = now()->subDays(10)->startOfSecond();
+
+    $assignment = ($this->assign)(['started_at' => $startedAt, 'ended_at' => $startedAt]);
+
+    expect($assignment->refresh()->ended_at)->toEqual($startedAt);
 });
 
 test('an assignment cannot be linked to a terminated campaign', function () {
@@ -227,4 +252,62 @@ test('only territories that are not assigned can be picked for a new assignment'
         ->mountAction('create')
         ->assertFormFieldExists('territory_id', 'mountedActionSchema0', fn (Select $field): bool => array_key_exists($unassignedTerritory->id, $field->getOptions())
             && ! array_key_exists($this->territory->id, $field->getOptions()));
+});
+
+test('the assignment form rejects dates in the future or an end before the start', function (string $action, array $daysFromNow, string $field, string $rule, string $message) {
+    $user = User::factory()->create();
+    foreach (['ViewAny:TerritoryAssignment', 'View:TerritoryAssignment', 'Create:TerritoryAssignment', 'Update:TerritoryAssignment'] as $permission) {
+        $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+    $this->actingAs($user);
+
+    $startedAt = now()->subDays(10)->startOfSecond();
+    $dates = array_map(fn (int $days): Carbon => now()->addDays($days)->startOfSecond(), $daysFromNow);
+
+    $component = $action === 'create'
+        ? Livewire::test(ManageTerritoryAssignments::class)->callAction('create', [
+            'territory_id' => $this->territory->id,
+            'assignee_id' => $this->assignee->id,
+            'started_at' => $startedAt,
+            ...$dates,
+        ])
+        : Livewire::test(ManageTerritoryAssignments::class)->callAction(
+            TestAction::make('edit')->table(($this->assign)(['started_at' => $startedAt])),
+            $dates,
+        );
+
+    $component->assertHasFormErrors([$field => [$rule, __("validation.territory_assignment.{$message}")]]);
+
+    expect($this->territory->assignments()->get())
+        ->toHaveCount($action === 'create' ? 0 : 1)
+        ->each(fn ($assignment) => $assignment->started_at->toEqual($startedAt)->ended_at->toBeNull());
+})->with(['create', 'edit'])->with([
+    'end before start' => [['ended_at' => -20], 'ended_at', 'after_or_equal', 'ended_before_started'],
+    'start after end' => [['started_at' => -5, 'ended_at' => -8], 'ended_at', 'after_or_equal', 'ended_before_started'],
+    'start in the future' => [['started_at' => 1], 'started_at', 'before_or_equal', 'started_in_future'],
+    'end in the future' => [['ended_at' => 1], 'ended_at', 'before_or_equal', 'ended_in_future'],
+]);
+
+test('a past assignment can be recorded from the assignment form', function () {
+    $user = User::factory()->create();
+    foreach (['ViewAny:TerritoryAssignment', 'View:TerritoryAssignment', 'Create:TerritoryAssignment'] as $permission) {
+        $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+    $this->actingAs($user);
+
+    $startedAt = now()->subMonths(3)->startOfSecond();
+    $endedAt = now()->subMonth()->startOfSecond();
+
+    Livewire::test(ManageTerritoryAssignments::class)
+        ->callAction('create', [
+            'territory_id' => $this->territory->id,
+            'assignee_id' => $this->assignee->id,
+            'started_at' => $startedAt,
+            'ended_at' => $endedAt,
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($this->territory->assignments()->sole())
+        ->started_at->toEqual($startedAt)
+        ->ended_at->toEqual($endedAt);
 });

@@ -122,3 +122,54 @@ test('an assignment can be returned from the page of its terminated campaign', f
         ->campaign_id->toBe($campaign->id)
         ->ended_at->toEqual($returnedAt);
 });
+
+test('an assignment cannot end before it starts from the page of its territory', function () {
+    $assignment = TerritoryAssignment::factory()->create([
+        'territory_id' => $this->territory->id,
+        'assignee_id' => $this->assignee->id,
+        'started_at' => now()->subDays(10),
+        'ended_at' => null,
+    ]);
+
+    actingAsUserAllowedTo(['View:Territory', 'ViewAny:Territory', 'ViewAny:TerritoryAssignment', 'Update:TerritoryAssignment']);
+
+    Livewire::test(ManageTerritoryAssignments::class, ['record' => $this->territory->id])
+        ->callAction(TestAction::make('edit')->table($assignment), ['ended_at' => now()->subDays(20)])
+        ->assertHasFormErrors(['ended_at' => ['after_or_equal', __('validation.territory_assignment.ended_before_started')]]);
+
+    expect($assignment->refresh()->ended_at)->toBeNull();
+});
+
+test('an assignment cannot start in the future from the page of its campaign', function () {
+    $campaign = Campaign::factory()->create(['valid_until' => now()->addMonth()]);
+
+    actingAsUserAllowedTo(['View:Campaign', 'ViewAny:Campaign', 'ViewAny:TerritoryAssignment', 'Create:TerritoryAssignment']);
+
+    Livewire::test(ManageCampaignAssignments::class, ['record' => $campaign->id])
+        ->callAction(TestAction::make('create')->table(), [
+            'territory_id' => $this->territory->id,
+            'assignee_id' => $this->assignee->id,
+            'started_at' => now()->addDay()->toDateString(),
+        ])
+        ->assertHasFormErrors(['started_at' => ['before_or_equal', __('validation.territory_assignment.started_in_future')]]);
+
+    expect($this->territory->assignments()->count())->toBe(0);
+});
+
+test('an assignment can be created from the page of its campaign', function () {
+    $campaign = Campaign::factory()->create(['valid_until' => now()->addMonth()]);
+
+    actingAsUserAllowedTo(['View:Campaign', 'ViewAny:Campaign', 'ViewAny:TerritoryAssignment', 'Create:TerritoryAssignment']);
+
+    Livewire::test(ManageCampaignAssignments::class, ['record' => $campaign->id])
+        ->callAction(TestAction::make('create')->table(), [
+            'territory_id' => $this->territory->id,
+            'assignee_id' => $this->assignee->id,
+            'started_at' => now()->toDateString(),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($this->territory->assignments()->sole())
+        ->campaign_id->toBe($campaign->id)
+        ->started_at->isToday()->toBeTrue();
+});

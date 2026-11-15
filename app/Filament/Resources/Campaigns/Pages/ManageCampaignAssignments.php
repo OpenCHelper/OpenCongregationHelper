@@ -123,6 +123,10 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                     ->label(__('filament-resources.territory_assignment.field_started_at'))
                                     ->columns(1)
                                     ->default(now())
+                                    ->maxDate(now())
+                                    ->validationMessages([
+                                        'before_or_equal' => __('validation.territory_assignment.started_in_future'),
+                                    ])
                                     ->required(),
                             ])->columnSpanFull(),
                         Step::make(__('filament-resources.campaign.assignments_create_step_additional'))
@@ -157,7 +161,9 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                         DatePicker::make('started_at')
                                             ->label(__('filament-resources.territory_assignment.field_started_at'))
                                             ->columns(1)
-                                            ->disabled(),
+                                            ->disabled()
+                                            // Only a preview: its rules would replace the ones of the field of the first step
+                                            ->validatedWhenNotDehydrated(false),
                                         TextEntry::make('review_notes')
                                             ->label(__('filament-resources.territory_assignment.field_notes'))
                                             ->columnSpanFull()

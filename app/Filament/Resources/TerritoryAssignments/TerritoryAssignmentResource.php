@@ -282,9 +282,19 @@ class TerritoryAssignmentResource extends Resource
                             ->label(__('filament-resources.territory_assignment.field_started_at'))
                             ->default(now())
                             ->required()
+                            ->beforeOrEqual('now')
+                            ->validationMessages([
+                                'before_or_equal' => __('validation.territory_assignment.started_in_future'),
+                            ])
                             ->columnSpan(1),
                         DateTimePicker::make('ended_at')
                             ->label(__('filament-resources.territory_assignment.field_ended_at'))
+                            ->afterOrEqual('started_at')
+                            ->beforeOrEqual('now')
+                            ->validationMessages([
+                                'after_or_equal' => __('validation.territory_assignment.ended_before_started'),
+                                'before_or_equal' => __('validation.territory_assignment.ended_in_future'),
+                            ])
                             // Leaving the end date empty requires the territory to have no other assignment in progress
                             ->rule(fn (?TerritoryAssignment $record, Get $get): TerritoryNotAlreadyAssigned => new TerritoryNotAlreadyAssigned(
                                 territoryId: filled($territoryId = $record?->territory_id ?? $get('territory_id')) ? (int) $territoryId : null,

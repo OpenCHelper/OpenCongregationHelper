@@ -217,6 +217,9 @@ return [
 
     'territory_assignment' => [
         'already_assigned' => 'Questo territorio ha già un\'assegnazione in corso: riconsegnalo prima di assegnarlo di nuovo.',
+        'started_in_future' => 'La data inizio non può essere nel futuro.',
+        'ended_in_future' => 'La data fine non può essere nel futuro.',
+        'ended_before_started' => 'La data fine non può essere precedente alla data inizio.',
     ],
 
 ];
