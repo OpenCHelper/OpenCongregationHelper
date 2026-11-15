@@ -9,6 +9,7 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 
@@ -98,6 +99,38 @@ test('campaign groups are sorted by campaign name, with unassigned territories l
         ->set('tableGrouping', 'currentAssignment.campaign.name:desc')
         ->assertCanSeeTableRecords([$unassigned, $inBeta, $inAlpha], inOrder: true);
 });
+
+test('territories grouped by campaign can be searched', function (Closure $search) {
+    $alpha = Campaign::factory()->create(['name' => 'Alpha']);
+    $beta = Campaign::factory()->create(['name' => 'Beta']);
+
+    $romaUnassigned = territoryAssignedSince($this->zone, $this->assignee);
+    $romaInBeta = territoryAssignedSince($this->zone, $this->assignee, days: 5);
+    $romaInAlpha = territoryAssignedSince($this->zone, $this->assignee, days: 5);
+    $milanoInAlpha = territoryAssignedSince($this->zone, $this->assignee, days: 5);
+
+    $romaUnassigned->update(['name' => 'Via Roma 1']);
+    $romaInBeta->update(['name' => 'Via Roma 2']);
+    $romaInAlpha->update(['name' => 'Via Roma 3']);
+    $milanoInAlpha->update(['name' => 'Via Milano']);
+
+    $romaInBeta->currentAssignment->update(['campaign_id' => $beta->id]);
+    $romaInAlpha->currentAssignment->update(['campaign_id' => $alpha->id]);
+    $milanoInAlpha->currentAssignment->update(['campaign_id' => $alpha->id]);
+
+    $table = Livewire::test(ListTerritories::class)
+        ->set('tableGrouping', 'currentAssignment.campaign.name');
+
+    $search($table, 'Roma')
+        ->assertCanSeeTableRecords([$romaInAlpha, $romaInBeta, $romaUnassigned], inOrder: true)
+        ->assertCanNotSeeTableRecords([$milanoInAlpha])
+        ->set('tableGrouping', 'currentAssignment.campaign.name:desc')
+        ->assertCanSeeTableRecords([$romaUnassigned, $romaInBeta, $romaInAlpha], inOrder: true)
+        ->assertCanNotSeeTableRecords([$milanoInAlpha]);
+})->with([
+    'with the table search' => [fn (Testable $table, string $search): Testable => $table->searchTable($search)],
+    'with the name column search' => [fn (Testable $table, string $search): Testable => $table->searchTableColumns(['name' => $search])],
+]);
 
 test('the number of queries does not grow with the number of territories', function () {
     $countQueries = function (): int {

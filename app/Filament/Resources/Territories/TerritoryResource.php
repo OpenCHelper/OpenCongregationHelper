@@ -10,6 +10,7 @@ use App\Filament\Resources\Territories\Pages\ListTerritories;
 use App\Filament\Resources\Territories\Pages\ManageTerritoryAssignments;
 use App\Filament\Resources\Territories\Pages\ViewTerritory;
 use App\Filament\Resources\TerritoryAssignments\Actions as AssignmentActions;
+use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
 use App\Models\Campaign;
 use App\Models\Tag;
@@ -45,6 +46,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -68,6 +70,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Unique;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Override;
@@ -143,7 +146,21 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                     ->schema([
                         TextInput::make('name')
                             ->label(__('filament-resources.territory.field_name'))
-                            ->required(),
+                            ->required()
+                            // Deleted territories count too, like in the unique index of the database
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule, Get $get, string $operation, HasSchemas $livewire): Unique => $rule->where(
+                                    'territory_zone_id',
+                                    // On the territories page of a zone, new territories always go in that zone
+                                    ($operation === 'create') && ($livewire instanceof ManageZoneTerritories)
+                                        ? $livewire->getOwnerRecord()->getKey()
+                                        : $get('territory_zone_id'),
+                                ),
+                            )
+                            ->validationMessages([
+                                'unique' => __('filament-resources.territory.validation_name_unique'),
+                            ]),
                         Select::make('territory_zone_id')
                             ->label(__('filament-resources.territory.field_territory_zone'))
                             ->required()
@@ -376,16 +393,20 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                         return __('filament-resources.territory.filter_no_campaign')." ({$territoriesCount})";
                     })
                     ->orderQueryUsing(function (Builder $query, string $direction): Builder {
-                        // Wrapped by the grammar so that it gets the table prefix (`DB_PREFIX`), like the joins
-                        $campaignName = $query->getQuery()->getGrammar()->wrap('campaigns.name');
+                        // A subquery rather than a join: the query keeps reading the territories table only,
+                        // so the columns of the table searches (e.g. `name`) are not ambiguous
+                        $currentCampaignName = Campaign::query()
+                            ->select((new Campaign)->qualifyColumn('name'))
+                            ->whereHas('assignments', fn (Builder $assignments): Builder => $assignments
+                                ->whereColumn($assignments->qualifyColumn('territory_id'), $query->qualifyColumn('id'))
+                                ->whereNull($assignments->qualifyColumn('ended_at')))
+                            ->limit(1)
+                            ->toBase();
 
-                        return $query->leftJoin('territory_assignments as campaign_assignments', function ($join) {
-                            $join->on('territories.id', '=', 'campaign_assignments.territory_id')
-                                ->whereNull('campaign_assignments.ended_at');
-                        })
-                            ->leftJoin('campaigns', 'campaign_assignments.campaign_id', '=', 'campaigns.id')
-                            ->orderByRaw("COALESCE({$campaignName}, 'zzz_no_campaign') ".($direction === 'desc' ? 'desc' : 'asc'))
-                            ->select('territories.*');
+                        return $query->orderByRaw(
+                            "COALESCE(({$currentCampaignName->toSql()}), 'zzz_no_campaign') ".($direction === 'desc' ? 'desc' : 'asc'),
+                            $currentCampaignName->getBindings(),
+                        );
                     })
                     ->collapsible(),
             ])

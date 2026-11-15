@@ -3,9 +3,11 @@
 use App\Filament\Resources\Territories\Pages\CreateTerritory;
 use App\Filament\Resources\Territories\Pages\EditTerritory;
 use App\Filament\Resources\Territories\TerritoryResource;
+use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Http\UploadedFile;
@@ -155,4 +157,86 @@ test('the territory form loads the script that shows the map as soon as its tab 
             FilamentAsset::getScriptSrc('filament-map-picker-fix'),
             '/livewire.js',
         ], escape: false);
+});
+
+test('a territory cannot be created with the name of another territory of the same zone', function (bool $isOtherTerritoryDeleted) {
+    $existingTerritory = Territory::factory()->for($this->zone, 'territoryZone')->create(['name' => 'Via Roma']);
+
+    if ($isOtherTerritoryDeleted) {
+        $existingTerritory->delete();
+    }
+
+    Livewire::test(CreateTerritory::class)
+        ->fillForm([
+            'name' => 'Via Roma',
+            'territory_zone_id' => $this->zone->getKey(),
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique'])
+        // The message suggests restoring the territory, which may have been deleted
+        ->assertHasFormErrors(['name' => fn (array $failedRules, array $messages): bool => $messages === [__('filament-resources.territory.validation_name_unique')]]);
+
+    expect(Territory::withTrashed()->where('name', 'Via Roma')->count())->toBe(1);
+})->with([
+    'existing territory' => false,
+    'deleted territory' => true,
+]);
+
+test('a territory can have the name of a territory of another zone', function () {
+    Territory::factory()->for(TerritoryZone::factory()->create(['name' => 'South']), 'territoryZone')->create(['name' => 'Via Roma']);
+
+    Livewire::test(CreateTerritory::class)
+        ->fillForm([
+            'name' => 'Via Roma',
+            'territory_zone_id' => $this->zone->getKey(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(Territory::class, [
+        'name' => 'Via Roma',
+        'territory_zone_id' => $this->zone->getKey(),
+    ]);
+});
+
+test('a territory can be saved without changing its name', function () {
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create(['name' => 'Via Roma', 'image_path' => null]);
+
+    Livewire::test(EditTerritory::class, ['record' => $territory->getKey()])
+        ->fillForm(['notes' => 'Only the notes changed'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($territory->refresh()->notes)->toBe('Only the notes changed');
+});
+
+test('a territory cannot be renamed like another territory of the same zone', function () {
+    Territory::factory()->for($this->zone, 'territoryZone')->create(['name' => 'Via Roma']);
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create(['name' => 'Via Milano', 'image_path' => null]);
+
+    Livewire::test(EditTerritory::class, ['record' => $territory->getKey()])
+        ->fillForm(['name' => 'Via Roma'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($territory->refresh()->name)->toBe('Via Milano');
+});
+
+test('the territories page of a zone rejects the name of another territory of that zone', function () {
+    foreach (['ViewAny:TerritoryZone', 'View:TerritoryZone', 'Update:TerritoryZone'] as $permission) {
+        auth()->user()->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+
+    Territory::factory()->for($this->zone, 'territoryZone')->create(['name' => 'Via Roma']);
+    $south = TerritoryZone::factory()->create(['name' => 'South']);
+
+    // New territories go in the zone of the page, whatever zone is selected in the form
+    Livewire::test(ManageZoneTerritories::class, ['record' => $this->zone->getKey()])
+        ->callAction(TestAction::make('create')->table(), [
+            'name' => 'Via Roma',
+            'territory_zone_id' => $south->getKey(),
+        ])
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect(Territory::query()->where('name', 'Via Roma')->count())->toBe(1);
 });

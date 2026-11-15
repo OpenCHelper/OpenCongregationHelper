@@ -28,7 +28,10 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Override;
 use STS\FilamentImpersonate\Actions\Impersonate;
@@ -91,6 +94,7 @@ class UserResource extends Resource
                             ->email()
                             ->required()
                             ->maxLength(255)
+                            ->unique(ignoreRecord: true)
                             ->disabled(fn (?User $record) => $record?->isRootUserProtected())
                             ->helperText(fn (?User $record) => $record?->isRootUserProtected()
                                 ? __('profile.root_user_protection.generic_field_disabled')
@@ -165,7 +169,17 @@ class UserResource extends Resource
                     ->listWithLineBreaks()
                     ->limitList(3)
                     ->expandableLimitedList()
-                    ->sortable()
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        $roles = Relation::noConstraints(fn (): BelongsToMany => $query->getModel()->roles());
+                        $roleName = $roles->getRelated()->qualifyColumn('name');
+
+                        // Users with several roles are sorted by the first one in alphabetical order
+                        $firstRoleName = $roles->getRelationExistenceQuery($roles->getRelated()->newQuery(), $query, [$roleName])
+                            ->orderBy($roleName)
+                            ->limit(1);
+
+                        return $query->orderBy($firstRoleName->toBase(), $direction);
+                    })
                     ->searchable()
                     ->toggleable(),
                 IconColumn::make('email_verified_at')

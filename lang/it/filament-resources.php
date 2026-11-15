@@ -89,6 +89,7 @@ return [
         'section_additional_info' => 'Informazioni aggiuntive',
         'section_additional_info_description' => 'Informazioni utili in fase di lavorazione e/o gestione del territorio',
         'field_name' => 'Nome',
+        'validation_name_unique' => 'In questa zona esiste già un territorio con questo nome. Se non lo trovi nell\'elenco, potrebbe essere stato eliminato: puoi ripristinarlo invece di crearne uno nuovo.',
         'field_territory_zone' => 'Zona',
         'field_is_commercial' => 'Commerciale?',
         'field_notes' => 'Note',

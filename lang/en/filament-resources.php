@@ -89,6 +89,7 @@ return [
         'section_additional_info' => 'Additional Information',
         'section_additional_info_description' => 'Information useful during territory processing and/or management',
         'field_name' => 'Name',
+        'validation_name_unique' => 'A territory with this name already exists in this zone. If you cannot find it in the list, it may have been deleted: you can restore it instead of creating a new one.',
         'field_territory_zone' => 'Zone',
         'field_is_commercial' => 'Commercial?',
         'field_notes' => 'Notes',

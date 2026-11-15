@@ -157,7 +157,7 @@ class CampaignResource extends Resource
                     ->sortable(),
                 TextColumn::make('creator.full_name')
                     ->label(__('filament-resources.campaign.column_creator'))
-                    ->sortable(),
+                    ->sortable(['first_name', 'last_name']),
                 TextColumn::make('description')
                     ->label(__('filament-resources.campaign.column_description'))
                     ->searchable()

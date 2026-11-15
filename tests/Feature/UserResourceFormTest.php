@@ -71,6 +71,36 @@ test('a password is required when creating a user that can log in', function () 
         ->assertHasFormErrors(['password' => 'required']);
 });
 
+test('a user cannot be created with the email of another user', function () {
+    $this->actingAs($this->manager);
+
+    Livewire::test(CreateUser::class)
+        ->fillForm([
+            'first_name' => 'New',
+            'last_name' => 'User',
+            'email' => $this->user->email,
+            'can_login' => false,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['email' => 'unique']);
+
+    expect(User::query()->where('email', $this->user->email)->count())->toBe(1);
+});
+
+test('a user can be saved with their own email but not with the email of another user', function () {
+    $this->actingAs($this->manager);
+
+    Livewire::test(EditUser::class, ['record' => $this->user->id])
+        ->fillForm(['first_name' => 'Updated'])
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->fillForm(['email' => $this->manager->email])
+        ->call('save')
+        ->assertHasFormErrors(['email' => 'unique']);
+
+    expect($this->user->refresh()->email)->not->toBe($this->manager->email);
+});
+
 test('users that are not super administrators cannot assign roles', function () {
     $this->actingAs($this->manager);
 
