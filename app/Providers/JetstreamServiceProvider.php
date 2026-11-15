@@ -16,10 +16,13 @@ class JetstreamServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
+     *
+     * The routes of Jetstream are not registered, as its pages are replaced by the ones of the Filament panel.
+     * This must happen here, because Jetstream registers its routes while booting, before this provider boots.
      */
     public function register(): void
     {
-        //
+        Jetstream::ignoreRoutes();
     }
 
     /**

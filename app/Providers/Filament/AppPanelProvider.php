@@ -47,9 +47,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Fortify\Features as FortifyFeatures;
-use Laravel\Fortify\Fortify;
 use Laravel\Jetstream\Features;
-use Laravel\Jetstream\Jetstream;
 use pxlrbt\FilamentEnvironmentIndicator\EnvironmentIndicatorPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
 use Tapp\FilamentMailLog\FilamentMailLogPlugin;
@@ -213,16 +211,6 @@ class AppPanelProvider extends PanelProvider
 
     public function boot()
     {
-        /**
-         * Disable Fortify routes
-         */
-        Fortify::$registersRoutes = false;
-
-        /**
-         * Disable Jetstream routes
-         */
-        Jetstream::$registersRoutes = false;
-
         /**
          * Listen and switch team if tenant was changed
          */
