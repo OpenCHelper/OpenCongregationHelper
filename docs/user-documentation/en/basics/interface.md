@@ -16,10 +16,9 @@ Every page of the application shares the same layout.
 3. **Global search**: searches territories, zones and campaigns at once (see below).
 4. **Language**: switches the language of the interface (English, Italian or Spanish).
 5. **Notifications**: the bell shows the number of unread notifications (see [Notifications](notifications)).
-6. **Settings**: customizes the look of the application (see below).
-7. **User menu**: your profile and the **Sign out** button.
-8. **Documentation**: opens this guide. Above it you can read the version of the application.
-9. **Page actions**: the main buttons of the current page (e.g. **New territory**).
+6. **User menu**: your [profile](profile), the look of the interface (see below) and the **Sign out** button.
+7. **Documentation**: opens this guide. Above it you can read the version of the application.
+8. **Page actions**: the main buttons of the current page (e.g. **New territory**).
 
 ## Global search
 
@@ -42,8 +41,8 @@ emails you receive is set in your [profile](profile) instead.
 
 ## Customizing the look
 
-The **Settings** button (gear icon) opens a panel where each user can personalize the interface. The choices are saved
-in the browser:
+Open the user menu (your initials in the top right corner) and click **Settings**: a panel opens where each user can
+personalize the interface. The choices are saved in the browser:
 
 - **Mode**: light, dark or follow the system;
 - **Layout**: sidebar, compact sidebar, no top bar or top navigation bar;

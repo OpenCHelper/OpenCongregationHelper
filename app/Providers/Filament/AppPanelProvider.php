@@ -18,17 +18,18 @@ use Awcodes\Versions\VersionsPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Detection\MobileDetect;
 use DiscoveryDesign\FilamentGaze\FilamentGazePlugin;
+use Filament\Actions\Action;
 use Filament\Enums\GlobalSearchPosition;
 use Filament\Events\TenantSet;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Platform;
+use Filament\Support\Facades\FilamentView;
 use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
@@ -55,6 +56,13 @@ use Tapp\FilamentMailLog\FilamentMailLogPlugin;
 
 class AppPanelProvider extends PanelProvider
 {
+    /**
+     * Render hook of the panel with the UI preferences (mode, layout, color and font).
+     *
+     * The panel is opened from the user menu, so the button of the plugin is hidden (see the theme of the panel).
+     */
+    private const UI_PREFERENCES_RENDER_HOOK = 'app::ui-preferences';
+
     public function panel(Panel $panel): Panel
     {
         $detect = new MobileDetect;
@@ -81,13 +89,22 @@ class AppPanelProvider extends PanelProvider
                 default => null,
             })
             ->userMenuItems([
-                MenuItem::make()
-                    ->label(fn () => __('filament-resources.user_profile.menu_label'))
+                // Named `profile` so that Filament uses it as the profile item instead of adding its own.
+                Action::make('profile')
+                    ->label(fn (): string => __('filament-resources.user_profile.menu_label'))
                     ->icon(Heroicon::OutlinedUserCircle)
-                    ->url(fn () => $this->shouldRegisterMenuItem()
+                    ->url(fn (): string => $this->shouldRegisterMenuItem()
                         ? url(EditProfile::getUrl())
                         : url($panel->getPath())),
+                Action::make('uiPreferences')
+                    ->label(fn (): string => __('filament-ui-switcher::filament-ui-switcher.modal.heading'))
+                    ->icon(Heroicon::OutlinedCog6Tooth)
+                    ->alpineClickHandler("\$dispatch('open-modal', { id: 'ui-switcher-modal' })"),
             ])
+            ->renderHook(
+                PanelsRenderHook::LAYOUT_END,
+                fn (): string => '<div class="app-ui-preferences">'.FilamentView::renderHook(self::UI_PREFERENCES_RENDER_HOOK)->toHtml().'</div>',
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -135,6 +152,7 @@ class AppPanelProvider extends PanelProvider
                     ->modalTitleBreadcrumbs()
                     ->slideOverPreviews(),
                 FilamentUiSwitcherPlugin::make()
+                    ->iconRenderHook(self::UI_PREFERENCES_RENDER_HOOK)
                     ->withModeSwitcher(),
             ])
             ->middleware([
@@ -166,10 +184,10 @@ class AppPanelProvider extends PanelProvider
 
         if (Features::hasApiFeatures()) {
             $panel->userMenuItems([
-                MenuItem::make()
+                Action::make('apiTokens')
                     ->label('API Tokens')
                     ->icon(Heroicon::OutlinedKey)
-                    ->url(fn () => $this->shouldRegisterMenuItem()
+                    ->url(fn (): string => $this->shouldRegisterMenuItem()
                         ? url(ApiTokens::getUrl())
                         : url($panel->getPath())),
             ]);
@@ -181,10 +199,10 @@ class AppPanelProvider extends PanelProvider
                 ->tenantRegistration(CreateTeam::class)
                 ->tenantProfile(EditTeam::class)
                 ->userMenuItems([
-                    MenuItem::make()
-                        ->label(fn () => __('Team Settings'))
-                        ->icon(Heroicon::OutlinedCog6Tooth)
-                        ->url(fn () => $this->shouldRegisterMenuItem()
+                    Action::make('teamSettings')
+                        ->label(fn (): string => __('Team Settings'))
+                        ->icon(Heroicon::OutlinedUserGroup)
+                        ->url(fn (): string => $this->shouldRegisterMenuItem()
                             ? url(EditTeam::getUrl())
                             : url($panel->getPath())),
                 ]);

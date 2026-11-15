@@ -13,3 +13,13 @@
 @source '../../../../vendor/andreia/filament-ui-switcher';
 
 @import '../../app.css';
+
+/*
+   ------------ Override for `andreia/filament-ui-switcher` ------------
+
+   The panel with the UI preferences is opened from the user menu (see `AppPanelProvider`), so the button of the
+   plugin is hidden.
+*/
+.app-ui-preferences .fi-modal-trigger {
+    display: none;
+}

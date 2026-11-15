@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and refuses to run without a prefix when the database also holds the tables of other installations ([#156]).
 - Updated the dependencies, among them Laravel to 12.72, the impersonation plugin (`stechstudio/filament-impersonate`)
   to version 5, Vite to version 8 and `laravel-vite-plugin` to version 3 ([#168]).
+- The interface settings moved from the gear button in the top bar into the user menu, next to **Profile** and
+  **Sign out**.
 
 ### Removed
 
@@ -56,6 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zone names in the layers menu of the dashboard map showing raw HTML code ([#164]).
 - Sorting territories by assignment duration, and grouping them by campaign, failing when the database tables are
   prefixed (`DB_PREFIX`) ([#156]).
+- User menu showing an extra header with the name of the user when the interface is in Italian or Spanish, but not
+  in English.
 
 ### Security
 

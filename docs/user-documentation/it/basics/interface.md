@@ -16,10 +16,9 @@ Tutte le pagine dell'applicazione condividono la stessa struttura.
 3. **Ricerca globale**: cerca contemporaneamente tra territori, zone e campagne (vedi sotto).
 4. **Lingua**: cambia la lingua dell'interfaccia (inglese, italiano o spagnolo).
 5. **Notifiche**: la campanella mostra il numero di notifiche non lette (vedi [Notifiche](notifications)).
-6. **Impostazioni**: personalizza l'aspetto dell'applicazione (vedi sotto).
-7. **Menu utente**: il tuo profilo e il pulsante **Disconnetti**.
-8. **Documentazione**: apre questa guida. Sopra il pulsante è indicata la versione dell'applicazione.
-9. **Azioni della pagina**: i pulsanti principali della pagina corrente (es. **Nuovo**).
+6. **Menu utente**: il tuo [profilo](profile), l'aspetto dell'interfaccia (vedi sotto) e il pulsante **Disconnetti**.
+7. **Documentazione**: apre questa guida. Sopra il pulsante è indicata la versione dell'applicazione.
+8. **Azioni della pagina**: i pulsanti principali della pagina corrente (es. **Nuovo**).
 
 ## Ricerca globale
 
@@ -42,8 +41,8 @@ che ricevi si imposta invece nel tuo [profilo](profile).
 
 ## Personalizzare l'aspetto
 
-Il pulsante **Impostazioni** (icona a ingranaggio) apre un pannello in cui ogni utente può personalizzare l'interfaccia.
-Le scelte vengono salvate nel browser:
+Apri il menu utente (le tue iniziali in alto a destra) e clicca **Impostazioni interfaccia**: si apre un pannello in
+cui ogni utente può personalizzare l'interfaccia. Le scelte vengono salvate nel browser:
 
 - **Modalità**: chiara, scura o come il sistema;
 - **Layout**: barra laterale, barra laterale compatta, senza barra superiore o con menu in alto;
