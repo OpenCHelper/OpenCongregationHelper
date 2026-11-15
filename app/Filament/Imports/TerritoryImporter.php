@@ -15,6 +15,7 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
@@ -93,6 +94,31 @@ class TerritoryImporter extends Importer
         }
 
         return new Territory;
+    }
+
+    /**
+     * Fail the rows that the user who started the import is not allowed to import. Filament checks no
+     * policies while importing, so updating an existing territory requires the permission to update it,
+     * and importing into a zone that does not exist yet requires the permission to create zones.
+     *
+     * @throws RowImportFailedException
+     */
+    protected function afterValidate(): void
+    {
+        $gate = Gate::forUser($this->import->user);
+
+        if ($this->record->exists && $gate->denies('update', $this->record)) {
+            throw new RowImportFailedException(__('import.territory.errors.update_unauthorized', [
+                'name' => $this->data['name'],
+                'zone' => $this->data['territoryZone'],
+            ]));
+        }
+
+        if ($gate->denies('create', TerritoryZone::class) && TerritoryZone::where('name', $this->data['territoryZone'])->doesntExist()) {
+            throw new RowImportFailedException(__('import.territory.errors.zone_create_unauthorized', [
+                'zone' => $this->data['territoryZone'],
+            ]));
+        }
     }
 
     protected function beforeCreate(): void

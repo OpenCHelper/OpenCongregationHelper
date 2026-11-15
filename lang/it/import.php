@@ -26,6 +26,8 @@ return [
         ],
         'errors' => [
             'duplicate' => 'Esiste già un territorio chiamato ":name" nella zona ":zone".',
+            'update_unauthorized' => 'Non hai il permesso di modificare il territorio ":name" della zona ":zone".',
+            'zone_create_unauthorized' => 'La zona ":zone" non esiste e non hai il permesso di crearla.',
             'image_unsupported_scheme' => 'Schema URI ":scheme" non supportato per l\'immagine ":url".',
             'image_larger_than' => 'l\'immagine è più grande di :size',
             'image_download_failed' => 'Impossibile scaricare l\'immagine ":url": :reason',

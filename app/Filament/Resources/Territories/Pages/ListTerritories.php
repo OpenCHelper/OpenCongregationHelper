@@ -11,6 +11,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 
 class ListTerritories extends ListRecords
 {
@@ -41,6 +42,7 @@ class ListTerritories extends ListRecords
             CreateAction::make(),
             ImportAction::make()
                 ->pluralModelLabel(__('filament-resources.territory.plural_model_label'))
+                ->authorize(fn (): bool => Gate::allows('create', Territory::class))
                 ->importer(TerritoryImporter::class),
         ];
     }

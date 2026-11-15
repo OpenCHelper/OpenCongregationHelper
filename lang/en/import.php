@@ -26,6 +26,8 @@ return [
         ],
         'errors' => [
             'duplicate' => 'A territory named ":name" already exists in the zone ":zone".',
+            'update_unauthorized' => 'You are not allowed to update the territory ":name" of the zone ":zone".',
+            'zone_create_unauthorized' => 'The zone ":zone" does not exist and you are not allowed to create it.',
             'image_unsupported_scheme' => 'Unsupported URI scheme ":scheme" for the image ":url".',
             'image_larger_than' => 'the image is larger than :size',
             'image_download_failed' => 'Unable to download the image ":url": :reason',

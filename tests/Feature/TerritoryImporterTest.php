@@ -1,16 +1,40 @@
 <?php
 
 use App\Filament\Imports\TerritoryImporter;
+use App\Filament\Resources\Territories\Pages\ListTerritories;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
+use Filament\Actions\Imports\Jobs\ImportCsv;
 use Filament\Actions\Imports\Models\Import;
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+/**
+ * Create a user with the given permissions, by default those needed to import territories,
+ * update the existing ones and create the missing zones.
+ *
+ * @param  array<int, string>  $permissions
+ * @param  array<string, mixed>  $attributes
+ */
+function territoryImportUser(array $permissions = ['Create:Territory', 'Update:Territory', 'Create:TerritoryZone'], array $attributes = []): User
+{
+    $user = User::factory()->create($attributes);
+
+    foreach ($permissions as $permission) {
+        $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+
+    return $user;
+}
 
 function makeTerritoryImport(int $totalRows = 1, int $successfulRows = 0, ?User $user = null): Import
 {
@@ -20,8 +44,18 @@ function makeTerritoryImport(int $totalRows = 1, int $successfulRows = 0, ?User 
         'importer' => TerritoryImporter::class,
         'total_rows' => $totalRows,
         'successful_rows' => $successfulRows,
-        'user_id' => ($user ?? User::factory()->create())->id,
+        'user_id' => ($user ?? territoryImportUser())->id,
     ]);
+}
+
+/**
+ * @return array<string, string>
+ */
+function territoryImportColumnMap(): array
+{
+    return collect(TerritoryImporter::getColumns())
+        ->mapWithKeys(fn ($column) => [$column->getName() => $column->getName()])
+        ->all();
 }
 
 /**
@@ -31,14 +65,28 @@ function makeTerritoryImporter(array $options = [], ?User $user = null): Territo
 {
     $import = makeTerritoryImport(user: $user);
 
-    $columnMap = collect(TerritoryImporter::getColumns())
-        ->mapWithKeys(fn ($column) => [$column->getName() => $column->getName()])
-        ->all();
-
-    return new TerritoryImporter($import, $columnMap, [
+    return new TerritoryImporter($import, territoryImportColumnMap(), [
         'keep_image_links' => true,
         ...$options,
     ]);
+}
+
+/**
+ * Process the given rows as the queued job of the import action does, which records the failed rows.
+ *
+ * @param  array<int, array<string, string>>  $rows
+ * @param  array<string, mixed>  $options
+ */
+function runTerritoryImportJob(array $rows, User $user, array $options = []): Import
+{
+    $import = makeTerritoryImport(count($rows), user: $user);
+
+    (new ImportCsv($import, $rows, territoryImportColumnMap(), [
+        'keep_image_links' => true,
+        ...$options,
+    ]))->handle();
+
+    return $import->refresh();
 }
 
 test('a new territory can be imported into an existing zone', function () {
@@ -258,3 +306,69 @@ test('the validation errors of a row are in the language of the user who started
         'territoryZone' => 'North',
     ]))->toThrow(ValidationException::class, 'Il campo nome è obbligatorio.');
 });
+
+test('the import action is hidden and cannot be mounted for users who cannot create territories', function () {
+    Filament::setCurrentPanel('app');
+    User::factory()->create(['id' => 1]);
+
+    $this->actingAs(territoryImportUser(['View:Territory', 'ViewAny:Territory', 'View:TerritoryZone', 'ViewAny:TerritoryZone']));
+
+    Livewire::test(ListTerritories::class)
+        ->assertActionHidden('import')
+        ->mountAction('import')
+        ->assertActionNotMounted('import');
+});
+
+test('super administrators can import territories', function () {
+    Filament::setCurrentPanel('app');
+    User::factory()->create(['id' => 1]);
+
+    $superAdmin = User::factory()->create();
+    $superAdmin->assignRole(Role::findOrCreate('super_admin', 'web'));
+    $this->actingAs($superAdmin);
+
+    Livewire::test(ListTerritories::class)
+        ->assertActionVisible('import')
+        ->mountAction('import')
+        ->assertActionMounted('import');
+});
+
+test('existing territories are not updated for users who cannot update them', function () {
+    $zone = TerritoryZone::factory()->create(['name' => 'North']);
+    $territory = Territory::factory()->for($zone, 'territoryZone')->create([
+        'name' => 'T-1',
+        'notes' => 'original',
+        'is_commercial' => false,
+    ]);
+
+    $import = runTerritoryImportJob([
+        ['name' => 'T-1', 'notes' => 'overwritten', 'is_commercial' => 'true', 'territoryZone' => 'North'],
+        ['name' => 'T-2', 'notes' => 'new', 'is_commercial' => 'false', 'territoryZone' => 'North'],
+    ], territoryImportUser(['Create:Territory'], ['locale' => 'en']), ['updateExisting' => true]);
+
+    expect($territory->refresh())
+        ->notes->toBe('original')
+        ->is_commercial->toBeFalse()
+        ->and(Territory::where('name', 'T-2')->where('territory_zone_id', $zone->id)->exists())->toBeTrue()
+        ->and($import->successful_rows)->toBe(1)
+        ->and($import->failedRows()->sole())
+        ->data->toMatchArray(['name' => 'T-1'])
+        ->validation_error->toBe('You are not allowed to update the territory "T-1" of the zone "North".');
+});
+
+test('a missing zone is not created for users who cannot create zones', function (string $locale, string $reason) {
+    app()->setLocale('en');
+
+    expect(fn () => makeTerritoryImporter(user: territoryImportUser(['Create:Territory'], ['locale' => $locale]))([
+        'name' => 'T-1',
+        'is_commercial' => 'false',
+        'territoryZone' => 'South',
+    ]))->toThrow(RowImportFailedException::class, $reason);
+
+    expect(TerritoryZone::where('name', 'South')->exists())->toBeFalse()
+        ->and(Territory::count())->toBe(0);
+})->with([
+    'it' => ['it', 'La zona "South" non esiste e non hai il permesso di crearla.'],
+    'en' => ['en', 'The zone "South" does not exist and you are not allowed to create it.'],
+    'es' => ['es', 'La zona "South" no existe y no tienes permiso para crearla.'],
+]);
