@@ -107,17 +107,19 @@ class TerritoryAssignmentResource extends Resource
                     ->columns(2)
                     ->schema([
                         TextEntry::make('territory.name')
-                            ->label(__('filament-resources.territory_assignment.info_territory')),
+                            ->label(__('filament-resources.territory_assignment.info_territory'))
+                            // Shown when the territory (or its zone) has been deleted while still assigned
+                            ->placeholder(__('filament-resources.territory_assignment.info_territory_placeholder')),
                         TextEntry::make('territory.territoryZone.name')
                             ->label(__('filament-resources.territory_assignment.info_zone')),
                         Tabs::make('Tabs')
                             ->columnSpanFull()
-                            ->hidden(fn (Model $record) => is_null($record->territory->image_path) && is_null($record->territory->geojson))
+                            ->hidden(fn (Model $record) => is_null($record->territory?->image_path) && is_null($record->territory?->geojson))
                             ->tabs([
                                 Tab::make('TabMap')
                                     ->label(__('filament-resources.territory.tab_map'))
                                     ->icon(Heroicon::OutlinedMap)
-                                    ->visible(fn (TerritoryAssignment $record) => $record->territory->geojson != null)
+                                    ->visible(fn (TerritoryAssignment $record) => $record->territory?->geojson != null)
                                     ->schema([
                                         MapEntry::make('map')
                                             ->hiddenLabel()
@@ -125,7 +127,7 @@ class TerritoryAssignmentResource extends Resource
                                             ->id('assignment-map')
                                             ->state(null)
                                             ->columnSpanFull()
-                                            ->visible(fn (TerritoryAssignment $record) => $record->territory->geojson != null)
+                                            ->visible(fn (TerritoryAssignment $record) => $record->territory?->geojson != null)
                                             ->fitBounds()
                                         // ->zoom(10)
                                             ->recenterTimeout(null)
@@ -168,14 +170,14 @@ class TerritoryAssignmentResource extends Resource
                                 Tab::make('TabImage')
                                     ->label(__('filament-resources.territory.tab_image'))
                                     ->icon(Heroicon::OutlinedPhoto)
-                                    ->visible(fn (Model $record) => $record->territory->image_path != null)
+                                    ->visible(fn (Model $record) => $record->territory?->image_path != null)
                                     ->schema([
                                         ImageEntry::make('territory.image_path')
                                             ->visibility('private')
                                             ->imageHeight('auto')
                                             ->imageWidth('100%')
                                             ->hiddenLabel()
-                                            ->visible(fn (Model $record) => $record->territory->image_path != null)
+                                            ->visible(fn (Model $record) => $record->territory?->image_path != null)
                                             ->columnSpanFull(),
                                     ]),
 
@@ -183,7 +185,7 @@ class TerritoryAssignmentResource extends Resource
                         TextEntry::make('territory.description')
                             ->label(__('filament-resources.territory_assignment.info_description'))
                             ->columnSpanFull()
-                            ->visible(fn (Model $record) => $record->territory->description != null)
+                            ->visible(fn (Model $record) => $record->territory?->description != null)
                             ->placeholder(__('filament-resources.territory_assignment.info_description_placeholder')),
                         TextEntry::make('territory.notes')
                             ->label(__('filament-resources.territory_assignment.info_notes'))

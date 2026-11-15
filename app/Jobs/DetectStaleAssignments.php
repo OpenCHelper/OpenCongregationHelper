@@ -58,6 +58,8 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
         $staleAfterDays = min(array_keys($this->getStaleLevels()));
 
         TerritoryAssignment::query()
+            // Skip the assignments whose territory (or its zone) has been deleted while still assigned
+            ->whereHas('territory')
             ->whereNull('ended_at')
             ->where('started_at', '<', now()->subDays($staleAfterDays))
             ->lazyById()

@@ -60,23 +60,25 @@ class ManageZoneTerritories extends ManageRelatedRecords
                 TrashedFilter::make(),
             ])
             ->headerActions([
-                CreateAction::make(),
+                // A territory created in a deleted zone would be hidden together with the zone
+                CreateAction::make()
+                    ->hidden(fn (): bool => $this->getOwnerRecord()->trashed()),
                 // Tables\Actions\AssociateAction::make(),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
                 // Tables\Actions\DissociateAction::make(),
-                DeleteAction::make(),
-                ForceDeleteAction::make(),
+                TerritoryResource::explainRefusedDeletion(DeleteAction::make()),
+                TerritoryResource::explainRefusedDeletion(ForceDeleteAction::make()),
                 RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     // Tables\Actions\DissociateBulkAction::make(),
-                    DeleteBulkAction::make(),
+                    TerritoryResource::explainRefusedDeletion(DeleteBulkAction::make()),
                     RestoreBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
+                    TerritoryResource::explainRefusedDeletion(ForceDeleteBulkAction::make()),
                 ]),
             ])
             ->modifyQueryUsing(fn (Builder $query) => $query->withoutGlobalScopes([

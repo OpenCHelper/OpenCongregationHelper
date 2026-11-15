@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Territory;
+use App\Models\TerritoryAssignment;
 
 class TerritoryObserver
 {
@@ -20,6 +21,24 @@ class TerritoryObserver
     public function updated(Territory $territory): void
     {
         //
+    }
+
+    /**
+     * Handle the Territory "deleting" event, fired by both soft and force deletes.
+     *
+     * A territory that is still assigned cannot be deleted: its assignment in progress
+     * (and its public link) would be left pointing to a territory that can no longer
+     * be loaded. The territory must be returned first.
+     *
+     * @return false|null false cancels the deletion; null lets it (and the other "deleting" listeners) go on
+     */
+    public function deleting(Territory $territory): ?bool
+    {
+        if (TerritoryAssignment::territoryHasOpenAssignment($territory->getKey())) {
+            return false;
+        }
+
+        return null;
     }
 
     /**

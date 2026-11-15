@@ -20,7 +20,7 @@ class ViewTerritoryZone extends ViewRecord
     {
         return [
             EditAction::make(),
-            DeleteAction::make(),
+            TerritoryZoneResource::explainRefusedDeletion(DeleteAction::make()),
         ];
     }
 }

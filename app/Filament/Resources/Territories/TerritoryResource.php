@@ -17,10 +17,12 @@ use App\Models\Tag;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\User;
+use App\Observers\TerritoryObserver;
 use Carbon\Carbon;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Dotswan\MapPicker\Fields\Map;
 use Exception;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -546,7 +548,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                 ActionGroup::make([
                     AssignmentActions\CreateAssignmentAction::make('create_assignment'),
                     AssignmentActions\ReturnAssignmentAction::make('cancel_assignment'),
-                    ForceDeleteAction::make()
+                    static::explainRefusedDeletion(ForceDeleteAction::make())
                         ->visible(fn (Territory $record) => $record->deleted_at !== null),
                     RestoreAction::make()
                         ->visible(fn (Territory $record) => $record->deleted_at !== null),
@@ -630,9 +632,9 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                             }
                         })
                         ->deselectRecordsAfterCompletion(),
-                    DeleteBulkAction::make()
+                    static::explainRefusedDeletion(DeleteBulkAction::make())
                         ->deselectRecordsAfterCompletion(),
-                    ForceDeleteBulkAction::make()
+                    static::explainRefusedDeletion(ForceDeleteBulkAction::make())
                         ->deselectRecordsAfterCompletion(),
                     RestoreBulkAction::make()
                         ->deselectRecordsAfterCompletion(),
@@ -703,5 +705,27 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
         unset($data['image_file']);
 
         return $data;
+    }
+
+    /**
+     * Explain why a territory has not been deleted: {@see TerritoryObserver::deleting()}
+     * refuses to (force) delete a territory that is still assigned.
+     *
+     * @template TAction of Action
+     *
+     * @param  TAction  $action  A (force) delete action, single or bulk
+     * @return TAction
+     */
+    public static function explainRefusedDeletion(Action $action): Action
+    {
+        if ($action instanceof BulkAction) {
+            return $action->missingBulkProcessingFailureNotificationMessage(
+                fn (int $count): string => trans_choice('filament-resources.territory.delete_refused_bulk', $count),
+            );
+        }
+
+        return $action
+            ->failureNotificationTitle(__('filament-resources.territory.delete_refused_title'))
+            ->failureNotificationBody(__('filament-resources.territory.delete_refused_body'));
     }
 }

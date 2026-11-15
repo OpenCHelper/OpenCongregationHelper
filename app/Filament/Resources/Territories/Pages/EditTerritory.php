@@ -22,7 +22,7 @@ class EditTerritory extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            TerritoryResource::explainRefusedDeletion(DeleteAction::make()),
         ];
     }
 }

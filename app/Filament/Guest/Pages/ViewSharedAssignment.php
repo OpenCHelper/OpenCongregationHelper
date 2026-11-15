@@ -39,7 +39,10 @@ class ViewSharedAssignment extends Page implements HasInfolists
 
     public function getTitle(): string
     {
-        return ucfirst(__('filament-resources.territory_assignment.model_label').': '.$this->assignment->territory->name);
+        // The territory is missing when it (or its zone) has been deleted while still assigned
+        $territoryName = $this->assignment->territory?->name ?? __('filament-resources.territory_assignment.info_territory_placeholder');
+
+        return ucfirst(__('filament-resources.territory_assignment.model_label').': '.$territoryName);
     }
 
     public function assignmentInfolist(Schema $schema): Schema

@@ -164,7 +164,9 @@ test('territories of soft-deleted zones are hidden', function () {
     $visibleTerritory = territoryAssignedSince($this->zone, $this->assignee);
     territoryAssignedSince($south, $this->assignee);
 
-    $south->delete();
+    // Deleting a zone that still has territories is refused (see TerritoryZoneObserver),
+    // but zones deleted before that, with their territories, can still exist
+    $south->deleteQuietly();
 
     expect(Territory::pluck('id')->all())->toBe([$visibleTerritory->id]);
 });

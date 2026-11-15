@@ -11,10 +11,17 @@ use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Filament\Resources\TerritoryZones\Pages\ViewTerritoryZone;
 use App\Models\Tag;
 use App\Models\TerritoryZone;
+use App\Observers\TerritoryZoneObserver;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Forms;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\SpatieTagsInput;
@@ -26,9 +33,11 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Override;
 use UnitEnum;
 
@@ -120,7 +129,8 @@ class TerritoryZoneResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('territories_count')
-                    ->counts('territories')
+                    // Also count the territories of deleted zones, hidden by `parentNotDeleted` until the zone is restored
+                    ->counts(['territories' => fn (Builder $query): Builder => $query->withoutGlobalScope('parentNotDeleted')])
                     ->label(__('filament-resources.territory_zone.column_territories_count'))
                     ->sortable(),
                 SpatieTagsColumn::make('tags')
@@ -128,6 +138,7 @@ class TerritoryZoneResource extends Resource
                     ->type(TagType::ZONES->value),
             ])
             ->filters([
+                TrashedFilter::make(),
                 SelectFilter::make('tags')
                     ->label(__('filament-resources.territory_zone.filter_tags'))
                     ->multiple()
@@ -140,10 +151,14 @@ class TerritoryZoneResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                static::explainRefusedDeletion(ForceDeleteAction::make()),
+                RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->deselectRecordsAfterCompletion(),
+                    static::explainRefusedDeletion(DeleteBulkAction::make())->deselectRecordsAfterCompletion(),
+                    static::explainRefusedDeletion(ForceDeleteBulkAction::make())->deselectRecordsAfterCompletion(),
+                    RestoreBulkAction::make()->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }
@@ -172,5 +187,41 @@ class TerritoryZoneResource extends Resource
             'edit' => EditTerritoryZone::route('/{record}/edit'),
             'territories' => ManageZoneTerritories::route('/{record}/territories'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+
+    /**
+     * Explain why a zone has not been deleted: {@see TerritoryZoneObserver::deleting()}
+     * refuses to delete a zone that still has territories, and to force delete one that
+     * still has territories, deleted ones included.
+     *
+     * @template TAction of Action
+     *
+     * @param  TAction  $action  A (force) delete action, single or bulk
+     * @return TAction
+     */
+    public static function explainRefusedDeletion(Action $action): Action
+    {
+        // A force delete is also refused because of the deleted territories, so it has its own explanation
+        $reason = ($action instanceof ForceDeleteAction) || ($action instanceof ForceDeleteBulkAction)
+            ? 'force_delete_refused'
+            : 'delete_refused';
+
+        if ($action instanceof BulkAction) {
+            return $action->missingBulkProcessingFailureNotificationMessage(
+                fn (int $count): string => trans_choice("filament-resources.territory_zone.{$reason}_bulk", $count),
+            );
+        }
+
+        return $action
+            ->failureNotificationTitle(__('filament-resources.territory_zone.delete_refused_title'))
+            ->failureNotificationBody(__("filament-resources.territory_zone.{$reason}_body"));
     }
 }

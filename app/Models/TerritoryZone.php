@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Observers\TerritoryZoneObserver;
 use Database\Factories\TerritoryZoneFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +13,7 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Tags\HasTags;
 
+#[ObservedBy(TerritoryZoneObserver::class)]
 class TerritoryZone extends Model
 {
     /** @use HasFactory<TerritoryZoneFactory> */

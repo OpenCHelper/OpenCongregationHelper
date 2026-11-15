@@ -13,7 +13,7 @@ class EditTerritoryZone extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            TerritoryZoneResource::explainRefusedDeletion(DeleteAction::make()),
         ];
     }
 }
