@@ -1,11 +1,11 @@
-<x-action-section>
-    <x-slot name="title">
-        {{ __('profile.contacts.section_title') }}
-    </x-slot>
-    <x-slot name="description">
-        {{ __('profile.contacts.section_description') }}
-    </x-slot>
-    <x-slot name="content">
+<div>
+    {{-- Not contained: the table is already a card, so it must not be wrapped in the card of the section. --}}
+    <x-filament::section
+        aside
+        :contained="false"
+        :heading="__('profile.contacts.section_title')"
+        :description="__('profile.contacts.section_description')"
+    >
         {{ $this->table }}
-    </x-slot>
-</x-action-section>
+    </x-filament::section>
+</div>

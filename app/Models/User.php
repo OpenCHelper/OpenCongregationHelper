@@ -6,6 +6,7 @@ use App\Enums\ContactType;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
@@ -29,7 +30,7 @@ use Spatie\Permission\Traits\HasRoles;
 use STS\FilamentImpersonate\Facades\Impersonation;
 
 #[ObservedBy([UserObserver::class])]
-class User extends Authenticatable implements FilamentUser, HasLocalePreference, HasName, HasTenants, MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocalePreference, HasName, HasTenants, MustVerifyEmail
 {
     use HasApiTokens;
 
@@ -141,6 +142,15 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
     public function getFilamentName(): string
     {
         return $this->getFullName();
+    }
+
+    /**
+     * The photo uploaded from the profile page, or `null` to let Filament generate the avatar from the initials.
+     */
+    public function getFilamentAvatarUrl(): ?string
+    {
+        // The URL is an accessor of the `HasProfilePhoto` trait of Jetstream
+        return $this->profile_photo_path ? $this->getAttribute('profile_photo_url') : null;
     }
 
     /**

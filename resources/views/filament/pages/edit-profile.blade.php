@@ -2,40 +2,20 @@
     @if (Laravel\Fortify\Features::canUpdateProfileInformation())
         @livewire(Laravel\Jetstream\Http\Livewire\UpdateProfileInformationForm::class)
 
-        <x-section-border/>
-
-        <div class="mt-10 sm:mt-0">
-            @livewire('profile-contacts')
-        </div>
-
-        <x-section-border/>
+        @livewire('profile-contacts')
     @endif
 
     @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
-        <div class="mt-10 sm:mt-0">
-            @livewire(Laravel\Jetstream\Http\Livewire\UpdatePasswordForm::class)
-        </div>
-
-        <x-section-border/>
+        @livewire(Laravel\Jetstream\Http\Livewire\UpdatePasswordForm::class)
     @endif
 
     @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
-        <div class="mt-10 sm:mt-0">
-            @livewire(Laravel\Jetstream\Http\Livewire\TwoFactorAuthenticationForm::class)
-        </div>
-
-        <x-section-border/>
+        @livewire(Laravel\Jetstream\Http\Livewire\TwoFactorAuthenticationForm::class)
     @endif
 
-    <div class="mt-10 sm:mt-0">
-        @livewire(Laravel\Jetstream\Http\Livewire\LogoutOtherBrowserSessionsForm::class)
-    </div>
+    @livewire(Laravel\Jetstream\Http\Livewire\LogoutOtherBrowserSessionsForm::class)
 
     @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
-        <x-section-border/>
-
-        <div class="mt-10 sm:mt-0">
-            @livewire(Laravel\Jetstream\Http\Livewire\DeleteUserForm::class)
-        </div>
+        @livewire(Laravel\Jetstream\Http\Livewire\DeleteUserForm::class)
     @endif
 </x-filament-panels::page>

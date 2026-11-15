@@ -13,6 +13,14 @@ class EditProfile extends Page
 
     protected static ?string $navigationLabel = null;
 
+    /**
+     * Translated title, otherwise Filament derives "Edit Profile" from the name of the class.
+     */
+    public function getTitle(): string
+    {
+        return __('profile.header.title');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('filament-resources.user_profile.navigation_label');

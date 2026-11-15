@@ -3,6 +3,10 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
+/* Views of the profile page: the forms of Jetstream are published in `profile/`, the contacts are in `livewire/`. */
+@source '../../../../resources/views/profile/**/*';
+@source '../../../../resources/views/livewire/**/*';
+
 @source '../../../../vendor/laravel/jetstream/**/*';
 @source '../../../../vendor/awcodes/filament-versions/**/*';
 

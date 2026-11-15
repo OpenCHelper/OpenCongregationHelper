@@ -24,6 +24,9 @@ Route::redirect('/register', '/app/register')->name('register');
 
 Route::redirect('/dashboard', '/app')->name('dashboard');
 
+// Jetstream sends the user here after uploading a new profile photo, but the profile page is in the Filament panel.
+Route::redirect('/user/profile', '/app/edit-profile')->name('profile.show');
+
 Route::get('/team-invitations/{invitation}', [TeamInvitationController::class, 'accept'])
     ->middleware(['signed', 'verified', 'auth', AuthenticateSession::class])
     ->name('team-invitations.accept');

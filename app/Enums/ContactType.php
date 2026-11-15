@@ -17,16 +17,6 @@ enum ContactType: string implements HasColor, HasLabel
         return array_column(self::cases(), 'value');
     }
 
-    public function badgeClass(): string
-    {
-        return match ($this) {
-            self::PERSONAL => 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100',
-            self::EMERGENCY => 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
-            self::BUSINESS => 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
-            self::OTHER => 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100',
-        };
-    }
-
     public function getLabel(): string
     {
         return match ($this) {

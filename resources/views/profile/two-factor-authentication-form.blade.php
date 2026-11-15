@@ -1,124 +1,141 @@
-<x-action-section>
-    <x-slot name="title">
-        {{ __('profile.two_factor_authentication.title') }}
-    </x-slot>
+@php
+    use Filament\Support\Icons\Heroicon;
+@endphp
 
-    <x-slot name="description">
-        {{ __('profile.two_factor_authentication.description') }}
-    </x-slot>
+<div>
+    <x-filament::section
+        aside
+        :heading="__('profile.two_factor_authentication.title')"
+        :description="__('profile.two_factor_authentication.description')"
+    >
+        <div class="grid gap-6">
+            <div class="grid gap-y-2">
+                <h3 class="flex items-center gap-x-2 text-sm font-semibold text-gray-950 dark:text-white">
+                    @if ($this->enabled && ! $showingConfirmation)
+                        <x-filament::icon :icon="Heroicon::OutlinedShieldCheck" class="size-5 text-success-500 dark:text-success-400" />
+                    @endif
 
-    <x-slot name="content">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            @if ($this->enabled)
-                @if ($showingConfirmation)
-                    {{ __('profile.two_factor_authentication.finish_enabling') }}
-                @else
-                    {{ __('profile.two_factor_authentication.enabled') }}
-                @endif
-            @else
-                {{ __('profile.two_factor_authentication.not_enabled') }}
-            @endif
-        </h3>
-
-        <div class="mt-3 max-w-xl text-sm text-gray-600 dark:text-gray-400">
-            <p>
-                {{ __('profile.two_factor_authentication.when_enabled_description') }}
-            </p>
-        </div>
-
-        @if ($this->enabled)
-            @if ($showingQrCode)
-                <div class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-400">
-                    <p class="font-semibold">
+                    @if ($this->enabled)
                         @if ($showingConfirmation)
-                            {{ __('profile.two_factor_authentication.scan_qr_code') }}
+                            {{ __('profile.two_factor_authentication.finish_enabling') }}
                         @else
-                            {{ __('profile.two_factor_authentication.qr_code_enabled') }}
+                            {{ __('profile.two_factor_authentication.enabled') }}
                         @endif
-                    </p>
-                </div>
+                    @else
+                        {{ __('profile.two_factor_authentication.not_enabled') }}
+                    @endif
+                </h3>
 
-                <div class="mt-4 p-2 inline-block bg-white">
-                    {!! $this->user->twoFactorQrCodeSvg() !!}
-                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('profile.two_factor_authentication.when_enabled_description') }}
+                </p>
+            </div>
 
-                <div class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-400">
-                    <p class="font-semibold">
-                        {{ __('profile.two_factor_authentication.setup_key') }}: {{ decrypt($this->user->two_factor_secret) }}
-                    </p>
-                </div>
+            @if ($this->enabled)
+                @if ($showingQrCode)
+                    <div class="grid gap-y-4">
+                        <p class="text-sm font-medium text-gray-950 dark:text-white">
+                            @if ($showingConfirmation)
+                                {{ __('profile.two_factor_authentication.scan_qr_code') }}
+                            @else
+                                {{ __('profile.two_factor_authentication.qr_code_enabled') }}
+                            @endif
+                        </p>
 
-                @if ($showingConfirmation)
-                    <div class="mt-4">
-                        <x-label for="code" value="{{ __('profile.two_factor_authentication.code') }}" />
+                        <div class="w-fit rounded-lg bg-white p-2 ring-1 ring-gray-950/5">
+                            {!! $this->user->twoFactorQrCodeSvg() !!}
+                        </div>
 
-                        <x-input id="code" type="text" name="code" class="block mt-1 w-1/2" inputmode="numeric" autofocus autocomplete="one-time-code"
-                            wire:model="code"
-                            wire:keydown.enter="confirmTwoFactorAuthentication" />
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ __('profile.two_factor_authentication.setup_key') }}:
+                            <code class="font-mono text-gray-950 dark:text-white">{{ decrypt($this->user->two_factor_secret) }}</code>
+                        </p>
 
-                        <x-input-error for="code" class="mt-2" />
+                        @if ($showingConfirmation)
+                            <x-filament-forms::field-wrapper
+                                id="code"
+                                :label="__('profile.two_factor_authentication.code')"
+                                required
+                                state-path="code"
+                                class="max-w-xs"
+                            >
+                                <x-filament::input.wrapper :valid="! $errors->has('code')">
+                                    <x-filament::input
+                                        id="code"
+                                        type="text"
+                                        name="code"
+                                        inputmode="numeric"
+                                        autofocus
+                                        autocomplete="one-time-code"
+                                        wire:model="code"
+                                        wire:keydown.enter="confirmTwoFactorAuthentication"
+                                    />
+                                </x-filament::input.wrapper>
+                            </x-filament-forms::field-wrapper>
+                        @endif
+                    </div>
+                @endif
+
+                @if ($showingRecoveryCodes)
+                    <div class="grid gap-y-4">
+                        <p class="text-sm font-medium text-gray-950 dark:text-white">
+                            {{ __('profile.two_factor_authentication.recovery_codes_description') }}
+                        </p>
+
+                        <div class="grid gap-1 rounded-lg bg-gray-50 px-4 py-3 font-mono text-sm text-gray-950 ring-1 ring-gray-950/5 dark:bg-white/5 dark:text-white dark:ring-white/10">
+                            @foreach (json_decode(decrypt($this->user->two_factor_recovery_codes), true) as $code)
+                                <div>{{ $code }}</div>
+                            @endforeach
+                        </div>
                     </div>
                 @endif
             @endif
-
-            @if ($showingRecoveryCodes)
-                <div class="mt-4 max-w-xl text-sm text-gray-600 dark:text-gray-400">
-                    <p class="font-semibold">
-                        {{ __('profile.two_factor_authentication.recovery_codes_description') }}
-                    </p>
-                </div>
-
-                <div class="grid gap-1 max-w-xl mt-4 px-4 py-4 font-mono text-sm bg-gray-100 dark:bg-gray-900 dark:text-gray-100 rounded-lg">
-                    @foreach (json_decode(decrypt($this->user->two_factor_recovery_codes), true) as $code)
-                        <div>{{ $code }}</div>
-                    @endforeach
-                </div>
-            @endif
-        @endif
-
-        <div class="mt-5">
-            @if (! $this->enabled)
-                <x-confirms-password wire:then="enableTwoFactorAuthentication">
-                    <x-button type="button" wire:loading.attr="disabled">
-                        {{ __('profile.two_factor_authentication.enable') }}
-                    </x-button>
-                </x-confirms-password>
-            @else
-                @if ($showingRecoveryCodes)
-                    <x-confirms-password wire:then="regenerateRecoveryCodes">
-                        <x-secondary-button class="me-3">
-                            {{ __('profile.two_factor_authentication.regenerate_recovery_codes') }}
-                        </x-secondary-button>
-                    </x-confirms-password>
-                @elseif ($showingConfirmation)
-                    <x-confirms-password wire:then="confirmTwoFactorAuthentication">
-                        <x-button type="button" class="me-3" wire:loading.attr="disabled">
-                            {{ __('profile.two_factor_authentication.confirm') }}
-                        </x-button>
-                    </x-confirms-password>
-                @else
-                    <x-confirms-password wire:then="showRecoveryCodes">
-                        <x-secondary-button class="me-3">
-                            {{ __('profile.two_factor_authentication.show_recovery_codes') }}
-                        </x-secondary-button>
-                    </x-confirms-password>
-                @endif
-
-                @if ($showingConfirmation)
-                    <x-confirms-password wire:then="disableTwoFactorAuthentication">
-                        <x-secondary-button wire:loading.attr="disabled">
-                            {{ __('profile.two_factor_authentication.cancel') }}
-                        </x-secondary-button>
-                    </x-confirms-password>
-                @else
-                    <x-confirms-password wire:then="disableTwoFactorAuthentication">
-                        <x-danger-button wire:loading.attr="disabled">
-                            {{ __('profile.two_factor_authentication.disable') }}
-                        </x-danger-button>
-                    </x-confirms-password>
-                @endif
-
-            @endif
         </div>
-    </x-slot>
-</x-action-section>
+
+        <x-slot name="footer">
+            <div class="flex flex-wrap items-center gap-3">
+                @if (! $this->enabled)
+                    <x-confirms-password wire:then="enableTwoFactorAuthentication">
+                        <x-filament::button :icon="Heroicon::ShieldCheck">
+                            {{ __('profile.two_factor_authentication.enable') }}
+                        </x-filament::button>
+                    </x-confirms-password>
+                @else
+                    @if ($showingRecoveryCodes)
+                        <x-confirms-password wire:then="regenerateRecoveryCodes">
+                            <x-filament::button color="gray">
+                                {{ __('profile.two_factor_authentication.regenerate_recovery_codes') }}
+                            </x-filament::button>
+                        </x-confirms-password>
+                    @elseif ($showingConfirmation)
+                        <x-confirms-password wire:then="confirmTwoFactorAuthentication">
+                            <x-filament::button>
+                                {{ __('profile.two_factor_authentication.confirm') }}
+                            </x-filament::button>
+                        </x-confirms-password>
+                    @else
+                        <x-confirms-password wire:then="showRecoveryCodes">
+                            <x-filament::button color="gray">
+                                {{ __('profile.two_factor_authentication.show_recovery_codes') }}
+                            </x-filament::button>
+                        </x-confirms-password>
+                    @endif
+
+                    @if ($showingConfirmation)
+                        <x-confirms-password wire:then="disableTwoFactorAuthentication">
+                            <x-filament::button color="gray">
+                                {{ __('profile.two_factor_authentication.cancel') }}
+                            </x-filament::button>
+                        </x-confirms-password>
+                    @else
+                        <x-confirms-password wire:then="disableTwoFactorAuthentication">
+                            <x-filament::button color="danger">
+                                {{ __('profile.two_factor_authentication.disable') }}
+                            </x-filament::button>
+                        </x-confirms-password>
+                    @endif
+                @endif
+            </div>
+        </x-slot>
+    </x-filament::section>
+</div>

@@ -38,8 +38,6 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
     use InteractsWithActions;
     use InteractsWithForms, InteractsWithInfolists, InteractsWithTable;
 
-    public ?Contact $editingContact = null;
-
     public function table(Table $table): Table
     {
         return $table
@@ -94,59 +92,44 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
                     ),
             ])
             ->headerActions([
-                Action::make('create')
-                    ->label(__('profile.contacts.add_contact'))
-                    ->icon(Heroicon::OutlinedPlus)
-                    ->schema($this->getFormSchema())
-                    ->action(function (array $data, Schema $schema): void {
-                        // If this contact is set as primary, unset any other primary contacts
-                        // if ($data['is_primary']) {
-                        //     /** @var User $user */
-                        //     $user = Auth::user();
-                        //     $user->contacts()->update(['is_primary' => false]);
-                        // }
-
-                        /** @var User $user */
-                        $user = Auth::user();
-                        $contact = $user->contacts()->create($data);
-
-                        // Save the relationships of the action form to the created contact
-                        $schema->model($contact)->saveRelationships();
-                    })
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('profile.contacts.contact_saved'))
-                    ),
+                $this->getCreateAction(),
             ])
+            ->emptyStateIcon(Heroicon::OutlinedUserGroup)
             ->emptyStateHeading(__('profile.contacts.no_contacts'))
             ->emptyStateDescription(__('profile.contacts.no_contacts_description'))
             ->emptyStateActions([
-                Action::make('create')
-                    ->label(__('profile.contacts.add_contact'))
-                    ->icon(Heroicon::OutlinedPlus)
-                    ->schema($this->getFormSchema())
-                    ->action(function (array $data, Schema $schema): void {
-                        // If this contact is set as primary, unset any other primary contacts
-                        // if ($data['is_primary']) {
-                        //     /** @var User $user */
-                        //     $user = Auth::user();
-                        //     $user->contacts()->update(['is_primary' => false]);
-                        // }
-
-                        /** @var User $user */
-                        $user = Auth::user();
-                        $contact = $user->contacts()->create($data);
-
-                        // Save the relationships of the action form to the created contact
-                        $schema->model($contact)->saveRelationships();
-                    })
-                    ->successNotification(
-                        Notification::make()
-                            ->success()
-                            ->title(__('profile.contacts.contact_saved'))
-                    ),
+                $this->getCreateAction(),
             ]);
+    }
+
+    /**
+     * Action to add a contact, shown both in the header of the table and in its empty state.
+     */
+    protected function getCreateAction(): Action
+    {
+        return Action::make('create')
+            ->label(__('profile.contacts.add_contact'))
+            ->icon(Heroicon::Plus)
+            ->schema($this->getFormSchema())
+            ->action(function (array $data, Schema $schema): void {
+                /** @var User $user */
+                $user = Auth::user();
+
+                // A new primary contact replaces the previous one, as when editing a contact.
+                if ($data['is_primary'] ?? false) {
+                    $user->contacts()->update(['is_primary' => false]);
+                }
+
+                $contact = $user->contacts()->create($data);
+
+                // Save the relationships of the action form to the created contact
+                $schema->model($contact)->saveRelationships();
+            })
+            ->successNotification(
+                Notification::make()
+                    ->success()
+                    ->title(__('profile.contacts.contact_saved'))
+            );
     }
 
     protected function getTableQuery(): Builder
@@ -187,7 +170,6 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
                 ->requiredWithout('phone_number'),
             Textarea::make('notes')
                 ->label(__('profile.contacts.notes'))
-                ->placeholder('Notes...')
                 ->columnSpanFull(),
         ];
     }

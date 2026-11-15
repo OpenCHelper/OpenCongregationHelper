@@ -53,6 +53,22 @@ test('a contact needs a phone number or an address', function () {
     expect($this->user->contacts()->exists())->toBeFalse();
 });
 
+test('adding a primary contact unsets the previous primary contact', function () {
+    $previousPrimary = $this->user->contacts()->create(['type' => ContactType::PERSONAL, 'name' => 'Previous', 'phone_number' => '123', 'is_primary' => true]);
+
+    Livewire::test(ProfileContacts::class)
+        ->callAction(TestAction::make('create')->table(), [
+            'type' => ContactType::EMERGENCY->value,
+            'name' => 'New primary',
+            'phone_number' => '456',
+            'is_primary' => true,
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($this->user->contacts()->where('name', 'New primary')->sole()->is_primary)->toBeTrue()
+        ->and($previousPrimary->refresh()->is_primary)->toBeFalse();
+});
+
 test('making a contact primary unsets the previous primary contact', function () {
     $previousPrimary = $this->user->contacts()->create(['type' => ContactType::PERSONAL, 'name' => 'Previous', 'phone_number' => '123', 'is_primary' => true]);
     $contact = $this->user->contacts()->create(['type' => ContactType::EMERGENCY, 'name' => 'New primary', 'phone_number' => '456']);

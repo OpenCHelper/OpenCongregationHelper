@@ -15,32 +15,45 @@
 </span>
 
 @once
-<x-dialog-modal wire:model.live="confirmingPassword">
-    <x-slot name="title">
-        {{ $title }}
-    </x-slot>
+{{-- The modal follows `$confirmingPassword` of the `ConfirmsPasswords` trait of Jetstream, which is toggled on the server. --}}
+<x-filament::modal
+    id="confirm-password"
+    :icon="Filament\Support\Icons\Heroicon::OutlinedLockClosed"
+    :heading="$title"
+    :description="$content"
+    alignment="center"
+    footer-actions-alignment="center"
+    width="md"
+    x-effect="if ($wire.confirmingPassword) { isOpen || open() } else if (isOpen) { close() }"
+    x-on:modal-closed="if ($wire.confirmingPassword) { $wire.stopConfirmingPassword() }"
+    wire:submit.prevent="confirmPassword"
+>
+    <x-filament-forms::field-wrapper
+        id="confirmable_password"
+        :label="__('Password')"
+        label-sr-only
+        state-path="confirmable_password"
+    >
+        <x-filament::input.wrapper :valid="! $errors->has('confirmable_password')">
+            <x-filament::input
+                id="confirmable_password"
+                type="password"
+                autocomplete="current-password"
+                :placeholder="__('Password')"
+                wire:model="confirmablePassword"
+                x-on:confirming-password.window="setTimeout(() => $el.focus(), 250)"
+            />
+        </x-filament::input.wrapper>
+    </x-filament-forms::field-wrapper>
 
-    <x-slot name="content">
-        {{ $content }}
-
-        <div class="mt-4" x-data="{}" x-on:confirming-password.window="setTimeout(() => $refs.confirmable_password.focus(), 250)">
-            <x-input type="password" class="mt-1 block w-3/4" placeholder="{{ __('Password') }}" autocomplete="current-password"
-                        x-ref="confirmable_password"
-                        wire:model="confirmablePassword"
-                        wire:keydown.enter="confirmPassword" />
-
-            <x-input-error for="confirmable_password" class="mt-2" />
-        </div>
-    </x-slot>
-
-    <x-slot name="footer">
-        <x-secondary-button wire:click="stopConfirmingPassword" wire:loading.attr="disabled">
+    <x-slot name="footerActions">
+        <x-filament::button color="gray" x-on:click="close()">
             {{ __('Cancel') }}
-        </x-secondary-button>
+        </x-filament::button>
 
-        <x-button class="ms-3" dusk="confirm-password-button" wire:click="confirmPassword" wire:loading.attr="disabled">
+        <x-filament::button type="submit" form="confirmPassword" dusk="confirm-password-button">
             {{ $button }}
-        </x-button>
+        </x-filament::button>
     </x-slot>
-</x-dialog-modal>
+</x-filament::modal>
 @endonce

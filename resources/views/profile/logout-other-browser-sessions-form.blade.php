@@ -1,98 +1,104 @@
-<x-action-section>
-    <x-slot name="title">
-        {{ __('profile.browser_sessions.title') }}
-    </x-slot>
+@php
+    use Filament\Support\Icons\Heroicon;
+@endphp
 
-    <x-slot name="description">
-        {{ __('profile.browser_sessions.description') }}
-    </x-slot>
+<div
+    x-data
+    x-init="$wire.on('loggedOut', () => new FilamentNotification().title(@js(__('profile.browser_sessions.logged_out'))).success().send())"
+>
+    <x-filament::section
+        aside
+        :heading="__('profile.browser_sessions.title')"
+        :description="__('profile.browser_sessions.description')"
+    >
+        <div class="grid gap-6">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                {{ __('profile.browser_sessions.explanation') }}
+            </p>
 
-    <x-slot name="content">
-        <div class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
-            {{ __('profile.browser_sessions.explanation') }}
-        </div>
+            @if (count($this->sessions) > 0)
+                <ul class="grid gap-4">
+                    @foreach ($this->sessions as $session)
+                        <li class="flex items-center gap-3">
+                            <x-filament::icon
+                                :icon="$session->agent->isDesktop() ? Heroicon::OutlinedComputerDesktop : Heroicon::OutlinedDevicePhoneMobile"
+                                class="size-8 shrink-0 text-gray-400 dark:text-gray-500"
+                            />
 
-        @if (count($this->sessions) > 0)
-            <div class="mt-5 space-y-6">
-                <!-- Other Browser Sessions -->
-                @foreach ($this->sessions as $session)
-                    <div class="flex items-center">
-                        <div>
-                            @if ($session->agent->isDesktop())
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-gray-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
-                                </svg>
-                            @else
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-gray-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-                                </svg>
-                            @endif
-                        </div>
+                            <div class="grid gap-y-1">
+                                <span class="text-sm font-medium text-gray-950 dark:text-white">
+                                    {{ $session->agent->platform() ?: __('profile.browser_sessions.unknown') }}
+                                    &ndash;
+                                    {{ $session->agent->browser() ?: __('profile.browser_sessions.unknown') }}
+                                </span>
 
-                        <div class="ms-3">
-                            <div class="text-sm text-gray-600 dark:text-gray-400">
-                                {{ $session->agent->platform() ? $session->agent->platform() : __('profile.browser_sessions.unknown') }} - {{ $session->agent->browser() ? $session->agent->browser() : __('profile.browser_sessions.unknown') }}
-                            </div>
-
-                            <div>
-                                <div class="text-xs text-gray-500">
-                                    {{ $session->ip_address }},
+                                <span class="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ $session->ip_address }}
 
                                     @if ($session->is_current_device)
-                                        <span class="text-green-500 font-semibold">{{ __('profile.browser_sessions.this_device') }}</span>
+                                        <x-filament::badge color="success" size="sm">
+                                            {{ __('profile.browser_sessions.this_device') }}
+                                        </x-filament::badge>
                                     @else
-                                        {{ __('profile.browser_sessions.last_active') }} {{ $session->last_active }}
+                                        <span>&middot; {{ __('profile.browser_sessions.last_active') }} {{ $session->last_active }}</span>
                                     @endif
-                                </div>
+                                </span>
                             </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-
-        <div class="flex items-center mt-5">
-            <x-button wire:click="confirmLogout" wire:loading.attr="disabled">
-                {{ __('profile.browser_sessions.logout_other_sessions') }}
-            </x-button>
-
-            <x-action-message class="ms-3" on="loggedOut">
-                {{ __('profile.browser_sessions.done') }}
-            </x-action-message>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
 
-        <!-- Log Out Other Devices Confirmation Modal -->
-        <x-dialog-modal wire:model.live="confirmingLogout">
-            <x-slot name="title">
+        <x-slot name="footer">
+            <x-filament::button
+                :icon="Heroicon::ArrowRightStartOnRectangle"
+                wire:click="confirmLogout"
+            >
                 {{ __('profile.browser_sessions.logout_other_sessions') }}
-            </x-slot>
+            </x-filament::button>
+        </x-slot>
+    </x-filament::section>
 
-            <x-slot name="content">
-                {{ __('profile.browser_sessions.confirm_password') }}
+    {{-- The modal follows `$confirmingLogout`, which Jetstream toggles on the server. --}}
+    <x-filament::modal
+        id="confirm-logout-other-browser-sessions"
+        :icon="Heroicon::OutlinedArrowRightStartOnRectangle"
+        :heading="__('profile.browser_sessions.logout_other_sessions')"
+        :description="__('profile.browser_sessions.confirm_password')"
+        alignment="center"
+        footer-actions-alignment="center"
+        width="md"
+        x-effect="if ($wire.confirmingLogout) { isOpen || open() } else if (isOpen) { close() }"
+        x-on:modal-closed="$wire.confirmingLogout = false"
+        wire:submit.prevent="logoutOtherBrowserSessions"
+    >
+        <x-filament-forms::field-wrapper
+            id="logout_other_browser_sessions_password"
+            :label="__('profile.browser_sessions.password_placeholder')"
+            label-sr-only
+            state-path="password"
+        >
+            <x-filament::input.wrapper :valid="! $errors->has('password')">
+                <x-filament::input
+                    id="logout_other_browser_sessions_password"
+                    type="password"
+                    autocomplete="current-password"
+                    :placeholder="__('profile.browser_sessions.password_placeholder')"
+                    wire:model="password"
+                    x-on:confirming-logout-other-browser-sessions.window="setTimeout(() => $el.focus(), 250)"
+                />
+            </x-filament::input.wrapper>
+        </x-filament-forms::field-wrapper>
 
-                <div class="mt-4" x-data="{}" x-on:confirming-logout-other-browser-sessions.window="setTimeout(() => $refs.password.focus(), 250)">
-                    <x-input type="password" class="mt-1 block w-3/4"
-                                autocomplete="current-password"
-                                placeholder="{{ __('profile.browser_sessions.password_placeholder') }}"
-                                x-ref="password"
-                                wire:model="password"
-                                wire:keydown.enter="logoutOtherBrowserSessions" />
+        <x-slot name="footerActions">
+            <x-filament::button color="gray" x-on:click="close()">
+                {{ __('profile.browser_sessions.cancel') }}
+            </x-filament::button>
 
-                    <x-input-error for="password" class="mt-2" />
-                </div>
-            </x-slot>
-
-            <x-slot name="footer">
-                <x-secondary-button wire:click="$toggle('confirmingLogout')" wire:loading.attr="disabled">
-                    {{ __('profile.browser_sessions.cancel') }}
-                </x-secondary-button>
-
-                <x-button class="ms-3"
-                            wire:click="logoutOtherBrowserSessions"
-                            wire:loading.attr="disabled">
-                    {{ __('profile.browser_sessions.logout_other_sessions') }}
-                </x-button>
-            </x-slot>
-        </x-dialog-modal>
-    </x-slot>
-</x-action-section>
+            <x-filament::button type="submit" form="logoutOtherBrowserSessions">
+                {{ __('profile.browser_sessions.logout_other_sessions') }}
+            </x-filament::button>
+        </x-slot>
+    </x-filament::modal>
+</div>

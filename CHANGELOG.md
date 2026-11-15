@@ -37,7 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated the dependencies, among them Laravel to 12.72, the impersonation plugin (`stechstudio/filament-impersonate`)
   to version 5, Vite to version 8 and `laravel-vite-plugin` to version 3 ([#168]).
 - The interface settings moved from the gear button in the top bar into the user menu, next to **Profile** and
-  **Sign out**.
+  **Sign out** ([#172]).
+- The profile page looks like the rest of the application: its sections, fields, buttons, confirmation dialogs and
+  "Saved" notifications match the other pages, and the contacts table is no longer boxed inside another box ([#174]).
 
 ### Removed
 
@@ -59,7 +61,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sorting territories by assignment duration, and grouping them by campaign, failing when the database tables are
   prefixed (`DB_PREFIX`) ([#156]).
 - User menu showing an extra header with the name of the user when the interface is in Italian or Spanish, but not
-  in English.
+  in English ([#172]).
+- Saving a new profile photo leading to an unstyled page outside the application ([#174]).
+- Profile photo not shown in the top bar, which always showed the initials of the user ([#174]).
+- Email field of the profile page not visible, and the warnings shown to the root user on that page not styled
+  ([#174]).
+- **Delete account** and **Log out other browser sessions** dialogs of the profile page shown behind their dark
+  overlay ([#174]).
+- Adding a primary contact from the profile page leaving the previous primary contact marked as primary too
+  ([#174]).
+- Title of the profile page always shown in English ("Edit Profile") ([#174]).
 
 ### Security
 
@@ -337,4 +348,6 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 [#168]: https://github.com/LukeSavefrogs/registro-territori/pull/168
 [#170]: https://github.com/LukeSavefrogs/registro-territori/pull/170
 [#171]: https://github.com/LukeSavefrogs/registro-territori/pull/171
+[#172]: https://github.com/LukeSavefrogs/registro-territori/pull/172
 [#173]: https://github.com/LukeSavefrogs/registro-territori/pull/173
+[#174]: https://github.com/LukeSavefrogs/registro-territori/pull/174

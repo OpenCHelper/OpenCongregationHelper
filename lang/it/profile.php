@@ -65,7 +65,7 @@ return [
         'this_device' => 'Questo dispositivo',
         'last_active' => 'Ultimo accesso',
         'logout_other_sessions' => 'Disconnetti altre sessioni del browser',
-        'done' => 'Fatto.',
+        'logged_out' => 'Disconnesso dalle altre sessioni del browser.',
         'confirm_password' => 'Inserisci la tua password per confermare che desideri disconnetterti dalle altre sessioni del browser su tutti i tuoi dispositivi.',
         'password_placeholder' => 'Password',
         'cancel' => 'Annulla',
