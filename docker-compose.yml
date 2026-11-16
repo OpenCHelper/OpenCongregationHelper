@@ -1,4 +1,4 @@
-name: registro-territori
+name: opencongregationhelper
 services:
     laravel.test:
         build:

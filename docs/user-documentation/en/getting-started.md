@@ -5,7 +5,7 @@ title: Getting started
 order: -1
 ---
 
-# OpenCongregationTools
+# OpenCongregationHelper
 
 This project aims at having an **Open Source** territory management system for **Jehovah's Witnesses**.
 
@@ -38,8 +38,8 @@ them, since when, and which ones have been covered. It runs in the browser and a
 
 ## How can I contribute?
 
-- Report bugs or suggest features using the [Issues](https://github.com/LukeSavefrogs/registro-territori/issues);
-- If you have the required programming skills, you can contribute by making [Pull Requests](https://github.com/LukeSavefrogs/registro-territori/pulls);
+- Report bugs or suggest features using the [Issues](https://github.com/OpenCHelper/OpenCongregationHelper/issues);
+- If you have the required programming skills, you can contribute by making [Pull Requests](https://github.com/OpenCHelper/OpenCongregationHelper/pulls);
 - Help translate the UI in other languages, or improve existing ones.
 
-The full code can be found on its [official Github repository](https://github.com/LukeSavefrogs/registro-territori).
+The full code can be found on its [official Github repository](https://github.com/OpenCHelper/OpenCongregationHelper).

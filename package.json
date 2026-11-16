@@ -1,8 +1,8 @@
 {
-    "name": "registro-territori",
+    "name": "opencongregationhelper",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/LukeSavefrogs/registro-territori.git"
+        "url": "git+https://github.com/OpenCHelper/OpenCongregationHelper.git"
     },
     "private": true,
     "type": "module",

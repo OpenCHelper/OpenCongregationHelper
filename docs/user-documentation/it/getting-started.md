@@ -5,7 +5,7 @@ title: Introduzione
 order: -1
 ---
 
-# OpenCongregationTools
+# OpenCongregationHelper
 
 Questo progetto mira a creare un sistema di gestione dei territori **Open Source** per i **Testimoni di Geova**.
 
@@ -38,8 +38,8 @@ sta lavorando, da quando e quali sono stati percorsi. Funziona nel browser, anch
 
 ## Come posso contribuire?
 
-- Segnala bug o suggerisci nuove funzionalità tramite la sezione [Issues](https://github.com/LukeSavefrogs/registro-territori/issues);
-- Se possiedi le competenze di programmazione necessarie, puoi contribuire inviando delle [Pull Request](https://github.com/LukeSavefrogs/registro-territori/pulls);
+- Segnala bug o suggerisci nuove funzionalità tramite la sezione [Issues](https://github.com/OpenCHelper/OpenCongregationHelper/issues);
+- Se possiedi le competenze di programmazione necessarie, puoi contribuire inviando delle [Pull Request](https://github.com/OpenCHelper/OpenCongregationHelper/pulls);
 - Aiuta a tradurre l'interfaccia utente in altre lingue o a migliorare quelle esistenti.
 
-Il codice completo è disponibile sul suo [repository ufficiale di GitHub](https://github.com/LukeSavefrogs/registro-territori).
+Il codice completo è disponibile sul suo [repository ufficiale di GitHub](https://github.com/OpenCHelper/OpenCongregationHelper).

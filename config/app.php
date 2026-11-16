@@ -13,13 +13,13 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Registro Territori'),
+    'name' => env('APP_NAME', 'OpenCongregationHelper'),
     'version' => env('APP_VERSION', json_decode(file_get_contents(base_path('./composer.json')))->version),
     'version_info' => [
         'branch_file' => env('APP_VERSION_BRANCH_FILE', '.git/HEAD'),
         'commit_file' => env('APP_VERSION_COMMIT_FILE'),
     ],
-    'repository_url' => 'https://github.com/LukeSavefrogs/registro-territori',
+    'repository_url' => 'https://github.com/OpenCHelper/OpenCongregationHelper',
 
     /*
     |--------------------------------------------------------------------------

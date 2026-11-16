@@ -1,6 +1,6 @@
-# Registro Territori - Laravel 11 + Filament V3 Application
+# OpenCongregationHelper - Laravel 11 + Filament V3 Application
 
-Registro Territori is a **Laravel 11** application for managing territories for Jehovah's Witness congregations, built with **Filament V3** admin panel, **Laravel Jetstream** authentication, **Livewire 3** reactive components, **Vite 5** frontend tooling, and comprehensive testing via **Pest PHP**.
+OpenCongregationHelper is a **Laravel 11** application for managing territories for Jehovah's Witness congregations, built with **Filament V3** admin panel, **Laravel Jetstream** authentication, **Livewire 3** reactive components, **Vite 5** frontend tooling, and comprehensive testing via **Pest PHP**.
 
 **ALWAYS follow these instructions first** and only fall back to search or additional context gathering if the information here is incomplete or found to be in error.
 

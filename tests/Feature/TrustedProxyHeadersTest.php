@@ -27,10 +27,10 @@ beforeEach(function () {
 });
 
 test('forwarded host, port and prefix headers do not change the links of the authentication pages', function (string $page, string $linkedPage) {
-    $this->get('http://registro.example.test'.$page, $this->spoofedHeaders)
+    $this->get('http://opencongregationhelper.example.test'.$page, $this->spoofedHeaders)
         ->assertOk()
-        ->assertSee('href="http://registro.example.test'.$linkedPage.'"', escape: false)
-        ->assertSee('data-update-uri="http://registro.example.test/livewire-', escape: false)
+        ->assertSee('href="http://opencongregationhelper.example.test'.$linkedPage.'"', escape: false)
+        ->assertSee('data-update-uri="http://opencongregationhelper.example.test/livewire-', escape: false)
         ->assertDontSee('evil.example', escape: false)
         ->assertDontSee(':8443', escape: false)
         ->assertDontSee('/evil/', escape: false);
@@ -45,20 +45,20 @@ test('forwarded host, port and prefix headers do not change the password reset l
         User::factory()->make(['email' => 'admin@example.test']),
     ));
 
-    $resetPasswordUrl = $this->get('http://registro.example.test/trusted-proxy-test/reset-password-url', $this->spoofedHeaders)
+    $resetPasswordUrl = $this->get('http://opencongregationhelper.example.test/trusted-proxy-test/reset-password-url', $this->spoofedHeaders)
         ->assertOk()
         ->getContent();
 
-    expect($resetPasswordUrl)->toStartWith('http://registro.example.test/app/password-reset/reset?');
+    expect($resetPasswordUrl)->toStartWith('http://opencongregationhelper.example.test/app/password-reset/reset?');
 });
 
 test('URLs use the HTTPS scheme without an explicit port when the proxy forwards an HTTPS request over port 80 (GH36)', function () {
-    $this->get('http://registro.example.test/app/login', ['X-Forwarded-Proto' => 'https'])
+    $this->get('http://opencongregationhelper.example.test/app/login', ['X-Forwarded-Proto' => 'https'])
         ->assertOk()
-        ->assertSee('href="https://registro.example.test/app/password-reset/request"', escape: false)
-        ->assertSee('data-update-uri="https://registro.example.test/livewire-', escape: false)
-        ->assertDontSee('http://registro.example.test', escape: false)
-        ->assertDontSee('registro.example.test:', escape: false);
+        ->assertSee('href="https://opencongregationhelper.example.test/app/password-reset/request"', escape: false)
+        ->assertSee('data-update-uri="https://opencongregationhelper.example.test/livewire-', escape: false)
+        ->assertDontSee('http://opencongregationhelper.example.test', escape: false)
+        ->assertDontSee('opencongregationhelper.example.test:', escape: false);
 });
 
 test('the client IP is the right-most address of the forwarded chain', function (?string $forwardedFor, string $expectedIp) {

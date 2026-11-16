@@ -1,6 +1,6 @@
 // https://aka.ms/devcontainer.json
 {
-    "name": "Registro Territori",
+    "name": "OpenCongregationHelper",
     "dockerComposeFile": [
         "../docker-compose.yml"
     ],

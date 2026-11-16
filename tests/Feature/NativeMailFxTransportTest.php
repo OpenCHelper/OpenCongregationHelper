@@ -20,7 +20,7 @@ beforeEach(function () {
     };
 
     $this->email = (new Email)
-        ->from(new Address('noreply@example.com', 'Registro Territori'))
+        ->from(new Address('noreply@example.com', 'OpenCongregationHelper'))
         ->to(new Address('mario@example.com', 'Mario Rossità'))
         ->subject('Territorio assegnato: città')
         ->text('Plain text body')

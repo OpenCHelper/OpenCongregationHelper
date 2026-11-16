@@ -45,13 +45,13 @@ test('the scheduler endpoint runs with a valid cron token', function () {
 });
 
 test('jobs processed through the cron endpoints build URLs from the application URL', function () {
-    config(['app.artisan_cron_token' => 'cron-secret', 'app.url' => 'https://registro.example.test/']);
+    config(['app.artisan_cron_token' => 'cron-secret', 'app.url' => 'https://opencongregationhelper.example.test/']);
 
     $this->postJson($this->artisanUrl.'/schedule/process', [], ['X-Cron-Token' => 'cron-secret'])
         ->assertOk();
 
     // Not the host of the request (e.g. links in queued notification emails)
-    expect(url('/app/territory-assignments/1'))->toBe('https://registro.example.test/app/territory-assignments/1');
+    expect(url('/app/territory-assignments/1'))->toBe('https://opencongregationhelper.example.test/app/territory-assignments/1');
 });
 
 test('artisan command endpoints reject requests when the token file is missing', function () {

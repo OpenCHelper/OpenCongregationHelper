@@ -8,13 +8,13 @@ beforeEach(function () {
 });
 
 test('welcome page describes the project scope', function () {
-    Config::set('app.name', 'Registro Territori');
+    Config::set('app.name', 'OpenCongregationHelper');
 
     $this->get('/')
         ->assertOk()
-        ->assertSee('<title>Registro Territori</title>', escape: false)
+        ->assertSee('<title>OpenCongregationHelper</title>', escape: false)
         ->assertSeeText(__('welcome.hero.title'))
-        ->assertSeeText(__('welcome.hero.description', ['app' => 'Registro Territori']));
+        ->assertSeeText(__('welcome.hero.description', ['app' => 'OpenCongregationHelper']));
 });
 
 test('welcome page lists the current features', function () {
@@ -32,7 +32,7 @@ test('welcome page lists the current features', function () {
 test('welcome page links to the github repository', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('href="https://github.com/LukeSavefrogs/registro-territori"', escape: false)
+        ->assertSee('href="https://github.com/OpenCHelper/OpenCongregationHelper"', escape: false)
         ->assertSeeText(__('welcome.open_source.action'));
 });
 

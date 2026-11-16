@@ -12,30 +12,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub release published automatically for every version tag, with the notes of its section of this changelog.
 - Login page of the PR previews pre-filled with the root user's credentials, so reviewers can test right away; the
   previews are public demos, so save only dummy data there. Other demo installations (e.g. TEST) can enable it with the
-  new `DEMO_PREFILL_LOGIN_CREDENTIALS` setting, always ignored in production ([#173]).
+  new `DEMO_PREFILL_LOGIN_CREDENTIALS` setting, always ignored in production.
 
 ### Changed
 
 - Versions renumbered for the first release as OpenCongregationHelper: `2.0.0-alpha1` to `2.0.0-alpha7` are now
   `1.0.0-alpha1` to `1.0.0-alpha7`.
+- **BREAKING**: The project is now called OpenCongregationHelper and lives at
+  `https://github.com/OpenCHelper/OpenCongregationHelper`. Installations without an `APP_NAME` setting show the new
+  name and sign out their users once; set `APP_NAME` to keep the previous name. The local Docker Compose project is
+  renamed too, so the local development database starts empty.
 - The interface settings moved from the gear button in the top bar into the user menu, next to **Profile** and
-  **Sign out** ([#172]).
+  **Sign out**.
 - The profile page looks like the rest of the application: its sections, fields, buttons, confirmation dialogs and
-  "Saved" notifications match the other pages, and the contacts table is no longer boxed inside another box ([#174]).
+  "Saved" notifications match the other pages, and the contacts table is no longer boxed inside another box.
 
 ### Fixed
 
 - User menu showing an extra header with the name of the user when the interface is in Italian or Spanish, but not
-  in English ([#172]).
-- Saving a new profile photo leading to an unstyled page outside the application ([#174]).
-- Profile photo not shown in the top bar, which always showed the initials of the user ([#174]).
+  in English.
+- Saving a new profile photo leading to an unstyled page outside the application.
+- Profile photo not shown in the top bar, which always showed the initials of the user.
 - Email field of the profile page not visible, and the warnings shown to the root user on that page not styled
-  ([#174]).
+ .
 - **Delete account** and **Log out other browser sessions** dialogs of the profile page shown behind their dark
-  overlay ([#174]).
+  overlay.
 - Adding a primary contact from the profile page leaving the previous primary contact marked as primary too
-  ([#174]).
-- Title of the profile page always shown in English ("Edit Profile") ([#174]).
+ .
+- Title of the profile page always shown in English ("Edit Profile").
 
 ## [1.0.0-alpha7] - 2026-11-14
 
@@ -43,130 +47,130 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Dashboard map coloring**: color the territories by zone, availability, assignment frequency over the last 12
   months or progress in a campaign, with a legend counting the territories of each color. Clicking a territory shows
-  its zone, its status and a link to its page ([#164]).
+  its zone, its status and a link to its page.
 - **PR previews**: every pull request gets its own preview site at `https://pr-<N>.<site>.altervista.org`, filled with
-  dummy data, updated on every push and removed when the pull request is closed (see the README) ([#156]).
+  dummy data, updated on every push and removed when the pull request is closed (see the README).
 - Scheduled tasks and queue of the PR previews, run by cron-job.org every 5 minutes from 8:00 to 22:55 (Rome time),
   Monday to Friday: the previews need the new `CRON_JOB_ORG_API_KEY` secret of the `PREVIEW` environment (see the
-  README) ([#171]).
+  README).
 - Back button at the bottom of the documentation sidebar, leading to the app, or to the welcome page for visitors who
-  are not signed in ([#170]).
+  are not signed in.
 
 ### Changed
 
 - **BREAKING**: The remote Artisan endpoints moved from the `artisan.` subdomain to the `/api/artisan` path (e.g.
-  `https://example.com/api/artisan/queue/process`): update the URLs called by your cron services ([#156]).
-- **BREAKING**: Building the frontend assets requires Node.js 20.19 or newer, needed by Vite 8 ([#168]).
+  `https://example.com/api/artisan/queue/process`): update the URLs called by your cron services.
+- **BREAKING**: Building the frontend assets requires Node.js 20.19 or newer, needed by Vite 8.
 - Upgraded to Filament 5 and Livewire 4, together with the Filament plugins (among them the knowledge base, now at
-  version 3, and the activity log, now at version 4) ([#154]).
+  version 3, and the activity log, now at version 4).
 - The **Logs** page (Developer group, super administrators only) uses a new log viewer, since the previous one does
-  not support Filament 5: log entries are listed in a table with level tabs, a date filter and stack traces ([#154]).
+  not support Filament 5: log entries are listed in a table with level tabs, a date filter and stack traces.
 - `db:wipe`, also run by `migrate:fresh`, only drops the tables with the prefix of the installation (`DB_PREFIX`),
-  and refuses to run without a prefix when the database also holds the tables of other installations ([#156]).
+  and refuses to run without a prefix when the database also holds the tables of other installations.
 - Updated the dependencies, among them Laravel to 12.72, the impersonation plugin (`stechstudio/filament-impersonate`)
-  to version 5, Vite to version 8 and `laravel-vite-plugin` to version 3 ([#168]).
+  to version 5, Vite to version 8 and `laravel-vite-plugin` to version 3.
 
 ### Removed
 
-- Downloading log files from the **Logs** page, not supported by its new log viewer ([#154]).
+- Downloading log files from the **Logs** page, not supported by its new log viewer.
 
 ### Fixed
 
 - Territory import results (the notification, the reasons of the failed rows and the downloadable CSV) shown partly
   in English and partly in the default language of the application, instead of the language of the user who started
-  the import ([#165]).
+  the import.
 - Tags duplicated when saving a territory or a zone with the interface in a language other than English: the Tags page
-  listed them twice and the tag filters did not find them ([#166]).
+  listed them twice and the tag filters did not find them.
 - Assignments of a terminated campaign failing to save when edited, for example to return the territory, with "The
   selected campaign is invalid". Assigning a territory to a terminated campaign is still refused, now everywhere and
-  not only in the forms ([#155]).
-- Dashboard failing to load when a zone with territories on the map has no color ([#164]).
-- Clicking the dashboard map showing debug notifications and zooming back out to all the territories ([#164]).
-- Zone names in the layers menu of the dashboard map showing raw HTML code ([#164]).
+  not only in the forms.
+- Dashboard failing to load when a zone with territories on the map has no color.
+- Clicking the dashboard map showing debug notifications and zooming back out to all the territories.
+- Zone names in the layers menu of the dashboard map showing raw HTML code.
 - Sorting territories by assignment duration, and grouping them by campaign, failing when the database tables are
-  prefixed (`DB_PREFIX`) ([#156]).
+  prefixed (`DB_PREFIX`).
 
 ### Security
 
 - Critical Laravel vulnerability allowing the API token guard to be bypassed with non-string credentials, along with
-  the other security advisories reported for the dependencies ([#168]).
+  the other security advisories reported for the dependencies.
 
 ## [1.0.0-alpha6] - 2026-11-11
 
 ### Added
 
 - **User guide** covering every feature of the application, in English and Italian, with screenshots and
-  step-by-step walkthroughs for the first setup, campaigns and publishers ([#152]).
+  step-by-step walkthroughs for the first setup, campaigns and publishers.
 - **Welcome page** describing the project and its features, with links to the GitHub repository, the user guide and
-  the login page. Available in English, Italian and Spanish ([#142]).
+  the login page. Available in English, Italian and Spanish.
 - `ENABLE_SHARED_PII` environment variable to show personal data (assignee name and territory notes) on publicly
-  shared assignment pages, where it is now hidden by default ([#141]).
+  shared assignment pages, where it is now hidden by default.
 
 ### Changed
 
 - Notification emails are sent through the queue instead of during the request: on hosts without a queue worker,
-  they are only sent when a cron service calls the queue endpoint (`/queue/process`) ([#146]).
-- Users who cannot log in no longer receive the notification of a new campaign ([#146]).
-- Assignees are sorted by name when assigning territories ([#146]).
+  they are only sent when a cron service calls the queue endpoint (`/queue/process`).
+- Users who cannot log in no longer receive the notification of a new campaign.
+- Assignees are sorted by name when assigning territories.
 
 ### Fixed
 
 - Application version stuck at `v1.0.0-alpha3` in the sidebar.
-- Home page failing with a server error when using the built frontend assets ([#142]).
-- Publicly shared assignment pages failing with a server error when using the built frontend assets ([#141]).
-- Error notifications of the assign and return territory actions never being shown ([#141]).
+- Home page failing with a server error when using the built frontend assets.
+- Publicly shared assignment pages failing with a server error when using the built frontend assets.
+- Error notifications of the assign and return territory actions never being shown.
 - Users allowed to list all assignments only seeing their own, because the roles seeder used an outdated permission
-  name ([#141]).
-- Already assigned territories being offered when adding an assignment to a campaign ([#141]).
-- Campaign filters returning wrong results when combined with other conditions ([#141]).
+  name.
+- Already assigned territories being offered when adding an assignment to a campaign.
+- Campaign filters returning wrong results when combined with other conditions.
 - Campaign overview widget failing when there are no territories, exceeding 100% when a territory was assigned more
-  than once, and always showing the remaining-time warning ([#141]).
-- Stale assignment emails mentioning the wrong territory ([#141]).
+  than once, and always showing the remaining-time warning.
+- Stale assignment emails mentioning the wrong territory.
 - Territory import rejecting every territory of an existing zone as a duplicate, and "update existing" ignoring the
-  zone ([#141]).
-- Editing a user requiring a new password to be entered ([#141]).
+  zone.
+- Editing a user requiring a new password to be entered.
 - Emails sent through the native `mail()` transport having duplicated `To` and `Subject` headers and no MIME content
-  type ([#141]).
+  type.
 - Territories having more than one assignment in progress: assigning, reopening or restoring an assignment is now
-  refused when the territory is already assigned ([#146]).
-- Sorting territories by assignment duration failing on databases other than MySQL ([#146]).
+  refused when the territory is already assigned.
+- Sorting territories by assignment duration failing on databases other than MySQL.
 - Links in the emails sent through the queue and scheduler endpoints pointing to the `artisan.` subdomain instead of
-  the application URL ([#146]).
-- Territories table loading slowly with many territories ([#146]).
-- High memory usage of the stale assignment detection, which loaded every assignment in progress at once ([#146]).
-- Database seeding failing with a cached configuration or without the development dependencies installed ([#146]).
-- Log files growing quickly because of debug messages written on every render of the territory form ([#146]).
-- Deleting a user leaving their team memberships behind ([#148]).
-- Saving a territory erasing its map, even when only other fields were changed ([#150]).
-- Creating a territory failing, and an image uploaded while creating it not being linked to the territory ([#150]).
-- Assignments in progress failing to save when edited, with "The selected territory is invalid" ([#150]).
-- Global search results hidden under the top bar on tablets and desktops ([#150]).
+  the application URL.
+- Territories table loading slowly with many territories.
+- High memory usage of the stale assignment detection, which loaded every assignment in progress at once.
+- Database seeding failing with a cached configuration or without the development dependencies installed.
+- Log files growing quickly because of debug messages written on every render of the territory form.
+- Deleting a user leaving their team memberships behind.
+- Saving a territory erasing its map, even when only other fields were changed.
+- Creating a territory failing, and an image uploaded while creating it not being linked to the territory.
+- Assignments in progress failing to save when edited, with "The selected territory is invalid".
+- Global search results hidden under the top bar on tablets and desktops.
 - Campaign status showing "Almost Expired" for every campaign ending in the future, and never "Expiring". It now shows
-  "Expiring" from 7 days before the end date and "Almost Expired" from 3 days before ([#151]).
+  "Expiring" from 7 days before the end date and "Almost Expired" from 3 days before.
 - Territory map staying a grey box, without tiles or polygon, until it was scrolled fully into view, for example after
-  switching from the image tab or on phones ([#153]).
+  switching from the image tab or on phones.
 
 ### Security
 
 - **BREAKING**: The queue and scheduler endpoints called by external cron services (`/queue/process` and
   `/schedule/process`) could be called by anyone: they now require an `X-Cron-Token` header matching the new
-  `ARTISAN_CRON_TOKEN` environment variable, and are rate limited ([#141]).
-- Only super administrators can impersonate users, and the `root` user can no longer be impersonated ([#141]).
+  `ARTISAN_CRON_TOKEN` environment variable, and are rate limited.
+- Only super administrators can impersonate users, and the `root` user can no longer be impersonated.
 - Only super administrators can assign roles, so users can no longer grant themselves the `super_admin` role
-  ([#141]).
+ .
 - The API tokens page is only available when the API feature is enabled, the API endpoints check the permissions of
-  the user, and the territories and zones API is read-only ([#141]).
+  the user, and the territories and zones API is read-only.
 - The token protecting the remote Artisan endpoints is compared in constant time, an empty token is rejected and the
-  submitted token is no longer logged ([#141]).
-- Email bodies, including password reset links, are no longer written to the logs ([#141]).
-- The assign and return territory actions check the permissions of the user ([#141]).
-- The database password is no longer written to the logs when running the migrations ([#146]).
+  submitted token is no longer logged.
+- Email bodies, including password reset links, are no longer written to the logs.
+- The assign and return territory actions check the permissions of the user.
+- The database password is no longer written to the logs when running the migrations.
 - Territory import only downloads images from public hosts (also after redirects), with timeouts and a 10 MB size
-  limit, and deletes invalid downloads ([#146]).
+  limit, and deletes invalid downloads.
 - The root `.htaccess` denies every request when `mod_rewrite` is not available, instead of serving the project files
-  (e.g. `.env`) ([#146]).
+  (e.g. `.env`).
 - The assignments shown on the territory, campaign and user pages follow the same visibility rules as the assignments
-  list: users who cannot list every assignment only see their own ([#148]).
+  list: users who cannot list every assignment only see their own.
 
 ## [1.0.0-alpha5] - 2026-09-16
 
@@ -176,51 +180,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and image URL. Rows duplicating a territory of the same zone are rejected.
 - **User documentation** (knowledge base) at `/knowledge-base`, in English and Italian, readable without logging in.
 - **Campaign details page** with an overview widget, an assignments chart and a page to manage and bulk-terminate the
-  campaign assignments. The territories table can also be grouped by campaign ([#120]).
+  campaign assignments. The territories table can also be grouped by campaign.
 - Territory image upload from a URL, as an alternative to uploading a file.
 - Appearance settings: each user can choose the font, font size, accent color, layout and density of the interface.
 - Bottom navigation bar on mobile devices.
 - Highlighted (solid) navigation icon for the current page.
 - Emergency contacts (phone number and/or address) for users, editable by each user from the profile page and by
-  administrators from the "Users" menu ([#116]).
-- Date and time of the last commit next to the version in the sidebar ([#135]).
+  administrators from the "Users" menu.
+- Date and time of the last commit next to the version in the sidebar.
 - Protection of the `root` user on non-production environments: nobody, not even `root` itself, can change its email,
-  password or roles ([#122]).
+  password or roles.
 
 ### Changed
 
 - **BREAKING**: Upgraded to Laravel 12 and Filament 4, along with the other dependencies. Filament resources follow
-  the Filament 4 directory structure (e.g. `app/Filament/Resources/Territories/TerritoryResource.php`) ([#139]).
+  the Filament 4 directory structure (e.g. `app/Filament/Resources/Territories/TerritoryResource.php`).
 - **BREAKING**: Territory names must be unique within their zone.
 - The dashboard map uses `eduardoribeirodev/filament-leaflet`, compatible with Filament 4, instead of
-  `webbingbrasil/filament-maps`, and colors the territories by zone only ([#139]).
+  `webbingbrasil/filament-maps`, and colors the territories by zone only.
 - Sidebar navigation reorganized: groups reordered, roles moved next to users, and assignments listed last in their
   group.
 
 ### Removed
 
-- Artisan commands panel (`tomatophp/filament-artisan`), not compatible with Filament 4 ([#139]).
+- Artisan commands panel (`tomatophp/filament-artisan`), not compatible with Filament 4.
 
 ### Fixed
 
-- Stats overview widget failing on SQLite databases ([#137]).
+- Stats overview widget failing on SQLite databases.
 - `root` user not receiving the `super_admin` role.
 - Application version overflowing out of the sidebar.
 - Creating a territory overwriting its image path.
 - Territory form tabs hidden outside of the view page, and image tab not selected when no map is available.
 - Missing styles on the guest pages, and broken styles in the interface.
 - Documentation panel not being reachable.
-- Wrong values in the example environment file ([#107]).
+- Wrong values in the example environment file.
 
 ### Security
 
-- Remote code execution vulnerability in Livewire (CVE-2025-54068), fixed by updating it to 3.6.4 ([#106]).
+- Remote code execution vulnerability in Livewire (CVE-2025-54068), fixed by updating it to 3.6.4.
 
 ## [1.0.0-alpha4] - 2025-06-23
 
 ### Fixed
 
-- Map edit controls shown on read-only territory assignment views ([#103]).
+- Map edit controls shown on read-only territory assignment views.
 
 ## [1.0.0-alpha3] - 2025-06-22
 
@@ -228,22 +232,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Git branch and commit shown in the sidebar. On systems without `git`, they are read from the files set in the new
   `APP_VERSION_BRANCH_FILE` (default: `.git/HEAD`) and `APP_VERSION_COMMIT_FILE` (default: `.git/refs/heads/{branch}`)
-  environment variables ([#96]).
+  environment variables.
 
 ### Changed
 
 - **BREAKING**: "Assignment types" renamed to "campaigns", and the `TerritoryAssignmentType` model to `Campaign`
-  ([#99]).
-- Campaigns are optional when assigning a territory, and none is selected by default ([#100]).
-- Campaign validity dates are inclusive ([#100]).
-- The creator of a campaign is always recorded ([#100]).
+ .
+- Campaigns are optional when assigning a territory, and none is selected by default.
+- Campaign validity dates are inclusive.
+- The creator of a campaign is always recorded.
 - The territory map in the assignment details is shown only when the territory has one.
 
 ### Fixed
 
-- Territories being assignable to terminated campaigns ([#100]).
-- Sidebar not starting closed on mobile devices ([#94]).
-- "User profile" page not reachable by users without a verified email ([#101]).
+- Territories being assignable to terminated campaigns.
+- Sidebar not starting closed on mobile devices.
+- "User profile" page not reachable by users without a verified email.
 - Raw GeoJSON shown among the territory assignment details.
 - Territory notes hidden from the assignment details when empty.
 
@@ -251,20 +255,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Multiple languages**, with English, Italian and Spanish translations ([#78]).
+- **Multiple languages**, with English, Italian and Spanish translations.
 - **Tag manager** to create and organize the tags of territories and zones, with per-type tabs, usage counters and
-  translations ([#79]).
-- **Public link** to share the details of a territory assignment, viewable without logging in ([#80]).
-- Territory map in the territory assignment details ([#77]).
-- Current and past status column in the territories table, and tabs to filter the commercial territories ([#93]).
+  translations.
+- **Public link** to share the details of a territory assignment, viewable without logging in.
+- Territory map in the territory assignment details.
+- Current and past status column in the territories table, and tabs to filter the commercial territories.
 
 ### Fixed
 
-- Sorting territories by assignee ([#93]).
+- Sorting territories by assignee.
 
 ## [1.0.0-alpha1] - 2025-05-17
 
-Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel Jetstream ([#35]).
+Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel Jetstream.
 
 ### Added
 
@@ -285,13 +289,13 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
   user.
 - Virtual users, which can be assigned territories but cannot log in.
 - Roles and permissions management through Filament Shield, with policies for all resources. Users allowed to view
-  only their own assignments see just those (closes [#45]).
+  only their own assignments see just those.
 - Impersonation of other users.
 - Tags for territories and zones.
 - Global search across territories, zones and campaigns, matching name, description, zone, notes and tags.
-- Activity log of user actions ([#71]).
+- Activity log of user actions.
 - In-app notifications when an assignment starts or ends, when a campaign is created, and when an assignment has been
-  out for more than 60, 90, 120 or 150 days ([#53], closes [#56]).
+  out for more than 60, 90, 120 or 150 days.
 - Language switcher (Italian and English).
 - Warning when leaving a page with unsaved changes.
 - Live indicator of other users viewing or editing the same territory or zone (`discoverydesign/filament-gaze`).
@@ -300,13 +304,13 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 - Application version in the sidebar.
 - Mail transport based on PHP's native `mail()` function, used as the primary mailer with failover.
 - Token-protected HTTP API to run Artisan commands, the queue worker and the scheduled jobs on hosts without shell
-  access, and an Artisan commands panel on test environments (closes [#57]).
+  access, and an Artisan commands panel on test environments.
 - Configurable database table prefix (`DB_PREFIX`) and engine (`DB_ENGINE`).
 
 ### Changed
 
 - **BREAKING**: Rewrote the database structure from scratch. It is not compatible with the v1 database.
-- Renamed the `testing` environment to `nightly` ([#69]).
+- Renamed the `testing` environment to `nightly`.
 
 ### Removed
 
@@ -317,51 +321,4 @@ Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel
 
 - HTTPS is enforced everywhere except in local development.
 - The API can only be used by authenticated users.
-- Uploaded territory images are stored on a private disk ([#69]).
-
-[#35]: https://github.com/LukeSavefrogs/registro-territori/pull/35
-[#45]: https://github.com/LukeSavefrogs/registro-territori/issues/45
-[#53]: https://github.com/LukeSavefrogs/registro-territori/issues/53
-[#56]: https://github.com/LukeSavefrogs/registro-territori/issues/56
-[#57]: https://github.com/LukeSavefrogs/registro-territori/issues/57
-[#69]: https://github.com/LukeSavefrogs/registro-territori/pull/69
-[#71]: https://github.com/LukeSavefrogs/registro-territori/pull/71
-[#77]: https://github.com/LukeSavefrogs/registro-territori/pull/77
-[#78]: https://github.com/LukeSavefrogs/registro-territori/pull/78
-[#79]: https://github.com/LukeSavefrogs/registro-territori/pull/79
-[#80]: https://github.com/LukeSavefrogs/registro-territori/pull/80
-[#93]: https://github.com/LukeSavefrogs/registro-territori/pull/93
-[#94]: https://github.com/LukeSavefrogs/registro-territori/pull/94
-[#96]: https://github.com/LukeSavefrogs/registro-territori/pull/96
-[#99]: https://github.com/LukeSavefrogs/registro-territori/pull/99
-[#100]: https://github.com/LukeSavefrogs/registro-territori/pull/100
-[#101]: https://github.com/LukeSavefrogs/registro-territori/pull/101
-[#103]: https://github.com/LukeSavefrogs/registro-territori/pull/103
-[#106]: https://github.com/LukeSavefrogs/registro-territori/pull/106
-[#107]: https://github.com/LukeSavefrogs/registro-territori/pull/107
-[#116]: https://github.com/LukeSavefrogs/registro-territori/pull/116
-[#120]: https://github.com/LukeSavefrogs/registro-territori/pull/120
-[#122]: https://github.com/LukeSavefrogs/registro-territori/pull/122
-[#135]: https://github.com/LukeSavefrogs/registro-territori/pull/135
-[#137]: https://github.com/LukeSavefrogs/registro-territori/pull/137
-[#139]: https://github.com/LukeSavefrogs/registro-territori/pull/139
-[#141]: https://github.com/LukeSavefrogs/registro-territori/pull/141
-[#142]: https://github.com/LukeSavefrogs/registro-territori/pull/142
-[#146]: https://github.com/LukeSavefrogs/registro-territori/pull/146
-[#148]: https://github.com/LukeSavefrogs/registro-territori/pull/148
-[#150]: https://github.com/LukeSavefrogs/registro-territori/pull/150
-[#151]: https://github.com/LukeSavefrogs/registro-territori/pull/151
-[#152]: https://github.com/LukeSavefrogs/registro-territori/pull/152
-[#153]: https://github.com/LukeSavefrogs/registro-territori/pull/153
-[#154]: https://github.com/LukeSavefrogs/registro-territori/pull/154
-[#155]: https://github.com/LukeSavefrogs/registro-territori/pull/155
-[#156]: https://github.com/LukeSavefrogs/registro-territori/pull/156
-[#164]: https://github.com/LukeSavefrogs/registro-territori/pull/164
-[#165]: https://github.com/LukeSavefrogs/registro-territori/pull/165
-[#166]: https://github.com/LukeSavefrogs/registro-territori/pull/166
-[#168]: https://github.com/LukeSavefrogs/registro-territori/pull/168
-[#170]: https://github.com/LukeSavefrogs/registro-territori/pull/170
-[#171]: https://github.com/LukeSavefrogs/registro-territori/pull/171
-[#172]: https://github.com/LukeSavefrogs/registro-territori/pull/172
-[#173]: https://github.com/LukeSavefrogs/registro-territori/pull/173
-[#174]: https://github.com/LukeSavefrogs/registro-territori/pull/174
+- Uploaded territory images are stored on a private disk.

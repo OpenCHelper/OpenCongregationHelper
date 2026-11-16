@@ -257,7 +257,7 @@ jobs:
           echo "cron-token=${cron_token}" >> "$GITHUB_OUTPUT"
 
           cat > .env <<EOF
-          APP_NAME='Registro Territori (PR #${PR})'
+          APP_NAME='OpenCongregationHelper (PR #${PR})'
           APP_ENV='preview'
           APP_KEY='$(php artisan key:generate --show --no-ansi)'
           APP_DEBUG=true

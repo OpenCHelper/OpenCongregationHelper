@@ -39,9 +39,6 @@ return Application::configure(basePath: dirname(__DIR__))
             - `X-Forwarded-Host`, `-Port` and `-Prefix` are NOT trusted:
               they would let a client choose the host of every generated
               URL, including the password reset links sent by email.
-
-            See [GH36](https://github.com/LukeSavefrogs/registro-territori/issues/36)
-            for more information.
         */
         $middleware->trustProxies(
             at: '*',

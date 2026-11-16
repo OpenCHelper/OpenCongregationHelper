@@ -58,7 +58,7 @@ function createFiles(string $folder, array $files): void
 function createPreviewWithDatabase(string $previewsPath, string $slug, string $databasePath, string $prefix): void
 {
     createFiles("{$previewsPath}/{$slug}", ['.env' => implode("\n", [
-        "APP_NAME='Registro Territori (#1)'",
+        "APP_NAME='OpenCongregationHelper (#1)'",
         'DB_CONNECTION=sqlite',
         "DB_DATABASE='{$databasePath}'",
         "DB_PREFIX='{$prefix}'",
