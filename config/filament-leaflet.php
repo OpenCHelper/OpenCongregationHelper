@@ -17,10 +17,11 @@ return [
     /*
      * Where the maps open when they have nothing to show yet (e.g. a new territory), as
      * [latitude, longitude]: set `MAP_DEFAULT_CENTER` to the area of the congregation, as
-     * "latitude,longitude" (e.g. "39.8017,-89.6436"). Rome (Italy) by default.
+     * "latitude,longitude" (e.g. "39.8017,-89.6436"). When not set, the maps open on
+     * northern New Jersey (USA).
      */
     'default_map_center' => array_map(
         'floatval',
-        explode(',', (string) env('MAP_DEFAULT_CENTER', '41.896961975616,12.481241781767'), 2),
+        explode(',', (string) env('MAP_DEFAULT_CENTER', '41.159063,-74.255188'), 2),
     ),
 ];

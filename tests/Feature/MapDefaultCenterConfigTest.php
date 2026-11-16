@@ -26,8 +26,8 @@ function mapDefaultCenter(?string $value): array
     }
 }
 
-test('the maps open on Rome when no default centre is configured', function () {
-    expect(mapDefaultCenter(null))->toBe([41.896961975616, 12.481241781767]);
+test('the maps open on the built-in centre when no default centre is configured', function () {
+    expect(mapDefaultCenter(null))->toBe([41.159063, -74.255188]);
 });
 
 test('the default map centre is read from comma separated coordinates', function (string $value) {
