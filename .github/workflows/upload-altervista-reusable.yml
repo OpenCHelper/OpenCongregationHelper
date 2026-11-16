@@ -66,6 +66,15 @@ on:
         required: false
         default: ""
         type: string
+      dotenv:
+        description: >-
+          Contents of the `.env` file written by the build and deployed with the release, instead of the one managed
+          on the server (archive deployments only, see `environment-folder`), e.g. for a demo. A new `APP_KEY` is
+          added on every deployment, and the `DB_PASSWORD` and `ROOT_PASSWORD` secrets of the environment, when set,
+          as `DB_PASSWORD` and `INITIAL_ROOT_PASSWORD`. Empty to keep the `.env` file of the server.
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -130,6 +139,41 @@ jobs:
           else
             echo "ref: refs/heads/${REF}" > .git-branch-name
           fi
+
+      # Only with the `dotenv` input: the `.env` file of the release, with a new application key on every deployment
+      - name: Write the .env file
+        if: inputs.dotenv != ''
+        env:
+          DOTENV: ${{ inputs.dotenv }}
+          ENVIRONMENT_FOLDER: ${{ inputs.environment-folder }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+        run: |
+          if [[ -z "$ENVIRONMENT_FOLDER" ]]; then
+            echo "::error::The dotenv input needs an archive deployment: set the environment-folder input too."
+            exit 1
+          fi
+
+          # Values are single-quoted, so that they are read literally (no `${...}` interpolation)
+          for name in DB_PASSWORD ROOT_PASSWORD; do
+            if [[ "${!name}" == *"'"* ]]; then
+              echo "::error::The ${name} secret cannot contain single quotes."
+              exit 1
+            fi
+          done
+
+          {
+            printf '%s\n' "$DOTENV"
+            echo "APP_KEY='$(php artisan key:generate --show --no-ansi)'"
+            if [[ -n "$DB_PASSWORD" ]]; then
+              echo "DB_PASSWORD='${DB_PASSWORD}'"
+            fi
+            if [[ -n "$ROOT_PASSWORD" ]]; then
+              echo "INITIAL_ROOT_PASSWORD='${ROOT_PASSWORD}'"
+            fi
+          } > .env
+
+          echo "Written the .env file with the settings: $(sed -n 's/^\([A-Z_]*\)=.*/\1/p' .env | sort -u | paste -sd ' ')"
 
       # The files never deployed (`.git-ftp-ignore`, also read by the archive deployments), as FTP-Deploy globs
       - name: Read the files never deployed
@@ -232,9 +276,10 @@ jobs:
           manage-router: true
           default-environment: ${{ vars.SPACE_DEFAULT_ENVIRONMENT }}
           php-handler: ${{ vars.SPACE_PHP_HANDLER }}
-          # `.env` is managed on the server, and the files of the environment survive its releases
+          # `.env` is managed on the server (unless written by the build, see the `dotenv` input), and the files of the
+          # environment survive its releases
           keep: |
-            .env
+            ${{ inputs.dotenv == '' && '.env' || '' }}
             storage/app
             storage/logs
           # A release that changes no Composer package uploads only the autoloader of `vendor/`
