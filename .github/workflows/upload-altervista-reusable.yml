@@ -70,8 +70,9 @@ on:
         description: >-
           Contents of the `.env` file written by the build and deployed with the release, instead of the one managed
           on the server (archive deployments only, see `environment-folder`), e.g. for a demo. A new `APP_KEY` is
-          added on every deployment, and the `DB_PASSWORD` and `ROOT_PASSWORD` secrets of the environment, when set,
-          as `DB_PASSWORD` and `INITIAL_ROOT_PASSWORD`. Empty to keep the `.env` file of the server.
+          added on every deployment, and the `DB_PASSWORD`, `ROOT_PASSWORD` and `ARTISAN_CRON_TOKEN` secrets of the
+          environment, when set, as `DB_PASSWORD`, `INITIAL_ROOT_PASSWORD` and `ARTISAN_CRON_TOKEN`. Empty to keep the
+          `.env` file of the server.
         required: false
         default: ""
         type: string
@@ -148,6 +149,7 @@ jobs:
           ENVIRONMENT_FOLDER: ${{ inputs.environment-folder }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+          ARTISAN_CRON_TOKEN: ${{ secrets.ARTISAN_CRON_TOKEN }}
         run: |
           if [[ -z "$ENVIRONMENT_FOLDER" ]]; then
             echo "::error::The dotenv input needs an archive deployment: set the environment-folder input too."
@@ -155,7 +157,7 @@ jobs:
           fi
 
           # Values are single-quoted, so that they are read literally (no `${...}` interpolation)
-          for name in DB_PASSWORD ROOT_PASSWORD; do
+          for name in DB_PASSWORD ROOT_PASSWORD ARTISAN_CRON_TOKEN; do
             if [[ "${!name}" == *"'"* ]]; then
               echo "::error::The ${name} secret cannot contain single quotes."
               exit 1
@@ -170,6 +172,9 @@ jobs:
             fi
             if [[ -n "$ROOT_PASSWORD" ]]; then
               echo "INITIAL_ROOT_PASSWORD='${ROOT_PASSWORD}'"
+            fi
+            if [[ -n "$ARTISAN_CRON_TOKEN" ]]; then
+              echo "ARTISAN_CRON_TOKEN='${ARTISAN_CRON_TOKEN}'"
             fi
           } > .env
 
