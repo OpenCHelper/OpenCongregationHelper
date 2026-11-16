@@ -3,29 +3,48 @@
 namespace Database\Seeders;
 
 use App\Enums\TagType;
+use App\Models\Tag;
 use Illuminate\Database\Seeder;
-use Spatie\Tags\Tag;
 
 class FakeTagSeeder extends Seeder
 {
     /**
-     * The total number of fake tags to create.
+     * The tags to create, by type, as a congregation would use them.
+     *
+     * The zones and territories seeded by `FakeTerritorySeeder` are tagged with these names.
+     *
+     * @var array<string, list<string>>
      */
-    private const TAGS_COUNT = 8;
+    public const TAGS = [
+        TagType::ZONES->value => [
+            'Residential',
+            'Suburban',
+            'Commercial',
+            'Mixed use',
+            'Low density',
+        ],
+        TagType::TERRITORIES->value => [
+            'Apartment buildings',
+            'Single-family homes',
+            'Intercom',
+            'Gated',
+            'Shops',
+            'Do not call list',
+            'Foreign language',
+            'Elderly residents',
+            'Car needed',
+        ],
+    ];
 
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Create one tag of each type first, so that the factories attaching
-        // random tags of a given type always find at least one (see #123).
-        foreach (TagType::cases() as $type) {
-            Tag::factory()->ofType($type)->create();
+        foreach (self::TAGS as $type => $names) {
+            foreach ($names as $name) {
+                Tag::findOrCreate($name, $type);
+            }
         }
-
-        Tag::factory()
-            ->count(max(0, self::TAGS_COUNT - count(TagType::cases())))
-            ->create();
     }
 }

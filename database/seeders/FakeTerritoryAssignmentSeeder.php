@@ -11,25 +11,50 @@ use Illuminate\Database\Seeder;
 class FakeTerritoryAssignmentSeeder extends Seeder
 {
     /**
+     * The number of territories to assign, each one to a single user.
+     */
+    private const ASSIGNED_TERRITORIES_COUNT = 12;
+
+    /**
+     * The notes left on the assignments, as a publisher would write them.
+     */
+    private const NOTES = [
+        null,
+        null,
+        'Worked the odd numbers, the even ones are still to do.',
+        'Nobody at home in the morning: better to go back in the afternoon.',
+        'Left the tracts in the mailboxes of the gated buildings.',
+        'Two return visits to make, see the card.',
+        'Worked together with the group on Saturday.',
+    ];
+
+    /**
      * Run the database seeds.
+     *
+     * Each territory gets at most one assignment, so that it is never assigned to two users at
+     * once, and only the campaigns already started (see `FakeCampaignSeeder`) are used.
      */
     public function run(): void
     {
         $users = User::all();
-        $territories = Territory::all();
+        $campaigns = Campaign::query()
+            ->where(fn ($query) => $query->whereNull('valid_from')->orWhere('valid_from', '<=', now()))
+            ->get();
 
-        $campaigns = Campaign::factory(3)->create();
+        if ($campaigns->isEmpty()) {
+            $campaigns = Campaign::factory(3)->create();
+        }
 
-        TerritoryAssignment::factory(3)
-            // ->for($territories->random())
-            // ->for($users->random(), 'assignee')
-            // ->has($campaigns->random())
-            ->state(fn () => [
+        $territories = Territory::all()->shuffle()->take(self::ASSIGNED_TERRITORIES_COUNT);
+
+        foreach ($territories as $territory) {
+            TerritoryAssignment::factory()->create([
                 'assignee_id' => $users->random()->id,
-                'territory_id' => $territories->random()->id,
+                'territory_id' => $territory->id,
                 'campaign_id' => $campaigns->random()->id,
-                // 'assigned_to' => $users->random()->id,
+                'notes' => fake()->randomElement(self::NOTES),
                 'created_by' => $users->random()->id,
-            ])->create();
+            ]);
+        }
     }
 }
