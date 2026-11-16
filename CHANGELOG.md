@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Maps with nothing to show yet open on northern New Jersey (USA) instead of Rome, unless `MAP_DEFAULT_CENTER` is set.
+- Maps with nothing to show yet open on Warwick, New York (USA) instead of Rome, unless `MAP_DEFAULT_CENTER` is set.
 
 ## [1.0.0-alpha8] - 2026-11-16
 
