@@ -4,6 +4,23 @@
 [<img alt="Deployed with FTP Deploy Action" src="https://img.shields.io/badge/Deployed With-FTP DEPLOY ACTION-%3CCOLOR%3E?style=for-the-badge&color=blue">](https://github.com/SamKirkland/FTP-Deploy-Action)
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenCHelper/OpenCongregationHelper)
 
+Open source territory management system for congregations of Jehovah's Witnesses: it replaces the paper territory
+register, and works in the browser, also on smartphones.
+
+## Features
+
+| Feature | What it does | Screenshot |
+| --- | --- | --- |
+| **Territories and zones** | Create territories one by one or import them from a CSV file, group them into zones, and add a map, an image (e.g. a scanned paper card), notes and tags | <a href="docs/user-documentation/en/territories/assets/territory-view.webp"><img src="docs/readme-screenshots/territory-view.webp" alt="Territories and zones" width="300"></a> |
+| **Assignments** | Record when a territory is given out and returned, with the full history of each one | <a href="docs/user-documentation/en/territories/assets/territory-assignment-history.webp"><img src="docs/readme-screenshots/territory-assignment-history.webp" alt="Assignments" width="300"></a> |
+| **Campaigns** | Follow special activities (e.g. the Memorial invitations) separately, with their dates and progress | <a href="docs/user-documentation/en/assignments/assets/campaign-view.webp"><img src="docs/readme-screenshots/campaign-view.webp" alt="Campaigns" width="300"></a> |
+| **Dashboard** | Key statistics and a map of all the territories, colored by zone, availability, how often they were worked or campaign progress | <a href="docs/user-documentation/en/basics/assets/dashboard.webp"><img src="docs/readme-screenshots/dashboard.webp" alt="Dashboard" width="300"></a> |
+| **Notifications** | In the app and by email, when a territory is assigned or returned, a campaign starts, or a territory has been out for more than 60 days | <a href="docs/user-documentation/en/basics/assets/notifications.webp"><img src="docs/user-documentation/en/basics/assets/notifications.webp" alt="Notifications" width="300"></a> |
+| **Link sharing** | Send an assignment to a publisher as a link that opens without an account, and revoke it any time | <a href="docs/user-documentation/en/assignments/assets/shared-page.webp"><img src="docs/readme-screenshots/shared-page.webp" alt="Link sharing" width="300"></a> |
+| **Users and roles** | Permissions by role, users without login who can still receive territories, and a log of who changed what | <a href="docs/user-documentation/en/administration/assets/users-list.webp"><img src="docs/readme-screenshots/users-list.webp" alt="Users and roles" width="300"></a> |
+| **Languages** | Interface in English, Italian and Spanish | <a href="docs/user-documentation/en/basics/assets/language-switch.webp"><img src="docs/user-documentation/en/basics/assets/language-switch.webp" alt="Languages" width="300"></a> |
+| **User guide** | Built into the app (English and Italian), with a **Help** button on each page | <a href="docs/user-documentation/en/basics/assets/help-slideover.webp"><img src="docs/readme-screenshots/help-slideover.webp" alt="User guide" width="300"></a> |
+
 ## Demo
 
 Try it on the **[public demo](https://ochdemo.altervista.org)**: it runs the latest release with dummy data, and anyone
