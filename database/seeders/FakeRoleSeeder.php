@@ -119,6 +119,7 @@ class FakeRoleSeeder extends Seeder
         $users = User::query()
             ->whereKeyNot(1)
             ->whereDoesntHave('roles')
+            ->with('roles')
             ->orderBy('id')
             ->get();
 

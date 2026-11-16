@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Campaign;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 /**
  * Seed the campaigns of a congregation.
@@ -32,7 +33,7 @@ class FakeCampaignSeeder extends Seeder
     /**
      * Get the campaigns to create.
      *
-     * @return list<array{name: string, short_name: string, description: string, color: string, valid_from: ?\Illuminate\Support\Carbon, valid_until: ?\Illuminate\Support\Carbon}>
+     * @return list<array{name: string, short_name: string, description: string, color: string, valid_from: ?Carbon, valid_until: ?Carbon}>
      */
     public function campaigns(): array
     {

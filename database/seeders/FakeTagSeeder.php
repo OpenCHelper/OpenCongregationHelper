@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\TagType;
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class FakeTagSeeder extends Seeder
 {
@@ -43,8 +44,23 @@ class FakeTagSeeder extends Seeder
     {
         foreach (self::TAGS as $type => $names) {
             foreach ($names as $name) {
-                Tag::findOrCreate($name, $type);
+                self::findOrCreate($name, TagType::from($type));
             }
         }
+    }
+
+    /**
+     * Find the tag with the given name and type, or create it.
+     *
+     * The slug is set explicitly, since Spatie sets it in a model event, and the fake data
+     * seeders run without model events (see `WithoutModelEvents`).
+     */
+    public static function findOrCreate(string $name, TagType $type): Tag
+    {
+        return Tag::findFromString($name, $type->value)
+            ?? Tag::factory()->ofType($type)->create([
+                'name' => [Tag::getLocale() => $name],
+                'slug' => [Tag::getLocale() => Str::slug($name)],
+            ]);
     }
 }

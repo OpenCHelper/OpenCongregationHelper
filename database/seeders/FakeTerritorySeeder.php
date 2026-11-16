@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\TagType;
+use App\Models\Tag;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
@@ -127,7 +128,7 @@ class FakeTerritorySeeder extends Seeder
                 'color' => $zoneData['color'],
                 'created_by' => $users->random()->id,
             ]);
-            $zone->attachTags($zoneData['tags'], TagType::ZONES->value);
+            $zone->attachTags($this->tags($zoneData['tags'], TagType::ZONES));
 
             foreach ($zoneData['territories'] as $index => $territoryData) {
                 $territory = Territory::factory()->for($zone)->create([
@@ -141,9 +142,20 @@ class FakeTerritorySeeder extends Seeder
                     'geojson' => $this->blockGeoJson($faker, $zoneData['center'], $index, count($zoneData['territories']), $territoryData['name']),
                     'created_by' => $users->random()->id,
                 ]);
-                $territory->attachTags($territoryData['tags'], TagType::TERRITORIES->value);
+                $territory->attachTags($this->tags($territoryData['tags'], TagType::TERRITORIES));
             }
         }
+    }
+
+    /**
+     * Find or create the tags with the given names and type.
+     *
+     * @param  list<string>  $names
+     * @return list<Tag>
+     */
+    private function tags(array $names, TagType $type): array
+    {
+        return array_map(fn (string $name): Tag => FakeTagSeeder::findOrCreate($name, $type), $names);
     }
 
     /**
