@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- GitHub release published automatically for every version tag, with the notes of its section of this changelog.
+- Login page of the PR previews pre-filled with the root user's credentials, so reviewers can test right away; the
+  previews are public demos, so save only dummy data there. Other demo installations (e.g. TEST) can enable it with the
+  new `DEMO_PREFILL_LOGIN_CREDENTIALS` setting, always ignored in production ([#173]).
+
+### Changed
+
+- Versions renumbered for the first release as OpenCongregationHelper: `2.0.0-alpha1` to `2.0.0-alpha7` are now
+  `1.0.0-alpha1` to `1.0.0-alpha7`.
+- The interface settings moved from the gear button in the top bar into the user menu, next to **Profile** and
+  **Sign out** ([#172]).
+- The profile page looks like the rest of the application: its sections, fields, buttons, confirmation dialogs and
+  "Saved" notifications match the other pages, and the contacts table is no longer boxed inside another box ([#174]).
+
+### Fixed
+
+- User menu showing an extra header with the name of the user when the interface is in Italian or Spanish, but not
+  in English ([#172]).
+- Saving a new profile photo leading to an unstyled page outside the application ([#174]).
+- Profile photo not shown in the top bar, which always showed the initials of the user ([#174]).
+- Email field of the profile page not visible, and the warnings shown to the root user on that page not styled
+  ([#174]).
+- **Delete account** and **Log out other browser sessions** dialogs of the profile page shown behind their dark
+  overlay ([#174]).
+- Adding a primary contact from the profile page leaving the previous primary contact marked as primary too
+  ([#174]).
+- Title of the profile page always shown in English ("Edit Profile") ([#174]).
+
+## [1.0.0-alpha7] - 2026-11-14
+
+### Added
+
 - **Dashboard map coloring**: color the territories by zone, availability, assignment frequency over the last 12
   months or progress in a campaign, with a legend counting the territories of each color. Clicking a territory shows
   its zone, its status and a link to its page ([#164]).
@@ -17,9 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scheduled tasks and queue of the PR previews, run by cron-job.org every 5 minutes from 8:00 to 22:55 (Rome time),
   Monday to Friday: the previews need the new `CRON_JOB_ORG_API_KEY` secret of the `PREVIEW` environment (see the
   README) ([#171]).
-- Login page of the PR previews pre-filled with the root user's credentials, so reviewers can test right away; the
-  previews are public demos, so save only dummy data there. Other demo installations (e.g. TEST) can enable it with the
-  new `DEMO_PREFILL_LOGIN_CREDENTIALS` setting, always ignored in production ([#173]).
 - Back button at the bottom of the documentation sidebar, leading to the app, or to the welcome page for visitors who
   are not signed in ([#170]).
 
@@ -36,10 +65,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and refuses to run without a prefix when the database also holds the tables of other installations ([#156]).
 - Updated the dependencies, among them Laravel to 12.72, the impersonation plugin (`stechstudio/filament-impersonate`)
   to version 5, Vite to version 8 and `laravel-vite-plugin` to version 3 ([#168]).
-- The interface settings moved from the gear button in the top bar into the user menu, next to **Profile** and
-  **Sign out** ([#172]).
-- The profile page looks like the rest of the application: its sections, fields, buttons, confirmation dialogs and
-  "Saved" notifications match the other pages, and the contacts table is no longer boxed inside another box ([#174]).
 
 ### Removed
 
@@ -60,24 +85,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zone names in the layers menu of the dashboard map showing raw HTML code ([#164]).
 - Sorting territories by assignment duration, and grouping them by campaign, failing when the database tables are
   prefixed (`DB_PREFIX`) ([#156]).
-- User menu showing an extra header with the name of the user when the interface is in Italian or Spanish, but not
-  in English ([#172]).
-- Saving a new profile photo leading to an unstyled page outside the application ([#174]).
-- Profile photo not shown in the top bar, which always showed the initials of the user ([#174]).
-- Email field of the profile page not visible, and the warnings shown to the root user on that page not styled
-  ([#174]).
-- **Delete account** and **Log out other browser sessions** dialogs of the profile page shown behind their dark
-  overlay ([#174]).
-- Adding a primary contact from the profile page leaving the previous primary contact marked as primary too
-  ([#174]).
-- Title of the profile page always shown in English ("Edit Profile") ([#174]).
 
 ### Security
 
 - Critical Laravel vulnerability allowing the API token guard to be bypassed with non-string credentials, along with
   the other security advisories reported for the dependencies ([#168]).
 
-## [2.0.0-alpha6] - 2026-11-11
+## [1.0.0-alpha6] - 2026-11-11
 
 ### Added
 
@@ -97,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Application version stuck at `v2.0.0-alpha3` in the sidebar.
+- Application version stuck at `v1.0.0-alpha3` in the sidebar.
 - Home page failing with a server error when using the built frontend assets ([#142]).
 - Publicly shared assignment pages failing with a server error when using the built frontend assets ([#141]).
 - Error notifications of the assign and return territory actions never being shown ([#141]).
@@ -154,7 +168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The assignments shown on the territory, campaign and user pages follow the same visibility rules as the assignments
   list: users who cannot list every assignment only see their own ([#148]).
 
-## [2.0.0-alpha5] - 2026-09-16
+## [1.0.0-alpha5] - 2026-09-16
 
 ### Added
 
@@ -202,13 +216,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remote code execution vulnerability in Livewire (CVE-2025-54068), fixed by updating it to 3.6.4 ([#106]).
 
-## [2.0.0-alpha4] - 2025-06-23
+## [1.0.0-alpha4] - 2025-06-23
 
 ### Fixed
 
 - Map edit controls shown on read-only territory assignment views ([#103]).
 
-## [2.0.0-alpha3] - 2025-06-22
+## [1.0.0-alpha3] - 2025-06-22
 
 ### Added
 
@@ -233,7 +247,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Raw GeoJSON shown among the territory assignment details.
 - Territory notes hidden from the assignment details when empty.
 
-## [2.0.0-alpha2] - 2025-06-17
+## [1.0.0-alpha2] - 2025-06-17
 
 ### Added
 
@@ -248,7 +262,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Sorting territories by assignee ([#93]).
 
-## [2.0.0-alpha1] - 2025-05-17
+## [1.0.0-alpha1] - 2025-05-17
 
 Complete rewrite of the application on top of Laravel 11, Filament 3 and Laravel Jetstream ([#35]).
 
