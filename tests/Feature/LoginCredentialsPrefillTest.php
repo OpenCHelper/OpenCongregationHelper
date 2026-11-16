@@ -30,6 +30,20 @@ it('pre-fills the credentials of the root user on demos', function () {
         ]);
 });
 
+it('does not focus the email field when the credentials are pre-filled', function () {
+    $emailField = Livewire::test(Login::class)->instance()->form->getFlatFields()['email'];
+
+    expect($emailField->isAutofocused())->toBeFalse();
+});
+
+it('focuses the email field when the credentials are not pre-filled', function () {
+    config(['app.demo_prefill_login_credentials' => false]);
+
+    $emailField = Livewire::test(Login::class)->instance()->form->getFlatFields()['email'];
+
+    expect($emailField->isAutofocused())->toBeTrue();
+});
+
 it('logs in as the root user with the pre-filled credentials', function () {
     $rootUser = User::factory()
         ->withPassword('DummyPassword')
