@@ -7,6 +7,7 @@ use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use Dotswan\MapPicker\Fields\Map;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentAsset;
@@ -239,4 +240,11 @@ test('the territories page of a zone rejects the name of another territory of th
         ->assertHasFormErrors(['name' => 'unique']);
 
     expect(Territory::query()->where('name', 'Via Roma')->count())->toBe(1);
+});
+
+test('the map of a new territory opens on the configured default centre', function () {
+    config(['filament-leaflet.default_map_center' => [39.8017, -89.6436]]);
+
+    Livewire::test(CreateTerritory::class)
+        ->assertFormComponentExists('location', checkComponentUsing: fn (Map $map): bool => json_decode($map->getMapConfig(), true)['default'] === ['lat' => 39.8017, 'lng' => -89.6436]);
 });

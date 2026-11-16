@@ -217,6 +217,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                                 $set('location', $location);
                                             })
                                             ->showMarker(false)
+                                            ->defaultLocation(...config('filament-leaflet.default_map_center'))
                                             ->showFullscreenControl()
                                             ->showZoomControl()
                                             ->draggable()
