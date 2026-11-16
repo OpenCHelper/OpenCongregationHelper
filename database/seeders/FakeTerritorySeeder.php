@@ -130,14 +130,11 @@ class FakeTerritorySeeder extends Seeder
             $zone->attachTags($zoneData['tags'], TagType::ZONES->value);
 
             foreach ($zoneData['territories'] as $index => $territoryData) {
-                $factory = Territory::factory()->for($zone);
-
-                if ($territoryData['with_image'] ?? false) {
-                    $factory = $factory->withImage();
-                }
-
-                $territory = $factory->create([
+                $territory = Territory::factory()->for($zone)->create([
                     'name' => $territoryData['name'],
+                    'image_path' => ($territoryData['with_image'] ?? false)
+                        ? 'https://placehold.co/600x400?text='.rawurlencode($territoryData['name'])
+                        : null,
                     'description' => $territoryData['description'],
                     'notes' => $territoryData['notes'] ?? null,
                     'is_commercial' => $territoryData['is_commercial'] ?? false,
