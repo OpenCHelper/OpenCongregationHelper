@@ -100,28 +100,29 @@ The preferred way of developing is by using **Docker Compose** to build the cont
 
 You can run the Github Action workflows locally using [`nektos/act`](https://github.com/nektos/act) (already included in the [DevContainer](./.devcontainer/devcontainer.json)).
 
-For example, to only deploy the application using the nightly workflow:
+For example, to deploy the preview of a pull request:
 
 ```shell
 act --rm --verbose=false \
     -s GITHUB_TOKEN="$(gh auth status &>/dev/null || gh auth login >&2; gh auth token)" \
     --pull=false \
     --rebuild=false \
-    --workflows .github/workflows/upload-nightly.yml \
-    --job 'upload' \
+    --workflows .github/workflows/preview.yml \
+    --job 'deploy' \
+    --input action=deploy --input pr=123 \
     --secret-file .act/.secrets \
     --env-file .act/.env \
     --var-file .act/.vars \
     --insecure-secrets
 ```
 
-This command will run the `upload` job of the `.github/workflows/upload-nightly.yml` workflow:
+This command will run the `deploy` job of the `.github/workflows/preview.yml` workflow:
 - use [`gh`](https://cli.github.com/) to retrieve a token to authenticate Act against GitHub (_higher quotas and access to private repositories, may be omitted if not needed_).
 - read the [workflow secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) (`${{ secrets.[*] }}`) from `.act/.secrets`
 - read the [workflow environment variables](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#defining-environment-variables-for-a-single-workflow) (`${{ env.[*] }}`) from `.act/.env`
 - read the [workflow configuration variables](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#defining-configuration-variables-for-multiple-workflows) (`${{ vars.[*] }}`) from `.act/.vars`
 
-The deploy workflows read the settings of their GitHub environment (`NIGHTLY`, `UAT` or `PREVIEW`, see
+The deploy workflows read the settings of their GitHub environment (e.g. `PREVIEW`, see
 [Altervista](#altervista)) and the repository variables. Locally, `act` reads all of them from the files above, under
 the same names whatever the environment, so keep one pair of files for each space (both are ignored by git):
 
@@ -190,25 +191,42 @@ the previews: e.g. `DetectStaleAssignments`, which sends the reminders of the te
 Monday at 9:00, Rome time.
 
 The deployments use [GitHub environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
-(Settings → Environments), each with the FTP credentials of its space, under the same names:
+(Settings → Environments), each with the FTP credentials of its space. This repository deploys only the PR previews:
 
 | Environment | Deployed by | Variables | Secrets |
 | --- | --- | --- | --- |
-| `NIGHTLY` | [`upload-nightly.yml`](.github/workflows/upload-nightly.yml) (TEST, on every push to `main`) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD` |
-| `UAT` | [`upload-staging.yml`](.github/workflows/upload-staging.yml) (PRE-PRODUCTION, on every release tag) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD` |
 | `PREVIEW` | [`preview.yml`](.github/workflows/preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD`, `CRON_JOB_ORG_API_KEY` |
+
+Any other installation (a test or production site, or the
+[demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo)) is deployed from a repository of its own, calling
+the reusable [`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow of this one
+with the GitHub environment holding its settings, the release to deploy and, optionally, the `.env` file to write and
+the cron job of its scheduler (see the inputs of the workflow):
+
+```yaml
+jobs:
+  deploy:
+    uses: OpenCHelper/OpenCongregationHelper/.github/workflows/upload-altervista-reusable.yml@main
+    with:
+      repository: OpenCHelper/OpenCongregationHelper
+      ref: v1.0.0                 # release to deploy
+      environment: PRODUCTION     # GitHub environment of the calling repository
+      environment-folder: prod    # folder of the space (see below)
+    secrets: inherit
+```
 
 `FTP_SERVER` is the FTP hostname of the space (e.g. `ftp.{username}.altervista.org`), also used to build its URLs,
 `ROOT_PASSWORD` the password of the root user of the previews (public, since it is pre-filled on their login page), and `CRON_JOB_ORG_API_KEY` an API key of cron-job.org
 (Console → Settings → API), better dedicated to the previews. `FTP_SERVER` and `FTP_USERNAME` can be secrets too, but
 GitHub then hides every text containing them, like the URLs of the sites (`https://{username}.altervista.org`): the
 deployments get no link, and the logs show `***` instead of the hosts. The environments can also restrict who and what deploys
-(e.g. `UAT` only from release tags, or after an approval).
+(e.g. only from the default branch, or after an approval).
 
-Add also these repository variables (Settings → Secrets and variables → Actions → *Variables*), read by the TEST and
-the preview deployments, which write the router of their space (see [below](#hosting-the-previews-on-the-test-space)).
-They are repository variables, not environment ones, because `NIGHTLY` and `PREVIEW` may deploy to the same space, and
-must then write the same router:
+Add also these repository variables (Settings → Secrets and variables → Actions → *Variables*), read by the
+deployments into a folder of the space, which write the router of their space (see
+[below](#hosting-the-previews-on-the-test-space)). They are repository variables, not environment ones, because several
+environments may deploy to the same space (e.g. a TEST installation and the previews), and must then write the same
+router:
 
 | Variable | Value |
 | --- | --- |
@@ -249,7 +267,7 @@ routes each request by host to the `public/` folder of the environment:
 
 | Host | Folder |
 | --- | --- |
-| `{username}.altervista.org` (and `www.`) | `test/` (TEST, deployed by [`upload-nightly.yml`](.github/workflows/upload-nightly.yml)), from `SPACE_DEFAULT_ENVIRONMENT` |
+| `{username}.altervista.org` (and `www.`) | `test/` (TEST, deployed with the reusable workflow, see above), from `SPACE_DEFAULT_ENVIRONMENT` |
 | `pr-<N>.{username}.altervista.org` | `previews/pr-<N>/` |
 | `<name>.{username}.altervista.org` | `<name>/`: another environment is added by creating a folder |
 
@@ -264,7 +282,7 @@ The deployer never runs longer than the PHP execution time limit of the server: 
 (and at most 15 seconds), the long tasks (unpacking, deleting a release) are split over as many requests as needed, and
 a failed request is retried with a smaller budget, since every step can be safely repeated.
 
-To host the previews on the TEST space, give the `PREVIEW` environment the same FTP secrets as `NIGHTLY`: the previews
+To host the previews on the TEST space, give the `PREVIEW` environment the same FTP secrets as TEST: the previews
 then use the database of the TEST account. `MAX_PREVIEWS` can be lowered if the 3 GB, now shared with
 TEST, run short.
 

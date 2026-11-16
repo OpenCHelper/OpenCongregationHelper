@@ -328,7 +328,7 @@ php artisan tinker
 ## CI/CD Integration
 
 The application includes GitHub Actions workflows in `.github/workflows/`:
-- `build.yml` - Production builds
+- `preview.yml` - PR previews, and `upload-altervista-reusable.yml` - deployments, called by other repositories
 - `run-tests.yml` - Test execution with coverage
 - `check-translations.yml` - Translation validation
 
