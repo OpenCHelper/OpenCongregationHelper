@@ -2,7 +2,16 @@ name: Claude Code
 
 # Runs Claude Code when `@claude` is mentioned in an issue (title or body), an issue or pull request comment, or a pull
 # request review: it answers, or works on the request and opens a pull request. Only users with write access to the
-# repository can trigger it. It acts as the Claude GitHub App, which must be installed on the repository.
+# repository can trigger it.
+#
+# Identity: with the MAINTAINER_TOKEN secret and the MAINTAINER_LOGIN and MAINTAINER_ID variables, Claude acts as the
+# machine account of the project: its commits are authored by it (`<id>+<login>@users.noreply.github.com`) and its
+# comments, issues and pull requests are made with its token. Without them, it acts as the Claude GitHub App, which must
+# then be installed on the repository.
+#   - MAINTAINER_TOKEN (secret): fine-grained personal access token of the machine account, for this repository only,
+#     with read and write access to Contents, Issues, Pull requests and Workflows, and read access to Actions;
+#   - MAINTAINER_LOGIN (variable): username of the machine account;
+#   - MAINTAINER_ID (variable): numeric ID of the machine account (https://api.github.com/users/<login>, `id`).
 #
 # Secrets (Settings → Secrets and variables → Actions), one of:
 #   - ANTHROPIC_API_KEY: an API key of the Anthropic Console (usage billed to its account);
@@ -51,3 +60,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Empty without the machine account: the action then uses the Claude GitHub App and its bot identity
+          github_token: ${{ secrets.MAINTAINER_TOKEN }}
+          bot_name: ${{ vars.MAINTAINER_LOGIN || 'claude[bot]' }}
+          bot_id: ${{ vars.MAINTAINER_ID || '41898282' }}
