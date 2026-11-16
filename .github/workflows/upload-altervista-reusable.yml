@@ -54,6 +54,18 @@ on:
         required: false
         default: ""
         type: string
+      repository:
+        description: >-
+          Repository to deploy (`owner/name`), e.g. when called from another repository to deploy a release of this
+          one. Empty for the repository of the caller.
+        required: false
+        default: ""
+        type: string
+      ref:
+        description: Tag, branch or commit to deploy. Empty for the one that triggered the caller.
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -76,6 +88,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          repository: ${{ inputs.repository || github.repository }}
+          ref: ${{ inputs.ref }}
           fetch-depth: 0
 
       - name: Get Artisan required data
@@ -101,10 +115,21 @@ jobs:
           install-dev-dependencies: ${{ inputs.install-dev-dependencies }}
           node-version: ${{ env.node_version }}
 
+      # From the code checked out, which may not be the one of the caller (see the `ref` input)
       - name: Create git detail files
+        env:
+          REF: ${{ inputs.ref }}
+          TRIGGER_REF: ${{ github.ref }}
         run: |
-          echo "${{ github.sha }}" > .git-commit-hash
-          echo "ref: ${{ github.ref }}" > .git-branch-name
+          git rev-parse HEAD > .git-commit-hash
+
+          if [[ -z "$REF" ]]; then
+            echo "ref: ${TRIGGER_REF}" > .git-branch-name
+          elif git show-ref --verify --quiet "refs/tags/${REF}"; then
+            echo "ref: refs/tags/${REF}" > .git-branch-name
+          else
+            echo "ref: refs/heads/${REF}" > .git-branch-name
+          fi
 
       # The files never deployed (`.git-ftp-ignore`, also read by the archive deployments), as FTP-Deploy globs
       - name: Read the files never deployed
@@ -362,15 +387,16 @@ jobs:
           ARTISAN_LOG_FILE: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           ARTISAN_BASE_URL: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
         run: |
-          declare -r github_sha_hash=${{ github.sha }}
+          declare -r github_sha_hash="$(git rev-parse HEAD)"
           declare -r github_sha_short="${github_sha_hash:0:7}"
+          declare -r deployed_ref="$(sed 's|^ref: refs/[a-z]*/||' .git-branch-name)"
 
           cat <<EOF >> "$GITHUB_STEP_SUMMARY"
           ## Deployment Summary
 
           ### Deployment details
           - **Commit**: \`${github_sha_short}\` (\`${github_sha_hash}\`)
-          - **Branch**: \`${{ github.ref_name }}\`
+          - **Branch**: \`${deployed_ref}\`
           - **Target**: \`${{ inputs.label }}\`
           - **Environment**: \`${{ steps.parse-environment.outputs.app_environment }}\`
 
