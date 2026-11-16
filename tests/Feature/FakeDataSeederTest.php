@@ -74,7 +74,7 @@ test('the fake data seeder seeds tagged zones and territories', function () {
     $this->seed(FakeDataSeeder::class);
 
     expect(TerritoryZone::count())->toBe(count(FakeTerritorySeeder::ZONES))
-        ->and(TerritoryZone::pluck('name')->all())->toContain('Casalotti', 'Boccea', 'Primavalle')
+        ->and(TerritoryZone::pluck('name')->all())->toContain('Northgate', 'Downtown', 'Riverside')
         ->and(TerritoryZone::with('tags')->get()->every(fn (TerritoryZone $zone): bool => $zone->tagsWithType(TagType::ZONES->value)->isNotEmpty()))->toBeTrue()
         ->and(Territory::count())->toBe(collect(FakeTerritorySeeder::ZONES)->sum(fn (array $zone): int => count($zone['territories'])))
         ->and(Territory::with('tags')->get()->every(fn (Territory $territory): bool => $territory->tagsWithType(TagType::TERRITORIES->value)->isNotEmpty()))->toBeTrue()
