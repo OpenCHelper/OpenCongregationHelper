@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `MAP_DEFAULT_LATITUDE` and `MAP_DEFAULT_LONGITUDE` settings, to open the maps on the area of the congregation when
-  they have nothing to show yet (e.g. the map of a new territory) instead of on Rome.
+- `MAP_DEFAULT_CENTER` setting (`"latitude,longitude"`), to open the maps on the area of the congregation when they
+  have nothing to show yet (e.g. the map of a new territory) instead of on Rome.
 
 ## [1.0.0-alpha8] - 2026-11-16
 
