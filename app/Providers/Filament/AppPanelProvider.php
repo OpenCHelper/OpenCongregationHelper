@@ -124,14 +124,7 @@ class AppPanelProvider extends PanelProvider
                     ->navigationGroup(EnumsNavigationGroup::Developer->name)
                     ->navigationIcon(Heroicon::OutlinedServer),
                 EnvironmentIndicatorPlugin::make()
-                    ->color(fn () => match (app()->environment()) {
-                        'local' => Color::Blue,             // 1. Local development machine
-                        'nightly' => Color::Amber,          // 2. First stage (nightly)
-                        'preview' => Color::Purple,         // 2. Pull request previews
-                        'staging', 'uat' => Color::Orange,  // 3. Pre-production
-                        'production' => Color::Red,         // 4. Production
-                        default => Color::Fuchsia,          // (unknown)
-                    }),
+                    ->color(fn () => self::environmentColor(app()->environment())),
                 FilamentGazePlugin::make(),
                 VersionsPlugin::make()
                     ->hasDefaults(App::environment() !== 'production')
@@ -207,6 +200,23 @@ class AppPanelProvider extends PanelProvider
         }
 
         return $panel;
+    }
+
+    /**
+     * Color of the environment indicator shown in the top bar for the given environment (`APP_ENV`).
+     *
+     * @return array<int|string, string>
+     */
+    public static function environmentColor(string $environment): array
+    {
+        return match ($environment) {
+            'local' => Color::Blue,             // 1. Local development machine
+            'nightly' => Color::Amber,          // 2. First stage (nightly)
+            'preview', 'demo' => Color::Purple, // 2. Pull request previews and public demo, with dummy data
+            'staging', 'uat' => Color::Orange,  // 3. Pre-production
+            'production' => Color::Red,         // 4. Production
+            default => Color::Fuchsia,          // (unknown)
+        };
     }
 
     public function boot()
