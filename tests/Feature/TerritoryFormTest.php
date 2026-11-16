@@ -272,6 +272,10 @@ test('the map of a new territory opens on the territories that have a map', func
 });
 
 test('the map of a new territory of a zone opens on the territories of that zone', function () {
+    foreach (['ViewAny:TerritoryZone', 'View:TerritoryZone', 'Update:TerritoryZone'] as $permission) {
+        auth()->user()->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+
     $far = TerritoryZone::factory()->create(['name' => 'Far']);
     Territory::factory()->for($far, 'territoryZone')->create([
         'geojson' => territoryPolygon([[-74.30, 41.10], [-74.20, 41.10], [-74.20, 41.20], [-74.30, 41.10]]),
