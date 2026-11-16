@@ -4,6 +4,12 @@
 [<img alt="Deployed with FTP Deploy Action" src="https://img.shields.io/badge/Deployed With-FTP DEPLOY ACTION-%3CCOLOR%3E?style=for-the-badge&color=blue">](https://github.com/SamKirkland/FTP-Deploy-Action)
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenCHelper/OpenCongregationHelper)
 
+## Demo
+
+Try it on the **[public demo](https://ochdemo.altervista.org)**: it runs the latest release with dummy data, and anyone
+can sign in as administrator, so never enter real data there (it is reset every night). It is deployed by
+[OpenCongregationHelper-demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo).
+
 ## Tech stack
 
 - Laravel 12

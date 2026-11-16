@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-alpha8] - 2026-11-16
+
 ### Added
 
 - GitHub release published automatically for every version tag, with the notes of its section of this changelog.
 - Purple environment badge in the top bar for demo installations (`APP_ENV=demo`), like the PR previews.
+- [Public demo](https://ochdemo.altervista.org), with the latest release and dummy data, linked from the README and
+  the user guide.
 - Login page of the PR previews pre-filled with the root user's credentials, so reviewers can test right away; the
   previews are public demos, so save only dummy data there. Other demo installations (e.g. TEST) can enable it with the
   new `DEMO_PREFILL_LOGIN_CREDENTIALS` setting, always ignored in production.

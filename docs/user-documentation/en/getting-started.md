@@ -14,6 +14,9 @@ them, since when, and which ones have been covered. It runs in the browser and a
 
 ![Home page of the application](/docs/user-documentation/en/basics/assets/welcome-page.webp)
 
+> 💡 **Try it:** the [public demo](https://ochdemo.altervista.org) runs the latest version with dummy data. Anyone can
+> sign in to it as administrator and its data is reset every night: never enter real names or addresses there.
+
 ## Key concepts
 
 | Concept | What it is |

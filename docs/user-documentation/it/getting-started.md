@@ -14,6 +14,9 @@ sta lavorando, da quando e quali sono stati percorsi. Funziona nel browser, anch
 
 ![Home page dell'applicazione](/docs/user-documentation/it/basics/assets/welcome-page.webp)
 
+> 💡 **Provalo:** la [demo pubblica](https://ochdemo.altervista.org) usa l'ultima versione con dati di prova. Chiunque
+> può accedervi come amministratore e i suoi dati vengono azzerati ogni notte: non inserire mai nomi o indirizzi reali.
+
 ## Concetti chiave
 
 | Concetto | Cos'è |
