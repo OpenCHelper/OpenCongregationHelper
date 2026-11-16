@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `MAP_DEFAULT_CENTER` setting (`"latitude,longitude"`), to open the maps on the area of the congregation when they
-  have nothing to show yet (e.g. the map of a new territory).
+- The map of a new territory opens on the territories already drawn: those of its zone when created from the zone's
+  territories page, otherwise all of them.
+- `MAP_DEFAULT_CENTER` setting (`"latitude,longitude"`), where the maps open while no territory has a map yet.
 
 ### Changed
 

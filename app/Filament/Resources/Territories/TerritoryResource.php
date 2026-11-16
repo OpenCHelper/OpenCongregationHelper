@@ -18,6 +18,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\User;
 use App\Observers\TerritoryObserver;
+use App\TerritoryMapCenter;
 use Carbon\Carbon;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Dotswan\MapPicker\Fields\Map;
@@ -133,6 +134,23 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
         return $record->name.' ('.$record->territoryZone->name.')';
     }
 
+    /**
+     * Get the zone whose territories the map of the form opens on, if known when the form is built:
+     * the zone of the territory being edited, or the zone whose territories page the form is on.
+     */
+    protected static function getMapCenterZoneId(Schema $schema): ?int
+    {
+        $livewire = $schema->getLivewire();
+
+        if ($livewire instanceof ManageZoneTerritories) {
+            return (int) $livewire->getOwnerRecord()->getKey();
+        }
+
+        $record = $schema->getRecord();
+
+        return $record instanceof Territory && $record->territory_zone_id !== null ? (int) $record->territory_zone_id : null;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -217,7 +235,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                                 $set('location', $location);
                                             })
                                             ->showMarker(false)
-                                            ->defaultLocation(...config('filament-leaflet.default_map_center'))
+                                            ->defaultLocation(...TerritoryMapCenter::resolve(static::getMapCenterZoneId($schema)))
                                             ->showFullscreenControl()
                                             ->showZoomControl()
                                             ->draggable()

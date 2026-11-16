@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
+use App\TerritoryMapCenter;
 
 class TerritoryObserver
 {
@@ -12,7 +13,7 @@ class TerritoryObserver
      */
     public function created(Territory $territory): void
     {
-        //
+        TerritoryMapCenter::forget();
     }
 
     /**
@@ -20,7 +21,7 @@ class TerritoryObserver
      */
     public function updated(Territory $territory): void
     {
-        //
+        TerritoryMapCenter::forget();
     }
 
     /**
@@ -46,7 +47,7 @@ class TerritoryObserver
      */
     public function deleted(Territory $territory): void
     {
-        //
+        TerritoryMapCenter::forget();
     }
 
     /**
@@ -54,7 +55,7 @@ class TerritoryObserver
      */
     public function restored(Territory $territory): void
     {
-        //
+        TerritoryMapCenter::forget();
     }
 
     /**
@@ -62,6 +63,6 @@ class TerritoryObserver
      */
     public function forceDeleted(Territory $territory): void
     {
-        //
+        TerritoryMapCenter::forget();
     }
 }
