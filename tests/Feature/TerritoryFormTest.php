@@ -246,5 +246,5 @@ test('the map of a new territory opens on the configured default centre', functi
     config(['filament-leaflet.default_map_center' => [39.8017, -89.6436]]);
 
     Livewire::test(CreateTerritory::class)
-        ->assertFormComponentExists('location', checkComponentUsing: fn (Map $map): bool => json_decode($map->getMapConfig(), true)['default'] === ['lat' => 39.8017, 'lng' => -89.6436]);
+        ->assertSchemaComponentExists('location', 'form', checkComponentUsing: fn (Map $map): bool => json_decode($map->getMapConfig(), true)['default'] === ['lat' => 39.8017, 'lng' => -89.6436]);
 });
