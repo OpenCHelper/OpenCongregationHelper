@@ -38,9 +38,16 @@ Apri la pagina della campagna ogni pochi giorni:
 
 Nell'elenco **Territori**, **Raggruppa per → Campagna** mostra i territori che si stanno lavorando per la campagna.
 
+Negli ultimi 7 giorni, un numero arancione accanto a **Campagne** nella barra laterale ricorda che la campagna sta per
+terminare, e le sue assegnazioni ancora in corso sono evidenziate in arancione.
+
 ## Alla fine della campagna
 
 1. Apri la scheda **Assegnazioni** della campagna.
 2. Seleziona le assegnazioni ancora in corso e usa **Termina assegnazioni** per riconsegnarle tutte insieme.
 
 Dalla data di fine lo stato della campagna diventa **Terminata** e non è più possibile assegnarle territori.
+
+I territori non riconsegnati in tempo non vanno persi: un numero rosso accanto ad **Assegnazioni** nella barra laterale
+li conta, e in **Assegnazioni** la scheda **Campagna terminata** li elenca. L'avviso sopra la tabella può riconsegnarli
+tutti insieme con **Restituisci tutti**, e i proclamatori che ne hanno ancora uno vedono un promemoria nella sua pagina.

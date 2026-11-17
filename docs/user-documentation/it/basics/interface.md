@@ -12,6 +12,9 @@ Tutte le pagine dell'applicazione condividono la stessa struttura.
 1. **Barra laterale**: il menu, diviso in gruppi. Vedi solo le voci che il tuo ruolo ti permette di usare.
    - **Reparto territori**: Territori, Zone, Campagne e Assegnazioni;
    - **Amministrazione**: Utenti, Ruoli e Tag.
+
+   Un numero accanto a una voce segnala qualcosa da controllare: accanto a **Campagne** (arancione) le campagne che
+   terminano entro 7 giorni, accanto ad **Assegnazioni** (rosso) i territori ancora fuori per una campagna terminata.
 2. **Aiuto**: apre in un pannello laterale la pagina di questa guida che spiega la schermata corrente.
 3. **Ricerca globale**: cerca contemporaneamente tra territori, zone e campagne (vedi sotto).
 4. **Lingua**: cambia la lingua dell'interfaccia (inglese, italiano o spagnolo).

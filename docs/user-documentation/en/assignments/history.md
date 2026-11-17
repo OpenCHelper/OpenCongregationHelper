@@ -17,6 +17,19 @@ Every assignment, in progress or returned, is kept. You can find them:
 The table shows the **Territory**, the **Assignee**, the **Started At** and **Ended At** dates (*(in progress)* if not
 returned yet) and the **Campaign**.
 
+## Assignments of ended or ending campaigns
+
+Assignments still in progress whose campaign has ended, or ends within 7 days, stand out in the table:
+
+- a **red** edge on the left of the row when the campaign has ended, an **amber** one when it ends within 7 days;
+- under the campaign name, when it ended or when it ends (e.g. *Campaign ended 3 days ago*, *Campaign ends in 5 days*).
+
+Above the table, the **Campaign ended** and **Campaign ending soon** tabs show only those assignments, with their
+number. When some territories are still out for a campaign that has ended, a banner says how many: **Show them** opens
+the **Campaign ended** tab, and **Return all** returns them all at once, if your role allows it.
+
+The number of territories still out for an ended campaign also appears in red next to **Assignments** in the sidebar.
+
 ## Filters
 
 By default only the assignments **in progress** are shown. Open the filters to change it:
@@ -35,6 +48,9 @@ Click a row to open the assignment. The page shows:
 - **Assignment Information**: assignee, campaign, start and end of the assignment.
 
 ![Assignment details](/docs/user-documentation/en/assignments/assets/assignment-view.webp)
+
+If the campaign of the assignment has ended, or ends within 7 days, a banner at the top of the page says so and
+reminds to return the territory. If your role allows it, **End Assignment** in the banner returns it right away.
 
 From the **Actions** menu you can share the assignment with a public link (see [Sharing an assignment](sharing)).
 
