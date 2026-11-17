@@ -4,8 +4,10 @@
 [<img alt="Deployed with FTP Deploy Action" src="https://img.shields.io/badge/Deployed With-FTP DEPLOY ACTION-%3CCOLOR%3E?style=for-the-badge&color=blue">](https://github.com/SamKirkland/FTP-Deploy-Action)
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/OpenCHelper/OpenCongregationHelper)
 
-Open source territory management system for congregations of Jehovah's Witnesses: it replaces the paper territory
+Open source **self-hosted** territory management system for congregations of Jehovah's Witnesses: it replaces the paper territory
 register, and works in the browser, also on smartphones.
+
+You choose where to host the webapp, you own the data.
 
 ## Features
 
