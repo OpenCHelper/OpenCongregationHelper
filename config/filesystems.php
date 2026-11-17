@@ -33,6 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
+            // Signed URLs of the private files (`temporaryUrl()`), away from `/storage`, the URL of the `public` disk
+            'url' => '/private-storage',
             'serve' => true,
             'throw' => false,
         ],

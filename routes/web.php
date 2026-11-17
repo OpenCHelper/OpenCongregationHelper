@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PublicStorageController;
 use App\Http\Controllers\WebManifestController;
 use App\Models\SharedUrl;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
@@ -32,6 +33,9 @@ Route::redirect('/login', '/app/login')->name('login');
 if (Features::enabled(Features::registration())) {
     Route::redirect('/register', '/app/register')->name('register');
 }
+
+// Files of the `public` disk, reached only when the web server cannot follow the `public/storage` link (e.g. Altervista)
+Route::get('/storage/{path}', PublicStorageController::class)->where('path', '.*')->name('storage.public');
 
 Route::redirect('/dashboard', '/app')->name('dashboard');
 
