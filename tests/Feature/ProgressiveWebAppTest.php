@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\WebManifestController;
+use App\Support\ServiceWorker;
 
 beforeEach(function () {
     // Render the real assets when they are built (as in CI), and fake them otherwise (e.g. on a fresh clone)
@@ -63,16 +64,37 @@ it('ships the service worker and the icons it caches', function () {
         ->and(public_path('icons/apple-touch-icon.png'))->toBeFile();
 });
 
-it('registers the service worker with the app version, to replace its cache on new versions', function () {
+it('registers the service worker with its version, to replace its cache on new versions', function () {
     config(['app.version' => 'v2.0.0-beta1']);
+
+    $version = ServiceWorker::version();
+
+    expect($version)->toStartWith('v2.0.0-beta1+');
 
     $this->get('/')
         ->assertOk()
-        ->assertSee("navigator.serviceWorker.register('\/sw.js?version=v2.0.0-beta1')", escape: false);
+        ->assertSee("navigator.serviceWorker.register('\/sw.js?version=".rawurlencode($version)."')", escape: false);
 
     expect(file_get_contents(public_path('sw.js')))
         ->toContain('const CACHE = `opencongregationhelper-${VERSION}`')
         ->toContain("searchParams.get('version')");
+});
+
+it('changes the fingerprint of the cached files when one of them changes', function () {
+    $file = tempnam(sys_get_temp_dir(), 'pwa');
+    file_put_contents($file, 'first content');
+
+    try {
+        $fingerprint = ServiceWorker::fingerprint([$file]);
+
+        expect(ServiceWorker::fingerprint([$file]))->toBe($fingerprint);
+
+        file_put_contents($file, 'second content');
+
+        expect(ServiceWorker::fingerprint([$file]))->not->toBe($fingerprint);
+    } finally {
+        unlink($file);
+    }
 });
 
 it('links the manifest and registers the service worker', function (string $uri) {
