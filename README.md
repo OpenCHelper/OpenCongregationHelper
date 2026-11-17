@@ -180,38 +180,11 @@ CRON_JOB_ORG_API_KEY=MyCronJobOrgApiKey
 
 ## Deploy
 
-The application is deployed to [Altervista](https://www.altervista.org) (PHP 8.2, FTP only, no cron) by GitHub Actions,
-uploading each release as a single archive unpacked on the server by the
-[`ftp-archive-deploy`](.github/actions/ftp-archive-deploy/action.yml) action.
+| Workflow | Deploys to |
+| --- | --- |
+| [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) | `https://pr-<N>.<site>`, a preview of every PR |
+| [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) | The [nightly demo](#demo), on every push to `main` |
 
-| Workflow | Deploys | GitHub environment |
-| --- | --- | --- |
-| [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) | A preview of every PR to `https://pr-<N>.<site>`, removed when the PR is closed | `PREVIEW` |
-| [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) | Every push to `main` to the [nightly demo](#demo) | `Nightly` |
-
-Each environment (Settings → Environments) needs the `FTP_SERVER` (e.g. `ftp.{username}.altervista.org`) and
-`FTP_USERNAME` variables and the `FTP_PASSWORD` secret; `PREVIEW` also needs the `ROOT_PASSWORD` and
-`CRON_JOB_ORG_API_KEY` secrets ([cron-job.org](https://cron-job.org) calls the scheduler of the previews). The
-`SPACE_DEFAULT_ENVIRONMENT` (folder served at the root of the site) and `SPACE_PHP_HANDLER` (e.g. `av-php82`) variables
-configure the router of each space.
-
-Any other installation (e.g. production, or the
-[public demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo)) is deployed from a repository of its own,
-calling the reusable [`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow (see
-its inputs):
-
-```yaml
-jobs:
-  deploy:
-    uses: OpenCHelper/OpenCongregationHelper/.github/workflows/upload-altervista-reusable.yml@main
-    with:
-      repository: OpenCHelper/OpenCongregationHelper
-      ref: v1.0.0                 # release to deploy
-      environment: PRODUCTION     # GitHub environment of the calling repository
-      environment-folder: prod    # folder of the space
-    secrets: inherit
-```
-
-> [!IMPORTANT]
-> Installations sharing a database must each have their own `DB_PREFIX`: `migrate:fresh` only drops the tables of its
-> own prefix, and refuses to run without one when the database holds other installations' tables.
+Other installations call the reusable
+[`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow from their own repository
+(see its inputs).
