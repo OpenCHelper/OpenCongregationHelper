@@ -632,6 +632,8 @@ test('the router serves the document root of every environment of the space on i
         // A preview without document root (e.g. of a closed PR) gets the page of the missing previews
         ->toContain('RewriteCond %2%1/public/ !-d')
         ->toContain('RewriteRule ^(pr-[0-9]+)/public/ 404.php [E=MISSING_PREVIEW:1,L]')
+        // Served as is also to the subrequest of PHP running as a CGI program, finding the script it runs
+        ->toContain("RewriteCond %{IS_SUBREQ} =true\n    RewriteRule ^404\\.php$ - [L]")
         ->not->toContain('{{')
         ->and(file_get_contents($this->root.'/router/previews/404.php'))
         ->not->toContain('{{');

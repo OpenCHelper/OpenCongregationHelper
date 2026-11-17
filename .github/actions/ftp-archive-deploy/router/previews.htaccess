@@ -10,8 +10,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # The page of the missing previews, only when sent there by the rule below: `/404.php` of a live preview is its own
-    RewriteCond %{ENV:REDIRECT_MISSING_PREVIEW} =1
+    # The page of the missing previews, only when sent there by the rule below (`/404.php` of a live preview is its own),
+    # or when the server looks up its file: PHP running as a CGI program (e.g. on Altervista) finds the script it runs
+    # with a subrequest, which must not be routed to the missing preview ("No input file specified")
+    RewriteCond %{ENV:REDIRECT_MISSING_PREVIEW} =1 [OR]
+    RewriteCond %{IS_SUBREQ} =true
     RewriteRule ^404\.php$ - [L]
 
     # Already routed to the document root of a preview that has no `.htaccess` handling the request: when that folder
