@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Support;
 
 use App\Models\Territory;
 use Illuminate\Support\Facades\Cache;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
  * The centres of the territories are cached, and the cache is cleared whenever a territory changes
  * (see `TerritoryObserver`). Zones need not clear it: one can be deleted only without territories.
  */
-class TerritoryMapCenter
+class MapCenter
 {
     /**
      * The cache key of the centres of the territories, grouped by zone.

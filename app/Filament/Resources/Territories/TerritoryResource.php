@@ -18,7 +18,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\User;
 use App\Observers\TerritoryObserver;
-use App\TerritoryMapCenter;
+use App\Support\MapCenter;
 use Carbon\Carbon;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Dotswan\MapPicker\Fields\Map;
@@ -235,7 +235,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                                 $set('location', $location);
                                             })
                                             ->showMarker(false)
-                                            ->defaultLocation(...TerritoryMapCenter::resolve(static::getMapCenterZoneId($schema)))
+                                            ->defaultLocation(...MapCenter::resolve(static::getMapCenterZoneId($schema)))
                                             ->showFullscreenControl()
                                             ->showZoomControl()
                                             ->draggable()

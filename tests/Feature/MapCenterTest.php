@@ -3,7 +3,7 @@
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
-use App\TerritoryMapCenter;
+use App\Support\MapCenter;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
@@ -51,8 +51,8 @@ test('the configured default centre is used when no territory has a map', functi
     $zone = TerritoryZone::factory()->create();
     Territory::factory()->for($zone, 'territoryZone')->create(['geojson' => null]);
 
-    expect(TerritoryMapCenter::resolve())->toBe([41.159063, -74.255188])
-        ->and(TerritoryMapCenter::resolve($zone->getKey()))->toBe([41.159063, -74.255188]);
+    expect(MapCenter::resolve())->toBe([41.159063, -74.255188])
+        ->and(MapCenter::resolve($zone->getKey()))->toBe([41.159063, -74.255188]);
 });
 
 test('the centre is the median of the centres of the territories, ignoring a far away one', function () {
@@ -64,7 +64,7 @@ test('the centre is the median of the centres of the territories, ignoring a far
     territoryCentredOn($zone, 60.0, 80.0);
     territoryCentredOn($zone, 10.6, 20.6);
 
-    expect(TerritoryMapCenter::resolve())->toEqualWithDelta([10.4, 20.4], 0.000001);
+    expect(MapCenter::resolve())->toEqualWithDelta([10.4, 20.4], 0.000001);
 });
 
 test('the centre of a zone is the centre of its own territories', function () {
@@ -75,8 +75,8 @@ test('the centre of a zone is the centre of its own territories', function () {
     territoryCentredOn($south, 40.2, 10.2);
     territoryCentredOn($south, 40.4, 10.4);
 
-    expect(TerritoryMapCenter::resolve($north->getKey()))->toEqualWithDelta([50.0, 10.0], 0.000001)
-        ->and(TerritoryMapCenter::resolve($south->getKey()))->toEqualWithDelta([40.2, 10.2], 0.000001);
+    expect(MapCenter::resolve($north->getKey()))->toEqualWithDelta([50.0, 10.0], 0.000001)
+        ->and(MapCenter::resolve($south->getKey()))->toEqualWithDelta([40.2, 10.2], 0.000001);
 });
 
 test('a zone without maps falls back to the centre of all the territories', function () {
@@ -84,22 +84,22 @@ test('a zone without maps falls back to the centre of all the territories', func
     $empty = TerritoryZone::factory()->create();
     territoryCentredOn($mapped, 45.0, 9.0);
 
-    expect(TerritoryMapCenter::resolve($empty->getKey()))->toEqualWithDelta([45.0, 9.0], 0.000001);
+    expect(MapCenter::resolve($empty->getKey()))->toEqualWithDelta([45.0, 9.0], 0.000001);
 });
 
 test('the cached centre follows the territories that are added, moved and deleted', function () {
     $zone = TerritoryZone::factory()->create();
 
-    expect(TerritoryMapCenter::resolve())->toBe([41.159063, -74.255188]);
+    expect(MapCenter::resolve())->toBe([41.159063, -74.255188]);
 
     $territory = territoryCentredOn($zone, 45.0, 9.0);
-    expect(TerritoryMapCenter::resolve())->toEqualWithDelta([45.0, 9.0], 0.000001);
+    expect(MapCenter::resolve())->toEqualWithDelta([45.0, 9.0], 0.000001);
 
     $territory->update(['geojson' => squareGeoJson(46.0, 8.0)]);
-    expect(TerritoryMapCenter::resolve())->toEqualWithDelta([46.0, 8.0], 0.000001);
+    expect(MapCenter::resolve())->toEqualWithDelta([46.0, 8.0], 0.000001);
 
     $territory->delete();
-    expect(TerritoryMapCenter::resolve())->toBe([41.159063, -74.255188]);
+    expect(MapCenter::resolve())->toBe([41.159063, -74.255188]);
 });
 
 test('the centre of a GeoJSON is the centre of the bounding box of all its geometries', function () {
@@ -111,7 +111,7 @@ test('the centre of a GeoJSON is the centre of the bounding box of all its geome
         ],
     ]);
 
-    expect(TerritoryMapCenter::centerOf($geojson))->toBe([41.0, 11.0])
-        ->and(TerritoryMapCenter::centerOf(null))->toBeNull()
-        ->and(TerritoryMapCenter::centerOf('{"type":"FeatureCollection","features":[]}'))->toBeNull();
+    expect(MapCenter::centerOf($geojson))->toBe([41.0, 11.0])
+        ->and(MapCenter::centerOf(null))->toBeNull()
+        ->and(MapCenter::centerOf('{"type":"FeatureCollection","features":[]}'))->toBeNull();
 });
