@@ -140,9 +140,7 @@ class TerritoryAssignment extends Model
     public function scopeDueSoon(Builder $query): void
     {
         $query->whereNull('ended_at')
-            ->whereHas('campaign', fn (Builder $query) => $query
-                ->where('valid_until', '>', now())
-                ->where('valid_until', '<=', now()->addDays(CampaignStatus::EXPIRING_DAYS)));
+            ->whereHas('campaign', fn (Builder $query) => $query->expiring());
     }
 
     /**

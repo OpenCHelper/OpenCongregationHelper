@@ -280,6 +280,7 @@ return [
         'status_is_expiring' => 'In scadenza',
         'status_almost_expired' => 'Quasi scaduta',
         'status_terminated' => 'Terminata',
+        'navigation_badge_tooltip' => 'Campagne che terminano entro una settimana',
         'filter_trashed' => 'Elementi eliminati',
 
         // Campaign Overview Widget

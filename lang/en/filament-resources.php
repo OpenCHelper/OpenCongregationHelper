@@ -280,6 +280,7 @@ return [
         'status_is_expiring' => 'Expiring',
         'status_almost_expired' => 'Almost Expired',
         'status_terminated' => 'Terminated',
+        'navigation_badge_tooltip' => 'Campaigns ending within a week',
         'filter_trashed' => 'Trashed Items',
 
         // Campaign Overview Widget

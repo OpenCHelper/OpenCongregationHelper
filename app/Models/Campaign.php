@@ -142,6 +142,16 @@ class Campaign extends Model
     }
 
     /**
+     * Scope a query to only include campaigns that are about to end
+     * (i.e. expiring or almost expired, see `CampaignStatus`).
+     */
+    public function scopeExpiring(Builder $query): void
+    {
+        $query->where('valid_until', '>', now())
+            ->where('valid_until', '<=', now()->addDays(CampaignStatus::EXPIRING_DAYS));
+    }
+
+    /**
      * Scope a query to only include campaigns that are expired.
      */
     public function scopeWithExpired(Builder $query): void
