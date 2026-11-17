@@ -29,7 +29,7 @@ can sign in as administrator, so never enter real data there (it is reset every 
 
 To preview what is coming next, the **[nightly demo](https://ochtest.altervista.org)** runs the latest code of `main`
 instead of the latest release: it is redeployed on every push, with fresh dummy data, so it may be unstable and its data
-is reset each time. It is deployed by [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml).
+is reset each time. Like the public demo, anyone can sign in as administrator. It is deployed by [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml).
 
 ## Tech stack
 
