@@ -8,6 +8,7 @@ use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Models\TerritoryAssignment;
 use App\Rules\NotTerminatedCampaign;
 use App\Rules\TerritoryNotAlreadyAssigned;
+use Carbon\CarbonInterface;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
@@ -154,13 +155,22 @@ class TerritoryAssignmentResource extends Resource
     }
 
     /**
+     * Time between now and the end of the campaign of the assignment, rounded and without direction (e.g. "2 days"):
+     * the translations add it ("in 2 days", "2 days ago"), so that each language can phrase it naturally.
+     */
+    public static function getCampaignDeadlineDistance(TerritoryAssignment $record): string
+    {
+        return $record->campaign->valid_until->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE, options: CarbonInterface::ROUND);
+    }
+
+    /**
      * Description of when the campaign of an assignment still in progress has ended (or is going to end).
      */
     public static function getCampaignDeadlineDescription(TerritoryAssignment $record): ?string
     {
         return match (true) {
-            $record->isOverdue() => __('filament-resources.territory_assignment.campaign_ended', ['when' => $record->campaign->valid_until->diffForHumans()]),
-            $record->isDueSoon() => __('filament-resources.territory_assignment.campaign_ending', ['when' => $record->campaign->valid_until->diffForHumans()]),
+            $record->isOverdue() => __('filament-resources.territory_assignment.campaign_ended', ['when' => static::getCampaignDeadlineDistance($record)]),
+            $record->isDueSoon() => __('filament-resources.territory_assignment.campaign_ending', ['when' => static::getCampaignDeadlineDistance($record)]),
             default => null,
         };
     }
@@ -173,12 +183,12 @@ class TerritoryAssignmentResource extends Resource
         return Callout::make(fn (TerritoryAssignment $record): ?string => match (true) {
             $record->isOverdue() => __('filament-resources.territory_assignment.overdue_assignment_heading', [
                 'campaign' => $record->campaign->name,
-                'when' => $record->campaign->valid_until->diffForHumans(),
+                'when' => static::getCampaignDeadlineDistance($record),
                 'date' => $record->campaign->valid_until->format('d/m/Y'),
             ]),
             $record->isDueSoon() => __('filament-resources.territory_assignment.due_soon_assignment_heading', [
                 'campaign' => $record->campaign->name,
-                'when' => $record->campaign->valid_until->diffForHumans(),
+                'when' => static::getCampaignDeadlineDistance($record),
                 'date' => $record->campaign->valid_until->format('d/m/Y'),
             ]),
             default => null,

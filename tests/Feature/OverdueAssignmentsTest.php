@@ -45,6 +45,7 @@ function assignmentInProgressFor(?Campaign $campaign): TerritoryAssignment
 }
 
 beforeEach(function () {
+    $this->freezeTime();
     Notification::fake();
     Filament::setCurrentPanel('app');
 
@@ -81,13 +82,14 @@ test('only the assignments in progress of a campaign ending within a week are du
 });
 
 test('the assignments of an ended or ending campaign stand out in the table', function () {
+    app()->setLocale('en');
     actingAsOverdueAssignmentsUser(['ViewAny:TerritoryAssignment']);
 
     Livewire::test(ManageTerritoryAssignments::class)
         ->assertSeeHtml('fi-ta-row-assignment-overdue')
         ->assertSeeHtml('fi-ta-row-assignment-due-soon')
-        ->assertSee(__('filament-resources.territory_assignment.campaign_ended', ['when' => $this->endedCampaign->valid_until->diffForHumans()]))
-        ->assertSee(__('filament-resources.territory_assignment.campaign_ending', ['when' => $this->endingCampaign->valid_until->diffForHumans()]));
+        ->assertSee('Campaign ended 1 week ago')
+        ->assertSee('Campaign ends in 3 days');
 });
 
 test('the tabs list the overdue and the due soon assignments', function () {
