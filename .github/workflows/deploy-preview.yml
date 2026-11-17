@@ -9,7 +9,9 @@ name: Deploy (PR previews)
 # as a single archive and unpacked on the server by the `ftp-archive-deploy` action (`.github/actions/`).
 #
 # Altervista has no cron: cron-job.org runs the scheduler and the queue of each preview, through the jobs of its own
-# folder, `(Preview) PR-<N>`, created (or updated) on every deployment and deleted with the preview.
+# folder, `(Preview) PR-<N>`, deleted with the preview. They send the `ARTISAN_CRON_TOKEN` secret, when set: they are
+# then created (or updated) only when the preview is new, or on reopening, manual runs and re-runs, sparing the API of
+# cron-job.org (rate limited). Otherwise a new random token on every deployment, so they are updated on every push.
 #
 # Settings of the PREVIEW GitHub environment:
 #   - variables: FTP_SERVER, FTP_USERNAME (the web space; they can be secrets too, but GitHub then hides the URLs of
@@ -17,7 +19,8 @@ name: Deploy (PR previews)
 #   - secrets: FTP_PASSWORD, ROOT_PASSWORD (root user of the previews, pre-filled on their login page, so public: never
 #     reuse a real password), CRON_JOB_ORG_API_KEY (API key of cron-job.org);
 #   - optional secrets: DB_DATABASE, DB_USERNAME, DB_PASSWORD (its database, by default the one of the Altervista
-#     account: `my_<FTP username>`, user `<FTP username>`, no password);
+#     account: `my_<FTP username>`, user `<FTP username>`, no password), ARTISAN_CRON_TOKEN (fixed token of the cron
+#     jobs, see above: never reuse the one of another environment, as the code of the PRs can read it);
 #   - optional variables: ROOT_EMAIL (default: root@example.com), MAX_PREVIEWS (live previews, default: 5).
 # Repository variables: SPACE_DEFAULT_ENVIRONMENT, SPACE_PHP_HANDLER (the router of the space, shared with TEST).
 #
@@ -374,6 +377,7 @@ jobs:
             install-router
 
       - name: Check the server and the number of previews
+        id: server
         env:
           SITE: ${{ steps.resolve.outputs.site }}
           SLUG: ${{ steps.resolve.outputs.slug }}
@@ -393,6 +397,12 @@ jobs:
 
           previews="$(deployer list | jq -r '.previews[]')"
           echo "Live previews: ${previews//$'\n'/, }"
+
+          if grep -qx "$SLUG" <<< "$previews"; then
+            echo "existing=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "existing=false" >> "$GITHUB_OUTPUT"
+          fi
 
           if ! grep -qx "$SLUG" <<< "$previews" && (( $(grep -c . <<< "$previews") >= MAX_PREVIEWS )); then
             echo "::error::There are already ${MAX_PREVIEWS} live previews (the disk space is limited): close a PR, or raise the MAX_PREVIEWS variable of the PREVIEW environment."
@@ -417,6 +427,10 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           ROOT_EMAIL: ${{ vars.ROOT_EMAIL || 'root@example.com' }}
           ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+          FIXED_CRON_TOKEN: ${{ secrets.ARTISAN_CRON_TOKEN }}
+          EXISTING: ${{ steps.server.outputs.existing }}
+          EVENT_ACTION: ${{ github.event.action }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           # By default, the database of the Altervista account: `my_<username>`, user `<username>`, no password (it is
           # only reachable from the server itself)
@@ -424,7 +438,7 @@ jobs:
           DB_USERNAME="${DB_USERNAME:-${FTP_USERNAME}}"
 
           # Values are single-quoted, so that they are read literally (no `${...}` interpolation)
-          for name in DB_DATABASE DB_USERNAME DB_PASSWORD ROOT_EMAIL ROOT_PASSWORD; do
+          for name in DB_DATABASE DB_USERNAME DB_PASSWORD ROOT_EMAIL ROOT_PASSWORD FIXED_CRON_TOKEN; do
             if [[ "${!name}" == *"'"* ]]; then
               echo "::error::The value of ${name} cannot contain single quotes."
               exit 1
@@ -436,11 +450,23 @@ jobs:
             exit 1
           fi
 
-          # Secret sent by the cron jobs of the preview to its scheduler and queue endpoints: a new one on every
-          # deployment, also given to the cron jobs
-          cron_token="$(openssl rand -hex 32)"
-          echo "::add-mask::${cron_token}"
+          # Secret sent by the cron jobs of the preview to its scheduler and queue endpoints. A fixed one never changes:
+          # the jobs of a preview already live are left as they are on every push (but re-runs, e.g. after cron-job.org
+          # refused them). Otherwise a new random one on every deployment, also given to the cron jobs
+          if [[ -n "$FIXED_CRON_TOKEN" ]]; then
+            cron_token="$FIXED_CRON_TOKEN"
+            if [[ "$EXISTING" == "true" ]] && [[ "$EVENT_ACTION" == "synchronize" ]] && (( RUN_ATTEMPT == 1 )); then
+              cron_sync=false
+            else
+              cron_sync=true
+            fi
+          else
+            cron_token="$(openssl rand -hex 32)"
+            echo "::add-mask::${cron_token}"
+            cron_sync=true
+          fi
           echo "cron-token=${cron_token}" >> "$GITHUB_OUTPUT"
+          echo "cron-sync=${cron_sync}" >> "$GITHUB_OUTPUT"
 
           cat > .env <<EOF
           APP_NAME='OpenCongregationHelper (PR #${PR})'
@@ -517,13 +543,14 @@ jobs:
             artisan och:post-deploy
             artisan db:seed --class=FakeDataSeeder
 
-      # Once the preview runs with the new token: the jobs of its folder are matched by title, so that every push
-      # updates them (with the new token) instead of creating them again.
+      # Once the preview runs with the token: the jobs of its folder are matched by title, so that every synchronization
+      # updates them (with the token) instead of creating them again.
       #
       # cron-job.org rate limits its API (HTTP 429): the jobs are only needed by the scheduler and the queue, so the
       # preview is still deployed without them (the action already retries for ~30s), with a warning.
       - name: Create the cron jobs of the preview
         id: cron
+        if: steps.environment-file.outputs.cron-sync == 'true'
         continue-on-error: true
         uses: LukeSavefrogs/cron-job-org-action@v2
         with:
@@ -548,6 +575,9 @@ jobs:
         run: |
           if [[ "$CRON_OUTCOME" == 'success' ]]; then
             echo "created=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$CRON_OUTCOME" == 'skipped' ]]; then
+            # Fixed token: the jobs created by an earlier deployment still work
+            echo "created=unchanged" >> "$GITHUB_OUTPUT"
           else
             echo "created=false" >> "$GITHUB_OUTPUT"
             echo "::warning::The cron jobs of the preview could not be created on cron-job.org: its scheduler and queue do not run. Re-run the workflow to retry."
@@ -594,7 +624,7 @@ jobs:
           CRON_FOLDER: ${{ env.cron_folder_prefix }}${{ steps.resolve.outputs.pr }}
           CRON_CREATED: ${{ steps.cron-result.outputs.created }}
         run: |
-          if [[ "$CRON_CREATED" == 'true' ]]; then
+          if [[ "$CRON_CREATED" == 'true' ]] || [[ "$CRON_CREATED" == 'unchanged' ]]; then
             cron_line="scheduler and queue (\`${cron_schedule}\`, ${cron_timezone}), in the \`${CRON_FOLDER}\` folder of cron-job.org"
           else
             cron_line="⚠️ **not created** (cron-job.org refused them): the scheduler and the queue do not run, re-run the workflow to retry"
