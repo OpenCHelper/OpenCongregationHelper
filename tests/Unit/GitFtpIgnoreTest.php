@@ -42,7 +42,7 @@ function ftpDeployGlobs(string $ignoreFile, string $scope): array
 test('the files never deployed include what serves only to develop, build or test the application', function (string $path) {
     expect(isNeverDeployed($path, __DIR__.'/../../.git-ftp-ignore'))->toBeTrue();
 })->with([
-    '.github/workflows/preview.yml',
+    '.github/workflows/deploy-preview.yml',
     '.devcontainer/devcontainer.json',
     'tests/Unit/GitFtpIgnoreTest.php',
     'AGENTS.md',

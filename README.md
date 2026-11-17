@@ -130,7 +130,7 @@ act --rm --verbose=false \
     -s GITHUB_TOKEN="$(gh auth status &>/dev/null || gh auth login >&2; gh auth token)" \
     --pull=false \
     --rebuild=false \
-    --workflows .github/workflows/preview.yml \
+    --workflows .github/workflows/deploy-preview.yml \
     --job 'deploy' \
     --input action=deploy --input pr=123 \
     --secret-file .act/.secrets \
@@ -139,7 +139,7 @@ act --rm --verbose=false \
     --insecure-secrets
 ```
 
-This command will run the `deploy` job of the `.github/workflows/preview.yml` workflow:
+This command will run the `deploy` job of the `.github/workflows/deploy-preview.yml` workflow:
 - use [`gh`](https://cli.github.com/) to retrieve a token to authenticate Act against GitHub (_higher quotas and access to private repositories, may be omitted if not needed_).
 - read the [workflow secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) (`${{ secrets.[*] }}`) from `.act/.secrets`
 - read the [workflow environment variables](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#defining-environment-variables-for-a-single-workflow) (`${{ env.[*] }}`) from `.act/.env`
@@ -169,7 +169,7 @@ CRON_JOB_ORG_API_KEY=MyCronJobOrgApiKey
 ```
 
 To deploy the preview of a PR, run `act workflow_dispatch` with the same options as above, except for
-`--workflows .github/workflows/preview.yml --job deploy --input action=deploy --input pr=<N>`.
+`--workflows .github/workflows/deploy-preview.yml --job deploy --input action=deploy --input pr=<N>`.
 
 ## Deploy
 
@@ -187,7 +187,7 @@ To deploy the preview of a PR, run `act workflow_dispatch` with the same options
 #### PR previews
 
 Every PR opened from a branch of this repository gets its own preview, like on Vercel or Render: it is deployed to
-`https://pr-<N>.<site>.altervista.org` by [`preview.yml`](.github/workflows/preview.yml) on every push, with fresh dummy
+`https://pr-<N>.<site>.altervista.org` by [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) on every push, with fresh dummy
 data, and removed (files and database tables) when the PR is closed or merged. A comment on the PR shows its status and
 URL. The URL of a preview that does not exist (e.g. of a closed PR, or not deployed yet) shows a 404 page linking to its
 PR.
@@ -220,7 +220,7 @@ the nightly build of `main`:
 
 | Environment | Deployed by | Variables | Secrets |
 | --- | --- | --- | --- |
-| `PREVIEW` | [`preview.yml`](.github/workflows/preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD`, `CRON_JOB_ORG_API_KEY` |
+| `PREVIEW` | [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD`, `CRON_JOB_ORG_API_KEY` |
 | `Nightly` | [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) (every push to `main`, into `test/`, with fresh dummy data; `.env` managed on the server) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD` |
 
 Any other installation (a test or production site, or the

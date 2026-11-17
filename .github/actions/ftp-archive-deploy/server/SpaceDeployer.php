@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * Server side of the deployments to an Altervista space hosting several environments (see the README): the PR
- * previews (`.github/workflows/preview.yml`) and the environments living in a folder of their own, like TEST.
+ * previews (`.github/workflows/deploy-preview.yml`) and the environments living in a folder of their own, like TEST.
  *
  * Altervista only offers FTP, which takes hours to upload the ~20k files of a release one by one: the release is
  * uploaded as a single archive instead, and this class unpacks it on the server and then swaps the folders. No request
