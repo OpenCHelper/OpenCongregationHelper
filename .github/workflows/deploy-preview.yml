@@ -634,8 +634,10 @@ jobs:
           CRON_FOLDER: ${{ env.cron_folder_prefix }}${{ steps.resolve.outputs.pr }}
           CRON_CREATED: ${{ steps.cron-result.outputs.created }}
         run: |
-          if [[ "$CRON_CREATED" == 'true' ]] || [[ "$CRON_CREATED" == 'unchanged' ]]; then
+          if [[ "$CRON_CREATED" == 'true' ]]; then
             cron_line="scheduler and queue (\`${cron_schedule}\`, ${cron_timezone}), in the \`${CRON_FOLDER}\` folder of cron-job.org"
+          elif [[ "$CRON_CREATED" == 'unchanged' ]]; then
+            cron_line="scheduler and queue, in the \`${CRON_FOLDER}\` folder of cron-job.org (left as they are: fixed token)"
           else
             cron_line="⚠️ **not created** (cron-job.org refused them): the scheduler and the queue do not run, deploy the preview manually (\`workflow_dispatch\`) to retry"
           fi
