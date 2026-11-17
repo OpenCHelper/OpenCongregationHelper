@@ -62,6 +62,29 @@ test('the average coverage time ignores deleted assignments', function () {
     expect($this->territory->averageCoverageDays())->toEqual(10.0);
 });
 
+test('the average coverage time ignores the assignments ending before they start', function () {
+    coverageOfTerritory($this->territory, 100, 90);
+    TerritoryAssignment::factory()->createQuietly([
+        'territory_id' => $this->territory->id,
+        'assignee_id' => User::factory()->create()->id,
+        'started_at' => now()->subDays(10),
+        'ended_at' => now()->subDays(40),
+    ]);
+
+    expect($this->territory->averageCoverageDays())->toEqual(10.0);
+});
+
+test('the average coverage time counts calendar days, like the dashboard', function () {
+    TerritoryAssignment::factory()->create([
+        'territory_id' => $this->territory->id,
+        'assignee_id' => User::factory()->create()->id,
+        'started_at' => today()->subDays(3)->setTime(20, 0),
+        'ended_at' => today()->subDays(2)->setTime(8, 0),
+    ]);
+
+    expect($this->territory->averageCoverageDays())->toEqual(1.0);
+});
+
 test('the average coverage time is formatted in days', function (?float $days, ?string $expected) {
     app()->setLocale('en');
 
@@ -69,6 +92,7 @@ test('the average coverage time is formatted in days', function (?float $days, ?
 })->with([
     'never covered' => [null, null],
     'less than a day' => [0.3, 'Less than a day'],
+    'negative' => [-3.0, 'Less than a day'],
     'one day' => [1.2, '1 day'],
     'rounded days' => [14.6, '15 days'],
 ]);

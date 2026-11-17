@@ -392,7 +392,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
 
         $roundedDays = (int) round($days);
 
-        if ($roundedDays === 0) {
+        if ($roundedDays <= 0) {
             return __('filament-resources.territory.average_coverage_time_less_than_a_day');
         }
 
