@@ -3,10 +3,11 @@
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
     Storage::fake('public');
-    Storage::fake('local', ['serve' => true, 'url' => '/private-storage']);
+    Storage::fake('local');
 });
 
 test('a profile photo is served by the application without the public/storage link', function () {
@@ -37,8 +38,12 @@ test('missing, hidden and outside files of the public disk are not found', funct
 test('the private files are still served through their signed URLs only', function () {
     Storage::disk('local')->put('maps/map.png', 'image');
 
-    $this->get(Storage::disk('local')->temporaryUrl('maps/map.png', now()->addMinute()))
-        ->assertOk();
+    // The fake disk builds dummy temporary URLs: sign the route of the real ones
+    $signedUrl = URL::temporarySignedRoute('storage.local', now()->addMinute(), ['path' => 'maps/map.png'], absolute: false);
+
+    expect($signedUrl)->toStartWith('/private-storage/maps/map.png');
+
+    $this->get($signedUrl)->assertOk();
 
     $this->get('/private-storage/maps/map.png')->assertForbidden();
 });
