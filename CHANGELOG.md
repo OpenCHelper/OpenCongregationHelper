@@ -20,7 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Top bar scrolling sideways on smartphones: the help button is now more compact and shows only its icon there
   ([#9](https://github.com/OpenCHelper/OpenCongregationHelper/pull/9)).
 - Profile photos shown as broken images (403) on hostings that cannot serve the `public/storage` link, such as
-  Altervista: the application now serves the files of the public disk itself
+  Altervista: the application now serves the files of the public disk itself. The temporary links to the private
+  files (e.g. the images of the territories) move from `/storage/` to `/private-storage/`: links created before the
+  update stop working, reload the page to get new ones
   ([#10](https://github.com/OpenCHelper/OpenCongregationHelper/pull/10)).
 
 ## [1.0.0-alpha9] - 2026-11-17
