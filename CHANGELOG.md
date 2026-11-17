@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The map of a new territory opens on the territories already drawn: those of its zone when created from the zone's
+  territories page, otherwise all of them.
+- `MAP_DEFAULT_CENTER` setting (`"latitude,longitude"`), where the maps open while no territory has a map yet.
+
+### Changed
+
+- Maps with nothing to show yet open on Warwick, New York (USA) instead of Rome, unless `MAP_DEFAULT_CENTER` is set.
+
 ## [1.0.0-alpha8] - 2026-11-16
 
 ### Added

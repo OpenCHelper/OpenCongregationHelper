@@ -7,6 +7,7 @@ use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use Dotswan\MapPicker\Fields\Map;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentAsset;
@@ -239,4 +240,52 @@ test('the territories page of a zone rejects the name of another territory of th
         ->assertHasFormErrors(['name' => 'unique']);
 
     expect(Territory::query()->where('name', 'Via Roma')->count())->toBe(1);
+});
+
+test('the map of a new territory opens on the configured default centre', function () {
+    config(['filament-leaflet.default_map_center' => [39.8017, -89.6436]]);
+
+    Livewire::test(CreateTerritory::class)
+        ->assertSchemaComponentExists('location', 'form', checkComponentUsing: fn (Map $map): bool => json_decode($map->getMapConfig(), true)['default'] === ['lat' => 39.8017, 'lng' => -89.6436]);
+});
+
+/**
+ * Get the centre the map of a form opens on, as [latitude, longitude].
+ *
+ * @return array{float, float}
+ */
+function mapDefaultLocation(Map $map): array
+{
+    $default = json_decode($map->getMapConfig(), true)['default'];
+
+    return [$default['lat'], $default['lng']];
+}
+
+test('the map of a new territory opens on the territories that have a map', function () {
+    Territory::factory()->for($this->zone, 'territoryZone')->create([
+        'geojson' => territoryPolygon([[12.39, 41.99], [12.37, 41.87], [12.45, 41.90], [12.39, 41.99]]),
+    ]);
+
+    Livewire::test(CreateTerritory::class)
+        ->assertSchemaComponentExists('location', 'form', checkComponentUsing: fn (Map $map): bool => abs(mapDefaultLocation($map)[0] - 41.93) < 0.000001
+            && abs(mapDefaultLocation($map)[1] - 12.41) < 0.000001);
+});
+
+test('the map of a new territory of a zone opens on the territories of that zone', function () {
+    foreach (['ViewAny:TerritoryZone', 'View:TerritoryZone', 'Update:TerritoryZone'] as $permission) {
+        auth()->user()->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+
+    $far = TerritoryZone::factory()->create(['name' => 'Far']);
+    Territory::factory()->for($far, 'territoryZone')->create([
+        'geojson' => territoryPolygon([[-74.30, 41.10], [-74.20, 41.10], [-74.20, 41.20], [-74.30, 41.10]]),
+    ]);
+    Territory::factory()->for($this->zone, 'territoryZone')->create([
+        'geojson' => territoryPolygon([[12.39, 41.99], [12.37, 41.87], [12.45, 41.90], [12.39, 41.99]]),
+    ]);
+
+    Livewire::test(ManageZoneTerritories::class, ['record' => $this->zone->getKey()])
+        ->mountAction(TestAction::make('create')->table())
+        ->assertSchemaComponentExists('location', 'mountedActionSchema0', checkComponentUsing: fn (Map $map): bool => abs(mapDefaultLocation($map)[0] - 41.93) < 0.000001
+            && abs(mapDefaultLocation($map)[1] - 12.41) < 0.000001);
 });
