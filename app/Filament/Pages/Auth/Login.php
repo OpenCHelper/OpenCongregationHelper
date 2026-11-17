@@ -3,6 +3,8 @@
 namespace App\Filament\Pages\Auth;
 
 use Filament\Auth\Pages\Login as BaseLogin;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use Filament\Support\Components\Attributes\Unexposed;
 
 /**
@@ -26,6 +28,21 @@ class Login extends BaseLogin
                 'remember' => true,
             ]);
         }
+    }
+
+    /**
+     * The email field is not focused when the credentials are pre-filled: there is nothing to type, the user most
+     * likely just wants to click on the login button.
+     */
+    protected function getEmailFormComponent(): Component
+    {
+        $component = parent::getEmailFormComponent();
+
+        if ($component instanceof TextInput) {
+            $component->autofocus(! $this->shouldPrefillCredentials());
+        }
+
+        return $component;
     }
 
     /**

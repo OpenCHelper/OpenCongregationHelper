@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Maps with nothing to show yet open on Warwick, New York (USA) instead of Rome, unless `MAP_DEFAULT_CENTER` is set.
+- On demo installations with the pre-filled login form, the email field is no longer focused, so the login button can
+  be clicked right away.
 
 ## [1.0.0-alpha8] - 2026-11-16
 
