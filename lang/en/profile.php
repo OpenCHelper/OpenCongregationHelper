@@ -128,5 +128,7 @@ return [
         'test_title' => 'Push notifications work',
         'test_body' => 'You will receive the notifications on this device.',
         'test_sent' => 'Test notification sent to your devices.',
+        'test_no_devices' => 'Push notifications are not enabled on any of your devices: enable them again.',
+        'test_too_many' => 'Too many test notifications: try again in a minute.',
     ],
 ];

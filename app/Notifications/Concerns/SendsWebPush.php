@@ -40,8 +40,8 @@ trait SendsWebPush
         $url = collect($message['actions'] ?? [])->pluck('url')->filter()->first() ?? route('dashboard');
 
         return (new WebPushMessage)
-            ->title(strip_tags((string) ($message['title'] ?? config('app.name'))))
-            ->body(strip_tags((string) ($message['body'] ?? '')))
+            ->title((string) ($message['title'] ?? config('app.name')))
+            ->body((string) ($message['body'] ?? ''))
             ->icon(asset('icons/icon-192.png'))
             ->badge(asset('icons/favicon-32.png'))
             ->lang(app()->getLocale())

@@ -128,5 +128,7 @@ return [
         'test_title' => 'Le notifiche push funzionano',
         'test_body' => 'Riceverai le notifiche su questo dispositivo.',
         'test_sent' => 'Notifica di prova inviata ai tuoi dispositivi.',
+        'test_no_devices' => 'Le notifiche push non sono attive su nessuno dei tuoi dispositivi: attivale di nuovo.',
+        'test_too_many' => 'Troppe notifiche di prova: riprova tra un minuto.',
     ],
 ];

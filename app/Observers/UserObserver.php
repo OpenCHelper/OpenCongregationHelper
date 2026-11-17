@@ -63,10 +63,11 @@ class UserObserver
 
     /**
      * Handle the User "deleted" event.
+     *
+     * The push subscriptions are linked polymorphically, so the database does not delete them with the user.
      */
     public function deleted(User $user): void
     {
-        // The subscriptions are linked polymorphically, so the database does not delete them with the user
         $user->pushSubscriptions()->delete();
     }
 

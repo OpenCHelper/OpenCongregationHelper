@@ -8,6 +8,7 @@ use App\Support\WebPush;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -22,6 +23,22 @@ use NotificationChannels\WebPush\PushSubscription;
  */
 class ProfilePushNotifications extends Component
 {
+    /**
+     * Test notifications that a user can send per minute, as each one calls the push services of all their devices.
+     */
+    public const TEST_NOTIFICATIONS_PER_MINUTE = 3;
+
+    /**
+     * Whether the subscription of the current device belongs to the user.
+     *
+     * A device subscribed by another user (e.g. a shared device) is not taken over until the user enables the push
+     * notifications on it.
+     */
+    public function ownsSubscription(string $endpoint): bool
+    {
+        return $this->user()->pushSubscriptions()->where('endpoint', $endpoint)->exists();
+    }
+
     /**
      * Store the subscription of the current device (or update it, as the browser may renew it).
      *
@@ -61,7 +78,31 @@ class ProfilePushNotifications extends Component
     {
         abort_unless(WebPush::isConfigured(), 404);
 
-        $this->user()->notifyNow(new TestPushNotification);
+        $user = $this->user();
+
+        if (! $user->pushSubscriptions()->exists()) {
+            Notification::make()
+                ->title(__('profile.push_notifications.test_no_devices'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $rateLimiterKey = 'push-test:'.$user->getKey();
+
+        if (RateLimiter::tooManyAttempts($rateLimiterKey, self::TEST_NOTIFICATIONS_PER_MINUTE)) {
+            Notification::make()
+                ->title(__('profile.push_notifications.test_too_many'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        RateLimiter::hit($rateLimiterKey);
+
+        $user->notifyNow(new TestPushNotification);
 
         Notification::make()
             ->title(__('profile.push_notifications.test_sent'))

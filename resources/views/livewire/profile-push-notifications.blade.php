@@ -29,14 +29,22 @@
                             return;
                         }
 
-                        const subscription = await this.currentSubscription();
+                        try {
+                            const subscription = await this.currentSubscription();
 
-                        // Sent again on every visit, as the browser may have renewed it in the meantime.
-                        if (subscription) {
+                            if (! subscription || ! await $wire.ownsSubscription(subscription.endpoint)) {
+                                this.status = 'disabled';
+
+                                return;
+                            }
+
+                            // Sent again on every visit, as the browser may have renewed its keys in the meantime.
                             await $wire.subscribe(this.serialize(subscription));
+                            this.status = 'enabled';
+                        } catch (error) {
+                            console.error(error);
+                            this.status = 'error';
                         }
-
-                        this.status = subscription ? 'enabled' : 'disabled';
                     },
                     isIos() {
                         return /iphone|ipad|ipod/i.test(navigator.userAgent)
@@ -46,14 +54,24 @@
                         return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
                     },
                     async currentSubscription() {
-                        const registration = await navigator.serviceWorker.ready;
+                        const registration = await this.serviceWorker();
 
                         return registration.pushManager.getSubscription();
+                    },
+                    serviceWorker() {
+                        // `ready` never settles when the service worker cannot be registered.
+                        return Promise.race([
+                            navigator.serviceWorker.ready,
+                            new Promise((resolve, reject) => setTimeout(() => reject(new Error('Service worker not ready')), 10000)),
+                        ]);
                     },
                     serialize(subscription) {
                         return {
                             ...subscription.toJSON(),
-                            contentEncoding: (PushManager.supportedContentEncodings ?? ['aesgcm'])[0],
+                            // `aes128gcm` is the standard encoding, supported by every browser with the Push API.
+                            contentEncoding: PushManager.supportedContentEncodings?.includes('aes128gcm') === false
+                                ? PushManager.supportedContentEncodings[0]
+                                : 'aes128gcm',
                         };
                     },
                     applicationServerKey() {
@@ -75,7 +93,7 @@
                                 return;
                             }
 
-                            const registration = await navigator.serviceWorker.ready;
+                            const registration = await this.serviceWorker();
                             const subscription = await registration.pushManager.subscribe({
                                 userVisibleOnly: true,
                                 applicationServerKey: this.applicationServerKey(),
@@ -102,6 +120,9 @@
                             }
 
                             this.status = 'disabled';
+                        } catch (error) {
+                            console.error(error);
+                            this.status = 'error';
                         } finally {
                             this.busy = false;
                         }

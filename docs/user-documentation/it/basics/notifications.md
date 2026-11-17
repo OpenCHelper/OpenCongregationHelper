@@ -29,7 +29,8 @@ chiusa. Cliccandone una si apre il territorio o l'assegnazione collegata.
 2. In **Notifiche push**, clicca **Attiva su questo dispositivo** e consenti le notifiche quando il browser lo chiede.
 3. Clicca **Invia una notifica di prova** per verificare che arrivino.
 
-Attivale su ogni dispositivo che usi. Per non riceverle più, clicca **Disattiva su questo dispositivo**.
+Attivale su ogni dispositivo che usi. Per non riceverle più, clicca **Disattiva su questo dispositivo**. Anche uscire
+dall'account le disattiva su quel dispositivo, così un dispositivo condiviso non riceve le tue notifiche.
 
 > ℹ️ **Nota:** su iPhone e iPad le notifiche push funzionano solo dopo aver aggiunto l'app alla schermata Home
 > (**Condividi**, poi **Aggiungi alla schermata Home**): aprila da lì, poi attivale. Se la sezione non compare nel

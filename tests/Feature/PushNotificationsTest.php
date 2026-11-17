@@ -209,6 +209,68 @@ test('users can disable push notifications only on their own devices', function 
         ->and($otherUser->pushSubscriptions()->exists())->toBeTrue();
 });
 
+test('users can check whether the subscription of the device is theirs', function () {
+    subscribe(User::factory()->create(), $this->subscription);
+    subscribe($this->user, [...$this->subscription, 'endpoint' => 'https://push.example.com/send/own']);
+
+    $this->actingAs($this->user);
+
+    $component = Livewire::test(ProfilePushNotifications::class);
+
+    expect($component->instance()->ownsSubscription('https://push.example.com/send/own'))->toBeTrue()
+        ->and($component->instance()->ownsSubscription($this->subscription['endpoint']))->toBeFalse();
+});
+
+test('the test push notification warns users without enabled devices', function () {
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->call('sendTest')
+        ->assertNotified(__('profile.push_notifications.test_no_devices'));
+
+    Notification::assertNothingSent();
+});
+
+test('test push notifications are throttled', function () {
+    subscribe($this->user, $this->subscription);
+    $this->actingAs($this->user);
+
+    $component = Livewire::test(ProfilePushNotifications::class);
+
+    foreach (range(1, ProfilePushNotifications::TEST_NOTIFICATIONS_PER_MINUTE) as $attempt) {
+        $component->call('sendTest')->assertNotified(__('profile.push_notifications.test_sent'));
+    }
+
+    $component->call('sendTest')->assertNotified(__('profile.push_notifications.test_too_many'));
+
+    Notification::assertSentToTimes($this->user, TestPushNotification::class, ProfilePushNotifications::TEST_NOTIFICATIONS_PER_MINUTE);
+});
+
+test('the push notifications of the device stop when the user logs out', function (bool $isConfigured) {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    if (! $isConfigured) {
+        config(['webpush.vapid.public_key' => null]);
+    }
+
+    $response = $this->actingAs($this->user)->get(EditProfile::getUrl())->assertOk();
+
+    $isConfigured
+        ? $response->assertSee('form.dataset.pushUnsubscribed', escape: false)->assertSee(Filament::getLogoutUrl(), escape: false)
+        : $response->assertDontSee('pushUnsubscribed', escape: false);
+})->with([
+    'configured' => true,
+    'not configured' => false,
+]);
+
+test('push subscriptions use the default database connection, unless configured otherwise', function () {
+    subscribe($this->user, $this->subscription);
+
+    expect($this->user->pushSubscriptions()->sole()->getConnectionName())->toBe(config('database.default'));
+});
+
 test('users can send themselves a test push notification', function () {
     subscribe($this->user, $this->subscription);
     $this->actingAs($this->user);
