@@ -54,7 +54,8 @@
 #                                       the folder of the environment itself)
 #   --repository-url <url>              Router: repository of the PRs, linked from the page of the missing previews
 #                                       (default: the one of the GitHub Actions run, if any; empty: no links)
-#   --no-previews                       Router: the space hosts no PR previews (no `pr-<N>` rule nor `previews/`)
+#   --previews                          Router: the space hosts PR previews (the `pr-<N>` rule, and `previews/`
+#                                       with the page of the missing previews)
 #   -v, --verbose
 #
 # Like `remote_artisan.sh`, the requests are authorized with a random token uploaded through FTP, which is always
@@ -78,7 +79,7 @@ declare -r DEPLOYER_PATH="_deployer/${DEPLOYER_VERSION}"
 # Read by the `EXIT` trap, which runs after `main` has returned: not local
 ftp_hostname="" ftp_username="" ftp_password="" token_id="" token_file="" token=""
 base_url="" verbose=false server_budget="" server_time_limit="" default_environment="" php_handler="" document_root="public"
-router_previews=true
+router_previews=false
 repository_url="${GITHUB_SERVER_URL:+${GITHUB_REPOSITORY:+${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}}}"
 keep=() reuse=() exclude=() include=() exclude_from=""
 
@@ -282,7 +283,7 @@ render_router () {
     # `&` in the replacements must stay literal (Bash 5.2)
     shopt -u patsub_replacement 2> /dev/null || true
 
-    # Lines of the PR previews in the template, placeholders included: removed when the space hosts none
+    # Lines of the PR previews in the template, placeholders included: only when the space hosts them
     if [[ "$router_previews" == "true" ]]; then
         previews_summary='#  - `pr-<N>.{{SITE}}`        => `previews/` (the PR previews, see `previews/.htaccess`);'
         previews_rule='    # pr-<N>.{{SITE}} => the PR previews'$'\n'
@@ -474,7 +475,7 @@ main () {
             --php-handler)      php_handler="$2"; shift 2 ;;
             --document-root)    document_root="$2"; shift 2 ;;
             --repository-url)   repository_url="$2"; shift 2 ;;
-            --no-previews)      router_previews=false; shift ;;
+            --previews)         router_previews=true; shift ;;
             -h | --help)
                 sed -n '/^# Usage:/,/^# action can be safely/p' "$0" | sed 's/^# \{0,1\}//' >&2
                 return 0

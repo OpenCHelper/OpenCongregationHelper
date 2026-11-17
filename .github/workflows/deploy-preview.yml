@@ -184,7 +184,7 @@ jobs:
 
           "${action_dir}/deploy.sh" --base-url "https://${SITE}" \
             --ftp-hostname "$FTP_SERVER" --ftp-username "$FTP_USERNAME" --ftp-password "$FTP_PASSWORD" \
-            --default-environment "$SPACE_DEFAULT_ENVIRONMENT" --php-handler "$SPACE_PHP_HANDLER" \
+            --default-environment "$SPACE_DEFAULT_ENVIRONMENT" --php-handler "$SPACE_PHP_HANDLER" --previews \
             install-router
 
       - name: Check the server and the number of previews

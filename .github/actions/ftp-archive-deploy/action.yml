@@ -9,7 +9,8 @@ description: >-
 
   Targets: `pr-<N>` deploys to `previews/pr-<N>/`, any other folder name (e.g. `test`) to that folder of the root of the
   space. With `manage-router`, the action also writes the `.htaccess` of the root of the space (from `router/`), which
-  serves each of them on its own subdomain: `pr-<N>.<site>`, `<folder>.<site>`, and `default-environment` on `<site>`.
+  serves each of them on its own subdomain: `<folder>.<site>`, `default-environment` on `<site>`, and `pr-<N>.<site>`
+  with `router-previews`.
   Every deployment to the same space must then use the same router inputs (e.g. from repository variables).
 
 inputs:
@@ -66,9 +67,9 @@ inputs:
   router-previews:
     description: >-
       Router: whether the space hosts PR previews (the `pr-<N>.<site>` rule, and `previews/` with the 404 page of the
-      missing previews); `false` for a space without previews
+      missing previews)
     required: false
-    default: "true"
+    default: "false"
   default-environment:
     description: "Router: folder served on the site without subdomain (and `www.`); empty: none (404)"
     required: false
@@ -144,7 +145,7 @@ runs:
 
         if [[ "$MANAGE_ROUTER" == "true" ]]; then
           router_args=()
-          [[ "$ROUTER_PREVIEWS" == "false" ]] && router_args+=(--no-previews)
+          [[ "$ROUTER_PREVIEWS" == "true" ]] && router_args+=(--previews)
           deployer --default-environment "$DEFAULT_ENVIRONMENT" --php-handler "$PHP_HANDLER" \
             ${DOCUMENT_ROOT:+--document-root "$DOCUMENT_ROOT"} "${router_args[@]}" install-router
         fi

@@ -34,7 +34,5 @@ jobs:
       # The space may also host the PR previews: each environment has its own folder (see the README), and Nightly is
       # deployed as a single archive unpacked on the server
       environment-folder: nightly
-      # The space of Nightly hosts no PR previews
-      router-previews: false
     # The FTP credentials are the secrets of the GitHub environment
     secrets: inherit

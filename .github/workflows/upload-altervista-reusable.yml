@@ -56,10 +56,10 @@ on:
         type: string
       router-previews:
         description: >-
-          Whether the space hosts PR previews (archive deployments only, see `environment-folder`): `false` leaves the
-          `pr-<N>` rule and the `previews/` folder out of the router of the space.
+          Whether the space also hosts PR previews (archive deployments only, see `environment-folder`): the router of
+          the space then gets the `pr-<N>` rule and the `previews/` folder.
         required: false
-        default: true
+        default: false
         type: boolean
       repository:
         description: >-

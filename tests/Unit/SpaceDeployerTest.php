@@ -610,6 +610,7 @@ function requestMissingPreviewPage(string $page, string $host): array
 test('the router serves the document root of every environment of the space on its own subdomain', function () {
     $exitCode = renderRouter($this->root.'/router', [
         '--base-url', 'https://Example.altervista.org/',
+        '--previews',
         '--default-environment', 'test',
         '--php-handler', 'av-php82',
     ]);
@@ -640,7 +641,7 @@ test('the router serves the document root of every environment of the space on i
 });
 
 test('the router keeps the previews out of the search engines with the directives allowed by shared hostings', function () {
-    expect(renderRouter($this->root.'/router', ['--base-url', 'https://example.altervista.org']))->toBe(0);
+    expect(renderRouter($this->root.'/router', ['--base-url', 'https://example.altervista.org', '--previews']))->toBe(0);
 
     // Altervista fails every request with an error 500 on a `Header` directive in a `.htaccess` file
     expect(file_get_contents($this->root.'/router/previews/.htaccess'))
@@ -652,11 +653,10 @@ test('the router keeps the previews out of the search engines with the directive
         ->toContain("User-agent: *\nDisallow: /\n");
 });
 
-test('the router of a space without previews has no previews', function () {
+test('the router has no previews unless the space hosts them', function () {
     expect(renderRouter($this->root.'/router', [
         '--base-url', 'https://example.altervista.org',
         '--default-environment', 'nightly',
-        '--no-previews',
     ]))->toBe(0);
 
     expect(file_get_contents($this->root.'/router/.htaccess'))
@@ -673,6 +673,7 @@ test('the router can serve the folders of the environments themselves', function
         '--base-url', 'https://example.org',
         '--default-environment', 'test',
         '--document-root', '.',
+        '--previews',
     ]))->toBe(0);
 
     expect(file_get_contents($this->root.'/router/.htaccess'))
@@ -687,6 +688,7 @@ test('a missing preview gets a 404 page linking to its PR', function () {
     expect(renderRouter($this->root.'/router', [
         '--base-url', 'https://example.altervista.org',
         '--repository-url', 'https://github.com/acme/app',
+        '--previews',
     ]))->toBe(0);
 
     $response = requestMissingPreviewPage($this->root.'/router/previews/404.php', 'pr-7.example.altervista.org');
@@ -698,7 +700,7 @@ test('a missing preview gets a 404 page linking to its PR', function () {
 });
 
 test('the page of the missing previews links to the PRs of the repository running the deployment', function (array $options, array $environment, ?string $link) {
-    expect(renderRouter($this->root.'/router', ['--base-url', 'http://example.org:8080', ...$options], $environment))
+    expect(renderRouter($this->root.'/router', ['--base-url', 'http://example.org:8080', '--previews', ...$options], $environment))
         ->toBe(0);
 
     $body = requestMissingPreviewPage($this->root.'/router/previews/404.php', 'pr-7.example.org:8080')['body'];
@@ -781,7 +783,7 @@ function installRouterOn(string $space, string $workDir): array
     exec(
         'PATH='.escapeshellarg($bin).':"$PATH" FAKE_FTP_ROOT='.escapeshellarg($space).' FAKE_FTP_LOG='.escapeshellarg($log)
             .' bash '.escapeshellarg(__DIR__.'/../../.github/actions/ftp-archive-deploy/deploy.sh')
-            .' --base-url https://example.altervista.org --default-environment test --php-handler av-php82'
+            .' --base-url https://example.altervista.org --default-environment test --php-handler av-php82 --previews'
             .' --ftp-hostname ftp.example.org --ftp-username example --ftp-password secret install-router 2>&1',
         $output,
         $exitCode,
