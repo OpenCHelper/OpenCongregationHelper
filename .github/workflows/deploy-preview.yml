@@ -342,8 +342,13 @@ jobs:
             artisan filament:optimize
 
       # Once the preview runs with the new token: the jobs of its folder are matched by title, so that every push
-      # updates them (with the new token) instead of creating them again
+      # updates them (with the new token) instead of creating them again.
+      #
+      # cron-job.org rate limits its API (HTTP 429): the jobs are only needed by the scheduler and the queue, so the
+      # preview is still deployed without them (the action already retries for ~30s), with a warning.
       - name: Create the cron jobs of the preview
+        id: cron
+        continue-on-error: true
         uses: LukeSavefrogs/cron-job-org-action@v2
         with:
           api-key: ${{ secrets.CRON_JOB_ORG_API_KEY }}
@@ -359,6 +364,18 @@ jobs:
               url: /api/artisan/schedule/process
             - title: Queue run
               url: /api/artisan/queue/process
+
+      - name: Warn about the missing cron jobs
+        id: cron-result
+        env:
+          CRON_OUTCOME: ${{ steps.cron.outcome }}
+        run: |
+          if [[ "$CRON_OUTCOME" == 'success' ]]; then
+            echo "created=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::The cron jobs of the preview could not be created on cron-job.org: its scheduler and queue do not run. Re-run the workflow to retry."
+          fi
 
       - name: Check the certificate of the preview
         env:
@@ -399,14 +416,21 @@ jobs:
           BRANCH: ${{ steps.resolve.outputs.branch }}
           ROOT_EMAIL: ${{ vars.ROOT_EMAIL || 'root@example.com' }}
           CRON_FOLDER: ${{ env.cron_folder_prefix }}${{ steps.resolve.outputs.pr }}
+          CRON_CREATED: ${{ steps.cron-result.outputs.created }}
         run: |
+          if [[ "$CRON_CREATED" == 'true' ]]; then
+            cron_line="scheduler and queue (\`${cron_schedule}\`, ${cron_timezone}), in the \`${CRON_FOLDER}\` folder of cron-job.org"
+          else
+            cron_line="⚠️ **not created** (cron-job.org refused them): the scheduler and the queue do not run, re-run the workflow to retry"
+          fi
+
           cat <<EOF >> "$GITHUB_STEP_SUMMARY"
           ## Preview deployed
 
           - **URL**: ${URL}
           - **Branch**: \`${BRANCH}\` (\`${SHA:0:7}\`)
           - **Login**: \`${ROOT_EMAIL}\`, pre-filled on the login page (public demo: dummy data only, never real data)
-          - **Cron jobs**: scheduler and queue (\`${cron_schedule}\`, ${cron_timezone}), in the \`${CRON_FOLDER}\` folder of cron-job.org
+          - **Cron jobs**: ${cron_line}
 
           <details>
           <summary>Artisan output</summary>
@@ -427,6 +451,10 @@ jobs:
           url: ${{ steps.resolve.outputs.url }}
           sha: ${{ steps.resolve.outputs.sha }}
           login: ${{ vars.ROOT_EMAIL || 'root@example.com' }}
+          warning: >-
+            ${{ steps.cron-result.outputs.created == 'false'
+              && 'The cron jobs could not be created on cron-job.org: the scheduler and the queue do not run. Re-run the workflow to retry.'
+              || '' }}
 
   destroy:
     name: Remove previews

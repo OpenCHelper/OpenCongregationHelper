@@ -61,6 +61,13 @@ class AppPanelProvider extends PanelProvider
      */
     private const UI_PREFERENCES_RENDER_HOOK = 'app::ui-preferences';
 
+    /**
+     * Render hook of the help menu of the knowledge base.
+     *
+     * The menu is wrapped before the global search so that the theme of the panel can make its button compact.
+     */
+    private const HELP_MENU_RENDER_HOOK = 'app::help-menu';
+
     public function panel(Panel $panel): Panel
     {
         $detect = new MobileDetect;
@@ -103,6 +110,13 @@ class AppPanelProvider extends PanelProvider
                 PanelsRenderHook::LAYOUT_END,
                 fn (): string => '<div class="app-ui-preferences">'.FilamentView::renderHook(self::UI_PREFERENCES_RENDER_HOOK)->toHtml().'</div>',
             )
+            // Registered after the plugins, so that the help menu stays after the environment indicator.
+            ->bootUsing(function (): void {
+                FilamentView::registerRenderHook(
+                    PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
+                    fn (): string => '<div class="app-help-menu">'.FilamentView::renderHook(self::HELP_MENU_RENDER_HOOK)->toHtml().'</div>',
+                );
+            })
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -138,7 +152,7 @@ class AppPanelProvider extends PanelProvider
                     ->slideOverModals($detect->isMobile()),
                 KnowledgeBaseCompanionPlugin::make()
                     ->knowledgeBasePanelId('knowledge-base')
-                    ->helpMenuRenderHook(PanelsRenderHook::GLOBAL_SEARCH_BEFORE)
+                    ->helpMenuRenderHook(self::HELP_MENU_RENDER_HOOK)
                     ->modalPreviews()
                     ->modalTitleBreadcrumbs()
                     ->slideOverPreviews(),

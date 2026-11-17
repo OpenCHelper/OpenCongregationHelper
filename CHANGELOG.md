@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   window, and a page explaining when there is no connection
   ([#7](https://github.com/OpenCHelper/OpenCongregationHelper/pull/7)).
 
+### Fixed
+
+- Top bar scrolling sideways on smartphones: the help button is now more compact and shows only its icon there
+  ([#9](https://github.com/OpenCHelper/OpenCongregationHelper/pull/9)).
+
 ## [1.0.0-alpha9] - 2026-11-17
 
 ### Added
