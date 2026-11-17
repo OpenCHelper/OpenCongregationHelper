@@ -38,9 +38,16 @@ Open the campaign page every few days:
 
 In the **Territories** list, **Group by → Campaign** shows the territories being worked for the campaign.
 
+In the last 7 days, an amber number next to **Campaigns** in the sidebar reminds you that the campaign is ending, and
+its assignments still in progress are highlighted in amber.
+
 ## At the end of the campaign
 
 1. Open the campaign **Assignments** tab.
 2. Select the assignments still in progress and use **Terminate assignments** to return them all at once.
 
 From the end date on the campaign status becomes **Terminated** and territories can no longer be assigned to it.
+
+Territories not returned in time are not lost: a red number next to **Assignments** in the sidebar counts them, and in
+**Assignments** the **Campaign ended** tab lists them. The banner above the table can return them all at once with
+**Return all**, and the publishers who still have one see a reminder on its page.

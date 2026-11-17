@@ -12,6 +12,9 @@ Every page of the application shares the same layout.
 1. **Sidebar**: the menu, divided into groups. You only see the items your role allows you to use.
    - **Territory Department**: Territories, Zones, Campaigns and Assignments;
    - **Administration**: Users, Roles and Tags.
+
+   A number next to an item points out something to check: next to **Campaigns** (amber) the campaigns ending within
+   7 days, next to **Assignments** (red) the territories still out for a campaign that has ended.
 2. **Help**: opens the page of this guide that explains the current screen, in a side panel.
 3. **Global search**: searches territories, zones and campaigns at once (see below).
 4. **Language**: switches the language of the interface (English, Italian or Spanish).

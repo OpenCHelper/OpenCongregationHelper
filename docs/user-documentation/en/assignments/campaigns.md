@@ -24,6 +24,8 @@ The **Campaign Status** column is calculated from the **Valid Until** date:
 | **Almost Expired** | 3 days or less left. |
 | **Terminated** | The end date has passed. Territories can no longer be assigned to the campaign. |
 
+The number of campaigns ending within 7 days appears in amber next to **Campaigns** in the sidebar.
+
 ## Creating a campaign
 
 1. Open **Campaigns** and click **New campaign**.
@@ -59,6 +61,8 @@ The **Assignments** tab of a campaign lists its assignments (by default the ones
   start date), **Additional Information** (notes) and **Review**. Only territories that are not already out are offered.
 - Tick some assignments and choose **Terminate assignments** from the bulk actions to return them all at once, for
   example when the campaign ends. Assignments that were already returned are skipped.
+- Assignments still in progress when the campaign has ended, or ends within 7 days, are highlighted in red or amber
+  (see [Assignment history](history)).
 
 ![New campaign assignment](/docs/user-documentation/en/assignments/assets/campaign-assignment-wizard.webp)
 

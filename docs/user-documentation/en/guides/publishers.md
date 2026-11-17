@@ -26,6 +26,9 @@ the street names, and use the **full screen** button to see it better on a smart
 When you have finished, tell the person who manages the territories, or click **End Assignment** in the territory page
 if your role allows it.
 
+If the territory was assigned to you for a campaign that has ended, or ends within 7 days, the page of the assignment
+shows a reminder to return it.
+
 ## Keeping your data up to date
 
 From your [profile](../basics/profile) you can change your password, choose the language of the emails and add an

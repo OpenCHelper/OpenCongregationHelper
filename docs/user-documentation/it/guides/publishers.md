@@ -27,6 +27,9 @@ zoom per leggere i nomi delle vie e usa il pulsante **schermo intero** per veder
 Quando hai finito, avvisa chi gestisce i territori, oppure clicca **Termina assegnazione** nella pagina del territorio
 se il tuo ruolo lo permette.
 
+Se il territorio ti è stato assegnato per una campagna terminata, o che termina entro 7 giorni, la pagina
+dell'assegnazione mostra un promemoria per riconsegnarlo.
+
 ## Tenere aggiornati i tuoi dati
 
 Dal tuo [profilo](../basics/profile) puoi cambiare la password, scegliere la lingua delle email e aggiungere un contatto

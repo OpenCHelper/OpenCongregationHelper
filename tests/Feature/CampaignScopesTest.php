@@ -56,3 +56,7 @@ test('scopes keep previous where clauses when chained', function () {
     expect(Campaign::where('name', 'Active')->withExpired()->pluck('name')->all())
         ->toBeEmpty();
 });
+
+test('expiring scope only includes campaigns ending within a week', function () {
+    expect(Campaign::expiring()->pluck('name')->all())->toBe(['Active']);
+});

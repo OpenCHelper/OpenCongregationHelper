@@ -82,6 +82,26 @@ class CampaignResource extends Resource
         return __('filament-resources.campaign.plural_model_label');
     }
 
+    /**
+     * Number of campaigns about to end (within `CampaignStatus::EXPIRING_DAYS` days).
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        $expiringCount = Campaign::query()->expiring()->count();
+
+        return $expiringCount > 0 ? (string) $expiringCount : null;
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return __('filament-resources.campaign.navigation_badge_tooltip');
+    }
+
     #[Override]
     public static function getNavigationGroup(): string|UnitEnum|null
     {

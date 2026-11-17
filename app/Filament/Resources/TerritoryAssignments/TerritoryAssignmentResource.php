@@ -8,9 +8,12 @@ use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Models\TerritoryAssignment;
 use App\Rules\NotTerminatedCampaign;
 use App\Rules\TerritoryNotAlreadyAssigned;
+use Carbon\CarbonInterface;
+use Carbon\CarbonInterval;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -25,7 +28,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -80,6 +85,46 @@ class TerritoryAssignmentResource extends Resource
     }
 
     /**
+     * Number of overdue assignments (in progress although their campaign has ended) the user can see.
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        $overdueCount = static::getOverdueAssignmentsQuery()->count();
+
+        return $overdueCount > 0 ? (string) $overdueCount : null;
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'danger';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return __('filament-resources.territory_assignment.navigation_badge_tooltip');
+    }
+
+    /**
+     * The assignments the current user is allowed to see, ignoring the deleted ones.
+     *
+     * @return Builder<TerritoryAssignment>
+     */
+    public static function getVisibleAssignmentsQuery(): Builder
+    {
+        return static::scopeToVisibleAssignments(TerritoryAssignment::query()->whereHas('assignee'));
+    }
+
+    /**
+     * The assignments the current user is allowed to see that are still in progress although their campaign has ended.
+     *
+     * @return Builder<TerritoryAssignment>
+     */
+    public static function getOverdueAssignmentsQuery(): Builder
+    {
+        return static::getVisibleAssignmentsQuery()->overdue();
+    }
+
+    /**
      * Users allowed to list all the assignments see everyone's assignments,
      * the others only see their own (e.g. when opening a notification link).
      */
@@ -98,10 +143,98 @@ class TerritoryAssignmentResource extends Resource
             && ! config('app.enable_shared_pii');
     }
 
+    /**
+     * Color highlighting an assignment still in progress whose campaign has ended (or is about to).
+     */
+    public static function getCampaignDeadlineColor(TerritoryAssignment $record): ?string
+    {
+        return match (true) {
+            $record->isOverdue() => 'danger',
+            $record->isDueSoon() => 'warning',
+            default => null,
+        };
+    }
+
+    /**
+     * Time between now and the end of the campaign of the assignment, rounded and without direction (e.g. "2 days"):
+     * the translations add it ("in 2 days", "2 days ago"), so that each language can phrase it naturally.
+     *
+     * Under two weeks the time is counted in days ("10 days" rather than "1 week"), since every day counts there.
+     */
+    public static function getCampaignDeadlineDistance(TerritoryAssignment $record): string
+    {
+        $validUntil = $record->campaign->valid_until;
+        $days = (int) round(abs(now()->diffInDays($validUntil)));
+
+        if ($days >= 1 && $days < 14) {
+            return CarbonInterval::days($days)->forHumans(['skip' => 'week']);
+        }
+
+        return $validUntil->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE, options: CarbonInterface::ROUND);
+    }
+
+    /**
+     * Description of when the campaign of an assignment still in progress has ended (or is going to end).
+     */
+    public static function getCampaignDeadlineDescription(TerritoryAssignment $record): ?string
+    {
+        return match (true) {
+            $record->isOverdue() => __('filament-resources.territory_assignment.campaign_ended', ['when' => static::getCampaignDeadlineDistance($record)]),
+            $record->isDueSoon() => __('filament-resources.territory_assignment.campaign_ending', ['when' => static::getCampaignDeadlineDistance($record)]),
+            default => null,
+        };
+    }
+
+    /**
+     * Banner reminding to return an assignment whose campaign has ended (or is about to end).
+     */
+    public static function getCampaignDeadlineCallout(): Callout
+    {
+        return Callout::make(fn (TerritoryAssignment $record): ?string => match (true) {
+            $record->isOverdue() => __('filament-resources.territory_assignment.overdue_assignment_heading', [
+                'campaign' => $record->campaign->name,
+                'when' => static::getCampaignDeadlineDistance($record),
+                'date' => $record->campaign->valid_until->format('d/m/Y'),
+            ]),
+            $record->isDueSoon() => __('filament-resources.territory_assignment.due_soon_assignment_heading', [
+                'campaign' => $record->campaign->name,
+                'when' => static::getCampaignDeadlineDistance($record),
+                'date' => $record->campaign->valid_until->format('d/m/Y'),
+            ]),
+            default => null,
+        })
+            ->key('campaignDeadlineCallout')
+            ->description(__('filament-resources.territory_assignment.campaign_deadline_callout_description'))
+            ->icon(fn (TerritoryAssignment $record): Heroicon => $record->isOverdue() ? Heroicon::OutlinedExclamationTriangle : Heroicon::OutlinedClock)
+            ->color(fn (TerritoryAssignment $record): ?string => static::getCampaignDeadlineColor($record))
+            ->visible(fn (TerritoryAssignment $record): bool => $record->isOverdue() || $record->isDueSoon())
+            ->columnSpanFull()
+            ->actions([
+                Action::make('returnAssignment')
+                    ->button()
+                    ->label(__('filament-resources.territory_assignment.action_end_assignment'))
+                    ->icon(Heroicon::OutlinedArchiveBoxArrowDown)
+                    ->color(fn (TerritoryAssignment $record): ?string => static::getCampaignDeadlineColor($record))
+                    ->requiresConfirmation()
+                    ->modalHeading(__('filament-resources.territory_assignment.action_end_assignment'))
+                    ->modalSubmitActionLabel(__('filament-resources.territory_assignment.action_end'))
+                    ->authorize(fn (TerritoryAssignment $record): bool => Gate::allows('update', $record))
+                    ->action(function (TerritoryAssignment $record): void {
+                        $record->update(['ended_at' => now()]);
+
+                        Notification::make()
+                            ->success()
+                            ->title(__('filament-resources.territory_assignment.return_success'))
+                            ->send();
+                    }),
+            ]);
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema
             ->components([
+                static::getCampaignDeadlineCallout(),
                 Section::make(__('filament-resources.territory_assignment.section_territory_info'))
                     ->description(__('filament-resources.territory_assignment.section_territory_info_description'))
                     ->columns(2)
@@ -330,6 +463,12 @@ class TerritoryAssignmentResource extends Resource
     {
         return $table
             ->recordUrl(fn (Model $record): string => TerritoryAssignmentResource::getUrl('view', ['record' => $record]))
+            // Accent border on the assignments still in progress of an ended (or ending) campaign (see the panel theme)
+            ->recordClasses(fn (TerritoryAssignment $record): ?string => match (true) {
+                $record->isOverdue() => 'fi-ta-row-assignment-overdue',
+                $record->isDueSoon() => 'fi-ta-row-assignment-due-soon',
+                default => null,
+            })
             ->columns([
                 TextColumn::make('territory.name')
                     ->label(__('filament-resources.territory_assignment.column_territory'))
@@ -352,6 +491,15 @@ class TerritoryAssignmentResource extends Resource
                 TextColumn::make('campaign.name')
                     ->label(__('filament-resources.territory_assignment.column_campaign'))
                     ->placeholder(__('filament-resources.territory_assignment.column_campaign_placeholder'))
+                    // Make the assignments still in progress of an ended (or ending) campaign stand out
+                    ->icon(fn (TerritoryAssignment $record): ?Heroicon => match (true) {
+                        $record->isOverdue() => Heroicon::OutlinedExclamationTriangle,
+                        $record->isDueSoon() => Heroicon::OutlinedClock,
+                        default => null,
+                    })
+                    ->color(fn (TerritoryAssignment $record): ?string => static::getCampaignDeadlineColor($record))
+                    ->iconColor(fn (TerritoryAssignment $record): ?string => static::getCampaignDeadlineColor($record))
+                    ->description(fn (TerritoryAssignment $record): ?string => static::getCampaignDeadlineDescription($record))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('creator.full_name')

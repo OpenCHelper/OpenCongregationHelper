@@ -17,6 +17,22 @@ Ogni assegnazione, in corso o riconsegnata, viene conservata. Le trovi:
 La tabella mostra il **Territorio**, l'**Assegnatario**, le date **Iniziato il** e **Terminato il** (*(in lavorazione)*
 se non ancora riconsegnato) e la **Campagna**.
 
+## Assegnazioni di campagne terminate o in scadenza
+
+Le assegnazioni ancora in corso la cui campagna è terminata, o termina entro 7 giorni, risaltano nella tabella:
+
+- un bordo **rosso** a sinistra della riga quando la campagna è terminata, **arancione** quando termina entro 7 giorni;
+- sotto il nome della campagna, quando è terminata o quando termina (es. *Campagna terminata 3 giorni fa*, *Campagna in
+  scadenza tra 5 giorni*).
+
+Sopra la tabella, le schede **Campagna terminata** e **Campagna in scadenza** mostrano solo queste assegnazioni, con il
+loro numero. Quando alcuni territori sono ancora fuori per una campagna terminata, un avviso indica quanti sono:
+**Mostrali** apre la scheda **Campagna terminata**, e **Restituisci tutti** li riconsegna tutti insieme, se il tuo ruolo
+lo permette.
+
+Il numero di territori ancora fuori per una campagna terminata compare anche in rosso accanto ad **Assegnazioni** nella
+barra laterale.
+
 ## Filtri
 
 Di default vengono mostrate solo le assegnazioni **in lavorazione**. Apri i filtri per cambiarlo:
@@ -35,6 +51,10 @@ Clicca una riga per aprire l'assegnazione. La pagina mostra:
 - **Informazioni assegnazione**: assegnatario, campagna, inizio e fine dell'assegnazione.
 
 ![Dettagli dell'assegnazione](/docs/user-documentation/it/assignments/assets/assignment-view.webp)
+
+Se la campagna dell'assegnazione è terminata, o termina entro 7 giorni, un avviso in cima alla pagina lo segnala e
+ricorda di riconsegnare il territorio. Se il tuo ruolo lo permette, **Termina assegnazione** nell'avviso lo riconsegna
+subito.
 
 Dal menu **Azioni** puoi condividere l'assegnazione con un link pubblico (vedi
 [Condividere un'assegnazione](sharing)).

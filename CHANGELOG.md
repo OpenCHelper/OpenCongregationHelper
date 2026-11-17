@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The map of a new territory opens on the territories already drawn: those of its zone when created from the zone's
   territories page, otherwise all of them.
 - `MAP_DEFAULT_CENTER` setting (`"latitude,longitude"`), where the maps open while no territory has a map yet.
+- Assignments still in progress whose campaign has ended (red) or ends within a week (amber) stand out in the tables of
+  assignments, with an accent border and a warning under the campaign name.
+- "Campaign ended" and "Campaign ending soon" tabs on the assignments page, and a banner listing the territories still
+  out for an ended campaign, to show them or return them all at once.
+- Banner on the page of an assignment whose campaign has ended (or is about to end), reminding to return the territory.
+- Red badge next to "Assignments" in the menu with the number of assignments still in progress of an ended campaign.
+- Amber badge next to "Campaigns" in the menu with the number of campaigns ending within a week.
 
 ### Changed
 
