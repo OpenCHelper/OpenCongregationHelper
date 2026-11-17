@@ -29,6 +29,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Platform;
+use Filament\Support\Enums\Width;
 use Filament\Support\Facades\FilamentView;
 use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
@@ -111,6 +112,17 @@ class AppPanelProvider extends PanelProvider
                     ->label(fn (): string => __('filament-ui-switcher::filament-ui-switcher.modal.heading'))
                     ->icon(Heroicon::OutlinedCog6Tooth)
                     ->alpineClickHandler("\$dispatch('open-modal', { id: 'ui-switcher-modal' })"),
+                Action::make('versionInfo')
+                    ->label(fn (): string => __('filament-resources.version_info.menu_label'))
+                    ->icon(Heroicon::OutlinedInformationCircle)
+                    ->modalHeading(fn (): string => __('filament-resources.version_info.modal_heading'))
+                    ->modalIcon(Heroicon::OutlinedInformationCircle)
+                    ->modalWidth(Width::Medium)
+                    ->modalContent(fn (): View => view('filament.version-info', [
+                        'versions' => VersionsPlugin::get()->getVersions(),
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel(fn (): string => __('filament-actions::view.single.modal.actions.close.label')),
             ])
             ->renderHook(
                 PanelsRenderHook::LAYOUT_END,
@@ -152,7 +164,9 @@ class AppPanelProvider extends PanelProvider
                 EnvironmentIndicatorPlugin::make()
                     ->color(fn () => self::environmentColor(app()->environment())),
                 FilamentGazePlugin::make(),
+                // The versions are shown from the user menu (see `versionInfo`), not in the sidebar
                 VersionsPlugin::make()
+                    ->hasNavigationView(false)
                     ->hasDefaults(App::environment() !== 'production')
                     ->items([
                         new AppVersionProvider,

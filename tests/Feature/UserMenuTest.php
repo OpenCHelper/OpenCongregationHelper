@@ -2,6 +2,7 @@
 
 use App\Filament\Pages\EditProfile;
 use App\Models\User;
+use Awcodes\Versions\VersionsPlugin;
 use Filament\Facades\Filament;
 
 beforeEach(function () {
@@ -18,7 +19,7 @@ test('the user menu has the same items in every language', function (string $loc
 
     // Filament adds a header with the name of the user when no item is named `profile`
     expect(array_keys(Filament::getPanel('app')->getUserMenuItems()))
-        ->toBe(['profile', 'uiPreferences', 'logout']);
+        ->toBe(['profile', 'uiPreferences', 'versionInfo', 'logout']);
 })->with(['en', 'it', 'es']);
 
 test('the UI preferences are picked from the user menu, the language from the top bar', function () {
@@ -36,4 +37,28 @@ test('the UI preferences are picked from the user menu, the language from the to
         // The panel opened by the menu item, whose own button is hidden by the theme
         ->assertSee('<div class="app-ui-preferences">', escape: false)
         ->assertSee('id="ui-switcher-modal"', escape: false);
+});
+
+test('the versions are shown from the user menu, not in the sidebar', function () {
+    $this->actingAs(User::factory()->create(['can_login' => true, 'email_verified_at' => now()]))
+        ->get(EditProfile::getUrl())
+        ->assertOk()
+        ->assertSeeInOrder([
+            'fi-user-menu',
+            __('filament-resources.version_info.menu_label'),
+        ], escape: false)
+        ->assertDontSee('versions-nav-widget', escape: false)
+        ->assertDontSee('versions-footer-widget', escape: false);
+});
+
+test('the version modal lists the version of the app', function () {
+    config(['app.version' => '9.8.7-test']);
+
+    $html = view('filament.version-info', [
+        'versions' => VersionsPlugin::get()->getVersions(),
+    ])->render();
+
+    expect($html)
+        ->toContain('App')
+        ->toContain('9.8.7-test');
 });
