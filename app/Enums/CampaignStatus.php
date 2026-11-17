@@ -12,6 +12,16 @@ enum CampaignStatus: string
     case ALMOST_EXPIRED = 'almost_expired';
     case TERMINATED = 'terminated';
 
+    /**
+     * Number of days before its end date from which a campaign is expiring.
+     */
+    public const EXPIRING_DAYS = 7;
+
+    /**
+     * Number of days before its end date from which a campaign is almost expired.
+     */
+    public const ALMOST_EXPIRED_DAYS = 3;
+
     public function getLabel(): string
     {
         return match ($this) {
@@ -50,8 +60,8 @@ enum CampaignStatus: string
         $daysRemaining = now()->diffInDays($validUntil);
 
         return match (true) {
-            $daysRemaining <= 3 => self::ALMOST_EXPIRED,
-            $daysRemaining <= 7 => self::IS_EXPIRING,
+            $daysRemaining <= self::ALMOST_EXPIRED_DAYS => self::ALMOST_EXPIRED,
+            $daysRemaining <= self::EXPIRING_DAYS => self::IS_EXPIRING,
             default => self::ACTIVE,
         };
     }

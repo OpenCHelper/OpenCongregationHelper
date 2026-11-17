@@ -27,3 +27,17 @@
 .app-ui-preferences .fi-modal-trigger {
     display: none;
 }
+
+/*
+   ------------ Assignments of an ended (or ending) campaign ------------
+
+   Accent border on the left of the assignments still in progress whose campaign has ended (or is about to end).
+   The classes are added by `TerritoryAssignmentResource::table()`.
+*/
+.fi-ta-row.fi-ta-row-assignment-overdue > td:first-child {
+    box-shadow: inset 3px 0 0 var(--danger-500);
+}
+
+.fi-ta-row.fi-ta-row-assignment-due-soon > td:first-child {
+    box-shadow: inset 3px 0 0 var(--warning-500);
+}

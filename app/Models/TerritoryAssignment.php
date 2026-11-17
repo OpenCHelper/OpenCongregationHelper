@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CampaignStatus;
 use App\Observers\TerritoryAssignmentObserver;
 use App\Traits\HasGuestViewPage;
 use App\Traits\HasSharedUrl;
@@ -101,6 +102,47 @@ class TerritoryAssignment extends Model
             ->whereNull('ended_at')
             ->when($ignoredAssignmentId !== null, fn (Builder $query) => $query->whereKeyNot($ignoredAssignmentId))
             ->exists();
+    }
+
+    /**
+     * Whether the assignment is still in progress although its campaign has already ended.
+     */
+    public function isOverdue(): bool
+    {
+        return $this->ended_at === null
+            && $this->campaign?->valid_until !== null
+            && $this->campaign->valid_until->isPast();
+    }
+
+    /**
+     * Whether the assignment is still in progress and its campaign is about to end
+     * (i.e. the campaign is expiring or almost expired).
+     */
+    public function isDueSoon(): bool
+    {
+        return $this->ended_at === null
+            && $this->campaign !== null
+            && in_array($this->campaign->getStatus(), [CampaignStatus::IS_EXPIRING, CampaignStatus::ALMOST_EXPIRED], true);
+    }
+
+    /**
+     * Scope a query to only include the assignments in progress whose campaign has already ended.
+     */
+    public function scopeOverdue(Builder $query): void
+    {
+        $query->whereNull('ended_at')
+            ->whereHas('campaign', fn (Builder $query) => $query->withExpired());
+    }
+
+    /**
+     * Scope a query to only include the assignments in progress whose campaign is about to end.
+     */
+    public function scopeDueSoon(Builder $query): void
+    {
+        $query->whereNull('ended_at')
+            ->whereHas('campaign', fn (Builder $query) => $query
+                ->where('valid_until', '>', now())
+                ->where('valid_until', '<=', now()->addDays(CampaignStatus::EXPIRING_DAYS)));
     }
 
     /**
