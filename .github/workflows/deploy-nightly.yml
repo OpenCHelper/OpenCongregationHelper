@@ -2,7 +2,7 @@ name: Deploy (Nightly)
 
 # Deploys every push to `main` to the `Nightly` GitHub environment, with fresh dummy data. Its settings (FTP_SERVER and
 # FTP_USERNAME variables, FTP_PASSWORD secret) are the ones of the environment; its `.env` file is managed on the server
-# (`test/.env`), see the README.
+# (`nightly/.env`), see the README.
 on:
   push:
     branches:
@@ -33,6 +33,6 @@ jobs:
       install-dev-dependencies: false
       # The space may also host the PR previews: each environment has its own folder (see the README), and Nightly is
       # deployed as a single archive unpacked on the server
-      environment-folder: test
+      environment-folder: nightly
     # The FTP credentials are the secrets of the GitHub environment
     secrets: inherit

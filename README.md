@@ -231,7 +231,7 @@ the nightly build of `main`:
 | Environment | Deployed by | Variables | Secrets |
 | --- | --- | --- | --- |
 | `PREVIEW` | [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD`, `CRON_JOB_ORG_API_KEY` |
-| `Nightly` | [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) (every push to `main`, into `test/`, with fresh dummy data; `.env` managed on the server) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD` |
+| `Nightly` | [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) (every push to `main`, into `nightly/`, with fresh dummy data; `.env` managed on the server) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD` |
 
 Any other installation (a test or production site, or the
 [demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo)) is deployed from a repository of its own, calling
