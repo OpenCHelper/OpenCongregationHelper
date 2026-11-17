@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#7](https://github.com/OpenCHelper/OpenCongregationHelper/pull/7)).
 - Offer to install the app after logging in: an **Install** button on Android, Chrome and Edge, and the steps to add it
   to the home screen on iPhone and iPad ([#12](https://github.com/OpenCHelper/OpenCongregationHelper/pull/12)).
+- **Average coverage time** on the territory page: how long the territory takes to be covered on average, based on its
+  returned assignments ([#19](https://github.com/OpenCHelper/OpenCongregationHelper/issues/19)).
 
 ### Changed
 

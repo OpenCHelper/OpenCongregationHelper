@@ -93,6 +93,9 @@ Clicca una riga per aprire il territorio. La pagina mostra i dati del territorio
 schede separate, e il pulsante **Termina assegnazione** / **Assegna territorio** in alto. Il menu **⋮** contiene
 **Modifica**; il pulsante **Elimina** si trova nella pagina di modifica.
 
+Il **Tempo medio di percorrenza** indica quanto tempo serve in media a percorrere il territorio, dall'inizio alla fine
+delle sue assegnazioni terminate; le assegnazioni ancora in corso non vengono conteggiate.
+
 ![Dettagli del territorio](/docs/user-documentation/it/territories/assets/territory-view.webp)
 
 La scheda **Storico uscite** elenca tutte le assegnazioni del territorio, dalla più recente. Di default mostra solo

@@ -99,6 +99,22 @@ class Territory extends Model
     }
 
     /**
+     * Get the average time, in days, the territory took to be covered,
+     * based on its returned assignments (null if it was never returned).
+     */
+    public function averageCoverageDays(): ?float
+    {
+        $durations = $this->assignments()
+            ->whereNotNull('started_at')
+            ->whereNotNull('ended_at')
+            ->without('assignee')
+            ->get(['started_at', 'ended_at'])
+            ->map(fn (TerritoryAssignment $assignment): float => $assignment->started_at->diffInDays($assignment->ended_at));
+
+        return $durations->isEmpty() ? null : $durations->avg();
+    }
+
+    /**
      * Get the current assignee directly through the assignment.
      */
     public function currentAssignee(): HasOneThrough

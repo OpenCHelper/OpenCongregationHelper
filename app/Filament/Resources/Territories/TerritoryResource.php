@@ -372,8 +372,31 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                         SpatieTagsInput::make('tags')
                             ->label(__('filament-resources.territory.field_tags'))
                             ->type(TagType::TERRITORIES->value),
+                        TextEntry::make('average_coverage_time')
+                            ->label(__('filament-resources.territory.field_average_coverage_time'))
+                            ->visibleOn('view')
+                            ->state(fn (Territory $record): ?string => static::formatAverageCoverageTime($record->averageCoverageDays()))
+                            ->placeholder(__('filament-resources.territory.average_coverage_time_never_covered')),
                     ]),
             ]);
+    }
+
+    /**
+     * Format the average coverage time of a territory, given in days.
+     */
+    public static function formatAverageCoverageTime(?float $days): ?string
+    {
+        if ($days === null) {
+            return null;
+        }
+
+        $roundedDays = (int) round($days);
+
+        if ($roundedDays === 0) {
+            return __('filament-resources.territory.average_coverage_time_less_than_a_day');
+        }
+
+        return trans_choice('filament-resources.territory.assignment_duration_day', $roundedDays, ['count' => $roundedDays]);
     }
 
     public static function table(Table $table): Table
