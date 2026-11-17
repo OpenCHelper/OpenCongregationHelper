@@ -98,13 +98,12 @@ This application uses the following specific versions and technologies:
    cp .env.example .env
    ```
 
-4. Switch the `.env` file to the development environment (the example is production-safe) and update the URLs to match the port the application is running on (`docker-compose.yml` is configured to use port 80):
+4. Switch the `.env` file to the development environment (the example is production-safe) and update the URL to match the port the application is running on (`docker-compose.yml` is configured to use port 80):
    ```bash
    APP_ENV=local
    APP_DEBUG=true
    LOG_LEVEL=debug
    APP_URL=http://localhost
-   ASSET_URL=http://localhost
    ```
 
 5. **Build Docker images** (2+ minutes, NEVER CANCEL):
@@ -167,13 +166,12 @@ This application uses the following specific versions and technologies:
    php artisan key:generate
    ```
 
-4. Switch the `.env` file to the development environment (the example is production-safe) and update the URLs to match the port the application is running on:
+4. Switch the `.env` file to the development environment (the example is production-safe) and update the URL to match the port the application is running on:
    ```bash
    APP_ENV=local
    APP_DEBUG=true
    LOG_LEVEL=debug
    APP_URL=http://localhost:8000
-   ASSET_URL=http://localhost:8000
    ```
 
 5. **Database setup (SQLite for testing)**:

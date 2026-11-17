@@ -262,7 +262,6 @@ jobs:
           APP_KEY='$(php artisan key:generate --show --no-ansi)'
           APP_DEBUG=true
           APP_URL='${URL}'
-          ASSET_URL='${URL}'
           APP_VERSION_BRANCH_FILE='.git-branch-name'
           APP_VERSION_COMMIT_FILE='.git-commit-hash'
           APP_LOCALE='it'
