@@ -88,7 +88,7 @@ test('the assignments of an ended or ending campaign stand out in the table', fu
     Livewire::test(ManageTerritoryAssignments::class)
         ->assertSeeHtml('fi-ta-row-assignment-overdue')
         ->assertSeeHtml('fi-ta-row-assignment-due-soon')
-        ->assertSee('Campaign ended 1 week ago')
+        ->assertSee('Campaign ended 10 days ago')
         ->assertSee('Campaign ends in 3 days');
 });
 
@@ -188,3 +188,22 @@ test('the navigation badge is hidden when no assignment is overdue', function ()
 
     expect(TerritoryAssignmentResource::getNavigationBadge())->toBeNull();
 });
+
+test('the time left is counted in days under two weeks', function (int $minutes, string $expected) {
+    app()->setLocale('en');
+
+    $assignment = new TerritoryAssignment;
+    $assignment->setRelation('campaign', new Campaign(['valid_until' => now()->addMinutes($minutes)]));
+
+    expect(TerritoryAssignmentResource::getCampaignDeadlineDistance($assignment))->toBe($expected);
+})->with([
+    'a few hours' => [5 * 60, '5 hours'],
+    'one day' => [24 * 60, '1 day'],
+    'almost a week' => [(int) (6.6 * 24 * 60), '7 days'],
+    'ten days' => [10 * 24 * 60, '10 days'],
+    'ten days ago' => [-10 * 24 * 60, '10 days'],
+    'thirteen days' => [13 * 24 * 60, '13 days'],
+    'two weeks' => [14 * 24 * 60, '2 weeks'],
+    'three weeks' => [21 * 24 * 60, '3 weeks'],
+    'seven months ago' => [-213 * 24 * 60, '7 months'],
+]);

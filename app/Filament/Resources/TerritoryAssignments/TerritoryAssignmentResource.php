@@ -9,6 +9,7 @@ use App\Models\TerritoryAssignment;
 use App\Rules\NotTerminatedCampaign;
 use App\Rules\TerritoryNotAlreadyAssigned;
 use Carbon\CarbonInterface;
+use Carbon\CarbonInterval;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
@@ -157,10 +158,19 @@ class TerritoryAssignmentResource extends Resource
     /**
      * Time between now and the end of the campaign of the assignment, rounded and without direction (e.g. "2 days"):
      * the translations add it ("in 2 days", "2 days ago"), so that each language can phrase it naturally.
+     *
+     * Under two weeks the time is counted in days ("10 days" rather than "1 week"), since every day counts there.
      */
     public static function getCampaignDeadlineDistance(TerritoryAssignment $record): string
     {
-        return $record->campaign->valid_until->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE, options: CarbonInterface::ROUND);
+        $validUntil = $record->campaign->valid_until;
+        $days = (int) round(abs(now()->diffInDays($validUntil)));
+
+        if ($days >= 1 && $days < 14) {
+            return CarbonInterval::days($days)->forHumans(['skip' => 'week']);
+        }
+
+        return $validUntil->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE, options: CarbonInterface::ROUND);
     }
 
     /**
