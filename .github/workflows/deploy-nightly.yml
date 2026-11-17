@@ -1,8 +1,8 @@
 name: Deploy (Nightly)
 
 # Deploys every push to `main` to the `Nightly` GitHub environment, with fresh dummy data. The environment holds the
-# FTP_SERVER and FTP_USERNAME variables and the FTP_PASSWORD, ROOT_PASSWORD and CRON_JOB_ORG_API_KEY secrets; the `.env`
-# file is written on every deployment (see the `dotenv` input below).
+# FTP_SERVER and FTP_USERNAME variables, the FTP_PASSWORD, ROOT_PASSWORD and CRON_JOB_ORG_API_KEY secrets, and the
+# optional ARTISAN_CRON_TOKEN secret; the `.env` file is written on every deployment (see the `dotenv` input below).
 on:
   push:
     branches:
@@ -35,11 +35,13 @@ jobs:
       # deployed as a single archive unpacked on the server
       environment-folder: nightly
       # Scheduler cron job on cron-job.org, with the CRON_JOB_ORG_API_KEY secret of the Nightly environment: every 5
-      # minutes from 8:00 to 22:55 (Rome time) on weekdays. Not worth failing the deployment for (e.g. API rate limit)
+      # minutes from 8:00 to 22:55 (Rome time) on weekdays. Not worth failing the deployment for (e.g. API rate limit).
+      # With the ARTISAN_CRON_TOKEN secret, the job keeps its token and is only synchronized by manual runs and re-runs
       cron-folder: (Nightly)
       cron-optional: true
-      # The `.env` file of Nightly, written on every deployment with a new `APP_KEY` and `ARTISAN_CRON_TOKEN`, plus the
-      # `ROOT_PASSWORD` secret of the Nightly environment as `INITIAL_ROOT_PASSWORD` (the database has no password)
+      # The `.env` file of Nightly, written on every deployment with a new `APP_KEY`, the `ARTISAN_CRON_TOKEN` (the
+      # secret of the same name, or a new random one) and the `ROOT_PASSWORD` secret of the Nightly environment as
+      # `INITIAL_ROOT_PASSWORD` (the database has no password)
       dotenv: |
         APP_NAME='OpenCongregationHelper (Nightly)'
         APP_ENV='nightly'
