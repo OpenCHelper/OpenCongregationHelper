@@ -24,6 +24,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -38,6 +39,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     use HasFactory;
 
     use HasProfilePhoto;
+    use HasPushSubscriptions;
     use HasRoles;
     use HasTeams;
     use LogsActivity;

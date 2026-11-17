@@ -123,6 +123,21 @@ tempo. Entrambe richiedono qualcosa che venga eseguito periodicamente:
 
   Gli endpoint hanno un limite di 10 richieste al minuto.
 
+## Notifiche push
+
+Le notifiche push sono facoltative: finché non sono configurate, le notifiche vengono inviate solo via email e
+all'interno dell'applicazione, e il profilo non propone di attivarle. Per abilitarle, genera le chiavi una sola volta:
+
+```shell
+php artisan webpush:vapid
+```
+
+Il comando scrive `VAPID_PUBLIC_KEY` e `VAPID_PRIVATE_KEY` nel file `.env`. Non cambiarle in seguito, altrimenti ogni
+utente dovrà riattivare le notifiche push. Facoltativamente, imposta `VAPID_SUBJECT` con un contatto dell'amministratore
+(es. `mailto:admin@example.com`), fornito ai servizi push dei browser (`APP_URL` se non impostato).
+
+Le notifiche push richiedono HTTPS e, come le email, vengono inviate dalla coda (vedi sopra).
+
 ## Ambienti
 
 Negli ambienti diversi da `production` (es. `local`, `nightly`, `staging`) i super amministratori vedono un bordo

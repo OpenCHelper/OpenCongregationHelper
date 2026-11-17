@@ -6,7 +6,8 @@ order: 5
 ---
 
 L'applicazione ti informa degli eventi che ti riguardano, sia **all'interno dell'applicazione** (la campanella nella
-barra in alto) sia **via email**, nella lingua scelta nel tuo [profilo](profile).
+barra in alto) sia **via email** e, se le attivi, come **notifiche push** sui tuoi dispositivi, nella lingua scelta nel
+tuo [profilo](profile).
 
 ![Pannello delle notifiche](/docs/user-documentation/it/basics/assets/notifications.webp)
 
@@ -18,6 +19,21 @@ barra in alto) sia **via email**, nella lingua scelta nel tuo [profilo](profile)
 | **Territorio riconsegnato** | la persona che aveva il territorio |
 | **Nuova campagna** | tutti gli utenti che possono accedere |
 | **Territorio fuori da *N* giorni** | chi ha un territorio da più di 60 giorni. Il promemoria viene inviato ogni lunedì finché il territorio non viene riconsegnato. |
+
+## Notifiche push
+
+Le notifiche push compaiono sul telefono o sul computer come quelle di qualsiasi altra app, anche ad applicazione
+chiusa. Cliccandone una si apre il territorio o l'assegnazione collegata.
+
+1. Apri il tuo [profilo](profile) sul dispositivo su cui vuoi riceverle.
+2. In **Notifiche push**, clicca **Attiva su questo dispositivo** e consenti le notifiche quando il browser lo chiede.
+3. Clicca **Invia una notifica di prova** per verificare che arrivino.
+
+Attivale su ogni dispositivo che usi. Per non riceverle più, clicca **Disattiva su questo dispositivo**.
+
+> ℹ️ **Nota:** su iPhone e iPad le notifiche push funzionano solo dopo aver aggiunto l'app alla schermata Home
+> (**Condividi**, poi **Aggiungi alla schermata Home**): aprila da lì, poi attivale. Se la sezione non compare nel
+> profilo, l'amministratore non ha ancora configurato le notifiche push (vedi la [Guida al setup](../setup#notifiche-push)).
 
 ## Gestire le notifiche
 

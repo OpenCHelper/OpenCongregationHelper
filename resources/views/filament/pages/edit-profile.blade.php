@@ -5,6 +5,8 @@
         @livewire('profile-contacts')
     @endif
 
+    @livewire('profile-push-notifications')
+
     @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
         @livewire(Laravel\Jetstream\Http\Livewire\UpdatePasswordForm::class)
     @endif

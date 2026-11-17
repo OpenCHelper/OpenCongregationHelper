@@ -1,0 +1,239 @@
+<?php
+
+use App\Filament\Pages\EditProfile;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
+use App\Livewire\ProfilePushNotifications;
+use App\Models\Campaign;
+use App\Models\Territory;
+use App\Models\TerritoryAssignment;
+use App\Models\TerritoryZone;
+use App\Models\User;
+use App\Notifications\CampaignCreatedNotification;
+use App\Notifications\StaleAssignmentNotification;
+use App\Notifications\TerritoryAssignedNotification;
+use App\Notifications\TerritoryReturnedNotification;
+use App\Notifications\TestPushNotification;
+use App\Support\WebPush;
+use Filament\Facades\Filament;
+use Illuminate\Notifications\Notification as BaseNotification;
+use Illuminate\Support\Facades\Notification;
+use Livewire\Livewire;
+use NotificationChannels\WebPush\WebPushChannel;
+
+beforeEach(function () {
+    config([
+        'webpush.vapid.public_key' => 'BPublicKeyOfTheServer',
+        'webpush.vapid.private_key' => 'PrivateKeyOfTheServer',
+    ]);
+
+    // The user with ID 1 is the root user
+    User::factory()->create(['id' => 1]);
+
+    Filament::setCurrentPanel('app');
+
+    // Creating campaigns and assignments notifies the users: nothing must reach a real push service
+    Notification::fake();
+
+    $this->user = User::factory()->create(['can_login' => true, 'email_verified_at' => now()]);
+    $this->subscription = [
+        'endpoint' => 'https://push.example.com/send/abc123',
+        'keys' => ['p256dh' => 'public-key-of-the-browser', 'auth' => 'auth-secret'],
+        'contentEncoding' => 'aes128gcm',
+    ];
+});
+
+/**
+ * @param  array{endpoint: string, keys: array{p256dh: string, auth: string}}  $subscription
+ */
+function subscribe(User $user, array $subscription): void
+{
+    $user->updatePushSubscription($subscription['endpoint'], $subscription['keys']['p256dh'], $subscription['keys']['auth']);
+}
+
+/**
+ * Assign a new territory to a new user.
+ */
+function pushNotifiedAssignment(): TerritoryAssignment
+{
+    return TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for(TerritoryZone::factory(), 'territoryZone')->create()->id,
+        'assignee_id' => User::factory()->create()->id,
+        'ended_at' => null,
+    ]);
+}
+
+test('push notifications are configured only with both VAPID keys', function (?string $publicKey, ?string $privateKey, bool $isConfigured) {
+    config(['webpush.vapid.public_key' => $publicKey, 'webpush.vapid.private_key' => $privateKey]);
+
+    expect(WebPush::isConfigured())->toBe($isConfigured);
+})->with([
+    'both keys' => ['public', 'private', true],
+    'no public key' => [null, 'private', false],
+    'no private key' => ['public', '', false],
+    'no keys' => [null, null, false],
+]);
+
+test('notifications are sent as push notifications to users who enabled them', function (BaseNotification $notification) {
+    subscribe($this->user, $this->subscription);
+
+    expect($notification->via($this->user))->toBe(['mail', 'database', WebPushChannel::class])
+        ->and($notification->via(User::factory()->create()))->toBe(['mail', 'database']);
+})->with([
+    'campaign created' => fn () => new CampaignCreatedNotification(Campaign::factory()->create()),
+    'stale assignment' => fn () => new StaleAssignmentNotification(pushNotifiedAssignment()),
+    'territory assigned' => fn () => new TerritoryAssignedNotification(pushNotifiedAssignment()),
+    'territory returned' => fn () => new TerritoryReturnedNotification(pushNotifiedAssignment()),
+]);
+
+test('notifications are not sent as push notifications when they are not configured', function () {
+    config(['webpush.vapid.public_key' => null, 'webpush.vapid.private_key' => null]);
+    subscribe($this->user, $this->subscription);
+
+    $notification = new TerritoryAssignedNotification(pushNotifiedAssignment());
+
+    expect($notification->via($this->user))->toBe(['mail', 'database']);
+});
+
+test('push notifications show the database notification and open its page', function () {
+    $assignment = pushNotifiedAssignment();
+
+    $message = (new TerritoryAssignedNotification($assignment))->toWebPush($this->user, new TestPushNotification)->toArray();
+
+    expect($message)
+        ->title->toBe(__('filament-resources.database_notifications.territory_assigned_title', ['territory' => $assignment->territory->name]))
+        ->body->toBe(__('filament-resources.database_notifications.territory_assigned_body', ['territory' => $assignment->territory->name]))
+        ->icon->toBe(asset('icons/icon-192.png'))
+        ->data->toBe(['url' => TerritoryAssignmentResource::getUrl('view', ['record' => $assignment->id])]);
+});
+
+test('push notifications without actions open the app', function () {
+    $message = (new TerritoryReturnedNotification(pushNotifiedAssignment()))
+        ->toWebPush($this->user, new TestPushNotification)
+        ->toArray();
+
+    expect($message['data'])->toBe(['url' => route('dashboard')]);
+});
+
+test('the profile offers to enable push notifications only when they are configured', function (bool $isConfigured) {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    if (! $isConfigured) {
+        config(['webpush.vapid.public_key' => null]);
+    }
+
+    $response = $this->actingAs($this->user)->get(EditProfile::getUrl())->assertOk();
+
+    $isConfigured
+        ? $response->assertSee(__('profile.push_notifications.title'))->assertSee('BPublicKeyOfTheServer')
+        : $response->assertDontSee(__('profile.push_notifications.title'));
+})->with([
+    'configured' => true,
+    'not configured' => false,
+]);
+
+test('users can enable push notifications on a device', function () {
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->call('subscribe', $this->subscription)
+        ->assertHasNoErrors();
+
+    expect($this->user->pushSubscriptions()->sole())
+        ->endpoint->toBe('https://push.example.com/send/abc123')
+        ->public_key->toBe('public-key-of-the-browser')
+        ->auth_token->toBe('auth-secret');
+});
+
+test('the subscription of a device is updated, not duplicated', function () {
+    $this->actingAs($this->user);
+    subscribe($this->user, $this->subscription);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->call('subscribe', [...$this->subscription, 'keys' => ['p256dh' => 'renewed-key', 'auth' => 'renewed-secret']]);
+
+    expect($this->user->pushSubscriptions()->sole())
+        ->public_key->toBe('renewed-key')
+        ->auth_token->toBe('renewed-secret');
+});
+
+test('a device moves to the user who enables push notifications on it', function () {
+    $previousUser = User::factory()->create();
+    subscribe($previousUser, $this->subscription);
+
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)->call('subscribe', $this->subscription);
+
+    expect($previousUser->pushSubscriptions()->exists())->toBeFalse()
+        ->and($this->user->pushSubscriptions()->count())->toBe(1);
+});
+
+test('invalid subscriptions are rejected', function (array $subscription) {
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->call('subscribe', [...$this->subscription, ...$subscription])
+        ->assertHasErrors();
+
+    expect($this->user->pushSubscriptions()->exists())->toBeFalse();
+})->with([
+    'not HTTPS' => [['endpoint' => 'http://push.example.com/send/abc123']],
+    'not a URL' => [['endpoint' => 'not a url']],
+    'without keys' => [['keys' => []]],
+    'unknown encoding' => [['contentEncoding' => 'gzip']],
+]);
+
+test('subscriptions are rejected when push notifications are not configured', function () {
+    config(['webpush.vapid.private_key' => null]);
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->call('subscribe', $this->subscription)
+        ->assertNotFound();
+});
+
+test('users can disable push notifications only on their own devices', function () {
+    $otherUser = User::factory()->create();
+    subscribe($otherUser, $this->subscription);
+    subscribe($this->user, [...$this->subscription, 'endpoint' => 'https://push.example.com/send/own']);
+
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->call('unsubscribe', $this->subscription['endpoint'])
+        ->call('unsubscribe', 'https://push.example.com/send/own');
+
+    expect($this->user->pushSubscriptions()->exists())->toBeFalse()
+        ->and($otherUser->pushSubscriptions()->exists())->toBeTrue();
+});
+
+test('users can send themselves a test push notification', function () {
+    subscribe($this->user, $this->subscription);
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->call('sendTest')
+        ->assertNotified(__('profile.push_notifications.test_sent'));
+
+    Notification::assertSentTo($this->user, TestPushNotification::class, function (TestPushNotification $notification, array $channels): bool {
+        return $channels === [WebPushChannel::class];
+    });
+});
+
+test('the subscriptions are deleted with the user', function () {
+    subscribe($this->user, $this->subscription);
+
+    $this->user->delete();
+
+    expect($this->user->pushSubscriptions()->exists())->toBeFalse();
+});
+
+test('the service worker shows the push notifications and opens their page', function () {
+    expect(file_get_contents(public_path('sw.js')))
+        ->toContain("self.addEventListener('push'")
+        ->toContain('self.registration.showNotification(title, options)')
+        ->toContain("self.addEventListener('notificationclick'")
+        ->toContain('event.notification.data?.url');
+});

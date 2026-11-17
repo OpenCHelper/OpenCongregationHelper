@@ -35,6 +35,11 @@ Per aggiungere un contatto:
 Usa **Visualizza**, **Modifica** ed **Elimina** accanto a ogni contatto per gestirlo. Visualizzando un contatto, i
 pulsanti **Chiama** e **Apri in Maps** avviano una telefonata o aprono l'indirizzo nell'app delle mappe.
 
+## Notifiche push
+
+Ricevi le notifiche anche su questo dispositivo, pure ad applicazione chiusa: clicca **Attiva su questo dispositivo**.
+Vedi [Notifiche](notifications#notifiche-push).
+
 ## Aggiorna password
 
 Inserisci la **Password attuale**, poi due volte la **Nuova password** e clicca **Salva**. Usa una password lunga e
