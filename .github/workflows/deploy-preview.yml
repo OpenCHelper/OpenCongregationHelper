@@ -1,4 +1,4 @@
-name: PR previews
+name: Deploy (PR previews)
 
 # Every open PR gets its own preview, like Vercel/Render: https://pr-<N>.<site>.altervista.org, redeployed with fresh
 # dummy data on every push and removed when the PR is closed or merged.

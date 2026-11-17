@@ -79,7 +79,7 @@ test('the stale assignments job is due on Monday at 9:00, Rome time', function (
 test('the stale assignments job runs once a week when the scheduler is called as on the previews', function () {
     $task = staleAssignmentsScheduledTask();
 
-    // As cron-job.org does for the previews (see `.github/workflows/preview.yml`): every 5 minutes, from 8:00 to
+    // As cron-job.org does for the previews (see `.github/workflows/deploy-preview.yml`): every 5 minutes, from 8:00 to
     // 22:55 (Rome time), Monday to Friday
     $monday = CarbonImmutable::parse('2026-11-16 00:00', 'Europe/Rome');
     $callsRunningTheTask = collect(range(0, 7 * 24 * 60 - 5, 5))

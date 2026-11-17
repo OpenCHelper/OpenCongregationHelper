@@ -1,0 +1,38 @@
+name: Deploy (Nightly)
+
+# Deploys every push to `main` to the `Nightly` GitHub environment, with fresh dummy data. Its settings (FTP_SERVER and
+# FTP_USERNAME variables, FTP_PASSWORD secret) are the ones of the environment; its `.env` file is managed on the server
+# (`test/.env`), see the README.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Manually trigger a workflow run
+
+permissions:
+  contents: read
+
+# One deployment at a time, to avoid overloading the server: a newer run cancels the one in progress
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  linter:
+    uses: ./.github/workflows/run-linter.yml
+
+  deploy:
+    needs: linter
+    uses: ./.github/workflows/upload-altervista-reusable.yml
+    with:
+      environment: Nightly
+      label: Nightly
+      reset-database: true
+      seed-dummy-data: true
+      setup-root-user: true
+      install-dev-dependencies: false
+      # The space may also host the PR previews: each environment has its own folder (see the README), and Nightly is
+      # deployed as a single archive unpacked on the server
+      environment-folder: test
+    # The FTP credentials are the secrets of the GitHub environment
+    secrets: inherit

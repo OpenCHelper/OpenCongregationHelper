@@ -23,9 +23,19 @@ register, and works in the browser, also on smartphones.
 
 ## Demo
 
-Try it on the **[public demo](https://ochdemo.altervista.org)**: it runs the latest release with dummy data, and anyone
-can sign in as administrator, so never enter real data there (it is reset every night). It is deployed by
-[OpenCongregationHelper-demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo).
+See it in action, no installation needed: both demos come with dummy data and sign you in as administrator in one click.
+
+| | Runs | Data reset |
+| --- | --- | --- |
+| 🚀 **[Public demo](https://ochdemo.altervista.org)** | The latest release | Every night |
+| 🌙 **[Nightly demo](https://ochtest.altervista.org)** | The latest code of `main`, a sneak peek of what's coming | On every push to `main` |
+
+The public demo is deployed by [OpenCongregationHelper-demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo),
+the nightly one by [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml).
+
+> [!WARNING]
+> Anyone can sign in as administrator and the data is regularly wiped: **never enter real data** in the demos. The
+> nightly demo runs unreleased code, so expect bugs and unfinished features.
 
 ## Tech stack
 
@@ -130,7 +140,7 @@ act --rm --verbose=false \
     -s GITHUB_TOKEN="$(gh auth status &>/dev/null || gh auth login >&2; gh auth token)" \
     --pull=false \
     --rebuild=false \
-    --workflows .github/workflows/preview.yml \
+    --workflows .github/workflows/deploy-preview.yml \
     --job 'deploy' \
     --input action=deploy --input pr=123 \
     --secret-file .act/.secrets \
@@ -139,7 +149,7 @@ act --rm --verbose=false \
     --insecure-secrets
 ```
 
-This command will run the `deploy` job of the `.github/workflows/preview.yml` workflow:
+This command will run the `deploy` job of the `.github/workflows/deploy-preview.yml` workflow:
 - use [`gh`](https://cli.github.com/) to retrieve a token to authenticate Act against GitHub (_higher quotas and access to private repositories, may be omitted if not needed_).
 - read the [workflow secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) (`${{ secrets.[*] }}`) from `.act/.secrets`
 - read the [workflow environment variables](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#defining-environment-variables-for-a-single-workflow) (`${{ env.[*] }}`) from `.act/.env`
@@ -169,7 +179,7 @@ CRON_JOB_ORG_API_KEY=MyCronJobOrgApiKey
 ```
 
 To deploy the preview of a PR, run `act workflow_dispatch` with the same options as above, except for
-`--workflows .github/workflows/preview.yml --job deploy --input action=deploy --input pr=<N>`.
+`--workflows .github/workflows/deploy-preview.yml --job deploy --input action=deploy --input pr=<N>`.
 
 ## Deploy
 
@@ -187,7 +197,7 @@ To deploy the preview of a PR, run `act workflow_dispatch` with the same options
 #### PR previews
 
 Every PR opened from a branch of this repository gets its own preview, like on Vercel or Render: it is deployed to
-`https://pr-<N>.<site>.altervista.org` by [`preview.yml`](.github/workflows/preview.yml) on every push, with fresh dummy
+`https://pr-<N>.<site>.altervista.org` by [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) on every push, with fresh dummy
 data, and removed (files and database tables) when the PR is closed or merged. A comment on the PR shows its status and
 URL. The URL of a preview that does not exist (e.g. of a closed PR, or not deployed yet) shows a 404 page linking to its
 PR.
@@ -215,11 +225,13 @@ the previews: e.g. `DetectStaleAssignments`, which sends the reminders of the te
 Monday at 9:00, Rome time.
 
 The deployments use [GitHub environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
-(Settings → Environments), each with the FTP credentials of its space. This repository deploys only the PR previews:
+(Settings → Environments), each with the FTP credentials of its space. This repository deploys the PR previews and
+the nightly build of `main`:
 
 | Environment | Deployed by | Variables | Secrets |
 | --- | --- | --- | --- |
-| `PREVIEW` | [`preview.yml`](.github/workflows/preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD`, `CRON_JOB_ORG_API_KEY` |
+| `PREVIEW` | [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) (the PR previews) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD`, `ROOT_PASSWORD`, `CRON_JOB_ORG_API_KEY` |
+| `Nightly` | [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) (every push to `main`, into `test/`, with fresh dummy data; `.env` managed on the server) | `FTP_SERVER`, `FTP_USERNAME` | `FTP_PASSWORD` |
 
 Any other installation (a test or production site, or the
 [demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo)) is deployed from a repository of its own, calling
