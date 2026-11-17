@@ -4,13 +4,24 @@
 # are overwritten.
 #
 # Only `mod_rewrite` directives: shared hostings like Altervista reject the others (e.g. `Header`) in `.htaccess` files,
-# failing every request with an error 500.
+# failing every request with an error 500. That includes `ErrorDocument`: the page of the missing previews (`404.php`,
+# which answers with a 404 itself) is reached with a rewrite instead.
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Already routed to the document root of a preview that has no `.htaccess` handling the request (e.g. a missing
-    # one): stop here, instead of routing it again
+    # The page of the missing previews, only when sent there by the rule below: `/404.php` of a live preview is its own
+    RewriteCond %{ENV:REDIRECT_MISSING_PREVIEW} =1
+    RewriteRule ^404\.php$ - [L]
+
+    # Already routed to the document root of a preview that has no `.htaccess` handling the request: when that folder
+    # does not exist (e.g. the PR was closed, or its preview is not deployed yet), the page of the missing previews.
+    # Its path is the one of this folder (where the routed request lands, %2) followed by `pr-<N>/{{DOCUMENT_ROOT}}`
+    RewriteCond $1::%{REQUEST_FILENAME} ^(pr-[0-9]+)::(.*?/)\1(/|$)
+    RewriteCond %2%1/{{DOCUMENT_ROOT}} !-d
+    RewriteRule ^(pr-[0-9]+)/{{DOCUMENT_ROOT}} 404.php [E=MISSING_PREVIEW:1,L]
+
+    # Otherwise stop here, instead of routing it again
     RewriteRule ^pr-[0-9]+/{{DOCUMENT_ROOT}} - [L]
 
     # Keep the previews out of the search engines: they all share the `robots.txt` of this folder, disallowing everything

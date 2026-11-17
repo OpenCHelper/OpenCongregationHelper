@@ -189,7 +189,8 @@ To deploy the preview of a PR, run `act workflow_dispatch` with the same options
 Every PR opened from a branch of this repository gets its own preview, like on Vercel or Render: it is deployed to
 `https://pr-<N>.<site>.altervista.org` by [`preview.yml`](.github/workflows/preview.yml) on every push, with fresh dummy
 data, and removed (files and database tables) when the PR is closed or merged. A comment on the PR shows its status and
-URL.
+URL. The URL of a preview that does not exist (e.g. of a closed PR, or not deployed yet) shows a 404 page linking to its
+PR.
 
 The login page of the previews is pre-filled with the credentials of the root user (`DEMO_PREFILL_LOGIN_CREDENTIALS`),
 so that reviewers can test them right away: anyone with the link can log in as root, so the previews MUST hold dummy
@@ -364,6 +365,8 @@ nothing but the `.gitignore` of the build's copy), since `storage:link` replaces
 
 With `manage-router`, the action also writes the router of the space (the `.htaccess` of its root and of `previews/`,
 from the templates of its `router/` folder), sending each host straight to the document root of its environment
-(`public/` by default, `document-root` input). The router is shared by every workflow deploying to the space, so they
-must all pass the same settings: that is why they come from repository variables.
+(`public/` by default, `document-root` input), and a request to a preview without one to the page of the missing
+previews (`previews/404.php`, linking to the PRs of the repository running the deployment). The router is shared by
+every workflow deploying to the space, so they must all pass the same settings: that is why they come from repository
+variables.
 

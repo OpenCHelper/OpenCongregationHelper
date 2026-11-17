@@ -59,8 +59,8 @@ inputs:
     default: "false"
   manage-router:
     description: >-
-      Write the router of the space (the `.htaccess` of its root and of `previews/`) before deploying: for spaces
-      hosting several environments, each in its own folder
+      Write the router of the space (the `.htaccess` of its root and of `previews/`, and the 404 page of the missing
+      previews, linking to their PR) before deploying: for spaces hosting several environments, each in its own folder
     required: false
     default: "false"
   default-environment:
