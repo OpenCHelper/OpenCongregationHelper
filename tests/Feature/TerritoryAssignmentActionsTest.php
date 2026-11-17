@@ -222,12 +222,22 @@ test('campaign assignments cannot be created for an already assigned territory',
     expect($this->territory->assignments()->count())->toBe(1);
 });
 
-test('assignee options are sorted by name', function () {
+test('assignee options are sorted by first name, then last name', function () {
     User::factory()->create(['first_name' => 'Zeno', 'last_name' => 'Bianchi']);
+    User::factory()->create(['first_name' => 'Annamarie', 'last_name' => 'Abbott']);
     User::factory()->create(['first_name' => 'Anna', 'last_name' => 'Verdi']);
 
     $names = array_values(User::getAssigneeOptions());
 
-    expect($names)->toBe(collect($names)->sort(SORT_NATURAL | SORT_FLAG_CASE)->values()->all())
-        ->and($names)->toContain('Anna Verdi', 'Zeno Bianchi');
+    // Not a natural sort of the full names, which ignores the spaces: `Annamarie Abbott` would come before `Anna Verdi`
+    $expected = User::all()
+        ->sort(fn (User $a, User $b): int => [mb_strtolower($a->first_name), mb_strtolower($a->last_name)]
+            <=> [mb_strtolower($b->first_name), mb_strtolower($b->last_name)])
+        ->map(fn (User $user): string => $user->full_name)
+        ->values()
+        ->all();
+
+    expect($names)->toBe($expected)
+        ->and(array_search('Anna Verdi', $names))->toBeLessThan(array_search('Annamarie Abbott', $names))
+        ->and($names)->toContain('Zeno Bianchi');
 });
