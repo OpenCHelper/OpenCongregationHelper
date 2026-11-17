@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-alpha9] - 2026-11-17
+
 ### Added
 
 - The map of a new territory opens on the territories already drawn: those of its zone when created from the zone's

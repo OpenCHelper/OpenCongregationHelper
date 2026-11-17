@@ -1,6 +1,6 @@
 {
     "name": "openchelper/opencongregationhelper",
-    "version": "v1.0.0-alpha8",
+    "version": "v1.0.0-alpha9",
     "type": "project",
     "description": "Gestionale dei territori per la congregazione di Ciampino.",
     "keywords": ["laravel", "framework"],
