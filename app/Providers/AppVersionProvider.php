@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use Awcodes\Versions\Providers\Contracts\VersionProvider;
 use DateTimeZone;
 
-class AppVersionProvider implements VersionProvider
+class AppVersionProvider
 {
     protected ?string $branch = null;
 
@@ -41,6 +40,33 @@ class AppVersionProvider implements VersionProvider
         $git_details = ' ('.($this->branch ?? '').'#'.($this->commitShort ?? 'unknown').$commit_date_time.')';
 
         return config('app.version').$git_details;
+    }
+
+    /**
+     * Branch (or tag) the app was built from.
+     */
+    public function getBranch(): ?string
+    {
+        return $this->branch;
+    }
+
+    /**
+     * Full hash of the commit the app was built from.
+     */
+    public function getCommit(): ?string
+    {
+        return $this->commit;
+    }
+
+    /**
+     * Date and time of the build, in the timezone of the app (`Y-m-d H:i:s`).
+     *
+     * It is the last modification of the file with the commit hash: the git ref of the branch, or the file set by
+     * `APP_VERSION_COMMIT_FILE`.
+     */
+    public function getCommitDateTime(): ?string
+    {
+        return $this->commitDateTime;
     }
 
     /**

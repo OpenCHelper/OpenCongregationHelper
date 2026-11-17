@@ -13,8 +13,7 @@ use App\Filament\Pages\EditTeam;
 use App\Filament\Pages\Logs;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
-use App\Providers\AppVersionProvider;
-use Awcodes\Versions\VersionsPlugin;
+use App\Support\AppVersions;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Detection\MobileDetect;
 use DiscoveryDesign\FilamentGaze\FilamentGazePlugin;
@@ -29,6 +28,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Platform;
+use Filament\Support\Enums\Width;
 use Filament\Support\Facades\FilamentView;
 use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
@@ -42,7 +42,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -111,6 +110,18 @@ class AppPanelProvider extends PanelProvider
                     ->label(fn (): string => __('filament-ui-switcher::filament-ui-switcher.modal.heading'))
                     ->icon(Heroicon::OutlinedCog6Tooth)
                     ->alpineClickHandler("\$dispatch('open-modal', { id: 'ui-switcher-modal' })"),
+                Action::make('versionInfo')
+                    ->label(fn (): string => __('filament-resources.version_info.menu_label'))
+                    ->icon(Heroicon::OutlinedInformationCircle)
+                    ->modalHeading(fn (): string => __('filament-resources.version_info.modal_heading'))
+                    ->modalIcon(Heroicon::OutlinedInformationCircle)
+                    ->modalWidth(Width::Medium)
+                    ->modalContent(fn (): View => view('filament.version-info', [
+                        'versions' => AppVersions::all(),
+                        'build' => AppVersions::build(),
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel(fn (): string => __('filament-actions::view.single.modal.actions.close.label')),
             ])
             ->renderHook(
                 PanelsRenderHook::LAYOUT_END,
@@ -152,11 +163,6 @@ class AppPanelProvider extends PanelProvider
                 EnvironmentIndicatorPlugin::make()
                     ->color(fn () => self::environmentColor(app()->environment())),
                 FilamentGazePlugin::make(),
-                VersionsPlugin::make()
-                    ->hasDefaults(App::environment() !== 'production')
-                    ->items([
-                        new AppVersionProvider,
-                    ]),
                 FilamentMailLogPlugin::make(),
                 ActivitylogPlugin::make(),
                 FilamentMobilePresetPlugin::make()

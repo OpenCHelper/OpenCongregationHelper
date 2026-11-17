@@ -5,6 +5,16 @@ return [
         'navigation_label' => 'User Profiles',
         'menu_label' => 'Profile',
     ],
+    'version_info' => [
+        'menu_label' => 'About',
+        'modal_heading' => 'Version information',
+        'versions' => 'Versions',
+        'build' => 'Build',
+        'branch' => 'Branch',
+        'commit' => 'Commit',
+        'date' => 'Date',
+        'unknown' => 'Unknown',
+    ],
     'stats_widget' => [
         'territories' => 'Territories',
         'total_territories_description' => 'Total number of territories',

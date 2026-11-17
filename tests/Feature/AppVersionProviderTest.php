@@ -1,7 +1,6 @@
 <?php
 
 use App\Providers\AppVersionProvider;
-use Awcodes\Versions\Providers\Contracts\VersionProvider;
 use Illuminate\Support\Facades\Config;
 
 beforeEach(function () {
@@ -29,12 +28,6 @@ afterEach(function () {
 });
 
 describe('AppVersionProvider', function () {
-
-    it('implements VersionProvider interface', function () {
-        $provider = new AppVersionProvider;
-
-        expect($provider)->toBeInstanceOf(VersionProvider::class);
-    });
 
     it('returns correct name', function () {
         $provider = new AppVersionProvider;

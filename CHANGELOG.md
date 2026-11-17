@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Offer to install the app after logging in: an **Install** button on Android, Chrome and Edge, and the steps to add it
   to the home screen on iPhone and iPad ([#12](https://github.com/OpenCHelper/OpenCongregationHelper/pull/12)).
 
+### Changed
+
+- The version information moved from the bottom of the sidebar to **About** in the profile menu. The branch, commit
+  and date of the build are no longer shown in production
+  ([#13](https://github.com/OpenCHelper/OpenCongregationHelper/pull/13)).
+
 ### Fixed
 
 - Top bar scrolling sideways on smartphones: the help button is now more compact and shows only its icon there
