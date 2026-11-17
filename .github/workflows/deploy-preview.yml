@@ -10,7 +10,7 @@ name: Deploy (PR previews)
 #
 # Altervista has no cron: cron-job.org runs the scheduler and the queue of each preview, through the jobs of its own
 # folder, `(Preview) PR-<N>`, deleted with the preview. They send the `ARTISAN_CRON_TOKEN` secret, when set: they are
-# then created (or updated) only when the preview is new, or on reopening, manual runs and re-runs, sparing the API of
+# then created only by the first deployment of the preview (and by manual runs, e.g. to retry), sparing the API of
 # cron-job.org (rate limited). Otherwise a new random token on every deployment, so they are updated on every push.
 #
 # Settings of the PREVIEW GitHub environment:
@@ -428,8 +428,7 @@ jobs:
           ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
           FIXED_CRON_TOKEN: ${{ secrets.ARTISAN_CRON_TOKEN }}
           EXISTING: ${{ steps.server.outputs.existing }}
-          EVENT_ACTION: ${{ github.event.action }}
-          RUN_ATTEMPT: ${{ github.run_attempt }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           # By default, the database of the Altervista account: `my_<username>`, user `<username>`, no password (it is
           # only reachable from the server itself)
@@ -450,14 +449,15 @@ jobs:
           fi
 
           # Secret sent by the cron jobs of the preview to its scheduler and queue endpoints. A fixed one never changes:
-          # the jobs of a preview already live are left as they are on every push (but re-runs, e.g. after cron-job.org
-          # refused them). Otherwise a new random one on every deployment, also given to the cron jobs
+          # the jobs are created by the first deployment of the preview only (or by a manual run, e.g. after
+          # cron-job.org refused them), and later pushes leave them as they are. Otherwise a new random one on every
+          # deployment, also given to the cron jobs
           if [[ -n "$FIXED_CRON_TOKEN" ]]; then
             cron_token="$FIXED_CRON_TOKEN"
-            if [[ "$EXISTING" == "true" ]] && [[ "$EVENT_ACTION" == "synchronize" ]] && (( RUN_ATTEMPT == 1 )); then
-              cron_sync=false
-            else
+            if [[ "$EXISTING" != "true" ]] || [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
               cron_sync=true
+            else
+              cron_sync=false
             fi
           else
             cron_token="$(openssl rand -hex 32)"
@@ -590,7 +590,7 @@ jobs:
             echo "created=unchanged" >> "$GITHUB_OUTPUT"
           else
             echo "created=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::The cron jobs of the preview could not be created on cron-job.org: its scheduler and queue do not run. Re-run the workflow to retry."
+            echo "::warning::The cron jobs of the preview could not be created on cron-job.org: its scheduler and queue do not run. Deploy the preview manually (workflow_dispatch) to retry."
           fi
 
       - name: Check the certificate of the preview
@@ -637,7 +637,7 @@ jobs:
           if [[ "$CRON_CREATED" == 'true' ]] || [[ "$CRON_CREATED" == 'unchanged' ]]; then
             cron_line="scheduler and queue (\`${cron_schedule}\`, ${cron_timezone}), in the \`${CRON_FOLDER}\` folder of cron-job.org"
           else
-            cron_line="⚠️ **not created** (cron-job.org refused them): the scheduler and the queue do not run, re-run the workflow to retry"
+            cron_line="⚠️ **not created** (cron-job.org refused them): the scheduler and the queue do not run, deploy the preview manually (\`workflow_dispatch\`) to retry"
           fi
 
           cat <<EOF >> "$GITHUB_STEP_SUMMARY"
@@ -672,7 +672,7 @@ jobs:
           opt-out-label: ${{ env.opt_out_label }}
           warning: >-
             ${{ steps.cron-result.outputs.created == 'false'
-              && 'The cron jobs could not be created on cron-job.org: the scheduler and the queue do not run. Re-run the workflow to retry.'
+              && 'The cron jobs could not be created on cron-job.org: the scheduler and the queue do not run. Deploy the preview manually (Run workflow, action `deploy`) to retry.'
               || '' }}
 
   destroy:
