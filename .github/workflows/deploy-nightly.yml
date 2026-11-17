@@ -1,8 +1,8 @@
 name: Deploy (Nightly)
 
-# Deploys every push to `main` to the `Nightly` GitHub environment, with fresh dummy data. Its settings (FTP_SERVER and
-# FTP_USERNAME variables, FTP_PASSWORD secret) are the ones of the environment; its `.env` file is managed on the server
-# (`nightly/.env`), see the README.
+# Deploys every push to `main` to the `Nightly` GitHub environment, with fresh dummy data. The environment holds the
+# FTP_SERVER and FTP_USERNAME variables and the FTP_PASSWORD, ROOT_PASSWORD and CRON_JOB_ORG_API_KEY secrets; the `.env`
+# file is written on every deployment (see the `dotenv` input below).
 on:
   push:
     branches:
@@ -34,5 +34,39 @@ jobs:
       # The space may also host the PR previews: each environment has its own folder (see the README), and Nightly is
       # deployed as a single archive unpacked on the server
       environment-folder: nightly
+      # Scheduler cron job on cron-job.org, with the CRON_JOB_ORG_API_KEY secret of the Nightly environment: every 5
+      # minutes from 8:00 to 22:55 (Rome time) on weekdays. Not worth failing the deployment for (e.g. API rate limit)
+      cron-folder: (Nightly)
+      cron-optional: true
+      # The `.env` file of Nightly, written on every deployment with a new `APP_KEY` and `ARTISAN_CRON_TOKEN`, plus the
+      # `ROOT_PASSWORD` secret of the Nightly environment as `INITIAL_ROOT_PASSWORD` (the database has no password)
+      dotenv: |
+        APP_NAME='OpenCongregationHelper (Nightly)'
+        APP_ENV='nightly'
+        APP_DEBUG=false
+        APP_URL='https://ochtest.altervista.org'
+        ASSET_URL='https://ochtest.altervista.org'
+        APP_VERSION_BRANCH_FILE='.git-branch-name'
+        APP_VERSION_COMMIT_FILE='.git-commit-hash'
+        APP_LOCALE='en'
+        APP_FALLBACK_LOCALE='en'
+        LOG_CHANNEL='single'
+        LOG_LEVEL='info'
+        DB_CONNECTION='mysql'
+        DB_HOST='localhost'
+        DB_PORT=3306
+        DB_DATABASE='my_ochtest'
+        DB_USERNAME='ochtest'
+        DB_PASSWORD=''
+        DB_ENGINE='InnoDB'
+        # At most 6 characters: longer ones push some index names past the 64 characters allowed by MySQL
+        DB_PREFIX='nite_'
+        SESSION_DRIVER='database'
+        CACHE_STORE='database'
+        QUEUE_CONNECTION='sync'
+        MAIL_MAILER='log'
+        INITIAL_ROOT_USERNAME='Root User'
+        INITIAL_ROOT_USERMAIL='root@example.com'
+        DEMO_PREFILL_LOGIN_CREDENTIALS=true
     # The FTP credentials are the secrets of the GitHub environment
     secrets: inherit

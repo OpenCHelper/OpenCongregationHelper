@@ -91,6 +91,13 @@ on:
         required: false
         default: ""
         type: string
+      cron-optional:
+        description: >-
+          Never fail the deployment because of its cron job (see `cron-folder`), e.g. when the API of cron-job.org
+          refuses it (rate limit) or the `CRON_JOB_ORG_API_KEY` secret is missing: a warning is shown instead.
+        required: false
+        default: false
+        type: boolean
       cron-schedule:
         description: Schedule of the cron job (see `cron-folder`), e.g. every 5 minutes from 8:00 to 22:55 on weekdays.
         required: false
@@ -174,6 +181,7 @@ jobs:
           DOTENV: ${{ inputs.dotenv }}
           ENVIRONMENT_FOLDER: ${{ inputs.environment-folder }}
           CRON_FOLDER: ${{ inputs.cron-folder }}
+          CRON_OPTIONAL: ${{ inputs.cron-optional }}
           CRON_JOB_ORG_API_KEY: ${{ secrets.CRON_JOB_ORG_API_KEY }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
@@ -187,8 +195,12 @@ jobs:
             exit 1
           fi
           if [[ -n "$CRON_FOLDER" ]] && [[ -z "$CRON_JOB_ORG_API_KEY" ]]; then
-            echo "::error::Set the CRON_JOB_ORG_API_KEY secret of the environment, needed by the cron-folder input."
-            exit 1
+            if [[ "$CRON_OPTIONAL" != "true" ]]; then
+              echo "::error::Set the CRON_JOB_ORG_API_KEY secret of the environment, needed by the cron-folder input."
+              exit 1
+            fi
+            echo "::warning::No CRON_JOB_ORG_API_KEY secret in the environment: the cron job is not created nor updated."
+            CRON_FOLDER=""
           fi
 
           # Secret sent by the cron job to the scheduler endpoint: a new one on every deployment, also given to the job
@@ -479,7 +491,8 @@ jobs:
       # Once the deployment runs with the new token (see the `cron-folder` input): the job of the folder is matched by
       # title, so that every deployment updates it (with the new token) instead of creating it again
       - name: Create or update the cron job
-        if: inputs.cron-folder != ''
+        if: steps.dotenv.outputs.cron-token != ''
+        continue-on-error: ${{ inputs.cron-optional }}
         uses: LukeSavefrogs/cron-job-org-action@v2
         with:
           api-key: ${{ secrets.CRON_JOB_ORG_API_KEY }}
