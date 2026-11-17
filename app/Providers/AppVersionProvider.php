@@ -59,7 +59,10 @@ class AppVersionProvider
     }
 
     /**
-     * Date and time of the commit, in the timezone of the app (`Y-m-d H:i:s`).
+     * Date and time of the build, in the timezone of the app (`Y-m-d H:i:s`).
+     *
+     * It is the last modification of the file with the commit hash: the git ref of the branch, or the file set by
+     * `APP_VERSION_COMMIT_FILE`.
      */
     public function getCommitDateTime(): ?string
     {

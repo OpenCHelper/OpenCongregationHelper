@@ -2,6 +2,7 @@
 
 use App\Filament\Pages\EditProfile;
 use App\Models\User;
+use App\Providers\AppVersionProvider;
 use App\Support\AppVersions;
 use Filament\Facades\Filament;
 
@@ -89,6 +90,27 @@ test('the version modal shows the branch, commit and date of the build', functio
         ->toContain('2026-01-02 03:04:05')
         // The version of the app no longer repeats the details of the build
         ->not->toContain('release-branch#');
+});
+
+test('the build details are the ones of the version of the app', function () {
+    file_put_contents(base_path('test-git-head'), 'ref: refs/heads/main');
+    file_put_contents(base_path('test-git-commit'), 'abcdef1234567890abcdef1234567890abcdef12');
+    touch(base_path('test-git-commit'), strtotime('2026-01-02 03:04:05 UTC'));
+    config([
+        'app.version' => '1.0.0',
+        'app.version_info.branch_file' => 'test-git-head',
+        'app.version_info.commit_file' => 'test-git-commit',
+    ]);
+
+    try {
+        $build = AppVersions::build();
+        $version = (new AppVersionProvider)->getVersion();
+    } finally {
+        unlink(base_path('test-git-head'));
+        unlink(base_path('test-git-commit'));
+    }
+
+    expect($version)->toBe('1.0.0 ('.$build['branch'].'#'.substr($build['commit'], 0, 7).' @ '.$build['date'].')');
 });
 
 test('unknown build details are shown as unknown', function () {
