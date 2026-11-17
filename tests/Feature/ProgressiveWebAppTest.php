@@ -63,6 +63,18 @@ it('ships the service worker and the icons it caches', function () {
         ->and(public_path('icons/apple-touch-icon.png'))->toBeFile();
 });
 
+it('registers the service worker with the app version, to replace its cache on new versions', function () {
+    config(['app.version' => 'v2.0.0-beta1']);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSee("navigator.serviceWorker.register('\/sw.js?version=v2.0.0-beta1')", escape: false);
+
+    expect(file_get_contents(public_path('sw.js')))
+        ->toContain('const CACHE = `opencongregationhelper-${VERSION}`')
+        ->toContain("searchParams.get('version')");
+});
+
 it('links the manifest and registers the service worker', function (string $uri) {
     $this->followingRedirects()
         ->get($uri)

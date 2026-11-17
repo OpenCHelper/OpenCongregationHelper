@@ -5,9 +5,10 @@
  * cached offline page is shown instead. Only the static assets built by Vite (whose names change with their content)
  * and the app icons are cached, so the app starts faster.
  *
- * Change `VERSION` to replace the cached files (e.g. when the offline page or the icons change).
+ * The cached files are replaced when the app version changes: the page registers this script with the version in its
+ * URL (`sw.js?version=...`), and a new URL installs a new service worker, which deletes the caches of the old one.
  */
-const VERSION = 'v1';
+const VERSION = new URL(self.location.href).searchParams.get('version') ?? 'unversioned';
 const CACHE = `opencongregationhelper-${VERSION}`;
 const OFFLINE_URL = '/offline';
 const PRECACHED_URLS = [

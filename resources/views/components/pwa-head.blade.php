@@ -1,4 +1,7 @@
-{{-- Progressive Web App: manifest, icons and service worker, shared by the home page, the layouts and the panels. --}}
+{{--
+    Progressive Web App: manifest, icons and service worker, shared by the home page, the layouts and the panels.
+    The service worker gets the app version, so that a new version replaces the files it cached.
+--}}
 <link rel="manifest" href="{{ route('web-manifest') }}">
 <meta name="theme-color" content="{{ \App\Http\Controllers\WebManifestController::THEME_COLOR }}">
 <meta name="mobile-web-app-capable" content="yes">
@@ -9,6 +12,6 @@
 <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+        window.addEventListener('load', () => navigator.serviceWorker.register(@js('/sw.js?'.http_build_query(['version' => config('app.version')]))));
     }
 </script>
