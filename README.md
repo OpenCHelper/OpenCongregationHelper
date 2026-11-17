@@ -23,13 +23,19 @@ register, and works in the browser, also on smartphones.
 
 ## Demo
 
-Try it on the **[public demo](https://ochdemo.altervista.org)**: it runs the latest release with dummy data, and anyone
-can sign in as administrator, so never enter real data there (it is reset every night). It is deployed by
-[OpenCongregationHelper-demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo).
+See it in action, no installation needed: both demos come with dummy data and sign you in as administrator in one click.
 
-To preview what is coming next, the **[nightly demo](https://ochtest.altervista.org)** runs the latest code of `main`
-instead of the latest release: it is redeployed on every push, with fresh dummy data, so it may be unstable and its data
-is reset each time. Like the public demo, anyone can sign in as administrator. It is deployed by [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml).
+| | Runs | Data reset |
+| --- | --- | --- |
+| 🚀 **[Public demo](https://ochdemo.altervista.org)** | The latest release | Every night |
+| 🌙 **[Nightly demo](https://ochtest.altervista.org)** | The latest code of `main`, a sneak peek of what's coming | On every push to `main` |
+
+The public demo is deployed by [OpenCongregationHelper-demo](https://github.com/OpenCHelper/OpenCongregationHelper-demo),
+the nightly one by [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml).
+
+> [!WARNING]
+> Anyone can sign in as administrator and the data is regularly wiped: **never enter real data** in the demos. The
+> nightly demo runs unreleased code, so expect bugs and unfinished features.
 
 ## Tech stack
 
