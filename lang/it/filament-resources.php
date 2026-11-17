@@ -204,6 +204,7 @@ return [
         'due_soon_assignment_heading' => 'La campagna ":campaign" termina :when (:date)',
         'campaign_deadline_callout_description' => 'Questo territorio non è ancora stato restituito. Se hai finito di lavorarlo, ricordati di restituirlo.',
         'return_success' => 'Assegnazione restituita',
+        'navigation_badge_tooltip' => 'Assegnazioni ancora in corso di una campagna terminata',
         'column_creator' => 'Creatore',
         'column_created_at' => 'Creato il',
         'column_updated_at' => 'Aggiornato il',

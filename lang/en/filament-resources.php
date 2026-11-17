@@ -204,6 +204,7 @@ return [
         'due_soon_assignment_heading' => 'The campaign ":campaign" ends :when (:date)',
         'campaign_deadline_callout_description' => 'This territory has not been returned yet. If you have finished working on it, remember to return it.',
         'return_success' => 'Assignment returned',
+        'navigation_badge_tooltip' => 'Assignments still in progress of an ended campaign',
         'column_creator' => 'Creator',
         'column_created_at' => 'Created At',
         'column_updated_at' => 'Updated At',

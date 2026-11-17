@@ -31,8 +31,8 @@ class ManageTerritoryAssignments extends ManageRecords
 
     public function getTabs(): array
     {
-        $overdueCount = $this->getOverdueAssignmentsQuery()->count();
-        $dueSoonCount = $this->getVisibleAssignmentsQuery()->dueSoon()->count();
+        $overdueCount = TerritoryAssignmentResource::getOverdueAssignmentsQuery()->count();
+        $dueSoonCount = TerritoryAssignmentResource::getVisibleAssignmentsQuery()->dueSoon()->count();
 
         return [
             'all' => Tab::make('all')
@@ -69,12 +69,12 @@ class ManageTerritoryAssignments extends ManageRecords
 
     protected function getOverdueAssignmentsCallout(): Callout
     {
-        return Callout::make(fn (): string => trans_choice('filament-resources.territory_assignment.overdue_callout_heading', $this->getOverdueAssignmentsQuery()->count()))
+        return Callout::make(fn (): string => trans_choice('filament-resources.territory_assignment.overdue_callout_heading', TerritoryAssignmentResource::getOverdueAssignmentsQuery()->count()))
             ->description(__('filament-resources.territory_assignment.overdue_callout_description'))
             ->key('overdueAssignmentsCallout')
             ->danger()
             ->icon(Heroicon::OutlinedExclamationTriangle)
-            ->visible(fn (): bool => $this->getOverdueAssignmentsQuery()->exists())
+            ->visible(fn (): bool => TerritoryAssignmentResource::getOverdueAssignmentsQuery()->exists())
             ->actions([
                 Action::make('showOverdueAssignments')
                     ->button()
@@ -98,7 +98,7 @@ class ManageTerritoryAssignments extends ManageRecords
                     ->action(function (): void {
                         $returnedCount = 0;
 
-                        $this->getOverdueAssignmentsQuery()
+                        TerritoryAssignmentResource::getOverdueAssignmentsQuery()
                             ->lazyById()
                             ->each(function (TerritoryAssignment $assignment) use (&$returnedCount): void {
                                 if (Gate::denies('update', $assignment)) {
@@ -115,25 +115,5 @@ class ManageTerritoryAssignments extends ManageRecords
                             ->send();
                     }),
             ]);
-    }
-
-    /**
-     * The assignments the current user is allowed to see, ignoring the deleted ones.
-     *
-     * @return Builder<TerritoryAssignment>
-     */
-    protected function getVisibleAssignmentsQuery(): Builder
-    {
-        return TerritoryAssignmentResource::scopeToVisibleAssignments(
-            TerritoryAssignment::query()->whereHas('assignee')
-        );
-    }
-
-    /**
-     * @return Builder<TerritoryAssignment>
-     */
-    protected function getOverdueAssignmentsQuery(): Builder
-    {
-        return $this->getVisibleAssignmentsQuery()->overdue();
     }
 }

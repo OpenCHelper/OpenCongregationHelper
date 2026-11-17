@@ -83,6 +83,46 @@ class TerritoryAssignmentResource extends Resource
     }
 
     /**
+     * Number of overdue assignments (in progress although their campaign has ended) the user can see.
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        $overdueCount = static::getOverdueAssignmentsQuery()->count();
+
+        return $overdueCount > 0 ? (string) $overdueCount : null;
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'danger';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return __('filament-resources.territory_assignment.navigation_badge_tooltip');
+    }
+
+    /**
+     * The assignments the current user is allowed to see, ignoring the deleted ones.
+     *
+     * @return Builder<TerritoryAssignment>
+     */
+    public static function getVisibleAssignmentsQuery(): Builder
+    {
+        return static::scopeToVisibleAssignments(TerritoryAssignment::query()->whereHas('assignee'));
+    }
+
+    /**
+     * The assignments the current user is allowed to see that are still in progress although their campaign has ended.
+     *
+     * @return Builder<TerritoryAssignment>
+     */
+    public static function getOverdueAssignmentsQuery(): Builder
+    {
+        return static::getVisibleAssignmentsQuery()->overdue();
+    }
+
+    /**
      * Users allowed to list all the assignments see everyone's assignments,
      * the others only see their own (e.g. when opening a notification link).
      */

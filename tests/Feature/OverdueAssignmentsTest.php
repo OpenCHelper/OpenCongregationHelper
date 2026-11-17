@@ -2,6 +2,7 @@
 
 use App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\Campaign;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
@@ -159,4 +160,29 @@ test('the page of an assignment on time does not show the reminder', function ()
     Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->onTime->getKey()])
         ->assertSuccessful()
         ->assertDontSee(__('filament-resources.territory_assignment.campaign_deadline_callout_description'));
+});
+
+test('the navigation badge counts the overdue assignments', function () {
+    actingAsOverdueAssignmentsUser(['ViewAny:TerritoryAssignment']);
+
+    expect(TerritoryAssignmentResource::getNavigationBadge())->toBe('1')
+        ->and(TerritoryAssignmentResource::getNavigationBadgeColor())->toBe('danger');
+});
+
+test('the navigation badge only counts the overdue assignments the user can see', function () {
+    $assignee = actingAsOverdueAssignmentsUser(['View:TerritoryAssignment']);
+
+    expect(TerritoryAssignmentResource::getNavigationBadge())->toBeNull();
+
+    $this->overdue->update(['assignee_id' => $assignee->id]);
+
+    expect(TerritoryAssignmentResource::getNavigationBadge())->toBe('1');
+});
+
+test('the navigation badge is hidden when no assignment is overdue', function () {
+    $this->overdue->update(['ended_at' => now()]);
+
+    actingAsOverdueAssignmentsUser(['ViewAny:TerritoryAssignment']);
+
+    expect(TerritoryAssignmentResource::getNavigationBadge())->toBeNull();
 });

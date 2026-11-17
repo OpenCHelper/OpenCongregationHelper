@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "Campaign ended" and "Campaign ending soon" tabs on the assignments page, and a banner listing the territories still
   out for an ended campaign, to show them or return them all at once.
 - Banner on the page of an assignment whose campaign has ended (or is about to end), reminding to return the territory.
+- Red badge next to "Assignments" in the menu with the number of assignments still in progress of an ended campaign.
 
 ### Changed
 
