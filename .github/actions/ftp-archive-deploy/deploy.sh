@@ -54,6 +54,7 @@
 #                                       the folder of the environment itself)
 #   --repository-url <url>              Router: repository of the PRs, linked from the page of the missing previews
 #                                       (default: the one of the GitHub Actions run, if any; empty: no links)
+#   --no-previews                       Router: the space hosts no PR previews (no `pr-<N>` rule nor `previews/`)
 #   -v, --verbose
 #
 # Like `remote_artisan.sh`, the requests are authorized with a random token uploaded through FTP, which is always
@@ -77,6 +78,7 @@ declare -r DEPLOYER_PATH="_deployer/${DEPLOYER_VERSION}"
 # Read by the `EXIT` trap, which runs after `main` has returned: not local
 ftp_hostname="" ftp_username="" ftp_password="" token_id="" token_file="" token=""
 base_url="" verbose=false server_budget="" server_time_limit="" default_environment="" php_handler="" document_root="public"
+router_previews=true
 repository_url="${GITHUB_SERVER_URL:+${GITHUB_REPOSITORY:+${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}}}"
 keep=() reuse=() exclude=() include=() exclude_from=""
 
@@ -223,7 +225,7 @@ read_server_info () {
 # Write the router of the space into the given folder, from the templates of `router/`
 render_router () {
     local folder="$1" site site_pattern content default_rule default_description handler_lines root_path previews
-    local missing_page
+    local missing_page previews_summary previews_rule
 
     site="${base_url#*://}"
     site="${site%%/*}"
@@ -280,7 +282,22 @@ render_router () {
     # `&` in the replacements must stay literal (Bash 5.2)
     shopt -u patsub_replacement 2> /dev/null || true
 
-    content="$(< "${ROUTER_DIR}/root.htaccess")"
+    # Lines of the PR previews in the template, placeholders included: removed when the space hosts none
+    if [[ "$router_previews" == "true" ]]; then
+        previews_summary='#  - `pr-<N>.{{SITE}}`        => `previews/` (the PR previews, see `previews/.htaccess`);'
+        previews_rule='    # pr-<N>.{{SITE}} => the PR previews'$'\n'
+        previews_rule+='    RewriteCond %{HTTP_HOST} ^pr-[0-9]+\.{{SITE_PATTERN}}(:[0-9]+)?$ [NC]'$'\n'
+        previews_rule+='    RewriteRule ^(.*)$ previews/$1 [L]'$'\n'
+    else
+        previews_summary="" previews_rule=""
+    fi
+
+    # Read from the environment, since `awk -v` would interpret the backslashes
+    content="$(PREVIEWS_SUMMARY="$previews_summary" PREVIEWS_RULE="$previews_rule" awk '
+        $0 == "{{PREVIEWS_SUMMARY}}" { if (ENVIRON["PREVIEWS_SUMMARY"] != "") print ENVIRON["PREVIEWS_SUMMARY"]; next }
+        $0 == "{{PREVIEWS_RULE}}" { if (ENVIRON["PREVIEWS_RULE"] != "") print ENVIRON["PREVIEWS_RULE"]; next }
+        { print }
+    ' "${ROUTER_DIR}/root.htaccess")"
     content="${content//\{\{PHP_HANDLER\}\}/$handler_lines}"
     content="${content//\{\{DEFAULT_RULE\}\}/$default_rule}"
     content="${content//\{\{DEFAULT_DESCRIPTION\}\}/$default_description}"
@@ -294,11 +311,15 @@ render_router () {
     missing_page="$(< "${ROUTER_DIR}/404.php")"
     missing_page="${missing_page//\{\{REPOSITORY_URL\}\}/${repository_url}}"
 
-    mkdir -p "${folder}/previews"
+    mkdir -p "${folder}"
     printf '%s\n' "$content" > "${folder}/.htaccess"
-    printf '%s\n' "$previews" > "${folder}/previews/.htaccess"
-    printf '%s\n' "$missing_page" > "${folder}/previews/404.php"
-    cp "${ROUTER_DIR}/robots.txt" "${folder}/previews/robots.txt"
+
+    if [[ "$router_previews" == "true" ]]; then
+        mkdir -p "${folder}/previews"
+        printf '%s\n' "$previews" > "${folder}/previews/.htaccess"
+        printf '%s\n' "$missing_page" > "${folder}/previews/404.php"
+        cp "${ROUTER_DIR}/robots.txt" "${folder}/previews/robots.txt"
+    fi
 }
 
 install_router () {
@@ -453,6 +474,7 @@ main () {
             --php-handler)      php_handler="$2"; shift 2 ;;
             --document-root)    document_root="$2"; shift 2 ;;
             --repository-url)   repository_url="$2"; shift 2 ;;
+            --no-previews)      router_previews=false; shift ;;
             -h | --help)
                 sed -n '/^# Usage:/,/^# action can be safely/p' "$0" | sed 's/^# \{0,1\}//' >&2
                 return 0

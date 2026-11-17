@@ -54,6 +54,13 @@ on:
         required: false
         default: ""
         type: string
+      router-previews:
+        description: >-
+          Whether the space hosts PR previews (archive deployments only, see `environment-folder`): `false` leaves the
+          `pr-<N>` rule and the `previews/` folder out of the router of the space.
+        required: false
+        default: true
+        type: boolean
       repository:
         description: >-
           Repository to deploy (`owner/name`), e.g. when called from another repository to deploy a release of this
@@ -317,6 +324,7 @@ jobs:
           manage-router: true
           default-environment: ${{ vars.SPACE_DEFAULT_ENVIRONMENT }}
           php-handler: ${{ vars.SPACE_PHP_HANDLER }}
+          router-previews: ${{ inputs.router-previews }}
           # `.env` is managed on the server (unless written by the build, see the `dotenv` input), and the files of the
           # environment survive its releases
           keep: |

@@ -652,6 +652,22 @@ test('the router keeps the previews out of the search engines with the directive
         ->toContain("User-agent: *\nDisallow: /\n");
 });
 
+test('the router of a space without previews has no previews', function () {
+    expect(renderRouter($this->root.'/router', [
+        '--base-url', 'https://example.altervista.org',
+        '--default-environment', 'nightly',
+        '--no-previews',
+    ]))->toBe(0);
+
+    expect(file_get_contents($this->root.'/router/.htaccess'))
+        ->not->toContain('pr-')
+        ->not->toContain('previews')
+        ->not->toContain('{{')
+        ->toContain('RewriteCond %{HTTP_HOST} ^([a-z0-9-]+)\\.example\\.altervista\\.org(:[0-9]+)?$ [NC]')
+        ->toContain('RewriteRule ^(.*)$ nightly/public/$1 [L]')
+        ->and(file_exists($this->root.'/router/previews'))->toBeFalse();
+});
+
 test('the router can serve the folders of the environments themselves', function () {
     expect(renderRouter($this->root.'/router', [
         '--base-url', 'https://example.org',

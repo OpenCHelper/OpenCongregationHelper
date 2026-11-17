@@ -63,6 +63,12 @@ inputs:
       previews, linking to their PR) before deploying: for spaces hosting several environments, each in its own folder
     required: false
     default: "false"
+  router-previews:
+    description: >-
+      Router: whether the space hosts PR previews (the `pr-<N>.<site>` rule, and `previews/` with the 404 page of the
+      missing previews); `false` for a space without previews
+    required: false
+    default: "true"
   default-environment:
     description: "Router: folder served on the site without subdomain (and `www.`); empty: none (404)"
     required: false
@@ -129,6 +135,7 @@ runs:
         DEFAULT_ENVIRONMENT: ${{ inputs.default-environment }}
         PHP_HANDLER: ${{ inputs.php-handler }}
         DOCUMENT_ROOT: ${{ inputs.document-root }}
+        ROUTER_PREVIEWS: ${{ inputs.router-previews }}
       run: |
         deployer () {
           "$DEPLOY_SCRIPT" --base-url "$BASE_URL" \
@@ -136,8 +143,10 @@ runs:
         }
 
         if [[ "$MANAGE_ROUTER" == "true" ]]; then
+          router_args=()
+          [[ "$ROUTER_PREVIEWS" == "false" ]] && router_args+=(--no-previews)
           deployer --default-environment "$DEFAULT_ENVIRONMENT" --php-handler "$PHP_HANDLER" \
-            ${DOCUMENT_ROOT:+--document-root "$DOCUMENT_ROOT"} install-router
+            ${DOCUMENT_ROOT:+--document-root "$DOCUMENT_ROOT"} "${router_args[@]}" install-router
         fi
 
         archive="${RUNNER_TEMP}/ftp-archive-deploy-${TARGET}.zip"
