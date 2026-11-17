@@ -178,16 +178,7 @@ ROOT_PASSWORD=MyVerySecretPassword
 CRON_JOB_ORG_API_KEY=MyCronJobOrgApiKey
 ```
 
-## Deploy
-
-| Workflow | Deploys to |
-| --- | --- |
-| [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) | `https://pr-<N>.<site>`, a preview of every PR |
-| [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) | The [nightly demo](#demo), on every push to `main` |
-
-Other installations call the reusable
-[`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow from their own repository
-(see its inputs).
+## Deploying
 
 ### Altervista
 
@@ -199,3 +190,18 @@ Other installations call the reusable
 | Subdomain | `{username}.altervista.org` |
 | PHP versions | 8.2<br/>8.0<br/>~~7.3~~ (_deprecated_)<br/>~~5.6~~ (_deprecated_) |
 | Shell access | No |
+
+#### Examples
+
+This site itself, along with all the PR previews, is hosted on Altervista.
+
+
+| Workflow | Deploys to |
+| --- | --- |
+| [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) | `https://pr-<N>.<site>`, a preview of every PR |
+| [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) | The [nightly demo](#demo), on every push to `main` |
+
+Other installations call the reusable
+[`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow from their own repository
+(see its inputs).
+
