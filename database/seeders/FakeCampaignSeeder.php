@@ -10,8 +10,8 @@ use Illuminate\Support\Carbon;
 /**
  * Seed the campaigns of a congregation.
  *
- * The dates are relative to the day of seeding, so that the demo, reset every night, always shows
- * campaigns in each status: without an end date, active, expiring, almost expired, terminated and upcoming.
+ * The dates are relative to the day of seeding, so that the demo, reset every night, always shows an active,
+ * an expiring, a terminated and an upcoming campaign; the yearly campaigns are named after the year they start in.
  */
 class FakeCampaignSeeder extends Seeder
 {
@@ -37,15 +37,11 @@ class FakeCampaignSeeder extends Seeder
      */
     public function campaigns(): array
     {
+        $specialCampaignFrom = now()->subWeeks(3)->startOfDay();
+        $memorialFrom = now()->subMonths(8)->startOfDay();
+        $conventionFrom = now()->addMonth()->startOfDay();
+
         return [
-            [
-                'name' => 'House-to-house ministry',
-                'short_name' => 'H2H',
-                'description' => 'Regular door-to-door ministry, all year round.',
-                'color' => '#1565c0',
-                'valid_from' => null,
-                'valid_until' => null,
-            ],
             [
                 'name' => 'Letter writing',
                 'short_name' => 'LTR',
@@ -55,35 +51,27 @@ class FakeCampaignSeeder extends Seeder
                 'valid_until' => now()->addMonths(2)->endOfDay(),
             ],
             [
-                'name' => 'Special campaign',
+                'name' => "Special campaign {$specialCampaignFrom->year}",
                 'short_name' => 'SPC',
                 'description' => 'Distribution of the special issue of the magazine to every home of the territory.',
                 'color' => '#ef6c00',
-                'valid_from' => now()->subWeeks(3)->startOfDay(),
+                'valid_from' => $specialCampaignFrom,
                 'valid_until' => now()->addDays(6)->endOfDay(),
             ],
             [
-                'name' => 'Commercial territories',
-                'short_name' => 'COM',
-                'description' => 'Visits to shops and offices, on weekday mornings only.',
-                'color' => '#2e7d32',
-                'valid_from' => now()->subMonth()->startOfDay(),
-                'valid_until' => now()->addDays(2)->endOfDay(),
-            ],
-            [
-                'name' => 'Memorial invitation',
+                'name' => "Memorial invitation {$memorialFrom->year}",
                 'short_name' => 'MEM',
                 'description' => 'Invitations to the Memorial of the death of Jesus: cover the whole territory in the three weeks before.',
                 'color' => '#c62828',
-                'valid_from' => now()->subMonths(8)->startOfDay(),
+                'valid_from' => $memorialFrom,
                 'valid_until' => now()->subMonths(7)->endOfDay(),
             ],
             [
-                'name' => 'Convention invitation',
+                'name' => "Convention invitation {$conventionFrom->year}",
                 'short_name' => 'CON',
                 'description' => 'Invitations to the regional convention, in the month before it starts.',
                 'color' => '#00838f',
-                'valid_from' => now()->addMonth()->startOfDay(),
+                'valid_from' => $conventionFrom,
                 'valid_until' => now()->addMonths(2)->endOfDay(),
             ],
         ];

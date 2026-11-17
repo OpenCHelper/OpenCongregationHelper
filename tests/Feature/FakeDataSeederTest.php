@@ -110,15 +110,29 @@ test('the fake territories are closed polygons that do not overlap', function ()
     }
 });
 
-test('the fake campaigns cover every status', function () {
+test('the fake campaigns are active, expiring, terminated and upcoming', function () {
     Notification::fake();
     User::factory()->create(['id' => 1]);
 
     $this->seed(FakeCampaignSeeder::class);
 
     expect(Campaign::all()->map(fn (Campaign $campaign): CampaignStatus => $campaign->getStatus())->unique()->values()->all())
-        ->toEqualCanonicalizing(CampaignStatus::cases())
+        ->toEqualCanonicalizing([CampaignStatus::ACTIVE, CampaignStatus::IS_EXPIRING, CampaignStatus::TERMINATED])
         ->and(Campaign::where('valid_from', '>', now())->exists())->toBeTrue();
+});
+
+test('the yearly fake campaigns are named after the year they start in', function () {
+    Notification::fake();
+    User::factory()->create(['id' => 1]);
+
+    $this->seed(FakeCampaignSeeder::class);
+
+    $memorial = Campaign::where('short_name', 'MEM')->sole();
+
+    expect($memorial->name)->toBe('Memorial invitation '.$memorial->valid_from->year)
+        ->and(Campaign::where('short_name', 'SPC')->sole()->name)->toStartWith('Special campaign ')
+        ->and(Campaign::where('short_name', 'CON')->sole()->name)->toStartWith('Convention invitation ')
+        ->and(Campaign::whereIn('short_name', ['H2H', 'COM'])->exists())->toBeFalse();
 });
 
 test('the fake assignments use started campaigns and one territory each', function () {
