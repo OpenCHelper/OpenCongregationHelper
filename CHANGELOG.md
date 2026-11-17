@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   window, and a page explaining when there is no connection
   ([#7](https://github.com/OpenCHelper/OpenCongregationHelper/pull/7)).
 - Offer to install the app after logging in: an **Install** button on Android, Chrome and Edge, and the steps to add it
-  to the home screen on iPhone and iPad.
+  to the home screen on iPhone and iPad ([#12](https://github.com/OpenCHelper/OpenCongregationHelper/pull/12)).
 
 ### Fixed
 
