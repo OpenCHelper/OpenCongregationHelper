@@ -82,3 +82,13 @@ On small screens the sidebar is replaced by a **bottom navigation bar**. Tap **M
 Forms and dialogs open as panels sliding from the side, which are easier to use with a finger.
 
 ![The application on a smartphone](/docs/user-documentation/en/basics/assets/mobile-territories.webp)
+
+## Installing the app
+
+You can install the application on your smartphone or computer, to open it from the home screen or the desktop in its
+own window. After you log in, a box at the bottom of the page offers to install it:
+
+- on **Android** and in **Chrome** or **Edge** on computers, click **Install** and confirm;
+- on **iPhone** and **iPad**, tap the **Share** button of Safari, then **Add to Home Screen**.
+
+Click **Not now** to hide the box: it comes back after 30 days. It is not shown when the app is already installed.

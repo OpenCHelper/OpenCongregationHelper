@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\WebManifestController;
+use App\Models\User;
 use App\Support\ServiceWorker;
 
 beforeEach(function () {
@@ -104,6 +105,31 @@ it('links the manifest and registers the service worker', function (string $uri)
         ->assertSee('<link rel="manifest" href="'.route('web-manifest').'">', escape: false)
         ->assertSee('<link rel="apple-touch-icon"', escape: false)
         ->assertSee('navigator.serviceWorker.register', escape: false);
+})->with([
+    'home page' => '/',
+    'login page of the app panel' => '/app/login',
+    'knowledge base' => '/knowledge-base',
+]);
+
+it('offers to install the app in the app panel, once logged in', function () {
+    $user = User::factory()->create(['can_login' => true, 'email_verified_at' => now()]);
+
+    $this->actingAs($user)
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee("window.addEventListener('beforeinstallprompt'", escape: false)
+        ->assertSee('app-pwa-install', escape: false)
+        ->assertSee(__('pwa.install.title', ['app' => config('app.name')]))
+        ->assertSee(__('pwa.install.action'))
+        ->assertSee(__('pwa.install.dismiss'));
+});
+
+it('does not offer to install the app on the other pages', function (string $uri) {
+    $this->followingRedirects()
+        ->get($uri)
+        ->assertOk()
+        ->assertDontSee('beforeinstallprompt', escape: false);
 })->with([
     'home page' => '/',
     'login page of the app panel' => '/app/login',

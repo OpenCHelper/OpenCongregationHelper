@@ -35,6 +35,7 @@ use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Guava\FilamentKnowledgeBase\Plugins\KnowledgeBaseCompanionPlugin;
 use Hammadzafar05\FilamentMobilePreset\FilamentMobilePresetPlugin;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -67,6 +68,11 @@ class AppPanelProvider extends PanelProvider
      * The menu is wrapped before the global search so that the theme of the panel can make its button compact.
      */
     private const HELP_MENU_RENDER_HOOK = 'app::help-menu';
+
+    /**
+     * Days during which the offer to install the app is not shown again, after the user dismissed it.
+     */
+    public const PWA_INSTALL_DISMISS_DAYS = 30;
 
     public function panel(Panel $panel): Panel
     {
@@ -109,6 +115,12 @@ class AppPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::LAYOUT_END,
                 fn (): string => '<div class="app-ui-preferences">'.FilamentView::renderHook(self::UI_PREFERENCES_RENDER_HOOK)->toHtml().'</div>',
+            )
+            // Offer to install the app once logged in (on the login page it would cover the form), at the start of the
+            // body to catch the event of the browser early.
+            ->renderHook(
+                PanelsRenderHook::BODY_START,
+                fn (): ?View => Filament::auth()->check() ? view('filament.pwa-install-prompt') : null,
             )
             // Registered after the plugins, so that the help menu stays after the environment indicator.
             ->bootUsing(function (): void {

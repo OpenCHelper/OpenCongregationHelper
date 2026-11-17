@@ -82,3 +82,13 @@ Sugli schermi piccoli la barra laterale è sostituita da una **barra di navigazi
 raggiungere le altre voci del menu. Moduli e finestre si aprono come pannelli laterali, più comodi da usare con il dito.
 
 ![L'applicazione su uno smartphone](/docs/user-documentation/it/basics/assets/mobile-territories.webp)
+
+## Installare l'app
+
+Puoi installare l'applicazione sullo smartphone o sul computer, per aprirla dalla schermata Home o dal desktop in una
+sua finestra. Dopo l'accesso, un riquadro in fondo alla pagina propone di installarla:
+
+- su **Android** e in **Chrome** o **Edge** sui computer, clicca **Installa** e conferma;
+- su **iPhone** e **iPad**, tocca il pulsante **Condividi** di Safari, poi **Aggiungi alla schermata Home**.
+
+Clicca **Non ora** per nascondere il riquadro: ricompare dopo 30 giorni. Non è mostrato se l'app è già installata.
