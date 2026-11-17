@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The version information moved from the bottom of the sidebar to **About** in the profile menu. The branch, commit
-  and date of the build are no longer shown in production.
+  and date of the build are no longer shown in production
+  ([#13](https://github.com/OpenCHelper/OpenCongregationHelper/pull/13)).
 
 ### Fixed
 
