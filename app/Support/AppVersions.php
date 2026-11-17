@@ -27,9 +27,24 @@ class AppVersions
             ];
         }
 
-        $app = new AppVersionProvider;
-        $versions[$app->getName()] = $app->getVersion();
+        $versions['App'] = (string) config('app.version');
 
         return array_map(fn (string $version): string => ltrim($version, 'v'), $versions);
+    }
+
+    /**
+     * Details of the build of the app, `null` when they are unknown.
+     *
+     * @return array{branch: ?string, commit: ?string, date: ?string}
+     */
+    public static function build(): array
+    {
+        $app = new AppVersionProvider;
+
+        return [
+            'branch' => $app->getBranch(),
+            'commit' => $app->getCommit(),
+            'date' => $app->getCommitDateTime(),
+        ];
     }
 }

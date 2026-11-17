@@ -43,6 +43,30 @@ class AppVersionProvider
     }
 
     /**
+     * Branch (or tag) the app was built from.
+     */
+    public function getBranch(): ?string
+    {
+        return $this->branch;
+    }
+
+    /**
+     * Full hash of the commit the app was built from.
+     */
+    public function getCommit(): ?string
+    {
+        return $this->commit;
+    }
+
+    /**
+     * Date and time of the commit, in the timezone of the app (`Y-m-d H:i:s`).
+     */
+    public function getCommitDateTime(): ?string
+    {
+        return $this->commitDateTime;
+    }
+
+    /**
      * Get the current git branch name.
      *
      * By default, it reads from the `.git/HEAD` file.

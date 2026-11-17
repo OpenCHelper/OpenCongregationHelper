@@ -118,6 +118,7 @@ class AppPanelProvider extends PanelProvider
                     ->modalWidth(Width::Medium)
                     ->modalContent(fn (): View => view('filament.version-info', [
                         'versions' => AppVersions::all(),
+                        'build' => AppVersions::build(),
                     ]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel(fn (): string => __('filament-actions::view.single.modal.actions.close.label')),

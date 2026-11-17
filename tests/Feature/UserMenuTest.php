@@ -53,9 +53,50 @@ test('the versions are shown from the user menu', function () {
 test('the version modal lists the version of the app', function () {
     config(['app.version' => '9.8.7-test']);
 
-    expect(view('filament.version-info', ['versions' => AppVersions::all()])->render())
+    expect(view('filament.version-info', ['versions' => AppVersions::all(), 'build' => AppVersions::build()])->render())
         ->toContain('App')
         ->toContain('9.8.7-test');
+});
+
+test('the version modal shows the branch, commit and date of the build', function () {
+    file_put_contents(base_path('test-git-head'), 'ref: refs/heads/release-branch');
+    file_put_contents(base_path('test-git-commit'), 'abcdef1234567890abcdef1234567890abcdef12');
+    touch(base_path('test-git-commit'), strtotime('2026-01-02 03:04:05 UTC'));
+    config([
+        'app.timezone' => 'UTC',
+        'app.version_info.branch_file' => 'test-git-head',
+        'app.version_info.commit_file' => 'test-git-commit',
+    ]);
+
+    try {
+        $build = AppVersions::build();
+        $html = view('filament.version-info', ['versions' => AppVersions::all(), 'build' => $build])->render();
+    } finally {
+        unlink(base_path('test-git-head'));
+        unlink(base_path('test-git-commit'));
+    }
+
+    expect($build)->toBe([
+        'branch' => 'release-branch',
+        'commit' => 'abcdef1234567890abcdef1234567890abcdef12',
+        'date' => '2026-01-02 03:04:05',
+    ]);
+
+    expect($html)
+        ->toContain(__('filament-resources.version_info.build'))
+        ->toContain('release-branch')
+        ->toMatch('/title="abcdef1234567890abcdef1234567890abcdef12"\s*>abcdef1</')
+        ->toContain('2026-01-02 03:04:05')
+        // The version of the app no longer repeats the details of the build
+        ->not->toContain('release-branch#');
+});
+
+test('unknown build details are shown as unknown', function () {
+    config(['app.version_info.branch_file' => 'non-existent-file']);
+
+    $html = view('filament.version-info', ['versions' => AppVersions::all(), 'build' => AppVersions::build()])->render();
+
+    expect(substr_count($html, __('filament-resources.version_info.unknown')))->toBe(3);
 });
 
 test('the versions of the stack are listed only outside production', function (string $environment, array $names) {

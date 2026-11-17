@@ -8,6 +8,12 @@ return [
     'version_info' => [
         'menu_label' => 'Informazioni',
         'modal_heading' => 'Informazioni sulla versione',
+        'versions' => 'Versioni',
+        'build' => 'Build',
+        'branch' => 'Branch',
+        'commit' => 'Commit',
+        'date' => 'Data',
+        'unknown' => 'Sconosciuto',
     ],
     'stats_widget' => [
         'territories' => 'Territori',
