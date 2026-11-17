@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use Awcodes\Versions\Providers\Contracts\VersionProvider;
 use DateTimeZone;
 
-class AppVersionProvider implements VersionProvider
+class AppVersionProvider
 {
     protected ?string $branch = null;
 

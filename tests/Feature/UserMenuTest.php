@@ -2,7 +2,7 @@
 
 use App\Filament\Pages\EditProfile;
 use App\Models\User;
-use Awcodes\Versions\VersionsPlugin;
+use App\Support\AppVersions;
 use Filament\Facades\Filament;
 
 beforeEach(function () {
@@ -39,7 +39,7 @@ test('the UI preferences are picked from the user menu, the language from the to
         ->assertSee('id="ui-switcher-modal"', escape: false);
 });
 
-test('the versions are shown from the user menu, not in the sidebar', function () {
+test('the versions are shown from the user menu', function () {
     $this->actingAs(User::factory()->create(['can_login' => true, 'email_verified_at' => now()]))
         ->get(EditProfile::getUrl())
         ->assertOk()
@@ -47,18 +47,22 @@ test('the versions are shown from the user menu, not in the sidebar', function (
             'fi-user-menu',
             __('filament-resources.version_info.menu_label'),
         ], escape: false)
-        ->assertDontSee('versions-nav-widget', escape: false)
-        ->assertDontSee('versions-footer-widget', escape: false);
+        ->assertSee('versionInfo', escape: false);
 });
 
 test('the version modal lists the version of the app', function () {
     config(['app.version' => '9.8.7-test']);
 
-    $html = view('filament.version-info', [
-        'versions' => VersionsPlugin::get()->getVersions(),
-    ])->render();
-
-    expect($html)
+    expect(view('filament.version-info', ['versions' => AppVersions::all()])->render())
         ->toContain('App')
         ->toContain('9.8.7-test');
 });
+
+test('the versions of the stack are listed only outside production', function (string $environment, array $names) {
+    app()->detectEnvironment(fn (): string => $environment);
+
+    expect(array_keys(AppVersions::all()))->toBe($names);
+})->with([
+    'local' => ['local', ['Laravel', 'Filament', 'PHP', 'App']],
+    'production' => ['production', ['App']],
+]);

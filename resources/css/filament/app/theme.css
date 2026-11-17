@@ -8,7 +8,6 @@
 @source '../../../../resources/views/livewire/**/*';
 
 @source '../../../../vendor/laravel/jetstream/**/*';
-@source '../../../../vendor/awcodes/filament-versions/**/*';
 
 @plugin "@tailwindcss/typography";
 @source '../../../../vendor/guava/filament-knowledge-base/src/**/*';

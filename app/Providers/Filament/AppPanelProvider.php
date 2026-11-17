@@ -13,8 +13,7 @@ use App\Filament\Pages\EditTeam;
 use App\Filament\Pages\Logs;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
-use App\Providers\AppVersionProvider;
-use Awcodes\Versions\VersionsPlugin;
+use App\Support\AppVersions;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Detection\MobileDetect;
 use DiscoveryDesign\FilamentGaze\FilamentGazePlugin;
@@ -43,7 +42,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -119,7 +117,7 @@ class AppPanelProvider extends PanelProvider
                     ->modalIcon(Heroicon::OutlinedInformationCircle)
                     ->modalWidth(Width::Medium)
                     ->modalContent(fn (): View => view('filament.version-info', [
-                        'versions' => VersionsPlugin::get()->getVersions(),
+                        'versions' => AppVersions::all(),
                     ]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel(fn (): string => __('filament-actions::view.single.modal.actions.close.label')),
@@ -164,13 +162,6 @@ class AppPanelProvider extends PanelProvider
                 EnvironmentIndicatorPlugin::make()
                     ->color(fn () => self::environmentColor(app()->environment())),
                 FilamentGazePlugin::make(),
-                // The versions are shown from the user menu (see `versionInfo`), not in the sidebar
-                VersionsPlugin::make()
-                    ->hasNavigationView(false)
-                    ->hasDefaults(App::environment() !== 'production')
-                    ->items([
-                        new AppVersionProvider,
-                    ]),
                 FilamentMailLogPlugin::make(),
                 ActivitylogPlugin::make(),
                 FilamentMobilePresetPlugin::make()
