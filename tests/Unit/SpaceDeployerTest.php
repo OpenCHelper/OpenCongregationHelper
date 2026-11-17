@@ -485,6 +485,15 @@ test('the archive left by a cancelled upload is deleted, and the client deletes 
         ->toBeLessThan(strpos($client, "put -c '\${archive}'"));
 });
 
+test('the client creates the previews folder only to upload a preview', function () {
+    $client = (string) file_get_contents(__DIR__.'/../../.github/actions/ftp-archive-deploy/deploy.sh');
+
+    expect($client)
+        ->toContain("ftp <<< \"\${create_folder}put -c '\${archive}'")
+        ->and(substr_count($client, 'mkdir -p -f previews'))->toBe(1)
+        ->and(preg_match('/remote_archive="previews\/\$\{target\}\.zip"\s+# [^\n]+\n\s+create_folder="mkdir -p -f previews; "/', $client))->toBe(1);
+});
+
 test('the live release cannot be deleted', function () {
     mkdir($this->previews.'/pr-7');
 

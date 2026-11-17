@@ -396,11 +396,13 @@ create_archive () {
 
 # Upload a release archive and replace the live release of the target with it, printing a JSON summary
 deploy () {
-    local target="$1" archive="$2" remote_archive started_at unpacked activated
+    local target="$1" archive="$2" remote_archive create_folder="" started_at unpacked activated
     started_at="$(date +%s)"
 
     if [[ "$target" =~ ^pr-[0-9]+$ ]]; then
         remote_archive="previews/${target}.zip"
+        # Only the spaces hosting previews get the `previews/` folder
+        create_folder="mkdir -p -f previews; "
     else
         remote_archive="${target}.zip"
     fi
@@ -412,7 +414,7 @@ deploy () {
     delete "$target" zip > /dev/null || return 1
 
     printf 'Uploading the archive...\n' >&2
-    ftp <<< "mkdir -p -f previews; put -c '${archive}' -o '${remote_archive}'" || return 1
+    ftp <<< "${create_folder}put -c '${archive}' -o '${remote_archive}'" || return 1
 
     printf 'Unpacking the archive...\n' >&2
     unpacked="$(extract "$target")" || return 1
