@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WebManifestController;
 use App\Models\SharedUrl;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -19,6 +20,11 @@ use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
 */
 
 Route::get('/', fn () => view('welcome'));
+
+// Progressive Web App: the manifest makes the app installable, the offline page is shown by the service worker
+// (`public/sw.js`) when a page cannot be loaded without a connection.
+Route::get('/manifest.webmanifest', WebManifestController::class)->name('web-manifest');
+Route::view('/offline', 'offline')->name('offline');
 
 Route::redirect('/login', '/app/login')->name('login');
 

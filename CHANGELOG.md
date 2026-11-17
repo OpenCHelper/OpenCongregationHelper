@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Installable app**: add it to the home screen of smartphones or install it on computers, with its own icon and
+  window, and a page explaining when there is no connection.
+
 ## [1.0.0-alpha9] - 2026-11-17
 
 ### Added
