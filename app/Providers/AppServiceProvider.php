@@ -14,11 +14,14 @@ use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Columns\TextColumn;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -54,6 +57,12 @@ class AppServiceProvider extends ServiceProvider
             Js::make('filament-sidebar-fix', __DIR__.'/../../resources/js/filament-sidebar-fix.js'),
             Js::make('filament-map-picker-fix', __DIR__.'/../../resources/js/filament-map-picker-fix.js'),
         ]);
+
+        // Make every panel installable as a Progressive Web App (manifest, icons and service worker)
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            fn (): string => Blade::render('<x-pwa-head />'),
+        );
 
         // Add a custom mail transport that uses the native mail() function
         Mail::extend('nativemailfx', function (array $config = []) {

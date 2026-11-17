@@ -65,12 +65,6 @@ jobs:
             echo "APP_URL=${app_url}" >> .env
           fi
 
-          if grep -q '^ASSET_URL=' .env; then
-            sed -i "s|^ASSET_URL=.*|ASSET_URL=${app_url}|g" .env
-          else
-            echo "ASSET_URL=${app_url}" >> .env
-          fi
-
           # - Switch to the development environment (the .env.example is production-safe)
           # - Switch to SQLite (MySQL is not available in the runner environment)
           # - Switch session and cache drivers to file/array to avoid DB dependency at boot
