@@ -33,12 +33,16 @@ class AppVersions
     }
 
     /**
-     * Details of the build of the app, `null` when they are unknown.
+     * Details of the build of the app (each `null` when unknown), not shown in production.
      *
-     * @return array{branch: ?string, commit: ?string, date: ?string}
+     * @return array{branch: ?string, commit: ?string, date: ?string}|null
      */
-    public static function build(): array
+    public static function build(): ?array
     {
+        if (app()->isProduction()) {
+            return null;
+        }
+
         $app = new AppVersionProvider;
 
         return [

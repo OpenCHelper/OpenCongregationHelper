@@ -113,6 +113,19 @@ test('the build details are the ones of the version of the app', function () {
     expect($version)->toBe('1.0.0 ('.$build['branch'].'#'.substr($build['commit'], 0, 7).' @ '.$build['date'].')');
 });
 
+test('the build details are hidden in production', function () {
+    app()->detectEnvironment(fn (): string => 'production');
+    config(['app.version' => '9.8.7-test']);
+
+    $html = view('filament.version-info', ['versions' => AppVersions::all(), 'build' => AppVersions::build()])->render();
+
+    expect(AppVersions::build())->toBeNull();
+    expect($html)
+        ->toContain('9.8.7-test')
+        ->not->toContain('app-build-info')
+        ->not->toContain(__('filament-resources.version_info.branch'));
+});
+
 test('unknown build details are shown as unknown', function () {
     config(['app.version_info.branch_file' => 'non-existent-file']);
 
