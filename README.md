@@ -188,3 +188,14 @@ CRON_JOB_ORG_API_KEY=MyCronJobOrgApiKey
 Other installations call the reusable
 [`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow from their own repository
 (see its inputs).
+
+### Altervista
+
+| Feature | Details |
+| --- | --- |
+| Disk space | 3.072 MB (shared between file system and database) |
+| HTTPS | Yes |
+| Traffic | 30 GB / month |
+| Subdomain | `{username}.altervista.org` |
+| PHP versions | 8.2<br/>8.0<br/>~~7.3~~ (_deprecated_)<br/>~~5.6~~ (_deprecated_) |
+| Shell access | No |
