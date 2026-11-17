@@ -14,8 +14,9 @@
 #
 # Actions:
 #   version                             Version of the bundled deployer (its folder in `_deployer/`)
-#   render-router <dir>                 Write the router of a space hosting several environments (`.htaccess` and
-#                                       `previews/.htaccess`) into a local folder (no FTP involved)
+#   render-router <dir>                 Write the router of a space hosting several environments (`.htaccess`, and
+#                                       `previews/.htaccess` with the page of the missing previews) into a local folder
+#                                       (no FTP involved)
 #   install-router                      Upload the router to the root of the space (never deletes anything), unless the
 #                                       installed one is already up to date
 #   create-archive <file>               Create the release archive of the current folder (no FTP involved)
@@ -51,6 +52,8 @@
 #   --php-handler <handler>             Router: PHP handler of the space (e.g. `av-php82` on Altervista)
 #   --document-root <folder>            Router: document root inside each environment (default: `public`; `.` for
 #                                       the folder of the environment itself)
+#   --repository-url <url>              Router: repository of the PRs, linked from the page of the missing previews
+#                                       (default: the one of the GitHub Actions run, if any; empty: no links)
 #   -v, --verbose
 #
 # Like `remote_artisan.sh`, the requests are authorized with a random token uploaded through FTP, which is always
@@ -74,6 +77,7 @@ declare -r DEPLOYER_PATH="_deployer/${DEPLOYER_VERSION}"
 # Read by the `EXIT` trap, which runs after `main` has returned: not local
 ftp_hostname="" ftp_username="" ftp_password="" token_id="" token_file="" token=""
 base_url="" verbose=false server_budget="" server_time_limit="" default_environment="" php_handler="" document_root="public"
+repository_url="${GITHUB_SERVER_URL:+${GITHUB_REPOSITORY:+${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}}}"
 keep=() reuse=() exclude=() include=() exclude_from=""
 
 remove_token () {
@@ -219,6 +223,7 @@ read_server_info () {
 # Write the router of the space into the given folder, from the templates of `router/`
 render_router () {
     local folder="$1" site site_pattern content default_rule default_description handler_lines root_path previews
+    local missing_page
 
     site="${base_url#*://}"
     site="${site%%/*}"
@@ -247,6 +252,12 @@ render_router () {
         root_path="${document_root}/"
     else
         printf "Invalid document root: '%s'\n" "$document_root" >&2
+        return 1
+    fi
+
+    # Written in a PHP string and in links of the page of the missing previews
+    if [[ -n "$repository_url" ]] && [[ ! "$repository_url" =~ ^https?://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9_.-]+)+$ ]]; then
+        printf "Invalid repository URL: '%s'\n" "$repository_url" >&2
         return 1
     fi
 
@@ -280,9 +291,13 @@ render_router () {
     previews="$(< "${ROUTER_DIR}/previews.htaccess")"
     previews="${previews//\{\{DOCUMENT_ROOT\}\}/$root_path}"
 
+    missing_page="$(< "${ROUTER_DIR}/404.php")"
+    missing_page="${missing_page//\{\{REPOSITORY_URL\}\}/${repository_url}}"
+
     mkdir -p "${folder}/previews"
     printf '%s\n' "$content" > "${folder}/.htaccess"
     printf '%s\n' "$previews" > "${folder}/previews/.htaccess"
+    printf '%s\n' "$missing_page" > "${folder}/previews/404.php"
     cp "${ROUTER_DIR}/robots.txt" "${folder}/previews/robots.txt"
 }
 
@@ -437,6 +452,7 @@ main () {
             --default-environment) default_environment="$2"; shift 2 ;;
             --php-handler)      php_handler="$2"; shift 2 ;;
             --document-root)    document_root="$2"; shift 2 ;;
+            --repository-url)   repository_url="$2"; shift 2 ;;
             -h | --help)
                 sed -n '/^# Usage:/,/^# action can be safely/p' "$0" | sed 's/^# \{0,1\}//' >&2
                 return 0

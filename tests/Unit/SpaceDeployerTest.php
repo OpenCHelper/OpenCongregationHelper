@@ -572,17 +572,39 @@ test('the deployer is installed in a folder named after a hash of its files', fu
  * Render the router of a space with the client of the `ftp-archive-deploy` action, returning the exit code.
  *
  * @param  list<string>  $options
+ * @param  array<string, string>  $environment  Environment variables of the client (e.g. of GitHub Actions)
  */
-function renderRouter(string $folder, array $options): int
+function renderRouter(string $folder, array $options, array $environment = []): int
 {
+    $variables = collect($environment)
+        ->map(fn (string $value, string $name): string => $name.'='.escapeshellarg($value).' ')
+        ->implode('');
+
     exec(
-        'bash '.escapeshellarg(__DIR__.'/../../.github/actions/ftp-archive-deploy/deploy.sh').' '
+        $variables.'bash '.escapeshellarg(__DIR__.'/../../.github/actions/ftp-archive-deploy/deploy.sh').' '
             .implode(' ', array_map('escapeshellarg', [...$options, 'render-router', $folder])).' 2>&1',
         $output,
         $exitCode,
     );
 
     return $exitCode;
+}
+
+/**
+ * Request the rendered page of the missing previews on the given host, in a separate PHP process.
+ *
+ * @return array{status: int, body: string}
+ */
+function requestMissingPreviewPage(string $page, string $host): array
+{
+    $script = '$_SERVER["HTTP_HOST"] = '.var_export($host, true).'; ob_start(); require '.var_export($page, true).';'
+        .' echo json_encode(["status" => http_response_code(), "body" => ob_get_clean()]);';
+
+    exec(escapeshellarg(PHP_BINARY).' -r '.escapeshellarg($script).' 2>&1', $output, $exitCode);
+
+    expect($exitCode)->toBe(0, implode("\n", $output));
+
+    return json_decode(implode("\n", $output), true, flags: JSON_THROW_ON_ERROR);
 }
 
 test('the router serves the document root of every environment of the space on its own subdomain', function () {
@@ -607,6 +629,13 @@ test('the router serves the document root of every environment of the space on i
         ->and(file_get_contents($this->root.'/router/previews/.htaccess'))
         ->toContain('RewriteRule ^pr-[0-9]+/public/ - [L]')
         ->toContain('RewriteRule ^(.*)$ %1/public/$1 [L]')
+        // A preview without document root (e.g. of a closed PR) gets the page of the missing previews
+        ->toContain('RewriteCond %2%1/public/ !-d')
+        ->toContain('RewriteRule ^(pr-[0-9]+)/public/ 404.php [E=MISSING_PREVIEW:1,L]')
+        // Served as is also to the subrequest of PHP running as a CGI program, finding the script it runs
+        ->toContain("RewriteCond %{IS_SUBREQ} =true\n    RewriteRule ^404\\.php$ - [L]")
+        ->not->toContain('{{')
+        ->and(file_get_contents($this->root.'/router/previews/404.php'))
         ->not->toContain('{{');
 });
 
@@ -634,8 +663,42 @@ test('the router can serve the folders of the environments themselves', function
         ->toContain('RewriteRule ^(.*)$ %1/$1 [L]')
         ->toContain('RewriteRule ^(.*)$ test/$1 [L]')
         ->and(file_get_contents($this->root.'/router/previews/.htaccess'))
-        ->toContain('RewriteRule ^(.*)$ %1/$1 [L]');
+        ->toContain('RewriteRule ^(.*)$ %1/$1 [L]')
+        ->toContain('RewriteCond %2%1/ !-d');
 });
+
+test('a missing preview gets a 404 page linking to its PR', function () {
+    expect(renderRouter($this->root.'/router', [
+        '--base-url', 'https://example.altervista.org',
+        '--repository-url', 'https://github.com/acme/app',
+    ]))->toBe(0);
+
+    $response = requestMissingPreviewPage($this->root.'/router/previews/404.php', 'pr-7.example.altervista.org');
+
+    expect($response['status'])->toBe(404)
+        ->and($response['body'])
+        ->toContain('No preview for PR #7')
+        ->toContain('href="https://github.com/acme/app/pull/7"');
+});
+
+test('the page of the missing previews links to the PRs of the repository running the deployment', function (array $options, array $environment, ?string $link) {
+    expect(renderRouter($this->root.'/router', ['--base-url', 'http://example.org:8080', ...$options], $environment))
+        ->toBe(0);
+
+    $body = requestMissingPreviewPage($this->root.'/router/previews/404.php', 'pr-7.example.org:8080')['body'];
+
+    expect($body)->toContain('No preview for PR #7');
+
+    if ($link === null) {
+        expect($body)->not->toContain('/pull/');
+    } else {
+        expect($body)->toContain('href="'.$link.'"');
+    }
+})->with([
+    'GitHub Actions' => [[], ['GITHUB_SERVER_URL' => 'https://github.com', 'GITHUB_REPOSITORY' => 'acme/app'], 'https://github.com/acme/app/pull/7'],
+    'given repository' => [['--repository-url', 'https://git.example.org/acme/app'], ['GITHUB_SERVER_URL' => 'https://github.com', 'GITHUB_REPOSITORY' => 'acme/app'], 'https://git.example.org/acme/app/pull/7'],
+    'no repository' => [['--repository-url', ''], ['GITHUB_SERVER_URL' => 'https://github.com', 'GITHUB_REPOSITORY' => 'acme/app'], null],
+]);
 
 test('without a default environment nor a PHP handler, the router serves nothing on the site', function () {
     expect(renderRouter($this->root.'/router', ['--base-url', 'http://example.org:8080']))->toBe(0);
@@ -655,6 +718,7 @@ test('the router refuses invalid settings', function (array $options) {
     'invalid PHP handler' => [['--base-url', 'https://example.org', '--php-handler', 'a b']],
     'document root outside the environment' => [['--base-url', 'https://example.org', '--document-root', '../etc']],
     'invalid host' => [['--base-url', 'https://exa$mple.org']],
+    'invalid repository URL' => [['--base-url', 'https://example.org', '--repository-url', "https://github.com/acme/app'"]],
 ]);
 
 /**
@@ -728,6 +792,7 @@ test('the router is uploaded when the space has none or an outdated one', functi
     expect(uploadsRouter(installRouterOn($this->root.'/space', $this->root)))->toBeTrue()
         ->and(file_get_contents($this->root.'/space/.htaccess'))->toContain('RewriteRule ^(.*)$ test/public/$1 [L]')
         ->and(file_exists($this->root.'/space/previews/.htaccess'))->toBeTrue()
+        ->and(file_exists($this->root.'/space/previews/404.php'))->toBeTrue()
         ->and(file_exists($this->root.'/space/previews/robots.txt'))->toBeTrue();
 
     file_put_contents($this->root.'/space/previews/.htaccess', "# outdated\n");
@@ -746,5 +811,5 @@ test('the router is not uploaded again when the installed one is up to date', fu
 
     expect(uploadsRouter($commands))->toBeFalse()
         ->and(collect($commands)->map(fn (string $command): string => strtok($command, ' ').' '.strtok(' '))->all())
-        ->toBe(["get '.htaccess'", "get 'previews/.htaccess'", "get 'previews/robots.txt'"]);
+        ->toEqualCanonicalizing(["get '.htaccess'", "get 'previews/.htaccess'", "get 'previews/404.php'", "get 'previews/robots.txt'"]);
 });
