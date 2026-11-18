@@ -3,13 +3,16 @@
 namespace App\Filament\Resources\Users;
 
 use App\Enums\NavigationGroup;
+use App\Filament\Resources\ServiceGroups\Pages\ManageServiceGroupMembers;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ManageUserAssignments;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
+use App\Models\ServiceGroup;
 use App\Models\User;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -26,13 +29,16 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Override;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use UnitEnum;
@@ -100,6 +106,13 @@ class UserResource extends Resource
                                 ? __('profile.root_user_protection.generic_field_disabled')
                                 : null
                             ),
+                        Select::make('service_group_id')
+                            ->label(__('filament-resources.user.field_service_group'))
+                            ->relationship('serviceGroup', 'name', fn (Builder $query): Builder => $query->orderBy('name'))
+                            ->searchable()
+                            ->preload()
+                            ->placeholder(__('filament-resources.user.placeholder_service_group'))
+                            ->helperText(fn (?User $record): ?string => static::getServiceGroupRoleLabel($record)),
                     ]),
                 Section::make(__('filament-resources.user.section_login_info'))
                     ->schema([
@@ -182,6 +195,11 @@ class UserResource extends Resource
                     })
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('serviceGroup.name')
+                    ->label(__('filament-resources.user.column_service_group'))
+                    ->placeholder('—')
+                    ->sortable()
+                    ->toggleable(),
                 IconColumn::make('email_verified_at')
                     ->label(__('filament-resources.user.column_email_verified'))
                     ->default(false)
@@ -203,6 +221,11 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('service_group_id')
+                    ->label(__('filament-resources.user.filter_service_group'))
+                    ->relationship('serviceGroup', 'name', fn (Builder $query): Builder => $query->orderBy('name'))
+                    ->multiple()
+                    ->preload(),
                 TernaryFilter::make('can_login')
                     ->label(__('filament-resources.user.filter_access_enabled'))
                     ->placeholder(__('filament-resources.user.filter_access_enabled_all'))
@@ -231,6 +254,7 @@ class UserResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    static::changeServiceGroupBulkAction(),
                     DeleteBulkAction::make()
                         ->deselectRecordsAfterCompletion()
                         ->action(function ($records) {
@@ -264,6 +288,52 @@ class UserResource extends Resource
                         }),
                 ]),
             ]);
+    }
+
+    /**
+     * Move the selected users to a service group, or out of any group.
+     */
+    public static function changeServiceGroupBulkAction(): BulkAction
+    {
+        return BulkAction::make('changeServiceGroup')
+            ->label(__('filament-resources.user.action_change_service_group'))
+            ->icon(Heroicon::OutlinedUserGroup)
+            ->visible(fn (): bool => Gate::allows('update', User::class))
+            ->schema([
+                Select::make('service_group_id')
+                    ->label(__('filament-resources.user.field_service_group'))
+                    ->options(fn (): array => ServiceGroup::query()->orderBy('name')->pluck('name', 'id')->all())
+                    ->placeholder(__('filament-resources.user.placeholder_service_group'))
+                    ->searchable(),
+            ])
+            ->action(function (EloquentCollection $records, array $data): void {
+                $serviceGroupId = $data['service_group_id'] ?? null;
+
+                // Saved one by one, so that the change is recorded in the activity log
+                $records->each(fn (User $record): bool => $record->update(['service_group_id' => $serviceGroupId]));
+
+                Notification::make()
+                    ->success()
+                    ->title(trans_choice('filament-resources.user.service_group_changed', $records->count()))
+                    ->send();
+            })
+            ->deselectRecordsAfterCompletion();
+    }
+
+    /**
+     * The role of the user in their service group, if they lead it (e.g. "Coordinator of Group 1").
+     */
+    public static function getServiceGroupRoleLabel(?User $user): ?string
+    {
+        $serviceGroup = $user?->serviceGroup;
+
+        if ($serviceGroup === null) {
+            return null;
+        }
+
+        $role = ManageServiceGroupMembers::getRoleInGroup($serviceGroup, $user);
+
+        return $role !== null ? __('filament-resources.user.hint_service_group_role', ['role' => $role]) : null;
     }
 
     public static function getRelations(): array
