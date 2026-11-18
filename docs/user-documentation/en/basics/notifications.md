@@ -6,7 +6,8 @@ order: 5
 ---
 
 The application informs you about the events that concern you, both **inside the application** (the bell in the top
-bar) and **by email**, in the language chosen in your [profile](profile).
+bar), **by email** and, if you enable them, as **push notifications** on your devices, in the language chosen in your
+[profile](profile).
 
 ![Notifications panel](/docs/user-documentation/en/basics/assets/notifications.webp)
 
@@ -18,6 +19,22 @@ bar) and **by email**, in the language chosen in your [profile](profile).
 | **Territory returned** | the person who had the territory |
 | **New campaign** | every user who can log in |
 | **Territory out for *N* days** | the person who has had a territory for more than 60 days. The reminder is sent every Monday until the territory is returned. |
+
+## Push notifications
+
+Push notifications appear on your phone or computer like those of any other app, even when the application is closed.
+Clicking one opens the related territory or assignment.
+
+1. Open your [profile](profile) on the device where you want to receive them.
+2. In **Push notifications**, click **Enable on this device** and allow the notifications when the browser asks.
+3. Click **Send a test notification** to check that they arrive.
+
+Enable them on each device you use. To stop them, click **Disable on this device**. Logging out also stops them on
+that device, so a shared device does not receive your notifications.
+
+> ℹ️ **Note:** on iPhone and iPad, push notifications work only after adding the app to the Home Screen (**Share**, then
+> **Add to Home Screen**): open it from there, then enable them. If the section is missing from the profile, the
+> administrator has not configured push notifications yet (see the [Setup guide](../setup#push-notifications)).
 
 ## Managing notifications
 

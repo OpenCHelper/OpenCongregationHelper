@@ -4,16 +4,19 @@ namespace App\Notifications;
 
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\TerritoryAssignment;
+use App\Notifications\Concerns\SendsWebPush;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\WebPush\WebPushChannel;
 
 class TerritoryReturnedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use SendsWebPush;
 
     /**
      * Create a new notification instance.
@@ -31,7 +34,13 @@ class TerritoryReturnedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['mail', 'database'];
+
+        if ($this->isWebPushAvailable($notifiable)) {
+            $channels[] = WebPushChannel::class;
+        }
+
+        return $channels;
     }
 
     /**

@@ -36,9 +36,16 @@ class UserObserver
 
     /**
      * Handle the User "updated" event.
+     *
+     * The push subscriptions of users who can no longer log in are deleted: their devices may now belong to someone else,
+     * and they could not enable the push notifications again anyway.
      */
     public function updated(User $user): void
     {
+        if ($user->wasChanged('can_login') && $user->isVirtual()) {
+            $user->pushSubscriptions()->delete();
+        }
+
         // Handle role protection after update
         if ($user->isRootUserProtected()) {
             // If roles were modified, we need to check if we should revert them
@@ -63,10 +70,12 @@ class UserObserver
 
     /**
      * Handle the User "deleted" event.
+     *
+     * The push subscriptions are linked polymorphically, so the database does not delete them with the user.
      */
     public function deleted(User $user): void
     {
-        //
+        $user->pushSubscriptions()->delete();
     }
 
     /**

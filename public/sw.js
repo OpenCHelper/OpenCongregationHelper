@@ -62,3 +62,43 @@ self.addEventListener('fetch', (event) => {
         );
     }
 });
+
+/**
+ * Push notifications (see `App\Notifications\Concerns\SendsWebPush`): the payload holds the options of the notification,
+ * with the URL to open on click in `data.url`.
+ */
+self.addEventListener('push', (event) => {
+    let payload = {};
+
+    // A payload that is not JSON (e.g. a test from the developer tools of the browser) is shown as the body.
+    try {
+        payload = event.data?.json() ?? {};
+    } catch {
+        payload = { body: event.data?.text() };
+    }
+
+    const { title = 'OpenCongregationHelper', ...options } = payload;
+
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    const url = new URL(event.notification.data?.url ?? '/app', self.location.origin).href;
+
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+            const appWindow = windows.find((client) => new URL(client.url).origin === self.location.origin);
+
+            if (appWindow) {
+                // `navigate()` fails on pages not controlled by this service worker: a new window is opened instead.
+                return appWindow.focus()
+                    .then((client) => client.navigate(url))
+                    .catch(() => self.clients.openWindow(url));
+            }
+
+            return self.clients.openWindow(url);
+        }),
+    );
+});

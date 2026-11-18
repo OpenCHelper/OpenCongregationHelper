@@ -14,6 +14,7 @@ use App\Filament\Pages\Logs;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
 use App\Support\AppVersions;
+use App\Support\WebPush;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Detection\MobileDetect;
 use DiscoveryDesign\FilamentGaze\FilamentGazePlugin;
@@ -132,6 +133,10 @@ class AppPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::BODY_START,
                 fn (): ?View => Filament::auth()->check() ? view('filament.pwa-install-prompt') : null,
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): ?View => Filament::auth()->check() && WebPush::isConfigured() ? view('filament.push-logout') : null,
             )
             // Registered after the plugins, so that the help menu stays after the environment indicator.
             ->bootUsing(function (): void {

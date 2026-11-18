@@ -26,6 +26,7 @@
         "flowframe/laravel-trend": "*",
         "guava/filament-knowledge-base": "^3.3.2",
         "hammadzafar05/filament-mobile-preset": "^1.0",
+        "laravel-notification-channels/webpush": "^13.0",
         "laravel/framework": "^12.0",
         "laravel/jetstream": "^4.2|^5.0",
         "laravel/sanctum": "^4.0",

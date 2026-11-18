@@ -78,7 +78,8 @@ on:
           Contents of the `.env` file written by the build and deployed with the release, instead of the one managed
           on the server (archive deployments only, see `environment-folder`), e.g. for a demo. A new `APP_KEY` is
           added on every deployment, and the `DB_PASSWORD` and `ROOT_PASSWORD` secrets of the environment, when set,
-          as `DB_PASSWORD` and `INITIAL_ROOT_PASSWORD`. Empty to keep the `.env` file of the server.
+          as `DB_PASSWORD` and `INITIAL_ROOT_PASSWORD`. With `reset-database`, new keys of the push notifications
+          (`VAPID_*`) are added too, unless already given. Empty to keep the `.env` file of the server.
         required: false
         default: ""
         type: string
@@ -173,7 +174,9 @@ jobs:
             echo "ref: refs/heads/${REF}" > .git-branch-name
           fi
 
-      # Only with the `dotenv` input: the `.env` file of the release, with a new application key on every deployment
+      # Only with the `dotenv` input: the `.env` file of the release, with a new application key on every deployment, and
+      # new keys of the push notifications when the database is reset (the subscriptions made with the old keys are
+      # deleted with it, so nobody is left with a subscription that the new keys cannot reach)
       - name: Write the .env file
         id: dotenv
         if: inputs.dotenv != '' || inputs.cron-folder != ''
@@ -185,6 +188,7 @@ jobs:
           CRON_JOB_ORG_API_KEY: ${{ secrets.CRON_JOB_ORG_API_KEY }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
+          RESET_DATABASE: ${{ inputs.reset-database }}
         run: |
           if [[ -z "$DOTENV" ]]; then
             echo "::error::The cron-folder input needs the dotenv input, which receives the token of the cron job."
@@ -219,6 +223,9 @@ jobs:
             fi
           done
 
+          # Without the empty placeholders of the push keys (e.g. copied from `.env.example`), as the first value wins
+          DOTENV="$(printf '%s\n' "$DOTENV" | sed -E "/^VAPID_[A-Z_]*=(''|\"\")?[[:space:]]*$/d")"
+
           {
             printf '%s\n' "$DOTENV"
             echo "APP_KEY='$(php artisan key:generate --show --no-ansi)'"
@@ -230,6 +237,9 @@ jobs:
             fi
             if [[ -n "$cron_token" ]]; then
               echo "ARTISAN_CRON_TOKEN='${cron_token}'"
+            fi
+            if [[ "$RESET_DATABASE" == "true" ]] && ! grep -q '^VAPID_PUBLIC_KEY=' <<< "$DOTENV"; then
+              php artisan webpush:vapid --show --no-ansi | sed -n "s/^\(VAPID_[A-Z_]*\)=\(.*\)$/\1='\2'/p"
             fi
           } > .env
 

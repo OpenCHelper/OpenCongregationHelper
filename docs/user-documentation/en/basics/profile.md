@@ -35,6 +35,11 @@ To add a contact:
 Use **View**, **Edit** and **Delete** next to each contact to manage it. When viewing a contact, the **Call** and
 **Open in Maps** buttons start a phone call or open the address in your maps app.
 
+## Push notifications
+
+Receive the notifications on this device too, even when the application is closed: click **Enable on this device**.
+See [Notifications](notifications#push-notifications).
+
 ## Update password
 
 Enter your **Current password**, then the **New password** twice and click **Save**. Use a long, random password.

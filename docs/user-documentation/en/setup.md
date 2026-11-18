@@ -123,6 +123,27 @@ Both need something that runs periodically:
 
   The endpoints are rate limited (10 requests per minute).
 
+## Push notifications
+
+Push notifications are optional: until they are configured, the notifications are sent only by email and inside the
+application, and the profile does not offer to enable them. To enable them, generate the keys once:
+
+```shell
+php artisan webpush:vapid
+```
+
+The command writes `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` to the `.env` file. Never change them afterwards, or every
+user will have to enable the push notifications again. Optionally, set `VAPID_SUBJECT` to a contact of the
+administrator (e.g. `mailto:admin@example.com`), given to the push services of the browsers (`APP_URL` when not set).
+
+Push notifications need HTTPS and, like the emails, are sent by the queue (see above).
+
+> ⚠️ **In production**, generate the keys once, by hand, and keep a copy with the other secrets of the installation:
+> never let a deployment pipeline generate them. Only the test environments whose database is reset on every
+> deployment (Nightly and the PR previews) get new keys every time, as their subscriptions are deleted anyway.
+
+Users who cannot log in receive no push notifications, and their devices are forgotten when their access is revoked.
+
 ## Environments
 
 On environments other than `production` (e.g. `local`, `nightly`, `staging`), super administrators see a colored
