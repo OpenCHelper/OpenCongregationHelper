@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -141,6 +142,29 @@ class TerritoryAssignment extends Model
     {
         $query->whereNull('ended_at')
             ->whereHas('campaign', fn (Builder $query) => $query->expiring());
+    }
+
+    /**
+     * Scope a query to only include the returned assignments,
+     * ignoring the inconsistent ones that end before they start.
+     */
+    public function scopeReturned(Builder $query): void
+    {
+        $query->whereNotNull('ended_at')
+            ->whereColumn('ended_at', '>=', 'started_at');
+    }
+
+    /**
+     * The SQL expression of the duration of an assignment, in calendar days.
+     */
+    public static function durationInDaysExpression(): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'sqlite' => 'julianday(date(ended_at)) - julianday(date(started_at))',
+            'pgsql' => '(ended_at::date - started_at::date)',
+            'sqlsrv' => 'DATEDIFF(day, started_at, ended_at)',
+            default => 'DATEDIFF(ended_at, started_at)',
+        };
     }
 
     /**

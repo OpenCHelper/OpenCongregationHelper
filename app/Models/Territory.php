@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Tags\HasTags;
@@ -96,6 +97,19 @@ class Territory extends Model
             ['ended_at' => 'max'],
             fn (Builder $query) => $query->whereNotNull('ended_at'),
         );
+    }
+
+    /**
+     * Get the average time, in calendar days, the territory took to be covered,
+     * based on its returned assignments (null if it was never returned).
+     */
+    public function averageCoverageDays(): ?float
+    {
+        $average = $this->assignments()
+            ->returned()
+            ->avg(DB::raw(TerritoryAssignment::durationInDaysExpression()));
+
+        return $average === null ? null : (float) $average;
     }
 
     /**

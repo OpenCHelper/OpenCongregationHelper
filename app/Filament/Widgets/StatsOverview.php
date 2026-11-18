@@ -16,12 +16,7 @@ class StatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $durationExpr = match (DB::connection()->getDriverName()) {
-            'sqlite' => 'julianday(date(ended_at)) - julianday(date(started_at))',
-            'pgsql' => '(ended_at::date - started_at::date)',
-            'sqlsrv' => 'DATEDIFF(day, started_at, ended_at)',
-            default => 'DATEDIFF(ended_at, started_at)',
-        };
+        $durationExpr = TerritoryAssignment::durationInDaysExpression();
 
         $from = now()->subDays(365);
         $to = now();
@@ -50,14 +45,10 @@ class StatsOverview extends BaseWidget
     }
 
     /**
-     * The returned assignments, ignoring the inconsistent ones that end before they start.
-     *
      * @return Builder<TerritoryAssignment>
      */
     private function returnedAssignments(): Builder
     {
-        return TerritoryAssignment::query()
-            ->whereNotNull('ended_at')
-            ->whereColumn('ended_at', '>=', 'started_at');
+        return TerritoryAssignment::query()->returned();
     }
 }
