@@ -72,10 +72,11 @@ return [
         ],
         'stale_check_day' => [
             'label' => 'Day of the reminders',
+            'helper' => 'Monday to Friday.',
         ],
         'stale_check_time' => [
             'label' => 'Time of the reminders',
-            'helper' => 'Rome time.',
+            'helper' => 'Rome time, from 8:00 to 22:00.',
         ],
         'mail_from_name' => [
             'label' => 'Sender name of the emails',

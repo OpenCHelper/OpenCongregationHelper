@@ -19,13 +19,17 @@ use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Columns\TextColumn;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Console\Events\CommandFinished;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
@@ -51,11 +55,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Apply the settings changed from the Settings pages, except while caching the configuration: the cache must
-        // hold the values of `.env`, the defaults of the settings.
-        if (! $this->app->runningConsoleCommand('config:cache', 'optimize')) {
-            $this->app->make(SettingsOverrides::class)->apply();
-        }
+        // Apply the settings changed from the Settings pages, except while caching the configuration (from the shell or
+        // from the web): the cache must hold the values of `.env`, the defaults of the settings.
+        Event::listen(function (CommandStarting $event): void {
+            if (in_array($event->command, SettingsOverrides::CONFIG_CACHING_COMMANDS, true)) {
+                SettingsOverrides::cachingConfiguration(true);
+            }
+        });
+        Event::listen(function (CommandFinished $event): void {
+            if (in_array($event->command, SettingsOverrides::CONFIG_CACHING_COMMANDS, true)) {
+                SettingsOverrides::cachingConfiguration(false);
+            }
+        });
+
+        $this->app->make(SettingsOverrides::class)->apply();
+
+        // Long-running queue workers apply the settings saved since they started before each job
+        Queue::before(fn (): mixed => $this->app->make(SettingsOverrides::class)->apply());
 
         // Tell Eloquent to be strict about the data types it expects
         // locally.

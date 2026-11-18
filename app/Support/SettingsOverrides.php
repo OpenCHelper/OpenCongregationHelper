@@ -28,6 +28,18 @@ class SettingsOverrides
     ];
 
     /**
+     * The commands that cache the configuration: while they run, the settings are not applied, so that the cache holds
+     * the values of `.env` (their defaults). They also run from the web, through the Artisan endpoints.
+     */
+    public const CONFIG_CACHING_COMMANDS = ['config:cache', 'optimize'];
+
+    /**
+     * Whether a command caching the configuration is running. Static, because `config:cache` reads the configuration
+     * from a fresh application, which has its own instance of this class.
+     */
+    protected static bool $isCachingConfiguration = false;
+
+    /**
      * The configuration values before the settings are applied, keyed by configuration key.
      *
      * @var array<string, mixed>|null
@@ -46,6 +58,10 @@ class SettingsOverrides
      */
     public function apply(): void
     {
+        if (static::$isCachingConfiguration) {
+            return;
+        }
+
         $this->defaults ??= collect(self::SETTINGS)
             ->flatMap(fn (string $settings): array => array_values($settings::configKeys()))
             ->mapWithKeys(fn (string $configKey): array => [$configKey => config($configKey)])
@@ -70,8 +86,21 @@ class SettingsOverrides
 
         date_default_timezone_set((string) config('app.timezone'));
 
+        // The mailers keep the sender they were created with
+        if (app()->resolved('mail.manager')) {
+            app('mail.manager')->forgetMailers();
+        }
+
         // The language of the user, when they chose one (see `SwitchLanguageLocale`), wins over the default language
         App::setLocale($userLocale === $previousLocale ? $this->appliedLocale : $userLocale);
+    }
+
+    /**
+     * Track the commands caching the configuration (see `CONFIG_CACHING_COMMANDS`).
+     */
+    public static function cachingConfiguration(bool $isCaching): void
+    {
+        static::$isCachingConfiguration = $isCaching;
     }
 
     /**

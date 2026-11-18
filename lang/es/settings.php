@@ -72,10 +72,11 @@ return [
         ],
         'stale_check_day' => [
             'label' => 'Día de los recordatorios',
+            'helper' => 'De lunes a viernes.',
         ],
         'stale_check_time' => [
             'label' => 'Hora de los recordatorios',
-            'helper' => 'Hora de Roma.',
+            'helper' => 'Hora de Roma, de 8:00 a 22:00.',
         ],
         'mail_from_name' => [
             'label' => 'Nombre del remitente de los correos',

@@ -22,16 +22,24 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
         //
     }
 
+    /**
+     * The levels of the assignments in progress for too long, keyed by name, with the days after which they start (see
+     * the Settings page).
+     *
+     * @return array<string, array{days: int, description: string, color: string}>
+     */
     public function getStaleLevels(): array
     {
+        $days = TerritorySettings::values('stale_after_days', 'dead_after_days');
+
         return [
-            TerritorySettings::value('stale_after_days') => [
-                'label' => 'stale',
+            'stale' => [
+                'days' => $days['stale_after_days'],
                 'description' => 'Assignment is stale',
                 'color' => 'yellow',
             ],
-            TerritorySettings::value('dead_after_days') => [
-                'label' => 'dead',
+            'dead' => [
+                'days' => $days['dead_after_days'],
                 'description' => 'Assignment is dead',
                 'color' => 'black',
             ],
@@ -46,7 +54,7 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
         Log::info('DetectStaleAssignments job started.');
 
         // An assignment is stale when it has been open for longer than the lowest stale level
-        $staleAfterDays = min(array_keys($this->getStaleLevels()));
+        $staleAfterDays = min(array_column($this->getStaleLevels(), 'days'));
 
         TerritoryAssignment::query()
             // Skip the assignments whose territory (or its zone) has been deleted while still assigned

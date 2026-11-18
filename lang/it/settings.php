@@ -72,10 +72,11 @@ return [
         ],
         'stale_check_day' => [
             'label' => 'Giorno dei promemoria',
+            'helper' => 'Dal lunedì al venerdì.',
         ],
         'stale_check_time' => [
             'label' => 'Ora dei promemoria',
-            'helper' => 'Ora di Roma.',
+            'helper' => 'Ora di Roma, dalle 8:00 alle 22:00.',
         ],
         'mail_from_name' => [
             'label' => 'Nome del mittente delle email',

@@ -28,6 +28,23 @@ abstract class AppSettings extends Settings
     }
 
     /**
+     * Get the values of several settings at once, keyed by property, or their defaults when the settings cannot be
+     * loaded.
+     *
+     * @return array<string, mixed>
+     */
+    public static function values(string ...$properties): array
+    {
+        try {
+            $settings = app(static::class);
+
+            return array_combine($properties, array_map(fn (string $property): mixed => $settings->{$property}, $properties));
+        } catch (QueryException|MissingSettings|BindingResolutionException) {
+            return array_combine($properties, array_map(static::defaultValue(...), $properties));
+        }
+    }
+
+    /**
      * Get the default value of a setting, as declared on its property (`null` when it has none).
      */
     public static function defaultValue(string $property): mixed

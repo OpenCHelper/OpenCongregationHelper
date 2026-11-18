@@ -21,15 +21,21 @@ use App\Settings\TerritorySettings;
 use App\Support\SettingsOverrides;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
+use Illuminate\Console\Events\CommandFinished;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Scheduling\Event as ScheduledTask;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Queue\Job;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 
 beforeEach(function () {
     Filament::setCurrentPanel('app');
@@ -314,7 +320,7 @@ test('the stale assignment levels are used to find the assignments out for too l
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(array_keys((new DetectStaleAssignments)->getStaleLevels()))->toBe([30, 75]);
+    expect(array_column((new DetectStaleAssignments)->getStaleLevels(), 'days'))->toBe([30, 75]);
 
     $assignee = User::factory()->create();
     $zone = TerritoryZone::factory()->create();
@@ -366,6 +372,68 @@ test('the stale assignments are checked on the chosen day and time', function ()
 
     expect($task->expression)->toBe('0 18 * * 3')
         ->and($task->timezone)->toBe('Europe/Rome');
+});
+
+test('the stale assignments are checked only when the scheduler is called on hostings without cron', function (array $data) {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm($data)
+        ->call('save')
+        ->assertHasFormErrors(array_keys($data));
+})->with([
+    'on Saturday' => [['stale_check_day' => Schedule::SATURDAY]],
+    'on Sunday' => [['stale_check_day' => Schedule::SUNDAY]],
+    'before 8:00' => [['stale_check_time' => '07:00']],
+    'after 22:00' => [['stale_check_time' => '23:00']],
+]);
+
+test('equal stale assignment levels are both kept', function () {
+    $settings = app(TerritorySettings::class);
+    $settings->stale_after_days = 90;
+    $settings->dead_after_days = 90;
+    $settings->save();
+
+    expect((new DetectStaleAssignments)->getStaleLevels())->toHaveKeys(['stale', 'dead']);
+});
+
+test('the configuration is cached with the values of the environment, also from the web', function () {
+    $settings = app(GeneralSettings::class);
+    $settings->name = 'Territories of Springfield';
+    $settings->save();
+
+    $default = app(SettingsOverrides::class)->default(GeneralSettings::class, 'name');
+
+    // As fired by `Artisan::call()` from the Artisan endpoints, before `config:cache` builds a fresh application
+    event(new CommandStarting('config:cache', new ArrayInput([]), new NullOutput));
+
+    $fresh = new SettingsOverrides;
+    config(['app.name' => $default]);
+    $fresh->apply();
+
+    expect(config('app.name'))->toBe($default);
+
+    event(new CommandFinished('config:cache', new ArrayInput([]), new NullOutput, 0));
+
+    $fresh->apply();
+
+    expect(config('app.name'))->toBe('Territories of Springfield');
+});
+
+test('queue workers apply the settings saved after they started before each job', function () {
+    $settings = app(NotificationSettings::class);
+    $settings->mail_from_name = 'Territories of Springfield';
+    $settings->save();
+
+    expect(config('mail.from.name'))->not->toBe('Territories of Springfield');
+
+    $job = Mockery::mock(Job::class);
+    $job->shouldReceive('payload')->andReturn([]);
+    $job->shouldIgnoreMissing();
+
+    event(new JobProcessing('database', $job));
+
+    expect(config('mail.from.name'))->toBe('Territories of Springfield');
 });
 
 test('the stale assignments can be checked only on the hour', function () {

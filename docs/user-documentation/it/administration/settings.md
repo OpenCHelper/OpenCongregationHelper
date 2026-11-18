@@ -34,9 +34,9 @@ li disegna in scala mentre scrivi:
 
 - i giorni dopo cui un'assegnazione ancora in corso è fuori da troppo tempo e poi persa: questi ultimi devono essere di
   più;
-- il **giorno** e l'**ora** (ora di Roma, allo scoccare dell'ora) dei promemoria settimanali inviati agli assegnatari
-  delle assegnazioni fuori da troppo tempo. Su un hosting senza cron, il servizio esterno deve chiamare lo scheduler a
-  quell'ora (vedi la [Guida al setup](../setup)).
+- il **giorno** (dal lunedì al venerdì) e l'**ora** (allo scoccare dell'ora, dalle 8:00 alle 22:00 ora di Roma) dei
+  promemoria settimanali inviati agli assegnatari delle assegnazioni fuori da troppo tempo. Su un hosting senza cron, il
+  servizio esterno deve chiamare lo scheduler a quell'ora (vedi la [Guida al setup](../setup)).
 
 ## Campagne
 
