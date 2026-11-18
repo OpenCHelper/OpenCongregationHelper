@@ -303,15 +303,18 @@ test('the primary colour must be a hex colour', function () {
         ->assertHasFormErrors(['primary_color']);
 });
 
-test('the days set on the page are used to find the assignments out for too long', function () {
+test('the stale assignment levels are used to find the assignments out for too long', function () {
     actingAsSuperAdmin();
 
     Livewire::test(ManageTerritorySettings::class)
-        ->fillForm(['stale_after_days' => 30])
+        ->fillForm([
+            'stale_after_days' => 30,
+            'dead_after_days' => 75,
+        ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(app(TerritorySettings::class)->stale_after_days)->toBe(30);
+    expect(array_keys((new DetectStaleAssignments)->getStaleLevels()))->toBe([30, 75]);
 
     $assignee = User::factory()->create();
     $zone = TerritoryZone::factory()->create();
@@ -334,16 +337,19 @@ test('the days set on the page are used to find the assignments out for too long
     Event::assertDispatched(StaleAssignmentDetected::class, fn (StaleAssignmentDetected $event): bool => $event->assignment->is($staleAssignment));
 });
 
-test('the days after which an assignment is out for too long must be positive', function (int $days) {
+test('the stale assignment levels must grow', function () {
     actingAsSuperAdmin();
 
     Livewire::test(ManageTerritorySettings::class)
-        ->fillForm(['stale_after_days' => $days])
+        ->fillForm([
+            'stale_after_days' => 60,
+            'dead_after_days' => 50,
+        ])
         ->call('save')
-        ->assertHasFormErrors(['stale_after_days']);
+        ->assertHasFormErrors(['dead_after_days']);
 
-    expect(app(TerritorySettings::class)->stale_after_days)->toBe(60);
-})->with(['zero' => 0, 'negative' => -5]);
+    expect(app(TerritorySettings::class)->dead_after_days)->toBe(150);
+});
 
 test('the stale assignments are checked on the chosen day and time', function () {
     actingAsSuperAdmin();
@@ -431,12 +437,14 @@ test('the campaign thresholds are shown in the order of the statuses, with a bar
         ->assertSeeHtml('fi-settings-stages-bar');
 });
 
-test('the stale assignment threshold is shown after the assignments in progress', function () {
+test('the stale assignment levels are shown in order, with a bar to scale', function () {
     actingAsSuperAdmin();
 
     Livewire::test(ManageTerritorySettings::class)
         ->assertSeeInOrder([
             __('settings.stages.in_progress'),
             __('settings.fields.stale_after_days.label'),
-        ]);
+            __('settings.fields.dead_after_days.label'),
+        ])
+        ->assertSeeHtml('fi-settings-stages-bar');
 });

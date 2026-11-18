@@ -17,6 +17,7 @@ return [
         'in_progress' => 'In progress',
         'in_progress_note' => 'from the day of the assignment',
         'end_date' => 'End date',
+        'assigned' => 'Assigned',
     ],
 
     'pages' => [
@@ -65,6 +66,9 @@ return [
         ],
         'stale_after_days' => [
             'label' => 'Out for too long',
+        ],
+        'dead_after_days' => [
+            'label' => 'Lost',
         ],
         'stale_check_day' => [
             'label' => 'Day of the reminders',

@@ -17,6 +17,7 @@ return [
         'in_progress' => 'En curso',
         'in_progress_note' => 'desde el día de la asignación',
         'end_date' => 'Fecha de fin',
+        'assigned' => 'Asignada',
     ],
 
     'pages' => [
@@ -65,6 +66,9 @@ return [
         ],
         'stale_after_days' => [
             'label' => 'Fuera demasiado tiempo',
+        ],
+        'dead_after_days' => [
+            'label' => 'Perdida',
         ],
         'stale_check_day' => [
             'label' => 'Día de los recordatorios',

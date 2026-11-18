@@ -29,9 +29,10 @@ role. The options are grouped by area, with one page each in the menu on the sid
 - **Show personal data on shared pages**: when on, the public page of a [shared assignment](../assignments/sharing)
   also shows the name of the assignee and the notes of the territory.
 
-Under **Assignments out for too long**:
+Under **Assignments out for too long** the levels are listed in order, each with its colour, and the bar below draws
+them to scale while you type:
 
-- the days after which an assignment still in progress is out for too long, and its assignee is reminded to return it;
+- the days after which an assignment still in progress is out for too long and then lost: the latter must be more;
 - the **day** and **time** (Rome time, on the hour) of the weekly reminders sent to the assignees of the assignments out
   for too long. On a hosting without cron, the external service must call the scheduler at that time (see the
   [Setup guide](../setup)).

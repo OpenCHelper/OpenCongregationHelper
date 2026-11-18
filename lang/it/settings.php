@@ -17,6 +17,7 @@ return [
         'in_progress' => 'In corso',
         'in_progress_note' => 'dal giorno dell\'assegnazione',
         'end_date' => 'Data di fine',
+        'assigned' => 'Assegnata',
     ],
 
     'pages' => [
@@ -65,6 +66,9 @@ return [
         ],
         'stale_after_days' => [
             'label' => 'Fuori da troppo tempo',
+        ],
+        'dead_after_days' => [
+            'label' => 'Persa',
         ],
         'stale_check_day' => [
             'label' => 'Giorno dei promemoria',
