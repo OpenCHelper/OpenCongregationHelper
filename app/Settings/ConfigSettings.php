@@ -2,16 +2,14 @@
 
 namespace App\Settings;
 
-use Spatie\LaravelSettings\Settings;
-
 /**
- * Settings that replace configuration values, changed by the super administrators from the Settings pages.
+ * Settings that (also) replace configuration values.
  *
- * A property is `null` while it was never changed (or was set back to its default): the configuration then keeps
- * the value of `.env`. The other values are applied over the configuration on every request (see `SettingsOverrides`),
- * so the code keeps reading them with `config()`.
+ * A property listed in `configKeys()` is `null` while it was never changed (or was set back to its default): the
+ * configuration then keeps the value of `.env`. The other values are applied over the configuration on every request
+ * (see `SettingsOverrides`), so the code keeps reading them with `config()`.
  */
-abstract class ConfigSettings extends Settings
+abstract class ConfigSettings extends AppSettings
 {
     /**
      * The configuration that each property replaces.

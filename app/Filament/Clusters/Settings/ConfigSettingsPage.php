@@ -33,7 +33,7 @@ abstract class ConfigSettingsPage extends SettingsPage
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        foreach ($data as $property => $value) {
+        foreach (array_intersect_key($data, static::getSettings()::configKeys()) as $property => $value) {
             $data[$property] = $value ?? $this->defaultValue($property);
         }
 
@@ -46,7 +46,7 @@ abstract class ConfigSettingsPage extends SettingsPage
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        foreach ($data as $property => $value) {
+        foreach (array_intersect_key($data, static::getSettings()::configKeys()) as $property => $value) {
             if ($value === $this->defaultValue($property)) {
                 $data[$property] = null;
             }
@@ -68,7 +68,11 @@ abstract class ConfigSettingsPage extends SettingsPage
      */
     protected function defaultValue(string $property): mixed
     {
-        return app(SettingsOverrides::class)->default(static::getSettings(), $property);
+        $settings = static::getSettings();
+
+        return array_key_exists($property, $settings::configKeys())
+            ? app(SettingsOverrides::class)->default($settings, $property)
+            : $settings::defaultValue($property);
     }
 
     /**

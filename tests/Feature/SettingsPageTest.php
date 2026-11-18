@@ -79,7 +79,7 @@ test('the settings never changed show the values of the environment', function (
             'shared_pii' => config('app.enable_shared_pii'),
         ]);
 
-    expect(storedSettings('general'))->toBe(['locale' => null, 'name' => null, 'timezone' => null]);
+    expect(storedSettings('general'))->toMatchArray(['locale' => null, 'name' => null, 'timezone' => null]);
 });
 
 test('the general settings are stored and applied', function () {
@@ -95,7 +95,7 @@ test('the general settings are stored and applied', function () {
         ->assertHasNoFormErrors()
         ->assertNotified();
 
-    expect(storedSettings('general'))->toEqual([
+    expect(storedSettings('general'))->toMatchArray([
         'name' => 'Territories of Springfield',
         'locale' => 'es',
         'timezone' => 'Europe/Rome',
@@ -118,7 +118,7 @@ test('the territory settings are stored and applied', function () {
 
     $sharedPii = ! app(SettingsOverrides::class)->default(TerritorySettings::class, 'shared_pii');
 
-    expect(storedSettings('territories'))->toEqual([
+    expect(storedSettings('territories'))->toMatchArray([
         'map_default_center' => [39.8017, -89.6436],
         'shared_pii' => $sharedPii,
     ])

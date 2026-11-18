@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Settings\ConfigSettings;
 use App\Settings\GeneralSettings;
+use App\Settings\NotificationSettings;
 use App\Settings\TerritorySettings;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\App;
@@ -23,6 +24,7 @@ class SettingsOverrides
     public const SETTINGS = [
         GeneralSettings::class,
         TerritorySettings::class,
+        NotificationSettings::class,
     ];
 
     /**
