@@ -39,7 +39,7 @@ jobs:
         run: composer install --no-ansi --no-interaction --no-plugins --no-progress --no-scripts --optimize-autoloader
 
       - name: Check translations (application)
-        run: php artisan translations:check --excludedDirectories=vendor --excludedFileExtensions=json
+        run: php artisan translations:check --excludedDirectories=vendor
 
       - name: Check translations (vendor)
         continue-on-error: true
