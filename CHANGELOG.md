@@ -15,7 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Offer to install the app after logging in: an **Install** button on Android, Chrome and Edge, and the steps to add it
   to the home screen on iPhone and iPad ([#12](https://github.com/OpenCHelper/OpenCongregationHelper/pull/12)).
 - **Push notifications**: receive the notifications on your phone or computer even with the app closed, after enabling
-  them on each device from your profile. Administrators must first generate the keys with `php artisan webpush:vapid`.
+  them on each device from your profile. Administrators must first generate the keys with `php artisan webpush:vapid`
+  ([#41](https://github.com/OpenCHelper/OpenCongregationHelper/pull/41)).
+- **Average coverage time** on the territory page: how long the territory takes to be covered on average, based on its
+  returned assignments ([#19](https://github.com/OpenCHelper/OpenCongregationHelper/issues/19)).
 
 ### Changed
 

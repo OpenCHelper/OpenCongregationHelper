@@ -94,6 +94,9 @@ Click a row to open the territory. The page shows the territory data, with its *
 and the **End Assignment** / **Assign Territory** button at the top. The **⋮** menu contains **Edit**; the **Delete**
 button is in the edit page.
 
+The **Average coverage time** shows how long the territory takes to be covered on average, from the start to the end
+of its returned assignments; assignments still in progress are not counted.
+
 ![Territory details](/docs/user-documentation/en/territories/assets/territory-view.webp)
 
 The **Assignment History** tab lists every assignment of the territory, from the most recent. By default it only shows
