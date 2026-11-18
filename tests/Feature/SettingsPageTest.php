@@ -323,6 +323,7 @@ test('the stale assignment levels are used to find the assignments out for too l
     $createAssignment = fn (int $days): TerritoryAssignment => TerritoryAssignment::factory()->create([
         'territory_id' => Territory::factory()->for($zone, 'territoryZone')->create()->id,
         'assignee_id' => $assignee->id,
+        'created_by' => $assignee->id,
         'started_at' => now()->subDays($days),
         'ended_at' => null,
     ]);
