@@ -33,9 +33,10 @@ Under **Assignments out for too long** the levels are listed in order, each with
 them to scale while you type:
 
 - the days after which an assignment still in progress is out for too long and then lost: the latter must be more;
-- the **day** (Monday to Friday) and **time** (on the hour, from 8:00 to 22:00 Rome time) of the weekly reminders sent
-  to the assignees of the assignments out for too long. On a hosting without cron, the external service must call the
-  scheduler at that time (see the [Setup guide](../setup)).
+- the **day** and **time** (Rome time) of the weekly reminders sent to the assignees of the assignments out for too
+  long. They are sent only if the scheduler is running at that time, as a cron job or as a long-running process (e.g.
+  with Supervisor); on a hosting without cron, the external service must call it then (see the
+  [Setup guide](../setup)).
 
 ## Campaigns
 

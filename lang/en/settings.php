@@ -72,11 +72,10 @@ return [
         ],
         'stale_check_day' => [
             'label' => 'Day of the reminders',
-            'helper' => 'Monday to Friday.',
         ],
         'stale_check_time' => [
             'label' => 'Time of the reminders',
-            'helper' => 'Rome time, from 8:00 to 22:00.',
+            'helper' => 'Rome time. The reminders are sent only if the scheduler is running at that time, as a cron job or as a long-running process (e.g. with Supervisor): see the setup guide.',
         ],
         'mail_from_name' => [
             'label' => 'Sender name of the emails',

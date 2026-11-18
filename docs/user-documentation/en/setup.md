@@ -112,8 +112,9 @@ defaults: the super administrators can change them from the [Settings](administr
 Notification emails are queued and a weekly job sends the reminders for territories that have been out for a long time.
 Both need something that runs periodically:
 
-- **With shell access**, run the queue worker (`php artisan queue:work`) and add the Laravel scheduler to the crontab
-  (`* * * * * php /path/to/artisan schedule:run`).
+- **With shell access**, run the queue worker (`php artisan queue:work`) and the Laravel scheduler, either from the
+  crontab (`* * * * * php /path/to/artisan schedule:run`) or as a long-running process (`php artisan schedule:work`,
+  e.g. with Supervisor). Restart the queue worker after deploying a new version.
 - **Without shell access** (shared hosting), set `ARTISAN_CRON_TOKEN` and configure an external cron service to call
   these endpoints, which are served under the `/api/artisan` path of `APP_URL`:
 

@@ -112,8 +112,10 @@ modificare `.env`.
 Le email di notifica vengono messe in coda e un'attività settimanale invia i promemoria per i territori fuori da molto
 tempo. Entrambe richiedono qualcosa che venga eseguito periodicamente:
 
-- **Con accesso alla shell**, avvia il worker della coda (`php artisan queue:work`) e aggiungi lo scheduler di Laravel
-  al crontab (`* * * * * php /percorso/di/artisan schedule:run`).
+- **Con accesso alla shell**, avvia il worker della coda (`php artisan queue:work`) e lo scheduler di Laravel, dal
+  crontab (`* * * * * php /percorso/di/artisan schedule:run`) o come processo sempre attivo
+  (`php artisan schedule:work`, es. con Supervisor). Riavvia il worker della coda dopo aver installato una nuova
+  versione.
 - **Senza accesso alla shell** (hosting condiviso), imposta `ARTISAN_CRON_TOKEN` e configura un servizio di cron esterno
   che chiami questi endpoint, raggiungibili sotto il percorso `/api/artisan` di `APP_URL`:
 

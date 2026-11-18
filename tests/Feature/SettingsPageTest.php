@@ -374,20 +374,6 @@ test('the stale assignments are checked on the chosen day and time', function ()
         ->and($task->timezone)->toBe('Europe/Rome');
 });
 
-test('the stale assignments are checked only when the scheduler is called on hostings without cron', function (array $data) {
-    actingAsSuperAdmin();
-
-    Livewire::test(ManageTerritorySettings::class)
-        ->fillForm($data)
-        ->call('save')
-        ->assertHasFormErrors(array_keys($data));
-})->with([
-    'on Saturday' => [['stale_check_day' => Schedule::SATURDAY]],
-    'on Sunday' => [['stale_check_day' => Schedule::SUNDAY]],
-    'before 8:00' => [['stale_check_time' => '07:00']],
-    'after 22:00' => [['stale_check_time' => '23:00']],
-]);
-
 test('equal stale assignment levels are both kept', function () {
     $settings = app(TerritorySettings::class);
     $settings->stale_after_days = 90;
@@ -436,14 +422,30 @@ test('queue workers apply the settings saved after they started before each job'
     expect(config('mail.from.name'))->toBe('Territories of Springfield');
 });
 
-test('the stale assignments can be checked only on the hour', function () {
+test('the stale assignments can be checked on any day and at any time', function () {
     actingAsSuperAdmin();
 
     Livewire::test(ManageTerritorySettings::class)
-        ->fillForm(['stale_check_time' => '18:30'])
+        ->fillForm(['stale_check_day' => Schedule::SATURDAY, 'stale_check_time' => '07:35'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    Artisan::all();
+
+    $task = collect(app(Schedule::class)->events())
+        ->first(fn (ScheduledTask $task): bool => $task->description === DetectStaleAssignments::class);
+
+    expect($task->expression)->toBe('35 7 * * 6');
+});
+
+test('the time of the stale assignments check must be a time', function (string $time) {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['stale_check_time' => $time])
         ->call('save')
         ->assertHasFormErrors(['stale_check_time']);
-});
+})->with(['not a time' => 'soon', 'out of range' => '25:00']);
 
 test('the campaign thresholds decide when a campaign is expiring', function () {
     actingAsSuperAdmin();

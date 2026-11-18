@@ -54,8 +54,9 @@ return Application::configure(basePath: dirname(__DIR__))
             are called every 5 minutes, from 8:00 to 22:55 (Rome time),
             Monday to Friday: every task must be due inside that window, on
             a multiple of 5 minutes (better on the hour, for services that
-            call it hourly), in an explicit timezone, or it never runs: the
-            Settings page offers only whole hours.
+            call it hourly), in an explicit timezone, or it never runs. The
+            day and time of the stale assignments check are chosen on the
+            Settings page: they must match how the scheduler is run.
         */
         $schedule->job(new DetectStaleAssignments)
             ->weeklyOn(

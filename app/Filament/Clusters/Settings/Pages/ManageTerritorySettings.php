@@ -82,44 +82,29 @@ class ManageTerritorySettings extends AppSettingsPage
                         $this->stagesBar($staleStages, isCountdown: false, startLabel: __('settings.stages.assigned'), endLabel: ''),
                         Select::make('stale_check_day')
                             ->label(__('settings.fields.stale_check_day.label'))
-                            ->helperText(__('settings.fields.stale_check_day.helper').' '.$this->defaultHint(self::dayOptions()[$this->defaultValue('stale_check_day')]))
+                            ->helperText($this->defaultHint(self::dayOptions()[$this->defaultValue('stale_check_day')]))
                             ->options(self::dayOptions())
                             ->required()
                             ->native(false),
-                        Select::make('stale_check_time')
+                        TextInput::make('stale_check_time')
                             ->label(__('settings.fields.stale_check_time.label'))
                             ->helperText(__('settings.fields.stale_check_time.helper').' '.$this->defaultHint($this->defaultValue('stale_check_time')))
-                            ->options(self::timeOptions())
+                            ->type('time')
                             ->required()
-                            ->native(false),
+                            ->regex('/^([01]\d|2[0-3]):[0-5]\d$/'),
                     ]),
             ]);
     }
 
     /**
-     * The working days, keyed by number (1 = Monday), in the language of the user: on hostings without cron (e.g.
-     * Altervista) the scheduler is called only from Monday to Friday (see `bootstrap/app.php`).
+     * The days of the week, keyed by number (0 = Sunday), in the language of the user.
      *
      * @return array<int, string>
      */
     public static function dayOptions(): array
     {
-        return collect(range(1, 5))
+        return collect(range(0, 6))
             ->mapWithKeys(fn (int $day): array => [$day => ucfirst(Carbon::now()->startOfWeek(Carbon::SUNDAY)->addDays($day)->translatedFormat('l'))])
-            ->all();
-    }
-
-    /**
-     * The whole hours from 8:00 to 22:00, as "HH:00": on hostings without cron the scheduler is called only in that
-     * window, and possibly only once an hour (see `bootstrap/app.php`).
-     *
-     * @return array<string, string>
-     */
-    public static function timeOptions(): array
-    {
-        return collect(range(8, 22))
-            ->map(fn (int $hour): string => sprintf('%02d:00', $hour))
-            ->mapWithKeys(fn (string $time): array => [$time => $time])
             ->all();
     }
 
