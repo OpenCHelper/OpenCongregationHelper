@@ -54,6 +54,9 @@ INITIAL_ROOT_PASSWORD="password"
 
 ### Main settings
 
+`APP_NAME`, `APP_LOCALE`, `APP_TIMEZONE`, `MAP_DEFAULT_CENTER` and `ENABLE_SHARED_PII` are only the defaults: the super
+administrators can change them from the [Settings](administration/settings) pages, without editing `.env`.
+
 | Variable | Description |
 |----------|-------------|
 | `APP_URL` | Public URL of the application. Used in emails and in the links of shared assignments. |

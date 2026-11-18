@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Settings pages**: super administrators can change the name, default language, timezone, default map centre and
+  personal data on shared pages from **Administration → Settings**, without editing `.env`, which now only holds
+  their defaults.
+
 ### Fixed
 
 - The password reset and email verification emails are now in the language of the recipient, in Italian and

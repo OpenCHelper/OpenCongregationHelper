@@ -26,8 +26,8 @@ di inizio dell'assegnazione.
 ![Pagina pubblica di un'assegnazione condivisa](/docs/user-documentation/it/assignments/assets/shared-page.webp)
 
 > 🔒 **Privacy:** di default la pagina pubblica **non** mostra il nome dell'assegnatario né le note del territorio, che
-> possono contenere dati personali. L'amministratore può abilitarli con l'impostazione `ENABLE_SHARED_PII` (vedi la
-> [Guida al setup](../setup)).
+> possono contenere dati personali. L'amministratore può abilitarli dalla pagina
+> [Impostazioni](../administration/settings).
 
 ## Interrompere la condivisione
 

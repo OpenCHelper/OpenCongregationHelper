@@ -9,6 +9,7 @@ use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
 use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
+use App\Support\SettingsOverrides;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Filament\Forms\Components\DateTimePicker;
@@ -41,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
         // `db:wipe` (also run by `migrate:fresh`) drops only the tables of this installation when the database is
         // shared (see the command). Extended, not bound: the deferred Artisan provider registers the command later.
         $this->app->extend(WipeCommand::class, fn (): PrefixAwareWipeCommand => new PrefixAwareWipeCommand);
+
+        $this->app->singleton(SettingsOverrides::class);
     }
 
     /**
@@ -48,6 +51,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Apply the settings changed from the Settings pages, except while caching the configuration: the cache must
+        // hold the values of `.env`, the defaults of the settings.
+        if (! $this->app->runningConsoleCommand('config:cache', 'optimize')) {
+            $this->app->make(SettingsOverrides::class)->apply();
+        }
+
         // Tell Eloquent to be strict about the data types it expects
         // locally.
         // https://laraveldaily.com/lesson/laravel-eloquent-expert/model-fillable-guarded/
