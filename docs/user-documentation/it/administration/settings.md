@@ -29,11 +29,10 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 - **Mostra i dati personali nelle pagine condivise**: se attivo, la pagina pubblica di
   un'[assegnazione condivisa](../assignments/sharing) mostra anche il nome dell'assegnatario e le note del territorio.
 
-In **Assegnazioni fuori da troppo tempo** i livelli sono elencati in ordine, ognuno con il suo colore, e la barra sotto
-li disegna in scala mentre scrivi:
+In **Assegnazioni fuori da troppo tempo**:
 
-- i giorni dopo cui un'assegnazione ancora in corso è fuori da troppo tempo, da molto tempo, da moltissimo tempo o
-  persa. Ognuno deve essere maggiore del precedente;
+- i giorni dopo cui un'assegnazione ancora in corso è fuori da troppo tempo, e al suo assegnatario viene ricordato di
+  restituirla;
 - il **giorno** e l'**ora** (ora di Roma, allo scoccare dell'ora) dei promemoria settimanali inviati agli assegnatari
   delle assegnazioni fuori da troppo tempo. Su un hosting senza cron, il servizio esterno deve chiamare lo scheduler a
   quell'ora (vedi la [Guida al setup](../setup)).

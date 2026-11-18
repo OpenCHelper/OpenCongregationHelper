@@ -20,9 +20,6 @@ return new class extends SettingsMigration
         $this->migrator->add('territories.map_default_center');
         $this->migrator->add('territories.shared_pii');
         $this->migrator->add('territories.stale_after_days', 60);
-        $this->migrator->add('territories.very_stale_after_days', 90);
-        $this->migrator->add('territories.extremely_stale_after_days', 120);
-        $this->migrator->add('territories.dead_after_days', 150);
         $this->migrator->add('territories.stale_check_day', Schedule::MONDAY);
         $this->migrator->add('territories.stale_check_time', '09:00');
 

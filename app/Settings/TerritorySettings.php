@@ -24,21 +24,6 @@ class TerritorySettings extends ConfigSettings
     public int $stale_after_days = 60;
 
     /**
-     * Days after which an assignment in progress is very stale.
-     */
-    public int $very_stale_after_days = 90;
-
-    /**
-     * Days after which an assignment in progress is extremely stale.
-     */
-    public int $extremely_stale_after_days = 120;
-
-    /**
-     * Days after which an assignment in progress is considered lost.
-     */
-    public int $dead_after_days = 150;
-
-    /**
      * Day of the week of the check of the stale assignments (0 = Sunday, 1 = Monday, …).
      */
     public int $stale_check_day = Schedule::MONDAY;
