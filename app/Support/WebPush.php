@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use STS\FilamentImpersonate\Facades\Impersonation;
+
 /**
  * Push notifications of the browser (Web Push), shown by the service worker of the Progressive Web App.
  *
@@ -13,6 +15,16 @@ class WebPush
     public static function isConfigured(): bool
     {
         return filled(self::publicKey()) && filled(config('webpush.vapid.private_key'));
+    }
+
+    /**
+     * Whether the current user can enable the push notifications on this device.
+     *
+     * Not while impersonating: the device of the administrator would receive the notifications of the impersonated user.
+     */
+    public static function canSubscribe(): bool
+    {
+        return self::isConfigured() && ! Impersonation::isImpersonating();
     }
 
     /**

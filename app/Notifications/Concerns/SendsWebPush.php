@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Concerns;
 
+use App\Models\User;
 use App\Support\WebPush;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushChannel;
@@ -18,12 +19,15 @@ trait SendsWebPush
     /**
      * Add the push channel to the given ones, when the push notifications are configured and the user enabled them.
      *
+     * Users who cannot log in (anymore) get no push notifications: their devices may now belong to someone else.
+     *
      * @param  list<string>  $channels
      * @return list<string>
      */
     protected function withWebPush(object $notifiable, array $channels): array
     {
         if (WebPush::isConfigured()
+            && ! ($notifiable instanceof User && $notifiable->isVirtual())
             && method_exists($notifiable, 'pushSubscriptions')
             && $notifiable->pushSubscriptions()->exists()) {
             $channels[] = WebPushChannel::class;

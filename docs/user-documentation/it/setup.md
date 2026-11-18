@@ -138,6 +138,14 @@ utente dovrà riattivare le notifiche push. Facoltativamente, imposta `VAPID_SUB
 
 Le notifiche push richiedono HTTPS e, come le email, vengono inviate dalla coda (vedi sopra).
 
+> ⚠️ **In produzione** genera le chiavi una sola volta, a mano, e conservane una copia insieme agli altri segreti
+> dell'installazione: non farle mai generare a una pipeline di deploy. Solo gli ambienti di test il cui database viene
+> azzerato a ogni deploy (Nightly e le anteprime delle PR) ricevono nuove chiavi ogni volta, dato che le loro
+> iscrizioni vengono comunque eliminate.
+
+Gli utenti che non possono accedere non ricevono notifiche push, e i loro dispositivi vengono dimenticati quando
+l'accesso viene revocato.
+
 ## Ambienti
 
 Negli ambienti diversi da `production` (es. `local`, `nightly`, `staging`) i super amministratori vedono un bordo

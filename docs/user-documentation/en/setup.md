@@ -138,6 +138,12 @@ administrator (e.g. `mailto:admin@example.com`), given to the push services of t
 
 Push notifications need HTTPS and, like the emails, are sent by the queue (see above).
 
+> ⚠️ **In production**, generate the keys once, by hand, and keep a copy with the other secrets of the installation:
+> never let a deployment pipeline generate them. Only the test environments whose database is reset on every
+> deployment (Nightly and the PR previews) get new keys every time, as their subscriptions are deleted anyway.
+
+Users who cannot log in receive no push notifications, and their devices are forgotten when their access is revoked.
+
 ## Environments
 
 On environments other than `production` (e.g. `local`, `nightly`, `staging`), super administrators see a colored

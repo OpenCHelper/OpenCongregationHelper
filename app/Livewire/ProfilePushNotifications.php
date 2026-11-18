@@ -46,7 +46,7 @@ class ProfilePushNotifications extends Component
      */
     public function subscribe(array $subscription): void
     {
-        abort_unless(WebPush::isConfigured(), 404);
+        abort_unless(WebPush::canSubscribe(), 404);
 
         $validated = Validator::make($subscription, [
             'endpoint' => ['required', 'string', 'url:https', 'max:'.PushSubscription::ENDPOINT_MAX_LENGTH],
@@ -76,7 +76,7 @@ class ProfilePushNotifications extends Component
      */
     public function sendTest(): void
     {
-        abort_unless(WebPush::isConfigured(), 404);
+        abort_unless(WebPush::canSubscribe(), 404);
 
         $user = $this->user();
 
@@ -113,7 +113,7 @@ class ProfilePushNotifications extends Component
     public function render(): View
     {
         return view('livewire.profile-push-notifications', [
-            'isConfigured' => WebPush::isConfigured(),
+            'canSubscribe' => WebPush::canSubscribe(),
             'publicKey' => WebPush::publicKey(),
         ]);
     }

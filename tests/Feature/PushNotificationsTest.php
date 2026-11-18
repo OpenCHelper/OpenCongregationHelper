@@ -19,6 +19,7 @@ use Illuminate\Notifications\Notification as BaseNotification;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use NotificationChannels\WebPush\WebPushChannel;
+use STS\FilamentImpersonate\Facades\Impersonation;
 
 beforeEach(function () {
     config([
@@ -84,6 +85,39 @@ test('notifications are sent as push notifications to users who enabled them', f
     'territory assigned' => fn () => new TerritoryAssignedNotification(pushNotifiedAssignment()),
     'territory returned' => fn () => new TerritoryReturnedNotification(pushNotifiedAssignment()),
 ]);
+
+test('users who cannot log in get no push notifications', function () {
+    subscribe($this->user, $this->subscription);
+    User::withoutEvents(fn () => $this->user->forceFill(['can_login' => false])->save());
+
+    $notification = new TerritoryAssignedNotification(pushNotifiedAssignment());
+
+    expect($notification->via($this->user))->toBe(['mail', 'database']);
+});
+
+test('the subscriptions are deleted when the user can no longer log in', function () {
+    subscribe($this->user, $this->subscription);
+
+    $this->user->update(['first_name' => 'Renamed']);
+
+    expect($this->user->pushSubscriptions()->exists())->toBeTrue();
+
+    $this->user->update(['can_login' => false]);
+
+    expect($this->user->pushSubscriptions()->exists())->toBeFalse();
+});
+
+test('push notifications cannot be enabled while impersonating', function () {
+    Impersonation::shouldReceive('isImpersonating')->andReturn(true);
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->assertDontSee(__('profile.push_notifications.title'))
+        ->call('subscribe', $this->subscription)
+        ->assertNotFound();
+
+    expect($this->user->pushSubscriptions()->exists())->toBeFalse();
+});
 
 test('notifications are not sent as push notifications when they are not configured', function () {
     config(['webpush.vapid.public_key' => null, 'webpush.vapid.private_key' => null]);

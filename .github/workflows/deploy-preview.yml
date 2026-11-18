@@ -260,6 +260,7 @@ jobs:
           APP_NAME='OpenCongregationHelper (PR #${PR})'
           APP_ENV='preview'
           APP_KEY='$(php artisan key:generate --show --no-ansi)'
+          $(php artisan webpush:vapid --show --no-ansi | sed -n "s/^\(VAPID_[A-Z_]*\)=\(.*\)$/\1='\2'/p")
           APP_DEBUG=true
           APP_URL='${URL}'
           APP_VERSION_BRANCH_FILE='.git-branch-name'

@@ -3,9 +3,12 @@
     stored for the user, so that the service worker (`public/sw.js`) shows the notifications even with the app closed.
 
     On iOS and iPadOS the push notifications are available only once the app is added to the Home Screen.
+
+    A subscription made with other keys (e.g. before a new deployment of a test environment, which generates new ones)
+    cannot be reached anymore, and the browser refuses new subscriptions until it is removed: it is removed first.
 --}}
 <div>
-    @if ($isConfigured)
+    @if ($canSubscribe)
         <x-filament::section
             aside
             :heading="__('profile.push_notifications.title')"
@@ -55,8 +58,29 @@
                     },
                     async currentSubscription() {
                         const registration = await this.serviceWorker();
+                        const subscription = await registration.pushManager.getSubscription();
 
-                        return registration.pushManager.getSubscription();
+                        if (subscription && ! this.usesServerKey(subscription)) {
+                            await subscription.unsubscribe();
+
+                            return null;
+                        }
+
+                        return subscription;
+                    },
+                    usesServerKey(subscription) {
+                        const key = subscription.options?.applicationServerKey;
+
+                        // Browsers that do not expose the key: the subscription is assumed to be made with it.
+                        if (! key) {
+                            return true;
+                        }
+
+                        const subscriptionKey = new Uint8Array(key);
+                        const serverKey = this.applicationServerKey();
+
+                        return subscriptionKey.length === serverKey.length
+                            && subscriptionKey.every((byte, index) => byte === serverKey[index]);
                     },
                     serviceWorker() {
                         // `ready` never settles when the service worker cannot be registered.
@@ -92,6 +116,9 @@
 
                                 return;
                             }
+
+                            // Removes a subscription made with other keys, which would make the new one fail.
+                            await this.currentSubscription();
 
                             const registration = await this.serviceWorker();
                             const subscription = await registration.pushManager.subscribe({
