@@ -5,11 +5,11 @@ namespace App\Notifications\Concerns;
 use App\Models\User;
 use App\Support\WebPush;
 use Illuminate\Notifications\Notification;
-use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\WebPush\WebPushMessage;
 
 /**
- * Also sends the notification as a push notification, to the devices on which the user enabled them.
+ * Also sends the notification as a push notification, to the devices on which the user enabled them: `via()` adds
+ * `WebPushChannel::class` to its channels when `isWebPushAvailable()`.
  *
  * The push notification shows the same title and body as the database notification (`toDatabase()`), and opens the
  * page of its first action when clicked.
@@ -17,23 +17,17 @@ use NotificationChannels\WebPush\WebPushMessage;
 trait SendsWebPush
 {
     /**
-     * Add the push channel to the given ones, when the push notifications are configured and the user enabled them.
+     * Whether the notification can be sent as a push notification: the push notifications are configured and the user
+     * enabled them on at least one device.
      *
      * Users who cannot log in (anymore) get no push notifications: their devices may now belong to someone else.
-     *
-     * @param  list<string>  $channels
-     * @return list<string>
      */
-    protected function withWebPush(object $notifiable, array $channels): array
+    protected function isWebPushAvailable(object $notifiable): bool
     {
-        if (WebPush::isConfigured()
+        return WebPush::isConfigured()
             && ! ($notifiable instanceof User && $notifiable->isVirtual())
             && method_exists($notifiable, 'pushSubscriptions')
-            && $notifiable->pushSubscriptions()->exists()) {
-            $channels[] = WebPushChannel::class;
-        }
-
-        return $channels;
+            && $notifiable->pushSubscriptions()->exists();
     }
 
     public function toWebPush(object $notifiable, Notification $notification): WebPushMessage

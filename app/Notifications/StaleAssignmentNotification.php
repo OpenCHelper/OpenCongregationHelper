@@ -14,6 +14,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
+use NotificationChannels\WebPush\WebPushChannel;
 
 class StaleAssignmentNotification extends Notification implements ShouldQueue
 {
@@ -36,7 +37,13 @@ class StaleAssignmentNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return $this->withWebPush($notifiable, ['mail', 'database']);
+        $channels = ['mail', 'database'];
+
+        if ($this->isWebPushAvailable($notifiable)) {
+            $channels[] = WebPushChannel::class;
+        }
+
+        return $channels;
     }
 
     /**

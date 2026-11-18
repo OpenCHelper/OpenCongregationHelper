@@ -11,6 +11,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\WebPush\WebPushChannel;
 
 class CampaignCreatedNotification extends Notification implements ShouldQueue
 {
@@ -33,7 +34,13 @@ class CampaignCreatedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return $this->withWebPush($notifiable, ['mail', 'database']);
+        $channels = ['mail', 'database'];
+
+        if ($this->isWebPushAvailable($notifiable)) {
+            $channels[] = WebPushChannel::class;
+        }
+
+        return $channels;
     }
 
     /**

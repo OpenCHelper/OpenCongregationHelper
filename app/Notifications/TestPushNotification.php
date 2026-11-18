@@ -6,6 +6,7 @@ use App\Notifications\Concerns\SendsWebPush;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\WebPush\WebPushChannel;
 
 /**
  * Push notification sent from the profile, to check that the devices of the user receive the push notifications.
@@ -21,7 +22,13 @@ class TestPushNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return $this->withWebPush($notifiable, []);
+        $channels = [];
+
+        if ($this->isWebPushAvailable($notifiable)) {
+            $channels[] = WebPushChannel::class;
+        }
+
+        return $channels;
     }
 
     /**
