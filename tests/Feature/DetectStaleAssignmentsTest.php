@@ -55,16 +55,18 @@ test('only assignments in progress for more than 60 days are reported as stale',
     Event::assertDispatched(StaleAssignmentDetected::class, fn (StaleAssignmentDetected $event): bool => $event->assignment->is($veryStaleAssignment));
 });
 
-test('the stale assignments job is scheduled every Monday at 9:00, Rome time', function () {
+test('the stale assignments job is scheduled every Monday at 9:00, in the timezone of the application', function () {
     $task = staleAssignmentsScheduledTask();
 
     expect($task->expression)->toBe('0 9 * * 1')
-        ->and($task->timezone)->toBe('Europe/Rome')
+        ->and($task->timezone)->toBe(config('app.timezone'))
         ->and($task->withoutOverlapping)->toBeTrue()
         ->and($task->onOneServer)->toBeTrue();
 });
 
-test('the stale assignments job is due on Monday at 9:00, Rome time', function (string $now, bool $isDue) {
+test('the stale assignments job is due on Monday at 9:00 in the timezone of the application', function (string $now, bool $isDue) {
+    config(['app.timezone' => 'Europe/Rome']);
+
     $task = staleAssignmentsScheduledTask();
 
     $this->travelTo(CarbonImmutable::parse($now));
@@ -73,10 +75,14 @@ test('the stale assignments job is due on Monday at 9:00, Rome time', function (
 })->with([
     'Monday 9:00 in Rome, in winter' => ['2026-11-16 09:00 Europe/Rome', true],
     'Monday 9:00 in Rome, in summer' => ['2026-06-15 09:00 Europe/Rome', true],
+    'Monday 9:00 UTC' => ['2026-11-16 09:00 UTC', false],
     'Monday 0:00 UTC' => ['2026-11-16 00:00 UTC', false],
 ]);
 
 test('the stale assignments job runs once a week when the scheduler is called as on the previews', function () {
+    // The previews run in UTC, the default timezone
+    config(['app.timezone' => 'UTC']);
+
     $task = staleAssignmentsScheduledTask();
 
     // As cron-job.org does for the previews (see `.github/workflows/deploy-preview.yml`): every 5 minutes, from 8:00 to

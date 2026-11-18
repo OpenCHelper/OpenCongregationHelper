@@ -75,7 +75,7 @@ return [
         ],
         'stale_check_time' => [
             'label' => 'Ora dei promemoria',
-            'helper' => 'Ora di Roma. I promemoria vengono inviati solo se a quell\'ora lo scheduler è in esecuzione, come cron job o come processo sempre attivo (es. con Supervisor): vedi la guida al setup.',
+            'helper' => 'Nel fuso orario dell\'applicazione (pagina Generali). I promemoria vengono inviati solo se a quell\'ora lo scheduler è in esecuzione, come cron job o come processo sempre attivo (es. con Supervisor): vedi la guida al setup.',
         ],
         'mail_from_name' => [
             'label' => 'Nome del mittente delle email',

@@ -56,14 +56,15 @@ return Application::configure(basePath: dirname(__DIR__))
             a multiple of 5 minutes (better on the hour, for services that
             call it hourly), in an explicit timezone, or it never runs. The
             day and time of the stale assignments check are chosen on the
-            Settings page: they must match how the scheduler is run.
+            Settings page, in the timezone of the application (UTC on the
+            previews): they must match how the scheduler is run.
         */
         $schedule->job(new DetectStaleAssignments)
             ->weeklyOn(
                 TerritorySettings::value('stale_check_day'),
                 TerritorySettings::value('stale_check_time'),
             )
-            ->timezone('Europe/Rome')
+            ->timezone(config('app.timezone'))
             ->withoutOverlapping()
             ->onOneServer();
         // ->onFailure(function (Stringable $output) {

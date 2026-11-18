@@ -34,10 +34,10 @@ li disegna in scala mentre scrivi:
 
 - i giorni dopo cui un'assegnazione ancora in corso è fuori da troppo tempo e poi persa: questi ultimi devono essere di
   più;
-- il **giorno** e l'**ora** (ora di Roma) dei promemoria settimanali inviati agli assegnatari delle assegnazioni fuori
-  da troppo tempo. Vengono inviati solo se a quell'ora lo scheduler è in esecuzione, come cron job o come processo
-  sempre attivo (es. con Supervisor); su un hosting senza cron, il servizio esterno deve chiamarlo a quell'ora (vedi la
-  [Guida al setup](../setup)).
+- il **giorno** e l'**ora** (nel fuso orario scelto nella pagina **Generali**) dei promemoria settimanali inviati agli
+  assegnatari delle assegnazioni fuori da troppo tempo. Vengono inviati solo se a quell'ora lo scheduler è in
+  esecuzione, come cron job o come processo sempre attivo (es. con Supervisor); su un hosting senza cron, il servizio
+  esterno deve chiamarlo a quell'ora (vedi la [Guida al setup](../setup)).
 
 ## Campagne
 

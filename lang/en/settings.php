@@ -75,7 +75,7 @@ return [
         ],
         'stale_check_time' => [
             'label' => 'Time of the reminders',
-            'helper' => 'Rome time. The reminders are sent only if the scheduler is running at that time, as a cron job or as a long-running process (e.g. with Supervisor): see the setup guide.',
+            'helper' => 'In the timezone of the application (General page). The reminders are sent only if the scheduler is running at that time, as a cron job or as a long-running process (e.g. with Supervisor): see the setup guide.',
         ],
         'mail_from_name' => [
             'label' => 'Sender name of the emails',

@@ -371,7 +371,7 @@ test('the stale assignments are checked on the chosen day and time', function ()
         ->first(fn (ScheduledTask $task): bool => $task->description === DetectStaleAssignments::class);
 
     expect($task->expression)->toBe('0 18 * * 3')
-        ->and($task->timezone)->toBe('Europe/Rome');
+        ->and($task->timezone)->toBe(config('app.timezone'));
 });
 
 test('equal stale assignment levels are both kept', function () {
@@ -420,6 +420,20 @@ test('queue workers apply the settings saved after they started before each job'
     event(new JobProcessing('database', $job));
 
     expect(config('mail.from.name'))->toBe('Territories of Springfield');
+});
+
+test('the stale assignments are checked in the timezone chosen on the General page', function () {
+    $settings = app(GeneralSettings::class);
+    $settings->timezone = 'America/Chicago';
+    $settings->save();
+
+    app(SettingsOverrides::class)->apply();
+    Artisan::all();
+
+    $task = collect(app(Schedule::class)->events())
+        ->first(fn (ScheduledTask $task): bool => $task->description === DetectStaleAssignments::class);
+
+    expect($task->timezone)->toBe('America/Chicago');
 });
 
 test('the stale assignments can be checked on any day and at any time', function () {
