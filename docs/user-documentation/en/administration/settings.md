@@ -29,7 +29,8 @@ role. The options are grouped by area, with one page each in the menu on the sid
 - **Show personal data on shared pages**: when on, the public page of a [shared assignment](../assignments/sharing)
   also shows the name of the assignee and the notes of the territory.
 
-Under **Assignments out for too long**:
+Under **Assignments out for too long** the levels are listed in order, each with its colour, and the bar below draws
+them to scale while you type:
 
 - the days after which an assignment still in progress is out for too long, very long, extremely long or lost. Each
   must be more than the previous one;
@@ -41,7 +42,9 @@ Under **Assignments out for too long**:
 
 ![Campaign settings](/docs/user-documentation/en/administration/assets/settings-campaigns.webp)
 
-The days before its end from which a campaign is **expiring** and **almost expired**: the latter must be fewer.
+The days before its end from which a campaign is **expiring** and **almost expired**: the latter must be fewer. The
+statuses are listed in order, with the colours of the campaign badges, and the bar below draws them to scale while you
+type.
 
 ## Notifications
 

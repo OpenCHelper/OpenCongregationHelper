@@ -5,7 +5,20 @@ return [
     'default' => 'Predeterminado: :value.',
     'on' => 'activado',
     'off' => 'desactivado',
-    'days' => 'días',
+
+    'units' => [
+        'days_before_end' => 'días antes del final',
+        'days_after_assignment' => 'días después de la asignación',
+    ],
+
+    'stages' => [
+        'active_note' => 'hasta que está por vencer',
+        'terminated_note' => 'desde la fecha de fin',
+        'in_progress' => 'En curso',
+        'in_progress_note' => 'desde el día de la asignación',
+        'end_date' => 'Fecha de fin',
+        'assigned' => 'Asignada',
+    ],
 
     'pages' => [
         'general' => 'Generales',
@@ -15,6 +28,8 @@ return [
     ],
 
     'sections' => [
+        'campaign_expiry' => 'Vencimiento de las campañas',
+        'campaign_expiry_description' => 'A medida que se acerca su fecha de fin, una campaña activa pasa a estar por vencer y luego casi vencida.',
         'application' => 'Aplicación',
         'appearance' => 'Apariencia',
         'maps_and_sharing' => 'Mapas y compartir',
@@ -50,16 +65,16 @@ return [
             'helper' => 'La página pública de una asignación compartida muestra también el nombre del asignado y las notas del territorio.',
         ],
         'stale_after_days' => [
-            'label' => 'Fuera demasiado tiempo después de',
+            'label' => 'Fuera demasiado tiempo',
         ],
         'very_stale_after_days' => [
-            'label' => 'Mucho tiempo después de',
+            'label' => 'Mucho tiempo',
         ],
         'extremely_stale_after_days' => [
-            'label' => 'Muchísimo tiempo después de',
+            'label' => 'Muchísimo tiempo',
         ],
         'dead_after_days' => [
-            'label' => 'Perdidas después de',
+            'label' => 'Perdida',
         ],
         'stale_check_day' => [
             'label' => 'Día de los recordatorios',
@@ -67,14 +82,6 @@ return [
         'stale_check_time' => [
             'label' => 'Hora de los recordatorios',
             'helper' => 'Hora de Roma.',
-        ],
-        'expiring_days' => [
-            'label' => 'Por vencer',
-            'helper' => 'Días antes del final de una campaña desde los que está por vencer.',
-        ],
-        'almost_expired_days' => [
-            'label' => 'Casi vencida',
-            'helper' => 'Días antes del final de una campaña desde los que está casi vencida; menos que los de por vencer.',
         ],
         'mail_from_name' => [
             'label' => 'Nombre del remitente de los correos',

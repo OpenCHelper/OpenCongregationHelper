@@ -5,7 +5,7 @@ namespace App\Filament\Clusters\Settings\Pages;
 use App\Filament\Clusters\Settings\AppSettingsPage;
 use App\Settings\CampaignSettings;
 use BackedEnum;
-use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -31,27 +31,31 @@ class ManageCampaignSettings extends AppSettingsPage
 
     public function form(Schema $schema): Schema
     {
+        $stages = [
+            ['name' => __('filament-resources.campaign.status_active'), 'color' => 'var(--success-500)'],
+            ['name' => __('filament-resources.campaign.status_is_expiring'), 'color' => 'var(--warning-500)', 'field' => 'expiring_days'],
+            ['name' => __('filament-resources.campaign.status_almost_expired'), 'color' => 'var(--danger-500)', 'field' => 'almost_expired_days'],
+            ['name' => __('filament-resources.campaign.status_terminated'), 'color' => 'var(--gray-400)'],
+        ];
+        $unit = __('settings.units.days_before_end');
+
         return $schema
             ->components([
-                $this->daysInput('expiring_days'),
-                $this->daysInput('almost_expired_days')
-                    ->lt('expiring_days'),
+                Section::make(__('settings.sections.campaign_expiry'))
+                    ->description(__('settings.sections.campaign_expiry_description'))
+                    ->columnSpanFull()
+                    ->schema([
+                        $this->stageRow($stages[0]['name'], $stages[0]['color'], __('settings.stages.active_note')),
+                        $this->stageInput('expiring_days', $stages[1]['name'], $stages[1]['color'], $unit)
+                            ->minValue(1)
+                            ->maxValue(365),
+                        $this->stageInput('almost_expired_days', $stages[2]['name'], $stages[2]['color'], $unit)
+                            ->minValue(1)
+                            ->lt('expiring_days'),
+                        $this->stageRow($stages[3]['name'], $stages[3]['color'], __('settings.stages.terminated_note')),
+                        $this->stagesBar($stages, isCountdown: true, startLabel: '', endLabel: __('settings.stages.end_date')),
+                    ]),
             ]);
-    }
-
-    /**
-     * A field for a number of days before the end date of a campaign.
-     */
-    protected function daysInput(string $property): TextInput
-    {
-        return TextInput::make($property)
-            ->label(__("settings.fields.{$property}.label"))
-            ->helperText(__("settings.fields.{$property}.helper").' '.$this->defaultHint((string) $this->defaultValue($property)))
-            ->integer()
-            ->required()
-            ->minValue(1)
-            ->maxValue(365)
-            ->suffix(__('settings.days'));
     }
 
     /**

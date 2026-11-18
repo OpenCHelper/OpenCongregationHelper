@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
 
 class ManageTerritorySettings extends AppSettingsPage
@@ -36,6 +37,15 @@ class ManageTerritorySettings extends AppSettingsPage
 
     public function form(Schema $schema): Schema
     {
+        $staleStages = [
+            ['name' => __('settings.stages.in_progress'), 'color' => 'var(--gray-400)'],
+            ['name' => __('settings.fields.stale_after_days.label'), 'color' => Color::Yellow[500], 'field' => 'stale_after_days'],
+            ['name' => __('settings.fields.very_stale_after_days.label'), 'color' => Color::Orange[500], 'field' => 'very_stale_after_days'],
+            ['name' => __('settings.fields.extremely_stale_after_days.label'), 'color' => Color::Red[500], 'field' => 'extremely_stale_after_days'],
+            ['name' => __('settings.fields.dead_after_days.label'), 'color' => Color::Neutral[900], 'field' => 'dead_after_days'],
+        ];
+        $unit = __('settings.units.days_after_assignment');
+
         return $schema
             ->components([
                 Section::make(__('settings.sections.maps_and_sharing'))
@@ -64,14 +74,20 @@ class ManageTerritorySettings extends AppSettingsPage
                     ->columns(2)
                     ->columnSpanFull()
                     ->schema([
-                        $this->daysInput('stale_after_days')
-                            ->minValue(1),
-                        $this->daysInput('very_stale_after_days')
+                        $this->stageRow($staleStages[0]['name'], $staleStages[0]['color'], __('settings.stages.in_progress_note')),
+                        $this->stageInput('stale_after_days', $staleStages[1]['name'], $staleStages[1]['color'], $unit)
+                            ->minValue(1)
+                            ->maxValue(3650),
+                        $this->stageInput('very_stale_after_days', $staleStages[2]['name'], $staleStages[2]['color'], $unit)
+                            ->maxValue(3650)
                             ->gt('stale_after_days'),
-                        $this->daysInput('extremely_stale_after_days')
+                        $this->stageInput('extremely_stale_after_days', $staleStages[3]['name'], $staleStages[3]['color'], $unit)
+                            ->maxValue(3650)
                             ->gt('very_stale_after_days'),
-                        $this->daysInput('dead_after_days')
+                        $this->stageInput('dead_after_days', $staleStages[4]['name'], $staleStages[4]['color'], $unit)
+                            ->maxValue(3650)
                             ->gt('extremely_stale_after_days'),
+                        $this->stagesBar($staleStages, isCountdown: false, startLabel: __('settings.stages.assigned'), endLabel: ''),
                         Select::make('stale_check_day')
                             ->label(__('settings.fields.stale_check_day.label'))
                             ->helperText($this->defaultHint(self::dayOptions()[$this->defaultValue('stale_check_day')]))
@@ -86,20 +102,6 @@ class ManageTerritorySettings extends AppSettingsPage
                             ->native(false),
                     ]),
             ]);
-    }
-
-    /**
-     * A field for a number of days after which an assignment is stale.
-     */
-    protected function daysInput(string $property): TextInput
-    {
-        return TextInput::make($property)
-            ->label(__("settings.fields.{$property}.label"))
-            ->helperText($this->defaultHint((string) $this->defaultValue($property)))
-            ->integer()
-            ->required()
-            ->maxValue(3650)
-            ->suffix(__('settings.days'));
     }
 
     /**

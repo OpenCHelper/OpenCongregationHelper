@@ -5,7 +5,20 @@ return [
     'default' => 'Default: :value.',
     'on' => 'on',
     'off' => 'off',
-    'days' => 'days',
+
+    'units' => [
+        'days_before_end' => 'days before the end',
+        'days_after_assignment' => 'days after the assignment',
+    ],
+
+    'stages' => [
+        'active_note' => 'until it is expiring',
+        'terminated_note' => 'from the end date',
+        'in_progress' => 'In progress',
+        'in_progress_note' => 'from the day of the assignment',
+        'end_date' => 'End date',
+        'assigned' => 'Assigned',
+    ],
 
     'pages' => [
         'general' => 'General',
@@ -15,6 +28,8 @@ return [
     ],
 
     'sections' => [
+        'campaign_expiry' => 'Campaign expiry',
+        'campaign_expiry_description' => 'As its end date gets closer, an active campaign becomes expiring and then almost expired.',
         'application' => 'Application',
         'appearance' => 'Appearance',
         'maps_and_sharing' => 'Maps and sharing',
@@ -50,16 +65,16 @@ return [
             'helper' => 'The public page of a shared assignment also shows the name of the assignee and the notes of the territory.',
         ],
         'stale_after_days' => [
-            'label' => 'Out for too long after',
+            'label' => 'Out for too long',
         ],
         'very_stale_after_days' => [
-            'label' => 'Very long after',
+            'label' => 'Very long',
         ],
         'extremely_stale_after_days' => [
-            'label' => 'Extremely long after',
+            'label' => 'Extremely long',
         ],
         'dead_after_days' => [
-            'label' => 'Lost after',
+            'label' => 'Lost',
         ],
         'stale_check_day' => [
             'label' => 'Day of the reminders',
@@ -67,14 +82,6 @@ return [
         'stale_check_time' => [
             'label' => 'Time of the reminders',
             'helper' => 'Rome time.',
-        ],
-        'expiring_days' => [
-            'label' => 'Expiring',
-            'helper' => 'Days before the end of a campaign from which it is expiring.',
-        ],
-        'almost_expired_days' => [
-            'label' => 'Almost expired',
-            'helper' => 'Days before the end of a campaign from which it is almost expired; fewer than the expiring ones.',
         ],
         'mail_from_name' => [
             'label' => 'Sender name of the emails',

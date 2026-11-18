@@ -5,7 +5,10 @@ namespace App\Filament\Clusters\Settings;
 use App\Settings\AppSettings;
 use App\Settings\ConfigSettings;
 use App\Support\SettingsOverrides;
+use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\View;
+use Illuminate\Support\HtmlString;
 
 /**
  * A Settings page, shown only to the super administrators.
@@ -97,5 +100,56 @@ abstract class AppSettingsPage extends SettingsPage
     protected function defaultHint(string $value): string
     {
         return __('settings.default', ['value' => $value]);
+    }
+
+    /**
+     * A stage of a sequence of thresholds (e.g. the statuses of a campaign) without a value of its own, shown as a row
+     * among the fields of the thresholds.
+     */
+    protected function stageRow(string $name, string $color, string $note): View
+    {
+        return View::make('filament.settings.threshold-stage')
+            ->viewData(['name' => $name, 'color' => $color, 'note' => $note])
+            ->columnSpanFull();
+    }
+
+    /**
+     * The field of the threshold from which a stage starts, shown as a row with the colour of the stage.
+     */
+    protected function stageInput(string $property, string $name, string $color, string $unit): TextInput
+    {
+        return TextInput::make($property)
+            ->label(new HtmlString('<span class="fi-settings-stage-dot"></span>'.e($name)))
+            ->validationAttribute($name)
+            ->inlineLabel()
+            ->helperText($this->defaultHint((string) $this->defaultValue($property)))
+            ->integer()
+            ->required()
+            ->suffix($unit)
+            ->extraFieldWrapperAttributes([
+                'class' => 'fi-settings-stage',
+                'style' => "--stage-color: {$color}",
+            ])
+            ->columnSpanFull();
+    }
+
+    /**
+     * A bar showing the stages to scale, updated while the thresholds are typed.
+     *
+     * The stages without a field are open-ended (e.g. before the first threshold), and get a fixed width.
+     *
+     * @param  list<array{name: string, color: string, field?: string}>  $stages
+     * @param  bool  $isCountdown  Whether the thresholds are days before an end (decreasing), instead of days after a start
+     */
+    protected function stagesBar(array $stages, bool $isCountdown, string $startLabel, string $endLabel): View
+    {
+        return View::make('filament.settings.thresholds-bar')
+            ->viewData([
+                'stages' => $stages,
+                'isCountdown' => $isCountdown,
+                'startLabel' => $startLabel,
+                'endLabel' => $endLabel,
+            ])
+            ->columnSpanFull();
     }
 }

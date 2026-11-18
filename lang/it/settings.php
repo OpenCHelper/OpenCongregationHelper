@@ -5,7 +5,20 @@ return [
     'default' => 'Predefinito: :value.',
     'on' => 'attivo',
     'off' => 'disattivo',
-    'days' => 'giorni',
+
+    'units' => [
+        'days_before_end' => 'giorni prima della fine',
+        'days_after_assignment' => 'giorni dopo l\'assegnazione',
+    ],
+
+    'stages' => [
+        'active_note' => 'finché non è in scadenza',
+        'terminated_note' => 'dalla data di fine',
+        'in_progress' => 'In corso',
+        'in_progress_note' => 'dal giorno dell\'assegnazione',
+        'end_date' => 'Data di fine',
+        'assigned' => 'Assegnata',
+    ],
 
     'pages' => [
         'general' => 'Generali',
@@ -15,6 +28,8 @@ return [
     ],
 
     'sections' => [
+        'campaign_expiry' => 'Scadenza delle campagne',
+        'campaign_expiry_description' => 'Man mano che si avvicina la data di fine, una campagna attiva diventa in scadenza e poi quasi scaduta.',
         'application' => 'Applicazione',
         'appearance' => 'Aspetto',
         'maps_and_sharing' => 'Mappe e condivisione',
@@ -50,16 +65,16 @@ return [
             'helper' => 'La pagina pubblica di un\'assegnazione condivisa mostra anche il nome dell\'assegnatario e le note del territorio.',
         ],
         'stale_after_days' => [
-            'label' => 'Fuori da troppo tempo dopo',
+            'label' => 'Fuori da troppo tempo',
         ],
         'very_stale_after_days' => [
-            'label' => 'Da molto tempo dopo',
+            'label' => 'Da molto tempo',
         ],
         'extremely_stale_after_days' => [
-            'label' => 'Da moltissimo tempo dopo',
+            'label' => 'Da moltissimo tempo',
         ],
         'dead_after_days' => [
-            'label' => 'Perse dopo',
+            'label' => 'Persa',
         ],
         'stale_check_day' => [
             'label' => 'Giorno dei promemoria',
@@ -67,14 +82,6 @@ return [
         'stale_check_time' => [
             'label' => 'Ora dei promemoria',
             'helper' => 'Ora di Roma.',
-        ],
-        'expiring_days' => [
-            'label' => 'In scadenza',
-            'helper' => 'Giorni prima della fine di una campagna da cui è in scadenza.',
-        ],
-        'almost_expired_days' => [
-            'label' => 'Quasi scaduta',
-            'helper' => 'Giorni prima della fine di una campagna da cui è quasi scaduta; meno di quelli in scadenza.',
         ],
         'mail_from_name' => [
             'label' => 'Nome del mittente delle email',

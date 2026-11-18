@@ -73,3 +73,115 @@
 .fi-ta-row.fi-ta-row-assignment-due-soon > td:first-child {
     box-shadow: inset 3px 0 0 var(--warning-500);
 }
+
+/*
+   ------------ Sequences of thresholds on the Settings pages ------------
+
+   The stages of a sequence (e.g. the statuses of a campaign) are rows in their order, each with the colour of its stage
+   in `--stage-color`, followed by a bar drawing them to scale (see `AppSettingsPage`).
+*/
+.fi-settings-stage {
+    border-inline-start: 4px solid var(--stage-color);
+    border-radius: var(--radius-lg);
+    background-color: color-mix(in oklab, var(--stage-color) 7%, transparent);
+    padding: 0.625rem 0.875rem;
+}
+
+.fi-settings-stage-static {
+    display: grid;
+    gap: 0.25rem 1rem;
+    align-items: center;
+    font-size: var(--text-sm);
+
+    @media (width >= 40rem) {
+        grid-template-columns: 1fr 2fr;
+    }
+}
+
+.fi-settings-stage-name {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+    color: var(--color-gray-950);
+
+    &:where(.dark, .dark *) {
+        color: var(--color-white);
+    }
+}
+
+.fi-settings-stage-note {
+    color: var(--color-gray-500);
+
+    &:where(.dark, .dark *) {
+        color: var(--color-gray-400);
+    }
+}
+
+.fi-settings-stage-dot {
+    display: inline-block;
+    flex: none;
+    width: 0.625rem;
+    height: 0.625rem;
+    margin-inline-end: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--stage-color);
+}
+
+.fi-settings-stages-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    font-size: var(--text-sm);
+}
+
+.fi-settings-stages-bar-ends,
+.fi-settings-stages-bar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    color: var(--color-gray-500);
+
+    &:where(.dark, .dark *) {
+        color: var(--color-gray-400);
+    }
+}
+
+.fi-settings-stages-bar-legend {
+    justify-content: flex-start;
+    column-gap: 1.25rem;
+}
+
+.fi-settings-stages-bar-legend > span {
+    display: inline-flex;
+    align-items: center;
+}
+
+.fi-settings-stages-bar-track {
+    display: flex;
+    height: 0.75rem;
+    overflow: hidden;
+    border-radius: 9999px;
+}
+
+.fi-settings-stages-bar-segment {
+    height: 100%;
+    background-color: var(--stage-color);
+    transition: width 150ms;
+}
+
+/* The open-ended stages (before the first threshold or after the last one) are striped */
+.fi-settings-stages-bar-open {
+    background-image: repeating-linear-gradient(45deg, rgb(255 255 255 / 0.3) 0 6px, transparent 6px 12px);
+}
+
+.fi-settings-stages-bar-ticks {
+    position: relative;
+    height: 1.25rem;
+    font-weight: 500;
+
+    > span {
+        position: absolute;
+        transform: translateX(-50%);
+    }
+}

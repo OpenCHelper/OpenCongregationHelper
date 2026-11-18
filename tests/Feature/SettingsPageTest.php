@@ -426,3 +426,30 @@ test('the sender name of the emails follows the environment until changed', func
     expect(app(NotificationSettings::class)->mail_from_name)->toBeNull()
         ->and(config('mail.from.name'))->toBe($default);
 });
+
+test('the campaign thresholds are shown in the order of the statuses, with a bar to scale', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageCampaignSettings::class)
+        ->assertSeeInOrder([
+            __('filament-resources.campaign.status_active'),
+            __('filament-resources.campaign.status_is_expiring'),
+            __('filament-resources.campaign.status_almost_expired'),
+            __('filament-resources.campaign.status_terminated'),
+        ])
+        ->assertSeeHtml('fi-settings-stages-bar');
+});
+
+test('the stale assignment levels are shown in order, with a bar to scale', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSeeInOrder([
+            __('settings.stages.in_progress'),
+            __('settings.fields.stale_after_days.label'),
+            __('settings.fields.very_stale_after_days.label'),
+            __('settings.fields.extremely_stale_after_days.label'),
+            __('settings.fields.dead_after_days.label'),
+        ])
+        ->assertSeeHtml('fi-settings-stages-bar');
+});
