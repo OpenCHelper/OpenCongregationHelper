@@ -120,6 +120,7 @@ return [
         'disable' => 'Desactivar en este dispositivo',
         'send_test' => 'Enviar una notificación de prueba',
         'enabled' => 'Las notificaciones push están activadas en este dispositivo.',
+        'pop_up_tip' => '¿Solo aparecen en la barra de notificaciones? En Android, permite las notificaciones emergentes de este sitio (o de la app, si está instalada) en los ajustes de notificaciones del teléfono.',
         'disabled' => 'Las notificaciones push están desactivadas en este dispositivo.',
         'denied' => 'Las notificaciones están bloqueadas para este sitio: permítelas en los ajustes del navegador y vuelve a cargar la página.',
         'ios_install' => 'En iPhone y iPad, añade primero la app a la pantalla de inicio (Compartir y luego "Añadir a pantalla de inicio") y ábrela desde allí para activar las notificaciones push.',

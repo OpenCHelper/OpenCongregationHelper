@@ -120,6 +120,7 @@ return [
         'disable' => 'Disattiva su questo dispositivo',
         'send_test' => 'Invia una notifica di prova',
         'enabled' => 'Le notifiche push sono attive su questo dispositivo.',
+        'pop_up_tip' => 'Compaiono solo nella barra delle notifiche? Su Android consenti le notifiche a comparsa di questo sito (o dell\'app, se installata) nelle impostazioni delle notifiche del telefono.',
         'disabled' => 'Le notifiche push non sono attive su questo dispositivo.',
         'denied' => 'Le notifiche sono bloccate per questo sito: consentile nelle impostazioni del browser, poi ricarica la pagina.',
         'ios_install' => 'Su iPhone e iPad aggiungi prima l\'app alla schermata Home (Condividi, poi "Aggiungi alla schermata Home"), quindi aprila da lì per attivare le notifiche push.',

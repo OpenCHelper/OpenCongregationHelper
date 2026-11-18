@@ -32,6 +32,10 @@ Clicking one opens the related territory or assignment.
 Enable them on each device you use. To stop them, click **Disable on this device**. Logging out also stops them on
 that device, so a shared device does not receive your notifications.
 
+> 💡 **Tip:** if on Android the notifications appear only in the notification bar and not on screen, allow the pop-up
+> notifications: long-press a notification, open its settings and enable **Pop on screen** (on some phones,
+> **Pop-up notifications**) for the site or, if installed, for the app. **Vibration** is set on the same page.
+
 > ℹ️ **Note:** on iPhone and iPad, push notifications work only after adding the app to the Home Screen (**Share**, then
 > **Add to Home Screen**): open it from there, then enable them. If the section is missing from the profile, the
 > administrator has not configured push notifications yet (see the [Setup guide](../setup#push-notifications)).

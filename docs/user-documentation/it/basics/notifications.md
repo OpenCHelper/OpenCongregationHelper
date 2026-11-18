@@ -32,6 +32,10 @@ chiusa. Cliccandone una si apre il territorio o l'assegnazione collegata.
 Attivale su ogni dispositivo che usi. Per non riceverle più, clicca **Disattiva su questo dispositivo**. Anche uscire
 dall'account le disattiva su quel dispositivo, così un dispositivo condiviso non riceve le tue notifiche.
 
+> 💡 **Suggerimento:** se su Android le notifiche compaiono solo nella barra delle notifiche e non sullo schermo,
+> consenti le notifiche a comparsa: tieni premuta una notifica, aprine le impostazioni e attiva **Notifiche a comparsa**
+> per il sito o, se installata, per l'app. Nella stessa pagina puoi attivare anche la **Vibrazione**.
+
 > ℹ️ **Nota:** su iPhone e iPad le notifiche push funzionano solo dopo aver aggiunto l'app alla schermata Home
 > (**Condividi**, poi **Aggiungi alla schermata Home**): aprila da lì, poi attivale. Se la sezione non compare nel
 > profilo, l'amministratore non ha ancora configurato le notifiche push (vedi la [Guida al setup](../setup#notifiche-push)).

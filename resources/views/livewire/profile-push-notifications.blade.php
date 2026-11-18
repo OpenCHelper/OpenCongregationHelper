@@ -162,6 +162,11 @@
                     {{ __('profile.push_notifications.enabled') }}
                 </p>
 
+                {{-- Android lets each site or app show its notifications on screen only once allowed in its settings --}}
+                <p x-show="status === 'enabled'" x-cloak>
+                    {{ __('profile.push_notifications.pop_up_tip') }}
+                </p>
+
                 <p x-show="status === 'disabled'" x-cloak>
                     {{ __('profile.push_notifications.disabled') }}
                 </p>

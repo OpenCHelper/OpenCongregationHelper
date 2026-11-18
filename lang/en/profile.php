@@ -120,6 +120,7 @@ return [
         'disable' => 'Disable on this device',
         'send_test' => 'Send a test notification',
         'enabled' => 'Push notifications are enabled on this device.',
+        'pop_up_tip' => 'Do they only appear in the notification bar? On Android, allow the pop-up notifications of this site (or of the app, if installed) in the notification settings of the phone.',
         'disabled' => 'Push notifications are disabled on this device.',
         'denied' => 'Notifications are blocked for this site: allow them in the settings of your browser, then reload the page.',
         'ios_install' => 'On iPhone and iPad, add the app to the Home Screen first (Share, then "Add to Home Screen"), then open it from there to enable push notifications.',

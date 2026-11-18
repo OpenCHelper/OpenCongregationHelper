@@ -161,7 +161,7 @@ test('the profile offers to enable push notifications only when they are configu
     $response = $this->actingAs($this->user)->get(EditProfile::getUrl())->assertOk();
 
     $isConfigured
-        ? $response->assertSee(__('profile.push_notifications.title'))->assertSee('BPublicKeyOfTheServer')
+        ? $response->assertSee(__('profile.push_notifications.title'))->assertSee('BPublicKeyOfTheServer')->assertSee(__('profile.push_notifications.pop_up_tip'))
         : $response->assertDontSee(__('profile.push_notifications.title'));
 })->with([
     'configured' => true,
