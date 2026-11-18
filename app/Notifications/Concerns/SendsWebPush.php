@@ -41,7 +41,7 @@ trait SendsWebPush
             ->title((string) ($message['title'] ?? config('app.name')))
             ->body((string) ($message['body'] ?? ''))
             ->icon(asset('icons/icon-192.png'))
-            ->badge(asset('icons/favicon-32.png'))
+            ->badge(asset('icons/badge-96.png'))
             ->lang(app()->getLocale())
             ->data(['url' => $url])
             ->options(['TTL' => 60 * 60 * 24 * 7]);

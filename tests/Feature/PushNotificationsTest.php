@@ -137,6 +137,7 @@ test('push notifications show the database notification and open its page', func
         ->title->toBe(__('filament-resources.database_notifications.territory_assigned_title', ['territory' => $assignment->territory->name]))
         ->body->toBe(__('filament-resources.database_notifications.territory_assigned_body', ['territory' => $assignment->territory->name]))
         ->icon->toBe(asset('icons/icon-192.png'))
+        ->badge->toBe(asset('icons/badge-96.png'))
         ->data->toBe(['url' => TerritoryAssignmentResource::getUrl('view', ['record' => $assignment->id])]);
 });
 
@@ -202,6 +203,20 @@ test('a device moves to the user who enables push notifications on it', function
 
     expect($previousUser->pushSubscriptions()->exists())->toBeFalse()
         ->and($this->user->pushSubscriptions()->count())->toBe(1);
+});
+
+test('the device of another user cannot be taken over with its endpoint alone', function () {
+    $owner = User::factory()->create();
+    subscribe($owner, $this->subscription);
+
+    $this->actingAs($this->user);
+
+    Livewire::test(ProfilePushNotifications::class)
+        ->call('subscribe', [...$this->subscription, 'keys' => ['p256dh' => 'guessed-key', 'auth' => 'guessed-secret']])
+        ->assertHasErrors('endpoint');
+
+    expect($owner->pushSubscriptions()->sole())->public_key->toBe('public-key-of-the-browser')
+        ->and($this->user->pushSubscriptions()->exists())->toBeFalse();
 });
 
 test('invalid subscriptions are rejected', function (array $subscription) {
@@ -330,6 +345,14 @@ test('the service worker shows the push notifications and opens their page', fun
     expect(file_get_contents(public_path('sw.js')))
         ->toContain("self.addEventListener('push'")
         ->toContain('self.registration.showNotification(title, options)')
+        ->toContain('payload = { body: event.data?.text() }')
         ->toContain("self.addEventListener('notificationclick'")
         ->toContain('event.notification.data?.url');
+});
+
+test('the badge of the push notifications is a transparent silhouette, as Android shows only its alpha channel', function () {
+    $badge = imagecreatefrompng(public_path('icons/badge-96.png'));
+
+    expect(imagesx($badge))->toBe(96)
+        ->and(imagecolorsforindex($badge, imagecolorat($badge, 0, 0))['alpha'])->toBe(127);
 });

@@ -68,7 +68,15 @@ self.addEventListener('fetch', (event) => {
  * with the URL to open on click in `data.url`.
  */
 self.addEventListener('push', (event) => {
-    const payload = event.data?.json() ?? {};
+    let payload = {};
+
+    // A payload that is not JSON (e.g. a test from the developer tools of the browser) is shown as the body.
+    try {
+        payload = event.data?.json() ?? {};
+    } catch {
+        payload = { body: event.data?.text() };
+    }
+
     const { title = 'OpenCongregationHelper', ...options } = payload;
 
     event.waitUntil(self.registration.showNotification(title, options));

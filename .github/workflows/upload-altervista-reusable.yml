@@ -223,6 +223,9 @@ jobs:
             fi
           done
 
+          # Without the empty placeholders of the push keys (e.g. copied from `.env.example`), as the first value wins
+          DOTENV="$(printf '%s\n' "$DOTENV" | sed -E "/^VAPID_[A-Z_]*=(''|\"\")?[[:space:]]*$/d")"
+
           {
             printf '%s\n' "$DOTENV"
             echo "APP_KEY='$(php artisan key:generate --show --no-ansi)'"

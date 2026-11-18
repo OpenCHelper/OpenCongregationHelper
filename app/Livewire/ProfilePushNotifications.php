@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Minishlink\WebPush\ContentEncoding;
 use NotificationChannels\WebPush\PushSubscription;
@@ -42,6 +43,9 @@ class ProfilePushNotifications extends Component
     /**
      * Store the subscription of the current device (or update it, as the browser may renew it).
      *
+     * A device subscribed by another user moves to the current one only with the same keys, which only the browser of
+     * that device knows: knowing the endpoint alone is not enough to take the device over.
+     *
      * @param  array{endpoint?: mixed, keys?: array{p256dh?: mixed, auth?: mixed}, contentEncoding?: mixed}  $subscription
      */
     public function subscribe(array $subscription): void
@@ -54,6 +58,14 @@ class ProfilePushNotifications extends Component
             'keys.auth' => ['required', 'string', 'max:255'],
             'contentEncoding' => ['nullable', Rule::enum(ContentEncoding::class)],
         ])->validate();
+
+        $existingSubscription = PushSubscription::findByEndpoint($validated['endpoint']);
+
+        if ($existingSubscription
+            && ! $this->user()->ownsPushSubscription($existingSubscription)
+            && ($existingSubscription->public_key !== $validated['keys']['p256dh'] || $existingSubscription->auth_token !== $validated['keys']['auth'])) {
+            throw ValidationException::withMessages(['endpoint' => __('profile.push_notifications.error')]);
+        }
 
         $this->user()->updatePushSubscription(
             $validated['endpoint'],
