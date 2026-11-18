@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Models\Campaign;
+use App\Settings\CampaignSettings;
 use Carbon\Carbon;
 
 enum CampaignStatus: string
@@ -11,16 +12,6 @@ enum CampaignStatus: string
     case IS_EXPIRING = 'is_expiring';
     case ALMOST_EXPIRED = 'almost_expired';
     case TERMINATED = 'terminated';
-
-    /**
-     * Number of days before its end date from which a campaign is expiring.
-     */
-    public const EXPIRING_DAYS = 7;
-
-    /**
-     * Number of days before its end date from which a campaign is almost expired.
-     */
-    public const ALMOST_EXPIRED_DAYS = 3;
 
     public function getLabel(): string
     {
@@ -45,7 +36,8 @@ enum CampaignStatus: string
     /**
      * Get the status of a campaign from the days remaining until its end date.
      *
-     * Campaigns without an end date, or with more than 7 days left, are active.
+     * Campaigns without an end date, or with more days left than the expiring days (see `CampaignSettings`), are
+     * active.
      */
     public static function fromValidUntil(?Carbon $validUntil): self
     {
@@ -60,8 +52,8 @@ enum CampaignStatus: string
         $daysRemaining = now()->diffInDays($validUntil);
 
         return match (true) {
-            $daysRemaining <= self::ALMOST_EXPIRED_DAYS => self::ALMOST_EXPIRED,
-            $daysRemaining <= self::EXPIRING_DAYS => self::IS_EXPIRING,
+            $daysRemaining <= CampaignSettings::value('almost_expired_days') => self::ALMOST_EXPIRED,
+            $daysRemaining <= CampaignSettings::value('expiring_days') => self::IS_EXPIRING,
             default => self::ACTIVE,
         };
     }

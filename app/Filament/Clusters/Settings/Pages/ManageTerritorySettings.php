@@ -2,16 +2,19 @@
 
 namespace App\Filament\Clusters\Settings\Pages;
 
-use App\Filament\Clusters\Settings\ConfigSettingsPage;
+use App\Filament\Clusters\Settings\AppSettingsPage;
 use App\Settings\TerritorySettings;
 use BackedEnum;
+use Carbon\Carbon;
 use Closure;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
-class ManageTerritorySettings extends ConfigSettingsPage
+class ManageTerritorySettings extends AppSettingsPage
 {
     protected static string $settings = TerritorySettings::class;
 
@@ -35,26 +38,93 @@ class ManageTerritorySettings extends ConfigSettingsPage
     {
         return $schema
             ->components([
-                TextInput::make('map_default_center')
-                    ->label(__('settings.fields.map_default_center.label'))
-                    ->placeholder('41.159063, -74.255188')
-                    ->helperText(__('settings.fields.map_default_center.helper').' '.$this->defaultHint(
-                        self::formatCoordinates($this->defaultValue('map_default_center')),
-                    ))
-                    ->required()
-                    ->rule(fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
-                        if (self::parseCoordinates((string) $value) === null) {
-                            $fail(__('settings.fields.map_default_center.invalid'));
-                        }
-                    })
-                    ->columnSpanFull(),
-                Toggle::make('shared_pii')
-                    ->label(__('settings.fields.shared_pii.label'))
-                    ->helperText(__('settings.fields.shared_pii.helper').' '.$this->defaultHint(
-                        $this->defaultValue('shared_pii') ? __('settings.on') : __('settings.off'),
-                    ))
-                    ->columnSpanFull(),
+                Section::make(__('settings.sections.maps_and_sharing'))
+                    ->columnSpanFull()
+                    ->schema([
+                        TextInput::make('map_default_center')
+                            ->label(__('settings.fields.map_default_center.label'))
+                            ->placeholder('41.159063, -74.255188')
+                            ->helperText(__('settings.fields.map_default_center.helper').' '.$this->defaultHint(
+                                self::formatCoordinates($this->defaultValue('map_default_center')),
+                            ))
+                            ->required()
+                            ->rule(fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
+                                if (self::parseCoordinates((string) $value) === null) {
+                                    $fail(__('settings.fields.map_default_center.invalid'));
+                                }
+                            }),
+                        Toggle::make('shared_pii')
+                            ->label(__('settings.fields.shared_pii.label'))
+                            ->helperText(__('settings.fields.shared_pii.helper').' '.$this->defaultHint(
+                                $this->defaultValue('shared_pii') ? __('settings.on') : __('settings.off'),
+                            )),
+                    ]),
+                Section::make(__('settings.sections.stale_assignments'))
+                    ->description(__('settings.sections.stale_assignments_description'))
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->schema([
+                        $this->daysInput('stale_after_days')
+                            ->minValue(1),
+                        $this->daysInput('very_stale_after_days')
+                            ->gt('stale_after_days'),
+                        $this->daysInput('extremely_stale_after_days')
+                            ->gt('very_stale_after_days'),
+                        $this->daysInput('dead_after_days')
+                            ->gt('extremely_stale_after_days'),
+                        Select::make('stale_check_day')
+                            ->label(__('settings.fields.stale_check_day.label'))
+                            ->helperText($this->defaultHint(self::dayOptions()[$this->defaultValue('stale_check_day')]))
+                            ->options(self::dayOptions())
+                            ->required()
+                            ->native(false),
+                        Select::make('stale_check_time')
+                            ->label(__('settings.fields.stale_check_time.label'))
+                            ->helperText(__('settings.fields.stale_check_time.helper').' '.$this->defaultHint($this->defaultValue('stale_check_time')))
+                            ->options(self::timeOptions())
+                            ->required()
+                            ->native(false),
+                    ]),
             ]);
+    }
+
+    /**
+     * A field for a number of days after which an assignment is stale.
+     */
+    protected function daysInput(string $property): TextInput
+    {
+        return TextInput::make($property)
+            ->label(__("settings.fields.{$property}.label"))
+            ->helperText($this->defaultHint((string) $this->defaultValue($property)))
+            ->integer()
+            ->required()
+            ->maxValue(3650)
+            ->suffix(__('settings.days'));
+    }
+
+    /**
+     * The days of the week, keyed by number (0 = Sunday), in the language of the user.
+     *
+     * @return array<int, string>
+     */
+    public static function dayOptions(): array
+    {
+        return collect(range(0, 6))
+            ->mapWithKeys(fn (int $day): array => [$day => ucfirst(Carbon::now()->startOfWeek(Carbon::SUNDAY)->addDays($day)->translatedFormat('l'))])
+            ->all();
+    }
+
+    /**
+     * The whole hours of the day, as "HH:00": on hostings without cron the scheduler can be called only once an hour.
+     *
+     * @return array<string, string>
+     */
+    public static function timeOptions(): array
+    {
+        return collect(range(0, 23))
+            ->map(fn (int $hour): string => sprintf('%02d:00', $hour))
+            ->mapWithKeys(fn (string $time): array => [$time => $time])
+            ->all();
     }
 
     /**
@@ -77,6 +147,11 @@ class ManageTerritorySettings extends ConfigSettingsPage
     {
         $data['map_default_center'] = self::parseCoordinates((string) $data['map_default_center']);
         $data['shared_pii'] = (bool) $data['shared_pii'];
+        $data['stale_check_day'] = (int) $data['stale_check_day'];
+
+        foreach (['stale_after_days', 'very_stale_after_days', 'extremely_stale_after_days', 'dead_after_days'] as $property) {
+            $data[$property] = (int) $data[$property];
+        }
 
         return parent::mutateFormDataBeforeSave($data);
     }

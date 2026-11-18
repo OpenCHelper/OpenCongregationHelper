@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Events\StaleAssignmentDetected;
 use App\Models\TerritoryAssignment;
+use App\Settings\TerritorySettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -24,22 +25,22 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
     public function getStaleLevels(): array
     {
         return [
-            60 => [
+            TerritorySettings::value('stale_after_days') => [
                 'label' => 'stale',
                 'description' => 'Assignment is stale',
                 'color' => 'yellow',
             ],
-            90 => [
+            TerritorySettings::value('very_stale_after_days') => [
                 'label' => 'very_stale',
                 'description' => 'Assignment is very stale',
                 'color' => 'orange',
             ],
-            120 => [
+            TerritorySettings::value('extremely_stale_after_days') => [
                 'label' => 'extremely_stale',
                 'description' => 'Assignment is extremely stale',
                 'color' => 'red',
             ],
-            150 => [
+            TerritorySettings::value('dead_after_days') => [
                 'label' => 'dead',
                 'description' => 'Assignment is dead',
                 'color' => 'black',

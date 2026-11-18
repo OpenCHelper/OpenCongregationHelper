@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CampaignStatus;
 use App\Observers\CampaignObserver;
+use App\Settings\CampaignSettings;
 use Database\Factories\CampaignFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -148,7 +149,7 @@ class Campaign extends Model
     public function scopeExpiring(Builder $query): void
     {
         $query->where('valid_until', '>', now())
-            ->where('valid_until', '<=', now()->addDays(CampaignStatus::EXPIRING_DAYS));
+            ->where('valid_until', '<=', now()->addDays(CampaignSettings::value('expiring_days')));
     }
 
     /**

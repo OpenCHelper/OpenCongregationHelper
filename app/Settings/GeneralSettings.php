@@ -16,7 +16,8 @@ class GeneralSettings extends ConfigSettings
     public ?string $logo = null;
 
     /**
-     * The primary colour of the panel, as a hex colour (gray when not set).
+     * The primary colour of the users who did not choose one in their UI preferences, as a hex colour (the default of
+     * `config/ui-switcher.php` when not set).
      */
     public ?string $primary_color = null;
 

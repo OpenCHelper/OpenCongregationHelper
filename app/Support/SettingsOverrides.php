@@ -87,14 +87,4 @@ class SettingsOverrides
             ? $this->defaults[$configKey]
             : config($configKey);
     }
-
-    /**
-     * Get the value that a setting has now: changed from the Settings pages, or its default.
-     *
-     * @param  class-string<ConfigSettings>  $class
-     */
-    public function current(string $class, string $property): mixed
-    {
-        return app($class)->{$property} ?? $this->default($class, $property);
-    }
 }
