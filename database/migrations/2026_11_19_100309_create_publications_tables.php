@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * The Bible and the periodicals offered on paper to a new installation, with their name in every language of the
-     * application (written here, so that this migration always inserts the same rows), their code, category and how
-     * often they renew (in months). They can be changed, turned off or deleted later like any other publication.
+     * The publications offered on paper to a new installation (the Bible, the periodicals and the publications
+     * in print since 2015), with their name in every language of the application (written here, so that this
+     * migration always inserts the same rows), their code, category and how often they renew (in months). They
+     * can be changed, turned off or deleted later like any other publication.
      *
      * The codes are the ones of the index of the publications ("Abbreviations of Publication Titles").
      *
@@ -20,7 +21,7 @@ return new class extends Migration
      */
     private const DEFAULT_PUBLICATIONS = [
         [
-            'name' => ['en' => 'New World Translation of the Holy Scriptures', 'it' => 'Traduzione del Nuovo Mondo delle Sacre Scritture', 'es' => 'Traducción del Nuevo Mundo de las Santas Escrituras'],
+            'name' => ['en' => 'New World Translation of the Holy Scriptures', 'it' => 'Traduzione del Nuovo Mondo delle Sacre Scritture', 'es' => 'La Biblia. Traducción del Nuevo Mundo'],
             'code' => 'nwt',
             'category' => 'bibles',
             'renewal_months' => null,
@@ -62,6 +63,139 @@ return new class extends Migration
             'code' => 'mwb-lp',
             'category' => 'meeting_workbooks',
             'renewal_months' => 2,
+        ],
+        // The other publications in print since 2015, as in the index of the publications (requested once)
+        [
+            'name' => ['en' => 'New World Translation of the Holy Scriptures (Study Edition)', 'it' => 'Traduzione del Nuovo Mondo delle Sacre Scritture (edizione per lo studio)', 'es' => 'La Biblia. Traducción del Nuevo Mundo (edición de estudio)'],
+            'code' => 'nwtsty',
+            'category' => 'bibles',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'What Can the Bible Teach Us?', 'it' => 'Cosa ci insegna la Bibbia?', 'es' => '¿Qué nos enseña la Biblia?'],
+            'code' => 'bhs',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => '“Bearing Thorough Witness” About God’s Kingdom', 'it' => 'Rendiamo “completa testimonianza in merito al Regno di Dio”', 'es' => 'Demos “un testimonio completo sobre el Reino de Dios”'],
+            'code' => 'bt',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => '“Come Be My Follower”', 'it' => '“Vieni, sii mio discepolo”', 'es' => '“Ven y sé mi seguidor”'],
+            'code' => 'cf',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Draw Close to Jehovah', 'it' => 'Avviciniamoci a Geova', 'es' => 'Acerquémonos a Jehová'],
+            'code' => 'cl',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Insight on the Scriptures, Volume 1', 'it' => 'Perspicacia nello studio delle Scritture, volume 1', 'es' => 'Perspicacia para comprender las Escrituras, volumen 1'],
+            'code' => 'it-1',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Insight on the Scriptures, Volume 2', 'it' => 'Perspicacia nello studio delle Scritture, volume 2', 'es' => 'Perspicacia para comprender las Escrituras, volumen 2'],
+            'code' => 'it-2',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Jesus—The Way, the Truth, the Life', 'it' => 'Gesù: la via, la verità, la vita', 'es' => 'Jesús: el camino, la verdad y la vida'],
+            'code' => 'jy',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Lessons You Can Learn From the Bible', 'it' => 'Impariamo dai racconti della Bibbia', 'es' => 'Lecciones que aprendo de la Biblia'],
+            'code' => 'lfb',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Enjoy Life Forever!—An Interactive Bible Course', 'it' => 'Puoi vivere felice per sempre. Corso biblico interattivo', 'es' => '¡Disfrute de la vida para siempre! Curso interactivo de la Biblia'],
+            'code' => 'lff',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'How to Remain in God’s Love', 'it' => 'Come rimanere nell’amore di Dio', 'es' => 'Continúe en el amor de Dios'],
+            'code' => 'lvs',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Organized to Do Jehovah’s Will', 'it' => 'Organizzati per fare la volontà di Geova', 'es' => 'Organizados para hacer la voluntad de Jehová'],
+            'code' => 'od',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Pure Worship of Jehovah—Restored At Last!', 'it' => 'La pura adorazione di Geova: finalmente ristabilita!', 'es' => 'La adoración pura de Jehová: ¡por fin restaurada!'],
+            'code' => 'rr',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Scriptures for Christian Living', 'it' => 'Versetti utili nella vita di un cristiano', 'es' => 'Textos bíblicos para la vida cristiana'],
+            'code' => 'scl',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Walk Courageously With God', 'it' => 'Cammina coraggiosamente con Dio', 'es' => 'Seamos valientes al andar con Dios'],
+            'code' => 'wcg',
+            'category' => 'books',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Jehovah’s Witnesses and Education', 'it' => 'I Testimoni di Geova e l’istruzione', 'es' => 'Los testigos de Jehová y la educación'],
+            'code' => 'ed',
+            'category' => 'brochures_and_booklets',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Enjoy Life Forever!—Introductory Bible Lessons', 'it' => 'Puoi vivere felice per sempre. Lezioni bibliche introduttive', 'es' => '¡Disfrute de la vida para siempre! Introducción a las enseñanzas de la Biblia'],
+            'code' => 'lffi',
+            'category' => 'brochures_and_booklets',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Love People—Make Disciples', 'it' => 'Ama le persone. Fai discepoli', 'es' => 'Hacer discípulos: una obra de amor'],
+            'code' => 'lmd',
+            'category' => 'brochures_and_booklets',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Return to Jehovah', 'it' => 'Ritorna a Geova', 'es' => 'Jehová desea que vuelva'],
+            'code' => 'rj',
+            'category' => 'brochures_and_booklets',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Apply Yourself to Reading and Teaching', 'it' => 'Applicati alla lettura e all’insegnamento', 'es' => 'Seamos mejores lectores y maestros'],
+            'code' => 'th',
+            'category' => 'brochures_and_booklets',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Wisdom From the Gospels', 'it' => 'Perle di saggezza dal Vangelo', 'es' => 'La sabiduría de los Evangelios'],
+            'code' => 'wfg',
+            'category' => 'brochures_and_booklets',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'Answers to 10 Questions Young People Ask', 'it' => '10 domande dei ragazzi', 'es' => 'Respuestas a 10 preguntas de los jóvenes'],
+            'code' => 'ypq',
+            'category' => 'brochures_and_booklets',
+            'renewal_months' => null,
         ],
     ];
 

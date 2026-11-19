@@ -38,8 +38,8 @@ their publications are no longer requested, but their history is kept and you ca
 The publications that can be received are not fixed: open **Publications → Publication list** to add, rename or remove
 them. The list starts with the Bible (*New World Translation of the Holy Scriptures*) and the periodicals, already
 translated in every language: *The Watchtower* (also in large print and the public edition), *Awake!* and the *Meeting
-Workbook* (also in large print). Like any other publication, they can be changed, turned off or deleted (a deleted one
-is not created again).
+Workbook* (also in large print), and the other books and brochures in print since 2015 (e.g. *Enjoy Life Forever!*).
+Like any other publication, they can be changed, turned off or deleted (a deleted one is not created again).
 
 ![Publication list](/docs/user-documentation/en/publications/assets/publications.webp)
 
@@ -54,10 +54,11 @@ is not created again).
    [requested](requests).
 
 The publications are listed by category; drag them (with the button at the top of the table) to change their order
-within it. To stop offering a publication, turn off **Offered**: it can no longer be chosen in the regular publications
-and in new requests, and it is no longer requested again for whoever received it regularly, but the copies already
-entered are kept. Deleting it deletes those copies and its requests too. The **Pending** column counts its requests not
-delivered yet, and the **Requests** button opens their history.
+within it. To stop offering a publication, turn off **Offered** (or select more publications and choose **Stop
+offering**, or **Offer** to offer them again): it can no longer be chosen in the regular publications and in new
+requests, and it is no longer requested again for whoever received it regularly, but the copies already entered are
+kept. Deleting it deletes those copies and its requests too. The **Pending** column counts its requests not delivered
+yet, and the **Requests** button opens their history.
 
 To edit many publications at once, open **Import / Export** at the top of the publication list. **Export Publications**
 gives a file with a row for each publication: the **Name** in your language first, then *Code*, *Category*, *Renews

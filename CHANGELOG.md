@@ -18,9 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
 - **Regular publications** (Publications): who receives publications on paper regularly, with the total copies to order.
   The publications, with their names in every language, code and category (books, tracts, ...), are managed in the
-  publication list, which starts with the Bible and the periodicals already translated: The Watchtower (also large print
-  and public edition), Awake! and the Meeting Workbook (also large print). The list can be imported from and exported to
-  a spreadsheet ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
+  publication list, which starts with the Bible, the periodicals (The Watchtower, also large print and public edition,
+  Awake! and the Meeting Workbook, also large print) and the books and brochures in print since 2015, already
+  translated. Publications can be offered or no longer offered in bulk. The list can be imported from and exported to a
+  spreadsheet ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
 - **Publication requests** (Publications → Requests): when each publisher asked for a publication, until it is ordered
   (optional) and delivered, with a chart of the last 12 months and the history of each publisher and publication. The
   publications received regularly are requested again automatically every period, e.g. every month

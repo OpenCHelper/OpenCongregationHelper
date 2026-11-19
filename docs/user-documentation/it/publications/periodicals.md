@@ -38,8 +38,9 @@ nuovo in seguito. Il pulsante **Richieste** apre lo storico delle sue richieste.
 Le pubblicazioni che si possono ricevere non sono fisse: apri **Pubblicazioni → Elenco pubblicazioni** per aggiungerle,
 rinominarle o eliminarle. L'elenco parte con la Bibbia (*Traduzione del Nuovo Mondo delle Sacre Scritture*) e i
 periodici, già tradotti in ogni lingua: *La Torre di Guardia* (anche a caratteri grandi e nell'edizione per il
-pubblico), *Svegliatevi!* e la *Guida per l'adunanza* (anche a caratteri grandi). Come ogni altra pubblicazione si
-possono modificare, disattivare o eliminare (una volta eliminati non vengono ricreati).
+pubblico), *Svegliatevi!* e la *Guida per l'adunanza* (anche a caratteri grandi), e gli altri libri e opuscoli stampati
+dal 2015 (es. *Puoi vivere felice per sempre*). Come ogni altra pubblicazione si possono modificare, disattivare o
+eliminare (una volta eliminati non vengono ricreati).
 
 ![Elenco pubblicazioni](/docs/user-documentation/it/publications/assets/publications.webp)
 
@@ -57,7 +58,8 @@ possono modificare, disattivare o eliminare (una volta eliminati non vengono ric
    possono [richiedere](requests).
 
 Le pubblicazioni sono elencate per categoria; trascinale (col pulsante in alto nella tabella) per cambiarne l'ordine al
-suo interno. Per non offrire più una pubblicazione, disattiva **Disponibile**: non si può più scegliere nelle
+suo interno. Per non offrire più una pubblicazione, disattiva **Disponibile** (oppure seleziona più pubblicazioni e
+scegli **Rendi non disponibili**, o **Rendi disponibili** per offrirle di nuovo): non si può più scegliere nelle
 pubblicazioni periodiche e nelle nuove richieste, e non viene più richiesta di nuovo per chi la riceveva regolarmente,
 ma le copie già inserite vengono conservate. Eliminandola si eliminano anche quelle copie e le sue richieste. La colonna
 **In sospeso** conta le sue richieste non ancora consegnate, e il pulsante **Richieste** ne apre lo storico.

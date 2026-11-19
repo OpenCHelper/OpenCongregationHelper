@@ -24,21 +24,24 @@ beforeEach(function () {
     $this->actingAs($this->member);
 });
 
-test('the migrations create the Bible and the periodicals, offered, with their code, category and renewal', function () {
+test('the migrations create the Bible, the periodicals and the publications in print since 2015, offered', function () {
     $publications = Publication::query()->ordered()->get();
 
-    expect($publications->pluck('code')->all())->toBe(['nwt', 'w', 'w-lp', 'wp', 'g', 'mwb', 'mwb-lp'])
-        ->and($publications->pluck('category')->all())->toBe([
-            PublicationCategory::Bibles,
-            PublicationCategory::Watchtower,
-            PublicationCategory::Watchtower,
-            PublicationCategory::Watchtower,
-            PublicationCategory::Awake,
-            PublicationCategory::MeetingWorkbooks,
-            PublicationCategory::MeetingWorkbooks,
+    expect($publications->pluck('code')->take(8)->all())->toBe(['nwt', 'nwtsty', 'w', 'w-lp', 'wp', 'g', 'mwb', 'mwb-lp'])
+        ->and($publications->pluck('renewal_months', 'code')->only(['nwt', 'w', 'w-lp', 'wp', 'g', 'mwb', 'mwb-lp'])->all())
+        ->toBe(['nwt' => null, 'w' => 1, 'w-lp' => 1, 'wp' => null, 'g' => null, 'mwb' => 2, 'mwb-lp' => 2])
+        ->and($publications->countBy(fn (Publication $publication): string => $publication->category->value)->all())->toBe([
+            'bibles' => 2,
+            'watchtower' => 3,
+            'awake' => 1,
+            'meeting_workbooks' => 2,
+            'books' => 14,
+            'brochures_and_booklets' => 7,
         ])
-        ->and($publications->pluck('renewal_months')->all())->toBe([null, 1, 1, null, null, 2, 2])
-        ->and($publications->every(fn (Publication $publication): bool => $publication->is_active))->toBeTrue();
+        // Only the periodicals renew
+        ->and($publications->filter->isRenewable()->pluck('code')->all())->toBe(['w', 'w-lp', 'mwb', 'mwb-lp'])
+        ->and($publications->every(fn (Publication $publication): bool => $publication->is_active))->toBeTrue()
+        ->and($publications->pluck('code')->duplicates()->all())->toBe([]);
 });
 
 test('the names of the periodicals follow the language of the user, while the code is the same', function (string $locale, string $watchtower, string $awake) {
@@ -115,7 +118,7 @@ test('a periodical can be deleted like any other publication, and is not created
     $this->artisan('migrate')->assertSuccessful();
 
     expect(Publication::query()->where('code', 'g')->exists())->toBeFalse()
-        ->and(Publication::query()->count())->toBe(6);
+        ->and(Publication::query()->count())->toBe(28);
 });
 
 test('each language of the name shows the example in that language', function () {
@@ -142,7 +145,7 @@ test('the code of a publication is required and unique', function () {
         ->callMountedAction()
         ->assertHasFormErrors(['code' => 'unique']);
 
-    expect(Publication::query()->count())->toBe(7);
+    expect(Publication::query()->count())->toBe(29);
 });
 
 test('the renewal is shown only for the publications received regularly', function () {
@@ -182,11 +185,11 @@ test('a new publication is requested once unless it is received regularly', func
         ->callAction(TestAction::make('create'), [
             'name' => [app()->getLocale() => 'Enjoy Life Forever!'],
             'category' => PublicationCategory::Books->value,
-            'code' => 'lff',
+            'code' => 'abc',
         ])
         ->assertHasNoFormErrors();
 
-    expect(Publication::query()->where('code', 'lff')->sole()->renewal_months)->toBeNull();
+    expect(Publication::query()->where('code', 'abc')->sole()->renewal_months)->toBeNull();
 });
 
 test('the DVDs are listed after the printed publications, before the other ones', function () {
@@ -196,4 +199,23 @@ test('the DVDs are listed after the printed publications, before the other ones'
 
     expect(Publication::query()->ordered()->pluck('id')->take(-3)->values()->all())->toBe([$manual->id, $dvd->id, $other->id])
         ->and(PublicationCategory::Dvds->getLabel())->toBe('DVD');
+});
+
+test('the publications can be offered or no longer offered in bulk', function () {
+    $books = Publication::query()->where('category', PublicationCategory::Books)->get();
+
+    Livewire::test(ManagePublications::class)
+        ->selectTableRecords($books)
+        ->callAction(TestAction::make('stop_offering')->table()->bulk())
+        ->assertHasNoFormErrors();
+
+    expect(Publication::query()->where('category', PublicationCategory::Books)->where('is_active', true)->exists())->toBeFalse()
+        ->and(Publication::query()->where('code', 'w')->sole()->is_active)->toBeTrue();
+
+    Livewire::test(ManagePublications::class)
+        ->selectTableRecords($books->take(2))
+        ->callAction(TestAction::make('offer')->table()->bulk());
+
+    expect(Publication::query()->where('category', PublicationCategory::Books)->where('is_active', true)->pluck('id')->all())
+        ->toEqualCanonicalizing($books->take(2)->modelKeys());
 });

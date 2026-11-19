@@ -112,7 +112,7 @@ test('the publication list is exported with the name in the language of the user
     Publication::query()->delete();
     Publication::factory()->create([
         'name' => ['it' => 'Vivi felice per sempre!', 'en' => 'Enjoy Life Forever!'],
-        'code' => 'lff',
+        'code' => 'abc',
         'category' => PublicationCategory::Books,
         'renewal_months' => null,
         'is_active' => false,
@@ -122,7 +122,7 @@ test('the publication list is exported with the name in the language of the user
 
     expect($rows)->toBe([
         ['Nome (Italiano)', 'Sigla', 'Categoria', 'Si rinnova ogni (mesi)', 'Disponibile', 'Nome (English)', 'Nome (Español)'],
-        ['Vivi felice per sempre!', 'lff', 'Libri', '', 'no', 'Enjoy Life Forever!', ''],
+        ['Vivi felice per sempre!', 'abc', 'Libri', '', 'no', 'Enjoy Life Forever!', ''],
     ]);
 });
 
@@ -133,19 +133,19 @@ test('an exported publication list can be imported again, updating the publicati
         // An existing publication: the empty names keep their translation
         ['name_it' => 'La Torre di Guardia (studio)', 'code' => 'w', 'category' => '', 'renewal_months' => '1', 'is_active' => 'no', 'name_en' => '', 'name_es' => ''],
         // A new one, with the category in another language
-        ['name_it' => 'Vivi felice per sempre!', 'code' => 'lff', 'category' => 'Books', 'renewal_months' => '', 'is_active' => '', 'name_en' => 'Enjoy Life Forever!', 'name_es' => ''],
+        ['name_it' => 'Vivi felice per sempre!', 'code' => 'abc', 'category' => 'Books', 'renewal_months' => '', 'is_active' => '', 'name_en' => 'Enjoy Life Forever!', 'name_es' => ''],
         // Rows that cannot be imported
         ['name_it' => '', 'code' => 'nameless', 'category' => '', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
         ['name_it' => 'Sconosciuta', 'code' => 'unknown', 'category' => 'Fumetti', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
     ], $this->member);
 
-    $lff = Publication::query()->where('code', 'lff')->sole();
+    $abc = Publication::query()->where('code', 'abc')->sole();
 
     expect($import->successful_rows)->toBe(2)
         ->and($watchtower->fresh()->getTranslations('name'))->toEqual(['en' => 'The Watchtower', 'it' => 'La Torre di Guardia (studio)', 'es' => 'La Atalaya'])
         ->and($watchtower->fresh())->category->toBe(PublicationCategory::Watchtower)->is_active->toBeFalse()->renewal_months->toBe(1)
-        ->and($lff)->category->toBe(PublicationCategory::Books)->is_active->toBeTrue()->renewal_months->toBeNull()
-        ->and($lff->getTranslations('name'))->toEqual(['it' => 'Vivi felice per sempre!', 'en' => 'Enjoy Life Forever!'])
+        ->and($abc)->category->toBe(PublicationCategory::Books)->is_active->toBeTrue()->renewal_months->toBeNull()
+        ->and($abc->getTranslations('name'))->toEqual(['it' => 'Vivi felice per sempre!', 'en' => 'Enjoy Life Forever!'])
         ->and(Publication::query()->whereIn('code', ['nameless', 'unknown'])->exists())->toBeFalse();
 });
 
@@ -260,21 +260,21 @@ class ConcurrentPublicationImporter extends PublicationImporter
 
 test('a row whose record was created meanwhile by another chunk fails with a clear reason, keeping the others', function () {
     $import = importRows(ConcurrentPublicationImporter::class, [
-        ['name_it' => 'Vivi felice per sempre!', 'code' => 'lff', 'category' => 'Libri', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
+        ['name_it' => 'Vivi felice per sempre!', 'code' => 'abc', 'category' => 'Libri', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
     ], $this->member);
 
     expect($import->successful_rows)->toBe(0)
         ->and($import->failedRows()->sole()->validation_error)->toBe(__('import.errors.duplicate'))
         // The one created by the other chunk is left as it is
-        ->and(Publication::query()->where('code', 'lff')->sole()->getTranslation('name', 'it'))->toBe('Altro');
+        ->and(Publication::query()->where('code', 'abc')->sole()->getTranslation('name', 'it'))->toBe('Altro');
 
     // Imported again, the row updates it
     $import = importRows(PublicationImporter::class, [
-        ['name_it' => 'Vivi felice per sempre!', 'code' => 'lff', 'category' => 'Libri', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
+        ['name_it' => 'Vivi felice per sempre!', 'code' => 'abc', 'category' => 'Libri', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
     ], $this->member);
 
     expect($import->successful_rows)->toBe(1)
-        ->and(Publication::query()->where('code', 'lff')->sole()->getTranslation('name', 'it'))->toBe('Vivi felice per sempre!');
+        ->and(Publication::query()->where('code', 'abc')->sole()->getTranslation('name', 'it'))->toBe('Vivi felice per sempre!');
 });
 
 test('the imports of the same kind wait for each other, among all the users', function (string $importer) {
