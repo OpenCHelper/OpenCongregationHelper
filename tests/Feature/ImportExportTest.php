@@ -3,6 +3,7 @@
 use App\Enums\DepartmentKey;
 use App\Enums\PublicationCategory;
 use App\Filament\Exports\Concerns\ExportsInTheUserLocale;
+use App\Filament\Exports\PosterExporter;
 use App\Filament\Exports\StorageLocationExporter;
 use App\Filament\Imports\PosterImporter;
 use App\Filament\Imports\PublicationImporter;
@@ -29,6 +30,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Cell\StringCell;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
@@ -309,4 +312,21 @@ test('a poster is not saved when its copies fail to be saved', function () {
         ->and($import->failedRows()->sole()->validation_error)->toBe(__('import.errors.duplicate'))
         ->and($poster->fresh()->title)->toBe('Vecchio titolo')
         ->and(PosterStock::query()->where('storage_location_id', $hall->id)->count())->toBe(0);
+});
+
+test('the Excel file has the cells a spreadsheet would run as a formula as text, without the quote of the CSV file', function () {
+    $export = Export::query()->create([
+        'file_disk' => 'local',
+        'exporter' => PosterExporter::class,
+        'total_rows' => 1,
+        'user_id' => $this->member->id,
+    ]);
+
+    $cells = $export->getExporter(['title' => 'Titolo'], [])
+        ->makeXlsxRow(["'=HYPERLINK(\"x\")", "'- Campagna speciale", 'Box', '-5', ''])
+        ->getCells();
+
+    // Never a formula: OpenSpout would write a text starting with `=` as one
+    expect(array_map(fn (Cell $cell): string => $cell::class, array_slice($cells, 0, 4)))->each->toBe(StringCell::class)
+        ->and(array_map(fn (Cell $cell): mixed => $cell->getValue(), $cells))->toBe(['=HYPERLINK("x")', '- Campagna speciale', 'Box', '-5', '']);
 });
