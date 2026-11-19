@@ -8,12 +8,21 @@ use Filament\Actions\CreateAction;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ManagePeriodicalSubscriptions extends ManageRecords
 {
     use ExposesTableToWidgets;
 
     protected static string $resource = PeriodicalSubscriptionResource::class;
+
+    /**
+     * The name of the menu item, not the plural model label in title case ("Paper Periodicals").
+     */
+    public function getTitle(): string|Htmlable
+    {
+        return PeriodicalSubscriptionResource::getNavigationLabel();
+    }
 
     protected function getHeaderActions(): array
     {
