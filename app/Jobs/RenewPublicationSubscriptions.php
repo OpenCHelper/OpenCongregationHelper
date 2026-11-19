@@ -23,7 +23,8 @@ class RenewPublicationSubscriptions implements ShouldBeUnique, ShouldQueue
 
         PublicationSubscription::query()
             ->active()
-            ->whereHas('publication', fn ($query) => $query->where('renewal_months', '>', 0))
+            // Only the publications still offered: the ones turned off are no longer shown in the regular publications
+            ->whereHas('publication', fn ($query) => $query->where('renewal_months', '>', 0)->where('is_active', true))
             ->with(['publication', 'subscriber'])
             ->each(function (PublicationSubscription $subscription) use (&$made): void {
                 $made += count($subscription->renew());
