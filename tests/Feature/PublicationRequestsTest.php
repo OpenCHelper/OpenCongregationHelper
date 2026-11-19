@@ -210,6 +210,30 @@ describe('requests page', function () {
             ->and(PublicationRequest::query()->whereNull('subscription_id')->sole()->publication_id)->toBe($this->largePrint->id);
     });
 
+    test('a renewing request cannot start before this month, which would request every period since then', function () {
+        $data = [
+            'user_id' => $this->publisher->id,
+            'publication_id' => $this->watchtower->id,
+            'quantity' => 1,
+            'renews' => true,
+            'requested_at' => today()->subYears(2)->toDateString(),
+        ];
+
+        Livewire::test(ManagePublicationRequests::class)
+            ->callAction(TestAction::make('create'), $data)
+            ->assertHasFormErrors(['requested_at']);
+
+        expect(PublicationRequest::count())->toBe(0);
+
+        // A single request can still be recorded in the past
+        Livewire::test(ManagePublicationRequests::class)
+            ->callAction(TestAction::make('create'), [...$data, 'renews' => false])
+            ->assertHasNoFormErrors();
+
+        expect(PublicationRequest::count())->toBe(1)
+            ->and(PublicationSubscription::count())->toBe(0);
+    });
+
     test('the steps must be in order', function () {
         Livewire::test(ManagePublicationRequests::class)
             ->callAction(TestAction::make('create'), [

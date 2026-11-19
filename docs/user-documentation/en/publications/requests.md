@@ -26,7 +26,8 @@ The tabs show the requests **To order or retrieve**, the ones **Ordered** and wa
    **Requested on**.
 3. For a publication received regularly (e.g. *The Watchtower*), **Request it again every month** is on: the
    publication is added to the publisher's [regular publications](periodicals) and requested again automatically every
-   period, until it is stopped. Turn it off for a single request.
+   period, until it is stopped; its date is in this month (for the earlier months, add single requests). Turn it off
+   for a single request.
 4. Click **Create**, or **Create & create another**.
 
 ![New request](/docs/user-documentation/en/publications/assets/request-form.webp)

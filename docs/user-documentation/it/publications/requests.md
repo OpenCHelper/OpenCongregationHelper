@@ -27,7 +27,8 @@ prendere.
    **Richiesta il**.
 3. Per una pubblicazione ricevuta regolarmente (es. *La Torre di Guardia*), **Richiedila di nuovo ogni mese** è
    attivo: la pubblicazione viene aggiunta alle [pubblicazioni periodiche](periodicals) del proclamatore e richiesta di
-   nuovo automaticamente ogni periodo, finché non viene interrotta. Disattivalo per una richiesta singola.
+   nuovo automaticamente ogni periodo, finché non viene interrotta; la sua data è in questo mese (per i mesi precedenti
+   aggiungi delle richieste singole). Disattivalo per una richiesta singola.
 4. Clicca **Salva**, oppure **Salva & crea un altro**.
 
 ![Nuova richiesta](/docs/user-documentation/it/publications/assets/request-form.webp)

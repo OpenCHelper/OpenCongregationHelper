@@ -504,6 +504,7 @@ return [
         'field_renews' => 'Volver a solicitarla :every',
         'field_renews_helper' => 'La recibirá con regularidad: aparece en las publicaciones periódicas y se vuelve a solicitar automáticamente, hasta que se interrumpa.',
         'field_requested_at' => 'Solicitada el',
+        'field_requested_at_renews_helper' => 'Para volver a solicitarla con regularidad, la fecha es de este mes: para los meses anteriores añade solicitudes individuales.',
         'field_ordered_at' => 'Pedida el',
         'field_ordered_at_helper' => 'Opcional: déjalo vacío si ya está en el depósito.',
         'field_delivered_at' => 'Entregada el',

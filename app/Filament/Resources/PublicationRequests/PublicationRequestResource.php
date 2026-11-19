@@ -38,6 +38,7 @@ use Filament\Tables\Table;
 use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Override;
@@ -165,6 +166,12 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                             ->label(__('filament-resources.publication_request.field_requested_at'))
                             ->default(now())
                             ->maxDate(now())
+                            // Requested again from this period: an earlier date would request it again for every
+                            // period since then, all at once
+                            ->minDate(fn (string $operation, Get $get): ?Carbon => static::isRenewingFromTheForm($operation, $get) ? today()->startOfMonth() : null)
+                            ->helperText(fn (string $operation, Get $get): ?string => static::isRenewingFromTheForm($operation, $get)
+                                ? __('filament-resources.publication_request.field_requested_at_renews_helper')
+                                : null)
                             ->required(),
                         DatePicker::make('ordered_at')
                             ->label(__('filament-resources.publication_request.field_ordered_at'))
