@@ -26,7 +26,7 @@ beforeEach(function () {
 test('the migrations create the periodicals, offered, with their code, category and renewal', function () {
     $publications = Publication::query()->ordered()->get();
 
-    expect($publications->pluck('code')->all())->toBe(['w', 'wlp', 'wp', 'g', 'mwb', 'mwblp'])
+    expect($publications->pluck('code')->all())->toBe(['w', 'w-lp', 'wp', 'g', 'mwb', 'mwb-lp'])
         ->and($publications->pluck('category')->all())->toBe([
             PublicationCategory::Watchtower,
             PublicationCategory::Watchtower,
@@ -99,8 +99,8 @@ test('the publications are found by their name in any language', function () {
 
     Livewire::test(ManagePublications::class)
         ->searchTable('Atalaya')
-        ->assertCanSeeTableRecords(Publication::query()->whereIn('code', ['w', 'wlp', 'wp'])->get())
-        ->assertCanNotSeeTableRecords(Publication::query()->whereIn('code', ['g', 'mwb', 'mwblp'])->get());
+        ->assertCanSeeTableRecords(Publication::query()->whereIn('code', ['w', 'w-lp', 'wp'])->get())
+        ->assertCanNotSeeTableRecords(Publication::query()->whereIn('code', ['g', 'mwb', 'mwb-lp'])->get());
 });
 
 test('a periodical can be deleted like any other publication, and is not created again', function () {

@@ -12,6 +12,10 @@ return new class extends Migration
      * (written here, so that this migration always inserts the same rows), their code, category and how often they
      * renew (in months). They can be changed, turned off or deleted later like any other publication.
      *
+     * The codes are the ones of the index of the publications ("Abbreviations of Publication Titles").
+     *
+     * @see https://wol.jw.org/en/wol/d/r1/lp-e/1200270068
+     *
      * @var list<array{name: array<string, string>, code: string, category: string, renewal_months: ?int}>
      */
     private const DEFAULT_PUBLICATIONS = [
@@ -23,8 +27,8 @@ return new class extends Migration
         ],
         [
             'name' => ['en' => 'The Watchtower (large print)', 'it' => 'La Torre di Guardia (caratteri grandi)', 'es' => 'La Atalaya (letra grande)'],
-            // TODO: verify the code of the large-print edition
-            'code' => 'wlp',
+            // Not in the index of the publications, which has no large-print codes: the one of the edition, with "-lp"
+            'code' => 'w-lp',
             'category' => 'watchtower',
             'renewal_months' => 1,
         ],
@@ -48,8 +52,8 @@ return new class extends Migration
         ],
         [
             'name' => ['en' => 'Meeting Workbook (large print)', 'it' => 'Guida per l\'adunanza (caratteri grandi)', 'es' => 'Guía de actividades (letra grande)'],
-            // TODO: verify the code of the large-print edition
-            'code' => 'mwblp',
+            // Not in the index of the publications, which has no large-print codes: the one of the edition, with "-lp"
+            'code' => 'mwb-lp',
             'category' => 'meeting_workbooks',
             'renewal_months' => 2,
         ],

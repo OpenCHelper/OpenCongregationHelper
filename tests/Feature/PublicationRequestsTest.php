@@ -38,7 +38,7 @@ beforeEach(function () {
 
     // The renewable publications created by the migrations (renewed every month, every month, every two months): the
     // others are deleted, so that the tests deal with these only (see `PublicationsTest` for all of them)
-    Publication::query()->whereNotIn('code', ['w', 'wlp', 'mwb'])->delete();
+    Publication::query()->whereNotIn('code', ['w', 'w-lp', 'mwb'])->delete();
     [$this->watchtower, $this->largePrint, $this->workbook] = Publication::query()->ordered()->get()->all();
     $this->book = Publication::factory()->create(['name' => 'Enjoy Life Forever!', 'category' => PublicationCategory::Books, 'renewal_months' => null]);
     $this->publisher = User::factory()->create(['first_name' => 'Mario', 'last_name' => 'Rossi']);
