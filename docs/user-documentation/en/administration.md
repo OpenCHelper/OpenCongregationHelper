@@ -1,5 +1,5 @@
 ---
 type: group
 title: Administration
-order: 4
+order: 6
 ---
