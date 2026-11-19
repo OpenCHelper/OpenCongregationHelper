@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * The periodicals offered on paper to a new installation, with their name in every language of the application
-     * (written here, so that this migration always inserts the same rows), their code, category and how often they
-     * renew (in months). They can be changed, turned off or deleted later like any other publication.
+     * The Bible and the periodicals offered on paper to a new installation, with their name in every language of the
+     * application (written here, so that this migration always inserts the same rows), their code, category and how
+     * often they renew (in months). They can be changed, turned off or deleted later like any other publication.
      *
      * The codes are the ones of the index of the publications ("Abbreviations of Publication Titles").
      *
@@ -19,6 +19,12 @@ return new class extends Migration
      * @var list<array{name: array<string, string>, code: string, category: string, renewal_months: ?int}>
      */
     private const DEFAULT_PUBLICATIONS = [
+        [
+            'name' => ['en' => 'New World Translation of the Holy Scriptures', 'it' => 'Traduzione del Nuovo Mondo delle Sacre Scritture', 'es' => 'Traducción del Nuevo Mundo de las Santas Escrituras'],
+            'code' => 'nwt',
+            'category' => 'bibles',
+            'renewal_months' => null,
+        ],
         [
             'name' => ['en' => 'The Watchtower', 'it' => 'La Torre di Guardia', 'es' => 'La Atalaya'],
             'code' => 'w',

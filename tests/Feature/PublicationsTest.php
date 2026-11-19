@@ -24,11 +24,12 @@ beforeEach(function () {
     $this->actingAs($this->member);
 });
 
-test('the migrations create the periodicals, offered, with their code, category and renewal', function () {
+test('the migrations create the Bible and the periodicals, offered, with their code, category and renewal', function () {
     $publications = Publication::query()->ordered()->get();
 
-    expect($publications->pluck('code')->all())->toBe(['w', 'w-lp', 'wp', 'g', 'mwb', 'mwb-lp'])
+    expect($publications->pluck('code')->all())->toBe(['nwt', 'w', 'w-lp', 'wp', 'g', 'mwb', 'mwb-lp'])
         ->and($publications->pluck('category')->all())->toBe([
+            PublicationCategory::Bibles,
             PublicationCategory::Watchtower,
             PublicationCategory::Watchtower,
             PublicationCategory::Watchtower,
@@ -36,7 +37,7 @@ test('the migrations create the periodicals, offered, with their code, category 
             PublicationCategory::MeetingWorkbooks,
             PublicationCategory::MeetingWorkbooks,
         ])
-        ->and($publications->pluck('renewal_months')->all())->toBe([1, 1, null, null, 2, 2])
+        ->and($publications->pluck('renewal_months')->all())->toBe([null, 1, 1, null, null, 2, 2])
         ->and($publications->every(fn (Publication $publication): bool => $publication->is_active))->toBeTrue();
 });
 
@@ -101,7 +102,7 @@ test('the publications are found by their name in any language', function () {
     Livewire::test(ManagePublications::class)
         ->searchTable('Atalaya')
         ->assertCanSeeTableRecords(Publication::query()->whereIn('code', ['w', 'w-lp', 'wp'])->get())
-        ->assertCanNotSeeTableRecords(Publication::query()->whereIn('code', ['g', 'mwb', 'mwb-lp'])->get());
+        ->assertCanNotSeeTableRecords(Publication::query()->whereIn('code', ['nwt', 'g', 'mwb', 'mwb-lp'])->get());
 });
 
 test('a periodical can be deleted like any other publication, and is not created again', function () {
@@ -114,7 +115,7 @@ test('a periodical can be deleted like any other publication, and is not created
     $this->artisan('migrate')->assertSuccessful();
 
     expect(Publication::query()->where('code', 'g')->exists())->toBeFalse()
-        ->and(Publication::query()->count())->toBe(5);
+        ->and(Publication::query()->count())->toBe(6);
 });
 
 test('each language of the name shows the example in that language', function () {
@@ -141,7 +142,7 @@ test('the code of a publication is required and unique', function () {
         ->callMountedAction()
         ->assertHasFormErrors(['code' => 'unique']);
 
-    expect(Publication::query()->count())->toBe(6);
+    expect(Publication::query()->count())->toBe(7);
 });
 
 test('the renewal is shown only for the publications received regularly', function () {

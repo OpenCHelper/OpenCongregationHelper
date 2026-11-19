@@ -36,9 +36,10 @@ their publications are no longer requested, but their history is kept and you ca
 ## The publication list
 
 The publications that can be received are not fixed: open **Publications → Publication list** to add, rename or remove
-them. The list starts with the periodicals, already translated in every language: *The Watchtower* (also in large
-print and the public edition), *Awake!* and the *Meeting Workbook* (also in large print). Like any other publication,
-they can be changed, turned off or deleted (a deleted one is not created again).
+them. The list starts with the Bible (*New World Translation of the Holy Scriptures*) and the periodicals, already
+translated in every language: *The Watchtower* (also in large print and the public edition), *Awake!* and the *Meeting
+Workbook* (also in large print). Like any other publication, they can be changed, turned off or deleted (a deleted one
+is not created again).
 
 ![Publication list](/docs/user-documentation/en/publications/assets/publications.webp)
 

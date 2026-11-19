@@ -36,10 +36,10 @@ nuovo in seguito. Il pulsante **Richieste** apre lo storico delle sue richieste.
 ## L'elenco delle pubblicazioni
 
 Le pubblicazioni che si possono ricevere non sono fisse: apri **Pubblicazioni → Elenco pubblicazioni** per aggiungerle,
-rinominarle o eliminarle. L'elenco parte con i periodici, già tradotti in ogni lingua: *La Torre di Guardia* (anche a
-caratteri grandi e nell'edizione per il pubblico), *Svegliatevi!* e la *Guida per l'adunanza* (anche a caratteri
-grandi). Come ogni altra pubblicazione si possono modificare, disattivare o eliminare (una volta eliminati non vengono
-ricreati).
+rinominarle o eliminarle. L'elenco parte con la Bibbia (*Traduzione del Nuovo Mondo delle Sacre Scritture*) e i
+periodici, già tradotti in ogni lingua: *La Torre di Guardia* (anche a caratteri grandi e nell'edizione per il
+pubblico), *Svegliatevi!* e la *Guida per l'adunanza* (anche a caratteri grandi). Come ogni altra pubblicazione si
+possono modificare, disattivare o eliminare (una volta eliminati non vengono ricreati).
 
 ![Elenco pubblicazioni](/docs/user-documentation/it/publications/assets/publications.webp)
 
