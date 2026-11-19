@@ -2,6 +2,7 @@
 
 namespace App\Filament\Exports\Concerns;
 
+use App\Support\SpreadsheetFormula;
 use App\Support\UserLocale;
 use Filament\Actions\Action;
 use Filament\Actions\Exports\Models\Export;
@@ -39,15 +40,11 @@ trait ExportsInTheUserLocale
     }
 
     /**
-     * Show as text a cell that a spreadsheet would run as a formula; numbers (e.g. negative ones) are left as they are.
+     * Show as text a cell that a spreadsheet would run as a formula (see `SpreadsheetFormula`).
      */
     public static function escapeFormula(mixed $value): mixed
     {
-        if (! is_string($value) || $value === '' || is_numeric($value) || ! in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
-            return $value;
-        }
-
-        return "'".$value;
+        return SpreadsheetFormula::escape($value);
     }
 
     public static function getCompletedNotificationBody(Export $export): string

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports\Concerns;
 
+use App\Support\SpreadsheetFormula;
 use App\Support\UserLocale;
 use Closure;
 use Filament\Actions\Action;
@@ -10,7 +11,8 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Number;
 
 /**
- * Process the rows of an import, and notify its result, in the language of the user who started it.
+ * Process the rows of an import, and notify its result, in the language of the user who started it. The quote that the
+ * exports add to the cells a spreadsheet would run as a formula is removed (see `SpreadsheetFormula`).
  *
  * The import is processed (and its notification sent) by the queue worker, which runs in the default locale of the
  * application: without this, the reasons of the failed rows and the notification would not be in their language.
@@ -22,6 +24,9 @@ trait ImportsInTheUserLocale
      */
     public function __invoke(array $data): void
     {
+        // Without the quote that the export adds to the cells a spreadsheet would run as a formula
+        $data = array_map(SpreadsheetFormula::unescape(...), $data);
+
         static::withImportLocale($this->import, fn () => parent::__invoke($data));
     }
 

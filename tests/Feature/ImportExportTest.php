@@ -4,6 +4,7 @@ use App\Enums\DepartmentKey;
 use App\Enums\PublicationCategory;
 use App\Filament\Exports\Concerns\ExportsInTheUserLocale;
 use App\Filament\Exports\StorageLocationExporter;
+use App\Filament\Imports\PosterImporter;
 use App\Filament\Imports\PublicationImporter;
 use App\Filament\Imports\StorageLocationImporter;
 use App\Filament\Resources\Posters\Pages\ManagePosters;
@@ -14,6 +15,7 @@ use App\Models\Poster;
 use App\Models\Publication;
 use App\Models\StorageLocation;
 use App\Models\User;
+use App\Support\SpreadsheetFormula;
 use Filament\Actions\Exports\ContentGenerators\CsvExportContentGenerator;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Actions\Imports\Jobs\ImportCsv;
@@ -193,6 +195,16 @@ test('the cells that a spreadsheet would run as a formula are exported as text',
     'number' => [3, 3],
 ]);
 
+test('the quote added to a formula is removed only before a formula character', function (mixed $value, mixed $expected) {
+    expect(SpreadsheetFormula::unescape($value))->toBe($expected);
+})->with([
+    'formula' => ["'=1+1", '=1+1'],
+    'minus' => ["'- text", '- text'],
+    'a real quote' => ["'tis the season", "'tis the season"],
+    'only a quote' => ["'", "'"],
+    'number' => [3, 3],
+]);
+
 test('the export notification is in the language of the user who started it', function () {
     StorageLocation::factory()->create(['name' => 'Box']);
     App::setLocale('en');
@@ -202,4 +214,19 @@ test('the export notification is in the language of the user who started it', fu
     $export = Export::query()->latest('id')->firstOrFail();
 
     expect(StorageLocationExporter::getCompletedNotificationBody($export))->toBe('L\'esportazione è terminata: 1 riga esportata.');
+});
+
+test('a cell exported as text, to keep a spreadsheet from running it, is imported again as it was', function () {
+    $poster = Poster::factory()->create(['code' => null, 'title' => ['it' => '- Campagna speciale'], 'notes' => '@sala']);
+
+    [$header, $row] = exportRows(ManagePosters::class, ['locale' => 'it']);
+
+    expect($row)->toBe(['', "'- Campagna speciale", '', '', "'@sala"]);
+
+    importRows(PosterImporter::class, [array_combine(['code', 'title', 'storage', 'quantity', 'notes'], $row)], $this->member);
+
+    // Found again by its title, instead of creating another poster
+    expect(Poster::query()->count())->toBe(1)
+        ->and($poster->fresh()->title)->toBe('- Campagna speciale')
+        ->and($poster->fresh()->notes)->toBe('@sala');
 });
