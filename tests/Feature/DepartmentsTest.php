@@ -6,9 +6,11 @@ use App\Filament\Resources\Departments\DepartmentResource;
 use App\Filament\Resources\Departments\Pages\ListDepartments;
 use App\Filament\Resources\Departments\Pages\ViewDepartment;
 use App\Filament\Resources\Departments\RelationManagers\MembersRelationManager;
+use App\Filament\Resources\Posters\PosterResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Department;
+use App\Models\Poster;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -56,14 +58,18 @@ test('the departments are listed in the order of their keys, and cannot be creat
 
 test('the members of a department can fully manage its sections, and only them', function () {
     $member = User::factory()->create();
-    joinDepartment($member, DepartmentKey::Territories);
+    joinDepartment($member, DepartmentKey::PublicWitnessing);
 
     $this->actingAs($member);
 
-    expect($member->can('ForceDelete:Territory'))->toBeTrue()
-        ->and(TerritoryResource::canViewAny())->toBeTrue()
-        ->and(TerritoryResource::canCreate())->toBeTrue()
-        // The administration needs a role, as before
+    expect($member->can('ForceDelete:Poster'))->toBeTrue()
+        ->and($member->can('ViewAny:StorageLocation'))->toBeTrue()
+        ->and(PosterResource::canViewAny())->toBeTrue()
+        ->and(PosterResource::canCreate())->toBeTrue()
+        ->and(PosterResource::canDelete(Poster::factory()->create()))->toBeTrue()
+        // Other departments and the administration need a role, as before
+        ->and($member->can('ViewAny:PeriodicalSubscription'))->toBeFalse()
+        ->and(TerritoryResource::canViewAny())->toBeFalse()
         ->and($member->can('ViewAny:User'))->toBeFalse()
         ->and($member->can('ViewAny:Department'))->toBeFalse();
 });
@@ -81,10 +87,10 @@ test('the territory department grants the territories, zones, assignments, campa
 
 test('users without departments keep the permissions of their roles', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo(Permission::findOrCreate('ViewAny:Territory', 'web'));
+    $user->givePermissionTo(Permission::findOrCreate('ViewAny:Poster', 'web'));
 
-    expect($user->can('ViewAny:Territory'))->toBeTrue()
-        ->and($user->can('Create:Territory'))->toBeFalse();
+    expect($user->can('ViewAny:Poster'))->toBeTrue()
+        ->and($user->can('Create:Poster'))->toBeFalse();
 });
 
 test('administrators can add members to a department with a role', function () {
@@ -180,5 +186,5 @@ test('the department pages render', function () {
     $department = joinDepartment(User::factory()->create(['first_name' => 'Andrea']), DepartmentKey::PublicWitnessing, DepartmentRole::Overseer);
 
     $this->get(DepartmentResource::getUrl())->assertOk()->assertSee(DepartmentKey::PublicWitnessing->getLabel())->assertSee('Andrea');
-    $this->get(DepartmentResource::getUrl('view', ['record' => $department]))->assertOk()->assertSee(__('departments.members.title'));
+    $this->get(DepartmentResource::getUrl('view', ['record' => $department]))->assertOk()->assertSee(PosterResource::getNavigationLabel());
 });

@@ -3,6 +3,8 @@
 namespace App\Enums;
 
 use App\Filament\Resources\Campaigns\CampaignResource;
+use App\Filament\Resources\Posters\PosterResource;
+use App\Filament\Resources\StorageLocations\StorageLocationResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
@@ -81,7 +83,11 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
                 TerritoryAssignmentResource::class,
                 CampaignResource::class,
             ],
-            self::PublicWitnessing, self::Publications => [],
+            self::PublicWitnessing => [
+                PosterResource::class,
+                StorageLocationResource::class,
+            ],
+            self::Publications => [],
         };
     }
 
