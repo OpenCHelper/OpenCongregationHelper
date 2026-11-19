@@ -29,9 +29,7 @@ trait HasImportExportActions
             ImportAction::make()
                 ->pluralModelLabel($resource::getPluralModelLabel())
                 ->authorize(fn (): bool => Gate::allows('create', $model))
-                ->importer($importer)
-                // Most files in a single chunk, so that two queue workers seldom create the same record at once
-                ->chunkSize(1000),
+                ->importer($importer),
             ExportAction::make()
                 ->pluralModelLabel($resource::getPluralModelLabel())
                 ->authorize(fn (): bool => Gate::allows('viewAny', $model))

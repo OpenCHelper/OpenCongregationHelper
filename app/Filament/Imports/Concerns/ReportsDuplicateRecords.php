@@ -4,24 +4,35 @@ namespace App\Filament\Imports\Concerns;
 
 use Closure;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Fail with a clear reason the rows whose record was created meanwhile by another chunk of the same import.
+ * Import one file of a kind at a time, and fail with a clear reason the rows whose record was created meanwhile.
  *
- * The chunks of an import are processed in parallel by the queue workers: two of them can both find no record with a
- * code (or name) and both create it, and the second one hits the unique index. The row is then failed, with a reason
- * telling to import the file again (which updates the records instead of duplicating them), rather than with a
- * database error. The import actions read up to 1000 rows per chunk, so that this is rare.
- *
- * The records without a unique value (e.g. a poster without a code, found by its title) can't be told apart this
- * way: their rows must not be more than 1000 apart in the file, or two chunks could both create them.
+ * Filament already processes the chunks of an import one at a time (see `Importer::getJobMiddleware()`), but two
+ * imports started together (e.g. two users importing posters) could still both find no record with a code (or name,
+ * or title for a poster without a code) and both create it. Here the imports of the same importer wait for each other
+ * too, so that this can't happen. Should another writer still hit a unique index meanwhile, the row fails with a
+ * reason telling to import the file again (which updates the records instead of duplicating them), rather than with a
+ * database error, and the other rows of the chunk are kept.
  */
 trait ReportsDuplicateRecords
 {
+    /**
+     * The jobs of Filament, plus one import of this kind at a time (among all the users).
+     *
+     * @return array<int, object>
+     */
+    public function getJobMiddleware(): array
+    {
+        return [
+            ...parent::getJobMiddleware(),
+            (new WithoutOverlapping('imports:'.static::class))->releaseAfter(5)->expireAfter(600),
+        ];
+    }
+
     /**
      * @throws RowImportFailedException
      */
@@ -32,8 +43,8 @@ trait ReportsDuplicateRecords
     }
 
     /**
-     * Run the callback in a savepoint; the row fails with a clear reason when another chunk of the import wrote the
-     * same unique values at the same time.
+     * Run the callback in a savepoint; the row fails with a clear reason when another writer saved the same unique
+     * values at the same time.
      *
      * @template TResult
      *
@@ -49,22 +60,5 @@ trait ReportsDuplicateRecords
         } catch (UniqueConstraintViolationException) {
             throw new RowImportFailedException(__('import.errors.duplicate'));
         }
-    }
-
-    /**
-     * The record with the given attributes, created if missing; the row fails with a clear reason when another chunk
-     * of the import created it at the same time.
-     *
-     * @template TModel of Model
-     *
-     * @param  Builder<TModel>  $query
-     * @param  array<string, mixed>  $attributes
-     * @return TModel
-     *
-     * @throws RowImportFailedException
-     */
-    protected static function firstOrCreateOrReport(Builder $query, array $attributes): Model
-    {
-        return static::reportDuplicates(fn (): Model => (clone $query)->firstOrCreate($attributes));
     }
 }

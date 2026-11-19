@@ -44,8 +44,7 @@ vengono riconosciute dal loro nome, nella lingua dell'interfaccia o in inglese (
 ![Importare i poster](/docs/user-documentation/it/public-witnessing/assets/poster-import.webp)
 
 - Le righe con la stessa **Sigla** (o con lo stesso **Titolo**, se non c'è la sigla) sono lo stesso poster: importando
-  di nuovo il file si aggiornano i poster e le loro copie invece di duplicarli. In un file molto lungo (più di 1000
-  righe), tieni vicine le righe di un poster senza sigla.
+  di nuovo il file si aggiornano i poster e le loro copie invece di duplicarli.
 - Le **Copie** di una riga sostituiscono quelle di quel deposito; i depositi che non esistono ancora vengono creati.
 - I **Titoli** vengono salvati nella **Lingua dei titoli** scelta nella finestra (la tua lingua, se non la cambi): le
   traduzioni nelle altre lingue vengono conservate.

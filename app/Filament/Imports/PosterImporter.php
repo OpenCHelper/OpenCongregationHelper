@@ -62,7 +62,7 @@ class PosterImporter extends Importer
                 // The same poster in two storage places, to show that each one has its row
                 ->examples(fn (): array => [__('import.poster.examples.storage'), __('import.poster.examples.other_storage')])
                 ->rules(['nullable', 'max:255'])
-                // Not an attribute of the poster: saved as its copies in the storage place (see `afterSave()`)
+                // Not an attribute of the poster: saved as its copies in the storage place (see `saveRecord()`)
                 ->fillRecordUsing(fn () => null),
             ImportColumn::make('quantity')
                 ->label(fn (): string => __('import.poster.columns.quantity'))
@@ -152,22 +152,29 @@ class PosterImporter extends Importer
     }
 
     /**
-     * Save the copies of the poster in the storage place of the row, replacing the previous quantity.
+     * Save the poster and its copies in the storage place of the row (replacing the previous quantity) together: should
+     * they fail, the poster isn't saved either. Missing storage places are created.
+     *
+     * @throws RowImportFailedException
      */
-    protected function afterSave(): void
+    public function saveRecord(): void
     {
-        $storage = $this->getStorageName();
+        static::reportDuplicates(function (): void {
+            parent::saveRecord();
 
-        if ($storage === null) {
-            return;
-        }
+            $storage = $this->getStorageName();
 
-        $location = static::firstOrCreateOrReport(StorageLocation::query(), ['name' => $storage]);
+            if ($storage === null) {
+                return;
+            }
 
-        static::reportDuplicates(fn () => $this->record->stocks()->updateOrCreate(
-            ['storage_location_id' => $location->getKey()],
-            ['quantity' => (int) ($this->data['quantity'] ?? 0)],
-        ));
+            $location = StorageLocation::query()->firstOrCreate(['name' => $storage]);
+
+            $this->record->stocks()->updateOrCreate(
+                ['storage_location_id' => $location->getKey()],
+                ['quantity' => (int) ($this->data['quantity'] ?? 0)],
+            );
+        });
     }
 
     private function getStorageName(): ?string

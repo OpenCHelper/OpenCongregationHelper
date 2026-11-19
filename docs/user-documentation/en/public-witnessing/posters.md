@@ -44,8 +44,7 @@ recognised by their name, in the language of the interface or in English (e.g. *
 ![Importing posters](/docs/user-documentation/en/public-witnessing/assets/poster-import.webp)
 
 - The rows with the same **Code** (or with the same **Title**, when there is no code) are the same poster: importing
-  the file again updates the posters and their copies instead of duplicating them. In a very long file (more than 1000
-  rows), keep the rows of a poster without a code close to each other.
+  the file again updates the posters and their copies instead of duplicating them.
 - The **Copies** of a row replace the ones of that storage place; the storage places that don't exist yet are created.
 - The **Titles** are saved in the **Language of the titles** chosen in the window (your language by default): the
   translations in the other languages are kept.

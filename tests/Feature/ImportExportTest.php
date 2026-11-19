@@ -7,11 +7,13 @@ use App\Filament\Exports\StorageLocationExporter;
 use App\Filament\Imports\PosterImporter;
 use App\Filament\Imports\PublicationImporter;
 use App\Filament\Imports\StorageLocationImporter;
+use App\Filament\Imports\TerritoryImporter;
 use App\Filament\Resources\Posters\Pages\ManagePosters;
 use App\Filament\Resources\Publications\Pages\ManagePublications;
 use App\Filament\Resources\StorageLocations\Pages\ManageStorageLocations;
 use App\Models\Department;
 use App\Models\Poster;
+use App\Models\PosterStock;
 use App\Models\Publication;
 use App\Models\StorageLocation;
 use App\Models\User;
@@ -22,7 +24,9 @@ use Filament\Actions\Imports\Jobs\ImportCsv;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -268,4 +272,41 @@ test('a row whose record was created meanwhile by another chunk fails with a cle
 
     expect($import->successful_rows)->toBe(1)
         ->and(Publication::query()->where('code', 'lff')->sole()->getTranslation('name', 'it'))->toBe('Vivi felice per sempre!');
+});
+
+test('the imports of the same kind wait for each other, among all the users', function (string $importer) {
+    $import = Import::create([
+        'file_name' => 'file.csv',
+        'file_path' => 'file.csv',
+        'importer' => $importer,
+        'total_rows' => 0,
+        'successful_rows' => 0,
+        'user_id' => $this->member->id,
+    ]);
+
+    $keys = collect($import->getImporter([], [])->getJobMiddleware())
+        ->filter(fn (object $middleware): bool => $middleware instanceof WithoutOverlapping)
+        ->map(fn (WithoutOverlapping $middleware): string => $middleware->key)
+        ->all();
+
+    expect($keys)->toContain('imports:'.$importer, "filament:imports:{$import->getKey()}");
+})->with([PosterImporter::class, PublicationImporter::class, StorageLocationImporter::class, TerritoryImporter::class]);
+
+test('a poster is not saved when its copies fail to be saved', function () {
+    $hall = StorageLocation::factory()->create(['name' => 'Sala del Regno']);
+    $poster = Poster::factory()->create(['code' => 'abc-01', 'title' => ['it' => 'Vecchio titolo']]);
+
+    // As if another writer saved the same copies at the same time
+    PosterStock::creating(function (PosterStock $stock): void {
+        DB::table('poster_stocks')->insert(['poster_id' => $stock->poster_id, 'storage_location_id' => $stock->storage_location_id, 'quantity' => 9, 'created_at' => now(), 'updated_at' => now()]);
+    });
+
+    $import = importRows(PosterImporter::class, [
+        ['code' => 'abc-01', 'title' => 'Nuovo titolo', 'storage' => 'Sala del Regno', 'quantity' => '2', 'notes' => ''],
+    ], $this->member);
+
+    expect($import->successful_rows)->toBe(0)
+        ->and($import->failedRows()->sole()->validation_error)->toBe(__('import.errors.duplicate'))
+        ->and($poster->fresh()->title)->toBe('Vecchio titolo')
+        ->and(PosterStock::query()->where('storage_location_id', $hall->id)->count())->toBe(0);
 });
