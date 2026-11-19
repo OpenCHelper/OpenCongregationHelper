@@ -92,6 +92,7 @@ return new class extends Migration
             $table->unsignedInteger('quantity')->default(1);
             $table->date('started_at');
             $table->date('ended_at')->nullable()->comment('Stopped: no longer requested again');
+            $table->date('last_period_on')->nullable()->comment('Day of the last period requested, from which the next one is counted');
             $table->timestamps();
 
             $table->index(['subscriber_id', 'ended_at']);

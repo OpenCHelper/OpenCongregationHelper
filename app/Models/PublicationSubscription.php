@@ -30,6 +30,7 @@ class PublicationSubscription extends Model
         'quantity',
         'started_at',
         'ended_at',
+        'last_period_on',
     ];
 
     /**
@@ -43,6 +44,7 @@ class PublicationSubscription extends Model
             'quantity' => 'integer',
             'started_at' => 'date',
             'ended_at' => 'date',
+            'last_period_on' => 'date',
         ];
     }
 
@@ -105,8 +107,9 @@ class PublicationSubscription extends Model
 
     /**
      * Get the day the next request is due: the start of the subscription for the first one, then the 1st of the
-     * month every `renewal_months` of the publication. `null` when it is not requested again (stopped, or the
-     * publication does not renew).
+     * month every `renewal_months` of the publication, counted from the last period requested (`last_period_on`), so
+     * that a request deleted or moved to another day is not made again. `null` when it is not requested again
+     * (stopped, or the publication does not renew).
      */
     public function getNextRequestDate(): ?Carbon
     {
@@ -116,33 +119,42 @@ class PublicationSubscription extends Model
             return null;
         }
 
-        $last = $this->requests()->latest('requested_at')->value('requested_at');
-
-        return $last
-            ? Carbon::parse($last)->startOfMonth()->addMonthsNoOverflow($months)
+        return $this->last_period_on
+            ? $this->last_period_on->copy()->startOfMonth()->addMonthsNoOverflow($months)
             : $this->started_at->copy();
     }
 
     /**
-     * Make the requests due by the given day (today by default): one for each period, so that a missed run of the
-     * scheduler is caught up. Safe to call again: nothing is requested twice for the same period.
+     * Make the request of the current period, if it is due by the given day (today by default). The periods missed
+     * meanwhile (e.g. while the renewal of the publication was turned off) are skipped, not requested all at once.
+     * Safe to call again: nothing is requested twice for the same period.
      *
-     * @return list<PublicationRequest> the requests made
+     * @return list<PublicationRequest> the request made, if any
      */
     public function renew(?CarbonInterface $day = null): array
     {
         $day = Carbon::parse($day ?? today())->startOfDay();
-        $made = [];
+        $months = (int) $this->loadMissing('publication')->publication->renewal_months;
+        $next = $this->getNextRequestDate();
 
-        while (($next = $this->getNextRequestDate()) && $next->lessThanOrEqualTo($day)) {
-            $made[] = $this->requests()->create([
-                'user_id' => $this->loadMissing('subscriber')->subscriber->user_id,
-                'publication_id' => $this->publication_id,
-                'quantity' => $this->quantity,
-                'requested_at' => $next->toDateString(),
-            ]);
+        if (! $next || $next->greaterThan($day)) {
+            return [];
         }
 
-        return $made;
+        // The last period due by the day
+        while (($following = $next->copy()->startOfMonth()->addMonthsNoOverflow($months))->lessThanOrEqualTo($day)) {
+            $next = $following;
+        }
+
+        $request = $this->requests()->create([
+            'user_id' => $this->loadMissing('subscriber')->subscriber->user_id,
+            'publication_id' => $this->publication_id,
+            'quantity' => $this->quantity,
+            'requested_at' => $next->toDateString(),
+        ]);
+
+        $this->update(['last_period_on' => $next->toDateString()]);
+
+        return [$request];
     }
 }

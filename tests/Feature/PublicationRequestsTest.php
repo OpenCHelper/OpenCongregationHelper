@@ -66,25 +66,56 @@ function requestDays(PublicationSubscription $subscription): array
 
 describe('renewals', function () {
     test('a monthly publication is requested on its start, then on the 1st of every month', function () {
-        $this->travelTo('2026-03-20');
         $subscription = subscribeTo($this->publisher, $this->watchtower, '2026-01-15', 2);
 
-        $made = $subscription->renew();
+        // As the daily job does
+        foreach (['2026-01-15', '2026-02-01', '2026-03-01', '2026-03-20'] as $day) {
+            $this->travelTo($day);
+            $subscription->renew();
+        }
 
-        expect($made)->toHaveCount(3)
-            ->and(requestDays($subscription))->toBe(['2026-01-15', '2026-02-01', '2026-03-01'])
+        expect(requestDays($subscription))->toBe(['2026-01-15', '2026-02-01', '2026-03-01'])
             ->and($subscription->requests()->pluck('quantity')->unique()->all())->toBe([2])
             ->and($subscription->requests()->pluck('user_id')->unique()->all())->toBe([$this->publisher->id])
             ->and($subscription->getNextRequestDate()->toDateString())->toBe('2026-04-01');
     });
 
     test('a publication renewed every two months skips a month', function () {
-        $this->travelTo('2026-05-02');
         $subscription = subscribeTo($this->publisher, $this->workbook, '2026-01-10');
 
-        $subscription->renew();
+        foreach (['2026-01-10', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-02'] as $day) {
+            $this->travelTo($day);
+            $subscription->renew();
+        }
 
         expect(requestDays($subscription))->toBe(['2026-01-10', '2026-03-01', '2026-05-01']);
+    });
+
+    test('the periods missed meanwhile are skipped: only the current one is requested', function () {
+        // E.g. the renewal of the publication was turned off in January and on again in March
+        $subscription = subscribeTo($this->publisher, $this->watchtower, '2026-01-15');
+        $this->travelTo('2026-03-20');
+
+        expect($subscription->renew())->toHaveCount(1)
+            ->and(requestDays($subscription))->toBe(['2026-03-01']);
+    });
+
+    test('a renewal deleted, or moved to another day, is not requested again', function () {
+        $this->travelTo('2026-03-01');
+        $subscription = subscribeTo($this->publisher, $this->watchtower, '2026-02-01');
+        $subscription->update(['last_period_on' => '2026-02-01']);
+        [$march] = $subscription->renew();
+
+        $march->update(['requested_at' => '2026-02-20']);
+        $this->travelTo('2026-03-02');
+
+        expect($subscription->fresh()->renew())->toBe([]);
+
+        $march->delete();
+        $this->travelTo('2026-03-03');
+
+        expect($subscription->fresh()->renew())->toBe([])
+            ->and($subscription->fresh()->getNextRequestDate()->toDateString())->toBe('2026-04-01');
     });
 
     test('renewing again makes nothing until the next period, and a missed day is caught up', function () {
@@ -138,9 +169,17 @@ describe('renewals', function () {
         (new RenewPublicationSubscriptions)->handle();
         (new RenewPublicationSubscriptions)->handle();
 
-        expect(requestDays($watchtower))->toBe(['2026-02-10', '2026-03-01'])
+        // The periods before today are not requested all at once
+        expect(requestDays($watchtower))->toBe(['2026-03-01'])
             ->and(requestDays($workbook))->toBe(['2026-03-05'])
             ->and($stopped->requests()->count())->toBe(0);
+
+        // A publication no longer offered is not requested again
+        $this->watchtower->update(['is_active' => false]);
+        $this->travelTo('2026-04-02');
+        (new RenewPublicationSubscriptions)->handle();
+
+        expect(requestDays($watchtower))->toBe(['2026-03-01']);
 
         // The schedule is defined when the Artisan application starts
         Artisan::all();

@@ -8,6 +8,7 @@ use App\Filament\Resources\Publications\Pages\ManagePublications;
 use App\Filament\Resources\PublicationSubscribers\Pages\ManagePublicationSubscribers;
 use App\Filament\Resources\PublicationSubscribers\PublicationSubscriberResource;
 use App\Filament\Resources\PublicationSubscribers\Widgets\PublicationTotals;
+use App\Jobs\RenewPublicationSubscriptions;
 use App\Models\Department;
 use App\Models\Publication;
 use App\Models\PublicationRequest;
@@ -439,4 +440,25 @@ test('the publications are sorted with the table prefix of the installation', fu
     }
 
     expect($sql)->toContain($connection->getQueryGrammar()->wrap('p45_publications').'.');
+});
+
+test('a publication removed and added again in the same period is not requested twice', function () {
+    $this->travelTo('2026-11-03');
+    $subscriber = PublicationSubscriber::query()->create(['user_id' => User::factory()->create()->id]);
+
+    $subscriber->syncSubscriptions([['publication_id' => $this->watchtower->id, 'quantity' => 1]]);
+    // Removed by mistake, then added back
+    $subscriber->syncSubscriptions([]);
+    $subscriber->syncSubscriptions([['publication_id' => $this->watchtower->id, 'quantity' => 1]]);
+    // The publisher removed from the list, then added again
+    $subscriber->stopSubscriptions();
+    $subscriber->syncSubscriptions([['publication_id' => $this->watchtower->id, 'quantity' => 1]]);
+
+    expect(PublicationRequest::query()->where('publication_id', $this->watchtower->id)->count())->toBe(1);
+
+    // The next period is requested as usual
+    $this->travelTo('2026-12-01');
+    (new RenewPublicationSubscriptions)->handle();
+
+    expect(PublicationRequest::query()->where('publication_id', $this->watchtower->id)->count())->toBe(2);
 });

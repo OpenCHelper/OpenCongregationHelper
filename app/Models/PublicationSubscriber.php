@@ -135,8 +135,14 @@ class PublicationSubscriber extends Model
                     continue;
                 }
 
+                // Received again: from the period after the last one requested before, not twice for the same one
+                $lastPeriodOn = $this->subscriptions()
+                    ->where('publication_id', $publicationId)
+                    ->whereNotNull('last_period_on')
+                    ->max('last_period_on');
+
                 $this->subscriptions()
-                    ->create(['publication_id' => $publicationId, 'quantity' => $quantity, 'started_at' => today()])
+                    ->create(['publication_id' => $publicationId, 'quantity' => $quantity, 'started_at' => today(), 'last_period_on' => $lastPeriodOn])
                     ->renew();
             }
 

@@ -5,7 +5,9 @@ namespace Database\Seeders;
 use App\Models\Publication;
 use App\Models\PublicationRequest;
 use App\Models\PublicationSubscriber;
+use App\Models\PublicationSubscription;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -62,13 +64,13 @@ class FakePublicationSubscriberSeeder extends Seeder
                 // A publisher who no longer receives the large print edition, since two months ago: it stays in the history
                 if ($index === self::STOPPED[0] && $position === self::STOPPED[1]) {
                     $stoppedOn = today()->subMonthsNoOverflow(2)->startOfMonth()->addDays(10);
-                    $subscription->renew($stoppedOn);
+                    self::renewEveryMonth($subscription, $stoppedOn);
                     $subscription->stop($stoppedOn);
 
                     continue;
                 }
 
-                $subscription->renew();
+                self::renewEveryMonth($subscription, today());
             }
         }
 
@@ -81,5 +83,18 @@ class FakePublicationSubscriberSeeder extends Seeder
                 'delivered_at' => Carbon::parse($request->requested_at)->addDays(3 + $request->id % 5)->min(today())->toDateString(),
             ]));
 
+    }
+
+    /**
+     * Renew the subscription as the daily job did every month since its start, until the given day: the renewal
+     * requests only the current period, so the history of the past months is made one month at a time.
+     */
+    private static function renewEveryMonth(PublicationSubscription $subscription, CarbonInterface $until): void
+    {
+        for ($day = $subscription->started_at->copy(); $day->lessThanOrEqualTo($until); $day = $day->copy()->startOfMonth()->addMonthNoOverflow()) {
+            $subscription->renew($day);
+        }
+
+        $subscription->renew($until);
     }
 }
