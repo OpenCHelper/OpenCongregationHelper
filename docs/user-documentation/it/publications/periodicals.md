@@ -58,9 +58,9 @@ ricreati).
 
 Le pubblicazioni sono elencate per categoria; trascinale (col pulsante in alto nella tabella) per cambiarne l'ordine al
 suo interno. Per non offrire più una pubblicazione, disattiva **Disponibile**: non si può più scegliere nelle
-pubblicazioni periodiche e nelle nuove richieste, ma le copie già inserite vengono conservate. Eliminandola si eliminano
-anche quelle copie e le sue richieste. La colonna **In sospeso** conta le sue richieste non ancora consegnate, e il
-pulsante **Richieste** ne apre lo storico.
+pubblicazioni periodiche e nelle nuove richieste, e non viene più richiesta di nuovo per chi la riceveva regolarmente,
+ma le copie già inserite vengono conservate. Eliminandola si eliminano anche quelle copie e le sue richieste. La colonna
+**In sospeso** conta le sue richieste non ancora consegnate, e il pulsante **Richieste** ne apre lo storico.
 
 Per modificare molte pubblicazioni in una volta, apri **Importa / Esporta** in alto nell'elenco delle pubblicazioni.
 **Esporta Pubblicazioni** fornisce un file con una riga per ogni pubblicazione: il **Nome** nella tua lingua per primo,

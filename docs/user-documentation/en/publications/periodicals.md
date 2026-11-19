@@ -54,8 +54,9 @@ they can be changed, turned off or deleted (a deleted one is not created again).
 
 The publications are listed by category; drag them (with the button at the top of the table) to change their order
 within it. To stop offering a publication, turn off **Offered**: it can no longer be chosen in the regular publications
-and in new requests, but the copies already entered are kept. Deleting it deletes those copies and its requests too. The
-**Pending** column counts its requests not delivered yet, and the **Requests** button opens their history.
+and in new requests, and it is no longer requested again for whoever received it regularly, but the copies already
+entered are kept. Deleting it deletes those copies and its requests too. The **Pending** column counts its requests not
+delivered yet, and the **Requests** button opens their history.
 
 To edit many publications at once, open **Import / Export** at the top of the publication list. **Export Publications**
 gives a file with a row for each publication: the **Name** in your language first, then *Code*, *Category*, *Renews

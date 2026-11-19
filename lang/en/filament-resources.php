@@ -469,7 +469,7 @@ return [
         'field_code_placeholder' => 'e.g. g',
         'field_code_helper' => 'The same in every language, shown in the header of its column instead of the name.',
         'field_is_active' => 'Offered',
-        'field_is_active_helper' => 'Turn it off to stop offering it: it can no longer be chosen in the regular publications and in new requests, but the copies and requests already entered are kept.',
+        'field_is_active_helper' => 'Turn it off to stop offering it: it can no longer be chosen in the regular publications and in new requests, and it is no longer requested again for whoever received it regularly; the copies and requests already entered are kept.',
         'column_name' => 'Publication',
         'column_is_active' => 'Offered',
         'column_publishers' => 'Publishers',

@@ -470,7 +470,7 @@ return [
         'field_code_placeholder' => 'es. g',
         'field_code_helper' => 'La stessa in ogni lingua, mostrata nell\'intestazione della sua colonna al posto del nome.',
         'field_is_active' => 'Disponibile',
-        'field_is_active_helper' => 'Disattivala per non offrirla più: non si può più scegliere nelle pubblicazioni periodiche e nelle nuove richieste, ma le copie e le richieste già inserite vengono conservate.',
+        'field_is_active_helper' => 'Disattivala per non offrirla più: non si può più scegliere nelle pubblicazioni periodiche e nelle nuove richieste, e non viene più richiesta di nuovo per chi la riceveva regolarmente; le copie e le richieste già inserite vengono conservate.',
         'column_name' => 'Pubblicazione',
         'column_is_active' => 'Disponibile',
         'column_publishers' => 'Proclamatori',
