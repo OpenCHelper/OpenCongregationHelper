@@ -16,6 +16,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
@@ -84,6 +86,14 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                     ->required()
                     ->maxLength(50)
                     ->unique(ignoreRecord: true),
+                // Not a column: it only shows the renewal, which is saved empty when it is turned off
+                Toggle::make('is_renewable')
+                    ->label(__('filament-resources.publication.field_is_renewable'))
+                    ->helperText(__('filament-resources.publication.field_is_renewable_helper'))
+                    ->afterStateHydrated(fn (Toggle $component, ?Publication $record) => $component->state((bool) $record?->isRenewable()))
+                    ->afterStateUpdated(fn (bool $state, Set $set) => $set('renewal_months', $state ? 1 : null))
+                    ->live()
+                    ->dehydrated(false),
                 TextInput::make('renewal_months')
                     ->label(__('filament-resources.publication.field_renewal_months'))
                     ->helperText(__('filament-resources.publication.field_renewal_months_helper'))
@@ -92,8 +102,11 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                     ->integer()
                     ->minValue(1)
                     ->maxValue(24)
-                    // Empty: requested once (e.g. a book)
-                    ->nullable(),
+                    ->visible(fn (Get $get): bool => (bool) $get('is_renewable'))
+                    ->required(fn (Get $get): bool => (bool) $get('is_renewable'))
+                    // Saved (empty) when hidden too, so that turning the renewal off stops it
+                    ->dehydratedWhenHidden()
+                    ->dehydrateStateUsing(fn (mixed $state, Get $get): ?int => $get('is_renewable') && filled($state) ? (int) $state : null),
                 Toggle::make('is_active')
                     ->label(__('filament-resources.publication.field_is_active'))
                     ->helperText(__('filament-resources.publication.field_is_active_helper'))

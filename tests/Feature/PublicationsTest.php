@@ -142,3 +142,47 @@ test('the code of a publication is required and unique', function () {
 
     expect(Publication::query()->count())->toBe(6);
 });
+
+test('the renewal is shown only for the publications received regularly', function () {
+    $watchtower = Publication::query()->where('code', 'w')->sole();
+    $awake = Publication::query()->where('code', 'g')->sole();
+
+    Livewire::test(ManagePublications::class)
+        ->mountAction(TestAction::make('edit')->table($awake))
+        ->assertSchemaStateSet(['is_renewable' => false])
+        ->assertSchemaComponentHidden('renewal_months', 'mountedActionSchema0')
+        // Turned on, it starts from every month and must be filled in
+        ->fillForm(['is_renewable' => true])
+        ->assertSchemaComponentVisible('renewal_months', 'mountedActionSchema0')
+        ->assertSchemaStateSet(['renewal_months' => 1])
+        ->fillForm(['renewal_months' => null])
+        ->callMountedAction()
+        ->assertHasFormErrors(['renewal_months' => 'required'])
+        ->fillForm(['renewal_months' => 4])
+        ->callMountedAction()
+        ->assertHasNoFormErrors();
+
+    expect($awake->fresh()->renewal_months)->toBe(4);
+
+    // Turned off, the renewal is stopped
+    Livewire::test(ManagePublications::class)
+        ->mountAction(TestAction::make('edit')->table($watchtower))
+        ->assertSchemaStateSet(['is_renewable' => true, 'renewal_months' => 1])
+        ->fillForm(['is_renewable' => false])
+        ->callMountedAction()
+        ->assertHasNoFormErrors();
+
+    expect($watchtower->fresh()->renewal_months)->toBeNull();
+});
+
+test('a new publication is requested once unless it is received regularly', function () {
+    Livewire::test(ManagePublications::class)
+        ->callAction(TestAction::make('create'), [
+            'name' => [app()->getLocale() => 'Enjoy Life Forever!'],
+            'category' => PublicationCategory::Books->value,
+            'code' => 'lff',
+        ])
+        ->assertHasNoFormErrors();
+
+    expect(Publication::query()->where('code', 'lff')->sole()->renewal_months)->toBeNull();
+});

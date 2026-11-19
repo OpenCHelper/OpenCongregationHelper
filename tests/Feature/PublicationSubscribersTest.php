@@ -269,6 +269,7 @@ test('a new renewable publication can be received without changing the applicati
             'name' => [app()->getLocale() => 'Awake!'],
             'category' => PublicationCategory::Awake->value,
             'code' => 'g',
+            'is_renewable' => true,
             'renewal_months' => 4,
             'is_active' => true,
         ])
