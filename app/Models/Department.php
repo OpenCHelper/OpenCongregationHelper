@@ -59,7 +59,10 @@ class Department extends Model
             ->map(fn (string $key, int $index): string => "when '{$key}' then {$index}")
             ->implode(' ');
 
-        return $query->orderByRaw("case {$this->qualifyColumn('key')} {$cases} else ".count($keys).' end');
+        // Wrapped by the grammar, which adds the table prefix (e.g. of the previews) that raw SQL would miss
+        $column = $query->getQuery()->getGrammar()->wrap($this->qualifyColumn('key'));
+
+        return $query->orderByRaw("case {$column} {$cases} else ".count($keys).' end');
     }
 
     public function getLabel(): string

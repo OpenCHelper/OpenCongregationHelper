@@ -188,3 +188,17 @@ test('the department pages render', function () {
     $this->get(DepartmentResource::getUrl())->assertOk()->assertSee(DepartmentKey::PublicWitnessing->getLabel())->assertSee('Andrea');
     $this->get(DepartmentResource::getUrl('view', ['record' => $department]))->assertOk()->assertSee(PosterResource::getNavigationLabel());
 });
+
+test('the departments are sorted with the table prefix of the installation', function () {
+    $connection = Department::query()->getConnection();
+    $prefix = $connection->getTablePrefix();
+    $connection->setTablePrefix('p45_');
+
+    try {
+        $sql = Department::query()->ordered()->toSql();
+    } finally {
+        $connection->setTablePrefix($prefix);
+    }
+
+    expect($sql)->toContain($connection->getQueryGrammar()->wrap('p45_departments').'.');
+});
