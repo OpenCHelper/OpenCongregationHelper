@@ -140,7 +140,10 @@ class PublicationSubscriber extends Model
                     ->renew();
             }
 
-            $active->except($kept)->each(fn (PublicationSubscription $subscription) => $subscription->stop());
+            // By publication: `except()` of an Eloquent collection would compare the IDs of the subscriptions
+            $active
+                ->reject(fn (PublicationSubscription $subscription): bool => in_array($subscription->publication_id, $kept, true))
+                ->each(fn (PublicationSubscription $subscription) => $subscription->stop());
         });
 
         $this->unsetRelation('activeSubscriptions');

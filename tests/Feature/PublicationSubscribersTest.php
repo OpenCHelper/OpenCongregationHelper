@@ -198,6 +198,18 @@ test('changing the copies applies to the next requests, removing a publication s
         ->and($previous->fresh()->quantity)->toBe(1);
 });
 
+test('only the publications removed from the rows are stopped, whatever the IDs of the subscriptions', function () {
+    // Other subscriptions first, so that the IDs of the subscriptions differ from the IDs of their publications
+    PublicationSubscriber::factory()->receiving($this->largePrint)->receiving($this->workbook)->create();
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->receiving($this->workbook)->create();
+
+    expect($subscriber->subscriptions()->where('publication_id', $this->watchtower->id)->value('id'))->not->toBe($this->watchtower->id);
+
+    $subscriber->syncSubscriptions([['publication_id' => $this->watchtower->id, 'quantity' => 3]]);
+
+    expect($subscriber->activeSubscriptions()->pluck('quantity', 'publication_id')->all())->toBe([$this->watchtower->id => 3]);
+});
+
 test('removing a publisher stops their subscriptions and keeps their history; adding them again reuses the record', function () {
     $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->create();
     $request = PublicationRequest::factory()->create(['user_id' => $subscriber->user_id, 'publication_id' => $this->watchtower->id]);
