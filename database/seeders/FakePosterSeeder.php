@@ -14,17 +14,17 @@ class FakePosterSeeder extends Seeder
     /**
      * The posters, with their copies in the Kingdom Hall and in the storage box.
      *
-     * @var list<array{code: string, title: string, hall: int, box: int}>
+     * @var list<array{code: string, title: array<string, string>, hall: int, box: int}>
      */
     public const POSTERS = [
-        ['code' => 'mp-01', 'title' => 'Can the dead live again?', 'hall' => 2, 'box' => 3],
-        ['code' => 'mp-02', 'title' => 'Enjoy life forever!', 'hall' => 3, 'box' => 5],
-        ['code' => 'mp-03', 'title' => 'How can you have a happy family?', 'hall' => 1, 'box' => 2],
-        ['code' => 'mp-04', 'title' => 'What is God\'s Kingdom?', 'hall' => 2, 'box' => 0],
-        ['code' => 'mp-05', 'title' => 'Will suffering ever end?', 'hall' => 0, 'box' => 4],
-        ['code' => 'mp-06', 'title' => 'Who controls the world?', 'hall' => 1, 'box' => 1],
-        ['code' => 'mp-07', 'title' => 'Free Bible courses', 'hall' => 4, 'box' => 6],
-        ['code' => 'mp-08', 'title' => 'Does God care about you?', 'hall' => 0, 'box' => 0],
+        ['code' => 'mp-01', 'title' => ['en' => 'Can the dead live again?', 'it' => 'I morti possono tornare a vivere?', 'es' => '¿Pueden volver a vivir los muertos?'], 'hall' => 2, 'box' => 3],
+        ['code' => 'mp-02', 'title' => ['en' => 'Enjoy life forever!', 'it' => 'Vivi felice per sempre!', 'es' => '¡Disfrute de la vida para siempre!'], 'hall' => 3, 'box' => 5],
+        ['code' => 'mp-03', 'title' => ['en' => 'How can you have a happy family?', 'it' => 'Come avere una famiglia felice?', 'es' => '¿Cómo tener una familia feliz?'], 'hall' => 1, 'box' => 2],
+        ['code' => 'mp-04', 'title' => ['en' => 'What is God\'s Kingdom?', 'it' => 'Cos\'è il Regno di Dio?', 'es' => '¿Qué es el Reino de Dios?'], 'hall' => 2, 'box' => 0],
+        ['code' => 'mp-05', 'title' => ['en' => 'Will suffering ever end?', 'it' => 'Le sofferenze finiranno?', 'es' => '¿Terminará algún día el sufrimiento?'], 'hall' => 0, 'box' => 4],
+        ['code' => 'mp-06', 'title' => ['en' => 'Who controls the world?', 'it' => 'Chi controlla il mondo?', 'es' => '¿Quién controla el mundo?'], 'hall' => 1, 'box' => 1],
+        ['code' => 'mp-07', 'title' => ['en' => 'Free Bible courses', 'it' => 'Corsi biblici gratuiti', 'es' => 'Cursos bíblicos gratuitos'], 'hall' => 4, 'box' => 6],
+        ['code' => 'mp-08', 'title' => ['en' => 'Does God care about you?', 'it' => 'A Dio importa di te?', 'es' => '¿Le importa usted a Dios?'], 'hall' => 0, 'box' => 0],
     ];
 
     /**

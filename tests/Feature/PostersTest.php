@@ -34,7 +34,7 @@ test('a poster can be created with its quantities in each location', function ()
     Livewire::test(ManagePosters::class)
         ->callAction(TestAction::make('create'), [
             'code' => 'mi-25',
-            'title' => 'Enjoy life forever!',
+            'title' => ['en' => 'Enjoy life forever!', 'it' => 'Vivi felice per sempre!', 'es' => null],
             'stocks' => [
                 ['storage_location_id' => $this->hall->id, 'quantity' => 2],
                 ['storage_location_id' => $this->box->id, 'quantity' => 5],
@@ -46,7 +46,7 @@ test('a poster can be created with its quantities in each location', function ()
 
     expect($poster)
         ->code->toBe('mi-25')
-        ->title->toBe('Enjoy life forever!')
+        ->and($poster->getTranslations('title'))->toEqual(['en' => 'Enjoy life forever!', 'it' => 'Vivi felice per sempre!'])
         ->and($poster->quantityIn($this->hall))->toBe(2)
         ->and($poster->quantityIn($this->box))->toBe(5)
         ->and($poster->totalQuantity())->toBe(7);
@@ -58,7 +58,7 @@ test('the code of a poster is unique and the quantities cannot be negative', fun
     Livewire::test(ManagePosters::class)
         ->callAction(TestAction::make('create'), [
             'code' => 'mi-25',
-            'title' => 'Another poster',
+            'title' => ['en' => 'Another poster'],
             'stocks' => [
                 ['storage_location_id' => $this->hall->id, 'quantity' => -1],
             ],
@@ -153,3 +153,37 @@ test('the storage places are not called locations, a word left for the sites of 
     ['it', 'Depositi'],
     ['es', 'Depósitos'],
 ]);
+
+test('the title of a poster follows the language of the user, and is found and sorted in it', function () {
+    $kingdom = Poster::factory()->create(['title' => ['en' => 'What is God\'s Kingdom?', 'it' => 'Cos\'è il Regno di Dio?']]);
+    $courses = Poster::factory()->create(['title' => ['en' => 'Free Bible courses', 'it' => 'Corsi biblici gratuiti']]);
+    $english = Poster::factory()->create(['title' => ['en' => 'Does God care about you?']]);
+
+    App::setLocale('it');
+
+    expect($kingdom->fresh()->title)->toBe('Cos\'è il Regno di Dio?')
+        ->and($english->fresh()->title)->toBe('Does God care about you?');
+
+    Livewire::test(ManagePosters::class)
+        ->assertCanSeeTableRecords([$courses, $kingdom], inOrder: true)
+        ->searchTable('Kingdom')
+        ->assertCanSeeTableRecords([$kingdom])
+        ->assertCanNotSeeTableRecords([$courses, $english]);
+});
+
+test('the form edits the title in every language', function () {
+    $poster = Poster::factory()->create(['title' => ['en' => 'Free Bible courses', 'it' => 'Corsi biblici']]);
+
+    Livewire::test(ManagePosters::class)
+        ->mountAction(TestAction::make('edit')->table($poster))
+        ->assertSchemaStateSet(['title' => ['en' => 'Free Bible courses', 'it' => 'Corsi biblici', 'es' => null]])
+        ->fillForm(['title' => ['en' => 'Free Bible courses', 'it' => 'Corsi biblici gratuiti', 'es' => 'Cursos bíblicos gratuitos']])
+        ->callMountedAction()
+        ->assertHasNoFormErrors();
+
+    expect($poster->fresh()->getTranslations('title'))->toEqual([
+        'en' => 'Free Bible courses',
+        'it' => 'Corsi biblici gratuiti',
+        'es' => 'Cursos bíblicos gratuitos',
+    ]);
+});

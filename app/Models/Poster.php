@@ -8,16 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Translatable\HasTranslations;
 
 /**
- * A magnetic poster of the displays used in public witnessing (e.g. carts and stands).
+ * A magnetic poster of the displays used in public witnessing (e.g. carts and stands). Its title is translated in
+ * every language of the application, while its code is the same in all of them.
  */
 class Poster extends Model
 {
     /** @use HasFactory<PosterFactory> */
     use HasFactory;
 
+    use HasTranslations;
     use LogsActivity;
+
+    /**
+     * The attributes translated in every language of the application.
+     *
+     * @var list<string>
+     */
+    public array $translatable = ['title'];
 
     /**
      * The attributes that are mass assignable.

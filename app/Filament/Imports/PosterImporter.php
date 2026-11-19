@@ -5,10 +5,12 @@ namespace App\Filament\Imports;
 use App\Filament\Imports\Concerns\ImportsInTheUserLocale;
 use App\Models\Poster;
 use App\Models\StorageLocation;
+use App\Support\Translations;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Number;
 
@@ -78,7 +80,8 @@ class PosterImporter extends Importer
     }
 
     /**
-     * The poster with the same code or, without a code, with the same title.
+     * The poster with the same code or, without a code, with the same title in any language (the title of the row is
+     * saved in the language of the user who started the import).
      */
     public function resolveRecord(): Poster
     {
@@ -88,7 +91,14 @@ class PosterImporter extends Importer
             return Poster::query()->firstOrNew(['code' => $code]);
         }
 
-        return Poster::query()->whereNull('code')->where('title', $this->data['title'])->first() ?? new Poster;
+        return Poster::query()
+            ->whereNull('code')
+            ->where(function (Builder $query): void {
+                foreach (array_keys(Translations::getLocales()) as $locale) {
+                    $query->orWhere("title->{$locale}", $this->data['title']);
+                }
+            })
+            ->first() ?? new Poster;
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Filament\Resources\StorageLocations\StorageLocationResource;
 use App\Models\Poster;
 use App\Models\PosterStock;
 use App\Models\StorageLocation;
+use App\Support\Translations;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -78,7 +79,8 @@ class PosterResource extends Resource implements HasKnowledgeBase
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['title', 'code'];
+        // In every language, so that a title missing in the language of the user (shown in another one) is found too
+        return [...array_map(fn (string $locale): string => "title->{$locale}", array_keys(Translations::getLocales())), 'code'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
@@ -98,12 +100,8 @@ class PosterResource extends Resource implements HasKnowledgeBase
                             ->placeholder(__('filament-resources.poster.field_code_placeholder'))
                             ->maxLength(50)
                             ->unique(ignoreRecord: true),
-                        TextInput::make('title')
-                            ->label(__('filament-resources.poster.field_title'))
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpan(['sm' => 2]),
                     ]),
+                Translations::inputs('title', __('filament-resources.poster.field_title')),
                 Section::make(__('filament-resources.poster.section_stocks'))
                     ->description(__('filament-resources.poster.section_stocks_description'))
                     ->icon(Heroicon::OutlinedArchiveBox)
@@ -157,7 +155,7 @@ class PosterResource extends Resource implements HasKnowledgeBase
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('stocks'))
-            ->defaultSort('title')
+            ->defaultSort(fn (Builder $query): Builder => $query->orderBy('title->'.app()->getLocale()))
             ->paginated([25, 50, 100, 'all'])
             ->defaultPaginationPageOption(50)
             ->columns([
@@ -182,8 +180,8 @@ class PosterResource extends Resource implements HasKnowledgeBase
                     ->weight(FontWeight::Medium)
                     ->description(fn (Poster $record): ?string => $record->notes)
                     ->wrap()
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(query: fn (Builder $query, string $search): Builder => Translations::search($query, 'title', $search))
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('title->'.app()->getLocale(), $direction)),
                 ...static::getLocationColumns(),
                 TextColumn::make('total_quantity')
                     ->label(__('filament-resources.poster.column_total'))

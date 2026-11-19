@@ -21,7 +21,7 @@ return new class extends Migration
         Schema::create('posters', function (Blueprint $table) {
             $table->id();
             $table->string('code', 50)->nullable()->unique()->comment('Symbol of the poster, e.g. "mi-25"');
-            $table->string('title');
+            $table->json('title')->comment('Translated in every language (spatie/laravel-translatable)');
             $table->string('image_path')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

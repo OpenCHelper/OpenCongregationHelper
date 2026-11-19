@@ -83,9 +83,24 @@ test('importing again updates the quantities instead of duplicating the posters'
     ], $this->member);
 
     expect(Poster::count())->toBe(2)
-        ->and($poster->fresh()->title)->toBe('Enjoy life forever!')
+        // In the language of the user who imported it
+        ->and($poster->fresh()->getTranslation('title', $this->member->preferredLocale()))->toBe('Enjoy life forever!')
         ->and($poster->fresh()->load('stocks')->quantityIn($hall))->toBe(1)
         ->and($untitled->fresh()->load('stocks')->quantityIn($hall))->toBe(4);
+});
+
+test('the title is imported in the language of the user, keeping the other translations', function () {
+    $this->member->forceFill(['locale' => 'it'])->save();
+    $poster = Poster::factory()->create(['code' => null, 'title' => ['en' => 'Free Bible courses', 'it' => 'Corsi biblici']]);
+
+    // Without a code, the poster is found by its title in any language
+    runPosterImport([
+        ['code' => '', 'title' => 'Free Bible courses', 'storage' => '', 'quantity' => '', 'notes' => 'Updated'],
+    ], $this->member);
+
+    expect(Poster::count())->toBe(1)
+        ->and($poster->fresh()->notes)->toBe('Updated')
+        ->and($poster->fresh()->getTranslations('title'))->toEqual(['en' => 'Free Bible courses', 'it' => 'Free Bible courses']);
 });
 
 test('a poster can be imported without storage place, but not copies without one', function () {
