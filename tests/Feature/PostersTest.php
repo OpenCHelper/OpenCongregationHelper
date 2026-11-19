@@ -231,3 +231,23 @@ test('the picture of a poster cannot be an SVG, which can carry scripts', functi
 
     expect(Poster::query()->sole()->image_path)->toEndWith('.png');
 });
+
+test('the picture of a poster is deleted from the disk when replaced, removed or with the poster', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('posters/old.png', 'old');
+    Storage::disk('public')->put('posters/new.png', 'new');
+    $poster = Poster::factory()->create(['image_path' => 'posters/old.png']);
+
+    $poster->update(['image_path' => 'posters/new.png']);
+
+    Storage::disk('public')->assertMissing('posters/old.png');
+    Storage::disk('public')->assertExists('posters/new.png');
+
+    $poster->update(['notes' => 'Something else']);
+
+    Storage::disk('public')->assertExists('posters/new.png');
+
+    $poster->delete();
+
+    Storage::disk('public')->assertMissing('posters/new.png');
+});
