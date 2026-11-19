@@ -45,7 +45,7 @@ they can be changed, turned off or deleted (a deleted one is not created again).
 1. Click **New** and enter the **Name** in your language (e.g. *Enjoy Life Forever!*): you can also enter it in the
    other languages, otherwise they show it as you wrote it.
 2. Choose the **Category**, as in the Watchtower Online Library: *Bibles*, *Watchtower*, *Awake!*, *Meeting Workbooks*,
-   *Books*, *Brochures and Booklets*, *Tracts*, *Indexes*, *Programs*, *Manuals and Guidelines* or *Other*.
+   *Books*, *Brochures and Booklets*, *Tracts*, *Indexes*, *Programs*, *Manuals and Guidelines*, *DVD* or *Other*.
 3. Enter its **Code** (e.g. `lff`): it is required, the same in every language and shown in the header of its column.
 4. For the publications received regularly, turn on **Received regularly** and enter every how many months it **Renews**
    (e.g. 1 for *The Watchtower*, 2 for the *Meeting Workbook*); leave it off for the ones requested once (e.g. a book).

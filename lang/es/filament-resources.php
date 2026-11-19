@@ -460,6 +460,7 @@ return [
             'indexes' => 'Índices',
             'programs' => 'Programas',
             'manuals_and_guidelines' => 'Manuales y pautas',
+            'dvds' => 'DVD',
             'other' => 'Otras',
         ],
         'field_name' => 'Nombre',

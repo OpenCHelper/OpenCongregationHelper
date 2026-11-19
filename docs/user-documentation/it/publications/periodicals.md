@@ -46,8 +46,8 @@ non vengono ricreati).
 1. Clicca **Nuovo** e inserisci il **Nome** nella tua lingua (es. *Vivi felice per sempre!*): puoi inserirlo anche
    nelle altre lingue, altrimenti mostrano quello che hai scritto.
 2. Scegli la **Categoria**, come nella Biblioteca online Watchtower: *Bibbie*, *Torre di Guardia*, *Svegliatevi!*,
-   *Guide per l'adunanza*, *Libri*, *Opuscoli e brochure*, *Volantini*, *Indici*, *Programmi*, *Manuali e linee guida*
-   o *Altro*.
+   *Guide per l'adunanza*, *Libri*, *Opuscoli e brochure*, *Volantini*, *Indici*, *Programmi*, *Manuali e linee guida*,
+   *DVD* o *Altro*.
 3. Inserisci la sua **Sigla** (es. `lff`): è obbligatoria, la stessa in ogni lingua e mostrata nell'intestazione della
    sua colonna.
 4. Per le pubblicazioni ricevute regolarmente, attiva **Ricevuta regolarmente** e indica ogni quanti mesi **Si

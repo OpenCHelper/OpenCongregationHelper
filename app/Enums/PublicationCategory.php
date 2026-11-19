@@ -5,7 +5,8 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasLabel;
 
 /**
- * The categories of the publications that can be received on paper, as in the Watchtower Online Library.
+ * The categories of the publications that can be received on paper, as in the Watchtower Online Library, plus the
+ * DVDs (not in the library, which has only printed publications).
  *
  * @see https://wol.jw.org/en/wol/library/r1/lp-e/all-publications
  */
@@ -22,6 +23,7 @@ enum PublicationCategory: string implements HasLabel
     case Indexes = 'indexes';
     case Programs = 'programs';
     case ManualsAndGuidelines = 'manuals_and_guidelines';
+    case Dvds = 'dvds';
     case Other = 'other';
 
     public function getLabel(): string

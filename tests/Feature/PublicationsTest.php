@@ -186,3 +186,12 @@ test('a new publication is requested once unless it is received regularly', func
 
     expect(Publication::query()->where('code', 'lff')->sole()->renewal_months)->toBeNull();
 });
+
+test('the DVDs are listed after the printed publications, before the other ones', function () {
+    $other = Publication::factory()->create(['category' => PublicationCategory::Other, 'sort' => 0]);
+    $dvd = Publication::factory()->create(['category' => PublicationCategory::Dvds, 'sort' => 99]);
+    $manual = Publication::factory()->create(['category' => PublicationCategory::ManualsAndGuidelines, 'sort' => 99]);
+
+    expect(Publication::query()->ordered()->pluck('id')->take(-3)->values()->all())->toBe([$manual->id, $dvd->id, $other->id])
+        ->and(PublicationCategory::Dvds->getLabel())->toBe('DVD');
+});
