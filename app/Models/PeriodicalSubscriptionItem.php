@@ -16,7 +16,7 @@ class PeriodicalSubscriptionItem extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'periodical_subscription_id',
+        'subscription_id',
         'publication_id',
         'quantity',
     ];
@@ -38,7 +38,7 @@ class PeriodicalSubscriptionItem extends Model
      */
     public function subscription(): BelongsTo
     {
-        return $this->belongsTo(PeriodicalSubscription::class, 'periodical_subscription_id');
+        return $this->belongsTo(PeriodicalSubscription::class, 'subscription_id');
     }
 
     /**

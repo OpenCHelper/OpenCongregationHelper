@@ -40,12 +40,15 @@ return new class extends Migration
 
         Schema::create('periodical_subscription_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('periodical_subscription_id')->constrained()->cascadeOnDelete();
+            // A short column, so that the name of its foreign key (unique in the whole database) stays within the 64
+            // characters of MySQL with the table prefix of the installation (e.g. `p9999_` on the previews)
+            $table->foreignId('subscription_id')->constrained('periodical_subscriptions')->cascadeOnDelete();
             $table->foreignId('publication_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->timestamps();
 
-            $table->unique(['periodical_subscription_id', 'publication_id'], 'periodical_subscription_items_unique');
+            // Named, as the generated name would be too long (the names of indexes are unique only in their table)
+            $table->unique(['subscription_id', 'publication_id'], 'periodical_subscription_items_unique');
         });
 
         $locale = config('app.locale');

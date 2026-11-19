@@ -56,7 +56,7 @@ class PeriodicalSubscription extends Model
      */
     public function items(): HasMany
     {
-        return $this->hasMany(PeriodicalSubscriptionItem::class);
+        return $this->hasMany(PeriodicalSubscriptionItem::class, 'subscription_id');
     }
 
     /**
@@ -131,7 +131,7 @@ class PeriodicalSubscription extends Model
     public static function totals(iterable $subscriptionIds): array
     {
         return PeriodicalSubscriptionItem::query()
-            ->whereIn('periodical_subscription_id', collect($subscriptionIds)->all())
+            ->whereIn('subscription_id', collect($subscriptionIds)->all())
             ->where('quantity', '>', 0)
             ->groupBy('publication_id')
             ->select('publication_id')
