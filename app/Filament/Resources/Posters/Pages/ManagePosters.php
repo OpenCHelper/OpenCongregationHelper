@@ -2,12 +2,16 @@
 
 namespace App\Filament\Resources\Posters\Pages;
 
+use App\Filament\Imports\PosterImporter;
 use App\Filament\Resources\Posters\PosterResource;
 use App\Filament\Resources\StorageLocations\StorageLocationResource;
+use App\Models\Poster;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Gate;
 
 class ManagePosters extends ManageRecords
 {
@@ -22,6 +26,10 @@ class ManagePosters extends ManageRecords
                 ->color('gray')
                 ->url(StorageLocationResource::getUrl())
                 ->visible(StorageLocationResource::canViewAny()),
+            ImportAction::make()
+                ->pluralModelLabel(PosterResource::getPluralModelLabel())
+                ->authorize(fn (): bool => Gate::allows('create', Poster::class))
+                ->importer(PosterImporter::class),
             CreateAction::make(),
         ];
     }

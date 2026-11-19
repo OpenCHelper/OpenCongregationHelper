@@ -38,4 +38,28 @@ return [
             'image_private_host' => 'L\'immagine ":url" punta a un indirizzo privato o riservato.',
         ],
     ],
+    'poster' => [
+        'columns' => [
+            'code' => 'Sigla',
+            'title' => 'Titolo',
+            'storage' => 'Deposito',
+            'quantity' => 'Copie',
+            'notes' => 'Note',
+        ],
+        'examples' => [
+            'title' => 'Goditi la vita per sempre!',
+            'storage' => 'Sala del Regno',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'L\'importazione dei poster è terminata: :count riga importata.|L\'importazione dei poster è terminata: :count righe importate.',
+                'failed_rows' => ':count riga non è stata importata.|:count righe non sono state importate.',
+            ],
+        ],
+        'errors' => [
+            'unauthorized' => 'Non hai il permesso di importare il poster ":title".',
+            'storage_create_unauthorized' => 'Il deposito ":storage" non esiste e non hai il permesso di crearlo.',
+            'quantity_without_storage' => 'Le copie del poster ":title" non hanno un deposito.',
+        ],
+    ],
 ];

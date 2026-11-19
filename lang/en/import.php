@@ -38,4 +38,28 @@ return [
             'image_private_host' => 'The image ":url" points to a private or reserved address.',
         ],
     ],
+    'poster' => [
+        'columns' => [
+            'code' => 'Code',
+            'title' => 'Title',
+            'storage' => 'Storage place',
+            'quantity' => 'Copies',
+            'notes' => 'Notes',
+        ],
+        'examples' => [
+            'title' => 'Enjoy life forever!',
+            'storage' => 'Kingdom Hall',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'Your poster import has completed: :count row imported.|Your poster import has completed: :count rows imported.',
+                'failed_rows' => ':count row failed to import.|:count rows failed to import.',
+            ],
+        ],
+        'errors' => [
+            'unauthorized' => 'You are not allowed to import the poster ":title".',
+            'storage_create_unauthorized' => 'The storage place ":storage" does not exist and you are not allowed to create it.',
+            'quantity_without_storage' => 'The copies of the poster ":title" have no storage place.',
+        ],
+    ],
 ];

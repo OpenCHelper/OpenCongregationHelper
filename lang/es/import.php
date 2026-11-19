@@ -38,4 +38,28 @@ return [
             'image_private_host' => 'La imagen ":url" apunta a una dirección privada o reservada.',
         ],
     ],
+    'poster' => [
+        'columns' => [
+            'code' => 'Código',
+            'title' => 'Título',
+            'storage' => 'Depósito',
+            'quantity' => 'Copias',
+            'notes' => 'Notas',
+        ],
+        'examples' => [
+            'title' => '¡Disfrute de la vida para siempre!',
+            'storage' => 'Salón del Reino',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'La importación de carteles ha terminado: :count fila importada.|La importación de carteles ha terminado: :count filas importadas.',
+                'failed_rows' => 'No se ha podido importar :count fila.|No se han podido importar :count filas.',
+            ],
+        ],
+        'errors' => [
+            'unauthorized' => 'No tienes permiso para importar el cartel ":title".',
+            'storage_create_unauthorized' => 'El depósito ":storage" no existe y no tienes permiso para crearlo.',
+            'quantity_without_storage' => 'Las copias del cartel ":title" no tienen depósito.',
+        ],
+    ],
 ];
