@@ -359,6 +359,8 @@ return [
         'column_access_enabled' => 'Access enabled?',
         'column_created_at' => 'Created At',
         'column_updated_at' => 'Updated At',
+        'column_departments' => 'Departments',
+        'filter_department' => 'Department',
         'filter_access_enabled' => 'Access enabled?',
         'filter_access_enabled_all' => 'All',
         'filter_access_enabled_enabled' => 'Enabled',

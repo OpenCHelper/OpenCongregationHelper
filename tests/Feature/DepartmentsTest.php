@@ -7,6 +7,7 @@ use App\Filament\Resources\Departments\Pages\ListDepartments;
 use App\Filament\Resources\Departments\Pages\ViewDepartment;
 use App\Filament\Resources\Departments\RelationManagers\MembersRelationManager;
 use App\Filament\Resources\Territories\TerritoryResource;
+use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Department;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
@@ -157,6 +158,20 @@ test('the assistants cannot manage the members of their department', function ()
         ->and(DepartmentResource::canViewAny())->toBeFalse();
 
     $this->get(DepartmentResource::getUrl('view', ['record' => $department]))->assertForbidden();
+});
+
+test('the users list shows and filters the departments', function () {
+    $this->actingAs($this->admin);
+
+    $member = User::factory()->create();
+    joinDepartment($member, DepartmentKey::Publications);
+    $other = User::factory()->create();
+
+    Livewire::test(ListUsers::class)
+        ->assertTableColumnStateSet('departments', [DepartmentKey::Publications], $member)
+        ->filterTable('departments', [Department::for(DepartmentKey::Publications)->id])
+        ->assertCanSeeTableRecords([$member])
+        ->assertCanNotSeeTableRecords([$other]);
 });
 
 test('the department pages render', function () {
