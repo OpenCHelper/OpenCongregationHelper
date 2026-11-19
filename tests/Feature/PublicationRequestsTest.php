@@ -286,7 +286,7 @@ describe('requests page', function () {
         PublicationRequest::factory()->create(['publication_id' => $this->book->id, 'quantity' => 3]);
 
         Livewire::test(ManagePublicationRequests::class)
-            ->set('tableGrouping', 'publication.name')
+            ->set('tableGrouping', 'publication_id')
             ->assertSee($this->book->name)
             ->assertTableColumnSummarySet('quantity', 'total', 5);
     });

@@ -239,11 +239,14 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
             ->paginated([25, 50, 100, 'all'])
             ->defaultPaginationPageOption(50)
             ->groups([
-                // With the total of the copies: the requests to order, by publication, are the order for the branch
-                Group::make('publication.name')
+                // With the total of the copies: the requests to order, by publication, are the order for the branch.
+                // On the columns of the requests, not of their relationships: Filament would sum them with a raw
+                // column name, without the table prefix of the installation (e.g. on the previews).
+                Group::make('publication_id')
                     ->label(__('filament-resources.publication_request.group_publication'))
+                    ->getTitleFromRecordUsing(fn (PublicationRequest $record): string => $record->publication->name)
                     ->collapsible(),
-                Group::make('user.first_name')
+                Group::make('user_id')
                     ->label(__('filament-resources.publication_request.group_user'))
                     ->getTitleFromRecordUsing(fn (PublicationRequest $record): string => $record->user->getFullName())
                     ->collapsible(),
