@@ -2,14 +2,8 @@
 
 namespace App\Settings;
 
-class GeneralSettings extends ConfigSettings
+class GeneralSettings extends AppSettings
 {
-    public ?string $name;
-
-    public ?string $locale;
-
-    public ?string $timezone;
-
     /**
      * The address of the Kingdom Hall of the congregation.
      */
@@ -29,14 +23,5 @@ class GeneralSettings extends ConfigSettings
     public static function group(): string
     {
         return 'general';
-    }
-
-    public static function configKeys(): array
-    {
-        return [
-            'name' => 'app.name',
-            'locale' => 'app.locale',
-            'timezone' => 'app.timezone',
-        ];
     }
 }

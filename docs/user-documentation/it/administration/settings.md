@@ -13,9 +13,6 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 
 ![Impostazioni generali](/docs/user-documentation/it/administration/assets/settings-general.webp)
 
-- **Nome dell'applicazione**: mostrato nella barra in alto, nella scheda del browser, nelle email e nell'app installata;
-- **Lingua predefinita**: la lingua degli utenti che non ne hanno scelta una;
-- **Fuso orario**: usato per mostrare le date;
 - **Indirizzo della Sala del Regno**: l'indirizzo della Sala del Regno della congregazione (facoltativo);
 - **Logo**: mostrato nella barra in alto al posto del nome (al massimo 2 MB);
 - **Colore principale**: il colore dei pulsanti, dei link e degli elementi selezionati, per gli utenti che non ne hanno
@@ -48,17 +45,12 @@ I giorni prima della fine da cui una campagna è **in scadenza** e **quasi scadu
 Gli stati sono elencati in ordine, con i colori dei badge delle campagne, e la barra sotto li disegna in scala mentre
 scrivi.
 
-## Notifiche
-
-![Impostazioni delle notifiche](/docs/user-documentation/it/administration/assets/settings-notifications.webp)
-
-- **Nome del mittente delle email**: mostrato come mittente delle email inviate dall'applicazione.
-
 Clicca **Salva** per applicarle: hanno effetto subito, per tutti gli utenti.
 
 ## Valori predefiniti
 
-Sotto ogni opzione, **Predefinito** mostra il suo valore prima che venga cambiato qui: per nome, lingua, fuso orario,
-centro delle mappe, dati personali e nome del mittente, il valore impostato nel file `.env` da chi ha installato
-l'applicazione (vedi la [Guida al setup](../setup)). Queste opzioni continuano a seguire il file `.env` finché non
-vengono cambiate qui; per farne seguire di nuovo il file `.env` a una, reimpostala al suo valore predefinito e salva.
+Sotto ogni opzione, **Predefinito** mostra il suo valore prima che venga cambiato qui: per il centro delle mappe e i
+dati personali, il valore impostato nel file `.env` da chi ha installato l'applicazione (vedi la [Guida al
+setup](../setup)). Queste due opzioni continuano a seguire il file `.env` finché non vengono cambiate qui; per farne
+seguire di nuovo il file `.env` a una, reimpostala al suo valore predefinito e salva. Il nome, la lingua e il fuso
+orario dell'applicazione si impostano solo nel file `.env`.

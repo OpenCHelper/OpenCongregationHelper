@@ -13,9 +13,6 @@ role. The options are grouped by area, with one page each in the menu on the sid
 
 ![General settings](/docs/user-documentation/en/administration/assets/settings-general.webp)
 
-- **Name of the application**: shown in the top bar, in the browser tab, in the emails and in the installed app;
-- **Default language**: the language of the users who did not choose one;
-- **Timezone**: used to show the dates;
 - **Kingdom Hall address**: the address of the Kingdom Hall of the congregation (optional);
 - **Logo**: shown in the top bar instead of the name (at most 2 MB);
 - **Primary colour**: the colour of the buttons, links and selected items, for the users who did not choose their own
@@ -47,17 +44,11 @@ The days before its end from which a campaign is **expiring** and **almost expir
 statuses are listed in order, with the colours of the campaign badges, and the bar below draws them to scale while you
 type.
 
-## Notifications
-
-![Notification settings](/docs/user-documentation/en/administration/assets/settings-notifications.webp)
-
-- **Sender name of the emails**: shown as the sender of the emails sent by the application.
-
 Click **Save changes** to apply them: they take effect immediately, for every user.
 
 ## Default values
 
-Under each option, **Default** shows its value before it is changed here: for the name, language, timezone, map centre,
-personal data and sender name, the value set in `.env` by whoever installed the application (see the
-[Setup guide](../setup)). These options keep following `.env` until they are changed here; to make one follow `.env`
-again, set it back to its default value and save.
+Under each option, **Default** shows its value before it is changed here: for the map centre and the personal data, the
+value set in `.env` by whoever installed the application (see the [Setup guide](../setup)). These two options keep
+following `.env` until they are changed here; to make one follow `.env` again, set it back to its default value and
+save. The name, language and timezone of the application are set only in `.env`.

@@ -24,13 +24,11 @@ return [
         'general' => 'Generales',
         'territories' => 'Territorios',
         'campaigns' => 'Campañas',
-        'notifications' => 'Notificaciones',
     ],
 
     'sections' => [
         'campaign_expiry' => 'Vencimiento de las campañas',
         'campaign_expiry_description' => 'A medida que se acerca su fecha de fin, una campaña activa pasa a estar por vencer y luego casi vencida.',
-        'application' => 'Aplicación',
         'appearance' => 'Apariencia',
         'congregation' => 'Congregación',
         'maps_and_sharing' => 'Mapas y compartir',
@@ -42,15 +40,6 @@ return [
         'kingdom_hall_address' => [
             'label' => 'Dirección del Salón del Reino',
             'placeholder' => 'Calle, número, código postal y ciudad',
-        ],
-        'name' => [
-            'label' => 'Nombre de la aplicación',
-        ],
-        'locale' => [
-            'label' => 'Idioma predeterminado',
-        ],
-        'timezone' => [
-            'label' => 'Zona horaria',
         ],
         'logo' => [
             'label' => 'Logotipo',
@@ -80,11 +69,7 @@ return [
         ],
         'stale_check_time' => [
             'label' => 'Hora de los recordatorios',
-            'helper' => 'En la zona horaria de la aplicación (página Generales). Los recordatorios se envían solo si el planificador se está ejecutando a esa hora, como tarea cron o como proceso permanente (p. ej. con Supervisor): consulta la guía de instalación.',
-        ],
-        'mail_from_name' => [
-            'label' => 'Nombre del remitente de los correos',
-            'helper' => 'Se muestra como remitente de los correos enviados por la aplicación.',
+            'helper' => 'En la zona horaria de la aplicación (`APP_TIMEZONE`). Los recordatorios se envían solo si el planificador se está ejecutando a esa hora, como tarea cron o como proceso permanente (p. ej. con Supervisor): consulta la guía de instalación.',
         ],
     ],
 ];

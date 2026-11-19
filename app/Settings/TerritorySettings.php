@@ -34,7 +34,7 @@ class TerritorySettings extends ConfigSettings
     public int $stale_check_day = Schedule::MONDAY;
 
     /**
-     * Time of the check of the stale assignments, as "HH:MM", in the timezone of the application.
+     * Time of the check of the stale assignments, as "HH:MM", in the timezone of the application (`APP_TIMEZONE`).
      */
     public string $stale_check_time = '09:00';
 

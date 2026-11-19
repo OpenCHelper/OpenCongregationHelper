@@ -3,18 +3,35 @@
 namespace App\Settings;
 
 /**
- * Settings that (also) replace configuration values.
+ * Settings whose properties fall back on configuration values.
  *
- * A property listed in `configKeys()` is `null` while it was never changed (or was set back to its default): the
- * configuration then keeps the value of `.env`. The other values are applied over the configuration on every request
- * (see `SettingsOverrides`), so the code keeps reading them with `config()`.
+ * A property listed in `configKeys()` is `null` while it was never changed from the Settings pages (or was set back to
+ * its default): its value is then the one of the configuration, i.e. of `.env`.
  */
 abstract class ConfigSettings extends AppSettings
 {
     /**
-     * The configuration that each property replaces.
+     * The configuration that each property falls back on.
      *
      * @return array<string, string>
      */
     abstract public static function configKeys(): array;
+
+    /**
+     * Get the value of a setting: the one changed from the Settings pages, or the configured one.
+     */
+    public static function value(string $property): mixed
+    {
+        return parent::value($property) ?? static::configuredValue($property);
+    }
+
+    /**
+     * Get the configured value of a setting (from `.env`), used while it is not changed from the Settings pages.
+     */
+    public static function configuredValue(string $property): mixed
+    {
+        $configKey = static::configKeys()[$property] ?? null;
+
+        return $configKey !== null ? config($configKey) : static::defaultValue($property);
+    }
 }

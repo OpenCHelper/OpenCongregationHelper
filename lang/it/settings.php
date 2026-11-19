@@ -24,13 +24,11 @@ return [
         'general' => 'Generali',
         'territories' => 'Territori',
         'campaigns' => 'Campagne',
-        'notifications' => 'Notifiche',
     ],
 
     'sections' => [
         'campaign_expiry' => 'Scadenza delle campagne',
         'campaign_expiry_description' => 'Man mano che si avvicina la data di fine, una campagna attiva diventa in scadenza e poi quasi scaduta.',
-        'application' => 'Applicazione',
         'appearance' => 'Aspetto',
         'congregation' => 'Congregazione',
         'maps_and_sharing' => 'Mappe e condivisione',
@@ -42,15 +40,6 @@ return [
         'kingdom_hall_address' => [
             'label' => 'Indirizzo della Sala del Regno',
             'placeholder' => 'Via, numero civico, CAP e città',
-        ],
-        'name' => [
-            'label' => 'Nome dell\'applicazione',
-        ],
-        'locale' => [
-            'label' => 'Lingua predefinita',
-        ],
-        'timezone' => [
-            'label' => 'Fuso orario',
         ],
         'logo' => [
             'label' => 'Logo',
@@ -80,11 +69,7 @@ return [
         ],
         'stale_check_time' => [
             'label' => 'Ora dei promemoria',
-            'helper' => 'Nel fuso orario dell\'applicazione (pagina Generali). I promemoria vengono inviati solo se a quell\'ora lo scheduler è in esecuzione, come cron job o come processo sempre attivo (es. con Supervisor): vedi la guida al setup.',
-        ],
-        'mail_from_name' => [
-            'label' => 'Nome del mittente delle email',
-            'helper' => 'Mostrato come mittente delle email inviate dall\'applicazione.',
+            'helper' => 'Nel fuso orario dell\'applicazione (`APP_TIMEZONE`). I promemoria vengono inviati solo se a quell\'ora lo scheduler è in esecuzione, come cron job o come processo sempre attivo (es. con Supervisor): vedi la guida al setup.',
         ],
     ],
 ];

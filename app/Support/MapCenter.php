@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Territory;
+use App\Settings\TerritorySettings;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
  * The centre is the median of the centres of the territories that have a map, so that it follows the
  * area of the congregation, and a territory drawn far away (or a few separate areas) does not pull it
  * into the middle of nowhere like an average would. Only when no territory has a map yet, the configured
- * default centre is used (`MAP_DEFAULT_CENTER`, see `config/filament-leaflet.php`).
+ * default centre is used (from the Settings pages, or `MAP_DEFAULT_CENTER`: see `config/filament-leaflet.php`).
  *
  * The centres of the territories are cached, and the cache is cleared whenever a territory changes
  * (see `TerritoryObserver`). Zones need not clear it: one can be deleted only without territories.
@@ -49,7 +50,7 @@ class MapCenter
 
         if ($centers === []) {
             /** @var array{float, float} $default */
-            $default = config('filament-leaflet.default_map_center');
+            $default = TerritorySettings::value('map_default_center');
 
             return $default;
         }

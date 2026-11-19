@@ -8,6 +8,7 @@ use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Models\TerritoryAssignment;
 use App\Rules\NotTerminatedCampaign;
 use App\Rules\TerritoryNotAlreadyAssigned;
+use App\Settings\TerritorySettings;
 use Carbon\CarbonInterface;
 use Carbon\CarbonInterval;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
@@ -135,12 +136,12 @@ class TerritoryAssignmentResource extends Resource
 
     /**
      * Personal data (assignee name, notes) is hidden on publicly shared pages
-     * unless explicitly enabled through the `ENABLE_SHARED_PII` env variable.
+     * unless enabled from the Settings pages (or with `ENABLE_SHARED_PII`).
      */
     public static function shouldHidePersonalData(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'guest'
-            && ! config('app.enable_shared_pii');
+            && ! TerritorySettings::value('shared_pii');
     }
 
     /**

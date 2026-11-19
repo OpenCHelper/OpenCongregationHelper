@@ -12,7 +12,7 @@ use UnitEnum;
 
 /**
  * The Settings pages, one per area, where the super administrators change the options of the application instead of
- * editing `.env` (see `App\Settings\ConfigSettings`).
+ * editing `.env` (see `App\Settings\AppSettings`).
  */
 class SettingsCluster extends Cluster
 {

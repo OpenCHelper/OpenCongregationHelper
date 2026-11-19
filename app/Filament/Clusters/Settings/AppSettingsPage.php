@@ -4,7 +4,6 @@ namespace App\Filament\Clusters\Settings;
 
 use App\Settings\AppSettings;
 use App\Settings\ConfigSettings;
-use App\Support\SettingsOverrides;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\View;
@@ -13,7 +12,7 @@ use Illuminate\Support\HtmlString;
 /**
  * A Settings page, shown only to the super administrators.
  *
- * For the settings that replace configuration values (see `ConfigSettings`), the form shows the default (from `.env`)
+ * For the settings that fall back on configuration values (see `ConfigSettings`), the form shows the default (from `.env`)
  * of the settings never changed, and a value set back to its default is stored as `null`, so that it follows `.env`
  * again.
  */
@@ -75,22 +74,14 @@ abstract class AppSettingsPage extends SettingsPage
     }
 
     /**
-     * Apply the saved settings to the rest of the request too.
-     */
-    protected function afterSave(): void
-    {
-        app(SettingsOverrides::class)->apply();
-    }
-
-    /**
      * Get the default value of a setting: from `.env` for the settings replacing configuration values.
      */
     protected function defaultValue(string $property): mixed
     {
         $settings = static::getSettings();
 
-        return array_key_exists($property, static::getConfigKeys())
-            ? app(SettingsOverrides::class)->default($settings, $property)
+        return is_subclass_of($settings, ConfigSettings::class)
+            ? $settings::configuredValue($property)
             : $settings::defaultValue($property);
     }
 

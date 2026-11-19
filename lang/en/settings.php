@@ -24,13 +24,11 @@ return [
         'general' => 'General',
         'territories' => 'Territories',
         'campaigns' => 'Campaigns',
-        'notifications' => 'Notifications',
     ],
 
     'sections' => [
         'campaign_expiry' => 'Campaign expiry',
         'campaign_expiry_description' => 'As its end date gets closer, an active campaign becomes expiring and then almost expired.',
-        'application' => 'Application',
         'appearance' => 'Appearance',
         'congregation' => 'Congregation',
         'maps_and_sharing' => 'Maps and sharing',
@@ -42,15 +40,6 @@ return [
         'kingdom_hall_address' => [
             'label' => 'Kingdom Hall address',
             'placeholder' => 'Street, number, postcode and city',
-        ],
-        'name' => [
-            'label' => 'Name of the application',
-        ],
-        'locale' => [
-            'label' => 'Default language',
-        ],
-        'timezone' => [
-            'label' => 'Timezone',
         ],
         'logo' => [
             'label' => 'Logo',
@@ -80,11 +69,7 @@ return [
         ],
         'stale_check_time' => [
             'label' => 'Time of the reminders',
-            'helper' => 'In the timezone of the application (General page). The reminders are sent only if the scheduler is running at that time, as a cron job or as a long-running process (e.g. with Supervisor): see the setup guide.',
-        ],
-        'mail_from_name' => [
-            'label' => 'Sender name of the emails',
-            'helper' => 'Shown as the sender of the emails sent by the application.',
+            'helper' => 'In the timezone of the application (`APP_TIMEZONE`). The reminders are sent only if the scheduler is running at that time, as a cron job or as a long-running process (e.g. with Supervisor): see the setup guide.',
         ],
     ],
 ];

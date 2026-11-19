@@ -6,7 +6,6 @@ use App\Enums\NavigationGroup;
 use App\Events\StaleAssignmentDetected;
 use App\Filament\Clusters\Settings\Pages\ManageCampaignSettings;
 use App\Filament\Clusters\Settings\Pages\ManageGeneralSettings;
-use App\Filament\Clusters\Settings\Pages\ManageNotificationSettings;
 use App\Filament\Clusters\Settings\Pages\ManageTerritorySettings;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Jobs\DetectStaleAssignments;
@@ -16,26 +15,19 @@ use App\Models\TerritoryZone;
 use App\Models\User;
 use App\Settings\CampaignSettings;
 use App\Settings\GeneralSettings;
-use App\Settings\NotificationSettings;
 use App\Settings\TerritorySettings;
-use App\Support\SettingsOverrides;
+use App\Support\MapCenter;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
-use Illuminate\Console\Events\CommandFinished;
-use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Console\Scheduling\Event as ScheduledTask;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Contracts\Queue\Job;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
 
 beforeEach(function () {
     Filament::setCurrentPanel('app');
@@ -76,7 +68,6 @@ test('super administrators can open the settings pages', function (string $page)
     'general' => ManageGeneralSettings::class,
     'territories' => ManageTerritorySettings::class,
     'campaigns' => ManageCampaignSettings::class,
-    'notifications' => ManageNotificationSettings::class,
 ]);
 
 test('other users cannot open the settings pages', function (string $page) {
@@ -87,7 +78,6 @@ test('other users cannot open the settings pages', function (string $page) {
     'general' => ManageGeneralSettings::class,
     'territories' => ManageTerritorySettings::class,
     'campaigns' => ManageCampaignSettings::class,
-    'notifications' => ManageNotificationSettings::class,
 ]);
 
 test('the settings are listed in the administration navigation group', function () {
@@ -95,19 +85,11 @@ test('the settings are listed in the administration navigation group', function 
         ->and(ManageGeneralSettings::getCluster())->toBe(SettingsCluster::class)
         ->and(ManageTerritorySettings::getCluster())->toBe(SettingsCluster::class)
         ->and(ManageCampaignSettings::getCluster())->toBe(SettingsCluster::class)
-        ->and(ManageNotificationSettings::getCluster())->toBe(SettingsCluster::class)
         ->and(ManageGeneralSettings::getUrl())->toEndWith('/settings/general');
 });
 
 test('the settings never changed show the values of the environment', function () {
     actingAsSuperAdmin();
-
-    Livewire::test(ManageGeneralSettings::class)
-        ->assertSchemaStateSet([
-            'name' => config('app.name'),
-            'locale' => config('app.locale'),
-            'timezone' => config('app.timezone'),
-        ]);
 
     Livewire::test(ManageTerritorySettings::class)
         ->assertSchemaStateSet([
@@ -115,89 +97,47 @@ test('the settings never changed show the values of the environment', function (
             'shared_pii' => config('app.enable_shared_pii'),
         ]);
 
-    expect(storedSettings('general'))->toMatchArray(['locale' => null, 'name' => null, 'timezone' => null]);
+    expect(storedSettings('territories'))->toMatchArray(['map_default_center' => null, 'shared_pii' => null]);
 });
 
-test('the general settings are stored and applied', function () {
+test('the territory settings are stored and used', function () {
     actingAsSuperAdmin();
 
-    Livewire::test(ManageGeneralSettings::class)
-        ->fillForm([
-            'name' => 'Territories of Springfield',
-            'locale' => 'es',
-            'timezone' => 'Europe/Rome',
-        ])
-        ->call('save')
-        ->assertHasNoFormErrors()
-        ->assertNotified();
-
-    expect(storedSettings('general'))->toMatchArray([
-        'name' => 'Territories of Springfield',
-        'locale' => 'es',
-        'timezone' => 'Europe/Rome',
-    ])
-        ->and(config('app.name'))->toBe('Territories of Springfield')
-        ->and(config('app.timezone'))->toBe('Europe/Rome')
-        ->and(date_default_timezone_get())->toBe('Europe/Rome');
-});
-
-test('the territory settings are stored and applied', function () {
-    actingAsSuperAdmin();
+    $sharedPii = ! config('app.enable_shared_pii');
 
     Livewire::test(ManageTerritorySettings::class)
         ->fillForm([
             'map_default_center' => ' 39.8017 , -89.6436 ',
-            'shared_pii' => ! config('app.enable_shared_pii'),
+            'shared_pii' => $sharedPii,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
-
-    $sharedPii = ! app(SettingsOverrides::class)->default(TerritorySettings::class, 'shared_pii');
 
     expect(storedSettings('territories'))->toMatchArray([
         'map_default_center' => [39.8017, -89.6436],
         'shared_pii' => $sharedPii,
     ])
-        ->and(config('filament-leaflet.default_map_center'))->toBe([39.8017, -89.6436])
-        ->and(config('app.enable_shared_pii'))->toBe($sharedPii);
+        ->and(MapCenter::resolve())->toBe([39.8017, -89.6436])
+        ->and(TerritorySettings::value('shared_pii'))->toBe($sharedPii);
 });
 
 test('the settings set back to their default follow the environment again', function () {
     actingAsSuperAdmin();
 
-    $settings = app(GeneralSettings::class);
-    $settings->name = 'Territories of Springfield';
-    $settings->timezone = 'Europe/Rome';
+    $settings = app(TerritorySettings::class);
+    $settings->map_default_center = [39.8017, -89.6436];
     $settings->save();
 
-    $default = app(SettingsOverrides::class)->default(GeneralSettings::class, 'name');
+    $default = config('filament-leaflet.default_map_center');
 
-    Livewire::test(ManageGeneralSettings::class)
-        ->assertSchemaStateSet(['name' => 'Territories of Springfield', 'timezone' => 'Europe/Rome'])
-        ->fillForm(['name' => $default])
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSchemaStateSet(['map_default_center' => '39.8017, -89.6436'])
+        ->fillForm(['map_default_center' => implode(', ', $default)])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(storedSettings('general'))->toMatchArray(['name' => null, 'timezone' => 'Europe/Rome'])
-        ->and(config('app.name'))->toBe($default);
-});
-
-test('the language of the administrator is not saved as the default language', function () {
-    actingAsSuperAdmin();
-
-    $default = app(SettingsOverrides::class)->default(GeneralSettings::class, 'locale');
-    $otherLocale = collect(array_keys(config('app.available_locales')))->first(fn (string $locale): bool => $locale !== $default);
-
-    // As done by `SwitchLanguageLocale` for a user who chose another language, which changes `app.locale` too
-    app()->setLocale($otherLocale);
-
-    Livewire::test(ManageGeneralSettings::class)
-        ->assertSchemaStateSet(['locale' => $default])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    expect(storedSettings('general')['locale'])->toBeNull()
-        ->and(app()->getLocale())->toBe($otherLocale);
+    expect(storedSettings('territories')['map_default_center'])->toBeNull()
+        ->and(TerritorySettings::value('map_default_center'))->toBe($default);
 });
 
 test('the default map centre must be valid coordinates', function (string $coordinates) {
@@ -216,39 +156,12 @@ test('the default map centre must be valid coordinates', function (string $coord
     'longitude out of range' => '41, 181',
 ]);
 
-test('the timezone must be a valid timezone', function () {
-    actingAsSuperAdmin();
-
-    Livewire::test(ManageGeneralSettings::class)
-        ->fillForm(['timezone' => 'Mars/Olympus_Mons'])
-        ->call('save')
-        ->assertHasFormErrors(['timezone']);
-});
-
-test('the stored settings are applied over the configuration on boot', function () {
-    $settings = app(GeneralSettings::class);
-    $settings->timezone = 'America/Chicago';
-    $settings->locale = 'es';
-    $settings->save();
-
-    $default = config('app.timezone');
-
-    app(SettingsOverrides::class)->apply();
-
-    expect(config('app.timezone'))->toBe('America/Chicago')
-        ->and(date_default_timezone_get())->toBe('America/Chicago')
-        ->and(app()->getLocale())->toBe('es')
-        ->and(app(SettingsOverrides::class)->default(GeneralSettings::class, 'timezone'))->toBe($default);
-});
-
-test('the settings are ignored before they are migrated', function () {
+test('the settings follow the environment before they are migrated', function () {
     DB::table('settings')->delete();
     app()->forgetScopedInstances();
 
-    $overrides = new SettingsOverrides;
-    $overrides->apply();
-
-    expect(config('app.timezone'))->toBe($overrides->default(GeneralSettings::class, 'timezone'));
+    expect(TerritorySettings::value('map_default_center'))->toBe(config('filament-leaflet.default_map_center'))
+        ->and(CampaignSettings::value('expiring_days'))->toBe(7);
 });
 
 test('the logo and the primary colour are applied to the panel', function () {
@@ -273,7 +186,7 @@ test('the logo and the primary colour are applied to the panel', function () {
         ->and(FilamentUiSwitcherPlugin::getForPanel($panel)->getDefaults()['color'])->toBe('#2563eb');
 });
 
-test('without a logo and a primary colour the panel shows the name, in the default colour', function () {
+test('without a logo and a primary colour the panel uses its defaults', function () {
     $panel = Filament::getPanel('app');
 
     expect($panel->getBrandLogo())->toBeNull()
@@ -383,59 +296,6 @@ test('equal stale assignment levels are both kept', function () {
     expect((new DetectStaleAssignments)->getStaleLevels())->toHaveKeys(['stale', 'dead']);
 });
 
-test('the configuration is cached with the values of the environment, also from the web', function () {
-    $settings = app(GeneralSettings::class);
-    $settings->name = 'Territories of Springfield';
-    $settings->save();
-
-    $default = app(SettingsOverrides::class)->default(GeneralSettings::class, 'name');
-
-    // As fired by `Artisan::call()` from the Artisan endpoints, before `config:cache` builds a fresh application
-    event(new CommandStarting('config:cache', new ArrayInput([]), new NullOutput));
-
-    $fresh = new SettingsOverrides;
-    config(['app.name' => $default]);
-    $fresh->apply();
-
-    expect(config('app.name'))->toBe($default);
-
-    event(new CommandFinished('config:cache', new ArrayInput([]), new NullOutput, 0));
-
-    $fresh->apply();
-
-    expect(config('app.name'))->toBe('Territories of Springfield');
-});
-
-test('queue workers apply the settings saved after they started before each job', function () {
-    $settings = app(NotificationSettings::class);
-    $settings->mail_from_name = 'Territories of Springfield';
-    $settings->save();
-
-    expect(config('mail.from.name'))->not->toBe('Territories of Springfield');
-
-    $job = Mockery::mock(Job::class);
-    $job->shouldReceive('payload')->andReturn([]);
-    $job->shouldIgnoreMissing();
-
-    event(new JobProcessing('database', $job));
-
-    expect(config('mail.from.name'))->toBe('Territories of Springfield');
-});
-
-test('the stale assignments are checked in the timezone chosen on the General page', function () {
-    $settings = app(GeneralSettings::class);
-    $settings->timezone = 'America/Chicago';
-    $settings->save();
-
-    app(SettingsOverrides::class)->apply();
-    Artisan::all();
-
-    $task = collect(app(Schedule::class)->events())
-        ->first(fn (ScheduledTask $task): bool => $task->description === DetectStaleAssignments::class);
-
-    expect($task->timezone)->toBe('America/Chicago');
-});
-
 test('the stale assignments can be checked on any day and at any time', function () {
     actingAsSuperAdmin();
 
@@ -483,29 +343,6 @@ test('a campaign is almost expired fewer days before its end than it is expiring
         ->fillForm(['expiring_days' => 5, 'almost_expired_days' => 5])
         ->call('save')
         ->assertHasFormErrors(['almost_expired_days']);
-});
-
-test('the sender name of the emails follows the environment until changed', function () {
-    actingAsSuperAdmin();
-
-    $default = config('mail.from.name');
-
-    Livewire::test(ManageNotificationSettings::class)
-        ->assertSchemaStateSet(['mail_from_name' => $default])
-        ->fillForm(['mail_from_name' => 'Territories of Springfield'])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    expect(app(NotificationSettings::class)->mail_from_name)->toBe('Territories of Springfield')
-        ->and(config('mail.from.name'))->toBe('Territories of Springfield');
-
-    Livewire::test(ManageNotificationSettings::class)
-        ->fillForm(['mail_from_name' => $default])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    expect(app(NotificationSettings::class)->mail_from_name)->toBeNull()
-        ->and(config('mail.from.name'))->toBe($default);
 });
 
 test('the campaign thresholds are shown in the order of the statuses, with a bar to scale', function () {
