@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Filament\Resources\Campaigns\CampaignResource;
+use App\Filament\Resources\PeriodicalSubscriptions\PeriodicalSubscriptionResource;
 use App\Filament\Resources\Posters\PosterResource;
 use App\Filament\Resources\StorageLocations\StorageLocationResource;
 use App\Filament\Resources\Territories\TerritoryResource;
@@ -87,7 +88,9 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
                 PosterResource::class,
                 StorageLocationResource::class,
             ],
-            self::Publications => [],
+            self::Publications => [
+                PeriodicalSubscriptionResource::class,
+            ],
         };
     }
 
