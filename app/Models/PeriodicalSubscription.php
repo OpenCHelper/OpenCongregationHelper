@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -67,44 +66,6 @@ class PeriodicalSubscription extends Model
         $publicationId = $publication instanceof Publication ? $publication->getKey() : $publication;
 
         return (int) $this->items->firstWhere('publication_id', $publicationId)?->quantity;
-    }
-
-    /**
-     * Get the copies of each publication, as in the forms (keyed by `Publication::getFormKey()`).
-     *
-     * @return array<string, int>
-     */
-    public function getFormQuantities(): array
-    {
-        return $this->items
-            ->mapWithKeys(fn (PeriodicalSubscriptionItem $item): array => ['p'.$item->publication_id => $item->quantity])
-            ->all();
-    }
-
-    /**
-     * Save the subscription with the copies of each publication given (keyed by `Publication::getFormKey()`): the
-     * publications with no copies are removed, the ones not given are left as they are (e.g. no longer offered).
-     *
-     * @param  array{user_id?: int, notes?: ?string, quantities?: array<string, int|string|null>}  $data
-     */
-    public function saveWithQuantities(array $data): self
-    {
-        DB::transaction(function () use ($data): void {
-            $this->fill(collect($data)->only(['user_id', 'notes'])->all())->save();
-
-            foreach ($data['quantities'] ?? [] as $key => $quantity) {
-                $publicationId = (int) ltrim((string) $key, 'p');
-                $quantity = (int) $quantity;
-
-                if ($quantity > 0) {
-                    $this->items()->updateOrCreate(['publication_id' => $publicationId], ['quantity' => $quantity]);
-                } else {
-                    $this->items()->where('publication_id', $publicationId)->delete();
-                }
-            }
-        });
-
-        return $this->load('items');
     }
 
     /**

@@ -8,18 +8,16 @@ use App\Filament\Resources\Publications\PublicationResource;
 use App\Models\PeriodicalSubscription;
 use App\Models\Publication;
 use App\Models\User;
-use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
@@ -31,7 +29,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 use Override;
@@ -76,7 +73,6 @@ class PeriodicalSubscriptionResource extends Resource implements HasKnowledgeBas
     public static function form(Schema $schema): Schema
     {
         $publications = Publication::offered();
-        $firstPublication = $publications->first();
 
         return $schema
             ->columns(1)
@@ -100,23 +96,41 @@ class PeriodicalSubscriptionResource extends Resource implements HasKnowledgeBas
                     ->validationMessages([
                         'unique' => __('filament-resources.periodical_subscription.validation_already_listed'),
                     ]),
-                ...($publications->isEmpty()
-                    ? [
-                        TextEntry::make('no_publications')
-                            ->hiddenLabel()
-                            ->state(__('filament-resources.periodical_subscription.no_publications', ['list' => PublicationResource::getNavigationLabel()])),
-                    ]
-                    // A box of fields for each category, e.g. the periodicals apart from the books
-                    : $publications
-                        ->groupBy(fn (Publication $publication): string => $publication->category->value)
-                        ->map(fn (Collection $category): Fieldset => Fieldset::make($category->first()->category->getLabel())
-                            ->columns(['default' => 1, 'sm' => min(3, $category->count())])
-                            ->schema($category->map(fn (Publication $publication): TextInput => static::getQuantityField(
-                                $publication,
-                                isFirst: $publication->is($firstPublication),
-                            ))->all()))
-                        ->values()
-                        ->all()),
+                // One row for each publication received, so that the form stays short however many are offered
+                Repeater::make('items')
+                    ->label(__('filament-resources.periodical_subscription.field_items'))
+                    ->relationship()
+                    ->table([
+                        TableColumn::make(__('filament-resources.periodical_subscription.field_publication'))->markAsRequired(),
+                        TableColumn::make(__('filament-resources.periodical_subscription.field_quantity'))->markAsRequired(),
+                    ])
+                    ->compact()
+                    ->schema([
+                        Select::make('publication_id')
+                            ->label(__('filament-resources.periodical_subscription.field_publication'))
+                            ->options(fn (?int $state): array => static::getPublicationOptions($state))
+                            ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                            ->distinct()
+                            ->searchable()
+                            ->required(),
+                        TextInput::make('quantity')
+                            ->label(__('filament-resources.periodical_subscription.field_quantity'))
+                            ->numeric()
+                            ->integer()
+                            ->minValue(1)
+                            ->maxValue(99)
+                            ->default(1)
+                            ->required(),
+                    ])
+                    ->defaultItems(0)
+                    ->minItems(1)
+                    ->validationMessages([
+                        'min' => __('filament-resources.periodical_subscription.validation_at_least_one'),
+                    ])
+                    ->addActionLabel(__('filament-resources.periodical_subscription.action_add_publication'))
+                    ->helperText(fn (): ?string => $publications->isEmpty()
+                        ? __('filament-resources.periodical_subscription.no_publications', ['list' => PublicationResource::getNavigationLabel()])
+                        : null),
                 Textarea::make('notes')
                     ->label(__('filament-resources.periodical_subscription.field_notes'))
                     ->placeholder(__('filament-resources.periodical_subscription.field_notes_placeholder'))
@@ -125,45 +139,24 @@ class PeriodicalSubscriptionResource extends Resource implements HasKnowledgeBas
     }
 
     /**
-     * The field with the copies of a publication: the first one also checks that at least a copy is received.
-     */
-    protected static function getQuantityField(Publication $publication, bool $isFirst): TextInput
-    {
-        return TextInput::make("quantities.{$publication->getFormKey()}")
-            ->label($publication->name)
-            ->numeric()
-            ->integer()
-            ->minValue(0)
-            ->maxValue(99)
-            ->default(0)
-            ->placeholder('0')
-            // An empty field means no copies
-            ->dehydrateStateUsing(fn (mixed $state): int => (int) $state)
-            ->rules($isFirst ? [static::atLeastOneCopyRule()] : []);
-    }
-
-    /**
-     * Require at least one copy of a publication: a publisher receiving nothing should be removed from the list.
-     */
-    protected static function atLeastOneCopyRule(): Closure
-    {
-        return fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
-            $copies = array_sum(array_map(intval(...), (array) $get('quantities')));
-
-            if ($copies < 1) {
-                $fail(__('filament-resources.periodical_subscription.validation_at_least_one'));
-            }
-        };
-    }
-
-    /**
-     * Save the form of a publisher, with the copies of each publication.
+     * The publications that can be chosen, grouped by category: the offered ones, plus the one already chosen in the
+     * row, even if no longer offered (so that its copies are kept and shown).
      *
-     * @param  array<string, mixed>  $data
+     * @return array<string, array<int, string>>
      */
-    public static function saveRecord(?PeriodicalSubscription $record, array $data): Model
+    public static function getPublicationOptions(?int $selected = null): array
     {
-        return ($record ?? new PeriodicalSubscription)->saveWithQuantities($data);
+        return Publication::query()
+            ->where(fn (Builder $query): Builder => $query->where('is_active', true)->when($selected, fn (Builder $query): Builder => $query->orWhere('id', $selected)))
+            ->ordered()
+            ->get()
+            ->groupBy(fn (Publication $publication): string => $publication->category->getLabel())
+            ->map(fn (Collection $publications): array => $publications
+                ->mapWithKeys(fn (Publication $publication): array => [$publication->getKey() => $publication->is_active
+                    ? $publication->name
+                    : __('filament-resources.periodical_subscription.publication_not_offered', ['name' => $publication->name])])
+                ->all())
+            ->all();
     }
 
     public static function table(Table $table): Table
@@ -208,15 +201,7 @@ class PeriodicalSubscriptionResource extends Resource implements HasKnowledgeBas
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading(fn (PeriodicalSubscription $record): string => $record->user->getFullName())
-                    ->mutateRecordDataUsing(fn (array $data, PeriodicalSubscription $record): array => [
-                        ...$data,
-                        'quantities' => [
-                            ...Publication::offered()->mapWithKeys(fn (Publication $publication): array => [$publication->getFormKey() => 0])->all(),
-                            ...$record->getFormQuantities(),
-                        ],
-                    ])
-                    ->using(fn (PeriodicalSubscription $record, array $data): Model => static::saveRecord($record, $data)),
+                    ->modalHeading(fn (PeriodicalSubscription $record): string => $record->user->getFullName()),
                 DeleteAction::make()
                     ->label(__('filament-resources.periodical_subscription.action_remove'))
                     ->modalHeading(fn (PeriodicalSubscription $record): string => __('filament-resources.periodical_subscription.action_remove_heading', ['name' => $record->user->getFullName()])),

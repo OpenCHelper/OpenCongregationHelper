@@ -45,16 +45,19 @@ class FakePeriodicalSubscriptionSeeder extends Seeder
             $quantities = [];
 
             foreach ($publications as $position => $publication) {
-                $quantities[$publication->getFormKey()] = self::QUANTITIES[$index][$position] ?? 0;
+                $quantities[$publication->getKey()] = self::QUANTITIES[$index][$position] ?? 0;
             }
 
             if (isset($extras[$index])) {
                 [$extra, $quantity] = $extras[$index];
-                $quantities[$extra->getFormKey()] = $quantity;
+                $quantities[$extra->getKey()] = $quantity;
             }
 
-            PeriodicalSubscription::query()->firstOrNew(['user_id' => $user->getKey()])
-                ->saveWithQuantities(['user_id' => $user->getKey(), 'quantities' => $quantities]);
+            $subscription = PeriodicalSubscription::query()->firstOrCreate(['user_id' => $user->getKey()]);
+
+            foreach (array_filter($quantities) as $publicationId => $quantity) {
+                $subscription->items()->updateOrCreate(['publication_id' => $publicationId], ['quantity' => $quantity]);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@
 use App\Enums\DepartmentKey;
 use App\Enums\PublicationCategory;
 use App\Filament\Resources\PeriodicalSubscriptions\Pages\ManagePeriodicalSubscriptions;
+use App\Filament\Resources\PeriodicalSubscriptions\PeriodicalSubscriptionResource;
 use App\Filament\Resources\PeriodicalSubscriptions\Widgets\PeriodicalTotals;
 use App\Filament\Resources\Publications\Pages\ManagePublications;
 use App\Models\Department;
@@ -12,12 +13,16 @@ use App\Models\User;
 use Database\Seeders\FakePeriodicalSubscriptionSeeder;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
 beforeEach(function () {
     Notification::fake();
+
+    // Rows keyed by their position, to fill the repeater in the tests
+    $this->undoRepeaterFake = Repeater::fake();
     Filament::setCurrentPanel('app');
 
     User::factory()->create(['id' => 1]);
@@ -31,15 +36,37 @@ beforeEach(function () {
     [$this->watchtower, $this->largePrint, $this->workbook] = Publication::query()->ordered()->get()->all();
 });
 
+afterEach(function () {
+    ($this->undoRepeaterFake)();
+});
+
 /**
- * The copies of each publication, as in the form.
+ * The rows of the copies received, as in the form.
  *
  * @param  array<int, int>  $quantities  keyed by the ID of the publication
- * @return array<string, int>
+ * @return list<array{publication_id: int, quantity: int}>
  */
-function formQuantities(array $quantities): array
+function formItems(array $quantities): array
 {
-    return collect($quantities)->mapWithKeys(fn (int $quantity, int $id): array => ["p{$id}" => $quantity])->all();
+    return collect($quantities)
+        ->map(fn (int $quantity, int $id): array => ['publication_id' => $id, 'quantity' => $quantity])
+        ->values()
+        ->all();
+}
+
+/**
+ * Check the rows of the copies in the form, whatever their keys (`record-N` for the ones already saved).
+ *
+ * @param  array<int, int>  $quantities  keyed by the ID of the publication
+ */
+function expectItems(array $quantities): Closure
+{
+    return function (array $state) use ($quantities): array {
+        expect(collect($state['items'])->mapWithKeys(fn (array $item): array => [(int) $item['publication_id'] => (int) $item['quantity']])->all())
+            ->toEqual($quantities);
+
+        return [];
+    };
 }
 
 test('the publications are sorted by category, then as chosen in their list', function () {
@@ -84,11 +111,7 @@ test('a publisher can be added with the copies of each publication', function ()
     Livewire::test(ManagePeriodicalSubscriptions::class)
         ->callAction(TestAction::make('create'), [
             'user_id' => $publisher->id,
-            'quantities' => [
-                $this->watchtower->getFormKey() => 2,
-                $this->largePrint->getFormKey() => null,
-                $this->workbook->getFormKey() => 1,
-            ],
+            'items' => formItems([$this->watchtower->id => 2, $this->workbook->id => 1]),
             'notes' => 'Delivered at home',
         ])
         ->assertHasNoFormErrors();
@@ -111,13 +134,33 @@ test('the publisher is chosen in a field named as in the rest of the application
     expect(__('filament-resources.periodical_subscription.field_user', [], 'it'))->toBe('Proclamatore');
 });
 
+test('the form starts with no publications, added one row at a time', function () {
+    Livewire::test(ManagePeriodicalSubscriptions::class)
+        ->mountAction(TestAction::make('create'))
+        ->assertSchemaStateSet(['items' => []]);
+});
+
+test('a publication can be chosen only once, with at least one copy', function () {
+    Livewire::test(ManagePeriodicalSubscriptions::class)
+        ->callAction(TestAction::make('create'), [
+            'user_id' => User::factory()->create()->id,
+            'items' => [
+                ['publication_id' => $this->watchtower->id, 'quantity' => 1],
+                ['publication_id' => $this->watchtower->id, 'quantity' => 0],
+            ],
+        ])
+        ->assertHasFormErrors(['items.0.publication_id', 'items.1.quantity']);
+
+    expect(PeriodicalSubscription::exists())->toBeFalse();
+});
+
 test('a publisher must receive at least one copy', function () {
     Livewire::test(ManagePeriodicalSubscriptions::class)
         ->callAction(TestAction::make('create'), [
             'user_id' => User::factory()->create()->id,
-            'quantities' => formQuantities([$this->watchtower->id => 0, $this->largePrint->id => 0, $this->workbook->id => 0]),
+            'items' => [],
         ])
-        ->assertHasFormErrors(['quantities.'.$this->watchtower->getFormKey()]);
+        ->assertHasFormErrors(['items']);
 
     expect(PeriodicalSubscription::exists())->toBeFalse();
 });
@@ -128,7 +171,7 @@ test('a publisher is listed only once', function () {
     Livewire::test(ManagePeriodicalSubscriptions::class)
         ->callAction(TestAction::make('create'), [
             'user_id' => $subscription->user_id,
-            'quantities' => formQuantities([$this->watchtower->id => 1]),
+            'items' => formItems([$this->watchtower->id => 1]),
         ])
         ->assertHasFormErrors(['user_id']);
 });
@@ -138,8 +181,8 @@ test('the copies of a publisher can be changed', function () {
 
     Livewire::test(ManagePeriodicalSubscriptions::class)
         ->mountAction(TestAction::make('edit')->table($subscription))
-        ->assertSchemaStateSet(['quantities' => formQuantities([$this->watchtower->id => 1, $this->largePrint->id => 0, $this->workbook->id => 0])])
-        ->fillForm(['quantities' => formQuantities([$this->watchtower->id => 0, $this->largePrint->id => 1, $this->workbook->id => 0])])
+        ->assertSchemaStateSet(expectItems([$this->watchtower->id => 1]))
+        ->fillForm(['items' => formItems([$this->largePrint->id => 1])])
         ->callMountedAction()
         ->assertHasNoFormErrors();
 
@@ -184,7 +227,7 @@ test('a new publication can be received without changing the application', funct
         ->assertTableColumnExists("publication_{$awake->id}")
         ->callAction(TestAction::make('create'), [
             'user_id' => $publisher->id,
-            'quantities' => formQuantities([$awake->id => 3]),
+            'items' => formItems([$awake->id => 3]),
         ])
         ->assertHasNoFormErrors();
 
@@ -196,11 +239,18 @@ test('a publication no longer offered is hidden, and the copies already entered 
 
     $this->largePrint->update(['is_active' => false]);
 
+    expect(PeriodicalSubscriptionResource::getPublicationOptions())->not->toHaveKey(PublicationCategory::Watchtower->getLabel().'.'.$this->largePrint->id)
+        ->and(collect(PeriodicalSubscriptionResource::getPublicationOptions())->flatten(1)->keys())->not->toContain($this->largePrint->id)
+        // The row already chosen keeps its publication, marked as no longer offered
+        ->and(PeriodicalSubscriptionResource::getPublicationOptions($this->largePrint->id)[PublicationCategory::Watchtower->getLabel()][$this->largePrint->id])
+        ->toBe(__('filament-resources.periodical_subscription.publication_not_offered', ['name' => $this->largePrint->name]));
+
     Livewire::test(ManagePeriodicalSubscriptions::class)
         ->assertTableColumnDoesNotExist("publication_{$this->largePrint->id}")
-        ->callAction(TestAction::make('edit')->table($subscription), [
-            'quantities' => formQuantities([$this->watchtower->id => 2]),
-        ])
+        ->mountAction(TestAction::make('edit')->table($subscription))
+        ->assertSchemaStateSet(expectItems([$this->largePrint->id => 1, $this->watchtower->id => 1]))
+        ->fillForm(['items' => formItems([$this->largePrint->id => 1, $this->watchtower->id => 2])])
+        ->callMountedAction()
         ->assertHasNoFormErrors();
 
     $subscription->load('items');

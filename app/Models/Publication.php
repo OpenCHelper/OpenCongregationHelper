@@ -104,12 +104,4 @@ class Publication extends Model
     {
         return filled($this->short_name) ? $this->short_name : $this->name;
     }
-
-    /**
-     * The key of the copies of the publication in the forms (not a bare number, which would turn the state into a list).
-     */
-    public function getFormKey(): string
-    {
-        return 'p'.$this->getKey();
-    }
 }

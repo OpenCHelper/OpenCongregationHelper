@@ -11,7 +11,6 @@ use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Model;
 
 class ManagePeriodicalSubscriptions extends ManageRecords
 {
@@ -35,7 +34,6 @@ class ManagePeriodicalSubscriptions extends ManageRecords
                 ->modalHeading(__('filament-resources.periodical_subscription.action_add'))
                 ->icon(Heroicon::OutlinedUserPlus)
                 ->createAnother()
-                ->using(fn (array $data): Model => PeriodicalSubscriptionResource::saveRecord(null, $data))
                 // Nothing can be received until a publication is offered
                 ->disabled(fn (): bool => Publication::offered()->isEmpty())
                 ->tooltip(fn (): ?string => Publication::offered()->isEmpty()
