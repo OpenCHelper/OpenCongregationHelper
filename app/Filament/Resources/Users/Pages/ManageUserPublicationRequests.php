@@ -48,7 +48,8 @@ class ManageUserPublicationRequests extends ManageRelatedRecords
     }
 
     /**
-     * Only for whoever can see the requests (e.g. the publications department), besides the user.
+     * Only for whoever can both see the requests (e.g. the publications department) and see the user: a user without
+     * these permissions does not see their own requests here either.
      *
      * @param  array<string, mixed>  $parameters
      */
