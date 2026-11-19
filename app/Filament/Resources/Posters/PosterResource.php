@@ -140,6 +140,8 @@ class PosterResource extends Resource implements HasKnowledgeBase
                     ->label(__('filament-resources.poster.field_image'))
                     ->helperText(__('filament-resources.poster.field_image_helper'))
                     ->image()
+                    // Not SVG, which can carry scripts run when the picture is opened
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
                     ->imageEditor()
                     ->disk('public')
                     ->directory('posters')

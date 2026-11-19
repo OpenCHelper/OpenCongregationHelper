@@ -11,8 +11,10 @@ use App\Models\User;
 use Database\Seeders\FakePosterSeeder;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -202,4 +204,29 @@ test('the form edits the title in every language', function () {
         'it' => 'Corsi biblici gratuiti',
         'es' => 'Cursos bíblicos gratuitos',
     ]);
+});
+
+test('the picture of a poster cannot be an SVG, which can carry scripts', function () {
+    Storage::fake('public');
+
+    Livewire::test(ManagePosters::class)
+        ->mountAction(TestAction::make('create'))
+        ->fillForm([
+            'title' => [app()->getLocale() => 'Poster di esempio'],
+            'image_path' => UploadedFile::fake()->createWithContent('poster.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'),
+        ])
+        ->callMountedAction()
+        ->assertHasFormErrors(['image_path']);
+
+    Livewire::test(ManagePosters::class)
+        ->mountAction(TestAction::make('create'))
+        ->fillForm([
+            'title' => [app()->getLocale() => 'Poster di esempio'],
+            'image_path' => UploadedFile::fake()->image('poster.png'),
+            'stocks' => [],
+        ])
+        ->callMountedAction()
+        ->assertHasNoFormErrors();
+
+    expect(Poster::query()->sole()->image_path)->toEndWith('.png');
 });
