@@ -13,7 +13,8 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * A publication that the publishers can receive on paper, e.g. The Watchtower.
+ * A publication that the publishers can receive on paper, e.g. The Watchtower: requested once (e.g. a book), or
+ * again every period when it is renewable (`renewal_months`).
  */
 class Publication extends Model
 {
@@ -31,6 +32,7 @@ class Publication extends Model
         'name',
         'category',
         'short_name',
+        'renewal_months',
         'sort',
         'is_active',
     ];
@@ -44,6 +46,7 @@ class Publication extends Model
     {
         return [
             'category' => PublicationCategory::class,
+            'renewal_months' => 'integer',
             'sort' => 'integer',
             'is_active' => 'boolean',
         ];
@@ -53,17 +56,55 @@ class Publication extends Model
     {
         return LogOptions::defaults()
             ->logOnlyDirty()
-            ->logOnly(['name', 'category', 'short_name', 'is_active']);
+            ->logOnly(['name', 'category', 'short_name', 'renewal_months', 'is_active']);
     }
 
     /**
-     * Get the copies of the publication received by the publishers.
+     * Get the subscriptions to the publication, the stopped ones included.
      *
-     * @return HasMany<PeriodicalSubscriptionItem, $this>
+     * @return HasMany<PublicationSubscription, $this>
      */
-    public function subscriptionItems(): HasMany
+    public function subscriptions(): HasMany
     {
-        return $this->hasMany(PeriodicalSubscriptionItem::class);
+        return $this->hasMany(PublicationSubscription::class);
+    }
+
+    /**
+     * Get the subscriptions to the publication still requested again every period.
+     *
+     * @return HasMany<PublicationSubscription, $this>
+     */
+    public function activeSubscriptions(): HasMany
+    {
+        return $this->subscriptions()->active();
+    }
+
+    /**
+     * Get the requests of the publication.
+     *
+     * @return HasMany<PublicationRequest, $this>
+     */
+    public function requests(): HasMany
+    {
+        return $this->hasMany(PublicationRequest::class);
+    }
+
+    /**
+     * Check if the publication is requested again every period (e.g. The Watchtower every month).
+     */
+    public function isRenewable(): bool
+    {
+        return (int) $this->renewal_months > 0;
+    }
+
+    /**
+     * Get the renewable publications offered to the publishers, in their order: the ones received regularly.
+     *
+     * @return Collection<int, self>
+     */
+    public static function offeredRenewable(): Collection
+    {
+        return static::offered()->filter(fn (self $publication): bool => $publication->isRenewable())->values();
     }
 
     /**

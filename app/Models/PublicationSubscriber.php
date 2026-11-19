@@ -2,21 +2,24 @@
 
 namespace App\Models;
 
-use Database\Factories\PeriodicalSubscriptionFactory;
+use Database\Factories\PublicationSubscriberFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * The publications that a publisher receives on paper, with the number of copies of each one.
+ * A publisher receiving publications on paper regularly: their subscriptions, each one requested again every period.
+ *
+ * The subscriptions are stopped, never deleted, so that the history of the publisher is kept.
  */
-class PeriodicalSubscription extends Model
+class PublicationSubscriber extends Model
 {
-    /** @use HasFactory<PeriodicalSubscriptionFactory> */
+    /** @use HasFactory<PublicationSubscriberFactory> */
     use HasFactory;
 
     use LogsActivity;
@@ -49,27 +52,48 @@ class PeriodicalSubscription extends Model
     }
 
     /**
-     * Get the copies of each publication received.
+     * Get all the subscriptions of the publisher, the stopped ones included.
      *
-     * @return HasMany<PeriodicalSubscriptionItem, $this>
+     * @return HasMany<PublicationSubscription, $this>
      */
-    public function items(): HasMany
+    public function subscriptions(): HasMany
     {
-        return $this->hasMany(PeriodicalSubscriptionItem::class, 'subscription_id');
+        return $this->hasMany(PublicationSubscription::class, 'subscriber_id');
     }
 
     /**
-     * Get the copies of the given publication (from the loaded items).
+     * Get the subscriptions still requested again every period.
+     *
+     * @return HasMany<PublicationSubscription, $this>
+     */
+    public function activeSubscriptions(): HasMany
+    {
+        return $this->subscriptions()->active();
+    }
+
+    /**
+     * Only the publishers with at least an active subscription.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereHas('activeSubscriptions');
+    }
+
+    /**
+     * Get the copies of the given publication (from the loaded active subscriptions).
      */
     public function quantityOf(Publication|int $publication): int
     {
         $publicationId = $publication instanceof Publication ? $publication->getKey() : $publication;
 
-        return (int) $this->items->firstWhere('publication_id', $publicationId)?->quantity;
+        return (int) $this->activeSubscriptions->firstWhere('publication_id', $publicationId)?->quantity;
     }
 
     /**
-     * Only the subscriptions receiving at least a copy of the given publication.
+     * Only the publishers with an active subscription to the given publication.
      *
      * @param  Builder<self>  $query
      * @return Builder<self>
@@ -78,29 +102,79 @@ class PeriodicalSubscription extends Model
     {
         $publicationId = $publication instanceof Publication ? $publication->getKey() : $publication;
 
-        return $query->whereHas('items', fn (Builder $items): Builder => $items
+        return $query->whereHas('activeSubscriptions', fn (Builder $subscriptions): Builder => $subscriptions
             ->where('publication_id', $publicationId)
             ->where('quantity', '>', 0));
     }
 
     /**
-     * Get the total copies of each publication, and how many publishers receive it, among the given subscriptions.
+     * Update the active subscriptions to the given rows (one for each publication received):
      *
-     * @param  iterable<int>  $subscriptionIds
+     * - a new publication starts a subscription today, which requests it right away;
+     * - different copies apply to the next requests (the past ones keep theirs: that is the history);
+     * - a publication no longer in the rows is stopped today, not deleted.
+     *
+     * @param  iterable<array{publication_id: int|string, quantity: int|string}>  $rows
+     */
+    public function syncSubscriptions(iterable $rows): void
+    {
+        DB::transaction(function () use ($rows): void {
+            $active = $this->activeSubscriptions()->get()->keyBy('publication_id');
+            $kept = [];
+
+            foreach ($rows as $row) {
+                $publicationId = (int) $row['publication_id'];
+                $quantity = (int) $row['quantity'];
+                $kept[] = $publicationId;
+
+                $subscription = $active->get($publicationId);
+
+                if ($subscription) {
+                    $subscription->update(['quantity' => $quantity]);
+
+                    continue;
+                }
+
+                $this->subscriptions()
+                    ->create(['publication_id' => $publicationId, 'quantity' => $quantity, 'started_at' => today()])
+                    ->renew();
+            }
+
+            $active->except($kept)->each(fn (PublicationSubscription $subscription) => $subscription->stop());
+        });
+
+        $this->unsetRelation('activeSubscriptions');
+    }
+
+    /**
+     * Stop all the active subscriptions: the publisher leaves the list, but keeps the history.
+     */
+    public function stopSubscriptions(): void
+    {
+        $this->activeSubscriptions()->get()->each(fn (PublicationSubscription $subscription) => $subscription->stop());
+
+        $this->unsetRelation('activeSubscriptions');
+    }
+
+    /**
+     * Get the total copies of each publication, and how many publishers receive it, among the given publishers.
+     *
+     * @param  iterable<int>  $subscriberIds
      * @return array<int, array{copies: int, publishers: int}> keyed by the ID of the publication
      */
-    public static function totals(iterable $subscriptionIds): array
+    public static function totals(iterable $subscriberIds): array
     {
-        return PeriodicalSubscriptionItem::query()
-            ->whereIn('subscription_id', collect($subscriptionIds)->all())
+        return PublicationSubscription::query()
+            ->active()
+            ->whereIn('subscriber_id', collect($subscriberIds)->all())
             ->where('quantity', '>', 0)
             ->groupBy('publication_id')
             ->select('publication_id')
             ->selectRaw('sum(quantity) as copies, count(*) as publishers')
             ->get()
-            ->mapWithKeys(fn (PeriodicalSubscriptionItem $item): array => [$item->publication_id => [
-                'copies' => (int) $item->getAttribute('copies'),
-                'publishers' => (int) $item->getAttribute('publishers'),
+            ->mapWithKeys(fn (PublicationSubscription $subscription): array => [$subscription->publication_id => [
+                'copies' => (int) $subscription->getAttribute('copies'),
+                'publishers' => (int) $subscription->getAttribute('publishers'),
             ]])
             ->all();
     }

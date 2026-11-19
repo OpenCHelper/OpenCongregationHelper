@@ -4,71 +4,71 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\PeriodicalSubscription;
+use App\Models\PublicationSubscriber;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-class PeriodicalSubscriptionPolicy
+class PublicationSubscriberPolicy
 {
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:PeriodicalSubscription');
+        return $authUser->can('ViewAny:PublicationSubscriber');
     }
 
-    public function view(AuthUser $authUser, PeriodicalSubscription $periodicalSubscription): bool
+    public function view(AuthUser $authUser, PublicationSubscriber $publicationSubscriber): bool
     {
-        return $authUser->can('View:PeriodicalSubscription');
+        return $authUser->can('View:PublicationSubscriber');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:PeriodicalSubscription');
+        return $authUser->can('Create:PublicationSubscriber');
     }
 
-    public function update(AuthUser $authUser, PeriodicalSubscription $periodicalSubscription): bool
+    public function update(AuthUser $authUser, PublicationSubscriber $publicationSubscriber): bool
     {
-        return $authUser->can('Update:PeriodicalSubscription');
+        return $authUser->can('Update:PublicationSubscriber');
     }
 
-    public function delete(AuthUser $authUser, PeriodicalSubscription $periodicalSubscription): bool
+    public function delete(AuthUser $authUser, PublicationSubscriber $publicationSubscriber): bool
     {
-        return $authUser->can('Delete:PeriodicalSubscription');
+        return $authUser->can('Delete:PublicationSubscriber');
     }
 
     public function deleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('DeleteAny:PeriodicalSubscription');
+        return $authUser->can('DeleteAny:PublicationSubscriber');
     }
 
-    public function restore(AuthUser $authUser, PeriodicalSubscription $periodicalSubscription): bool
+    public function restore(AuthUser $authUser, PublicationSubscriber $publicationSubscriber): bool
     {
-        return $authUser->can('Restore:PeriodicalSubscription');
+        return $authUser->can('Restore:PublicationSubscriber');
     }
 
-    public function forceDelete(AuthUser $authUser, PeriodicalSubscription $periodicalSubscription): bool
+    public function forceDelete(AuthUser $authUser, PublicationSubscriber $publicationSubscriber): bool
     {
-        return $authUser->can('ForceDelete:PeriodicalSubscription');
+        return $authUser->can('ForceDelete:PublicationSubscriber');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:PeriodicalSubscription');
+        return $authUser->can('ForceDeleteAny:PublicationSubscriber');
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:PeriodicalSubscription');
+        return $authUser->can('RestoreAny:PublicationSubscriber');
     }
 
-    public function replicate(AuthUser $authUser, PeriodicalSubscription $periodicalSubscription): bool
+    public function replicate(AuthUser $authUser, PublicationSubscriber $publicationSubscriber): bool
     {
-        return $authUser->can('Replicate:PeriodicalSubscription');
+        return $authUser->can('Replicate:PublicationSubscriber');
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:PeriodicalSubscription');
+        return $authUser->can('Reorder:PublicationSubscriber');
     }
 }

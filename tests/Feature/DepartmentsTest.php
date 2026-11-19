@@ -68,7 +68,7 @@ test('the members of a department can fully manage its sections, and only them',
         ->and(PosterResource::canCreate())->toBeTrue()
         ->and(PosterResource::canDelete(Poster::factory()->create()))->toBeTrue()
         // Other departments and the administration need a role, as before
-        ->and($member->can('ViewAny:PeriodicalSubscription'))->toBeFalse()
+        ->and($member->can('ViewAny:PublicationSubscriber'))->toBeFalse()
         ->and(TerritoryResource::canViewAny())->toBeFalse()
         ->and($member->can('ViewAny:User'))->toBeFalse()
         ->and($member->can('ViewAny:Department'))->toBeFalse();

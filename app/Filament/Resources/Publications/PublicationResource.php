@@ -4,8 +4,11 @@ namespace App\Filament\Resources\Publications;
 
 use App\Enums\NavigationGroup;
 use App\Enums\PublicationCategory;
+use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
 use App\Filament\Resources\Publications\Pages\ManagePublications;
 use App\Models\Publication;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -36,7 +39,7 @@ class PublicationResource extends Resource implements HasKnowledgeBase
 
     protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::BookOpen;
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -83,6 +86,16 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                     ->placeholder(__('filament-resources.publication.field_short_name_placeholder'))
                     ->helperText(__('filament-resources.publication.field_short_name_helper'))
                     ->maxLength(50),
+                TextInput::make('renewal_months')
+                    ->label(__('filament-resources.publication.field_renewal_months'))
+                    ->helperText(__('filament-resources.publication.field_renewal_months_helper'))
+                    ->suffix(__('filament-resources.publication.field_renewal_months_suffix'))
+                    ->numeric()
+                    ->integer()
+                    ->minValue(1)
+                    ->maxValue(24)
+                    // Empty: requested once (e.g. a book)
+                    ->nullable(),
                 Toggle::make('is_active')
                     ->label(__('filament-resources.publication.field_is_active'))
                     ->helperText(__('filament-resources.publication.field_is_active_helper'))
@@ -94,8 +107,9 @@ class PublicationResource extends Resource implements HasKnowledgeBase
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
-                ->withCount(['subscriptionItems' => fn (Builder $query): Builder => $query->where('quantity', '>', 0)])
-                ->withSum('subscriptionItems', 'quantity'))
+                ->withCount(['activeSubscriptions' => fn (Builder $query): Builder => $query->where('quantity', '>', 0)])
+                ->withSum('activeSubscriptions', 'quantity')
+                ->withCount(['requests as pending_requests_count' => fn (Builder $query): Builder => $query->whereNull('delivered_at')]))
             ->defaultSort(fn (Builder $query): Builder => $query->ordered())
             ->reorderable('sort')
             ->defaultGroup(Group::make('category')
@@ -116,12 +130,23 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                 ToggleColumn::make('is_active')
                     ->label(__('filament-resources.publication.column_is_active'))
                     ->alignCenter(),
-                TextColumn::make('subscription_items_count')
+                TextColumn::make('renewal_months')
+                    ->label(__('filament-resources.publication.column_renewal'))
+                    ->formatStateUsing(fn (?int $state): string => trans_choice('filament-resources.publication.renewal_every', (int) $state, ['count' => $state]))
+                    ->placeholder(__('filament-resources.publication.renewal_none'))
+                    ->icon(fn (?int $state): ?Heroicon => $state ? Heroicon::OutlinedArrowPath : null)
+                    ->alignCenter(),
+                TextColumn::make('active_subscriptions_count')
                     ->label(__('filament-resources.publication.column_publishers'))
                     ->alignCenter(),
-                TextColumn::make('subscription_items_sum_quantity')
+                TextColumn::make('active_subscriptions_sum_quantity')
                     ->label(__('filament-resources.publication.column_copies'))
                     ->default(0)
+                    ->alignCenter(),
+                TextColumn::make('pending_requests_count')
+                    ->label(__('filament-resources.publication.column_pending_requests'))
+                    ->badge()
+                    ->color(fn (int $state): string => $state > 0 ? 'warning' : 'gray')
                     ->alignCenter(),
             ])
             ->filters([
@@ -131,9 +156,17 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                     ->multiple(),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make()
-                    ->modalDescription(__('filament-resources.publication.delete_description')),
+                Action::make('requests')
+                    ->label(__('filament-resources.publication.action_requests'))
+                    ->icon(Heroicon::OutlinedClock)
+                    ->color('gray')
+                    ->url(fn (Publication $record): string => PublicationRequestResource::getFilteredUrl(publication: $record->getKey()))
+                    ->visible(fn (): bool => PublicationRequestResource::canViewAny()),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make()
+                        ->modalDescription(__('filament-resources.publication.delete_description')),
+                ]),
             ])
             ->emptyStateIcon(Heroicon::OutlinedBookOpen)
             ->emptyStateHeading(__('filament-resources.publication.empty_heading'))

@@ -2,15 +2,15 @@
 
 namespace Database\Factories;
 
-use App\Models\PeriodicalSubscription;
 use App\Models\Publication;
+use App\Models\PublicationSubscriber;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<PeriodicalSubscription>
+ * @extends Factory<PublicationSubscriber>
  */
-class PeriodicalSubscriptionFactory extends Factory
+class PublicationSubscriberFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -26,13 +26,14 @@ class PeriodicalSubscriptionFactory extends Factory
     }
 
     /**
-     * Receive the given copies of a publication.
+     * Receive the given copies of a publication regularly, from today unless given (no request is made).
      */
-    public function receiving(Publication $publication, int $quantity = 1): self
+    public function receiving(Publication $publication, int $quantity = 1, ?string $since = null): self
     {
-        return $this->afterCreating(fn (PeriodicalSubscription $subscription) => $subscription->items()->create([
+        return $this->afterCreating(fn (PublicationSubscriber $subscriber) => $subscriber->subscriptions()->create([
             'publication_id' => $publication->getKey(),
             'quantity' => $quantity,
+            'started_at' => $since ?? today()->toDateString(),
         ]));
     }
 }

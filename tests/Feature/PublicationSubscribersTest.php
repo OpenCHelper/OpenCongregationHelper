@@ -2,15 +2,18 @@
 
 use App\Enums\DepartmentKey;
 use App\Enums\PublicationCategory;
-use App\Filament\Resources\PeriodicalSubscriptions\Pages\ManagePeriodicalSubscriptions;
-use App\Filament\Resources\PeriodicalSubscriptions\PeriodicalSubscriptionResource;
-use App\Filament\Resources\PeriodicalSubscriptions\Widgets\PeriodicalTotals;
+use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
 use App\Filament\Resources\Publications\Pages\ManagePublications;
+use App\Filament\Resources\PublicationSubscribers\Pages\ManagePublicationSubscribers;
+use App\Filament\Resources\PublicationSubscribers\PublicationSubscriberResource;
+use App\Filament\Resources\PublicationSubscribers\Widgets\PublicationTotals;
 use App\Models\Department;
-use App\Models\PeriodicalSubscription;
 use App\Models\Publication;
+use App\Models\PublicationRequest;
+use App\Models\PublicationSubscriber;
+use App\Models\PublicationSubscription;
 use App\Models\User;
-use Database\Seeders\FakePeriodicalSubscriptionSeeder;
+use Database\Seeders\FakePublicationSubscriberSeeder;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Repeater;
@@ -32,7 +35,7 @@ beforeEach(function () {
     Department::for(DepartmentKey::Publications)->members()->attach($this->member);
     $this->actingAs($this->member);
 
-    // The publications created by the migrations
+    // The publications created by the migrations (renewed every month, every month, every two months)
     [$this->watchtower, $this->largePrint, $this->workbook] = Publication::query()->ordered()->get()->all();
 });
 
@@ -62,7 +65,7 @@ function formItems(array $quantities): array
 function expectItems(array $quantities): Closure
 {
     return function (array $state) use ($quantities): array {
-        expect(collect($state['items'])->mapWithKeys(fn (array $item): array => [(int) $item['publication_id'] => (int) $item['quantity']])->all())
+        expect(collect($state['activeSubscriptions'])->mapWithKeys(fn (array $item): array => [(int) $item['publication_id'] => (int) $item['quantity']])->all())
             ->toEqual($quantities);
 
         return [];
@@ -77,23 +80,7 @@ test('the publications are sorted by category, then as chosen in their list', fu
         ->toBe([$bible->id, $this->watchtower->id, $this->largePrint->id, $this->workbook->id, $book->id]);
 });
 
-test('the publications are grouped by category in their list and in the paper publications', function () {
-    $book = Publication::factory()->create(['name' => 'Enjoy Life Forever!', 'category' => PublicationCategory::Books]);
-    $subscription = PeriodicalSubscription::factory()->receiving($book, 2)->create();
-
-    Livewire::test(ManagePublications::class)
-        ->assertSee(PublicationCategory::Books->getLabel())
-        ->filterTable('category', [PublicationCategory::Books->value])
-        ->assertCanSeeTableRecords([$book])
-        ->assertCanNotSeeTableRecords([$this->watchtower]);
-
-    Livewire::test(ManagePeriodicalSubscriptions::class)
-        ->assertSee(PublicationCategory::Books->getLabel())
-        ->assertSee(PublicationCategory::Watchtower->getLabel())
-        ->assertTableColumnStateSet("publication_{$book->id}", 2, $subscription);
-});
-
-test('the migrations create the usual publications, in the language of the installation', function () {
+test('the migrations create the usual publications, renewable, in the language of the installation', function () {
     expect(Publication::query()->ordered()->pluck('name')->all())->toBe([
         __('filament-resources.publication.defaults.watchtower.name', [], config('app.locale')),
         __('filament-resources.publication.defaults.watchtower_large_print.name', [], config('app.locale')),
@@ -102,103 +89,157 @@ test('the migrations create the usual publications, in the language of the insta
         PublicationCategory::Watchtower,
         PublicationCategory::Watchtower,
         PublicationCategory::MeetingWorkbooks,
-    ]);
+    ])->and(Publication::query()->ordered()->pluck('renewal_months')->all())->toBe([1, 1, 2]);
 });
 
-test('a publisher can be added with the copies of each publication', function () {
+test('a publisher can be added with the publications received regularly, which are requested right away', function () {
     $publisher = User::factory()->create();
 
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    Livewire::test(ManagePublicationSubscribers::class)
         ->callAction(TestAction::make('create'), [
             'user_id' => $publisher->id,
-            'items' => formItems([$this->watchtower->id => 2, $this->workbook->id => 1]),
+            'activeSubscriptions' => formItems([$this->watchtower->id => 2, $this->workbook->id => 1]),
             'notes' => 'Delivered at home',
         ])
         ->assertHasNoFormErrors();
 
-    $subscription = PeriodicalSubscription::with('items')->sole();
+    $subscriber = PublicationSubscriber::query()->with('activeSubscriptions')->sole();
 
-    expect($subscription->user->is($publisher))->toBeTrue()
-        ->and($subscription->quantityOf($this->watchtower))->toBe(2)
-        ->and($subscription->quantityOf($this->largePrint))->toBe(0)
-        ->and($subscription->quantityOf($this->workbook))->toBe(1)
-        ->and($subscription->items)->toHaveCount(2)
-        ->and($subscription->notes)->toBe('Delivered at home');
+    expect($subscriber->user->is($publisher))->toBeTrue()
+        ->and($subscriber->notes)->toBe('Delivered at home')
+        ->and($subscriber->quantityOf($this->watchtower))->toBe(2)
+        ->and($subscriber->quantityOf($this->largePrint))->toBe(0)
+        ->and($subscriber->quantityOf($this->workbook))->toBe(1)
+        ->and($subscriber->activeSubscriptions->pluck('started_at')->map->toDateString()->unique()->all())->toBe([today()->toDateString()])
+        // The first request of each one is made right away
+        ->and(PublicationRequest::query()->where('user_id', $publisher->id)->orderBy('publication_id')->get(['publication_id', 'quantity', 'requested_at'])->map(fn (PublicationRequest $request): array => [$request->publication_id, $request->quantity, $request->requested_at->toDateString()])->all())
+        ->toBe([
+            [$this->watchtower->id, 2, today()->toDateString()],
+            [$this->workbook->id, 1, today()->toDateString()],
+        ]);
 });
 
 test('the publisher is chosen in a field named as in the rest of the application', function () {
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    Livewire::test(ManagePublicationSubscribers::class)
         ->mountAction(TestAction::make('create'))
-        ->assertFormFieldExists('user_id', fn (Select $field): bool => $field->getLabel() === __('filament-resources.periodical_subscription.field_user'));
+        ->assertFormFieldExists('user_id', fn (Select $field): bool => $field->getLabel() === __('filament-resources.publication_subscriber.field_user'));
 
-    expect(__('filament-resources.periodical_subscription.field_user', [], 'it'))->toBe('Proclamatore');
+    expect(__('filament-resources.publication_subscriber.field_user', [], 'it'))->toBe('Proclamatore');
 });
 
 test('the form starts with no publications, added one row at a time', function () {
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    Livewire::test(ManagePublicationSubscribers::class)
         ->mountAction(TestAction::make('create'))
-        ->assertSchemaStateSet(['items' => []]);
+        ->assertSchemaStateSet(['activeSubscriptions' => []]);
 });
 
 test('a publication can be chosen only once, with at least one copy', function () {
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    Livewire::test(ManagePublicationSubscribers::class)
         ->callAction(TestAction::make('create'), [
             'user_id' => User::factory()->create()->id,
-            'items' => [
+            'activeSubscriptions' => [
                 ['publication_id' => $this->watchtower->id, 'quantity' => 1],
                 ['publication_id' => $this->watchtower->id, 'quantity' => 0],
             ],
         ])
-        ->assertHasFormErrors(['items.0.publication_id', 'items.1.quantity']);
+        ->assertHasFormErrors(['activeSubscriptions.0.publication_id', 'activeSubscriptions.1.quantity']);
 
-    expect(PeriodicalSubscription::exists())->toBeFalse();
+    expect(PublicationSubscriber::exists())->toBeFalse();
 });
 
-test('a publisher must receive at least one copy', function () {
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+test('a publisher must receive at least one publication', function () {
+    Livewire::test(ManagePublicationSubscribers::class)
         ->callAction(TestAction::make('create'), [
             'user_id' => User::factory()->create()->id,
-            'items' => [],
+            'activeSubscriptions' => [],
         ])
-        ->assertHasFormErrors(['items']);
+        ->assertHasFormErrors(['activeSubscriptions']);
 
-    expect(PeriodicalSubscription::exists())->toBeFalse();
+    expect(PublicationSubscriber::exists())->toBeFalse();
+});
+
+test('only the renewable publications can be received regularly', function () {
+    $book = Publication::factory()->create(['renewal_months' => null]);
+
+    $ids = collect(PublicationSubscriberResource::getPublicationOptions())->map(fn (array $group): array => array_keys($group))->flatten()->all();
+
+    expect($ids)->toContain($this->watchtower->id, $this->workbook->id)
+        ->not->toContain($book->id);
 });
 
 test('a publisher is listed only once', function () {
-    $subscription = PeriodicalSubscription::factory()->receiving($this->watchtower)->create();
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->create();
 
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    Livewire::test(ManagePublicationSubscribers::class)
         ->callAction(TestAction::make('create'), [
-            'user_id' => $subscription->user_id,
-            'items' => formItems([$this->watchtower->id => 1]),
+            'user_id' => $subscriber->user_id,
+            'activeSubscriptions' => formItems([$this->watchtower->id => 1]),
         ])
         ->assertHasFormErrors(['user_id']);
 });
 
-test('the copies of a publisher can be changed', function () {
-    $subscription = PeriodicalSubscription::factory()->receiving($this->watchtower)->create();
+test('changing the copies applies to the next requests, removing a publication stops it', function () {
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->receiving($this->workbook)->create();
+    $previous = PublicationRequest::factory()->create(['user_id' => $subscriber->user_id, 'publication_id' => $this->watchtower->id, 'quantity' => 1]);
 
-    Livewire::test(ManagePeriodicalSubscriptions::class)
-        ->mountAction(TestAction::make('edit')->table($subscription))
-        ->assertSchemaStateSet(expectItems([$this->watchtower->id => 1]))
-        ->fillForm(['items' => formItems([$this->largePrint->id => 1])])
+    Livewire::test(ManagePublicationSubscribers::class)
+        ->mountAction(TestAction::make('edit')->table($subscriber))
+        ->assertSchemaStateSet(expectItems([$this->watchtower->id => 1, $this->workbook->id => 1]))
+        ->fillForm(['activeSubscriptions' => formItems([$this->watchtower->id => 3])])
         ->callMountedAction()
         ->assertHasNoFormErrors();
 
-    $subscription->load('items');
+    $subscriber->load('activeSubscriptions');
 
-    expect($subscription->quantityOf($this->watchtower))->toBe(0)
-        ->and($subscription->quantityOf($this->largePrint))->toBe(1)
-        ->and($subscription->items)->toHaveCount(1);
+    expect($subscriber->quantityOf($this->watchtower))->toBe(3)
+        ->and($subscriber->quantityOf($this->workbook))->toBe(0)
+        // Stopped today, not deleted: it stays in the history
+        ->and($subscriber->subscriptions()->where('publication_id', $this->workbook->id)->sole()->ended_at->toDateString())->toBe(today()->toDateString())
+        ->and($previous->fresh()->quantity)->toBe(1);
+});
+
+test('removing a publisher stops their subscriptions and keeps their history; adding them again reuses the record', function () {
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->create();
+    $request = PublicationRequest::factory()->create(['user_id' => $subscriber->user_id, 'publication_id' => $this->watchtower->id]);
+
+    Livewire::test(ManagePublicationSubscribers::class)
+        ->callAction(TestAction::make('remove')->table($subscriber))
+        ->assertCanNotSeeTableRecords([$subscriber]);
+
+    expect(PublicationSubscription::query()->active()->exists())->toBeFalse()
+        ->and(PublicationSubscription::count())->toBe(1)
+        ->and($request->fresh())->not->toBeNull();
+
+    Livewire::test(ManagePublicationSubscribers::class)
+        ->callAction(TestAction::make('create'), [
+            'user_id' => $subscriber->user_id,
+            'activeSubscriptions' => formItems([$this->largePrint->id => 1]),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect(PublicationSubscriber::count())->toBe(1)
+        ->and($subscriber->subscriptions()->count())->toBe(2)
+        ->and($subscriber->activeSubscriptions()->sole()->publication_id)->toBe($this->largePrint->id);
+});
+
+test('the publishers can be removed in bulk', function () {
+    $subscribers = PublicationSubscriber::factory()->count(2)->receiving($this->watchtower)->create();
+
+    Livewire::test(ManagePublicationSubscribers::class)
+        ->selectTableRecords($subscribers)
+        ->callAction(TestAction::make('remove')->table()->bulk());
+
+    expect(PublicationSubscription::query()->active()->exists())->toBeFalse()
+        ->and(PublicationSubscription::count())->toBe(2);
 });
 
 test('the table shows the copies of each publication, their totals, and filters by publication', function () {
-    $both = PeriodicalSubscription::factory()->receiving($this->watchtower, 2)->receiving($this->workbook)->create();
-    $largePrint = PeriodicalSubscription::factory()->receiving($this->largePrint)->create();
+    $both = PublicationSubscriber::factory()->receiving($this->watchtower, 2)->receiving($this->workbook)->create();
+    $largePrint = PublicationSubscriber::factory()->receiving($this->largePrint)->create();
 
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    Livewire::test(ManagePublicationSubscribers::class)
         ->assertCanSeeTableRecords([$both, $largePrint])
+        ->assertSee(PublicationCategory::Watchtower->getLabel())
         ->assertTableColumnStateSet("publication_{$this->watchtower->id}", 2, $both)
         ->assertTableColumnStateSet("publication_{$this->watchtower->id}", 0, $largePrint)
         ->assertTableColumnSummarySet("publication_{$this->watchtower->id}", 'total', 2)
@@ -208,72 +249,92 @@ test('the table shows the copies of each publication, their totals, and filters 
         ->assertCanNotSeeTableRecords([$both]);
 });
 
-test('a new publication can be received without changing the application', function () {
+test('the stopped subscriptions are neither shown nor counted', function () {
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower, 2)->receiving($this->workbook)->create();
+    $subscriber->subscriptions()->where('publication_id', $this->watchtower->id)->sole()->stop();
+
+    expect(PublicationSubscriber::totals([$subscriber->id]))->toEqual([
+        $this->workbook->id => ['copies' => 1, 'publishers' => 1],
+    ]);
+
+    Livewire::test(ManagePublicationSubscribers::class)
+        ->assertTableColumnStateSet("publication_{$this->watchtower->id}", 0, $subscriber);
+});
+
+test('a new renewable publication can be received without changing the application', function () {
     Livewire::test(ManagePublications::class)
         ->callAction(TestAction::make('create'), [
             'name' => 'Awake!',
             'category' => PublicationCategory::Awake->value,
             'short_name' => 'Awake',
+            'renewal_months' => 4,
             'is_active' => true,
         ])
         ->assertHasNoFormErrors();
 
     $awake = Publication::query()->where('name', 'Awake!')->sole();
-
-    expect($awake->category)->toBe(PublicationCategory::Awake);
     $publisher = User::factory()->create();
 
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    expect($awake->category)->toBe(PublicationCategory::Awake)
+        ->and($awake->renewal_months)->toBe(4);
+
+    Livewire::test(ManagePublicationSubscribers::class)
         ->assertTableColumnExists("publication_{$awake->id}")
         ->callAction(TestAction::make('create'), [
             'user_id' => $publisher->id,
-            'items' => formItems([$awake->id => 3]),
+            'activeSubscriptions' => formItems([$awake->id => 3]),
         ])
         ->assertHasNoFormErrors();
 
-    expect($publisher->periodicalSubscription()->sole()->load('items')->quantityOf($awake))->toBe(3);
+    expect($publisher->publicationSubscriber()->sole()->load('activeSubscriptions')->quantityOf($awake))->toBe(3);
 });
 
 test('a publication no longer offered is hidden, and the copies already entered are kept', function () {
-    $subscription = PeriodicalSubscription::factory()->receiving($this->largePrint)->receiving($this->watchtower)->create();
+    $subscriber = PublicationSubscriber::factory()->receiving($this->largePrint)->receiving($this->watchtower)->create();
 
     $this->largePrint->update(['is_active' => false]);
 
-    expect(PeriodicalSubscriptionResource::getPublicationOptions())->not->toHaveKey(PublicationCategory::Watchtower->getLabel().'.'.$this->largePrint->id)
-        ->and(collect(PeriodicalSubscriptionResource::getPublicationOptions())->flatten(1)->keys())->not->toContain($this->largePrint->id)
+    expect(collect(PublicationSubscriberResource::getPublicationOptions())->map(fn (array $group): array => array_keys($group))->flatten()->all())
+        ->toContain($this->watchtower->id)
+        ->not->toContain($this->largePrint->id)
         // The row already chosen keeps its publication, marked as no longer offered
-        ->and(PeriodicalSubscriptionResource::getPublicationOptions($this->largePrint->id)[PublicationCategory::Watchtower->getLabel()][$this->largePrint->id])
-        ->toBe(__('filament-resources.periodical_subscription.publication_not_offered', ['name' => $this->largePrint->name]));
+        ->and(PublicationSubscriberResource::getPublicationOptions($this->largePrint->id)[PublicationCategory::Watchtower->getLabel()][$this->largePrint->id])
+        ->toBe(__('filament-resources.publication_subscriber.publication_not_offered', ['name' => $this->largePrint->name]));
 
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    Livewire::test(ManagePublicationSubscribers::class)
         ->assertTableColumnDoesNotExist("publication_{$this->largePrint->id}")
-        ->mountAction(TestAction::make('edit')->table($subscription))
+        ->mountAction(TestAction::make('edit')->table($subscriber))
         ->assertSchemaStateSet(expectItems([$this->largePrint->id => 1, $this->watchtower->id => 1]))
-        ->fillForm(['items' => formItems([$this->largePrint->id => 1, $this->watchtower->id => 2])])
+        ->fillForm(['activeSubscriptions' => formItems([$this->largePrint->id => 1, $this->watchtower->id => 2])])
         ->callMountedAction()
         ->assertHasNoFormErrors();
 
-    $subscription->load('items');
+    $subscriber->load('activeSubscriptions');
 
-    expect($subscription->quantityOf($this->watchtower))->toBe(2)
-        ->and($subscription->quantityOf($this->largePrint))->toBe(1);
+    expect($subscriber->quantityOf($this->watchtower))->toBe(2)
+        ->and($subscriber->quantityOf($this->largePrint))->toBe(1);
 });
 
-test('nobody can be added while no publication is offered', function () {
-    Publication::query()->update(['is_active' => false]);
+test('nobody can be added while no renewable publication is offered', function () {
+    Publication::query()->update(['renewal_months' => null]);
 
-    Livewire::test(ManagePeriodicalSubscriptions::class)
+    Livewire::test(ManagePublicationSubscribers::class)
         ->assertActionDisabled('create');
 });
 
-test('the publications list counts the publishers and copies, and can be reordered', function () {
-    PeriodicalSubscription::factory()->receiving($this->watchtower, 2)->create();
-    PeriodicalSubscription::factory()->receiving($this->watchtower)->create();
+test('the publications list shows the renewal, counts the publishers, copies and pending requests, and can be reordered', function () {
+    PublicationSubscriber::factory()->receiving($this->watchtower, 2)->create();
+    PublicationSubscriber::factory()->receiving($this->watchtower)->create();
+    PublicationRequest::factory()->create(['publication_id' => $this->watchtower->id]);
+    PublicationRequest::factory()->delivered()->create(['publication_id' => $this->watchtower->id]);
 
     Livewire::test(ManagePublications::class)
         ->assertCanSeeTableRecords([$this->watchtower, $this->largePrint, $this->workbook], inOrder: true)
-        ->assertTableColumnStateSet('subscription_items_count', 2, $this->watchtower)
-        ->assertTableColumnStateSet('subscription_items_sum_quantity', 3, $this->watchtower)
+        ->assertTableColumnStateSet('renewal_months', 2, $this->workbook)
+        ->assertTableColumnFormattedStateSet('renewal_months', trans_choice('filament-resources.publication.renewal_every', 2, ['count' => 2]), $this->workbook)
+        ->assertTableColumnStateSet('active_subscriptions_count', 2, $this->watchtower)
+        ->assertTableColumnStateSet('active_subscriptions_sum_quantity', 3, $this->watchtower)
+        ->assertTableColumnStateSet('pending_requests_count', 1, $this->watchtower)
         ->call('reorderTable', [$this->largePrint->getKey(), $this->watchtower->getKey(), $this->workbook->getKey()])
         ->assertHasNoErrors();
 
@@ -281,59 +342,85 @@ test('the publications list counts the publishers and copies, and can be reorder
         ->toBe([$this->largePrint->id, $this->watchtower->id, $this->workbook->id]);
 });
 
+test('the publications are grouped by category in their list', function () {
+    $book = Publication::factory()->create(['name' => 'Enjoy Life Forever!', 'category' => PublicationCategory::Books]);
+
+    Livewire::test(ManagePublications::class)
+        ->assertSee(PublicationCategory::Books->getLabel())
+        ->filterTable('category', [PublicationCategory::Books->value])
+        ->assertCanSeeTableRecords([$book])
+        ->assertCanNotSeeTableRecords([$this->watchtower]);
+});
+
+test('the publishers and the publications link to the history of their requests', function () {
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->create();
+
+    Livewire::test(ManagePublicationSubscribers::class)
+        ->assertActionHasUrl(TestAction::make('requests')->table($subscriber), PublicationRequestResource::getFilteredUrl(user: $subscriber->user_id));
+
+    Livewire::test(ManagePublications::class)
+        ->assertActionHasUrl(TestAction::make('requests')->table($this->workbook), PublicationRequestResource::getFilteredUrl(publication: $this->workbook->id));
+});
+
 test('deleting a publication deletes its copies', function () {
-    $subscription = PeriodicalSubscription::factory()->receiving($this->watchtower)->receiving($this->workbook)->create();
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->receiving($this->workbook)->create();
 
     Livewire::test(ManagePublications::class)
         ->callAction(TestAction::make('delete')->table($this->watchtower));
 
-    expect($subscription->items()->pluck('publication_id')->all())->toBe([$this->workbook->id]);
+    expect($subscriber->subscriptions()->pluck('publication_id')->all())->toBe([$this->workbook->id]);
 });
 
 test('the totals count the copies and the publishers of each publication', function () {
-    PeriodicalSubscription::factory()->receiving($this->watchtower, 2)->receiving($this->workbook)->create();
-    PeriodicalSubscription::factory()->receiving($this->watchtower)->create();
+    PublicationSubscriber::factory()->receiving($this->watchtower, 2)->receiving($this->workbook)->create();
+    PublicationSubscriber::factory()->receiving($this->watchtower)->create();
 
-    expect(PeriodicalSubscription::totals(PeriodicalSubscription::query()->pluck('id')))->toEqual([
+    expect(PublicationSubscriber::totals(PublicationSubscriber::query()->pluck('id')))->toEqual([
         $this->watchtower->id => ['copies' => 3, 'publishers' => 2],
         $this->workbook->id => ['copies' => 1, 'publishers' => 1],
     ]);
 
-    Livewire::test(PeriodicalTotals::class, ['tableClass' => ManagePeriodicalSubscriptions::class])
+    Livewire::test(PublicationTotals::class, ['tableClass' => ManagePublicationSubscribers::class])
         ->assertOk()
         ->assertSee($this->watchtower->name)
-        ->assertSee(trans_choice('filament-resources.periodical_subscription.widget_publishers', 2, ['count' => 2]));
+        ->assertSee(trans_choice('filament-resources.publication_subscriber.widget_publishers', 2, ['count' => 2]));
 });
 
 test('users outside the department without a role cannot open the lists', function () {
     $this->actingAs(User::factory()->create());
 
-    $this->get(ManagePeriodicalSubscriptions::getUrl())->assertForbidden();
+    $this->get(ManagePublicationSubscribers::getUrl())->assertForbidden();
     $this->get(ManagePublications::getUrl())->assertForbidden();
 });
 
-test('the subscription is deleted with its publisher', function () {
-    $subscription = PeriodicalSubscription::factory()->receiving($this->watchtower)->create();
+test('the subscriptions are deleted with their publisher', function () {
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->create();
 
-    $subscription->user->delete();
+    $subscriber->user->delete();
 
-    expect(PeriodicalSubscription::exists())->toBeFalse();
+    expect(PublicationSubscriber::exists())->toBeFalse()
+        ->and(PublicationSubscription::exists())->toBeFalse();
 });
 
-test('the fake seeder creates the publishers receiving publications', function () {
+test('the fake seeder creates the publishers receiving publications, with their history', function () {
     User::factory()->count(8)->create();
 
-    $this->seed(FakePeriodicalSubscriptionSeeder::class);
-    $this->seed(FakePeriodicalSubscriptionSeeder::class);
+    $this->seed(FakePublicationSubscriberSeeder::class);
+    $this->seed(FakePublicationSubscriberSeeder::class);
 
-    $totals = PeriodicalSubscription::totals(PeriodicalSubscription::query()->pluck('id'));
-    $book = Publication::query()->where('category', PublicationCategory::Books)->sole();
+    $totals = PublicationSubscriber::totals(PublicationSubscriber::query()->pluck('id'));
 
-    expect(PeriodicalSubscription::count())->toBe(7)
+    expect(PublicationSubscriber::count())->toBe(count(FakePublicationSubscriberSeeder::SUBSCRIPTIONS))
         ->and($totals[$this->watchtower->id]['copies'])->toBe(5)
-        ->and($totals[$book->id])->toBe(['copies' => 3, 'publishers' => 2]);
+        // One stopped two months ago, without requests after that
+        ->and(PublicationSubscription::query()->whereNotNull('ended_at')->count())->toBe(1)
+        ->and(PublicationSubscription::query()->whereNotNull('ended_at')->sole()->requests()->max('requested_at'))
+        ->toBeLessThanOrEqual(PublicationSubscription::query()->whereNotNull('ended_at')->sole()->ended_at->toDateString())
+        // The requests of the past months are delivered
+        ->and(PublicationRequest::query()->whereDate('requested_at', '<', today()->startOfMonth())->whereNull('delivered_at')->exists())->toBeFalse()
+        ->and(PublicationRequest::query()->whereNull('delivered_at')->exists())->toBeTrue();
 
-    $this->get(ManagePeriodicalSubscriptions::getUrl())->assertOk();
+    $this->get(ManagePublicationSubscribers::getUrl())->assertOk();
 });
 
 test('the publications are sorted with the table prefix of the installation', function () {

@@ -310,13 +310,23 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     }
 
     /**
-     * Get the periodicals the user receives on paper.
+     * Get the publications the user receives on paper regularly.
      *
-     * @return HasOne<PeriodicalSubscription, $this>
+     * @return HasOne<PublicationSubscriber, $this>
      */
-    public function periodicalSubscription(): HasOne
+    public function publicationSubscriber(): HasOne
     {
-        return $this->hasOne(PeriodicalSubscription::class);
+        return $this->hasOne(PublicationSubscriber::class);
+    }
+
+    /**
+     * Get the publications the user requested.
+     *
+     * @return HasMany<PublicationRequest, $this>
+     */
+    public function publicationRequests(): HasMany
+    {
+        return $this->hasMany(PublicationRequest::class);
     }
 
     /**

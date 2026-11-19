@@ -8,6 +8,7 @@ use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ManageUserAssignments;
+use App\Filament\Resources\Users\Pages\ManageUserPublicationRequests;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
 use App\Models\Department;
@@ -295,6 +296,7 @@ class UserResource extends Resource
         return $page->generateNavigationItems([
             ViewUser::class,
             ManageUserAssignments::class,
+            ManageUserPublicationRequests::class,
         ]);
     }
 
@@ -306,6 +308,7 @@ class UserResource extends Resource
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
             'assignments' => ManageUserAssignments::route('/{record}/assignments'),
+            'publication-requests' => ManageUserPublicationRequests::route('/{record}/publication-requests'),
         ];
     }
 }
