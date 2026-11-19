@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\ContactType;
+use App\Enums\DepartmentKey;
+use App\Enums\DepartmentRole;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -16,6 +18,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -236,6 +239,73 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     public function emergencyContacts(): HasMany
     {
         return $this->hasMany(Contact::class)->where('type', ContactType::EMERGENCY);
+    }
+
+    /**
+     * Get the departments the user serves in.
+     *
+     * @return BelongsToMany<Department, $this, DepartmentMember>
+     */
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class)
+            ->using(DepartmentMember::class)
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if the user serves in the given department.
+     */
+    public function isMemberOf(DepartmentKey $department): bool
+    {
+        return $this->getDepartmentKeys()->contains($department);
+    }
+
+    /**
+     * Check if the user is the overseer of a department (any one, when not given).
+     */
+    public function isDepartmentOverseer(?DepartmentKey $department = null): bool
+    {
+        if (! $this->exists) {
+            return false;
+        }
+
+        return $this->loadMissing('departments')->departments->contains(
+            fn (Department $joined): bool => $joined->pivot->role === DepartmentRole::Overseer
+                && ($department === null || $joined->key === $department),
+        );
+    }
+
+    /**
+     * Check if the departments of the user grant the given permission (`Action:Subject`, as checked by the
+     * policies): the members of a department can do everything on its sections.
+     */
+    public function hasDepartmentPermission(string $permission): bool
+    {
+        if (! str_contains($permission, ':')) {
+            return false;
+        }
+
+        $subject = explode(':', $permission, 2)[1];
+
+        return $this->getDepartmentKeys()->contains(
+            static fn (DepartmentKey $department): bool => in_array($subject, $department->getPermissionSubjects(), true),
+        );
+    }
+
+    /**
+     * Get the keys of the departments the user serves in, loaded once per instance.
+     *
+     * @return Collection<int, DepartmentKey>
+     */
+    public function getDepartmentKeys(): Collection
+    {
+        if (! $this->exists) {
+            return collect();
+        }
+
+        return $this->loadMissing('departments')->departments->pluck('key');
     }
 
     /**

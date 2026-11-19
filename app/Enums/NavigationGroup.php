@@ -9,6 +9,8 @@ enum NavigationGroup: string implements HasLabel
 {
     // Change the order of the cases to update the order on the UI
     case Territories = 'territories';
+    case PublicWitnessing = 'public_witnessing';
+    case Publications = 'publications';
     case Administration = 'administration';
     case Developer = 'developer';
 
@@ -18,6 +20,8 @@ enum NavigationGroup: string implements HasLabel
             self::Developer => __('navigation.groups.developer'),
             self::Administration => __('navigation.groups.administration'),
             self::Territories => __('navigation.groups.territories'),
+            self::PublicWitnessing => __('navigation.groups.public_witnessing'),
+            self::Publications => __('navigation.groups.publications'),
         };
     }
 }

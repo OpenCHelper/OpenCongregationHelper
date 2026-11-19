@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use App\Filament\Resources\Departments\DepartmentResource;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -186,6 +187,12 @@ return [
     'resources' => [
         'subject' => 'model',
         'manage' => [
+            // The departments are defined by the application: only their members can be changed
+            DepartmentResource::class => [
+                'viewAny',
+                'view',
+                'update',
+            ],
             RoleResource::class => [
                 'viewAny',
                 'view',
