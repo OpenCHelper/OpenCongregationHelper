@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Database\Factories\PublicationSubscriberFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -135,15 +137,7 @@ class PublicationSubscriber extends Model
                     continue;
                 }
 
-                // Received again: from the period after the last one requested before, not twice for the same one
-                $lastPeriodOn = $this->subscriptions()
-                    ->where('publication_id', $publicationId)
-                    ->whereNotNull('last_period_on')
-                    ->max('last_period_on');
-
-                $this->subscriptions()
-                    ->create(['publication_id' => $publicationId, 'quantity' => $quantity, 'started_at' => today(), 'last_period_on' => $lastPeriodOn])
-                    ->renew();
+                $this->startSubscription($publicationId, $quantity, today());
             }
 
             // By publication: `except()` of an Eloquent collection would compare the IDs of the subscriptions
@@ -153,6 +147,30 @@ class PublicationSubscriber extends Model
         });
 
         $this->unsetRelation('activeSubscriptions');
+    }
+
+    /**
+     * Start receiving a publication regularly, and request it for the current period. A publication received again
+     * continues from the period after the last one requested before, so that the same period is not requested twice
+     * (e.g. removed by mistake and added back).
+     */
+    public function startSubscription(int $publicationId, int $quantity, CarbonInterface|string $since): PublicationSubscription
+    {
+        $lastPeriodOn = $this->subscriptions()
+            ->where('publication_id', $publicationId)
+            ->whereNotNull('last_period_on')
+            ->max('last_period_on');
+
+        $subscription = $this->subscriptions()->create([
+            'publication_id' => $publicationId,
+            'quantity' => $quantity,
+            'started_at' => Carbon::parse($since)->toDateString(),
+            'last_period_on' => $lastPeriodOn,
+        ]);
+
+        $subscription->renew();
+
+        return $subscription;
     }
 
     /**

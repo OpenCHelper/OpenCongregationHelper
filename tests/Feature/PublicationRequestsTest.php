@@ -273,6 +273,26 @@ describe('requests page', function () {
             ->and(PublicationSubscription::count())->toBe(0);
     });
 
+    test('a publication already received regularly is not requested again from here, but changed in the regular publications', function () {
+        $subscription = subscribeTo($this->publisher, $this->watchtower, today()->toDateString(), 2);
+        [$current] = $subscription->renew();
+
+        Livewire::test(ManagePublicationRequests::class)
+            ->callAction(TestAction::make('create'), [
+                'user_id' => $this->publisher->id,
+                'publication_id' => $this->watchtower->id,
+                'quantity' => 1,
+                'renews' => true,
+                'requested_at' => today()->toDateString(),
+                'notes' => 'For the study',
+            ])
+            ->assertHasFormErrors(['publication_id']);
+
+        expect($subscription->fresh()->quantity)->toBe(2)
+            ->and($current->fresh()->notes)->toBeNull()
+            ->and(PublicationRequest::count())->toBe(1);
+    });
+
     test('the steps must be in order', function () {
         Livewire::test(ManagePublicationRequests::class)
             ->callAction(TestAction::make('create'), [
@@ -444,6 +464,38 @@ describe('access and history in context', function () {
         $this->get(ManageUserPublicationRequests::getUrl(['record' => $this->publisher]))
             ->assertOk()
             ->assertSee(__('filament-pages.manage_user_publication_requests_title', ['name' => 'Mario Rossi']));
+    });
+
+    test('a request is not moved to another publisher from their history, nor a renewal from the requests', function () {
+        $admin = User::factory()->create();
+        $admin->assignRole(Role::findOrCreate('super_admin', 'web'));
+        $this->actingAs($admin);
+
+        $own = PublicationRequest::factory()->create(['user_id' => $this->publisher->id, 'publication_id' => $this->book->id]);
+        $renewal = subscribeTo($this->publisher, $this->watchtower, today()->toDateString());
+        [$renewed] = $renewal->renew();
+        $single = PublicationRequest::factory()->create(['publication_id' => $this->book->id]);
+        $other = User::factory()->create();
+
+        Livewire::test(ManageUserPublicationRequests::class, ['record' => $this->publisher->getRouteKey()])
+            ->mountAction(TestAction::make('edit')->table($own))
+            ->assertFormFieldDisabled('user_id')
+            ->fillForm(['user_id' => $other->id, 'quantity' => 4])
+            ->callMountedAction();
+
+        Livewire::test(ManagePublicationRequests::class, ['activeTab' => 'all'])
+            ->mountAction(TestAction::make('edit')->table($renewed))
+            ->assertFormFieldDisabled('user_id')
+            ->fillForm(['user_id' => $other->id])
+            ->callMountedAction();
+
+        // A single request can still be corrected
+        Livewire::test(ManagePublicationRequests::class, ['activeTab' => 'all'])
+            ->mountAction(TestAction::make('edit')->table($single))
+            ->assertFormFieldEnabled('user_id');
+
+        expect($own->fresh())->user_id->toBe($this->publisher->id)->quantity->toBe(4)
+            ->and($renewed->fresh()->user_id)->toBe($this->publisher->id);
     });
 
     test('the user page of the requests is hidden from who cannot see the requests', function () {

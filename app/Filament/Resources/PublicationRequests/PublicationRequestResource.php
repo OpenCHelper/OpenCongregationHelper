@@ -5,10 +5,13 @@ namespace App\Filament\Resources\PublicationRequests;
 use App\Enums\NavigationGroup;
 use App\Enums\PublicationRequestStatus;
 use App\Filament\Resources\PublicationRequests\Pages\ManagePublicationRequests;
+use App\Filament\Resources\Users\Pages\ManageUserPublicationRequests;
 use App\Models\Publication;
 use App\Models\PublicationRequest;
 use App\Models\PublicationSubscriber;
+use App\Models\PublicationSubscription;
 use App\Models\User;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
@@ -40,7 +43,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 use Override;
 use UnitEnum;
 
@@ -130,7 +135,11 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                     ->getOptionLabelFromRecordUsing(fn (User $record): string => $record->getFullName())
                     ->searchable(['first_name', 'last_name'])
                     ->preload()
-                    ->required(),
+                    ->required()
+                    // Not moved to another publisher: a renewal belongs to the publisher of its subscription, and a
+                    // request edited from the history of a publisher stays in it
+                    ->disabled(fn (string $operation, Component $livewire, ?PublicationRequest $record): bool => static::isPublisherLocked($operation, $livewire, $record))
+                    ->dehydrated(fn (string $operation, Component $livewire, ?PublicationRequest $record): bool => ! static::isPublisherLocked($operation, $livewire, $record)),
                 Grid::make(['default' => 1, 'sm' => 3])
                     ->schema([
                         Select::make('publication_id')
@@ -139,6 +148,16 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                             ->searchable()
                             ->required()
                             ->live()
+                            // A publication received regularly is changed in the regular publications, not requested again
+                            ->rule(fn (string $operation, Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($operation, $get): void {
+                                if (static::isRenewingFromTheForm($operation, $get) && PublicationSubscription::query()
+                                    ->active()
+                                    ->where('publication_id', $value)
+                                    ->whereHas('subscriber', fn (Builder $query): Builder => $query->where('user_id', $get('user_id')))
+                                    ->exists()) {
+                                    $fail(__('filament-resources.publication_request.validation_already_received'));
+                                }
+                            })
                             ->columnSpan(['sm' => 2]),
                         TextInput::make('quantity')
                             ->label(__('filament-resources.publication_request.field_quantity'))
@@ -191,6 +210,15 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
     }
 
     /**
+     * Whether the publisher of the request can't be changed: the ones renewed by a subscription, and the requests
+     * edited from the history of a publisher.
+     */
+    public static function isPublisherLocked(string $operation, Component $livewire, ?PublicationRequest $record): bool
+    {
+        return $operation === 'edit' && ($livewire instanceof ManageUserPublicationRequests || (bool) $record?->isRenewal());
+    }
+
+    /**
      * Whether the form creates a subscription (renewed every period) rather than a single request.
      */
     public static function isRenewingFromTheForm(string $operation, Get $get): bool
@@ -216,26 +244,30 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
             return PublicationRequest::query()->create($data);
         }
 
-        $subscriber = PublicationSubscriber::query()->firstOrCreate(['user_id' => $data['user_id']]);
+        // All or nothing: the publisher in the regular publications, their subscription and its first request
+        return DB::transaction(function () use ($data, $publication): PublicationRequest {
+            $subscriber = PublicationSubscriber::query()->firstOrCreate(['user_id' => $data['user_id']]);
 
-        $subscription = $subscriber->activeSubscriptions()->where('publication_id', $publication->getKey())->first()
-            ?? $subscriber->subscriptions()->create([
-                'publication_id' => $publication->getKey(),
-                'quantity' => $data['quantity'],
-                'started_at' => $data['requested_at'],
-            ]);
+            // Rejected by the form when already received: changed in the regular publications instead
+            $made = $subscriber->activeSubscriptions()->where('publication_id', $publication->getKey())->exists()
+                ? []
+                : $subscriber->startSubscription($publication->getKey(), (int) $data['quantity'], $data['requested_at'])->requests()->get()->all();
 
-        $subscription->update(['quantity' => $data['quantity']]);
-        $subscription->renew();
+            // The request just made or, when its period was already requested (e.g. received again in the same month),
+            // the last one of the publisher
+            $request = $made[0] ?? PublicationRequest::query()
+                ->where('user_id', $data['user_id'])
+                ->where('publication_id', $publication->getKey())
+                ->latest('requested_at')
+                ->latest('id')
+                ->firstOrFail();
 
-        // The last request of the subscription: the one just made, or the current one if it was already received
-        $request = $subscription->requests()->latest('requested_at')->latest('id')->firstOrFail();
+            if ($made !== [] && filled($data['notes'] ?? null)) {
+                $request->update(['notes' => $data['notes']]);
+            }
 
-        if (filled($data['notes'] ?? null)) {
-            $request->update(['notes' => $data['notes']]);
-        }
-
-        return $request;
+            return $request;
+        });
     }
 
     public static function table(Table $table): Table

@@ -502,6 +502,7 @@ return [
         'field_quantity' => 'Copies',
         'field_renews' => 'Request it again :every',
         'field_renews_helper' => 'It will be received regularly: shown in the regular publications and requested again automatically, until it is stopped.',
+        'validation_already_received' => 'This publisher already receives it regularly: change the copies in the regular publications.',
         'field_requested_at' => 'Requested on',
         'field_requested_at_renews_helper' => 'To request it again regularly, the date is in this month: for the earlier months, add single requests.',
         'field_ordered_at' => 'Ordered on',

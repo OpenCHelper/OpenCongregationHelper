@@ -503,6 +503,7 @@ return [
         'field_quantity' => 'Copie',
         'field_renews' => 'Richiedila di nuovo :every',
         'field_renews_helper' => 'La riceverà regolarmente: compare nelle pubblicazioni periodiche e viene richiesta di nuovo automaticamente, finché non viene interrotta.',
+        'validation_already_received' => 'Questo proclamatore la riceve già regolarmente: cambia le copie nelle pubblicazioni periodiche.',
         'field_requested_at' => 'Richiesta il',
         'field_requested_at_renews_helper' => 'Per richiederla di nuovo regolarmente, la data è in questo mese: per i mesi precedenti aggiungi delle richieste singole.',
         'field_ordered_at' => 'Ordinata il',

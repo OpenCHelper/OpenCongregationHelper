@@ -503,6 +503,7 @@ return [
         'field_quantity' => 'Copias',
         'field_renews' => 'Volver a solicitarla :every',
         'field_renews_helper' => 'La recibirá con regularidad: aparece en las publicaciones periódicas y se vuelve a solicitar automáticamente, hasta que se interrumpa.',
+        'validation_already_received' => 'Este publicador ya la recibe con regularidad: cambia las copias en las publicaciones periódicas.',
         'field_requested_at' => 'Solicitada el',
         'field_requested_at_renews_helper' => 'Para volver a solicitarla con regularidad, la fecha es de este mes: para los meses anteriores añade solicitudes individuales.',
         'field_ordered_at' => 'Pedida el',
