@@ -49,9 +49,9 @@ class PublicationSubscriberResource extends Resource implements HasKnowledgeBase
 {
     protected static ?string $model = PublicationSubscriber::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPathRoundedSquare;
 
-    protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::Newspaper;
+    protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::ArrowPathRoundedSquare;
 
     protected static ?int $navigationSort = 1;
 
@@ -252,7 +252,7 @@ class PublicationSubscriberResource extends Resource implements HasKnowledgeBase
                         ->successNotificationTitle(__('filament-resources.publication_subscriber.notification_removed')),
                 ]),
             ])
-            ->emptyStateIcon(Heroicon::OutlinedNewspaper)
+            ->emptyStateIcon(Heroicon::OutlinedArrowPathRoundedSquare)
             ->emptyStateHeading(__('filament-resources.publication_subscriber.empty_heading'))
             ->emptyStateDescription(__('filament-resources.publication_subscriber.empty_description'));
     }

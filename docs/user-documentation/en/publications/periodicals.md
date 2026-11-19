@@ -1,6 +1,6 @@
 ---
 type: documentation
-icon: heroicon-o-newspaper
+icon: heroicon-o-arrow-path-rounded-square
 title: Regular publications
 order: 1
 ---
