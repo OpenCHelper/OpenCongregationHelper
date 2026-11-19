@@ -19,14 +19,16 @@ i totali seguono i filtri e la ricerca.
 
 1. Clicca **Aggiungi proclamatore**.
 2. Scegli il **Proclamatore** (sono elencati solo quelli non ancora presenti).
-3. Inserisci le copie di ogni pubblicazione, raggruppate per categoria: lascia `0` per quelle che non riceve. Serve
-   almeno una copia.
+3. In **Copie ricevute**, clicca **Aggiungi pubblicazione**, scegli la **Pubblicazione** (raggruppate per categoria,
+   puoi scrivere per cercarla) e inserisci il numero di **Copie**. Ripeti per ogni pubblicazione ricevuta: ne serve
+   almeno una.
 4. Se vuoi, aggiungi delle **Note** (ad esempio chi gliele consegna).
 5. Clicca **Salva**, oppure **Salva & crea un altro** per aggiungere più proclamatori di seguito.
 
-![Aggiungere un proclamatore](/docs/user-documentation/it/publications/assets/periodical-form.webp)
+![Copie ricevute da un proclamatore](/docs/user-documentation/it/publications/assets/periodical-form.webp)
 
-Per cambiare le copie clicca **Modifica**; quando un proclamatore non riceve più nulla clicca **Rimuovi**.
+Per cambiare le copie clicca **Modifica**: cambia i numeri, aggiungi una pubblicazione o toglila col cestino. Quando un
+proclamatore non riceve più nulla, clicca **Rimuovi**.
 
 ## L'elenco delle pubblicazioni
 

@@ -19,14 +19,15 @@ the filters and the search.
 
 1. Click **Add publisher**.
 2. Choose the **Publisher** (only the ones not already in the list are shown).
-3. Enter the copies of each publication, grouped by category: leave `0` for the ones not received. At least one copy
-   is needed.
+3. Under **Copies received**, click **Add publication**, choose the **Publication** (grouped by category, you can type
+   to search it) and enter the number of **Copies**. Repeat for each publication received: at least one is needed.
 4. Optionally, add some **Notes** (e.g. who delivers them).
 5. Click **Create**, or **Create & create another** to add more publishers in a row.
 
-![Adding a publisher](/docs/user-documentation/en/publications/assets/periodical-form.webp)
+![Copies received by a publisher](/docs/user-documentation/en/publications/assets/periodical-form.webp)
 
-To change the copies click **Edit**; when a publisher no longer receives anything click **Remove**.
+To change the copies click **Edit**: change the numbers, add a publication or remove one with its bin icon. When a
+publisher no longer receives anything, click **Remove**.
 
 ## The publication list
 
