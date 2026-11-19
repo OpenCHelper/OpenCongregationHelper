@@ -418,7 +418,7 @@ return [
         'navigation_label' => 'Publicaciones en papel',
         'model_label' => 'publicador que recibe publicaciones',
         'plural_model_label' => 'Publicaciones en papel',
-        'field_user' => 'Hermano o hermana',
+        'field_user' => 'Publicador',
         'field_notes' => 'Notas',
         'field_notes_placeholder' => 'p. ej. se las entrega en casa el superintendente del grupo',
         'column_user' => 'Nombre',

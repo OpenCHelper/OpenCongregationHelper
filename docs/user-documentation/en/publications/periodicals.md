@@ -18,7 +18,7 @@ the filters and the search.
 ## Adding a publisher
 
 1. Click **Add publisher**.
-2. Choose the **Brother or sister** (only the ones not already in the list are shown).
+2. Choose the **Publisher** (only the ones not already in the list are shown).
 3. Enter the copies of each publication, grouped by category: leave `0` for the ones not received. At least one copy
    is needed.
 4. Optionally, add some **Notes** (e.g. who delivers them).

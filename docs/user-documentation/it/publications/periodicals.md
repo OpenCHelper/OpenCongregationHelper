@@ -18,7 +18,7 @@ i totali seguono i filtri e la ricerca.
 ## Aggiungere un proclamatore
 
 1. Clicca **Aggiungi proclamatore**.
-2. Scegli il **Fratello o sorella** (sono elencati solo quelli non ancora presenti).
+2. Scegli il **Proclamatore** (sono elencati solo quelli non ancora presenti).
 3. Inserisci le copie di ogni pubblicazione, raggruppate per categoria: lascia `0` per quelle che non riceve. Serve
    almeno una copia.
 4. Se vuoi, aggiungi delle **Note** (ad esempio chi gliele consegna).

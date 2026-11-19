@@ -12,6 +12,7 @@ use App\Models\User;
 use Database\Seeders\FakePeriodicalSubscriptionSeeder;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
@@ -100,6 +101,14 @@ test('a publisher can be added with the copies of each publication', function ()
         ->and($subscription->quantityOf($this->workbook))->toBe(1)
         ->and($subscription->items)->toHaveCount(2)
         ->and($subscription->notes)->toBe('Delivered at home');
+});
+
+test('the publisher is chosen in a field named as in the rest of the application', function () {
+    Livewire::test(ManagePeriodicalSubscriptions::class)
+        ->mountAction(TestAction::make('create'))
+        ->assertFormFieldExists('user_id', fn (Select $field): bool => $field->getLabel() === __('filament-resources.periodical_subscription.field_user'));
+
+    expect(__('filament-resources.periodical_subscription.field_user', [], 'it'))->toBe('Proclamatore');
 });
 
 test('a publisher must receive at least one copy', function () {

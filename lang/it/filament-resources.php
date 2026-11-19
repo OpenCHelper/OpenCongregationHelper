@@ -418,7 +418,7 @@ return [
         'navigation_label' => 'Pubblicazioni su carta',
         'model_label' => 'proclamatore che riceve pubblicazioni',
         'plural_model_label' => 'Pubblicazioni su carta',
-        'field_user' => 'Fratello o sorella',
+        'field_user' => 'Proclamatore',
         'field_notes' => 'Note',
         'field_notes_placeholder' => 'es. consegnate a casa dal sorvegliante del gruppo',
         'column_user' => 'Nome',

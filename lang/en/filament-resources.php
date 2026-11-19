@@ -417,7 +417,7 @@ return [
         'navigation_label' => 'Paper publications',
         'model_label' => 'publisher receiving publications',
         'plural_model_label' => 'Paper publications',
-        'field_user' => 'Brother or sister',
+        'field_user' => 'Publisher',
         'field_notes' => 'Notes',
         'field_notes_placeholder' => 'e.g. delivered at home by his group overseer',
         'column_user' => 'Name',
