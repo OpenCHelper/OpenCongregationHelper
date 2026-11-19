@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Departments** (Administration → Departments): the Territory Department, Public Witnessing and Publications, each
+  with its overseers and assistants, who can manage the sections of their department without needing a role
+  ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
+- **Posters inventory** (Public Witnessing → Posters): the magnetic posters of the displays, with their code, title and
+  copies in each location, e.g. the Kingdom Hall or a storage box ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
+- **Paper periodicals** (Publications): who receives The Watchtower, its large print edition and the Meeting Workbook
+  on paper, with the total copies to order ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
+- Departments column and filter in the users list ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
+
 ### Fixed
 
 - The password reset and email verification emails are now in the language of the recipient, in Italian and
