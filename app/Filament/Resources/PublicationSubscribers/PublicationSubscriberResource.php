@@ -98,6 +98,10 @@ class PublicationSubscriberResource extends Resource implements HasKnowledgeBase
                     ->searchable(['first_name', 'last_name'])
                     ->preload()
                     ->required()
+                    // Once saved, the publisher is not changed: their history belongs to them, and a publisher removed
+                    // from the list keeps their record, which another one can't take
+                    ->disabledOn('edit')
+                    ->dehydrated(fn (string $operation): bool => $operation !== 'edit')
                     // Listed once; a publisher removed from the list can be added again (with their history)
                     ->rule(fn (?PublicationSubscriber $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($record): void {
                         $alreadyListed = PublicationSubscriber::query()

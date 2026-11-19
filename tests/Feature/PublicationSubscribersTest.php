@@ -170,6 +170,20 @@ test('a publisher is listed only once', function () {
         ->assertHasFormErrors(['user_id']);
 });
 
+test('the publisher of a row is not changed once saved', function () {
+    $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->create();
+    $removed = PublicationSubscriber::factory()->create();
+
+    Livewire::test(ManagePublicationSubscribers::class)
+        ->mountAction(TestAction::make('edit')->table($subscriber))
+        ->assertFormFieldDisabled('user_id')
+        ->fillForm(['user_id' => $removed->user_id])
+        ->callMountedAction()
+        ->assertHasNoFormErrors();
+
+    expect($subscriber->fresh()->user_id)->not->toBe($removed->user_id);
+});
+
 test('changing the copies applies to the next requests, removing a publication stops it', function () {
     $subscriber = PublicationSubscriber::factory()->receiving($this->watchtower)->receiving($this->workbook)->create();
     $previous = PublicationRequest::factory()->create(['user_id' => $subscriber->user_id, 'publication_id' => $this->watchtower->id, 'quantity' => 1]);
