@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Service groups**: gather the publishers in groups with a coordinator and up to two assistants, see the group on
+  the page of each user, and move people between groups by dragging them on a board or with a bulk action on the users
+  table.
+
 ### Fixed
 
 - The password reset and email verification emails are now in the language of the recipient, in Italian and

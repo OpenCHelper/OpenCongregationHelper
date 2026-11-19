@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -50,7 +51,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     {
         return LogOptions::defaults()
             ->logOnlyDirty()
-            ->logOnly(['first_name', 'last_name', 'email']);
+            ->logOnly(['first_name', 'last_name', 'email', 'service_group_id']);
     }
 
     /**
@@ -65,6 +66,16 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
         'password',
         'can_login',
         'locale',
+        'service_group_id',
+    ];
+
+    /**
+     * The default values of the attributes, so that the activity log can read them on users that were just created.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'service_group_id' => null,
     ];
 
     /**
@@ -216,6 +227,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     public function isVirtual(): bool
     {
         return ! $this->can_login;
+    }
+
+    /**
+     * Get the service group the user belongs to.
+     */
+    public function serviceGroup(): BelongsTo
+    {
+        return $this->belongsTo(ServiceGroup::class);
     }
 
     public function assignments(): HasMany
