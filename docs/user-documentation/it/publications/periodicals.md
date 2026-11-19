@@ -5,8 +5,9 @@ title: Pubblicazioni su carta
 order: 1
 ---
 
-Apri **Pubblicazioni → Pubblicazioni su carta** per vedere chi riceve pubblicazioni su carta (ad esempio *La Torre di
-Guardia* o la *Guida per l'adunanza*), e quante copie.
+Apri **Pubblicazioni → Pubblicazioni su carta** per vedere chi riceve regolarmente pubblicazioni su carta (ad esempio
+*La Torre di Guardia* o la *Guida per l'adunanza*), e quante copie. Ognuna viene [richiesta](requests) di nuovo
+automaticamente ogni periodo (es. ogni mese), e ogni richiesta resta nello storico.
 
 ![Pubblicazioni su carta](/docs/user-documentation/it/publications/assets/periodicals.webp)
 
@@ -19,16 +20,18 @@ i totali seguono i filtri e la ricerca.
 
 1. Clicca **Aggiungi proclamatore**.
 2. Scegli il **Proclamatore** (sono elencati solo quelli non ancora presenti).
-3. In **Copie ricevute**, clicca **Aggiungi pubblicazione**, scegli la **Pubblicazione** (raggruppate per categoria,
-   puoi scrivere per cercarla) e inserisci il numero di **Copie**. Ripeti per ogni pubblicazione ricevuta: ne serve
-   almeno una.
+3. In **Copie ricevute**, clicca **Aggiungi pubblicazione**, scegli la **Pubblicazione** (solo quelle che si
+   rinnovano, raggruppate per categoria; puoi scrivere per cercarla) e inserisci il numero di **Copie**. Ripeti per ogni
+   pubblicazione ricevuta: ne serve almeno una. La prima richiesta di ognuna viene fatta subito.
 4. Se vuoi, aggiungi delle **Note** (ad esempio chi gliele consegna).
 5. Clicca **Salva**, oppure **Salva & crea un altro** per aggiungere più proclamatori di seguito.
 
 ![Copie ricevute da un proclamatore](/docs/user-documentation/it/publications/assets/periodical-form.webp)
 
-Per cambiare le copie clicca **Modifica**: cambia i numeri, aggiungi una pubblicazione o toglila col cestino. Quando un
-proclamatore non riceve più nulla, clicca **Rimuovi**.
+Per cambiare le copie clicca **Modifica**: cambia i numeri (valgono per le prossime richieste), aggiungi una
+pubblicazione o toglila col cestino (non verrà più richiesta). Quando un proclamatore non riceve più nulla, clicca
+**Rimuovi**: le sue pubblicazioni non vengono più richieste, ma il suo storico viene conservato e potrai aggiungerlo di
+nuovo in seguito. Il pulsante **Richieste** apre lo storico delle sue richieste.
 
 ## L'elenco delle pubblicazioni
 
@@ -43,10 +46,14 @@ la *Guida per l'adunanza*.
    *Guide per l'adunanza*, *Libri*, *Opuscoli e brochure*, *Volantini*, *Indici*, *Programmi*, *Manuali e linee guida*
    o *Altro*.
 3. Se vuoi, inserisci un **Nome breve** (es. la sigla `lff`), mostrato nell'intestazione della sua colonna.
-4. Clicca **Salva**: la pubblicazione avrà la sua colonna e il suo campo nelle pubblicazioni su carta.
+4. Per le pubblicazioni ricevute regolarmente, indica ogni quanti mesi **Si rinnova** (es. 1 per *La Torre di
+   Guardia*, 2 per la *Guida per l'adunanza*); lascialo vuoto per quelle richieste una volta sola (es. un libro).
+5. Clicca **Salva**: una pubblicazione che si rinnova avrà la sua colonna nelle pubblicazioni su carta; tutte si
+   possono [richiedere](requests).
 
 Le pubblicazioni sono elencate per categoria; trascinale (col pulsante in alto nella tabella) per cambiarne l'ordine al
 suo interno. Per non offrire più una pubblicazione, disattiva **Disponibile**: sparisce dalle pubblicazioni su carta,
-ma le copie già inserite vengono conservate. Eliminandola si eliminano anche quelle copie.
+ma le copie già inserite vengono conservate. Eliminandola si eliminano anche quelle copie e le sue richieste. La
+colonna **In sospeso** conta le sue richieste non ancora consegnate, e il pulsante **Richieste** ne apre lo storico.
 
 I membri del [reparto Pubblicazioni](../administration/departments) possono gestire entrambi gli elenchi.

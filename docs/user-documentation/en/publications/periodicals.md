@@ -5,8 +5,9 @@ title: Paper publications
 order: 1
 ---
 
-Open **Publications → Paper publications** to see who receives publications on paper (e.g. *The Watchtower* or the
-*Meeting Workbook*), and how many copies.
+Open **Publications → Paper publications** to see who receives publications on paper regularly (e.g. *The Watchtower*
+or the *Meeting Workbook*), and how many copies. Each one is [requested](requests) again automatically every period
+(e.g. every month), and every request stays in the history.
 
 ![Paper publications](/docs/user-documentation/en/publications/assets/periodicals.webp)
 
@@ -19,15 +20,18 @@ the filters and the search.
 
 1. Click **Add publisher**.
 2. Choose the **Publisher** (only the ones not already in the list are shown).
-3. Under **Copies received**, click **Add publication**, choose the **Publication** (grouped by category, you can type
-   to search it) and enter the number of **Copies**. Repeat for each publication received: at least one is needed.
+3. Under **Copies received**, click **Add publication**, choose the **Publication** (only the ones that renew, grouped
+   by category; you can type to search it) and enter the number of **Copies**. Repeat for each publication received:
+   at least one is needed. The first request of each one is made right away.
 4. Optionally, add some **Notes** (e.g. who delivers them).
 5. Click **Create**, or **Create & create another** to add more publishers in a row.
 
 ![Copies received by a publisher](/docs/user-documentation/en/publications/assets/periodical-form.webp)
 
-To change the copies click **Edit**: change the numbers, add a publication or remove one with its bin icon. When a
-publisher no longer receives anything, click **Remove**.
+To change the copies click **Edit**: change the numbers (they apply to the next requests), add a publication or remove
+one with its bin icon (it will no longer be requested). When a publisher no longer receives anything, click **Remove**:
+their publications are no longer requested, but their history is kept and you can add them again later. The
+**Requests** button opens the history of their requests.
 
 ## The publication list
 
@@ -40,10 +44,14 @@ them. The list starts with *The Watchtower*, its large print edition and the *Me
 2. Choose the **Category**, as in the Watchtower Online Library: *Bibles*, *Watchtower*, *Awake!*, *Meeting Workbooks*,
    *Books*, *Brochures and Booklets*, *Tracts*, *Indexes*, *Programs*, *Manuals and Guidelines* or *Other*.
 3. Optionally, enter a **Short name** (e.g. the symbol `lff`), shown in the header of its column.
-4. Click **Create**: the publication gets its own column and field in the paper publications.
+4. For the publications received regularly, enter every how many months it **Renews** (e.g. 1 for *The Watchtower*, 2
+   for the *Meeting Workbook*); leave it empty for the ones requested once (e.g. a book).
+5. Click **Create**: a publication that renews gets its own column in the paper publications; all of them can be
+   [requested](requests).
 
 The publications are listed by category; drag them (with the button at the top of the table) to change their order
 within it. To stop offering a publication, turn off **Offered**: it disappears from the paper publications, but the
-copies already entered are kept. Deleting it deletes those copies too.
+copies already entered are kept. Deleting it deletes those copies and its requests too. The **Pending** column counts
+its requests not delivered yet, and the **Requests** button opens their history.
 
 The members of the [Publications department](../administration/departments) can manage both lists.
