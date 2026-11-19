@@ -63,6 +63,35 @@ class MembersRelationManager extends RelationManager
         return Gate::allows('update', $this->getOwnerRecord());
     }
 
+    /**
+     * Only the administrators (who can update every department) appoint the overseers, or change and remove them: an
+     * overseer manages the assistants of their department.
+     */
+    protected static function canManageOverseers(): bool
+    {
+        return Gate::allows('Update:Department');
+    }
+
+    /**
+     * Whether the member can be edited or removed by the current user: an overseer only by an administrator.
+     */
+    protected function canManageMember(User $member): bool
+    {
+        if (! $this->canManageMembers()) {
+            return false;
+        }
+
+        if (static::canManageOverseers()) {
+            return true;
+        }
+
+        // The role of the membership, also when the user was loaded without it (e.g. the records selected in bulk)
+        $role = $member->pivot?->getAttribute('role')
+            ?? $this->getOwnerRecord()->members()->whereKey($member->getKey())->first()?->pivot?->getAttribute('role');
+
+        return $role !== null && static::toRole($role) !== DepartmentRole::Overseer;
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -77,6 +106,11 @@ class MembersRelationManager extends RelationManager
             ->label(__('departments.members.field_role'))
             ->options(DepartmentRole::class)
             ->default(DepartmentRole::Assistant->value)
+            // Only the administrators appoint the overseers (checked again on save)
+            ->disableOptionWhen(fn (string $value): bool => $value === DepartmentRole::Overseer->value && ! static::canManageOverseers())
+            ->in(fn (): array => static::canManageOverseers()
+                ? array_map(fn (DepartmentRole $role): string => $role->value, DepartmentRole::cases())
+                : [DepartmentRole::Assistant->value])
             ->inline()
             ->required()
             ->helperText(__('departments.members.field_role_helper'));
@@ -122,7 +156,8 @@ class MembersRelationManager extends RelationManager
                     ->authorize(fn (): bool => $this->canManageMembers())
                     ->multiple()
                     ->preloadRecordSelect()
-                    ->recordSelectSearchColumns(['first_name', 'last_name', 'email'])
+                    // By name only: the overseers may not see the users, so their email addresses are not searchable
+                    ->recordSelectSearchColumns(['first_name', 'last_name'])
                     ->recordSelectOptionsQuery(fn (Builder $query): Builder => $query->orderBy('first_name')->orderBy('last_name'))
                     ->schema(fn (AttachAction $action): array => [
                         $action->getRecordSelect()
@@ -136,19 +171,21 @@ class MembersRelationManager extends RelationManager
                     ->label(__('departments.members.action_change_role'))
                     ->icon(Heroicon::OutlinedArrowsRightLeft)
                     ->modalHeading(fn (User $record): string => $record->getFullName())
-                    ->authorize(fn (): bool => $this->canManageMembers()),
+                    ->authorize(fn (User $record): bool => $this->canManageMember($record)),
                 DetachAction::make()
                     ->label(__('departments.members.action_remove'))
                     ->modalSubmitActionLabel(__('departments.members.action_remove'))
                     ->successNotificationTitle(__('departments.members.notification_removed'))
                     ->modalHeading(fn (User $record): string => __('departments.members.action_remove_heading', ['name' => $record->getFullName()]))
-                    ->authorize(fn (): bool => $this->canManageMembers()),
+                    ->authorize(fn (User $record): bool => $this->canManageMember($record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make()
                         ->label(__('departments.members.action_remove'))
-                        ->authorize(fn (): bool => $this->canManageMembers()),
+                        ->authorize(fn (): bool => $this->canManageMembers())
+                        // The overseers selected are kept, unless an administrator removes them
+                        ->authorizeIndividualRecords(fn (User $record): bool => $this->canManageMember($record)),
                 ]),
             ])
             ->emptyStateIcon(Heroicon::OutlinedUserGroup)

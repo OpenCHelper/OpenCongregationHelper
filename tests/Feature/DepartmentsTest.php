@@ -154,6 +154,64 @@ test('the overseers manage the members of their own department only', function (
     expect($newMember->fresh()->isMemberOf(DepartmentKey::PublicWitnessing))->toBeTrue();
 });
 
+test('the overseers add and manage assistants, but only the administrators appoint, change or remove overseers', function () {
+    $overseer = User::factory()->create();
+    $department = joinDepartment($overseer, DepartmentKey::Publications, DepartmentRole::Overseer);
+    $otherOverseer = User::factory()->create();
+    joinDepartment($otherOverseer, DepartmentKey::Publications, DepartmentRole::Overseer);
+    $assistant = User::factory()->create();
+    joinDepartment($assistant, DepartmentKey::Publications);
+    [$newOverseer, $newAssistant] = User::factory()->count(2)->create();
+
+    $this->actingAs($overseer);
+    $component = fn () => Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class]);
+
+    $component()
+        ->callAction(TestAction::make('attach')->table(), ['recordId' => [$newOverseer->id], 'role' => DepartmentRole::Overseer->value])
+        ->assertHasFormErrors(['role']);
+    $component()
+        ->callAction(TestAction::make('attach')->table(), ['recordId' => [$newAssistant->id], 'role' => DepartmentRole::Assistant->value])
+        ->assertHasNoFormErrors();
+    $component()
+        ->assertActionHidden(TestAction::make('edit')->table($otherOverseer))
+        ->assertActionHidden(TestAction::make('detach')->table($otherOverseer))
+        ->assertActionVisible(TestAction::make('detach')->table($assistant))
+        ->callAction(TestAction::make('edit')->table($assistant), ['role' => DepartmentRole::Overseer->value])
+        ->assertHasFormErrors(['role']);
+    $component()->selectTableRecords([$otherOverseer, $assistant])->callAction(TestAction::make('detach')->table()->bulk());
+
+    expect($department->overseers()->pluck('users.id')->sort()->values()->all())->toBe([$overseer->id, $otherOverseer->id])
+        ->and($newOverseer->fresh()->isMemberOf(DepartmentKey::Publications))->toBeFalse()
+        ->and($newAssistant->fresh()->isMemberOf(DepartmentKey::Publications))->toBeTrue()
+        ->and($assistant->fresh()->isMemberOf(DepartmentKey::Publications))->toBeFalse();
+
+    // An administrator can
+    $this->actingAs($this->admin);
+
+    $component()
+        ->callAction(TestAction::make('edit')->table($otherOverseer), ['role' => DepartmentRole::Assistant->value])
+        ->assertHasNoFormErrors();
+
+    expect($department->isOverseer($otherOverseer->fresh()))->toBeFalse();
+});
+
+test('the users to add are searched by name, not by email', function () {
+    $overseer = User::factory()->create();
+    $department = joinDepartment($overseer, DepartmentKey::Publications, DepartmentRole::Overseer);
+    User::factory()->create(['first_name' => 'Mario', 'last_name' => 'Rossi', 'email' => 'secret@example.com']);
+
+    $this->actingAs($overseer);
+
+    $select = Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class])
+        ->mountAction(TestAction::make('attach')->table())
+        ->instance()
+        ->getMountedAction()
+        ->getRecordSelect();
+
+    expect($select->getSearchResults('Rossi'))->not->toBeEmpty()
+        ->and($select->getSearchResults('secret@'))->toBeEmpty();
+});
+
 test('the assistants cannot manage the members of their department', function () {
     $assistant = User::factory()->create();
     $department = joinDepartment($assistant, DepartmentKey::PublicWitnessing);
