@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Poster;
 use App\Models\StorageLocation;
 use App\Models\User;
+use App\Support\Translations;
 use Filament\Actions\Imports\Jobs\ImportCsv;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Actions\Testing\TestAction;
@@ -128,8 +129,8 @@ test('the language of the titles is chosen in the import window, the one of the 
         ->and($select->getDefaultState())->toBe('it')
         ->and(array_keys($select->getOptions()))->toEqualCanonicalizing(array_keys(config('app.available_locales')))
         // An unknown language falls back to the one of the user
-        ->and(PosterImporter::getTitleLocale(['locale' => 'xx']))->toBe('it')
-        ->and(PosterImporter::getTitleLocale([]))->toBe('it');
+        ->and(Translations::resolveLocale('xx'))->toBe('it')
+        ->and(Translations::resolveLocale(null))->toBe('it');
 });
 
 test('a poster can be imported without storage place, but not copies without one', function () {

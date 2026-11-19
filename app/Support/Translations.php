@@ -53,6 +53,15 @@ class Translations
     }
 
     /**
+     * The language chosen (e.g. in an import or export window) when it is one of the application, otherwise the current
+     * one.
+     */
+    public static function resolveLocale(mixed $locale): string
+    {
+        return is_string($locale) && array_key_exists($locale, static::getLocales()) ? $locale : app()->getLocale();
+    }
+
+    /**
      * The languages of the application, by code.
      *
      * @return array<string, string>

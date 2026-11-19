@@ -52,7 +52,7 @@ class PosterImporter extends Importer
                 ->requiredMapping()
                 ->rules(['required', 'max:255'])
                 // In the language chosen in the import window, keeping the translations in the other languages
-                ->fillRecordUsing(fn (Poster $record, string $state, array $options) => $record->setTranslation('title', static::getTitleLocale($options), $state)),
+                ->fillRecordUsing(fn (Poster $record, string $state, array $options) => $record->setTranslation('title', Translations::resolveLocale($options['locale'] ?? null), $state)),
             ImportColumn::make('storage')
                 ->label(fn (): string => __('import.poster.columns.storage'))
                 ->guess(['storage', 'storage place', 'location'])
@@ -100,18 +100,6 @@ class PosterImporter extends Importer
                 ->required()
                 ->selectablePlaceholder(false),
         ];
-    }
-
-    /**
-     * The language the titles are saved in: the one chosen in the import window, or the one of the user.
-     *
-     * @param  array<string, mixed>  $options
-     */
-    public static function getTitleLocale(array $options): string
-    {
-        $locale = $options['locale'] ?? null;
-
-        return is_string($locale) && array_key_exists($locale, Translations::getLocales()) ? $locale : app()->getLocale();
     }
 
     /**

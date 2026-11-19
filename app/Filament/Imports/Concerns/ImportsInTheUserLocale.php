@@ -2,11 +2,11 @@
 
 namespace App\Filament\Imports\Concerns;
 
+use App\Support\UserLocale;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Notifications\Notification;
-use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Support\Number;
 
 /**
@@ -23,6 +23,28 @@ trait ImportsInTheUserLocale
     public function __invoke(array $data): void
     {
         static::withImportLocale($this->import, fn () => parent::__invoke($data));
+    }
+
+    /**
+     * A generic summary of the import, for the importers without their own.
+     */
+    public static function getCompletedNotificationBody(Import $import): string
+    {
+        return static::withImportLocale($import, function () use ($import): string {
+            $body = trans_choice('import.notifications.completed.body', $import->successful_rows, [
+                'count' => Number::format($import->successful_rows, locale: app()->getLocale()),
+            ]);
+
+            $failedRowsCount = $import->getFailedRowsCount();
+
+            if ($failedRowsCount) {
+                $body .= ' '.trans_choice('import.notifications.completed.failed_rows', $failedRowsCount, [
+                    'count' => Number::format($failedRowsCount, locale: app()->getLocale()),
+                ]);
+            }
+
+            return $body;
+        });
     }
 
     public static function getCompletedNotificationTitle(Import $import): string
@@ -65,22 +87,6 @@ trait ImportsInTheUserLocale
      */
     protected static function withImportLocale(Import $import, Closure $callback): mixed
     {
-        $originalLocale = app()->getLocale();
-        $user = $import->user;
-        $locale = $user instanceof HasLocalePreference
-            ? ($user->preferredLocale() ?: $originalLocale)
-            : $originalLocale;
-
-        if ($locale === $originalLocale) {
-            return $callback();
-        }
-
-        app()->setLocale($locale);
-
-        try {
-            return $callback();
-        } finally {
-            app()->setLocale($originalLocale);
-        }
+        return UserLocale::run($import->user, $callback);
     }
 }
