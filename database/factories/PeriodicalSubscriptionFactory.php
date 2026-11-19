@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Enums\Periodical;
 use App\Models\PeriodicalSubscription;
+use App\Models\Publication;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,27 +21,18 @@ class PeriodicalSubscriptionFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'quantities' => [
-                Periodical::Watchtower->value => 1,
-                Periodical::WatchtowerLargePrint->value => 0,
-                Periodical::MeetingWorkbook->value => 1,
-            ],
             'notes' => null,
         ];
     }
 
     /**
-     * Receive the given copies of each periodical (the others are not received).
-     *
-     * @param  array<string, int>  $quantities  keyed by `Periodical`
+     * Receive the given copies of a publication.
      */
-    public function receiving(array $quantities): self
+    public function receiving(Publication $publication, int $quantity = 1): self
     {
-        return $this->state(fn () => [
-            'quantities' => array_merge(
-                array_fill_keys(array_map(fn (Periodical $periodical): string => $periodical->value, Periodical::cases()), 0),
-                $quantities,
-            ),
-        ]);
+        return $this->afterCreating(fn (PeriodicalSubscription $subscription) => $subscription->items()->create([
+            'publication_id' => $publication->getKey(),
+            'quantity' => $quantity,
+        ]));
     }
 }

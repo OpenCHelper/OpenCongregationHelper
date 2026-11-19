@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use App\Enums\Periodical;
 use Database\Factories\PeriodicalSubscriptionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * The periodicals that a publisher receives on paper, with the number of copies of each one.
+ * The publications that a publisher receives on paper, with the number of copies of each one.
  */
 class PeriodicalSubscription extends Model
 {
@@ -28,31 +29,18 @@ class PeriodicalSubscription extends Model
      */
     protected $fillable = [
         'user_id',
-        'quantities',
         'notes',
     ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'quantities' => 'array',
-        ];
-    }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnlyDirty()
-            ->logOnly(['user_id', 'quantities', 'notes']);
+            ->logOnly(['user_id', 'notes']);
     }
 
     /**
-     * Get the publisher receiving the periodicals.
+     * Get the publisher receiving the publications.
      *
      * @return BelongsTo<User, $this>
      */
@@ -62,49 +50,97 @@ class PeriodicalSubscription extends Model
     }
 
     /**
-     * Get the copies of the given periodical.
+     * Get the copies of each publication received.
+     *
+     * @return HasMany<PeriodicalSubscriptionItem, $this>
      */
-    public function quantityOf(Periodical $periodical): int
+    public function items(): HasMany
     {
-        return (int) ($this->quantities[$periodical->value] ?? 0);
+        return $this->hasMany(PeriodicalSubscriptionItem::class);
     }
 
     /**
-     * Only the subscriptions receiving at least a copy of the given periodical.
+     * Get the copies of the given publication (from the loaded items).
+     */
+    public function quantityOf(Publication|int $publication): int
+    {
+        $publicationId = $publication instanceof Publication ? $publication->getKey() : $publication;
+
+        return (int) $this->items->firstWhere('publication_id', $publicationId)?->quantity;
+    }
+
+    /**
+     * Get the copies of each publication, as in the forms (keyed by `Publication::getFormKey()`).
+     *
+     * @return array<string, int>
+     */
+    public function getFormQuantities(): array
+    {
+        return $this->items
+            ->mapWithKeys(fn (PeriodicalSubscriptionItem $item): array => ['p'.$item->publication_id => $item->quantity])
+            ->all();
+    }
+
+    /**
+     * Save the subscription with the copies of each publication given (keyed by `Publication::getFormKey()`): the
+     * publications with no copies are removed, the ones not given are left as they are (e.g. no longer offered).
+     *
+     * @param  array{user_id?: int, notes?: ?string, quantities?: array<string, int|string|null>}  $data
+     */
+    public function saveWithQuantities(array $data): self
+    {
+        DB::transaction(function () use ($data): void {
+            $this->fill(collect($data)->only(['user_id', 'notes'])->all())->save();
+
+            foreach ($data['quantities'] ?? [] as $key => $quantity) {
+                $publicationId = (int) ltrim((string) $key, 'p');
+                $quantity = (int) $quantity;
+
+                if ($quantity > 0) {
+                    $this->items()->updateOrCreate(['publication_id' => $publicationId], ['quantity' => $quantity]);
+                } else {
+                    $this->items()->where('publication_id', $publicationId)->delete();
+                }
+            }
+        });
+
+        return $this->load('items');
+    }
+
+    /**
+     * Only the subscriptions receiving at least a copy of the given publication.
      *
      * @param  Builder<self>  $query
      * @return Builder<self>
      */
-    public function scopeReceiving(Builder $query, Periodical $periodical): Builder
+    public function scopeReceiving(Builder $query, Publication|int $publication): Builder
     {
-        return $query->where("quantities->{$periodical->value}", '>', 0);
+        $publicationId = $publication instanceof Publication ? $publication->getKey() : $publication;
+
+        return $query->whereHas('items', fn (Builder $items): Builder => $items
+            ->where('publication_id', $publicationId)
+            ->where('quantity', '>', 0));
     }
 
     /**
-     * Get the total copies of each periodical among the given subscriptions.
+     * Get the total copies of each publication, and how many publishers receive it, among the given subscriptions.
      *
-     * @param  iterable<self>  $subscriptions
-     * @return array<string, array{copies: int, publishers: int}>
+     * @param  iterable<int>  $subscriptionIds
+     * @return array<int, array{copies: int, publishers: int}> keyed by the ID of the publication
      */
-    public static function totals(iterable $subscriptions): array
+    public static function totals(iterable $subscriptionIds): array
     {
-        $totals = [];
-
-        foreach (Periodical::cases() as $periodical) {
-            $totals[$periodical->value] = ['copies' => 0, 'publishers' => 0];
-        }
-
-        foreach ($subscriptions as $subscription) {
-            foreach (Periodical::cases() as $periodical) {
-                $quantity = $subscription->quantityOf($periodical);
-
-                if ($quantity > 0) {
-                    $totals[$periodical->value]['copies'] += $quantity;
-                    $totals[$periodical->value]['publishers']++;
-                }
-            }
-        }
-
-        return $totals;
+        return PeriodicalSubscriptionItem::query()
+            ->whereIn('periodical_subscription_id', collect($subscriptionIds)->all())
+            ->where('quantity', '>', 0)
+            ->groupBy('publication_id')
+            ->select('publication_id')
+            ->selectRaw('sum(quantity) as copies, count(*) as publishers')
+            ->get()
+            ->mapWithKeys(fn (PeriodicalSubscriptionItem $item): array => [$item->publication_id => [
+                'copies' => (int) $item->getAttribute('copies'),
+                'publishers' => (int) $item->getAttribute('publishers'),
+            ]])
+            ->all();
     }
 }

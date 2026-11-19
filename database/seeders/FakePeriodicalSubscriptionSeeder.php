@@ -2,29 +2,30 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Periodical;
+use App\Enums\PublicationCategory;
 use App\Models\PeriodicalSubscription;
+use App\Models\Publication;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Seed the publishers receiving the periodicals on paper.
+ * Seed the publishers receiving publications on paper: the periodicals created by the migrations, a book and a tract.
  */
 class FakePeriodicalSubscriptionSeeder extends Seeder
 {
     /**
-     * The copies received by each publisher, in order.
+     * The copies of the first, second and third publication received by each publisher, in order.
      *
-     * @var list<array<string, int>>
+     * @var list<list<int>>
      */
     private const QUANTITIES = [
-        [Periodical::Watchtower->value => 1, Periodical::MeetingWorkbook->value => 1],
-        [Periodical::Watchtower->value => 2, Periodical::MeetingWorkbook->value => 2],
-        [Periodical::WatchtowerLargePrint->value => 1, Periodical::MeetingWorkbook->value => 1],
-        [Periodical::Watchtower->value => 1],
-        [Periodical::WatchtowerLargePrint->value => 1],
-        [Periodical::MeetingWorkbook->value => 1],
-        [Periodical::Watchtower->value => 1, Periodical::MeetingWorkbook->value => 1],
+        [1, 0, 1],
+        [2, 0, 2],
+        [0, 1, 1],
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+        [1, 0, 1],
     ];
 
     /**
@@ -32,16 +33,28 @@ class FakePeriodicalSubscriptionSeeder extends Seeder
      */
     public function run(): void
     {
+        $publications = Publication::query()->ordered()->limit(3)->get()->values();
+
+        // A book and a tract too, besides the periodicals created by the migrations
+        $book = Publication::query()->firstOrCreate(['name' => 'Enjoy Life Forever!'], ['category' => PublicationCategory::Books, 'short_name' => 'lff']);
+        $tract = Publication::query()->firstOrCreate(['name' => 'What Is the Kingdom of God?'], ['category' => PublicationCategory::Tracts, 'short_name' => 'T-36']);
+        $extras = [0 => [$book, 1], 2 => [$tract, 10], 5 => [$book, 2]];
         $users = User::query()->whereKeyNot(1)->orderByDesc('id')->limit(count(self::QUANTITIES))->get();
 
         foreach ($users->values() as $index => $user) {
-            PeriodicalSubscription::query()->updateOrCreate(
-                ['user_id' => $user->getKey()],
-                ['quantities' => array_merge(
-                    array_fill_keys(array_map(fn (Periodical $periodical): string => $periodical->value, Periodical::cases()), 0),
-                    self::QUANTITIES[$index],
-                )],
-            );
+            $quantities = [];
+
+            foreach ($publications as $position => $publication) {
+                $quantities[$publication->getFormKey()] = self::QUANTITIES[$index][$position] ?? 0;
+            }
+
+            if (isset($extras[$index])) {
+                [$extra, $quantity] = $extras[$index];
+                $quantities[$extra->getFormKey()] = $quantity;
+            }
+
+            PeriodicalSubscription::query()->firstOrNew(['user_id' => $user->getKey()])
+                ->saveWithQuantities(['user_id' => $user->getKey(), 'quantities' => $quantities]);
         }
     }
 }

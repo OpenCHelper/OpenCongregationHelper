@@ -11,7 +11,7 @@ return [
     ],
     'publications' => [
         'label' => 'Publications',
-        'description' => 'Publications and periodicals, e.g. who receives them on paper.',
+        'description' => 'The publications, and who receives them on paper.',
     ],
     'roles' => [
         'overseer' => 'Overseer',

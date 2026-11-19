@@ -11,7 +11,7 @@ return [
     ],
     'publications' => [
         'label' => 'Pubblicazioni',
-        'description' => 'Pubblicazioni e periodici, ad esempio chi li riceve su carta.',
+        'description' => 'Le pubblicazioni, e chi le riceve su carta.',
     ],
     'roles' => [
         'overseer' => 'Responsabile',

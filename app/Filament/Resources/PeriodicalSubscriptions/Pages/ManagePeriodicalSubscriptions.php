@@ -4,11 +4,14 @@ namespace App\Filament\Resources\PeriodicalSubscriptions\Pages;
 
 use App\Filament\Resources\PeriodicalSubscriptions\PeriodicalSubscriptionResource;
 use App\Filament\Resources\PeriodicalSubscriptions\Widgets\PeriodicalTotals;
+use App\Filament\Resources\Publications\PublicationResource;
+use App\Models\Publication;
 use Filament\Actions\CreateAction;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 
 class ManagePeriodicalSubscriptions extends ManageRecords
 {
@@ -31,7 +34,13 @@ class ManagePeriodicalSubscriptions extends ManageRecords
                 ->label(__('filament-resources.periodical_subscription.action_add'))
                 ->modalHeading(__('filament-resources.periodical_subscription.action_add'))
                 ->icon(Heroicon::OutlinedUserPlus)
-                ->createAnother(),
+                ->createAnother()
+                ->using(fn (array $data): Model => PeriodicalSubscriptionResource::saveRecord(null, $data))
+                // Nothing can be received until a publication is offered
+                ->disabled(fn (): bool => Publication::offered()->isEmpty())
+                ->tooltip(fn (): ?string => Publication::offered()->isEmpty()
+                    ? __('filament-resources.periodical_subscription.no_publications', ['list' => PublicationResource::getNavigationLabel()])
+                    : null),
         ];
     }
 
