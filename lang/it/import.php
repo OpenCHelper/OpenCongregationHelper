@@ -49,6 +49,8 @@ return [
         'examples' => [
             'title' => 'Goditi la vita per sempre!',
             'storage' => 'Sala del Regno',
+            'other_storage' => 'Box',
+            'notes' => 'Nuova edizione',
         ],
         'notifications' => [
             'completed' => [

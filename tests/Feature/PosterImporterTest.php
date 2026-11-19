@@ -11,6 +11,7 @@ use Filament\Actions\Imports\Jobs\ImportCsv;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -132,3 +133,16 @@ test('the spreadsheet headers in Italian are recognised', function () {
         ->and($guesses['storage'])->toContain('dislocazione')
         ->and($guesses['quantity'])->toContain('quantità');
 });
+
+test('the example file has the headers in the language of the user, recognised again when importing it', function (string $locale) {
+    App::setLocale($locale);
+
+    foreach (PosterImporter::getColumns() as $column) {
+        expect(array_map(mb_strtolower(...), $column->getGuesses()))->toContain(mb_strtolower($column->getExampleHeader()))
+            ->and($column->getExampleHeader())->toBe(__("import.poster.columns.{$column->getName()}"));
+    }
+
+    // The same poster in two storage places
+    expect(collect(PosterImporter::getColumns())->firstWhere(fn ($column): bool => $column->getName() === 'storage')->getExamples())
+        ->toBe([__('import.poster.examples.storage'), __('import.poster.examples.other_storage')]);
+})->with(['en', 'it', 'es']);

@@ -49,6 +49,8 @@ return [
         'examples' => [
             'title' => 'Enjoy life forever!',
             'storage' => 'Kingdom Hall',
+            'other_storage' => 'Storage box',
+            'notes' => 'New edition',
         ],
         'notifications' => [
             'completed' => [

@@ -49,6 +49,8 @@ return [
         'examples' => [
             'title' => '¡Disfrute de la vida para siempre!',
             'storage' => 'Salón del Reino',
+            'other_storage' => 'Trastero',
+            'notes' => 'Nueva edición',
         ],
         'notifications' => [
             'completed' => [
