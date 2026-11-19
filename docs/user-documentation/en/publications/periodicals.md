@@ -57,4 +57,10 @@ within it. To stop offering a publication, turn off **Offered**: it can no longe
 and in new requests, but the copies already entered are kept. Deleting it deletes those copies and its requests too. The
 **Pending** column counts its requests not delivered yet, and the **Requests** button opens their history.
 
+To edit many publications at once, open **Import / Export** at the top of the publication list. **Export Publications**
+gives a file with a row for each publication: the **Name** in your language first, then *Code*, *Category*, *Renews
+every (months)* and *Offered* (`yes`/`no`), then the name in the other languages. **Import Publications** reads the same
+file: a row with the code of an existing publication updates it (the names left empty keep their translation), the
+others are added; the category can be written in any language.
+
 The members of the [Publications department](../administration/departments) can manage both lists.

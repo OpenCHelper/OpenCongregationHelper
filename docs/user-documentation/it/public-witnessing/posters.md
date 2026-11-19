@@ -26,10 +26,10 @@ oppure solo quelli **Disponibili** o **Esauriti**.
 
 ![Modifica di un poster](/docs/user-documentation/it/public-witnessing/assets/poster-form.webp)
 
-## Importare i poster
+## Importare ed esportare i poster
 
-Per caricare molti poster in una volta, ad esempio da un foglio di calcolo che hai già, clicca **Importa Poster** in
-alto nella pagina e carica un file CSV con una riga per ogni poster e deposito:
+Per caricare molti poster in una volta, ad esempio da un foglio di calcolo che hai già, apri **Importa / Esporta →
+Importa Poster** in alto nella pagina e carica un file CSV con una riga per ogni poster e deposito:
 
 | Sigla | Titolo | Deposito | Copie | Note |
 |-------|--------|----------|-------|------|
@@ -49,6 +49,11 @@ vengono riconosciute dal loro nome, nella lingua dell'interfaccia o in inglese (
 - I **Titoli** vengono salvati nella **Lingua dei titoli** scelta nella finestra (la tua lingua, se non la cambi): le
   traduzioni nelle altre lingue vengono conservate.
 
+Per salvare l'elenco dei poster, ad esempio per tenerne una copia o modificarlo in un foglio di calcolo, apri **Importa
+/ Esporta → Esporta Poster**, scegli le colonne e la **Lingua dei titoli**, poi clicca **Esporta**. Una notifica
+fornisce il file, in CSV o Excel, quando è pronto: ha le stesse colonne dell'importazione, con una riga per ogni poster
+e deposito, così si può importare di nuovo.
+
 ## Depositi
 
 Clicca **Depositi** in alto nella pagina (o **Testimonianza pubblica → Depositi**) per gestire i posti in cui sono
@@ -56,6 +61,9 @@ conservati i poster, con delle note facoltative (ad esempio dove si trova la chi
 e quante copie contiene. Eliminando un deposito si eliminano anche le quantità dei poster conservati lì.
 
 Sono solo i posti in cui il materiale è **conservato**, non le postazioni in cui si montano i carrelli.
+
+Anche i depositi si possono importare ed esportare, da **Importa / Esporta** nella loro pagina, con una riga per ognuno
+(*Nome*, *Note*): importando un nome che esiste già se ne aggiornano le note.
 
 ![Depositi](/docs/user-documentation/it/public-witnessing/assets/storage-locations.webp)
 

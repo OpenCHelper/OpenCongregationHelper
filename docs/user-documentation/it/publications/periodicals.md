@@ -62,4 +62,11 @@ pubblicazioni periodiche e nelle nuove richieste, ma le copie già inserite veng
 anche quelle copie e le sue richieste. La colonna **In sospeso** conta le sue richieste non ancora consegnate, e il
 pulsante **Richieste** ne apre lo storico.
 
+Per modificare molte pubblicazioni in una volta, apri **Importa / Esporta** in alto nell'elenco delle pubblicazioni.
+**Esporta Pubblicazioni** fornisce un file con una riga per ogni pubblicazione: il **Nome** nella tua lingua per primo,
+poi *Sigla*, *Categoria*, *Si rinnova ogni (mesi)* e *Disponibile* (`yes`/`no`), poi il nome nelle altre lingue.
+**Importa Pubblicazioni** legge lo stesso file: una riga con la sigla di una pubblicazione esistente la aggiorna (i nomi
+lasciati vuoti mantengono la loro traduzione), le altre vengono aggiunte; la categoria si può scrivere in qualsiasi
+lingua.
+
 I membri del [reparto Pubblicazioni](../administration/departments) possono gestire entrambi gli elenchi.

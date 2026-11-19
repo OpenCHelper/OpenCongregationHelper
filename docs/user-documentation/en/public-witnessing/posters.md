@@ -26,10 +26,10 @@ the ones that are **Available** or **Out of stock**.
 
 ![Poster form](/docs/user-documentation/en/public-witnessing/assets/poster-form.webp)
 
-## Importing posters
+## Importing and exporting posters
 
-To load many posters at once, e.g. from an existing spreadsheet, click **Import Posters** at the top of the page and
-upload a CSV file with a row for each poster and storage place:
+To load many posters at once, e.g. from an existing spreadsheet, open **Import / Export → Import Posters** at the top of
+the page and upload a CSV file with a row for each poster and storage place:
 
 | Code | Title | Storage place | Copies | Notes |
 |------|-------|---------------|--------|-------|
@@ -49,6 +49,11 @@ recognised by their name, in the language of the interface or in English (e.g. *
 - The **Titles** are saved in the **Language of the titles** chosen in the window (your language by default): the
   translations in the other languages are kept.
 
+To save the list of the posters, e.g. to keep a copy or to edit it in a spreadsheet, open **Import / Export → Export
+Posters**, choose the columns and the **Language of the titles**, then click **Export**. A notification gives the file,
+as CSV or Excel, when it is ready: it has the same columns as the import, with a row for each poster and storage place,
+so it can be imported again.
+
 ## Storage
 
 Click **Storage** at the top of the page (or **Public Witnessing → Storage**) to manage the places where the posters
@@ -56,6 +61,9 @@ are kept, with optional notes (e.g. where the key is). Each storage place shows 
 Deleting a storage place also deletes the quantities of the posters kept there.
 
 These are only the places where the material is **kept**, not the sites where the carts are set up.
+
+The storage places can be imported and exported too, from **Import / Export** on their page, with a row for each one
+(*Name*, *Notes*): importing a name that already exists updates its notes.
 
 ![Storage](/docs/user-documentation/en/public-witnessing/assets/storage-locations.webp)
 
