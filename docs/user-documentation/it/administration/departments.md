@@ -11,7 +11,7 @@ Il lavoro della congregazione è organizzato in **reparti**, ognuno con la sua s
 |---------|---------|
 | **Reparto territori** | Territori, Zone, Assegnazioni, Campagne |
 | **Testimonianza pubblica** | [Poster e depositi in cui sono conservati](../public-witnessing/posters) |
-| **Pubblicazioni** | [Periodici su carta](../publications/periodicals) |
+| **Pubblicazioni** | [Pubblicazioni su carta ed elenco pubblicazioni](../publications/periodicals) |
 
 Apri **Amministrazione → Reparti** per vederli, con i loro responsabili e il numero di membri.
 
