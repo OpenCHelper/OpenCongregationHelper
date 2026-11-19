@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports\Concerns;
 
+use Closure;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,9 @@ use Illuminate\Support\Facades\DB;
  * code (or name) and both create it, and the second one hits the unique index. The row is then failed, with a reason
  * telling to import the file again (which updates the records instead of duplicating them), rather than with a
  * database error. The import actions read up to 1000 rows per chunk, so that this is rare.
+ *
+ * The records without a unique value (e.g. a poster without a code, found by its title) can't be told apart this
+ * way: their rows must not be more than 1000 apart in the file, or two chunks could both create them.
  */
 trait ReportsDuplicateRecords
 {
@@ -23,9 +27,25 @@ trait ReportsDuplicateRecords
      */
     public function saveRecord(): void
     {
+        // In a savepoint, so that the other rows of the chunk are kept
+        static::reportDuplicates(fn () => parent::saveRecord());
+    }
+
+    /**
+     * Run the callback in a savepoint; the row fails with a clear reason when another chunk of the import wrote the
+     * same unique values at the same time.
+     *
+     * @template TResult
+     *
+     * @param  Closure(): TResult  $callback
+     * @return TResult
+     *
+     * @throws RowImportFailedException
+     */
+    protected static function reportDuplicates(Closure $callback): mixed
+    {
         try {
-            // In a savepoint, so that the other rows of the chunk are kept
-            DB::transaction(fn () => parent::saveRecord());
+            return DB::transaction($callback);
         } catch (UniqueConstraintViolationException) {
             throw new RowImportFailedException(__('import.errors.duplicate'));
         }
@@ -45,10 +65,6 @@ trait ReportsDuplicateRecords
      */
     protected static function firstOrCreateOrReport(Builder $query, array $attributes): Model
     {
-        try {
-            return DB::transaction(fn (): Model => (clone $query)->firstOrCreate($attributes));
-        } catch (UniqueConstraintViolationException) {
-            throw new RowImportFailedException(__('import.errors.duplicate'));
-        }
+        return static::reportDuplicates(fn (): Model => (clone $query)->firstOrCreate($attributes));
     }
 }

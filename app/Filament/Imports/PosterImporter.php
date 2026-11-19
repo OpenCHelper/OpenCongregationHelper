@@ -164,10 +164,10 @@ class PosterImporter extends Importer
 
         $location = static::firstOrCreateOrReport(StorageLocation::query(), ['name' => $storage]);
 
-        $this->record->stocks()->updateOrCreate(
+        static::reportDuplicates(fn () => $this->record->stocks()->updateOrCreate(
             ['storage_location_id' => $location->getKey()],
             ['quantity' => (int) ($this->data['quantity'] ?? 0)],
-        );
+        ));
     }
 
     private function getStorageName(): ?string
