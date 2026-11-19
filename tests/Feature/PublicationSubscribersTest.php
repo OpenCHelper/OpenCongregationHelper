@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\DepartmentKey;
+use App\Enums\DepartmentRole;
 use App\Enums\PublicationCategory;
 use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
 use App\Filament\Resources\Publications\Pages\ManagePublications;
@@ -30,9 +31,9 @@ beforeEach(function () {
 
     User::factory()->create(['id' => 1]);
 
-    // A member of the publications department, who can manage the list without a role
+    // An overseer of the publications department, who can fully manage the list without a role
     $this->member = User::factory()->create();
-    Department::for(DepartmentKey::Publications)->members()->attach($this->member);
+    Department::for(DepartmentKey::Publications)->members()->attach($this->member, ['role' => DepartmentRole::Overseer]);
     $this->actingAs($this->member);
 
     // The renewable publications created by the migrations (renewed every month, every month, every two months): the

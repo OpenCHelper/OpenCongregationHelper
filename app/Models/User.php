@@ -279,19 +279,30 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     }
 
     /**
+     * The actions on the sections of a department that only its overseers are granted: the assistants can do
+     * everything else, but not delete (e.g. deleting a publication deletes its history too).
+     *
+     * @var list<string>
+     */
+    public const OVERSEER_ONLY_ACTIONS = ['Delete', 'DeleteAny', 'ForceDelete', 'ForceDeleteAny', 'Restore', 'RestoreAny'];
+
+    /**
      * Check if the departments of the user grant the given permission (`Action:Subject`, as checked by the
-     * policies): the members of a department can do everything on its sections.
+     * policies): the members of a department can do everything on its sections, except deleting for the assistants
+     * (see `OVERSEER_ONLY_ACTIONS`). The permissions of their roles still apply on top.
      */
     public function hasDepartmentPermission(string $permission): bool
     {
-        if (! str_contains($permission, ':')) {
+        if (! str_contains($permission, ':') || ! $this->exists) {
             return false;
         }
 
-        $subject = explode(':', $permission, 2)[1];
+        [$action, $subject] = explode(':', $permission, 2);
+        $overseersOnly = in_array($action, self::OVERSEER_ONLY_ACTIONS, true);
 
-        return $this->getDepartmentKeys()->contains(
-            static fn (DepartmentKey $department): bool => in_array($subject, $department->getPermissionSubjects(), true),
+        return $this->loadMissing('departments')->departments->contains(
+            static fn (Department $department): bool => in_array($subject, $department->key->getPermissionSubjects(), true)
+                && (! $overseersOnly || $department->pivot->role === DepartmentRole::Overseer),
         );
     }
 

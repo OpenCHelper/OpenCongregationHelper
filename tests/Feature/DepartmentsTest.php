@@ -56,9 +56,9 @@ test('the departments are listed in the order of their keys, and cannot be creat
         ->and(DepartmentResource::canDelete(Department::for(DepartmentKey::Publications)))->toBeFalse();
 });
 
-test('the members of a department can fully manage its sections, and only them', function () {
+test('the overseers of a department can fully manage its sections, and only them', function () {
     $member = User::factory()->create();
-    joinDepartment($member, DepartmentKey::PublicWitnessing);
+    joinDepartment($member, DepartmentKey::PublicWitnessing, DepartmentRole::Overseer);
 
     $this->actingAs($member);
 
@@ -72,6 +72,29 @@ test('the members of a department can fully manage its sections, and only them',
         ->and(TerritoryResource::canViewAny())->toBeFalse()
         ->and($member->can('ViewAny:User'))->toBeFalse()
         ->and($member->can('ViewAny:Department'))->toBeFalse();
+});
+
+test('the assistants of a department manage its sections but cannot delete, unless their roles allow it', function () {
+    $assistant = User::factory()->create();
+    joinDepartment($assistant, DepartmentKey::PublicWitnessing);
+    $poster = Poster::factory()->create();
+
+    $this->actingAs($assistant);
+
+    expect(PosterResource::canViewAny())->toBeTrue()
+        ->and(PosterResource::canCreate())->toBeTrue()
+        ->and(PosterResource::canEdit($poster))->toBeTrue()
+        ->and(PosterResource::canDelete($poster))->toBeFalse()
+        ->and(PosterResource::canDeleteAny())->toBeFalse();
+
+    foreach (User::OVERSEER_ONLY_ACTIONS as $action) {
+        expect($assistant->can("{$action}:Poster"))->toBeFalse();
+    }
+
+    // The permissions of their roles still apply
+    $assistant->givePermissionTo(Permission::findOrCreate('Delete:Poster', 'web'));
+
+    expect($assistant->fresh()->can('Delete:Poster'))->toBeTrue();
 });
 
 test('the territory department grants the territories, zones, assignments, campaigns and global map', function () {

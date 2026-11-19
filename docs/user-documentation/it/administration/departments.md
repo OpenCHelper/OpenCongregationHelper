@@ -19,16 +19,19 @@ Apri **Amministrazione → Reparti** per vederli, con i loro responsabili e il n
 
 ## Cosa possono fare i membri
 
-I **membri** di un reparto possono **gestirne completamente le sezioni** (vedere, creare, modificare ed eliminare),
-senza bisogno di un [ruolo](roles) con quei permessi. Ad esempio, un fratello del reparto *Testimonianza pubblica* vede
-la sezione **Testimonianza pubblica** del menu e può aggiornare i poster, anche se i suoi ruoli non gli danno altro.
+I **membri** di un reparto possono **gestirne le sezioni** (vedere, creare e modificare; i responsabili anche
+eliminare), senza bisogno di un [ruolo](roles) con quei permessi. Ad esempio, un fratello del reparto *Testimonianza
+pubblica* vede la sezione **Testimonianza pubblica** del menu e può aggiornare i poster, anche se i suoi ruoli non gli
+danno altro.
 
 Tutto il resto (ad esempio gli altri reparti, o gli utenti) dipende ancora dai ruoli, come prima.
 
 Ogni membro ha un **ruolo nel reparto**:
 
-- **Responsabile**: può anche aggiungere e rimuovere i membri del reparto, e cambiarne il ruolo;
-- **Assistente**: gestisce le sezioni del reparto.
+- **Responsabile**: può anche eliminare nelle sue sezioni, e aggiungere e rimuovere gli assistenti del reparto (solo un
+  amministratore nomina, cambia o rimuove i responsabili);
+- **Assistente**: gestisce le sezioni del reparto, ma non può eliminare (ad esempio una pubblicazione, che eliminerebbe
+  anche il suo storico), a meno che i suoi ruoli glielo permettano.
 
 ## Aggiungere o rimuovere membri
 

@@ -19,16 +19,18 @@ Open **Administration → Departments** to see them, with their overseers and th
 
 ## What the members can do
 
-The **members** of a department can **fully manage its sections** (see, create, edit and delete), without needing a
-[role](roles) with those permissions. For example, a brother in the *Public Witnessing* department sees the
+The **members** of a department can **manage its sections** (see, create and edit; the overseers delete too), without
+needing a [role](roles) with those permissions. For example, a brother in the *Public Witnessing* department sees the
 **Public Witnessing** section of the menu and can update the posters, even if his roles give him nothing else.
 
 Everything else (e.g. the other departments, or the users) still depends on the roles, as before.
 
 Each member has a **role in the department**:
 
-- **Overseer**: can also add and remove the members of the department, and change their role;
-- **Assistant**: manages the sections of the department.
+- **Overseer**: can also delete in its sections, and add and remove the assistants of the department (only an
+  administrator appoints, changes or removes the overseers);
+- **Assistant**: manages the sections of the department, but cannot delete (e.g. a publication, which would also
+  delete its history), unless their roles allow it.
 
 ## Adding or removing members
 

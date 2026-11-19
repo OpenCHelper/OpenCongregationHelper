@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\DepartmentKey;
+use App\Enums\DepartmentRole;
 use App\Filament\Resources\Posters\Pages\ManagePosters;
 use App\Filament\Resources\StorageLocations\Pages\ManageStorageLocations;
 use App\Filament\Resources\StorageLocations\StorageLocationResource;
@@ -23,9 +24,9 @@ beforeEach(function () {
 
     User::factory()->create(['id' => 1]);
 
-    // A member of the public witnessing department, who can manage the posters without a role
+    // An overseer of the public witnessing department, who can fully manage the posters without a role
     $this->member = User::factory()->create();
-    Department::for(DepartmentKey::PublicWitnessing)->members()->attach($this->member);
+    Department::for(DepartmentKey::PublicWitnessing)->members()->attach($this->member, ['role' => DepartmentRole::Overseer]);
     $this->actingAs($this->member);
 
     $this->hall = StorageLocation::factory()->create(['name' => 'Kingdom Hall']);
