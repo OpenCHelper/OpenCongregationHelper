@@ -68,6 +68,9 @@ return [
             'quantity_without_storage' => 'Le copie del poster ":title" non hanno un deposito.',
         ],
     ],
+    'errors' => [
+        'duplicate' => 'Questa riga è stata importata nello stesso momento da un\'altra parte dell\'importazione: importa di nuovo il file per aggiornarla.',
+    ],
     'notifications' => [
         'completed' => [
             'body' => 'L\'importazione è terminata: :count riga importata.|L\'importazione è terminata: :count righe importate.',

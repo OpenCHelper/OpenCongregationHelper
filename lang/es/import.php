@@ -68,6 +68,9 @@ return [
             'quantity_without_storage' => 'Las copias del cartel ":title" no tienen depósito.',
         ],
     ],
+    'errors' => [
+        'duplicate' => 'Esta fila se importó al mismo tiempo desde otra parte de la importación: importa de nuevo el archivo para actualizarla.',
+    ],
     'notifications' => [
         'completed' => [
             'body' => 'La importación ha terminado: :count fila importada.|La importación ha terminado: :count filas importadas.',

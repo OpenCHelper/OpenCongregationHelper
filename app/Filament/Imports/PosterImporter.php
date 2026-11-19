@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Filament\Imports\Concerns\ImportsInTheUserLocale;
+use App\Filament\Imports\Concerns\ReportsDuplicateRecords;
 use App\Models\Poster;
 use App\Models\StorageLocation;
 use App\Support\Translations;
@@ -32,6 +33,7 @@ use Illuminate\Support\Number;
 class PosterImporter extends Importer
 {
     use ImportsInTheUserLocale;
+    use ReportsDuplicateRecords;
 
     protected static ?string $model = Poster::class;
 
@@ -160,7 +162,7 @@ class PosterImporter extends Importer
             return;
         }
 
-        $location = StorageLocation::query()->firstOrCreate(['name' => $storage]);
+        $location = static::firstOrCreateOrReport(StorageLocation::query(), ['name' => $storage]);
 
         $this->record->stocks()->updateOrCreate(
             ['storage_location_id' => $location->getKey()],

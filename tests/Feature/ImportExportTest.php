@@ -202,8 +202,13 @@ test('the quote added to a formula is removed only before a formula character', 
     'minus' => ["'- text", '- text'],
     'a real quote' => ["'tis the season", "'tis the season"],
     'only a quote' => ["'", "'"],
+    'a quote typed before a number' => ["'-5", "'-5"],
     'number' => [3, 3],
 ]);
+
+test('every cell is imported again exactly as it was exported', function (string $value) {
+    expect(SpreadsheetFormula::unescape(SpreadsheetFormula::escape($value)))->toBe($value);
+})->with(['=1+1', '- text', "'=important", "''=x", "'-5", '-5', "'tis", 'Box', '', "'"]);
 
 test('the export notification is in the language of the user who started it', function () {
     StorageLocation::factory()->create(['name' => 'Box']);
@@ -229,4 +234,38 @@ test('a cell exported as text, to keep a spreadsheet from running it, is importe
     expect(Poster::query()->count())->toBe(1)
         ->and($poster->fresh()->title)->toBe('- Campagna speciale')
         ->and($poster->fresh()->notes)->toBe('@sala');
+});
+
+/**
+ * A publication import whose publication is created by another queue worker right after it was looked for.
+ */
+class ConcurrentPublicationImporter extends PublicationImporter
+{
+    public function resolveRecord(): Publication
+    {
+        $record = parent::resolveRecord();
+
+        Publication::query()->create(['name' => ['it' => 'Altro'], 'code' => $record->code, 'category' => PublicationCategory::Other]);
+
+        return $record;
+    }
+}
+
+test('a row whose record was created meanwhile by another chunk fails with a clear reason, keeping the others', function () {
+    $import = importRows(ConcurrentPublicationImporter::class, [
+        ['name_it' => 'Vivi felice per sempre!', 'code' => 'lff', 'category' => 'Libri', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
+    ], $this->member);
+
+    expect($import->successful_rows)->toBe(0)
+        ->and($import->failedRows()->sole()->validation_error)->toBe(__('import.errors.duplicate'))
+        // The one created by the other chunk is left as it is
+        ->and(Publication::query()->where('code', 'lff')->sole()->getTranslation('name', 'it'))->toBe('Altro');
+
+    // Imported again, the row updates it
+    $import = importRows(PublicationImporter::class, [
+        ['name_it' => 'Vivi felice per sempre!', 'code' => 'lff', 'category' => 'Libri', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
+    ], $this->member);
+
+    expect($import->successful_rows)->toBe(1)
+        ->and(Publication::query()->where('code', 'lff')->sole()->getTranslation('name', 'it'))->toBe('Vivi felice per sempre!');
 });

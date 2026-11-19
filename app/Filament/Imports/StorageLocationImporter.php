@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Filament\Imports\Concerns\ImportsInTheUserLocale;
+use App\Filament\Imports\Concerns\ReportsDuplicateRecords;
 use App\Models\StorageLocation;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Gate;
 class StorageLocationImporter extends Importer
 {
     use ImportsInTheUserLocale;
+    use ReportsDuplicateRecords;
 
     protected static ?string $model = StorageLocation::class;
 
