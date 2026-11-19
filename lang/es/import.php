@@ -46,6 +46,10 @@ return [
             'quantity' => 'Copias',
             'notes' => 'Notas',
         ],
+        'options' => [
+            'locale' => 'Idioma de los títulos',
+            'locale_helper' => 'El idioma en que están escritos los títulos del archivo: se guardan como su traducción, conservando los demás idiomas.',
+        ],
         'examples' => [
             'title' => '¡Disfrute de la vida para siempre!',
             'storage' => 'Salón del Reino',

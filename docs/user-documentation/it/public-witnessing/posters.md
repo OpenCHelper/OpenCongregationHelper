@@ -38,16 +38,17 @@ alto nella pagina e carica un file CSV con una riga per ogni poster e deposito:
 
 Serve solo il **Titolo**; **Scarica un file CSV di esempio** nella finestra fornisce un file da cui partire. Le colonne
 vengono riconosciute solo dal loro nome in inglese (*Code*, *Title*, *Storage place*, *Copies*, *Notes*), qualunque sia
-la lingua dell'interfaccia, mentre i valori si scrivono nella tua lingua; controllale in **Colonne** (una colonna con un
-altro nome si può sempre scegliere a mano), poi clicca **Importa**. Una notifica avvisa quando l'importazione è
-terminata, con le righe che non è stato possibile importare.
+la lingua dell'interfaccia; controllale in **Colonne** (una colonna con un altro nome si può sempre scegliere a mano),
+poi clicca **Importa**. Una notifica avvisa quando l'importazione è terminata, con le righe che non è stato possibile
+importare.
 
 ![Importare i poster](/docs/user-documentation/it/public-witnessing/assets/poster-import.webp)
 
 - Le righe con la stessa **Sigla** (o con lo stesso **Titolo**, se non c'è la sigla) sono lo stesso poster: importando
   di nuovo il file si aggiornano i poster e le loro copie invece di duplicarli.
 - Le **Copie** di una riga sostituiscono quelle di quel deposito; i depositi che non esistono ancora vengono creati.
-- I **Titoli** vengono salvati nella tua lingua: le traduzioni nelle altre lingue vengono conservate.
+- I **Titoli** vengono salvati nella **Lingua dei titoli** scelta nella finestra (la tua lingua, se non la cambi): le
+  traduzioni nelle altre lingue vengono conservate.
 
 ## Depositi
 

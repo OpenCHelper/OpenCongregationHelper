@@ -46,6 +46,10 @@ return [
             'quantity' => 'Copie',
             'notes' => 'Note',
         ],
+        'options' => [
+            'locale' => 'Lingua dei titoli',
+            'locale_helper' => 'La lingua in cui sono scritti i titoli nel file: vengono salvati come sua traduzione, conservando le altre lingue.',
+        ],
         'examples' => [
             'title' => 'Goditi la vita per sempre!',
             'storage' => 'Sala del Regno',

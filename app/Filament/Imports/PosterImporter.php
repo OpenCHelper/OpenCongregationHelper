@@ -9,6 +9,8 @@ use App\Support\Translations;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Component;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Number;
@@ -47,7 +49,9 @@ class PosterImporter extends Importer
                 ->exampleHeader(fn (): string => __('import.poster.columns.title'))
                 ->examples(fn (): array => array_fill(0, 2, __('import.poster.examples.title')))
                 ->requiredMapping()
-                ->rules(['required', 'max:255']),
+                ->rules(['required', 'max:255'])
+                // In the language chosen in the import window, keeping the translations in the other languages
+                ->fillRecordUsing(fn (Poster $record, string $state, array $options) => $record->setTranslation('title', static::getTitleLocale($options), $state)),
             EnglishImportColumn::make('storage')
                 ->label(fn (): string => __('import.poster.columns.storage'))
                 ->guess(['storage', 'storage place', 'location'])
@@ -80,8 +84,38 @@ class PosterImporter extends Importer
     }
 
     /**
+     * The options of the import window: the language of the titles in the file, the one of the user by default.
+     *
+     * @return array<Component>
+     */
+    public static function getOptionsFormComponents(): array
+    {
+        return [
+            Select::make('locale')
+                ->label(__('import.poster.options.locale'))
+                ->helperText(__('import.poster.options.locale_helper'))
+                ->options(Translations::getLocales())
+                ->default(app()->getLocale())
+                ->required()
+                ->selectablePlaceholder(false),
+        ];
+    }
+
+    /**
+     * The language the titles are saved in: the one chosen in the import window, or the one of the user.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    public static function getTitleLocale(array $options): string
+    {
+        $locale = $options['locale'] ?? null;
+
+        return is_string($locale) && array_key_exists($locale, Translations::getLocales()) ? $locale : app()->getLocale();
+    }
+
+    /**
      * The poster with the same code or, without a code, with the same title in any language (the title of the row is
-     * saved in the language of the user who started the import).
+     * saved in the language chosen in the import window).
      */
     public function resolveRecord(): Poster
     {

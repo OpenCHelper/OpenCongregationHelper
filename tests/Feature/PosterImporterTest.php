@@ -32,8 +32,9 @@ beforeEach(function () {
  * Import the given rows as the queue worker does, keeping the columns named as in the importer.
  *
  * @param  list<array<string, string>>  $rows
+ * @param  array<string, mixed>  $options  e.g. the language of the titles (`locale`)
  */
-function runPosterImport(array $rows, User $user): Import
+function runPosterImport(array $rows, User $user, array $options = []): Import
 {
     $import = Import::create([
         'file_name' => 'posters.csv',
@@ -48,7 +49,7 @@ function runPosterImport(array $rows, User $user): Import
         ->mapWithKeys(fn ($column): array => [$column->getName() => $column->getName()])
         ->all();
 
-    (new ImportCsv($import, $rows, $columnMap))->handle();
+    (new ImportCsv($import, $rows, $columnMap, $options))->handle();
 
     return $import->refresh();
 }
@@ -102,6 +103,34 @@ test('the title is imported in the language of the user, keeping the other trans
     expect(Poster::count())->toBe(1)
         ->and($poster->fresh()->notes)->toBe('Updated')
         ->and($poster->fresh()->getTranslations('title'))->toEqual(['en' => 'Free Bible courses', 'it' => 'Free Bible courses']);
+});
+
+test('the titles are saved in the language chosen in the import window, keeping the other ones', function () {
+    $this->member->forceFill(['locale' => 'it'])->save();
+    $poster = Poster::factory()->create(['code' => 'mi-25', 'title' => ['en' => 'Enjoy life forever!', 'it' => 'Vivi felice per sempre!']]);
+
+    runPosterImport([
+        ['code' => 'mi-25', 'title' => '¡Disfrute de la vida para siempre!', 'storage' => '', 'quantity' => '', 'notes' => ''],
+    ], $this->member, ['locale' => 'es']);
+
+    expect($poster->fresh()->getTranslations('title'))->toEqual([
+        'en' => 'Enjoy life forever!',
+        'it' => 'Vivi felice per sempre!',
+        'es' => '¡Disfrute de la vida para siempre!',
+    ]);
+});
+
+test('the language of the titles is chosen in the import window, the one of the user by default', function () {
+    App::setLocale('it');
+
+    $select = collect(PosterImporter::getOptionsFormComponents())->sole();
+
+    expect($select->getName())->toBe('locale')
+        ->and($select->getDefaultState())->toBe('it')
+        ->and(array_keys($select->getOptions()))->toEqualCanonicalizing(array_keys(config('app.available_locales')))
+        // An unknown language falls back to the one of the user
+        ->and(PosterImporter::getTitleLocale(['locale' => 'xx']))->toBe('it')
+        ->and(PosterImporter::getTitleLocale([]))->toBe('it');
 });
 
 test('a poster can be imported without storage place, but not copies without one', function () {

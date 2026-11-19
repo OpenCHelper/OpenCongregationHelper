@@ -38,16 +38,16 @@ upload a CSV file with a row for each poster and storage place:
 
 Only the **Title** is required; **Download example CSV file** in the window gives a file to start from. The columns are
 recognised only by their English name (*Code*, *Title*, *Storage place*, *Copies*, *Notes*), whatever the language of
-the interface, while the values are written in your language; check them under **Columns** (a column with another name
-can always be chosen by hand), then click **Import**. A notification tells when the import is over, with the rows that
-could not be imported.
+the interface; check them under **Columns** (a column with another name can always be chosen by hand), then click
+**Import**. A notification tells when the import is over, with the rows that could not be imported.
 
 ![Importing posters](/docs/user-documentation/en/public-witnessing/assets/poster-import.webp)
 
 - The rows with the same **Code** (or with the same **Title**, when there is no code) are the same poster: importing
   the file again updates the posters and their copies instead of duplicating them.
 - The **Copies** of a row replace the ones of that storage place; the storage places that don't exist yet are created.
-- The **Titles** are saved in your language: the translations in the other languages are kept.
+- The **Titles** are saved in the **Language of the titles** chosen in the window (your language by default): the
+  translations in the other languages are kept.
 
 ## Storage
 
