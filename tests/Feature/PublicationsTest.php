@@ -8,6 +8,7 @@ use App\Models\Publication;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\App;
 use Livewire\Livewire;
 
@@ -113,4 +114,31 @@ test('a periodical can be deleted like any other publication, and is not created
 
     expect(Publication::query()->where('code', 'g')->exists())->toBeFalse()
         ->and(Publication::query()->count())->toBe(5);
+});
+
+test('each language of the name shows the example in that language', function () {
+    App::setLocale('it');
+
+    Livewire::test(ManagePublications::class)
+        ->mountAction(TestAction::make('create'))
+        ->assertFormFieldExists('name.it', fn (TextInput $field): bool => $field->getPlaceholder() === 'es. Svegliatevi!')
+        ->assertFormFieldExists('name.en', fn (TextInput $field): bool => $field->getPlaceholder() === 'e.g. Awake!')
+        ->assertFormFieldExists('name.es', fn (TextInput $field): bool => $field->getPlaceholder() === 'p. ej. ¡Despertad!');
+});
+
+test('the code of a publication is required and unique', function () {
+    Livewire::test(ManagePublications::class)
+        ->mountAction(TestAction::make('create'))
+        ->fillForm([
+            'name' => [app()->getLocale() => 'Enjoy Life Forever!'],
+            'category' => PublicationCategory::Books->value,
+            'code' => '',
+        ])
+        ->callMountedAction()
+        ->assertHasFormErrors(['code' => 'required'])
+        ->fillForm(['code' => 'w'])
+        ->callMountedAction()
+        ->assertHasFormErrors(['code' => 'unique']);
+
+    expect(Publication::query()->count())->toBe(6);
 });

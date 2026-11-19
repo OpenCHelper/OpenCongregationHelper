@@ -70,7 +70,7 @@ class PublicationResource extends Resource implements HasKnowledgeBase
         return $schema
             ->columns(1)
             ->components([
-                Translations::inputs('name', __('filament-resources.publication.field_name'), __('filament-resources.publication.field_name_placeholder')),
+                Translations::inputs('name', __('filament-resources.publication.field_name'), 'filament-resources.publication.field_name_placeholder'),
                 Select::make('category')
                     ->label(__('filament-resources.publication.field_category'))
                     ->options(PublicationCategory::class)
@@ -81,7 +81,9 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                     ->label(__('filament-resources.publication.field_code'))
                     ->placeholder(__('filament-resources.publication.field_code_placeholder'))
                     ->helperText(__('filament-resources.publication.field_code_helper'))
-                    ->maxLength(50),
+                    ->required()
+                    ->maxLength(50)
+                    ->unique(ignoreRecord: true),
                 TextInput::make('renewal_months')
                     ->label(__('filament-resources.publication.field_renewal_months'))
                     ->helperText(__('filament-resources.publication.field_renewal_months_helper'))

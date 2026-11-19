@@ -149,10 +149,10 @@ class Publication extends Model
     }
 
     /**
-     * The label shown in the headers of the columns: the code, when it has one, otherwise the name.
+     * The label shown in the headers of the columns: the code, the same in every language.
      */
     public function getShortLabel(): string
     {
-        return filled($this->code) ? $this->code : $this->name;
+        return $this->code;
     }
 }

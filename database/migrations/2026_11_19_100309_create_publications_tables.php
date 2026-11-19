@@ -64,7 +64,7 @@ return new class extends Migration
             $table->id();
             $table->json('name')->comment('Translated in every language (spatie/laravel-translatable)');
             $table->string('category', 50)->default('other')->comment('See App\Enums\PublicationCategory');
-            $table->string('code', 50)->nullable()->comment('Code of the publication (e.g. w, mwb), the same in every language');
+            $table->string('code', 50)->unique()->comment('Code of the publication (e.g. w, mwb), the same in every language');
             $table->unsignedTinyInteger('renewal_months')->nullable()->comment('Requested again every N months; empty if not renewable');
             $table->unsignedInteger('sort')->default(0);
             $table->boolean('is_active')->default(true)->comment('Offered to the publishers');

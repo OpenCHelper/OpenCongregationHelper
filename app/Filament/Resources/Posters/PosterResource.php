@@ -101,7 +101,7 @@ class PosterResource extends Resource implements HasKnowledgeBase
                             ->maxLength(50)
                             ->unique(ignoreRecord: true),
                     ]),
-                Translations::inputs('title', __('filament-resources.poster.field_title')),
+                Translations::inputs('title', __('filament-resources.poster.field_title'), 'filament-resources.poster.field_title_placeholder'),
                 Section::make(__('filament-resources.poster.section_stocks'))
                     ->description(__('filament-resources.poster.section_stocks_description'))
                     ->icon(Heroicon::OutlinedArchiveBox)

@@ -21,7 +21,7 @@ class PublicationFactory extends Factory
         return [
             'name' => rtrim($this->faker->unique()->sentence(3), '.'),
             'category' => PublicationCategory::Books,
-            'code' => null,
+            'code' => $this->faker->unique()->bothify('???-##'),
             'sort' => $this->faker->numberBetween(10, 99),
             'is_active' => true,
         ];
