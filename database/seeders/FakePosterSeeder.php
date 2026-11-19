@@ -7,24 +7,48 @@ use App\Models\StorageLocation;
 use Illuminate\Database\Seeder;
 
 /**
- * Seed the magnetic posters of the displays, kept in the Kingdom Hall and in a storage box.
+ * Seed some demo posters (obviously not real ones), kept in the Kingdom Hall and in a storage box, named in the
+ * language of the installation.
  */
 class FakePosterSeeder extends Seeder
 {
     /**
-     * The posters, with their copies in the Kingdom Hall and in the storage box.
+     * The copies of each demo poster in the Kingdom Hall and in the storage box: none at all, only in one place, or in
+     * both.
      *
-     * @var list<array{code: string, title: array<string, string>, hall: int, box: int}>
+     * @var list<array{hall: int, box: int}>
      */
     public const POSTERS = [
-        ['code' => 'mp-01', 'title' => ['en' => 'Can the dead live again?', 'it' => 'I morti possono tornare a vivere?', 'es' => '¿Pueden volver a vivir los muertos?'], 'hall' => 2, 'box' => 3],
-        ['code' => 'mp-02', 'title' => ['en' => 'Enjoy life forever!', 'it' => 'Vivi felice per sempre!', 'es' => '¡Disfrute de la vida para siempre!'], 'hall' => 3, 'box' => 5],
-        ['code' => 'mp-03', 'title' => ['en' => 'How can you have a happy family?', 'it' => 'Come avere una famiglia felice?', 'es' => '¿Cómo tener una familia feliz?'], 'hall' => 1, 'box' => 2],
-        ['code' => 'mp-04', 'title' => ['en' => 'What is God\'s Kingdom?', 'it' => 'Cos\'è il Regno di Dio?', 'es' => '¿Qué es el Reino de Dios?'], 'hall' => 2, 'box' => 0],
-        ['code' => 'mp-05', 'title' => ['en' => 'Will suffering ever end?', 'it' => 'Le sofferenze finiranno?', 'es' => '¿Terminará algún día el sufrimiento?'], 'hall' => 0, 'box' => 4],
-        ['code' => 'mp-06', 'title' => ['en' => 'Who controls the world?', 'it' => 'Chi controlla il mondo?', 'es' => '¿Quién controla el mundo?'], 'hall' => 1, 'box' => 1],
-        ['code' => 'mp-07', 'title' => ['en' => 'Free Bible courses', 'it' => 'Corsi biblici gratuiti', 'es' => 'Cursos bíblicos gratuitos'], 'hall' => 4, 'box' => 6],
-        ['code' => 'mp-08', 'title' => ['en' => 'Does God care about you?', 'it' => 'A Dio importa di te?', 'es' => '¿Le importa usted a Dios?'], 'hall' => 0, 'box' => 0],
+        ['hall' => 2, 'box' => 3],
+        ['hall' => 3, 'box' => 5],
+        ['hall' => 1, 'box' => 2],
+        ['hall' => 2, 'box' => 0],
+        ['hall' => 0, 'box' => 4],
+        ['hall' => 1, 'box' => 1],
+        ['hall' => 4, 'box' => 6],
+        ['hall' => 0, 'box' => 0],
+    ];
+
+    /**
+     * The title of the demo posters in every language, numbered with `:number`.
+     *
+     * @var array<string, string>
+     */
+    public const TITLES = [
+        'en' => 'Demo poster :number',
+        'it' => 'Poster di esempio :number',
+        'es' => 'Póster de ejemplo :number',
+    ];
+
+    /**
+     * The storage places in every language, the Kingdom Hall and the storage box (with its notes).
+     *
+     * @var array<string, array{hall: string, box: string, box_notes: string}>
+     */
+    public const STORAGE_PLACES = [
+        'en' => ['hall' => 'Kingdom Hall', 'box' => 'Storage box', 'box_notes' => 'The key is in the literature room.'],
+        'it' => ['hall' => 'Sala del Regno', 'box' => 'Box', 'box_notes' => 'La chiave è nella stanza delle pubblicazioni.'],
+        'es' => ['hall' => 'Salón del Reino', 'box' => 'Trastero', 'box_notes' => 'La llave está en el cuarto de publicaciones.'],
     ];
 
     /**
@@ -32,15 +56,28 @@ class FakePosterSeeder extends Seeder
      */
     public function run(): void
     {
-        $hall = StorageLocation::query()->firstOrCreate(['name' => 'Kingdom Hall']);
-        $box = StorageLocation::query()->firstOrCreate(['name' => 'Storage box'], ['notes' => 'The key is in the literature room.']);
+        $places = self::getStoragePlaces();
+        $hall = StorageLocation::query()->firstOrCreate(['name' => $places['hall']]);
+        $box = StorageLocation::query()->firstOrCreate(['name' => $places['box']], ['notes' => $places['box_notes']]);
 
-        foreach (self::POSTERS as $data) {
-            $poster = Poster::query()->updateOrCreate(['code' => $data['code']], ['title' => $data['title']]);
+        foreach (self::POSTERS as $index => $data) {
+            $number = $index + 1;
+            $title = array_map(fn (string $title): string => str_replace(':number', (string) $number, $title), self::TITLES);
+            $poster = Poster::query()->updateOrCreate(['code' => sprintf('demo-%02d', $number)], ['title' => $title]);
 
             foreach ([[$hall, $data['hall']], [$box, $data['box']]] as [$location, $quantity]) {
                 $poster->stocks()->updateOrCreate(['storage_location_id' => $location->getKey()], ['quantity' => $quantity]);
             }
         }
+    }
+
+    /**
+     * The names of the storage places in the language of the installation (in English when it has none).
+     *
+     * @return array{hall: string, box: string, box_notes: string}
+     */
+    public static function getStoragePlaces(): array
+    {
+        return self::STORAGE_PLACES[config('app.locale')] ?? self::STORAGE_PLACES['en'];
     }
 }

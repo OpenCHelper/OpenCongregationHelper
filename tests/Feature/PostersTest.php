@@ -140,8 +140,24 @@ test('the fake poster seeder creates the posters in two locations', function () 
     expect(StorageLocation::count())->toBe(2)
         ->and(Poster::count())->toBe(count(FakePosterSeeder::POSTERS));
 
-    $this->get(ManagePosters::getUrl())->assertOk()->assertSee('Kingdom Hall')->assertSee('mp-01');
+    $this->get(ManagePosters::getUrl())->assertOk()->assertSee(FakePosterSeeder::getStoragePlaces()['hall'])->assertSee('demo-01');
 });
+
+test('the demo posters are clearly not real, and their storage places are named in the language of the installation', function (string $locale, string $hall, string $title) {
+    config(['app.locale' => $locale]);
+    StorageLocation::query()->delete();
+
+    $this->seed(FakePosterSeeder::class);
+
+    App::setLocale($locale);
+
+    expect(StorageLocation::query()->pluck('name')->all())->toContain($hall)
+        ->and(Poster::query()->where('code', 'demo-01')->sole()->title)->toBe($title);
+})->with([
+    'English' => ['en', 'Kingdom Hall', 'Demo poster 1'],
+    'Italian' => ['it', 'Sala del Regno', 'Poster di esempio 1'],
+    'Spanish' => ['es', 'Salón del Reino', 'Póster de ejemplo 1'],
+]);
 
 test('the storage places are not called locations, a word left for the sites of the carts', function (string $locale, string $plural) {
     App::setLocale($locale);
