@@ -7,6 +7,7 @@ use App\Enums\PublicationCategory;
 use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
 use App\Filament\Resources\Publications\Pages\ManagePublications;
 use App\Models\Publication;
+use App\Support\Translations;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -69,22 +70,17 @@ class PublicationResource extends Resource implements HasKnowledgeBase
         return $schema
             ->columns(1)
             ->components([
-                TextInput::make('name')
-                    ->label(__('filament-resources.publication.field_name'))
-                    ->placeholder(__('filament-resources.publication.field_name_placeholder'))
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                Translations::inputs('name', __('filament-resources.publication.field_name'), __('filament-resources.publication.field_name_placeholder')),
                 Select::make('category')
                     ->label(__('filament-resources.publication.field_category'))
                     ->options(PublicationCategory::class)
                     ->default(PublicationCategory::Books)
                     ->required()
                     ->native(false),
-                TextInput::make('short_name')
-                    ->label(__('filament-resources.publication.field_short_name'))
-                    ->placeholder(__('filament-resources.publication.field_short_name_placeholder'))
-                    ->helperText(__('filament-resources.publication.field_short_name_helper'))
+                TextInput::make('code')
+                    ->label(__('filament-resources.publication.field_code'))
+                    ->placeholder(__('filament-resources.publication.field_code_placeholder'))
+                    ->helperText(__('filament-resources.publication.field_code_helper'))
                     ->maxLength(50),
                 TextInput::make('renewal_months')
                     ->label(__('filament-resources.publication.field_renewal_months'))
@@ -125,8 +121,8 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                     ->label(__('filament-resources.publication.column_name'))
                     ->icon(Heroicon::OutlinedBookOpen)
                     ->weight(FontWeight::Medium)
-                    ->description(fn (Publication $record): ?string => $record->short_name)
-                    ->searchable(),
+                    ->description(fn (Publication $record): ?string => $record->code)
+                    ->searchable(query: fn (Builder $query, string $search): Builder => Translations::search($query, 'name', $search)),
                 ToggleColumn::make('is_active')
                     ->label(__('filament-resources.publication.column_is_active'))
                     ->alignCenter(),

@@ -37,8 +37,14 @@ class FakePublicationRequestSeeder extends Seeder
     public function run(): void
     {
         $publications = [
-            'book' => Publication::query()->firstOrCreate(['name' => 'Enjoy Life Forever!'], ['category' => PublicationCategory::Books, 'short_name' => 'lff']),
-            'tract' => Publication::query()->firstOrCreate(['name' => 'What Is the Kingdom of God?'], ['category' => PublicationCategory::Tracts, 'short_name' => 'T-36']),
+            'book' => Publication::query()->firstOrCreate(['code' => 'lff'], [
+                'name' => ['en' => 'Enjoy Life Forever!', 'it' => 'Vivi felice per sempre!', 'es' => '¡Disfrute de la vida para siempre!'],
+                'category' => PublicationCategory::Books,
+            ]),
+            'tract' => Publication::query()->firstOrCreate(['code' => 'T-36'], [
+                'name' => ['en' => 'What Is the Kingdom of God?', 'it' => 'Cos\'è il Regno di Dio?', 'es' => '¿Qué es el Reino de Dios?'],
+                'category' => PublicationCategory::Tracts,
+            ]),
         ];
 
         if (PublicationRequest::query()->whereIn('publication_id', array_map(fn (Publication $publication) => $publication->getKey(), $publications))->exists()) {

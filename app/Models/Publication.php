@@ -11,17 +11,27 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Translatable\HasTranslations;
 
 /**
  * A publication that the publishers can receive on paper, e.g. The Watchtower: requested once (e.g. a book), or
- * again every period when it is renewable (`renewal_months`).
+ * again every period when it is renewable (`renewal_months`). Its name is translated in every language of the
+ * application, while its code is the same in all of them.
  */
 class Publication extends Model
 {
     /** @use HasFactory<PublicationFactory> */
     use HasFactory;
 
+    use HasTranslations;
     use LogsActivity;
+
+    /**
+     * The attributes translated in every language of the application.
+     *
+     * @var list<string>
+     */
+    public array $translatable = ['name'];
 
     /**
      * The attributes that are mass assignable.
@@ -31,7 +41,7 @@ class Publication extends Model
     protected $fillable = [
         'name',
         'category',
-        'short_name',
+        'code',
         'renewal_months',
         'sort',
         'is_active',
@@ -56,7 +66,7 @@ class Publication extends Model
     {
         return LogOptions::defaults()
             ->logOnlyDirty()
-            ->logOnly(['name', 'category', 'short_name', 'renewal_months', 'is_active']);
+            ->logOnly(['name', 'category', 'code', 'renewal_months', 'is_active']);
     }
 
     /**
@@ -125,7 +135,7 @@ class Publication extends Model
         return $query
             ->orderByRaw("case {$column} {$cases} else ".count(PublicationCategory::cases()).' end')
             ->orderBy('sort')
-            ->orderBy('name');
+            ->orderBy($this->qualifyColumn('name->'.app()->getLocale()));
     }
 
     /**
@@ -139,10 +149,10 @@ class Publication extends Model
     }
 
     /**
-     * The name shown in the headers of the columns.
+     * The label shown in the headers of the columns: the code, when it has one, otherwise the name.
      */
     public function getShortLabel(): string
     {
-        return filled($this->short_name) ? $this->short_name : $this->name;
+        return filled($this->code) ? $this->code : $this->name;
     }
 }

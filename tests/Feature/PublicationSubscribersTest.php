@@ -35,7 +35,9 @@ beforeEach(function () {
     Department::for(DepartmentKey::Publications)->members()->attach($this->member);
     $this->actingAs($this->member);
 
-    // The publications created by the migrations (renewed every month, every month, every two months)
+    // The renewable publications created by the migrations (renewed every month, every month, every two months): the
+    // others are deleted, so that the tests deal with these only (see `PublicationsTest` for all of them)
+    Publication::query()->whereNotIn('code', ['w', 'wlp', 'mwb'])->delete();
     [$this->watchtower, $this->largePrint, $this->workbook] = Publication::query()->ordered()->get()->all();
 });
 
@@ -78,18 +80,6 @@ test('the publications are sorted by category, then as chosen in their list', fu
 
     expect(Publication::query()->ordered()->pluck('id')->all())
         ->toBe([$bible->id, $this->watchtower->id, $this->largePrint->id, $this->workbook->id, $book->id]);
-});
-
-test('the migrations create the usual publications, renewable, in the language of the installation', function () {
-    expect(Publication::query()->ordered()->pluck('name')->all())->toBe([
-        __('filament-resources.publication.defaults.watchtower.name', [], config('app.locale')),
-        __('filament-resources.publication.defaults.watchtower_large_print.name', [], config('app.locale')),
-        __('filament-resources.publication.defaults.meeting_workbook.name', [], config('app.locale')),
-    ])->and(Publication::query()->ordered()->pluck('category')->all())->toBe([
-        PublicationCategory::Watchtower,
-        PublicationCategory::Watchtower,
-        PublicationCategory::MeetingWorkbooks,
-    ])->and(Publication::query()->ordered()->pluck('renewal_months')->all())->toBe([1, 1, 2]);
 });
 
 test('a publisher can be added with the publications received regularly, which are requested right away', function () {
@@ -276,15 +266,15 @@ test('the stopped subscriptions are neither shown nor counted', function () {
 test('a new renewable publication can be received without changing the application', function () {
     Livewire::test(ManagePublications::class)
         ->callAction(TestAction::make('create'), [
-            'name' => 'Awake!',
+            'name' => [app()->getLocale() => 'Awake!'],
             'category' => PublicationCategory::Awake->value,
-            'short_name' => 'Awake',
+            'code' => 'g',
             'renewal_months' => 4,
             'is_active' => true,
         ])
         ->assertHasNoFormErrors();
 
-    $awake = Publication::query()->where('name', 'Awake!')->sole();
+    $awake = Publication::query()->where('code', 'g')->sole();
     $publisher = User::factory()->create();
 
     expect($awake->category)->toBe(PublicationCategory::Awake)

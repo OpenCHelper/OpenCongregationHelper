@@ -16,7 +16,8 @@ use Illuminate\Support\Carbon;
 class FakePublicationSubscriberSeeder extends Seeder
 {
     /**
-     * The copies of the first, second and third publication received by each publisher, and since how many months.
+     * The copies of the first, second and third renewable publication received by each publisher, and since how many
+     * months.
      *
      * @var list<array{0: list<int>, 1: int}>
      */
@@ -42,7 +43,7 @@ class FakePublicationSubscriberSeeder extends Seeder
      */
     public function run(): void
     {
-        $publications = Publication::query()->ordered()->limit(3)->get()->values();
+        $publications = Publication::offeredRenewable()->take(3)->values();
         $users = User::query()->whereKeyNot(1)->orderByDesc('id')->limit(count(self::SUBSCRIPTIONS))->get()->values();
 
         foreach ($users as $index => $user) {
