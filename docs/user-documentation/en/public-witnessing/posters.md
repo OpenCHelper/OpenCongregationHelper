@@ -37,8 +37,8 @@ upload a CSV file with a row for each poster and storage place:
 | mi-25 | Enjoy life forever! | Storage box | 3 | |
 
 Only the **Title** is required; **Download example CSV file** in the window gives a file to start from. The columns are
-recognised only by their English name (*Code*, *Title*, *Storage place*, *Copies*, *Notes*), whatever the language of
-the interface; check them under **Columns** (a column with another name can always be chosen by hand), then click
+recognised by their name, in the language of the interface or in English (e.g. *Code*, *Title*, *Storage place*,
+*Copies*); check them under **Columns** (a column with another name can always be chosen by hand), then click
 **Import**. A notification tells when the import is over, with the rows that could not be imported.
 
 ![Importing posters](/docs/user-documentation/en/public-witnessing/assets/poster-import.webp)

@@ -22,8 +22,6 @@ Click **Download example CSV file** in the import window to get a template. Each
 | **Image path** | No | Absolute link (`http://` or `https://`) to an image of the territory. |
 | **Geojson** | No | The map of the territory, as a GeoJSON `FeatureCollection`. |
 
-The columns are recognised by their English name, as in the template, whatever the language of the interface.
-
 > 💡 **Tip:** spreadsheet programs (LibreOffice Calc, Excel, Google Sheets) can save a sheet as CSV with
 > *File → Save as / Download → CSV*.
 

@@ -7,6 +7,7 @@ use App\Models\Poster;
 use App\Models\StorageLocation;
 use App\Support\Translations;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
+use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Select;
@@ -22,8 +23,8 @@ use Illuminate\Support\Number;
  *     mi-25 | Enjoy life forever! | Kingdom Hall  | 2
  *     mi-25 | Enjoy life forever! | Storage box   | 3
  *
- * The headers are recognised only in English (see `EnglishImportColumn`), whatever the language of the user; the
- * example file has them in English too, with the examples of the values in the language of the user.
+ * The headers are recognised by the label of each column in the language of the user (as Filament does) or by their
+ * English names; the example file has them in the language of the user, so it is recognised again when imported.
  *
  * The rows of the same poster (same code, or same title without a code) update a single poster, so importing the
  * spreadsheet again updates the quantities instead of duplicating the posters. Missing storage places are created.
@@ -37,13 +38,13 @@ class PosterImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            EnglishImportColumn::make('code')
+            ImportColumn::make('code')
                 ->label(fn (): string => __('import.poster.columns.code'))
                 ->guess(['code', 'symbol'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.code'))
                 ->examples(['mi-25', 'mi-25'])
                 ->rules(['nullable', 'max:50']),
-            EnglishImportColumn::make('title')
+            ImportColumn::make('title')
                 ->label(fn (): string => __('import.poster.columns.title'))
                 ->guess(['title', 'name'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.title'))
@@ -52,7 +53,7 @@ class PosterImporter extends Importer
                 ->rules(['required', 'max:255'])
                 // In the language chosen in the import window, keeping the translations in the other languages
                 ->fillRecordUsing(fn (Poster $record, string $state, array $options) => $record->setTranslation('title', static::getTitleLocale($options), $state)),
-            EnglishImportColumn::make('storage')
+            ImportColumn::make('storage')
                 ->label(fn (): string => __('import.poster.columns.storage'))
                 ->guess(['storage', 'storage place', 'location'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.storage'))
@@ -61,7 +62,7 @@ class PosterImporter extends Importer
                 ->rules(['nullable', 'max:255'])
                 // Not an attribute of the poster: saved as its copies in the storage place (see `afterSave()`)
                 ->fillRecordUsing(fn () => null),
-            EnglishImportColumn::make('quantity')
+            ImportColumn::make('quantity')
                 ->label(fn (): string => __('import.poster.columns.quantity'))
                 ->guess(['quantity', 'copies'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.quantity'))
@@ -69,7 +70,7 @@ class PosterImporter extends Importer
                 ->integer()
                 ->rules(['nullable', 'integer', 'min:0', 'max:9999'])
                 ->fillRecordUsing(fn () => null),
-            EnglishImportColumn::make('notes')
+            ImportColumn::make('notes')
                 ->label(fn (): string => __('import.poster.columns.notes'))
                 ->guess(['notes', 'note'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.notes'))

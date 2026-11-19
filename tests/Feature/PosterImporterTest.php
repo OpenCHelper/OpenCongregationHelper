@@ -2,7 +2,6 @@
 
 use App\Enums\DepartmentKey;
 use App\Filament\Imports\PosterImporter;
-use App\Filament\Imports\TerritoryImporter;
 use App\Filament\Resources\Posters\Pages\ManagePosters;
 use App\Models\Department;
 use App\Models\Poster;
@@ -169,39 +168,32 @@ test('the posters page offers the import to whoever can create posters', functio
     Livewire::test(ManagePosters::class)->assertActionHidden(TestAction::make('import'));
 });
 
-test('the headers are recognised only in English, whatever the language of the user', function () {
-    App::setLocale('it');
+test('the headers are recognised in the language of the user or in English, without listing every language', function (string $locale) {
+    App::setLocale($locale);
 
     $guesses = collect(PosterImporter::getColumns())
         ->mapWithKeys(fn ($column): array => [$column->getName() => $column->getGuesses()]);
 
-    expect($guesses['code'])->toContain('code', 'symbol')->not->toContain('sigla')
-        ->and($guesses['title'])->toContain('title')->not->toContain('titolo')
-        ->and($guesses['storage'])->toContain('storage place')->not->toContain('deposito', 'dislocazione')
-        ->and($guesses['quantity'])->toContain('copies', 'quantity')->not->toContain('copie', 'quantità')
-        ->and($guesses['notes'])->toContain('notes')->not->toContain('notas');
-});
+    foreach (['code', 'title', 'storage', 'quantity', 'notes'] as $name) {
+        expect($guesses[$name])->toContain(mb_strtolower(__("import.poster.columns.{$name}")), mb_strtolower(__("import.poster.columns.{$name}", [], 'en')));
+    }
 
-test('the example file has the headers in English, recognised again when importing it', function (string $locale) {
+    // The other languages are not listed, so that the guesses don't grow with every language added
+    expect($guesses['title'])->not->toContain(...array_map(
+        fn (string $other): string => mb_strtolower(__('import.poster.columns.title', [], $other)),
+        array_values(array_diff(['it', 'es'], [$locale])),
+    ));
+})->with(['en', 'it', 'es']);
+
+test('the example file has the headers in the language of the user, recognised again when importing it', function (string $locale) {
     App::setLocale($locale);
 
     foreach (PosterImporter::getColumns() as $column) {
         expect(array_map(mb_strtolower(...), $column->getGuesses()))->toContain(mb_strtolower($column->getExampleHeader()))
-            ->and($column->getExampleHeader())->toBe(__("import.poster.columns.{$column->getName()}", [], 'en'));
+            ->and($column->getExampleHeader())->toBe(__("import.poster.columns.{$column->getName()}"));
     }
 
-    // The values of the examples stay in the language of the user: the same poster in two storage places
+    // The same poster in two storage places
     expect(collect(PosterImporter::getColumns())->firstWhere(fn ($column): bool => $column->getName() === 'storage')->getExamples())
         ->toBe([__('import.poster.examples.storage'), __('import.poster.examples.other_storage')]);
 })->with(['en', 'it', 'es']);
-
-test('the territory headers are recognised only in English', function () {
-    App::setLocale('it');
-
-    $guesses = collect(TerritoryImporter::getColumns())
-        ->mapWithKeys(fn ($column): array => [$column->getName() => $column->getGuesses()]);
-
-    expect($guesses['name'])->toContain('name')->not->toContain('nome')
-        ->and($guesses['description'])->toContain('description')->not->toContain('descrizione')
-        ->and($guesses['territoryZone'])->toContain('zone')->not->toContain('zona');
-});
