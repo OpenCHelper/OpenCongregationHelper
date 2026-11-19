@@ -487,6 +487,10 @@ return [
         'renewal_none' => 'Once',
         'column_pending_requests' => 'Pending',
         'action_requests' => 'Requests',
+        'action_offer' => 'Offer',
+        'action_stop_offering' => 'Stop offering',
+        'notification_offered' => 'Offered',
+        'notification_not_offered' => 'No longer offered',
     ],
     'publication_request' => [
         'model_label' => 'Request',

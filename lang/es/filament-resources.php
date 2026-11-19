@@ -488,6 +488,10 @@ return [
         'renewal_none' => 'Una vez',
         'column_pending_requests' => 'Pendientes',
         'action_requests' => 'Solicitudes',
+        'action_offer' => 'Ofrecer',
+        'action_stop_offering' => 'Dejar de ofrecer',
+        'notification_offered' => 'Ofrecidas',
+        'notification_not_offered' => 'Ya no se ofrecen',
     ],
     'publication_request' => [
         'model_label' => 'Solicitud',

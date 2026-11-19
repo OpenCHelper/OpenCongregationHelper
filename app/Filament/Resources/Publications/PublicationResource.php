@@ -10,6 +10,8 @@ use App\Models\Publication;
 use App\Support\Translations;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -28,6 +30,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Override;
 use UnitEnum;
 
@@ -179,9 +182,32 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                         ->modalDescription(__('filament-resources.publication.delete_description')),
                 ]),
             ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    static::getOfferBulkAction(true),
+                    static::getOfferBulkAction(false),
+                ]),
+            ])
             ->emptyStateIcon(Heroicon::OutlinedBookOpen)
             ->emptyStateHeading(__('filament-resources.publication.empty_heading'))
             ->emptyStateDescription(__('filament-resources.publication.empty_description'));
+    }
+
+    /**
+     * Offer the selected publications, or stop offering them (as the "Offered" switch of each one does).
+     */
+    protected static function getOfferBulkAction(bool $offered): BulkAction
+    {
+        return BulkAction::make($offered ? 'offer' : 'stop_offering')
+            ->label(__($offered ? 'filament-resources.publication.action_offer' : 'filament-resources.publication.action_stop_offering'))
+            ->icon($offered ? Heroicon::OutlinedCheckCircle : Heroicon::OutlinedNoSymbol)
+            ->color($offered ? 'success' : 'gray')
+            ->requiresConfirmation()
+            ->modalDescription($offered ? null : __('filament-resources.publication.field_is_active_helper'))
+            ->authorizeIndividualRecords('update')
+            ->action(fn (EloquentCollection $records) => $records->each(fn (Publication $record) => $record->update(['is_active' => $offered])))
+            ->deselectRecordsAfterCompletion()
+            ->successNotificationTitle(__($offered ? 'filament-resources.publication.notification_offered' : 'filament-resources.publication.notification_not_offered'));
     }
 
     public static function getDocumentation(): array

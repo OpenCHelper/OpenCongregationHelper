@@ -488,6 +488,10 @@ return [
         'renewal_none' => 'Una volta',
         'column_pending_requests' => 'In sospeso',
         'action_requests' => 'Richieste',
+        'action_offer' => 'Rendi disponibili',
+        'action_stop_offering' => 'Rendi non disponibili',
+        'notification_offered' => 'Rese disponibili',
+        'notification_not_offered' => 'Non più disponibili',
     ],
     'publication_request' => [
         'model_label' => 'Richiesta',
