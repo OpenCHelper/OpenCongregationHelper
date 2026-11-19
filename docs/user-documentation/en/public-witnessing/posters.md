@@ -25,6 +25,27 @@ the ones that are **Available** or **Out of stock**.
 
 ![Poster form](/docs/user-documentation/en/public-witnessing/assets/poster-form.webp)
 
+## Importing posters
+
+To load many posters at once, e.g. from an existing spreadsheet, click **Import Posters** at the top of the page and
+upload a CSV file with a row for each poster and storage place:
+
+| Code | Title | Storage place | Copies | Notes |
+|------|-------|---------------|--------|-------|
+| mi-25 | Enjoy life forever! | Kingdom Hall | 2 | |
+| mi-25 | Enjoy life forever! | Storage box | 3 | |
+
+Only the **Title** is required; **Download example CSV file** in the window gives a file to start from. The columns are
+recognised by their name (in English, Italian or Spanish, e.g. *Sigla*, *Titolo*, *Dislocazione*, *Quantità*); check
+them under **Columns**, then click **Import**. A notification tells when the import is over, with the rows that could
+not be imported.
+
+![Importing posters](/docs/user-documentation/en/public-witnessing/assets/poster-import.webp)
+
+- The rows with the same **Code** (or with the same **Title**, when there is no code) are the same poster: importing
+  the file again updates the posters and their copies instead of duplicating them.
+- The **Copies** of a row replace the ones of that storage place; the storage places that don't exist yet are created.
+
 ## Storage
 
 Click **Storage** at the top of the page (or **Public Witnessing → Storage**) to manage the places where the posters

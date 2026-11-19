@@ -25,6 +25,27 @@ oppure solo quelli **Disponibili** o **Esauriti**.
 
 ![Modifica di un poster](/docs/user-documentation/it/public-witnessing/assets/poster-form.webp)
 
+## Importare i poster
+
+Per caricare molti poster in una volta, ad esempio da un foglio di calcolo che hai già, clicca **Importa Poster** in
+alto nella pagina e carica un file CSV con una riga per ogni poster e deposito:
+
+| Sigla | Titolo | Deposito | Copie | Note |
+|-------|--------|----------|-------|------|
+| mi-25 | Goditi la vita per sempre! | Sala del Regno | 2 | |
+| mi-25 | Goditi la vita per sempre! | Box | 3 | |
+
+Serve solo il **Titolo**; **Scarica un file CSV di esempio** nella finestra fornisce un file da cui partire. Le colonne
+vengono riconosciute dal loro nome (in italiano, inglese o spagnolo, es. *Sigla*, *Titolo*, *Dislocazione*,
+*Quantità*); controllale in **Colonne**, poi clicca **Importa**. Una notifica avvisa quando l'importazione è terminata,
+con le righe che non è stato possibile importare.
+
+![Importare i poster](/docs/user-documentation/it/public-witnessing/assets/poster-import.webp)
+
+- Le righe con la stessa **Sigla** (o con lo stesso **Titolo**, se non c'è la sigla) sono lo stesso poster: importando
+  di nuovo il file si aggiornano i poster e le loro copie invece di duplicarli.
+- Le **Copie** di una riga sostituiscono quelle di quel deposito; i depositi che non esistono ancora vengono creati.
+
 ## Depositi
 
 Clicca **Depositi** in alto nella pagina (o **Testimonianza pubblica → Depositi**) per gestire i posti in cui sono
