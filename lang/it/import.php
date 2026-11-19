@@ -51,10 +51,10 @@ return [
             'locale_helper' => 'La lingua in cui sono scritti i titoli nel file: vengono salvati come sua traduzione, conservando le altre lingue.',
         ],
         'examples' => [
-            'title' => 'Goditi la vita per sempre!',
-            'storage' => 'Sala del Regno',
-            'other_storage' => 'Box',
-            'notes' => 'Nuova edizione',
+            'title' => 'Poster di esempio',
+            'storage' => 'Deposito A',
+            'other_storage' => 'Deposito B',
+            'notes' => 'Nota di esempio',
         ],
         'notifications' => [
             'completed' => [

@@ -19,9 +19,9 @@ use Illuminate\Support\Number;
 /**
  * Import the posters from a spreadsheet with a row for each poster and storage place, e.g.:
  *
- *     Code  | Title                | Storage       | Quantity
- *     mi-25 | Enjoy life forever! | Kingdom Hall  | 2
- *     mi-25 | Enjoy life forever! | Storage box   | 3
+ *     Code   | Title          | Storage         | Quantity
+ *     abc-01 | Example poster | Storage place A | 2
+ *     abc-01 | Example poster | Storage place B | 3
  *
  * The headers are recognised by the label of each column in the language of the user (as Filament does) or by their
  * English names; the example file has them in the language of the user, so it is recognised again when imported.
@@ -42,7 +42,7 @@ class PosterImporter extends Importer
                 ->label(fn (): string => __('import.poster.columns.code'))
                 ->guess(['code', 'symbol'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.code'))
-                ->examples(['mi-25', 'mi-25'])
+                ->examples(['abc-01', 'abc-01'])
                 ->rules(['nullable', 'max:50']),
             ImportColumn::make('title')
                 ->label(fn (): string => __('import.poster.columns.title'))

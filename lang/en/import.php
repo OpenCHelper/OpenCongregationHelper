@@ -51,10 +51,10 @@ return [
             'locale_helper' => 'The language the titles in the file are written in: they are saved as its translation, keeping the other languages.',
         ],
         'examples' => [
-            'title' => 'Enjoy life forever!',
-            'storage' => 'Kingdom Hall',
-            'other_storage' => 'Storage box',
-            'notes' => 'New edition',
+            'title' => 'Example poster',
+            'storage' => 'Storage place A',
+            'other_storage' => 'Storage place B',
+            'notes' => 'Example note',
         ],
         'notifications' => [
             'completed' => [
