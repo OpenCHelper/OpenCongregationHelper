@@ -35,7 +35,9 @@ trait ImportsInTheUserLocale
      */
     public static function modifyCompletedNotification(Notification $notification, Import $import): Notification
     {
-        if (! ($failedRowsCount = $import->getFailedRowsCount())) {
+        $failedRowsCount = $import->getFailedRowsCount();
+
+        if (! $failedRowsCount) {
             return $notification;
         }
 

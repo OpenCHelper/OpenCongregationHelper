@@ -293,7 +293,9 @@ class TerritoryImporter extends Importer
                 'count' => Number::format($import->successful_rows, locale: app()->getLocale()),
             ]);
 
-            if ($failedRowsCount = $import->getFailedRowsCount()) {
+            $failedRowsCount = $import->getFailedRowsCount();
+
+            if ($failedRowsCount) {
                 $body .= ' '.trans_choice('import.territory.notifications.completed.failed_rows', $failedRowsCount, [
                     'count' => Number::format($failedRowsCount, locale: app()->getLocale()),
                 ]);
