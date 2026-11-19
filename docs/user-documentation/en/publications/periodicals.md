@@ -1,15 +1,15 @@
 ---
 type: documentation
 icon: heroicon-o-newspaper
-title: Paper publications
+title: Regular publications
 order: 1
 ---
 
-Open **Publications → Paper publications** to see who receives publications on paper regularly (e.g. *The Watchtower*
+Open **Publications → Regular publications** to see who receives publications on paper regularly (e.g. *The Watchtower*
 or the *Meeting Workbook*), and how many copies. Each one is [requested](requests) again automatically every period
 (e.g. every month), and every request stays in the history.
 
-![Paper publications](/docs/user-documentation/en/publications/assets/periodicals.webp)
+![Regular publications](/docs/user-documentation/en/publications/assets/periodicals.webp)
 
 There is a row for each publisher and a column for each publication (**—** when not received), grouped by category.
 The cards at the top, and the **Summary** row at the bottom, show the **total copies to order** of each publication and
@@ -49,12 +49,12 @@ they can be changed, turned off or deleted (a deleted one is not created again).
 3. Enter its **Code** (e.g. `lff`): it is required, the same in every language and shown in the header of its column.
 4. For the publications received regularly, turn on **Received regularly** and enter every how many months it **Renews**
    (e.g. 1 for *The Watchtower*, 2 for the *Meeting Workbook*); leave it off for the ones requested once (e.g. a book).
-5. Click **Create**: a publication that renews gets its own column in the paper publications; all of them can be
+5. Click **Create**: a publication that renews gets its own column in the regular publications; all of them can be
    [requested](requests).
 
 The publications are listed by category; drag them (with the button at the top of the table) to change their order
-within it. To stop offering a publication, turn off **Offered**: it disappears from the paper publications, but the
-copies already entered are kept. Deleting it deletes those copies and its requests too. The **Pending** column counts
-its requests not delivered yet, and the **Requests** button opens their history.
+within it. To stop offering a publication, turn off **Offered**: it can no longer be chosen in the regular publications
+and in new requests, but the copies already entered are kept. Deleting it deletes those copies and its requests too. The
+**Pending** column counts its requests not delivered yet, and the **Requests** button opens their history.
 
 The members of the [Publications department](../administration/departments) can manage both lists.

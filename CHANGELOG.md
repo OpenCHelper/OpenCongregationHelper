@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Posters inventory** (Public Witnessing → Posters): the magnetic posters of the displays, with their code, title and
   copies in each storage place, e.g. the Kingdom Hall or a storage box. Titles can be translated in every language, and
   posters can be imported from a spreadsheet ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
-- **Paper publications** (Publications): who receives publications on paper regularly, with the total copies to order.
+- **Regular publications** (Publications): who receives publications on paper regularly, with the total copies to order.
   The publications, with their names in every language, code and category (books, tracts, ...), are managed in the
   publication list, which starts with the periodicals already translated: The Watchtower (also large print and public
   edition), Awake! and the Meeting Workbook (also large print) ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).

@@ -26,7 +26,7 @@ prendere.
 2. Scegli il **Proclamatore**, la **Pubblicazione** e il numero di **Copie**, e controlla la data in cui è stata
    **Richiesta il**.
 3. Per una pubblicazione ricevuta regolarmente (es. *La Torre di Guardia*), **Richiedila di nuovo ogni mese** è
-   attivo: la pubblicazione viene aggiunta alle [pubblicazioni su carta](periodicals) del proclamatore e richiesta di
+   attivo: la pubblicazione viene aggiunta alle [pubblicazioni periodiche](periodicals) del proclamatore e richiesta di
    nuovo automaticamente ogni periodo, finché non viene interrotta. Disattivalo per una richiesta singola.
 4. Clicca **Salva**, oppure **Salva & crea un altro**.
 
@@ -47,7 +47,7 @@ prendere.
   ultimi 12 mesi; scegli una pubblicazione in alto a destra per vedere solo quella.
 - Le richieste rinnovate (fatte automaticamente per le pubblicazioni ricevute regolarmente) hanno un'icona con due
   frecce in cerchio nella colonna **Rinnovo**; il filtro **Tipo** mostra solo quelle, o solo le richieste singole.
-- Il pulsante **Richieste** di un proclamatore nelle [pubblicazioni su carta](periodicals), o di una pubblicazione
+- Il pulsante **Richieste** di un proclamatore nelle [pubblicazioni periodiche](periodicals), o di una pubblicazione
   nell'**Elenco pubblicazioni**, apre lo storico di quel proclamatore o di quella pubblicazione. Anche la pagina di un
   utente ha la scheda **Richieste pubblicazioni**, come per le sue assegnazioni.
 

@@ -11,7 +11,7 @@ The work of the congregation is organized in **departments**, each one with its 
 |------------|----------|
 | **Territory Department** | Territories, Zones, Assignments, Campaigns |
 | **Public Witnessing** | [Posters and their storage places](../public-witnessing/posters) |
-| **Publications** | [Paper publications](../publications/periodicals), [Requests](../publications/requests), Publication list |
+| **Publications** | [Regular publications](../publications/periodicals), [Requests](../publications/requests), Publication list |
 
 Open **Administration → Departments** to see them, with their overseers and the number of members.
 
