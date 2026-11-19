@@ -16,6 +16,7 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 - **Nome dell'applicazione**: mostrato nella barra in alto, nella scheda del browser, nelle email e nell'app installata;
 - **Lingua predefinita**: la lingua degli utenti che non ne hanno scelta una;
 - **Fuso orario**: usato per mostrare le date;
+- **Indirizzo della Sala del Regno**: l'indirizzo della Sala del Regno della congregazione (facoltativo);
 - **Logo**: mostrato nella barra in alto al posto del nome (al massimo 2 MB);
 - **Colore principale**: il colore dei pulsanti, dei link e degli elementi selezionati, per gli utenti che non ne hanno
   scelto uno nelle proprie preferenze dell'interfaccia.

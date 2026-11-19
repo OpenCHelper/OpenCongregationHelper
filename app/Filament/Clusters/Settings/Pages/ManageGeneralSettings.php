@@ -8,6 +8,7 @@ use BackedEnum;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -74,6 +75,15 @@ class ManageGeneralSettings extends AppSettingsPage
                             ->options(array_combine($timezones, $timezones))
                             ->required()
                             ->searchable(),
+                    ]),
+                Section::make(__('settings.sections.congregation'))
+                    ->columnSpanFull()
+                    ->schema([
+                        Textarea::make('kingdom_hall_address')
+                            ->label(__('settings.fields.kingdom_hall_address.label'))
+                            ->placeholder(__('settings.fields.kingdom_hall_address.placeholder'))
+                            ->rows(3)
+                            ->maxLength(500),
                     ]),
                 Section::make(__('settings.sections.appearance'))
                     ->columns(2)

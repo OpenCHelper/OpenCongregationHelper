@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   personal data on shared pages and email sender name from **Administration → Settings**, without editing `.env`,
   which now only holds their defaults.
 - Logo and default primary colour of the application, from the Settings pages.
+- Address of the Kingdom Hall, on the General settings page.
 - Days after which assignments are out for too long and the day and time of the weekly reminders, from the Settings
   pages.
 - Days before their end from which campaigns are expiring and almost expired, from the Settings pages.

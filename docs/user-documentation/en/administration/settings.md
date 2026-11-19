@@ -16,6 +16,7 @@ role. The options are grouped by area, with one page each in the menu on the sid
 - **Name of the application**: shown in the top bar, in the browser tab, in the emails and in the installed app;
 - **Default language**: the language of the users who did not choose one;
 - **Timezone**: used to show the dates;
+- **Kingdom Hall address**: the address of the Kingdom Hall of the congregation (optional);
 - **Logo**: shown in the top bar instead of the name (at most 2 MB);
 - **Primary colour**: the colour of the buttons, links and selected items, for the users who did not choose their own
   in their UI preferences.

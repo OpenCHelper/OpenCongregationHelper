@@ -11,6 +11,11 @@ class GeneralSettings extends ConfigSettings
     public ?string $timezone;
 
     /**
+     * The address of the Kingdom Hall of the congregation.
+     */
+    public ?string $kingdom_hall_address = null;
+
+    /**
      * The logo shown in the top bar instead of the name, as a path on the `public` disk.
      */
     public ?string $logo = null;

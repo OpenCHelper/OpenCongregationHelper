@@ -32,12 +32,17 @@ return [
         'campaign_expiry_description' => 'A medida que se acerca su fecha de fin, una campaña activa pasa a estar por vencer y luego casi vencida.',
         'application' => 'Aplicación',
         'appearance' => 'Apariencia',
+        'congregation' => 'Congregación',
         'maps_and_sharing' => 'Mapas y compartir',
         'stale_assignments' => 'Asignaciones fuera desde hace demasiado tiempo',
         'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan.',
     ],
 
     'fields' => [
+        'kingdom_hall_address' => [
+            'label' => 'Dirección del Salón del Reino',
+            'placeholder' => 'Calle, número, código postal y ciudad',
+        ],
         'name' => [
             'label' => 'Nombre de la aplicación',
         ],

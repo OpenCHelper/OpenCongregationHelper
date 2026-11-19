@@ -32,12 +32,17 @@ return [
         'campaign_expiry_description' => 'Man mano che si avvicina la data di fine, una campagna attiva diventa in scadenza e poi quasi scaduta.',
         'application' => 'Applicazione',
         'appearance' => 'Aspetto',
+        'congregation' => 'Congregazione',
         'maps_and_sharing' => 'Mappe e condivisione',
         'stale_assignments' => 'Assegnazioni fuori da troppo tempo',
         'stale_assignments_description' => 'Le assegnazioni ancora in corso dopo questi giorni sono fuori da troppo tempo: una volta a settimana, ai loro assegnatari viene ricordato di restituirle.',
     ],
 
     'fields' => [
+        'kingdom_hall_address' => [
+            'label' => 'Indirizzo della Sala del Regno',
+            'placeholder' => 'Via, numero civico, CAP e città',
+        ],
         'name' => [
             'label' => 'Nome dell\'applicazione',
         ],

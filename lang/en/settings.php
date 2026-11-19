@@ -32,12 +32,17 @@ return [
         'campaign_expiry_description' => 'As its end date gets closer, an active campaign becomes expiring and then almost expired.',
         'application' => 'Application',
         'appearance' => 'Appearance',
+        'congregation' => 'Congregation',
         'maps_and_sharing' => 'Maps and sharing',
         'stale_assignments' => 'Assignments out for too long',
         'stale_assignments_description' => 'Assignments still in progress after these days are out for too long: once a week, their assignees are reminded to return them.',
     ],
 
     'fields' => [
+        'kingdom_hall_address' => [
+            'label' => 'Kingdom Hall address',
+            'placeholder' => 'Street, number, postcode and city',
+        ],
         'name' => [
             'label' => 'Name of the application',
         ],

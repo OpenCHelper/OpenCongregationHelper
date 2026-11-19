@@ -532,3 +532,29 @@ test('the stale assignment levels are shown in order, with a bar to scale', func
         ])
         ->assertSeeHtml('fi-settings-stages-bar');
 });
+
+test('the address of the Kingdom Hall is stored', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageGeneralSettings::class)
+        ->assertSchemaStateSet(['kingdom_hall_address' => null])
+        ->fillForm(['kingdom_hall_address' => "Via Roma 1\n00043 Ciampino (RM)"])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(GeneralSettings::class)->kingdom_hall_address)->toBe("Via Roma 1\n00043 Ciampino (RM)");
+
+    Livewire::test(ManageGeneralSettings::class)
+        ->assertSchemaStateSet(['kingdom_hall_address' => "Via Roma 1\n00043 Ciampino (RM)"]);
+});
+
+test('the address of the Kingdom Hall is optional', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageGeneralSettings::class)
+        ->fillForm(['kingdom_hall_address' => ''])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(GeneralSettings::class)->kingdom_hall_address)->toBeNull();
+});
