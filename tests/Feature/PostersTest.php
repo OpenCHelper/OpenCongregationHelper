@@ -3,6 +3,7 @@
 use App\Enums\DepartmentKey;
 use App\Filament\Resources\Posters\Pages\ManagePosters;
 use App\Filament\Resources\StorageLocations\Pages\ManageStorageLocations;
+use App\Filament\Resources\StorageLocations\StorageLocationResource;
 use App\Models\Department;
 use App\Models\Poster;
 use App\Models\StorageLocation;
@@ -10,6 +11,7 @@ use App\Models\User;
 use Database\Seeders\FakePosterSeeder;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
@@ -140,3 +142,14 @@ test('the fake poster seeder creates the posters in two locations', function () 
 
     $this->get(ManagePosters::getUrl())->assertOk()->assertSee('Kingdom Hall')->assertSee('mp-01');
 });
+
+test('the storage places are not called locations, a word left for the sites of the carts', function (string $locale, string $plural) {
+    App::setLocale($locale);
+
+    expect(StorageLocationResource::getPluralModelLabel())->toBe($plural)
+        ->and(__('filament-resources.poster.action_manage_locations'))->toBe($plural);
+})->with([
+    ['en', 'Storage'],
+    ['it', 'Depositi'],
+    ['es', 'Depósitos'],
+]);

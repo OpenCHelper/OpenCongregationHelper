@@ -87,7 +87,7 @@ class StorageLocationResource extends Resource implements HasKnowledgeBase
             ->columns([
                 TextColumn::make('name')
                     ->label(__('filament-resources.storage_location.column_name'))
-                    ->icon(Heroicon::OutlinedMapPin)
+                    ->icon(Heroicon::OutlinedArchiveBox)
                     ->description(fn (StorageLocation $record): ?string => $record->notes)
                     ->searchable()
                     ->sortable(),
