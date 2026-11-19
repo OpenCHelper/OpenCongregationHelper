@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\PublicationSubscribers\Widgets;
 
 use App\Filament\Resources\PublicationSubscribers\Pages\ManagePublicationSubscribers;
-use App\Models\PublicationSubscriber;
 use App\Models\Publication;
+use App\Models\PublicationSubscriber;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;

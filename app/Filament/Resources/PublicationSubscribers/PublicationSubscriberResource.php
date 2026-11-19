@@ -3,12 +3,13 @@
 namespace App\Filament\Resources\PublicationSubscribers;
 
 use App\Enums\NavigationGroup;
-use App\Filament\Resources\PublicationSubscribers\Pages\ManagePublicationSubscribers;
 use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
 use App\Filament\Resources\Publications\PublicationResource;
-use App\Models\PublicationSubscriber;
+use App\Filament\Resources\PublicationSubscribers\Pages\ManagePublicationSubscribers;
 use App\Models\Publication;
+use App\Models\PublicationSubscriber;
 use App\Models\User;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -29,7 +30,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
-use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Query\Builder as QueryBuilder;

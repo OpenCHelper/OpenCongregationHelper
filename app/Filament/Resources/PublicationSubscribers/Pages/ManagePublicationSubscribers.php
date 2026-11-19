@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\PublicationSubscribers\Pages;
 
+use App\Filament\Resources\Publications\PublicationResource;
 use App\Filament\Resources\PublicationSubscribers\PublicationSubscriberResource;
 use App\Filament\Resources\PublicationSubscribers\Widgets\PublicationTotals;
-use App\Filament\Resources\Publications\PublicationResource;
 use App\Models\Publication;
 use App\Models\PublicationSubscriber;
 use Filament\Actions\CreateAction;
