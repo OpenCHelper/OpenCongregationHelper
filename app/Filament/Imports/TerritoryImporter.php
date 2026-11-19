@@ -6,7 +6,6 @@ use App\Filament\Imports\Concerns\ImportsInTheUserLocale;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
-use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Checkbox;
@@ -38,30 +37,30 @@ class TerritoryImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('name')
+            EnglishImportColumn::make('name')
                 ->label(fn (): string => __('import.territory.columns.name'))
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
-            ImportColumn::make('description')
+            EnglishImportColumn::make('description')
                 ->label(fn (): string => __('import.territory.columns.description')),
-            ImportColumn::make('image_path')
+            EnglishImportColumn::make('image_path')
                 ->label(fn (): string => __('import.territory.columns.image_path'))
                 ->helperText(fn (): string => __('import.territory.columns.image_path_helper'))
                 ->example('https://yavuzceliker.github.io/sample-images/image-6.jpg'),
-            ImportColumn::make('geojson')
+            EnglishImportColumn::make('geojson')
                 ->label(fn (): string => __('import.territory.columns.geojson')),
-            ImportColumn::make('notes')
+            EnglishImportColumn::make('notes')
                 ->label(fn (): string => __('import.territory.columns.notes')),
-            ImportColumn::make('is_commercial')
+            EnglishImportColumn::make('is_commercial')
                 ->label(fn (): string => __('import.territory.columns.is_commercial'))
                 ->requiredMapping()
                 ->boolean()
                 ->rules(['required', 'boolean']),
-            ImportColumn::make('territoryZone')
+            EnglishImportColumn::make('territoryZone')
                 ->label(fn (): string => __('import.territory.columns.territory_zone'))
                 // ->relationship(resolveUsing: 'name')
                 ->rules(['required']),
-            // ImportColumn::make('created_by')
+            // EnglishImportColumn::make('created_by')
             //     ->numeric()
             //     ->rules(['integer']),
         ];

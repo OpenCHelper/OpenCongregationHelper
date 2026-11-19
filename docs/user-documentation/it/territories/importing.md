@@ -23,6 +23,8 @@ territorio, con queste colonne:
 | **Image path** | No | Link assoluto (`http://` o `https://`) a un'immagine del territorio. |
 | **Geojson** | No | La mappa del territorio, come `FeatureCollection` GeoJSON. |
 
+Le colonne vengono riconosciute dal loro nome in inglese, come nel modello, qualunque sia la lingua dell'interfaccia.
+
 > 💡 **Suggerimento:** i programmi di fogli di calcolo (LibreOffice Calc, Excel, Fogli Google) possono salvare un foglio
 > in formato CSV con *File → Salva con nome / Scarica → CSV*.
 

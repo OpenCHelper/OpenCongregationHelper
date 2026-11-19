@@ -7,7 +7,6 @@ use App\Models\Poster;
 use App\Models\StorageLocation;
 use App\Support\Translations;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
-use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +20,8 @@ use Illuminate\Support\Number;
  *     mi-25 | Enjoy life forever! | Kingdom Hall  | 2
  *     mi-25 | Enjoy life forever! | Storage box   | 3
  *
- * The example file has the headers in the language of the user, which are recognised again when importing it.
+ * The headers are recognised only in English (see `EnglishImportColumn`), whatever the language of the user; the
+ * example file has them in English too, with the examples of the values in the language of the user.
  *
  * The rows of the same poster (same code, or same title without a code) update a single poster, so importing the
  * spreadsheet again updates the quantities instead of duplicating the posters. Missing storage places are created.
@@ -35,39 +35,39 @@ class PosterImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('code')
+            EnglishImportColumn::make('code')
                 ->label(fn (): string => __('import.poster.columns.code'))
-                ->guess(['code', 'symbol', 'sigla', 'codice', 'código', 'codigo'])
+                ->guess(['code', 'symbol'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.code'))
                 ->examples(['mi-25', 'mi-25'])
                 ->rules(['nullable', 'max:50']),
-            ImportColumn::make('title')
+            EnglishImportColumn::make('title')
                 ->label(fn (): string => __('import.poster.columns.title'))
-                ->guess(['title', 'name', 'titolo', 'nome', 'título', 'titulo', 'nombre'])
+                ->guess(['title', 'name'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.title'))
                 ->examples(fn (): array => array_fill(0, 2, __('import.poster.examples.title')))
                 ->requiredMapping()
                 ->rules(['required', 'max:255']),
-            ImportColumn::make('storage')
+            EnglishImportColumn::make('storage')
                 ->label(fn (): string => __('import.poster.columns.storage'))
-                ->guess(['storage', 'storage place', 'location', 'deposito', 'dislocazione', 'luogo', 'depósito', 'lugar'])
+                ->guess(['storage', 'storage place', 'location'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.storage'))
                 // The same poster in two storage places, to show that each one has its row
                 ->examples(fn (): array => [__('import.poster.examples.storage'), __('import.poster.examples.other_storage')])
                 ->rules(['nullable', 'max:255'])
                 // Not an attribute of the poster: saved as its copies in the storage place (see `afterSave()`)
                 ->fillRecordUsing(fn () => null),
-            ImportColumn::make('quantity')
+            EnglishImportColumn::make('quantity')
                 ->label(fn (): string => __('import.poster.columns.quantity'))
-                ->guess(['quantity', 'copies', 'quantità', 'quantita', 'copie', 'cantidad', 'copias'])
+                ->guess(['quantity', 'copies'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.quantity'))
                 ->examples(['2', '3'])
                 ->integer()
                 ->rules(['nullable', 'integer', 'min:0', 'max:9999'])
                 ->fillRecordUsing(fn () => null),
-            ImportColumn::make('notes')
+            EnglishImportColumn::make('notes')
                 ->label(fn (): string => __('import.poster.columns.notes'))
-                ->guess(['notes', 'note', 'notas'])
+                ->guess(['notes', 'note'])
                 ->exampleHeader(fn (): string => __('import.poster.columns.notes'))
                 ->examples(fn (): array => [__('import.poster.examples.notes'), ''])
                 // Keep the notes of the poster when the column is empty (e.g. in the other rows of the same poster)
