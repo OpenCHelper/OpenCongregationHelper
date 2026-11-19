@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Publications\Pages;
 
+use App\Filament\Exports\PublicationExporter;
+use App\Filament\Imports\PublicationImporter;
+use App\Filament\Resources\Concerns\HasImportExportActions;
 use App\Filament\Resources\Publications\PublicationResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
@@ -9,6 +12,8 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class ManagePublications extends ManageRecords
 {
+    use HasImportExportActions;
+
     protected static string $resource = PublicationResource::class;
 
     /**
@@ -27,6 +32,7 @@ class ManagePublications extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
+            $this->getImportExportActions(PublicationImporter::class, PublicationExporter::class),
             CreateAction::make(),
         ];
     }

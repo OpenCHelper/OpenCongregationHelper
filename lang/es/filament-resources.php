@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'import_export' => 'Importar / Exportar',
     'user_profile' => [
         'navigation_label' => 'Perfiles de Usuario',
         'menu_label' => 'Perfil',

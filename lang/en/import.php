@@ -68,4 +68,42 @@ return [
             'quantity_without_storage' => 'The copies of the poster ":title" have no storage place.',
         ],
     ],
+    'notifications' => [
+        'completed' => [
+            'body' => 'The import has completed: :count row imported.|The import has completed: :count rows imported.',
+            'failed_rows' => ':count row failed to import.|:count rows failed to import.',
+        ],
+    ],
+    'publication' => [
+        'columns' => [
+            'name' => 'Name (:language)',
+            'code' => 'Code',
+            'category' => 'Category',
+            'renewal_months' => 'Renews every (months)',
+            'is_active' => 'Offered',
+        ],
+        'examples' => [
+            'name' => 'Example publication',
+            'other_name' => 'Another publication',
+        ],
+        'errors' => [
+            'unauthorized' => 'You are not allowed to import the publication ":code".',
+            'name_missing' => 'The publication ":code" has no name.',
+            'category_unknown' => 'The category ":category" of the publication ":code" does not exist.',
+        ],
+    ],
+    'storage_location' => [
+        'columns' => [
+            'name' => 'Name',
+            'notes' => 'Notes',
+        ],
+        'examples' => [
+            'name' => 'Storage place A',
+            'other_name' => 'Storage place B',
+            'notes' => 'Example note',
+        ],
+        'errors' => [
+            'unauthorized' => 'You are not allowed to import the storage place ":name".',
+        ],
+    ],
 ];
