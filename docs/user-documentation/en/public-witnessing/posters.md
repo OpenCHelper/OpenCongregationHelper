@@ -17,7 +17,8 @@ the ones that are **Available** or **Out of stock**.
 ## Adding or editing a poster
 
 1. Click **New Poster** (or **Edit** on an existing one).
-2. Fill in the **Code** (optional, e.g. `mi-25`) and the **Title**.
+2. Fill in the **Code** (optional, e.g. `mi-25`) and the **Title** in your language; you can also enter it in the
+   other languages, otherwise they show it as you wrote it.
 3. Under **Quantities**, choose a **Storage place** and enter the number of **Copies**. Click **Add storage place** to add the
    copies kept in another place. To create a new storage place on the fly, click **+** next to it.
 4. Optionally, upload a **Picture** of the poster to recognize it at a glance.
@@ -45,6 +46,7 @@ not be imported.
 - The rows with the same **Code** (or with the same **Title**, when there is no code) are the same poster: importing
   the file again updates the posters and their copies instead of duplicating them.
 - The **Copies** of a row replace the ones of that storage place; the storage places that don't exist yet are created.
+- The **Titles** are saved in your language: the translations in the other languages are kept.
 
 ## Storage
 

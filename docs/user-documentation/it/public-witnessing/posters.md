@@ -17,7 +17,8 @@ oppure solo quelli **Disponibili** o **Esauriti**.
 ## Aggiungere o modificare un poster
 
 1. Clicca **Nuovo** (o **Modifica** su un poster esistente).
-2. Inserisci la **Sigla** (facoltativa, es. `mi-25`) e il **Titolo**.
+2. Inserisci la **Sigla** (facoltativa, es. `mi-25`) e il **Titolo** nella tua lingua; puoi inserirlo anche nelle
+   altre lingue, altrimenti mostrano quello che hai scritto.
 3. In **Quantità**, scegli un **Deposito** e inserisci il numero di **Copie**. Clicca **Aggiungi deposito** per aggiungere le
    copie conservate in un altro posto. Per creare al volo un nuovo deposito, clicca **+** accanto al campo.
 4. Se vuoi, carica un'**Immagine** del poster per riconoscerlo a colpo d'occhio.
@@ -45,6 +46,7 @@ con le righe che non è stato possibile importare.
 - Le righe con la stessa **Sigla** (o con lo stesso **Titolo**, se non c'è la sigla) sono lo stesso poster: importando
   di nuovo il file si aggiornano i poster e le loro copie invece di duplicarli.
 - Le **Copie** di una riga sostituiscono quelle di quel deposito; i depositi che non esistono ancora vengono creati.
+- I **Titoli** vengono salvati nella tua lingua: le traduzioni nelle altre lingue vengono conservate.
 
 ## Depositi
 

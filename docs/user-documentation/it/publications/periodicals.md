@@ -36,16 +36,20 @@ nuovo in seguito. Il pulsante **Richieste** apre lo storico delle sue richieste.
 ## L'elenco delle pubblicazioni
 
 Le pubblicazioni che si possono ricevere non sono fisse: apri **Pubblicazioni → Elenco pubblicazioni** per
-aggiungerle, rinominarle o eliminarle. L'elenco parte con *La Torre di Guardia*, la sua edizione a caratteri grandi e
-la *Guida per l'adunanza*.
+aggiungerle, rinominarle o eliminarle. L'elenco parte con i periodici, già tradotti in ogni lingua: *La Torre di
+Guardia* (anche a caratteri grandi e nell'edizione per il pubblico), *Svegliatevi!* e la *Guida per l'adunanza* (anche
+a caratteri grandi). Come ogni altra pubblicazione si possono modificare, disattivare o eliminare (una volta eliminati
+non vengono ricreati).
 
 ![Elenco pubblicazioni](/docs/user-documentation/it/publications/assets/publications.webp)
 
-1. Clicca **Nuovo** e inserisci il **Nome** (es. *Svegliatevi!*).
+1. Clicca **Nuovo** e inserisci il **Nome** nella tua lingua (es. *Vivi felice per sempre!*): puoi inserirlo anche
+   nelle altre lingue, altrimenti mostrano quello che hai scritto.
 2. Scegli la **Categoria**, come nella Biblioteca online Watchtower: *Bibbie*, *Torre di Guardia*, *Svegliatevi!*,
    *Guide per l'adunanza*, *Libri*, *Opuscoli e brochure*, *Volantini*, *Indici*, *Programmi*, *Manuali e linee guida*
    o *Altro*.
-3. Se vuoi, inserisci un **Nome breve** (es. la sigla `lff`), mostrato nell'intestazione della sua colonna.
+3. Se vuoi, inserisci la sua **Sigla** (es. `lff`), la stessa in ogni lingua e mostrata nell'intestazione della sua
+   colonna.
 4. Per le pubblicazioni ricevute regolarmente, indica ogni quanti mesi **Si rinnova** (es. 1 per *La Torre di
    Guardia*, 2 per la *Guida per l'adunanza*); lascialo vuoto per quelle richieste una volta sola (es. un libro).
 5. Clicca **Salva**: una pubblicazione che si rinnova avrà la sua colonna nelle pubblicazioni su carta; tutte si

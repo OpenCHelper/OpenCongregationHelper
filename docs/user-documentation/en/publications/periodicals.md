@@ -36,14 +36,17 @@ their publications are no longer requested, but their history is kept and you ca
 ## The publication list
 
 The publications that can be received are not fixed: open **Publications → Publication list** to add, rename or remove
-them. The list starts with *The Watchtower*, its large print edition and the *Meeting Workbook*.
+them. The list starts with the periodicals, already translated in every language: *The Watchtower* (also in large
+print and the public edition), *Awake!* and the *Meeting Workbook* (also in large print). Like any other publication,
+they can be changed, turned off or deleted (a deleted one is not created again).
 
 ![Publication list](/docs/user-documentation/en/publications/assets/publications.webp)
 
-1. Click **New** and enter the **Name** (e.g. *Awake!*).
+1. Click **New** and enter the **Name** in your language (e.g. *Enjoy Life Forever!*): you can also enter it in the
+   other languages, otherwise they show it as you wrote it.
 2. Choose the **Category**, as in the Watchtower Online Library: *Bibles*, *Watchtower*, *Awake!*, *Meeting Workbooks*,
    *Books*, *Brochures and Booklets*, *Tracts*, *Indexes*, *Programs*, *Manuals and Guidelines* or *Other*.
-3. Optionally, enter a **Short name** (e.g. the symbol `lff`), shown in the header of its column.
+3. Optionally, enter its **Code** (e.g. `lff`), the same in every language and shown in the header of its column.
 4. For the publications received regularly, enter every how many months it **Renews** (e.g. 1 for *The Watchtower*, 2
    for the *Meeting Workbook*); leave it empty for the ones requested once (e.g. a book).
 5. Click **Create**: a publication that renews gets its own column in the paper publications; all of them can be
