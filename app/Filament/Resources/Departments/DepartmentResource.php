@@ -17,6 +17,7 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Override;
@@ -27,7 +28,7 @@ use UnitEnum;
  *
  * The departments are defined by `DepartmentKey`: they can't be created nor deleted, only their members change.
  */
-class DepartmentResource extends Resource
+class DepartmentResource extends Resource implements HasKnowledgeBase
 {
     protected static ?string $model = Department::class;
 
@@ -147,6 +148,13 @@ class DepartmentResource extends Resource
     {
         return [
             MembersRelationManager::class,
+        ];
+    }
+
+    public static function getDocumentation(): array
+    {
+        return [
+            'administration.departments',
         ];
     }
 

@@ -26,6 +26,7 @@ use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Override;
@@ -34,7 +35,7 @@ use UnitEnum;
 /**
  * The publishers receiving the periodicals on paper, with the copies of each one.
  */
-class PeriodicalSubscriptionResource extends Resource
+class PeriodicalSubscriptionResource extends Resource implements HasKnowledgeBase
 {
     protected static ?string $model = PeriodicalSubscription::class;
 
@@ -204,6 +205,13 @@ class PeriodicalSubscriptionResource extends Resource
         return $query
             ->orderBy(User::query()->select('first_name')->whereColumn('users.id', 'periodical_subscriptions.user_id'), $direction)
             ->orderBy(User::query()->select('last_name')->whereColumn('users.id', 'periodical_subscriptions.user_id'), $direction);
+    }
+
+    public static function getDocumentation(): array
+    {
+        return [
+            'publications.periodicals',
+        ];
     }
 
     public static function getPages(): array

@@ -14,13 +14,14 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Override;
 use UnitEnum;
 
 /**
  * The places where the posters are kept, e.g. the Kingdom Hall or a storage box.
  */
-class StorageLocationResource extends Resource
+class StorageLocationResource extends Resource implements HasKnowledgeBase
 {
     protected static ?string $model = StorageLocation::class;
 
@@ -108,6 +109,13 @@ class StorageLocationResource extends Resource
             ->emptyStateIcon(Heroicon::OutlinedArchiveBox)
             ->emptyStateHeading(__('filament-resources.storage_location.empty_heading'))
             ->emptyStateDescription(__('filament-resources.storage_location.empty_description'));
+    }
+
+    public static function getDocumentation(): array
+    {
+        return [
+            'public-witnessing.posters',
+        ];
     }
 
     public static function getPages(): array

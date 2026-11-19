@@ -32,6 +32,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -42,7 +43,7 @@ use UnitEnum;
 /**
  * The inventory of the magnetic posters of the displays used in public witnessing.
  */
-class PosterResource extends Resource
+class PosterResource extends Resource implements HasKnowledgeBase
 {
     protected static ?string $model = Poster::class;
 
@@ -261,6 +262,13 @@ class PosterResource extends Resource
                 ->whereIn('poster_id', $query->pluck('id'))
                 ->when($location, fn (Builder $stocks) => $stocks->where('storage_location_id', $location->getKey()))
                 ->sum('quantity'));
+    }
+
+    public static function getDocumentation(): array
+    {
+        return [
+            'public-witnessing.posters',
+        ];
     }
 
     public static function getPages(): array
