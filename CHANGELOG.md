@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pages.
 - Days before their end from which campaigns are expiring and almost expired, from the Settings pages.
 
+### Changed
+
+- The weekly reminders for the territories out for too long follow the timezone of the application (`APP_TIMEZONE`)
+  instead of always Rome time: with `APP_TIMEZONE=UTC` they now arrive one or two hours later in Italy, unless the
+  time is changed from the Settings pages.
+
 ### Fixed
 
 - The password reset and email verification emails are now in the language of the recipient, in Italian and

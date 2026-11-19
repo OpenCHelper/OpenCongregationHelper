@@ -57,7 +57,10 @@ return Application::configure(basePath: dirname(__DIR__))
             call it hourly), in an explicit timezone, or it never runs. The
             day and time of the stale assignments check are chosen on the
             Settings page, in the timezone of the application (`APP_TIMEZONE`,
-            UTC on the previews): they must match how the scheduler is run.
+            UTC on the previews), and are not limited to that window: each
+            installation runs the scheduler its own way (cron, a long-running
+            process or an external service), and the page reminds the admin
+            that the scheduler must be running at that time.
         */
         $schedule->job(new DetectStaleAssignments)
             ->weeklyOn(

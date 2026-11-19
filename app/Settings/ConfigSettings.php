@@ -26,6 +26,22 @@ abstract class ConfigSettings extends AppSettings
     }
 
     /**
+     * Get the values of several settings at once, keyed by property, each falling back on its configured value.
+     *
+     * @return array<string, mixed>
+     */
+    public static function values(string ...$properties): array
+    {
+        $values = parent::values(...$properties);
+
+        foreach ($values as $property => $value) {
+            $values[$property] = $value ?? static::configuredValue($property);
+        }
+
+        return $values;
+    }
+
+    /**
      * Get the configured value of a setting (from `.env`), used while it is not changed from the Settings pages.
      */
     public static function configuredValue(string $property): mixed

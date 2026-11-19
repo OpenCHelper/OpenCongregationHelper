@@ -7,6 +7,7 @@ use App\Enums\TerritoryMapMode;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\Campaign;
 use App\Models\Territory;
+use App\Settings\TerritorySettings;
 use Closure;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\BaseLayer;
@@ -70,6 +71,17 @@ class TerritoryGlobalMap extends MapWidget
     public function getHeading(): string
     {
         return __('filament-widgets.territory_global_map.heading');
+    }
+
+    /**
+     * Open on the default centre of the Settings pages (or of `.env`), like the other maps with nothing to show yet.
+     *
+     * @return array{float, float}
+     */
+    #[Override]
+    protected function getMapCenter(): array
+    {
+        return $this->evaluate($this->mapCenter) ?? TerritorySettings::value('map_default_center');
     }
 
     #[Override]

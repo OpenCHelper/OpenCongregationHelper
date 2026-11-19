@@ -41,7 +41,6 @@ class AppServiceProvider extends ServiceProvider
         // `db:wipe` (also run by `migrate:fresh`) drops only the tables of this installation when the database is
         // shared (see the command). Extended, not bound: the deferred Artisan provider registers the command later.
         $this->app->extend(WipeCommand::class, fn (): PrefixAwareWipeCommand => new PrefixAwareWipeCommand);
-
     }
 
     /**

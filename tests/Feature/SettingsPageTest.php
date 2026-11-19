@@ -8,6 +8,7 @@ use App\Filament\Clusters\Settings\Pages\ManageCampaignSettings;
 use App\Filament\Clusters\Settings\Pages\ManageGeneralSettings;
 use App\Filament\Clusters\Settings\Pages\ManageTerritorySettings;
 use App\Filament\Clusters\Settings\SettingsCluster;
+use App\Filament\Widgets\TerritoryGlobalMap;
 use App\Jobs\DetectStaleAssignments;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
@@ -394,4 +395,26 @@ test('the address of the Kingdom Hall is optional', function () {
         ->assertHasNoFormErrors();
 
     expect(app(GeneralSettings::class)->kingdom_hall_address)->toBeNull();
+});
+
+test('the global map opens on the default centre of the settings', function () {
+    $this->actingAs(User::factory()->create());
+
+    expect(Livewire::test(TerritoryGlobalMap::class)->instance()->getMapData()['defaultCoord'])
+        ->toBe(config('filament-leaflet.default_map_center'));
+
+    $settings = app(TerritorySettings::class);
+    $settings->map_default_center = [39.8017, -89.6436];
+    $settings->save();
+
+    expect(Livewire::test(TerritoryGlobalMap::class)->instance()->getMapData()['defaultCoord'])
+        ->toBe([39.8017, -89.6436]);
+});
+
+test('several settings read at once fall back on the environment too', function () {
+    expect(TerritorySettings::values('map_default_center', 'shared_pii', 'stale_after_days'))->toBe([
+        'map_default_center' => config('filament-leaflet.default_map_center'),
+        'shared_pii' => config('app.enable_shared_pii'),
+        'stale_after_days' => 60,
+    ]);
 });

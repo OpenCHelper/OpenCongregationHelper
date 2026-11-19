@@ -61,7 +61,7 @@ INITIAL_ROOT_PASSWORD="password"
 |----------|-------------|
 | `APP_URL` | Public URL of the application. Used in emails and in the links of shared assignments. |
 | `APP_LOCALE` | Default language (`en`, `it` or `es`). Each user can then pick their own language. |
-| `APP_TIMEZONE` | Timezone used to display dates. |
+| `APP_TIMEZONE` | Timezone used to display dates, and in which the day and time of the weekly reminders (see the [Settings](administration/settings) pages) are counted. |
 | `DB_PREFIX` / `DB_ENGINE` | Optional table prefix and storage engine, useful on shared databases: `db:wipe` and `migrate:fresh` then drop only the tables with this prefix. |
 | `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Name (first and last name separated by a space), email and password of the **root** user, created the first time the database is seeded. |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | How emails are sent. `failover` tries the native PHP `mail()` function first and falls back to the log. |
