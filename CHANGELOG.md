@@ -15,9 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Posters inventory** (Public Witnessing → Posters): the magnetic posters of the displays, with their code, title and
   copies in each storage place, e.g. the Kingdom Hall or a storage box. They can be imported from a spreadsheet
   ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
-- **Paper publications** (Publications): who receives publications on paper, with the total copies to order. The
-  publications and their categories (books, tracts, ...) are managed in the publication list, which starts with The
+- **Paper publications** (Publications): who receives publications on paper regularly, with the total copies to order.
+  The publications and their categories (books, tracts, ...) are managed in the publication list, which starts with The
   Watchtower, its large print edition and the Meeting Workbook ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
+- **Publication requests** (Publications → Requests): when each publisher asked for a publication, until it is ordered
+  (optional) and delivered, with a chart of the last 12 months and the history of each publisher and publication. The
+  publications received regularly are requested again automatically every period, e.g. every month
+  ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
 - Departments column and filter in the users list ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
 
 ### Fixed
