@@ -39,7 +39,7 @@ return [
         'column_email' => 'Email',
         'field_users' => 'Brothers',
         'field_role' => 'Role in the department',
-        'field_role_helper' => 'The overseers can also delete in its sections, and add and remove its assistants. Only an administrator appoints the overseers.',
+        'field_role_helper' => 'The overseers can also delete in its sections, and add and remove its assistants.',
         'action_add' => 'Add members',
         'action_add_heading' => 'Add members to :department',
         'action_add_submit' => 'Add',

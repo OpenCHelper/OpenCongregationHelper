@@ -230,8 +230,11 @@ test('the publications can be offered or no longer offered in bulk', function ()
     $books = Publication::query()->where('category', PublicationCategory::Books)->get();
 
     Livewire::test(ManagePublications::class)
+        ->assertSee(__('filament-resources.publication.list_subheading'))
         ->selectTableRecords($books)
-        ->callAction(TestAction::make('stop_offering')->table()->bulk())
+        ->mountAction(TestAction::make('stop_offering')->table()->bulk())
+        ->assertMountedActionModalSee(__('filament-resources.publication.stop_offering_description'))
+        ->callMountedAction()
         ->assertHasNoFormErrors();
 
     expect(Publication::query()->where('category', PublicationCategory::Books)->where('is_active', true)->exists())->toBeFalse()

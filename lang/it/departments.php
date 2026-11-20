@@ -39,7 +39,7 @@ return [
         'column_email' => 'Email',
         'field_users' => 'Fratelli',
         'field_role' => 'Ruolo nel reparto',
-        'field_role_helper' => 'I responsabili possono anche eliminare nelle sue sezioni, e aggiungerne e rimuoverne gli assistenti. Solo un amministratore nomina i responsabili.',
+        'field_role_helper' => 'I responsabili possono anche eliminare nelle sue sezioni, e aggiungerne e rimuoverne gli assistenti.',
         'action_add' => 'Aggiungi membri',
         'action_add_heading' => 'Aggiungi membri a :department',
         'action_add_submit' => 'Aggiungi',

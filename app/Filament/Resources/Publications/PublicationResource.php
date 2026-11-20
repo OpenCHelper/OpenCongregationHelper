@@ -203,7 +203,7 @@ class PublicationResource extends Resource implements HasKnowledgeBase
             ->icon($offered ? Heroicon::OutlinedCheckCircle : Heroicon::OutlinedNoSymbol)
             ->color($offered ? 'success' : 'gray')
             ->requiresConfirmation()
-            ->modalDescription($offered ? null : __('filament-resources.publication.field_is_active_helper'))
+            ->modalDescription($offered ? null : __('filament-resources.publication.stop_offering_description'))
             ->authorizeIndividualRecords('update')
             ->action(fn (EloquentCollection $records) => $records->each(fn (Publication $record) => $record->update(['is_active' => $offered])))
             ->deselectRecordsAfterCompletion()
