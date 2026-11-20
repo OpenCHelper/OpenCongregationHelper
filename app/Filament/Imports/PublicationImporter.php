@@ -4,7 +4,6 @@ namespace App\Filament\Imports;
 
 use App\Enums\PublicationCategory;
 use App\Filament\Imports\Concerns\ImportsInTheUserLocale;
-use App\Filament\Imports\Concerns\ReportsDuplicateRecords;
 use App\Models\Publication;
 use App\Support\Translations;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
@@ -22,7 +21,6 @@ use Illuminate\Support\Facades\Gate;
 class PublicationImporter extends Importer
 {
     use ImportsInTheUserLocale;
-    use ReportsDuplicateRecords;
 
     protected static ?string $model = Publication::class;
 

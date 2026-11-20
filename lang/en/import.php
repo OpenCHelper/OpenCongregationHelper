@@ -68,9 +68,6 @@ return [
             'quantity_without_storage' => 'The copies of the poster ":title" have no storage place.',
         ],
     ],
-    'errors' => [
-        'duplicate' => 'This row was imported at the same time by another part of the import: import the file again to update it.',
-    ],
     'notifications' => [
         'completed' => [
             'body' => 'The import has completed: :count row imported.|The import has completed: :count rows imported.',

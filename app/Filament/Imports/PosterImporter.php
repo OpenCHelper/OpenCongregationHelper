@@ -3,7 +3,6 @@
 namespace App\Filament\Imports;
 
 use App\Filament\Imports\Concerns\ImportsInTheUserLocale;
-use App\Filament\Imports\Concerns\ReportsDuplicateRecords;
 use App\Models\Poster;
 use App\Models\StorageLocation;
 use App\Support\Translations;
@@ -14,6 +13,7 @@ use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Component;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Number;
 
@@ -33,7 +33,6 @@ use Illuminate\Support\Number;
 class PosterImporter extends Importer
 {
     use ImportsInTheUserLocale;
-    use ReportsDuplicateRecords;
 
     protected static ?string $model = Poster::class;
 
@@ -154,12 +153,10 @@ class PosterImporter extends Importer
     /**
      * Save the poster and its copies in the storage place of the row (replacing the previous quantity) together: should
      * they fail, the poster isn't saved either. Missing storage places are created.
-     *
-     * @throws RowImportFailedException
      */
     public function saveRecord(): void
     {
-        static::reportDuplicates(function (): void {
+        DB::transaction(function (): void {
             parent::saveRecord();
 
             $storage = $this->getStorageName();
