@@ -47,7 +47,12 @@ class ViewUser extends ViewRecord
                     $record = $this->getRecord();
 
                     return ! $record->isRootUser();
-                }),
+                })
+                // The only overseer of a department is kept until another one is appointed
+                ->disabled(fn (User $record): bool => $record->isLastDepartmentOverseer())
+                ->tooltip(fn (User $record): ?string => $record->isLastDepartmentOverseer()
+                    ? __('departments.users.delete_last_overseer')
+                    : null),
         ];
     }
 }

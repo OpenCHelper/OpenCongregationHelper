@@ -40,6 +40,7 @@ return [
         'field_users' => 'Brothers',
         'field_role' => 'Role in the department',
         'field_role_helper' => 'The overseers can also delete in its sections, and add and remove its assistants. Only an administrator appoints the overseers.',
+        'field_role_helper_first_overseer' => 'This department has no overseer yet: add its overseer first, then the assistants.',
         'action_add' => 'Add members',
         'action_add_heading' => 'Add members to :department',
         'action_add_submit' => 'Add',
@@ -50,5 +51,11 @@ return [
         'notification_removed' => 'Member removed',
         'empty_heading' => 'No members yet',
         'empty_description' => 'Add the brothers serving in this department: they will be able to manage its sections.',
+        'last_overseer' => 'A department needs at least one overseer: appoint another one first.',
+    ],
+    'users' => [
+        'delete_last_overseer' => 'The only overseer of a department cannot be deleted: a department needs at least one overseer, appoint another one first.',
+        'bulk_delete_last_overseers' => ':deleted user(s) deleted. The only overseers of a department were kept: a department needs at least one overseer, appoint another one first.',
+        'delete_account_last_overseer' => 'You are the only overseer of a department, which needs at least one: ask an administrator to appoint another overseer before deleting your account.',
     ],
 ];

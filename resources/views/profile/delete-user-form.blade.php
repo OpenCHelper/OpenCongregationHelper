@@ -1,5 +1,8 @@
 @php
     use Filament\Support\Icons\Heroicon;
+
+    // The only overseer of a department cannot leave until another one is appointed
+    $isLastDepartmentOverseer = ! auth()->user()->isRootUserProtected() && auth()->user()->isLastDepartmentOverseer();
 @endphp
 
 <div>
@@ -13,6 +16,12 @@
                 color="danger"
                 :icon="Heroicon::OutlinedNoSymbol"
                 :description="__('profile.root_user_protection.account_deletion_not_allowed')"
+            />
+        @elseif ($isLastDepartmentOverseer)
+            <x-filament::callout
+                color="warning"
+                :icon="Heroicon::OutlinedExclamationTriangle"
+                :description="__('departments.users.delete_account_last_overseer')"
             />
         @else
             <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -31,7 +40,7 @@
         @endif
     </x-filament::section>
 
-    @if (! auth()->user()->isRootUserProtected())
+    @if (! auth()->user()->isRootUserProtected() && ! $isLastDepartmentOverseer)
         {{-- The modal follows `$confirmingUserDeletion`, which Jetstream toggles on the server. --}}
         <x-filament::modal
             id="confirm-user-deletion"

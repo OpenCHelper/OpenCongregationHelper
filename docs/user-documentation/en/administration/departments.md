@@ -42,5 +42,17 @@ Each member has a **role in the department**:
 
 ![Adding members](/docs/user-documentation/en/administration/assets/department-add-members.webp)
 
+### Every department keeps an overseer
+
+Once a department has an overseer, it **always keeps at least one**, so that its assistants are never left without
+someone in charge:
+
+- in a department without an overseer, the first member added must be its **overseer**;
+- **Change role** and **Remove** are disabled for the only overseer of a department (hover them to see why): appoint
+  another overseer first, then change or remove the previous one;
+- removing several members at once is refused if it would remove every overseer;
+- the only overseer of a department cannot be [deleted](users), nor delete their own account, until another overseer
+  is appointed.
+
 The administrators can manage the members of every department; the overseers only those of their own departments.
 The **Departments** column and filter of the [users list](users) show who serves where.

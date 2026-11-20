@@ -26,6 +26,10 @@ class DeleteUser implements DeletesUsers
             throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
         }
 
+        if ($user->isLastDepartmentOverseer()) {
+            throw new Exception(__('departments.users.delete_last_overseer'));
+        }
+
         DB::transaction(function () use ($user) {
             $this->deleteTeams($user);
             $user->deleteProfilePhoto();

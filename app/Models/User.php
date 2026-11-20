@@ -279,6 +279,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     }
 
     /**
+     * Check if the user is the only overseer of a department: they cannot be deleted until another overseer is
+     * appointed, since the database would remove their membership without checking it.
+     */
+    public function isLastDepartmentOverseer(): bool
+    {
+        if (! $this->exists) {
+            return false;
+        }
+
+        return $this->departments()
+            ->wherePivot('role', DepartmentRole::Overseer->value)
+            ->get()
+            ->contains(fn (Department $department): bool => $department->isOnlyOverseer($this));
+    }
+
+    /**
      * The actions on the sections of a department that only its overseers are granted: the assistants can do
      * everything else, but not delete (e.g. deleting a publication deletes its history too).
      *

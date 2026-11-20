@@ -40,6 +40,7 @@ return [
         'field_users' => 'Hermanos',
         'field_role' => 'Rol en el departamento',
         'field_role_helper' => 'Los responsables también pueden eliminar en sus secciones, y añadir y quitar sus ayudantes. Solo un administrador nombra a los responsables.',
+        'field_role_helper_first_overseer' => 'Este departamento todavía no tiene responsable: añade primero su responsable, luego los ayudantes.',
         'action_add' => 'Añadir miembros',
         'action_add_heading' => 'Añadir miembros a :department',
         'action_add_submit' => 'Añadir',
@@ -50,5 +51,11 @@ return [
         'notification_removed' => 'Miembro quitado',
         'empty_heading' => 'Todavía no hay miembros',
         'empty_description' => 'Añade los hermanos que sirven en este departamento: podrán gestionar sus secciones.',
+        'last_overseer' => 'Un departamento necesita al menos un responsable: nombra primero a otro.',
+    ],
+    'users' => [
+        'delete_last_overseer' => 'El único responsable de un departamento no se puede eliminar: un departamento necesita al menos un responsable, nombra primero a otro.',
+        'bulk_delete_last_overseers' => ':deleted usuario(s) eliminado(s). Los únicos responsables de un departamento se han mantenido: un departamento necesita al menos un responsable, nombra primero a otro.',
+        'delete_account_last_overseer' => 'Eres el único responsable de un departamento, que necesita al menos uno: pide a un administrador que nombre a otro responsable antes de eliminar tu cuenta.',
     ],
 ];

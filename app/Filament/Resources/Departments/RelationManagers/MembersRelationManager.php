@@ -11,6 +11,7 @@ use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -100,20 +102,42 @@ class MembersRelationManager extends RelationManager
             ]);
     }
 
-    public static function getRoleField(): ToggleButtons
+    /**
+     * The role of the members, which must be the overseer when the department has none yet (`$overseerRequired`): its
+     * first member is its overseer, so that the assistants are never left without one.
+     */
+    public static function getRoleField(bool $overseerRequired = false): ToggleButtons
     {
         return ToggleButtons::make('role')
             ->label(__('departments.members.field_role'))
             ->options(DepartmentRole::class)
-            ->default(DepartmentRole::Assistant->value)
+            ->default($overseerRequired ? DepartmentRole::Overseer->value : DepartmentRole::Assistant->value)
             // Only the administrators appoint the overseers (checked again on save)
-            ->disableOptionWhen(fn (string $value): bool => $value === DepartmentRole::Overseer->value && ! static::canManageOverseers())
-            ->in(fn (): array => static::canManageOverseers()
-                ? array_map(fn (DepartmentRole $role): string => $role->value, DepartmentRole::cases())
-                : [DepartmentRole::Assistant->value])
+            ->disableOptionWhen(fn (string $value): bool => $value === DepartmentRole::Overseer->value
+                ? ! static::canManageOverseers()
+                : $overseerRequired)
+            ->in(fn (): array => match (true) {
+                $overseerRequired => [DepartmentRole::Overseer->value],
+                static::canManageOverseers() => array_map(fn (DepartmentRole $role): string => $role->value, DepartmentRole::cases()),
+                default => [DepartmentRole::Assistant->value],
+            })
             ->inline()
             ->required()
-            ->helperText(__('departments.members.field_role_helper'));
+            ->helperText($overseerRequired
+                ? __('departments.members.field_role_helper_first_overseer')
+                : __('departments.members.field_role_helper'));
+    }
+
+    /**
+     * Whether the member is the only overseer of the department, who cannot be demoted or removed until another
+     * overseer is appointed.
+     */
+    protected function isOnlyOverseer(User $member): bool
+    {
+        /** @var Department $department */
+        $department = $this->getOwnerRecord();
+
+        return $department->isOnlyOverseer($member);
     }
 
     public function table(Table $table): Table
@@ -163,7 +187,7 @@ class MembersRelationManager extends RelationManager
                         $action->getRecordSelect()
                             ->label(__('departments.members.field_users'))
                             ->hiddenLabel(false),
-                        static::getRoleField(),
+                        static::getRoleField(overseerRequired: $department->overseers()->doesntExist()),
                     ]),
             ])
             ->recordActions([
@@ -171,13 +195,18 @@ class MembersRelationManager extends RelationManager
                     ->label(__('departments.members.action_change_role'))
                     ->icon(Heroicon::OutlinedArrowsRightLeft)
                     ->modalHeading(fn (User $record): string => $record->getFullName())
-                    ->authorize(fn (User $record): bool => $this->canManageMember($record)),
+                    ->authorize(fn (User $record): bool => $this->canManageMember($record))
+                    // Demoting is the only change of role, refused for the only overseer (checked again on save)
+                    ->disabled(fn (User $record): bool => $this->isOnlyOverseer($record))
+                    ->tooltip(fn (User $record): ?string => $this->isOnlyOverseer($record) ? __('departments.members.last_overseer') : null),
                 DetachAction::make()
                     ->label(__('departments.members.action_remove'))
                     ->modalSubmitActionLabel(__('departments.members.action_remove'))
                     ->successNotificationTitle(__('departments.members.notification_removed'))
                     ->modalHeading(fn (User $record): string => __('departments.members.action_remove_heading', ['name' => $record->getFullName()]))
-                    ->authorize(fn (User $record): bool => $this->canManageMember($record)),
+                    ->authorize(fn (User $record): bool => $this->canManageMember($record))
+                    ->disabled(fn (User $record): bool => $this->isOnlyOverseer($record))
+                    ->tooltip(fn (User $record): ?string => $this->isOnlyOverseer($record) ? __('departments.members.last_overseer') : null),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -185,7 +214,22 @@ class MembersRelationManager extends RelationManager
                         ->label(__('departments.members.action_remove'))
                         ->authorize(fn (): bool => $this->canManageMembers())
                         // The overseers selected are kept, unless an administrator removes them
-                        ->authorizeIndividualRecords(fn (User $record): bool => $this->canManageMember($record)),
+                        ->authorizeIndividualRecords(fn (User $record): bool => $this->canManageMember($record))
+                        // The whole selection is checked: removing two overseers can leave none, even if each one alone could go
+                        ->before(function (DetachBulkAction $action, Collection $records) use ($department): void {
+                            $removed = $records->filter(fn (User $record): bool => $this->canManageMember($record));
+
+                            if (! $department->wouldLoseEveryOverseer($removed->map(fn (User $record): int|string => $record->getKey()))) {
+                                return;
+                            }
+
+                            Notification::make()
+                                ->danger()
+                                ->title(__('departments.members.last_overseer'))
+                                ->send();
+
+                            $action->cancel();
+                        }),
                 ]),
             ])
             ->emptyStateIcon(Heroicon::OutlinedUserGroup)

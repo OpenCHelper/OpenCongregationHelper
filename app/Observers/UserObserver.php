@@ -65,6 +65,11 @@ class UserObserver
             throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
         }
 
+        // The database removes the memberships without the checks of `DepartmentMember`
+        if ($user->isLastDepartmentOverseer()) {
+            throw new Exception(__('departments.users.delete_last_overseer'));
+        }
+
         return true;
     }
 

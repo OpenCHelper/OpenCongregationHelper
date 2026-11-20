@@ -100,4 +100,27 @@ class Department extends Model
     {
         return $this->overseers()->whereKey($user->getKey())->exists();
     }
+
+    /**
+     * Check if the given user is the only overseer of the department: they cannot be demoted or removed until
+     * another overseer is appointed.
+     */
+    public function isOnlyOverseer(User $user): bool
+    {
+        return $this->wouldLoseEveryOverseer([$user->getKey()]);
+    }
+
+    /**
+     * Check if demoting or removing the given users would leave the department without an overseer: once it has
+     * one, a department must always keep at least one.
+     *
+     * @param  iterable<int|string>  $userIds
+     */
+    public function wouldLoseEveryOverseer(iterable $userIds): bool
+    {
+        $userIds = collect($userIds)->all();
+
+        return $this->overseers()->whereKey($userIds)->exists()
+            && $this->overseers()->whereKeyNot($userIds)->doesntExist();
+    }
 }

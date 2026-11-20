@@ -43,5 +43,17 @@ Ogni membro ha un **ruolo nel reparto**:
 
 ![Aggiungere membri](/docs/user-documentation/it/administration/assets/department-add-members.webp)
 
+### Ogni reparto mantiene un responsabile
+
+Una volta che un reparto ha un responsabile, ne **mantiene sempre almeno uno**, così che i suoi assistenti non restino
+mai senza qualcuno che se ne occupi:
+
+- in un reparto senza responsabile, il primo membro da aggiungere deve essere il suo **responsabile**;
+- **Cambia ruolo** e **Rimuovi** sono disattivati per l'unico responsabile di un reparto (passaci sopra per vedere il
+  motivo): nomina prima un altro responsabile, poi cambia o rimuovi il precedente;
+- rimuovere più membri insieme non è permesso se toglierebbe tutti i responsabili;
+- l'unico responsabile di un reparto non può essere [eliminato](users), né eliminare il proprio account, finché non
+  viene nominato un altro responsabile.
+
 Gli amministratori possono gestire i membri di ogni reparto; i responsabili solo quelli dei propri reparti.
 La colonna e il filtro **Reparti** dell'[elenco degli utenti](users) mostrano chi serve in quale reparto.

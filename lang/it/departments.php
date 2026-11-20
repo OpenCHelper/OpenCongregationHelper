@@ -40,6 +40,7 @@ return [
         'field_users' => 'Fratelli',
         'field_role' => 'Ruolo nel reparto',
         'field_role_helper' => 'I responsabili possono anche eliminare nelle sue sezioni, e aggiungerne e rimuoverne gli assistenti. Solo un amministratore nomina i responsabili.',
+        'field_role_helper_first_overseer' => 'Questo reparto non ha ancora un responsabile: aggiungi prima il responsabile, poi gli assistenti.',
         'action_add' => 'Aggiungi membri',
         'action_add_heading' => 'Aggiungi membri a :department',
         'action_add_submit' => 'Aggiungi',
@@ -50,5 +51,11 @@ return [
         'notification_removed' => 'Membro rimosso',
         'empty_heading' => 'Ancora nessun membro',
         'empty_description' => 'Aggiungi i fratelli che servono in questo reparto: potranno gestirne le sezioni.',
+        'last_overseer' => 'Un reparto deve avere almeno un responsabile: nominane prima un altro.',
+    ],
+    'users' => [
+        'delete_last_overseer' => 'L\'unico responsabile di un reparto non può essere eliminato: un reparto deve avere almeno un responsabile, nominane prima un altro.',
+        'bulk_delete_last_overseers' => ':deleted utente/i eliminato/i. Gli unici responsabili di un reparto sono stati mantenuti: un reparto deve avere almeno un responsabile, nominane prima un altro.',
+        'delete_account_last_overseer' => 'Sei l\'unico responsabile di un reparto, che deve averne almeno uno: chiedi a un amministratore di nominare un altro responsabile prima di eliminare il tuo account.',
     ],
 ];

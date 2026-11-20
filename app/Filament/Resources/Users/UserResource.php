@@ -258,10 +258,29 @@ class UserResource extends Resource
                             // Filter out root user before deletion (root user can never be deleted)
                             $recordsToDelete = $records->filter(fn (User $record) => ! $record->isRootUser());
                             $deletedCount = 0;
+                            $lastOverseers = collect();
 
-                            if ($recordsToDelete->isNotEmpty()) {
-                                $recordsToDelete->each->delete();
-                                $deletedCount = $recordsToDelete->count();
+                            // One at a time: deleting an overseer can make another one selected the last of a department,
+                            // and the only overseers of a department are kept until another one is appointed
+                            foreach ($recordsToDelete as $record) {
+                                if ($record->isLastDepartmentOverseer()) {
+                                    $lastOverseers->push($record);
+
+                                    continue;
+                                }
+
+                                $record->delete();
+                                $deletedCount++;
+                            }
+
+                            if ($lastOverseers->isNotEmpty()) {
+                                Notification::make()
+                                    ->warning()
+                                    ->title(__('departments.users.bulk_delete_last_overseers', ['deleted' => $deletedCount]))
+                                    ->body($lastOverseers->map(fn (User $record): string => $record->getFullName())->implode(', '))
+                                    ->send();
+
+                                return;
                             }
 
                             // Provide appropriate feedback based on the situation
