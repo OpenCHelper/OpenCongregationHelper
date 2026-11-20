@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The sidebar can be collapsed to icons only on desktop too, from the arrow next to the app name.
-- Shorter description on the departments list.
+- Shorter descriptions on the departments and publications lists, and shorter help texts under the "Offered"
+  switch of publications and the role of department members.
 
 ## [1.0.0-alpha11] - 2026-11-20
 
