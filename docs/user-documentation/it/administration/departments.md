@@ -10,6 +10,7 @@ Il lavoro della congregazione è organizzato in **reparti**, ognuno con la sua s
 | Reparto | Sezioni |
 |---------|---------|
 | **Reparto territori** | Territori, Zone, Assegnazioni, Campagne |
+| **Testimonianza pubblica** | [Poster e depositi in cui sono conservati](../public-witnessing/posters) |
 
 Apri **Amministrazione → Reparti** per vederli, con i loro responsabili e il numero di membri.
 
@@ -18,8 +19,9 @@ Apri **Amministrazione → Reparti** per vederli, con i loro responsabili e il n
 ## Cosa possono fare i membri
 
 I **membri** di un reparto possono **gestirne le sezioni** (vedere, creare e modificare; i responsabili anche
-eliminare), senza bisogno di un [ruolo](roles) con quei permessi. Ad esempio, un fratello del *Reparto territori* vede
-la sezione **Reparto territori** del menu e può assegnare i territori, anche se i suoi ruoli non gli danno altro.
+eliminare), senza bisogno di un [ruolo](roles) con quei permessi. Ad esempio, un fratello del reparto *Testimonianza
+pubblica* vede la sezione **Testimonianza pubblica** del menu e può aggiornare i poster, anche se i suoi ruoli non gli
+danno altro.
 
 Tutto il resto (ad esempio gli altri reparti, o gli utenti) dipende ancora dai ruoli, come prima.
 

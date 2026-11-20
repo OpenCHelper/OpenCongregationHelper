@@ -10,6 +10,7 @@ The work of the congregation is organized in **departments**, each one with its 
 | Department | Sections |
 |------------|----------|
 | **Territory Department** | Territories, Zones, Assignments, Campaigns |
+| **Public Witnessing** | [Posters and their storage places](../public-witnessing/posters) |
 
 Open **Administration → Departments** to see them, with their overseers and the number of members.
 
@@ -18,8 +19,8 @@ Open **Administration → Departments** to see them, with their overseers and th
 ## What the members can do
 
 The **members** of a department can **manage its sections** (see, create and edit; the overseers delete too), without
-needing a [role](roles) with those permissions. For example, a brother in the *Territory Department* sees the
-**Territory Department** section of the menu and can assign the territories, even if his roles give him nothing else.
+needing a [role](roles) with those permissions. For example, a brother in the *Public Witnessing* department sees the
+**Public Witnessing** section of the menu and can update the posters, even if his roles give him nothing else.
 
 Everything else (e.g. the other departments, or the users) still depends on the roles, as before.
 

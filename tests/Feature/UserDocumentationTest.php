@@ -1,6 +1,8 @@
 <?php
 
 use App\Filament\Resources\Departments\DepartmentResource;
+use App\Filament\Resources\Posters\PosterResource;
+use App\Filament\Resources\StorageLocations\StorageLocationResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
@@ -119,6 +121,8 @@ test('documentation linked from the resources exists in every locale', function 
     $resources = [
         TerritoryResource::class,
         DepartmentResource::class,
+        PosterResource::class,
+        StorageLocationResource::class,
     ];
 
     foreach (collect($resources)->flatMap(fn (string $resource): array => $resource::getDocumentation()) as $documentationId) {

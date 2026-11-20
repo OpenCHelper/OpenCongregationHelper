@@ -2,19 +2,16 @@
 
 namespace App\Filament\Imports;
 
+use App\Filament\Imports\Concerns\ImportsInTheUserLocale;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
-use Closure;
-use Filament\Actions\Action;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -29,6 +26,8 @@ use Throwable;
 
 class TerritoryImporter extends Importer
 {
+    use ImportsInTheUserLocale;
+
     /**
      * The maximum size of an image downloaded during the import, in bytes.
      */
@@ -66,17 +65,6 @@ class TerritoryImporter extends Importer
             //     ->numeric()
             //     ->rules(['integer']),
         ];
-    }
-
-    /**
-     * Import a row in the language of the user who started the import, so that the reasons of the
-     * failed rows (validation errors included) are stored in their language rather than the worker's.
-     *
-     * @param  array<string, mixed>  $data
-     */
-    public function __invoke(array $data): void
-    {
-        static::withImportLocale($this->import, fn () => parent::__invoke($data));
     }
 
     public function resolveRecord(): Territory
@@ -298,11 +286,6 @@ class TerritoryImporter extends Importer
         ];
     }
 
-    public static function getCompletedNotificationTitle(Import $import): string
-    {
-        return static::withImportLocale($import, fn (): string => parent::getCompletedNotificationTitle($import));
-    }
-
     public static function getCompletedNotificationBody(Import $import): string
     {
         return static::withImportLocale($import, function () use ($import): string {
@@ -310,7 +293,9 @@ class TerritoryImporter extends Importer
                 'count' => Number::format($import->successful_rows, locale: app()->getLocale()),
             ]);
 
-            if ($failedRowsCount = $import->getFailedRowsCount()) {
+            $failedRowsCount = $import->getFailedRowsCount();
+
+            if ($failedRowsCount) {
                 $body .= ' '.trans_choice('import.territory.notifications.completed.failed_rows', $failedRowsCount, [
                     'count' => Number::format($failedRowsCount, locale: app()->getLocale()),
                 ]);
@@ -318,58 +303,5 @@ class TerritoryImporter extends Importer
 
             return $body;
         });
-    }
-
-    /**
-     * Label the action that downloads the failed rows in the language of the user who started the import too.
-     */
-    public static function modifyCompletedNotification(Notification $notification, Import $import): Notification
-    {
-        if (! ($failedRowsCount = $import->getFailedRowsCount())) {
-            return $notification;
-        }
-
-        foreach ($notification->getActions() as $action) {
-            if ($action instanceof Action && $action->getName() === 'downloadFailedRowsCsv') {
-                $action->label(static::withImportLocale($import, fn (): string => trans_choice(
-                    'filament-actions::import.notifications.completed.actions.download_failed_rows_csv.label',
-                    $failedRowsCount,
-                    ['count' => Number::format($failedRowsCount, locale: app()->getLocale())],
-                )));
-            }
-        }
-
-        return $notification;
-    }
-
-    /**
-     * Run the callback in the preferred locale of the user who started the import, falling back to the
-     * current locale: the import is processed (and its notification sent) by the queue worker, which
-     * runs in the default locale of the application.
-     *
-     * @template TResult
-     *
-     * @param  Closure(): TResult  $callback
-     * @return TResult
-     */
-    protected static function withImportLocale(Import $import, Closure $callback): mixed
-    {
-        $originalLocale = app()->getLocale();
-        $user = $import->user;
-        $locale = $user instanceof HasLocalePreference
-            ? ($user->preferredLocale() ?: $originalLocale)
-            : $originalLocale;
-
-        if ($locale === $originalLocale) {
-            return $callback();
-        }
-
-        app()->setLocale($locale);
-
-        try {
-            return $callback();
-        } finally {
-            app()->setLocale($originalLocale);
-        }
     }
 }

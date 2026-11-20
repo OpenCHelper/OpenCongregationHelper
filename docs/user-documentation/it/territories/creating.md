@@ -42,8 +42,8 @@ Il disegno della mappa è descritto in [Disegnare le mappe](maps).
 Nella scheda **Immagine** puoi:
 
 - incollare un link in **Image from URL**, oppure
-- trascinare un file su **Image from file** (o cliccare **Sfoglia**). L'editor integrato permette di ritagliare e
-  ruotare l'immagine prima di salvarla.
+- trascinare un file su **Image from file** (o cliccare **Sfoglia**): un'immagine PNG, JPEG o WebP. L'editor
+  integrato permette di ritagliare e ruotare l'immagine prima di salvarla.
 
 Le due opzioni sono alternative: compilarne una disabilita l'altra. Le immagini caricate sono conservate in modo
 privato e possono vederle solo gli utenti che hanno effettuato l'accesso.
