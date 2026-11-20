@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Days after which assignments are out for too long and the day and time of the weekly reminders, from the Settings
   pages.
 - Days before their end from which campaigns are expiring and almost expired, from the Settings pages.
+- Showing the personal data on shared pages is a clear choice between hiding them (recommended) and showing them,
+  which must be confirmed after reading what it means.
 - Months and number of assignments that set the assignment frequency on the dashboard map, from the Settings pages.
 - The installed app takes the primary colour chosen on the Settings pages.
 

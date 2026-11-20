@@ -185,3 +185,56 @@
         transform: translateX(-50%);
     }
 }
+
+/*
+   The choice of the personal data on the shared pages, as two cards: hiding them (recommended, green) or showing them
+   (red), with the label of the recommended one in `--recommended-label` (see `ManageTerritorySettings`).
+*/
+.fi-settings-privacy-choice {
+    & > .fi-fo-radio-label {
+        --choice-color: var(--color-green-600);
+        align-self: stretch;
+        border: 1px solid color-mix(in oklab, var(--choice-color) 35%, transparent);
+        border-radius: var(--radius-xl);
+        padding: 1rem;
+        cursor: pointer;
+
+        &:has(.fi-radio-input:checked) {
+            border-width: 2px;
+            border-color: var(--choice-color);
+            background-color: color-mix(in oklab, var(--choice-color) 7%, transparent);
+            padding: calc(1rem - 1px);
+        }
+
+        & > .fi-radio-input:checked {
+            background-color: var(--choice-color);
+        }
+
+        &:first-child .fi-fo-radio-label-text > p:first-child::after {
+            content: var(--recommended-label);
+            margin-inline-start: 0.5rem;
+            border-radius: var(--radius-md);
+            padding: 0.125rem 0.5rem;
+            font-size: var(--text-xs);
+            font-weight: 600;
+            color: var(--color-green-700);
+            background-color: var(--color-green-100);
+            white-space: nowrap;
+        }
+
+        &:last-child {
+            --choice-color: var(--color-red-600);
+        }
+    }
+}
+
+.fi-settings-privacy-consequences {
+    margin-top: 0.5rem;
+    padding-inline-start: 1.25rem;
+    list-style: disc;
+    text-align: start;
+
+    & > li + li {
+        margin-top: 0.375rem;
+    }
+}

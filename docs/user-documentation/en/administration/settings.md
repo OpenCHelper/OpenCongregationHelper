@@ -23,9 +23,16 @@ role. The options are grouped by area, with one page each in the menu on the sid
 ![Territory settings](/docs/user-documentation/en/administration/assets/settings-territories.webp)
 
 - **Default map centre**: where the maps open while no territory has a map yet, as `latitude, longitude` (e.g.
-  `41.159063, -74.255188`). Afterwards the maps open on the territories;
-- **Show personal data on shared pages**: when on, the public page of a [shared assignment](../assignments/sharing)
-  also shows the name of the assignee and the notes of the territory.
+  `41.159063, -74.255188`). Afterwards the maps open on the territories.
+
+Under **Privacy of shared pages** you choose what the public page of a [shared assignment](../assignments/sharing) shows
+to anyone who has its link:
+
+- **Hide personal data** (recommended): only the territory, its map and the dates;
+- **Show personal data**: also the name of the assignee and the notes of the territory, which may describe
+  householders. The shared links never expire and can be forwarded, so choose it only if the congregation has agreed to
+  it and the notes hold no personal data. Before choosing it you are asked to confirm that you understand what it
+  means: if you cancel, the personal data stay hidden.
 
 Under **Assignments out for too long** the levels are listed in order, each with its colour, and the bar below draws
 them to scale while you type:

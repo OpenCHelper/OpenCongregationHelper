@@ -3,8 +3,6 @@
 return [
     'navigation_label' => 'Ajustes',
     'default' => 'Predeterminado: :value.',
-    'on' => 'activado',
-    'off' => 'desactivado',
 
     'units' => [
         'days_before_end' => 'días antes del final',
@@ -35,7 +33,9 @@ return [
         'campaign_expiry_description' => 'A medida que se acerca su fecha de fin, una campaña activa pasa a estar por vencer y luego casi vencida.',
         'appearance' => 'Apariencia',
         'congregation' => 'Congregación',
-        'maps_and_sharing' => 'Mapas y compartir',
+        'maps' => 'Mapas',
+        'shared_pages_privacy' => 'Privacidad de las páginas compartidas',
+        'shared_pages_privacy_description' => 'Lo que muestra la página pública de una asignación compartida a cualquiera que tenga su enlace.',
         'stale_assignments' => 'Asignaciones fuera desde hace demasiado tiempo',
         'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan.',
         'assignment_frequency' => 'Frecuencia de asignación',
@@ -61,8 +61,20 @@ return [
             'invalid' => 'Escribe las coordenadas como "latitud, longitud" (p. ej. 41.159063, -74.255188).',
         ],
         'shared_pii' => [
-            'label' => 'Mostrar los datos personales en las páginas compartidas',
-            'helper' => 'La página pública de una asignación compartida muestra también el nombre del asignado y las notas del territorio.',
+            'hide' => 'Ocultar los datos personales',
+            'hide_description' => 'Solo el territorio, su mapa y las fechas: el asignado y las notas se quedan en la aplicación.',
+            'show' => 'Mostrar los datos personales',
+            'show_description' => 'También el nombre del asignado y las notas del territorio, a cualquiera que tenga el enlace. Los enlaces nunca caducan y se pueden reenviar.',
+            'recommended' => 'Recomendado',
+            'confirm_heading' => '¿Mostrar los datos personales en las páginas compartidas?',
+            'consequences' => [
+                'Cualquiera que tenga el enlace de una asignación compartida verá el nombre del asignado y las notas del territorio, que pueden describir a los moradores.',
+                'Los enlaces compartidos nunca caducan y se pueden reenviar, por ejemplo en un chat de grupo.',
+                'Hazlo solo si la congregación está de acuerdo y las notas no contienen datos personales.',
+            ],
+            'understood' => 'Entiendo que cualquiera con un enlace compartido verá estos datos, y la congregación está de acuerdo.',
+            'understood_required' => 'Confirma que entiendes lo que supone mostrar los datos personales.',
+            'confirm' => 'Mostrar los datos personales',
         ],
         'stale_after_days' => [
             'label' => 'Fuera demasiado tiempo',

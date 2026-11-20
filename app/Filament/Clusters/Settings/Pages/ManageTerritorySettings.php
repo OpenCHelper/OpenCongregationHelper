@@ -7,13 +7,17 @@ use App\Settings\TerritorySettings;
 use BackedEnum;
 use Carbon\Carbon;
 use Closure;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\HtmlString;
 
 class ManageTerritorySettings extends AppSettingsPage
 {
@@ -53,7 +57,7 @@ class ManageTerritorySettings extends AppSettingsPage
 
         return $schema
             ->components([
-                Section::make(__('settings.sections.maps_and_sharing'))
+                Section::make(__('settings.sections.maps'))
                     ->columnSpanFull()
                     ->schema([
                         TextInput::make('map_default_center')
@@ -68,11 +72,39 @@ class ManageTerritorySettings extends AppSettingsPage
                                     $fail(__('settings.fields.map_default_center.invalid'));
                                 }
                             }),
-                        Toggle::make('shared_pii')
-                            ->label(__('settings.fields.shared_pii.label'))
-                            ->helperText(__('settings.fields.shared_pii.helper').' '.$this->defaultHint(
-                                $this->defaultValue('shared_pii') ? __('settings.on') : __('settings.off'),
-                            )),
+                    ]),
+                Section::make(__('settings.sections.shared_pages_privacy'))
+                    ->description(__('settings.sections.shared_pages_privacy_description'))
+                    ->icon(Heroicon::OutlinedShieldCheck)
+                    ->columnSpanFull()
+                    ->schema([
+                        Radio::make('shared_pii')
+                            ->hiddenLabel()
+                            ->options([
+                                'hide' => __('settings.fields.shared_pii.hide'),
+                                'show' => __('settings.fields.shared_pii.show'),
+                            ])
+                            ->descriptions([
+                                'hide' => __('settings.fields.shared_pii.hide_description'),
+                                'show' => __('settings.fields.shared_pii.show_description'),
+                            ])
+                            ->columns(['default' => 1, 'md' => 2])
+                            ->extraAttributes([
+                                'class' => 'fi-settings-privacy-choice',
+                                'style' => "--recommended-label: '".addslashes(__('settings.fields.shared_pii.recommended'))."'",
+                            ])
+                            ->helperText($this->defaultHint(
+                                $this->defaultValue('shared_pii') ? __('settings.fields.shared_pii.show') : __('settings.fields.shared_pii.hide'),
+                            ))
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function (?string $state, ?string $old, Set $set): void {
+                                // Shown only once confirmed (see `confirmSharedPiiAction()`), so that cancelling keeps it hidden
+                                if ($state === 'show' && $old !== 'show') {
+                                    $set('shared_pii', 'hide');
+                                    $this->mountAction('confirmSharedPii');
+                                }
+                            }),
                     ]),
                 Section::make(__('settings.sections.stale_assignments'))
                     ->description(__('settings.sections.stale_assignments_description'))
@@ -125,6 +157,31 @@ class ManageTerritorySettings extends AppSettingsPage
     }
 
     /**
+     * Confirm that the personal data must be shown on the shared pages, after reading what it means.
+     */
+    public function confirmSharedPiiAction(): Action
+    {
+        return Action::make('confirmSharedPii')
+            ->requiresConfirmation()
+            ->color('danger')
+            ->modalIcon(Heroicon::OutlinedExclamationTriangle)
+            ->modalHeading(__('settings.fields.shared_pii.confirm_heading'))
+            ->modalDescription(new HtmlString('<ul class="fi-settings-privacy-consequences">'.collect(__('settings.fields.shared_pii.consequences'))
+                ->map(fn (string $consequence): string => '<li>'.e($consequence).'</li>')
+                ->implode('').'</ul>'))
+            ->schema([
+                Checkbox::make('understood')
+                    ->label(__('settings.fields.shared_pii.understood'))
+                    ->accepted()
+                    ->validationMessages(['accepted' => __('settings.fields.shared_pii.understood_required')]),
+            ])
+            ->modalSubmitActionLabel(__('settings.fields.shared_pii.confirm'))
+            ->action(function (): void {
+                $this->data['shared_pii'] = 'show';
+            });
+    }
+
+    /**
      * The days of the week, keyed by number (0 = Sunday), in the language of the user.
      *
      * @return array<int, string>
@@ -144,6 +201,7 @@ class ManageTerritorySettings extends AppSettingsPage
     {
         $data = parent::mutateFormDataBeforeFill($data);
         $data['map_default_center'] = self::formatCoordinates($data['map_default_center']);
+        $data['shared_pii'] = $data['shared_pii'] ? 'show' : 'hide';
 
         return $data;
     }
@@ -155,7 +213,7 @@ class ManageTerritorySettings extends AppSettingsPage
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['map_default_center'] = self::parseCoordinates((string) $data['map_default_center']);
-        $data['shared_pii'] = (bool) $data['shared_pii'];
+        $data['shared_pii'] = $data['shared_pii'] === 'show';
         $data['stale_check_day'] = (int) $data['stale_check_day'];
 
         foreach (['stale_after_days', 'dead_after_days', 'frequency_period_months', 'medium_frequency_min_assignments', 'high_frequency_min_assignments'] as $property) {

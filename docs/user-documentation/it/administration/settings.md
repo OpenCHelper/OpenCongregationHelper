@@ -23,9 +23,16 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 ![Impostazioni dei territori](/docs/user-documentation/it/administration/assets/settings-territories.webp)
 
 - **Centro predefinito delle mappe**: dove si aprono le mappe finché nessun territorio ha una mappa, come
-  `latitudine, longitudine` (es. `41.159063, -74.255188`). In seguito le mappe si aprono sui territori;
-- **Mostra i dati personali nelle pagine condivise**: se attivo, la pagina pubblica di
-  un'[assegnazione condivisa](../assignments/sharing) mostra anche il nome dell'assegnatario e le note del territorio.
+  `latitudine, longitudine` (es. `41.159063, -74.255188`). In seguito le mappe si aprono sui territori.
+
+In **Privacy delle pagine condivise** scegli cosa mostra la pagina pubblica di
+un'[assegnazione condivisa](../assignments/sharing) a chiunque ne abbia il link:
+
+- **Nascondi i dati personali** (consigliato): solo il territorio, la sua mappa e le date;
+- **Mostra i dati personali**: anche il nome dell'assegnatario e le note del territorio, che possono descrivere dei
+  padroni di casa. I link condivisi non scadono mai e possono essere inoltrati, quindi sceglilo solo se la congregazione
+  è d'accordo e le note non contengono dati personali. Prima di sceglierlo ti viene chiesto di confermare di aver capito
+  cosa comporta: se annulli, i dati personali restano nascosti.
 
 In **Assegnazioni fuori da troppo tempo** i livelli sono elencati in ordine, ognuno con il suo colore, e la barra sotto
 li disegna in scala mentre scrivi:

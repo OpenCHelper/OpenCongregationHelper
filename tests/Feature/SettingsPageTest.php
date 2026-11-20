@@ -97,7 +97,7 @@ test('the settings never changed show the values of the environment', function (
     Livewire::test(ManageTerritorySettings::class)
         ->assertSchemaStateSet([
             'map_default_center' => implode(', ', config('filament-leaflet.default_map_center')),
-            'shared_pii' => config('app.enable_shared_pii'),
+            'shared_pii' => config('app.enable_shared_pii') ? 'show' : 'hide',
         ]);
 
     expect(storedSettings('territories'))->toMatchArray(['map_default_center' => null, 'shared_pii' => null]);
@@ -106,22 +106,69 @@ test('the settings never changed show the values of the environment', function (
 test('the territory settings are stored and used', function () {
     actingAsSuperAdmin();
 
-    $sharedPii = ! config('app.enable_shared_pii');
+    config(['app.enable_shared_pii' => false]);
 
     Livewire::test(ManageTerritorySettings::class)
-        ->fillForm([
-            'map_default_center' => ' 39.8017 , -89.6436 ',
-            'shared_pii' => $sharedPii,
-        ])
+        ->fillForm(['map_default_center' => ' 39.8017 , -89.6436 '])
+        ->fillForm(['shared_pii' => 'show'])
+        ->fillForm(['understood' => true])
+        ->callMountedAction()
+        ->assertHasNoFormErrors()
+        ->assertSet('data.shared_pii', 'show')
         ->call('save')
         ->assertHasNoFormErrors();
 
     expect(storedSettings('territories'))->toMatchArray([
         'map_default_center' => [39.8017, -89.6436],
-        'shared_pii' => $sharedPii,
+        'shared_pii' => true,
     ])
         ->and(MapCenter::resolve())->toBe([39.8017, -89.6436])
-        ->and(TerritorySettings::value('shared_pii'))->toBe($sharedPii);
+        ->and(TerritorySettings::value('shared_pii'))->toBeTrue();
+});
+
+test('showing the personal data on the shared pages must be confirmed', function () {
+    actingAsSuperAdmin();
+    config(['app.enable_shared_pii' => false]);
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSee([__('settings.fields.shared_pii.hide'), __('settings.fields.shared_pii.show')])
+        ->fillForm(['shared_pii' => 'show'])
+        ->assertActionMounted('confirmSharedPii')
+        // Still hidden until confirmed
+        ->assertSet('data.shared_pii', 'hide')
+        ->callMountedAction()
+        ->assertHasFormErrors(['understood'])
+        ->assertSet('data.shared_pii', 'hide');
+});
+
+test('the personal data stay hidden when their confirmation is cancelled', function () {
+    actingAsSuperAdmin();
+    config(['app.enable_shared_pii' => false]);
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['shared_pii' => 'show'])
+        ->assertActionMounted('confirmSharedPii')
+        ->unmountAction()
+        ->assertSet('data.shared_pii', 'hide')
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(TerritorySettings::value('shared_pii'))->toBeFalse();
+});
+
+test('hiding the personal data again needs no confirmation', function () {
+    actingAsSuperAdmin();
+    config(['app.enable_shared_pii' => true]);
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSchemaStateSet(['shared_pii' => 'show'])
+        ->fillForm(['shared_pii' => 'hide'])
+        ->assertActionNotMounted('confirmSharedPii')
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(storedSettings('territories')['shared_pii'])->toBeFalse()
+        ->and(TerritorySettings::value('shared_pii'))->toBeFalse();
 });
 
 test('the settings set back to their default follow the environment again', function () {

@@ -3,8 +3,6 @@
 return [
     'navigation_label' => 'Impostazioni',
     'default' => 'Predefinito: :value.',
-    'on' => 'attivo',
-    'off' => 'disattivo',
 
     'units' => [
         'days_before_end' => 'giorni prima della fine',
@@ -35,7 +33,9 @@ return [
         'campaign_expiry_description' => 'Man mano che si avvicina la data di fine, una campagna attiva diventa in scadenza e poi quasi scaduta.',
         'appearance' => 'Aspetto',
         'congregation' => 'Congregazione',
-        'maps_and_sharing' => 'Mappe e condivisione',
+        'maps' => 'Mappe',
+        'shared_pages_privacy' => 'Privacy delle pagine condivise',
+        'shared_pages_privacy_description' => 'Cosa mostra la pagina pubblica di un\'assegnazione condivisa a chiunque ne abbia il link.',
         'stale_assignments' => 'Assegnazioni fuori da troppo tempo',
         'stale_assignments_description' => 'Le assegnazioni ancora in corso dopo questi giorni sono fuori da troppo tempo: una volta a settimana, ai loro assegnatari viene ricordato di restituirle.',
         'assignment_frequency' => 'Frequenza di assegnazione',
@@ -61,8 +61,20 @@ return [
             'invalid' => 'Scrivi le coordinate come "latitudine, longitudine" (es. 41.159063, -74.255188).',
         ],
         'shared_pii' => [
-            'label' => 'Mostra i dati personali nelle pagine condivise',
-            'helper' => 'La pagina pubblica di un\'assegnazione condivisa mostra anche il nome dell\'assegnatario e le note del territorio.',
+            'hide' => 'Nascondi i dati personali',
+            'hide_description' => 'Solo il territorio, la sua mappa e le date: l\'assegnatario e le note restano nell\'app.',
+            'show' => 'Mostra i dati personali',
+            'show_description' => 'Anche il nome dell\'assegnatario e le note del territorio, a chiunque abbia il link. I link non scadono mai e possono essere inoltrati.',
+            'recommended' => 'Consigliato',
+            'confirm_heading' => 'Mostrare i dati personali nelle pagine condivise?',
+            'consequences' => [
+                'Chiunque abbia il link di un\'assegnazione condivisa vedrà il nome dell\'assegnatario e le note del territorio, che possono descrivere dei padroni di casa.',
+                'I link condivisi non scadono mai e possono essere inoltrati, ad esempio in una chat di gruppo.',
+                'Fallo solo se la congregazione è d\'accordo e le note non contengono dati personali.',
+            ],
+            'understood' => 'Ho capito che chiunque abbia un link condiviso vedrà questi dati, e la congregazione è d\'accordo.',
+            'understood_required' => 'Conferma di aver capito cosa comporta mostrare i dati personali.',
+            'confirm' => 'Mostra i dati personali',
         ],
         'stale_after_days' => [
             'label' => 'Fuori da troppo tempo',
