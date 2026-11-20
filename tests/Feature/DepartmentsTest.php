@@ -12,6 +12,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Department;
 use App\Models\Poster;
 use App\Models\User;
+use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
@@ -282,4 +283,11 @@ test('the departments are sorted with the table prefix of the installation', fun
     }
 
     expect($sql)->toContain($connection->getQueryGrammar()->wrap('p45_departments').'.');
+});
+
+test('the roles offer only the permissions on the departments that the policy can grant', function () {
+    $permissions = collect(FilamentShield::getResources())
+        ->firstWhere('resourceFqcn', DepartmentResource::class)['permissions'];
+
+    expect(array_column($permissions, 'key'))->toBe(['ViewAny:Department', 'View:Department', 'Update:Department']);
 });
