@@ -26,8 +26,9 @@ assignment.
 ![Public page of a shared assignment](/docs/user-documentation/en/assignments/assets/shared-page.webp)
 
 > 🔒 **Privacy:** by default the public page does **not** show the name of the assignee nor the territory notes, which
-> may contain personal information. The administrator can enable them with the `ENABLE_SHARED_PII` setting (see the
-> [Setup guide](../setup)).
+> may contain personal information. The administrator can enable them from the [Settings](../administration/settings)
+> page. The shared pages also ask search engines (e.g. Google) not to index them, so they don't show up in search
+> results.
 
 ## Stopping sharing
 

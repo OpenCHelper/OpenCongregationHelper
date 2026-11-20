@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Settings\GeneralSettings;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -10,7 +11,8 @@ use Illuminate\Http\JsonResponse;
 class WebManifestController extends Controller
 {
     /**
-     * Color of the browser UI around the installed app (amber-700, as the brand mark of the home page).
+     * Default color of the browser UI around the installed app (amber-700, as the brand mark of the home page), while
+     * no primary color is chosen on the Settings page.
      */
     public const THEME_COLOR = '#b45309';
 
@@ -18,6 +20,14 @@ class WebManifestController extends Controller
      * Color of the splash screen shown while the installed app starts (stone-50, as the home page).
      */
     public const BACKGROUND_COLOR = '#fafaf9';
+
+    /**
+     * Get the color of the browser UI around the installed app: the primary color chosen on the Settings page, if any.
+     */
+    public static function themeColor(): string
+    {
+        return GeneralSettings::value('primary_color') ?? self::THEME_COLOR;
+    }
 
     public function __invoke(): JsonResponse
     {
@@ -54,7 +64,7 @@ class WebManifestController extends Controller
             'start_url' => '/app',
             'scope' => '/',
             'display' => 'standalone',
-            'theme_color' => self::THEME_COLOR,
+            'theme_color' => self::themeColor(),
             'background_color' => self::BACKGROUND_COLOR,
             'icons' => [
                 ['src' => asset('icons/icon.svg'), 'sizes' => 'any', 'type' => 'image/svg+xml', 'purpose' => 'any'],

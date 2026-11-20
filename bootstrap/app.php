@@ -2,6 +2,7 @@
 
 use App\Jobs\DetectStaleAssignments;
 use App\Jobs\RenewPublicationSubscriptions;
+use App\Settings\TerritorySettings;
 use BladeUI\Icons\Console\CacheCommand;
 use BladeUI\Icons\Console\ClearCommand;
 use Illuminate\Console\Scheduling\Schedule;
@@ -54,18 +55,28 @@ return Application::configure(basePath: dirname(__DIR__))
             are called every 5 minutes, from 8:00 to 22:55 (Rome time),
             Monday to Friday: every task must be due inside that window, on
             a multiple of 5 minutes (better on the hour, for services that
-            call it hourly), in an explicit timezone, or it never runs.
+            call it hourly), in an explicit timezone, or it never runs. The
+            day and time of the stale assignments check are chosen on the
+            Settings page, in the timezone of the application (`APP_TIMEZONE`,
+            UTC on the previews), and are not limited to that window: each
+            installation runs the scheduler its own way (cron, a long-running
+            process or an external service), and the page reminds the admin
+            that the scheduler must be running at that time. The publications
+            are renewed every day at 9:00 in the same timezone.
         */
         $schedule->job(new DetectStaleAssignments)
-            ->weeklyOn(Schedule::MONDAY, '09:00')
-            ->timezone('Europe/Rome')
+            ->weeklyOn(
+                TerritorySettings::value('stale_check_day'),
+                TerritorySettings::value('stale_check_time'),
+            )
+            ->timezone(config('app.timezone'))
             ->withoutOverlapping()
             ->onOneServer();
 
         // Every day (not on the 1st of the month only), so that a day missed by the scheduler is caught up
         $schedule->job(new RenewPublicationSubscriptions)
             ->dailyAt('09:00')
-            ->timezone('Europe/Rome')
+            ->timezone(config('app.timezone'))
             ->withoutOverlapping()
             ->onOneServer();
         // ->onFailure(function (Stringable $output) {

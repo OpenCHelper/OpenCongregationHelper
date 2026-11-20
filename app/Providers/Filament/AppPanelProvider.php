@@ -13,6 +13,7 @@ use App\Filament\Pages\EditTeam;
 use App\Filament\Pages\Logs;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
+use App\Settings\GeneralSettings;
 use App\Support\AppVersions;
 use App\Support\WebPush;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -46,6 +47,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Fortify\Features as FortifyFeatures;
 use Laravel\Jetstream\Features;
@@ -89,6 +91,8 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Gray,
             ])
+            ->brandLogo(fn (): ?string => filled($logo = GeneralSettings::value('logo')) ? Storage::disk('public')->url($logo) : null)
+            ->brandLogoHeight('2rem')
             ->themeSwitcher(false)
             ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
@@ -148,6 +152,7 @@ class AppPanelProvider extends PanelProvider
             })
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->pages([
                 // Pages\Dashboard::class,
                 EditProfile::class,
@@ -181,6 +186,8 @@ class AppPanelProvider extends PanelProvider
                     ->modalTitleBreadcrumbs()
                     ->slideOverPreviews(),
                 FilamentUiSwitcherPlugin::make()
+                    // The primary colour of the users who did not choose one in their UI preferences
+                    ->defaults(fn (): array => array_filter(['color' => GeneralSettings::value('primary_color')]))
                     ->iconRenderHook(self::UI_PREFERENCES_RENDER_HOOK)
                     ->withModeSwitcher(),
             ])

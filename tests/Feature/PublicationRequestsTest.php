@@ -189,7 +189,7 @@ describe('renewals', function () {
         expect(PublicationRequest::query()->whereNull('subscription_id')->count())->toBe(2);
     });
 
-    test('the daily job renews every active subscription and is scheduled every day', function () {
+    test('the daily job renews every active subscription and is scheduled every day, in the timezone of the application', function () {
         $this->travelTo('2026-03-20');
         $watchtower = subscribeTo($this->publisher, $this->watchtower, '2026-02-10');
         $workbook = subscribeTo(User::factory()->create(), $this->workbook, '2026-03-05');
@@ -218,7 +218,7 @@ describe('renewals', function () {
 
         expect($event)->not->toBeNull()
             ->and($event->expression)->toBe('0 9 * * *')
-            ->and($event->timezone)->toBe('Europe/Rome');
+            ->and($event->timezone)->toBe(config('app.timezone'));
     });
 });
 

@@ -54,11 +54,14 @@ INITIAL_ROOT_PASSWORD="password"
 
 ### Impostazioni principali
 
+`MAP_DEFAULT_CENTER` e `ENABLE_SHARED_PII` sono solo i valori predefiniti: i super amministratori possono cambiarli
+dalle pagine [Impostazioni](administration/settings), senza modificare `.env`.
+
 | Variabile | Descrizione |
 |-----------|-------------|
 | `APP_URL` | Indirizzo pubblico dell'applicazione. Usato nelle email e nei link delle assegnazioni condivise. |
 | `APP_LOCALE` | Lingua predefinita (`en`, `it` o `es`). Ogni utente può poi scegliere la propria lingua. |
-| `APP_TIMEZONE` | Fuso orario usato per mostrare le date. |
+| `APP_TIMEZONE` | Fuso orario usato per mostrare le date, e in cui si contano il giorno e l'ora dei promemoria settimanali (vedi le pagine [Impostazioni](administration/settings)) e l'ora del rinnovo giornaliero delle pubblicazioni (alle 9:00). |
 | `DB_PREFIX` / `DB_ENGINE` | Prefisso delle tabelle e motore di archiviazione, facoltativi, utili sui database condivisi: `db:wipe` e `migrate:fresh` eliminano allora solo le tabelle con questo prefisso. |
 | `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Nome (nome e cognome separati da uno spazio), email e password dell'utente **root**, creato la prima volta che il database viene popolato. |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Come vengono inviate le email. `failover` prova prima la funzione nativa `mail()` di PHP e in caso di errore scrive l'email nel log. |
@@ -108,8 +111,10 @@ INITIAL_ROOT_PASSWORD="password"
 Le email di notifica vengono messe in coda e un'attività settimanale invia i promemoria per i territori fuori da molto
 tempo. Entrambe richiedono qualcosa che venga eseguito periodicamente:
 
-- **Con accesso alla shell**, avvia il worker della coda (`php artisan queue:work`) e aggiungi lo scheduler di Laravel
-  al crontab (`* * * * * php /percorso/di/artisan schedule:run`).
+- **Con accesso alla shell**, avvia il worker della coda (`php artisan queue:work`) e lo scheduler di Laravel, dal
+  crontab (`* * * * * php /percorso/di/artisan schedule:run`) o come processo sempre attivo
+  (`php artisan schedule:work`, es. con Supervisor). Riavvia il worker della coda dopo aver installato una nuova
+  versione.
 - **Senza accesso alla shell** (hosting condiviso), imposta `ARTISAN_CRON_TOKEN` e configura un servizio di cron esterno
   che chiami questi endpoint, raggiungibili sotto il percorso `/api/artisan` di `APP_URL`:
 

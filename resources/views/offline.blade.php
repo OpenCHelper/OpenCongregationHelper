@@ -4,7 +4,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="{{ \App\Http\Controllers\WebManifestController::THEME_COLOR }}">
+        <meta name="theme-color" content="{{ \App\Http\Controllers\WebManifestController::themeColor() }}">
 
         <title>{{ __('pwa.offline.title') }} · {{ config('app.name') }}</title>
 

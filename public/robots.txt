@@ -1,2 +1,4 @@
+# The public pages of the shared links (/share, /guest) are not blocked here on purpose: they send `noindex` (see
+# `PreventSearchIndexing`), which the crawlers can only read if they are allowed to fetch them.
 User-agent: *
 Disallow:

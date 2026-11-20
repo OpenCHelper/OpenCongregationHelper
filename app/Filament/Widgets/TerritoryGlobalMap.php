@@ -7,6 +7,7 @@ use App\Enums\TerritoryMapMode;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\Campaign;
 use App\Models\Territory;
+use App\Settings\TerritorySettings;
 use Closure;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\BaseLayer;
@@ -70,6 +71,17 @@ class TerritoryGlobalMap extends MapWidget
     public function getHeading(): string
     {
         return __('filament-widgets.territory_global_map.heading');
+    }
+
+    /**
+     * Open on the default centre of the Settings pages (or of `.env`), like the other maps with nothing to show yet.
+     *
+     * @return array{float, float}
+     */
+    #[Override]
+    protected function getMapCenter(): array
+    {
+        return $this->evaluate($this->mapCenter) ?? TerritorySettings::value('map_default_center');
     }
 
     #[Override]
@@ -229,7 +241,7 @@ class TerritoryGlobalMap extends MapWidget
                 fn (Builder $query) => $query->withExists(['assignments as has_open_assignment' => $isAssignmentInProgress]),
             )
             ->when($this->mapMode === TerritoryMapMode::FREQUENCY, fn (Builder $query) => $query->withCount([
-                'assignments as recent_assignments_count' => fn (Builder $query) => $query->where('started_at', '>=', now()->subYear()),
+                'assignments as recent_assignments_count' => fn (Builder $query) => $query->where('started_at', '>=', now()->subMonthsNoOverflow(TerritorySettings::value('frequency_period_months'))),
             ]))
             ->when($this->mapMode === TerritoryMapMode::CAMPAIGN, fn (Builder $query) => $query->withExists([
                 'assignments as is_worked_in_campaign' => fn (Builder $query) => $query
@@ -276,6 +288,7 @@ class TerritoryGlobalMap extends MapWidget
 
         if ($this->mapMode === TerritoryMapMode::FREQUENCY) {
             $lines[] = e(__('filament-widgets.territory_global_map.popup_recent_assignments', [
+                'period' => TerritoryMapCategory::getFrequencyPeriod(),
                 'count' => (int) $territory->recent_assignments_count,
             ]));
         }

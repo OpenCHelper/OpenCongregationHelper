@@ -3,7 +3,7 @@
     The service worker gets its version (see `App\Support\ServiceWorker`), so that a new one replaces the files it cached.
 --}}
 <link rel="manifest" href="{{ route('web-manifest') }}">
-<meta name="theme-color" content="{{ \App\Http\Controllers\WebManifestController::THEME_COLOR }}">
+<meta name="theme-color" content="{{ \App\Http\Controllers\WebManifestController::themeColor() }}">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="{{ config('app.name') }}">

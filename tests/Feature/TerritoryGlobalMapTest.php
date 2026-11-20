@@ -9,6 +9,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use App\Settings\TerritorySettings;
 use Filament\Facades\Filament;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Notification;
@@ -167,7 +168,59 @@ test('territories are colored by how many times they were assigned in the last 1
             TerritoryMapCategory::HIGH_FREQUENCY->getLabel() => 1,
         ])
         ->and(globalMapPopups($component)['Assigned twice'])
-        ->toContain(e(__('filament-widgets.territory_global_map.popup_recent_assignments', ['count' => 2])));
+        ->toContain(e(__('filament-widgets.territory_global_map.popup_recent_assignments', [
+            'period' => TerritoryMapCategory::getFrequencyPeriod(),
+            'count' => 2,
+        ])));
+});
+
+test('the period and the thresholds of the assignment frequency are the ones of the settings', function () {
+    app()->setLocale('en');
+    $settings = app(TerritorySettings::class);
+    $settings->frequency_period_months = 6;
+    $settings->medium_frequency_min_assignments = 2;
+    $settings->high_frequency_min_assignments = 3;
+    $settings->save();
+
+    $assignedTwiceThisYear = territoryOnGlobalMap($this->zone, 'Assigned twice this year');
+    assignTerritoryOnGlobalMap($assignedTwiceThisYear, $this->assignee, startedDaysAgo: 250, returnedDaysAgo: 220);
+    assignTerritoryOnGlobalMap($assignedTwiceThisYear, $this->assignee, startedDaysAgo: 30);
+
+    $assignedTwiceRecently = territoryOnGlobalMap($this->zone, 'Assigned twice recently');
+    assignTerritoryOnGlobalMap($assignedTwiceRecently, $this->assignee, startedDaysAgo: 120, returnedDaysAgo: 90);
+    assignTerritoryOnGlobalMap($assignedTwiceRecently, $this->assignee, startedDaysAgo: 30);
+
+    $component = Livewire::test(TerritoryGlobalMap::class)
+        ->set('mapMode', TerritoryMapMode::FREQUENCY->value);
+
+    // Only the assignments of the last 6 months are counted
+    expect(globalMapFillColors($component))->toBe([
+        'Assigned twice recently' => globalMapCategoryColor(TerritoryMapCategory::MEDIUM_FREQUENCY),
+        'Assigned twice this year' => globalMapCategoryColor(TerritoryMapCategory::LOW_FREQUENCY),
+    ])
+        ->and(TerritoryMapCategory::LOW_FREQUENCY->getLabel())->toBe('Low (fewer than 2 assignments in the last 6 months)')
+        ->and(TerritoryMapCategory::MEDIUM_FREQUENCY->getLabel())->toBe('Medium (2 assignments)')
+        ->and(TerritoryMapCategory::HIGH_FREQUENCY->getLabel())->toBe('Frequent (3 or more assignments)')
+        ->and(globalMapPopups($component)['Assigned twice recently'])->toContain('Assignments in the last 6 months: 2');
+});
+
+test('the frequency labels describe the range of the medium frequency and a single month', function () {
+    app()->setLocale('en');
+    $settings = app(TerritorySettings::class);
+    $settings->frequency_period_months = 1;
+    $settings->medium_frequency_min_assignments = 1;
+    $settings->high_frequency_min_assignments = 4;
+    $settings->save();
+
+    expect(TerritoryMapCategory::LOW_FREQUENCY->getLabel())->toBe('Low (no assignment in the last month)')
+        ->and(TerritoryMapCategory::MEDIUM_FREQUENCY->getLabel())->toBe('Medium (1 to 3 assignments)');
+});
+
+test('the frequency labels are unchanged with the default settings', function () {
+    app()->setLocale('en');
+    expect(TerritoryMapCategory::LOW_FREQUENCY->getLabel())->toBe('Low (no assignment in the last 12 months)')
+        ->and(TerritoryMapCategory::MEDIUM_FREQUENCY->getLabel())->toBe('Medium (1 assignment)')
+        ->and(TerritoryMapCategory::HIGH_FREQUENCY->getLabel())->toBe('Frequent (2 or more assignments)');
 });
 
 test('territories are colored by their progress in the selected campaign', function () {

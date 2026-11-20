@@ -83,7 +83,7 @@ class CampaignResource extends Resource
     }
 
     /**
-     * Number of campaigns about to end (within `CampaignStatus::EXPIRING_DAYS` days).
+     * Number of campaigns about to end (within the expiring days of `CampaignSettings`).
      */
     public static function getNavigationBadge(): ?string
     {

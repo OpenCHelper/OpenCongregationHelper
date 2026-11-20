@@ -54,11 +54,14 @@ INITIAL_ROOT_PASSWORD="password"
 
 ### Main settings
 
+`MAP_DEFAULT_CENTER` and `ENABLE_SHARED_PII` are only the defaults: the super administrators can change them from the
+[Settings](administration/settings) pages, without editing `.env`.
+
 | Variable | Description |
 |----------|-------------|
 | `APP_URL` | Public URL of the application. Used in emails and in the links of shared assignments. |
 | `APP_LOCALE` | Default language (`en`, `it` or `es`). Each user can then pick their own language. |
-| `APP_TIMEZONE` | Timezone used to display dates. |
+| `APP_TIMEZONE` | Timezone used to display dates, and in which the day and time of the weekly reminders (see the [Settings](administration/settings) pages) and the daily renewal of the publications (at 9:00) are counted. |
 | `DB_PREFIX` / `DB_ENGINE` | Optional table prefix and storage engine, useful on shared databases: `db:wipe` and `migrate:fresh` then drop only the tables with this prefix. |
 | `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Name (first and last name separated by a space), email and password of the **root** user, created the first time the database is seeded. |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | How emails are sent. `failover` tries the native PHP `mail()` function first and falls back to the log. |
@@ -108,8 +111,9 @@ INITIAL_ROOT_PASSWORD="password"
 Notification emails are queued and a weekly job sends the reminders for territories that have been out for a long time.
 Both need something that runs periodically:
 
-- **With shell access**, run the queue worker (`php artisan queue:work`) and add the Laravel scheduler to the crontab
-  (`* * * * * php /path/to/artisan schedule:run`).
+- **With shell access**, run the queue worker (`php artisan queue:work`) and the Laravel scheduler, either from the
+  crontab (`* * * * * php /path/to/artisan schedule:run`) or as a long-running process (`php artisan schedule:work`,
+  e.g. with Supervisor). Restart the queue worker after deploying a new version.
 - **Without shell access** (shared hosting), set `ARTISAN_CRON_TOKEN` and configure an external cron service to call
   these endpoints, which are served under the `/api/artisan` path of `APP_URL`:
 

@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Events\StaleAssignmentDetected;
 use App\Models\TerritoryAssignment;
+use App\Settings\TerritorySettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -21,26 +22,24 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
         //
     }
 
+    /**
+     * The levels of the assignments in progress for too long, keyed by name, with the days after which they start (see
+     * the Settings page).
+     *
+     * @return array<string, array{days: int, description: string, color: string}>
+     */
     public function getStaleLevels(): array
     {
+        $days = TerritorySettings::values('stale_after_days', 'dead_after_days');
+
         return [
-            60 => [
-                'label' => 'stale',
+            'stale' => [
+                'days' => $days['stale_after_days'],
                 'description' => 'Assignment is stale',
                 'color' => 'yellow',
             ],
-            90 => [
-                'label' => 'very_stale',
-                'description' => 'Assignment is very stale',
-                'color' => 'orange',
-            ],
-            120 => [
-                'label' => 'extremely_stale',
-                'description' => 'Assignment is extremely stale',
-                'color' => 'red',
-            ],
-            150 => [
-                'label' => 'dead',
+            'dead' => [
+                'days' => $days['dead_after_days'],
                 'description' => 'Assignment is dead',
                 'color' => 'black',
             ],
@@ -55,7 +54,7 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
         Log::info('DetectStaleAssignments job started.');
 
         // An assignment is stale when it has been open for longer than the lowest stale level
-        $staleAfterDays = min(array_keys($this->getStaleLevels()));
+        $staleAfterDays = min(array_column($this->getStaleLevels(), 'days'));
 
         TerritoryAssignment::query()
             // Skip the assignments whose territory (or its zone) has been deleted while still assigned
