@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Enums\DepartmentKey;
 use App\Enums\NavigationGroup;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
@@ -9,6 +10,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ManageUserAssignments;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
+use App\Models\Department;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -26,6 +28,7 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -182,6 +185,14 @@ class UserResource extends Resource
                     })
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('departments')
+                    ->label(__('filament-resources.user.column_departments'))
+                    ->state(fn (User $record): array => $record->departments->map(fn (Department $department): DepartmentKey => $department->key)->all())
+                    ->formatStateUsing(fn (DepartmentKey $state): string => $state->getLabel())
+                    ->color(fn (DepartmentKey $state): string => $state->getColor())
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->toggleable(),
                 IconColumn::make('email_verified_at')
                     ->label(__('filament-resources.user.column_email_verified'))
                     ->default(false)
@@ -202,7 +213,13 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('departments'))
             ->filters([
+                SelectFilter::make('departments')
+                    ->label(__('filament-resources.user.filter_department'))
+                    ->relationship('departments', 'key', fn (Builder $query): Builder => $query->ordered())
+                    ->getOptionLabelFromRecordUsing(fn (Department $record): string => $record->getLabel())
+                    ->multiple(),
                 TernaryFilter::make('can_login')
                     ->label(__('filament-resources.user.filter_access_enabled'))
                     ->placeholder(__('filament-resources.user.filter_access_enabled_all'))

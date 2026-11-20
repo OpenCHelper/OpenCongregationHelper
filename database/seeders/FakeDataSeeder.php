@@ -24,6 +24,7 @@ class FakeDataSeeder extends Seeder
             FakeCampaignSeeder::class,
             FakeTerritorySeeder::class,
             FakeTerritoryAssignmentSeeder::class,
+            FakeDepartmentSeeder::class,
         ]);
     }
 }

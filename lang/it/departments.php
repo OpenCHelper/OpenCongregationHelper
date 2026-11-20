@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'territories' => [
+        'label' => 'Reparto territori',
+        'description' => 'Territori, zone, assegnazioni e campagne.',
+    ],
+    'roles' => [
+        'overseer' => 'Responsabile',
+        'assistant' => 'Assistente',
+    ],
+    'resource' => [
+        'model_label' => 'Reparto',
+        'plural_model_label' => 'Reparti',
+        'list_subheading' => 'I membri di un reparto possono gestirne le sezioni, senza bisogno di un ruolo (solo i responsabili eliminano). Apri un reparto per aggiungerne o rimuoverne i membri.',
+        'column_name' => 'Reparto',
+        'column_sections' => 'Sezioni',
+        'column_overseers' => 'Responsabili',
+        'column_members' => 'Membri',
+        'field_sections' => 'Sezioni del menu',
+        'field_sections_helper' => 'I membri del reparto possono gestire queste sezioni; solo i responsabili eliminano.',
+        'field_overseers' => 'Responsabili',
+        'no_overseer' => 'Nessun responsabile',
+    ],
+    'members' => [
+        'title' => 'Membri',
+        'model_label' => 'membro',
+        'plural_model_label' => 'membri',
+        'column_name' => 'Nome',
+        'column_role' => 'Ruolo',
+        'column_email' => 'Email',
+        'field_users' => 'Fratelli',
+        'field_role' => 'Ruolo nel reparto',
+        'field_role_helper' => 'I responsabili possono anche eliminare nelle sue sezioni, e aggiungerne e rimuoverne gli assistenti. Solo un amministratore nomina i responsabili.',
+        'action_add' => 'Aggiungi membri',
+        'action_add_heading' => 'Aggiungi membri a :department',
+        'action_add_submit' => 'Aggiungi',
+        'action_change_role' => 'Cambia ruolo',
+        'action_remove' => 'Rimuovi',
+        'action_remove_heading' => 'Rimuovi :name dal reparto',
+        'notification_added' => 'Membri aggiunti',
+        'notification_removed' => 'Membro rimosso',
+        'empty_heading' => 'Ancora nessun membro',
+        'empty_description' => 'Aggiungi i fratelli che servono in questo reparto: potranno gestirne le sezioni.',
+    ],
+];

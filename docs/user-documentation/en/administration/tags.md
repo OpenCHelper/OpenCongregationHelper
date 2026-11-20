@@ -2,7 +2,7 @@
 type: documentation
 icon: heroicon-o-tag
 title: Tags
-order: 3
+order: 4
 ---
 
 Tags are short labels that help to describe and find territories and zones, e.g. *Apartment blocks*, *Intercom only*

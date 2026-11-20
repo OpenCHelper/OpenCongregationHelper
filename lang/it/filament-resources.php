@@ -360,6 +360,8 @@ return [
         'column_access_enabled' => 'Accesso abilitato?',
         'column_created_at' => 'Creato il',
         'column_updated_at' => 'Aggiornato il',
+        'column_departments' => 'Reparti',
+        'filter_department' => 'Reparto',
         'filter_access_enabled' => 'Accesso abilitato?',
         'filter_access_enabled_all' => 'Tutti',
         'filter_access_enabled_enabled' => 'Abilitato',

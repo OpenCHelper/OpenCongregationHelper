@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Resources\Departments\DepartmentResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
@@ -114,12 +115,17 @@ test('documentation links and images point to existing files', function (string 
     }
 })->with('documentation locales');
 
-test('documentation linked from the territories resource exists in every locale', function (string $locale) {
-    foreach (TerritoryResource::getDocumentation() as $documentationId) {
+test('documentation linked from the resources exists in every locale', function (string $locale) {
+    $resources = [
+        TerritoryResource::class,
+        DepartmentResource::class,
+    ];
+
+    foreach (collect($resources)->flatMap(fn (string $resource): array => $resource::getDocumentation()) as $documentationId) {
         $path = str_replace('.', '/', $documentationId);
 
         expect(File::exists(base_path("docs/user-documentation/{$locale}/{$path}.md")))
-            ->toBeTrue("The documentation page [{$documentationId}] linked from the territories resource does not exist.");
+            ->toBeTrue("The documentation page [{$documentationId}] linked from a resource does not exist.");
     }
 })->with('documentation locales');
 

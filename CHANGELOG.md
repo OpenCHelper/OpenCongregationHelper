@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Departments** (Administration → Departments): overseers and assistants who manage the sections of their
+  department without needing a role, starting with the Territory Department; departments column and filter in the
+  users list ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
+
 ### Fixed
 
 - The password reset and email verification emails are now in the language of the recipient, in Italian and

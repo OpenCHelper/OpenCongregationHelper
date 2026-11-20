@@ -76,6 +76,10 @@ class AppServiceProvider extends ServiceProvider
                 : Response::denyWithStatus(404);
         });
 
+        // The members of a department can do everything on its sections (see `DepartmentKey::getResources()`),
+        // without needing a role with their permissions. Other abilities fall through to the roles.
+        Gate::before(fn (mixed $user, string $ability): ?bool => $user instanceof User && $user->hasDepartmentPermission($ability) ? true : null);
+
         // The policies of models outside `App\Models` are not discovered, and Filament allows everything on a
         // resource whose model has no policy: without the MailLogPolicy, every user could read the emails sent.
         Gate::policy(Activity::class, ActivityPolicy::class);

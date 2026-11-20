@@ -2,7 +2,7 @@
 type: documentation
 icon: heroicon-o-shield-check
 title: Roles and permissions
-order: 2
+order: 3
 ---
 
 What each user can see and do is decided by their **roles**. A role is a named set of **permissions**. Open
