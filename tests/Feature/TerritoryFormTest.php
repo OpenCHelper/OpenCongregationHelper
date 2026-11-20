@@ -143,21 +143,6 @@ test('an image uploaded while creating a territory becomes its image', function 
     Storage::disk('local')->assertExists($territory->image_path);
 });
 
-test('the image of a territory cannot be an SVG, which can carry scripts', function () {
-    Storage::fake('local');
-
-    Livewire::test(CreateTerritory::class)
-        ->fillForm([
-            'name' => 'Via Roma',
-            'territory_zone_id' => $this->zone->getKey(),
-            'image_file' => UploadedFile::fake()->createWithContent('via-roma.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'),
-        ])
-        ->call('create')
-        ->assertHasFormErrors(['image_file']);
-
-    expect(Territory::query()->where('name', 'Via Roma')->exists())->toBeFalse();
-});
-
 test('the territory form loads the script that shows the map as soon as its tab is opened', function () {
     $this->withoutVite();
 

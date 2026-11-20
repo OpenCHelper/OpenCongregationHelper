@@ -5,14 +5,6 @@ return [
         'label' => 'Reparto territori',
         'description' => 'Territori, zone, assegnazioni e campagne.',
     ],
-    'public_witnessing' => [
-        'label' => 'Testimonianza pubblica',
-        'description' => 'Carrelli ed espositori: l\'inventario dei loro poster magnetici.',
-    ],
-    'publications' => [
-        'label' => 'Pubblicazioni',
-        'description' => 'Le pubblicazioni, e chi le riceve su carta.',
-    ],
     'roles' => [
         'overseer' => 'Responsabile',
         'assistant' => 'Assistente',

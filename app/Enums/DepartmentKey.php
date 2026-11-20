@@ -3,11 +3,6 @@
 namespace App\Enums;
 
 use App\Filament\Resources\Campaigns\CampaignResource;
-use App\Filament\Resources\Posters\PosterResource;
-use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
-use App\Filament\Resources\Publications\PublicationResource;
-use App\Filament\Resources\PublicationSubscribers\PublicationSubscriberResource;
-use App\Filament\Resources\StorageLocations\StorageLocationResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
@@ -29,8 +24,6 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
 {
     // Change the order of the cases to update the order on the UI
     case Territories = 'territories';
-    case PublicWitnessing = 'public_witnessing';
-    case Publications = 'publications';
 
     public function getLabel(): string
     {
@@ -46,8 +39,6 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
     {
         return match ($this) {
             self::Territories => Heroicon::OutlinedMap,
-            self::PublicWitnessing => Heroicon::OutlinedPresentationChartBar,
-            self::Publications => Heroicon::OutlinedBookOpen,
         };
     }
 
@@ -55,8 +46,6 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
     {
         return match ($this) {
             self::Territories => 'success',
-            self::PublicWitnessing => 'info',
-            self::Publications => 'warning',
         };
     }
 
@@ -67,8 +56,6 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
     {
         return match ($this) {
             self::Territories => NavigationGroup::Territories,
-            self::PublicWitnessing => NavigationGroup::PublicWitnessing,
-            self::Publications => NavigationGroup::Publications,
         };
     }
 
@@ -85,15 +72,6 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
                 TerritoryZoneResource::class,
                 TerritoryAssignmentResource::class,
                 CampaignResource::class,
-            ],
-            self::PublicWitnessing => [
-                PosterResource::class,
-                StorageLocationResource::class,
-            ],
-            self::Publications => [
-                PublicationSubscriberResource::class,
-                PublicationRequestResource::class,
-                PublicationResource::class,
             ],
         };
     }

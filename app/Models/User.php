@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -280,7 +279,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
 
     /**
      * The actions on the sections of a department that only its overseers are granted: the assistants can do
-     * everything else, but not delete (e.g. deleting a publication deletes its history too).
+     * everything else, but not delete (deleting a record can delete its history too).
      *
      * @var list<string>
      */
@@ -318,26 +317,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
         }
 
         return $this->loadMissing('departments')->departments->pluck('key');
-    }
-
-    /**
-     * Get the publications the user receives on paper regularly.
-     *
-     * @return HasOne<PublicationSubscriber, $this>
-     */
-    public function publicationSubscriber(): HasOne
-    {
-        return $this->hasOne(PublicationSubscriber::class);
-    }
-
-    /**
-     * Get the publications the user requested.
-     *
-     * @return HasMany<PublicationRequest, $this>
-     */
-    public function publicationRequests(): HasMany
-    {
-        return $this->hasMany(PublicationRequest::class);
     }
 
     /**

@@ -10,7 +10,7 @@ return new class extends Migration
     /**
      * The departments of the congregation (see `App\Enums\DepartmentKey`).
      */
-    private const DEPARTMENTS = ['territories', 'public_witnessing', 'publications'];
+    private const DEPARTMENTS = ['territories'];
 
     /**
      * Run the migrations.

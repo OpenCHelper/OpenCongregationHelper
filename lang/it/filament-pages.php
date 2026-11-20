@@ -8,6 +8,4 @@ return [
     'view_territory_zone' => 'Zona',
     'view_user' => 'Utente',
     'manage_user_assignments' => 'Assegnazioni',
-    'manage_user_publication_requests' => 'Richieste pubblicazioni',
-    'manage_user_publication_requests_title' => 'Richieste pubblicazioni di :name',
 ];

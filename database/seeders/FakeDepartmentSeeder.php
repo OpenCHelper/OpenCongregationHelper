@@ -22,11 +22,8 @@ class FakeDepartmentSeeder extends Seeder
         $users = User::query()->whereKeyNot(1)->orderBy('id')->get();
 
         $territoryServants = $users->filter(fn (User $user): bool => $user->hasRole('territory_servant'))->values();
-        $others = $users->reject(fn (User $user): bool => $user->hasRole(['territory_servant', 'service_overseer']))->values();
 
         $this->addMembers(DepartmentKey::Territories, $territoryServants->all());
-        $this->addMembers(DepartmentKey::PublicWitnessing, $others->slice(0, 2)->all());
-        $this->addMembers(DepartmentKey::Publications, $others->slice(2, 2)->all());
     }
 
     /**
