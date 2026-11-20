@@ -108,6 +108,31 @@ test('the publications are found by their name in any language', function () {
         ->assertCanNotSeeTableRecords(Publication::query()->whereIn('code', ['nwt', 'g', 'mwb'])->get());
 });
 
+test('the search ignores the case, and finds the wildcards of the database as they are', function (string $search) {
+    App::setLocale('it');
+
+    Livewire::test(ManagePublications::class)
+        ->searchTable($search)
+        ->assertCanSeeTableRecords(Publication::query()->whereIn('code', ['w', 'wlp', 'wp'])->get())
+        ->assertCanNotSeeTableRecords(Publication::query()->whereIn('code', ['nwt', 'g', 'mwb'])->get());
+})->with(['lowercase' => 'atalaya', 'uppercase' => 'ATALAYA', 'mixed' => 'torre DI guardia']);
+
+test('the wildcards of the database typed in the search are not wildcards', function () {
+    $percent = Publication::factory()->create(['name' => ['en' => '100% Bible'], 'code' => 'pct']);
+    $underscore = Publication::factory()->create(['name' => ['en' => 'snake_case'], 'code' => 'snk']);
+    $other = Publication::factory()->create(['name' => ['en' => 'Snake case'], 'code' => 'oth']);
+
+    Livewire::test(ManagePublications::class)
+        ->searchTable('%')
+        ->assertCanSeeTableRecords([$percent])
+        ->assertCanNotSeeTableRecords([$underscore, $other])
+        ->searchTable('e_c')
+        ->assertCanSeeTableRecords([$underscore])
+        ->assertCanNotSeeTableRecords([$percent, $other])
+        ->searchTable('!')
+        ->assertCanNotSeeTableRecords([$percent, $underscore, $other]);
+});
+
 test('a periodical can be deleted like any other publication, and is not created again', function () {
     $awake = Publication::query()->where('code', 'g')->sole();
 

@@ -19,6 +19,7 @@ use Database\Seeders\FakePublicationRequestSeeder;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -160,6 +161,34 @@ describe('renewals', function () {
         expect($subscription->requests()->orderBy('requested_at')->pluck('quantity')->all())->toBe([1, 3]);
     });
 
+    test('a period is requested together with its progress: a failure in between requests nothing', function () {
+        $this->travelTo('2026-03-20');
+        $subscription = subscribeTo($this->publisher, $this->watchtower, '2026-03-01');
+
+        PublicationSubscription::updating(fn () => throw new RuntimeException('Failed in between'));
+
+        expect(fn () => $subscription->renew())->toThrow(RuntimeException::class, 'Failed in between')
+            ->and($subscription->requests()->count())->toBe(0)
+            ->and($subscription->fresh()->last_period_on)->toBeNull();
+    });
+
+    test('the database rejects the same period requested twice by a subscription, not two one-off requests', function () {
+        $this->travelTo('2026-03-20');
+        $subscription = subscribeTo($this->publisher, $this->watchtower, '2026-03-01');
+        [$march] = $subscription->renew();
+
+        expect(fn () => PublicationRequest::factory()->create([
+            'subscription_id' => $subscription->id,
+            'user_id' => $this->publisher->id,
+            'publication_id' => $this->watchtower->id,
+            'requested_at' => $march->requested_at->toDateString(),
+        ]))->toThrow(UniqueConstraintViolationException::class);
+
+        PublicationRequest::factory()->count(2)->create(['publication_id' => $this->book->id, 'requested_at' => '2026-03-20']);
+
+        expect(PublicationRequest::query()->whereNull('subscription_id')->count())->toBe(2);
+    });
+
     test('the daily job renews every active subscription and is scheduled every day', function () {
         $this->travelTo('2026-03-20');
         $watchtower = subscribeTo($this->publisher, $this->watchtower, '2026-02-10');
@@ -291,6 +320,35 @@ describe('requests page', function () {
         expect($subscription->fresh()->quantity)->toBe(2)
             ->and($current->fresh()->notes)->toBeNull()
             ->and(PublicationRequest::count())->toBe(1);
+    });
+
+    test('a renewal cannot be moved to a period its subscription already requested', function () {
+        $this->travelTo('2026-03-20');
+        $subscription = subscribeTo($this->publisher, $this->watchtower, '2026-02-10');
+        $subscription->update(['last_period_on' => '2026-02-01']);
+        $february = PublicationRequest::factory()->create([
+            'subscription_id' => $subscription->id,
+            'user_id' => $this->publisher->id,
+            'publication_id' => $this->watchtower->id,
+            'requested_at' => '2026-02-10',
+        ]);
+        [$march] = $subscription->renew();
+
+        Livewire::test(ManagePublicationRequests::class, ['activeTab' => 'all'])
+            ->callAction(TestAction::make('edit')->table($march), ['requested_at' => '2026-02-10'])
+            ->assertHasFormErrors(['requested_at']);
+
+        // Another day is fine, and so is the same day for a one-off request
+        $single = PublicationRequest::factory()->create(['publication_id' => $this->book->id, 'requested_at' => '2026-03-05']);
+
+        Livewire::test(ManagePublicationRequests::class, ['activeTab' => 'all'])
+            ->callAction(TestAction::make('edit')->table($march), ['requested_at' => '2026-03-02'])
+            ->assertHasNoFormErrors()
+            ->callAction(TestAction::make('edit')->table($single), ['requested_at' => '2026-02-10'])
+            ->assertHasNoFormErrors();
+
+        expect($march->fresh()->requested_at->toDateString())->toBe('2026-03-02')
+            ->and($february->fresh()->requested_at->toDateString())->toBe('2026-02-10');
     });
 
     test('the steps must be in order', function () {
@@ -496,6 +554,31 @@ describe('access and history in context', function () {
 
         expect($own->fresh())->user_id->toBe($this->publisher->id)->quantity->toBe(4)
             ->and($renewed->fresh()->user_id)->toBe($this->publisher->id);
+    });
+
+    test('the requests are kept when their publisher is deleted, without the publisher', function () {
+        $this->travelTo('2026-03-20');
+        $renewed = subscribeTo($this->publisher, $this->watchtower, '2026-03-01')->renew()[0];
+        $single = PublicationRequest::factory()->create(['user_id' => $this->publisher->id, 'publication_id' => $this->book->id]);
+
+        $this->publisher->delete();
+
+        expect($single->fresh())->not->toBeNull()->user_id->toBeNull()
+            ->and($renewed->fresh())->not->toBeNull()->user_id->toBeNull()->subscription_id->toBeNull();
+
+        Livewire::test(ManagePublicationRequests::class, ['activeTab' => 'all'])
+            ->assertCanSeeTableRecords([$single, $renewed])
+            ->assertSee(__('filament-resources.publication_request.deleted_user'))
+            ->set('tableGrouping', 'user_id')
+            ->assertSee(__('filament-resources.publication_request.deleted_user'))
+            // Still editable, without having to choose a publisher
+            ->mountAction(TestAction::make('edit')->table($single))
+            ->assertFormFieldDisabled('user_id')
+            ->fillForm(['quantity' => 5])
+            ->callMountedAction()
+            ->assertHasNoFormErrors();
+
+        expect($single->fresh())->quantity->toBe(5)->user_id->toBeNull();
     });
 
     test('the user page of the requests is hidden from who cannot see the requests', function () {

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -146,15 +147,19 @@ class PublicationSubscription extends Model
             $next = $following;
         }
 
-        $request = $this->requests()->create([
-            'user_id' => $this->loadMissing('subscriber')->subscriber->user_id,
-            'publication_id' => $this->publication_id,
-            'quantity' => $this->quantity,
-            'requested_at' => $next->toDateString(),
-        ]);
+        // Together, so that a failure in between doesn't request the same period again on the next run (the unique
+        // index on the subscription and day rejects that too)
+        return DB::transaction(function () use ($next): array {
+            $request = $this->requests()->create([
+                'user_id' => $this->loadMissing('subscriber')->subscriber->user_id,
+                'publication_id' => $this->publication_id,
+                'quantity' => $this->quantity,
+                'requested_at' => $next->toDateString(),
+            ]);
 
-        $this->update(['last_period_on' => $next->toDateString()]);
+            $this->update(['last_period_on' => $next->toDateString()]);
 
-        return [$request];
+            return [$request];
+        });
     }
 }
