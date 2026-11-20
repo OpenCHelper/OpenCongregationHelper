@@ -10,7 +10,6 @@ use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
 use App\Filament\Widgets\TerritoryGlobalMap;
 use BackedEnum;
-use Filament\Resources\Resource;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasIcon;
@@ -68,7 +67,7 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
     /**
      * The resources managed by the department.
      *
-     * @return list<class-string<resource>>
+     * @return list<class-string<\Filament\Resources\Resource>>
      */
     public function getResources(): array
     {

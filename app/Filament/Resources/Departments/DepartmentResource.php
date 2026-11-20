@@ -20,6 +20,8 @@ use Filament\Tables\Table;
 use Guava\FilamentKnowledgeBase\Contracts\HasKnowledgeBase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Override;
 use UnitEnum;
 
@@ -110,10 +112,26 @@ class DepartmentResource extends Resource implements HasKnowledgeBase
             ]);
     }
 
+    /**
+     * Only the departments the user may open: all of them with the permission to see the departments, otherwise
+     * (an overseer, see `DepartmentPolicy::viewAny()`) the ones they oversee.
+     *
+     * @param  Builder<Department>  $query
+     * @return Builder<Department>
+     */
+    protected static function onlyVisibleDepartments(Builder $query): Builder
+    {
+        if (Gate::allows('ViewAny:Department')) {
+            return $query;
+        }
+
+        return $query->whereHas('overseers', fn (Builder $overseers): Builder => $overseers->whereKey(Auth::id()));
+    }
+
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('overseers')->withCount('members'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => static::onlyVisibleDepartments($query)->with('overseers')->withCount('members'))
             ->recordUrl(fn (Department $record): ?string => static::canView($record) ? static::getUrl('view', ['record' => $record]) : null)
             ->paginated(false)
             ->columns([

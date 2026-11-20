@@ -35,7 +35,7 @@ return [
         'column_email' => 'Correo electrónico',
         'field_users' => 'Hermanos',
         'field_role' => 'Rol en el departamento',
-        'field_role_helper' => 'Los responsables también pueden eliminar en sus secciones, y añadir y quitar sus asistentes. Solo un administrador nombra a los responsables.',
+        'field_role_helper' => 'Los responsables también pueden eliminar en sus secciones, y añadir y quitar sus ayudantes. Solo un administrador nombra a los responsables.',
         'action_add' => 'Añadir miembros',
         'action_add_heading' => 'Añadir miembros a :department',
         'action_add_submit' => 'Añadir',
