@@ -42,8 +42,8 @@ Drawing the map is described in [Drawing maps](maps).
 In the **Image** tab you can either:
 
 - paste a link in **Image from URL**, or
-- drag a file onto **Image from file** (or click **Browse**). The built-in editor lets you crop and rotate the image
-  before saving it.
+- drag a file onto **Image from file** (or click **Browse**): a PNG, JPEG or WebP picture. The built-in editor lets
+  you crop and rotate the image before saving it.
 
 The two options are alternative: filling one disables the other. Uploaded images are stored privately and can only be
 seen by logged-in users.
