@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The windows to add a new item in Italian are now titled "Crea …" instead of "Salva …" (e.g. "Crea Poster").
+
 ## [1.0.0-alpha11] - 2026-11-20
 
 ### Added
