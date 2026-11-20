@@ -16,7 +16,7 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 - **Indirizzo della Sala del Regno**: l'indirizzo della Sala del Regno della congregazione (facoltativo);
 - **Logo**: mostrato nella barra in alto al posto del nome (al massimo 2 MB);
 - **Colore principale**: il colore dei pulsanti, dei link e degli elementi selezionati, per gli utenti che non ne hanno
-  scelto uno nelle proprie preferenze dell'interfaccia.
+  scelto uno nelle proprie preferenze dell'interfaccia. Colora anche la barra dell'[app installata](../basics/interface#installare-lapp).
 
 ## Territori
 
@@ -32,10 +32,18 @@ li disegna in scala mentre scrivi:
 
 - i giorni dopo cui un'assegnazione ancora in corso è fuori da troppo tempo e poi persa: questi ultimi devono essere di
   più;
-- il **giorno** e l'**ora** (nel fuso orario scelto nella pagina **Generali**) dei promemoria settimanali inviati agli
+- il **giorno** e l'**ora** (nel fuso orario dell'applicazione, `APP_TIMEZONE`) dei promemoria settimanali inviati agli
   assegnatari delle assegnazioni fuori da troppo tempo. Vengono inviati solo se a quell'ora lo scheduler è in
   esecuzione, come cron job o come processo sempre attivo (es. con Supervisor); su un hosting senza cron, il servizio
   esterno deve chiamarlo a quell'ora (vedi la [Guida al setup](../setup)).
+
+In **Frequenza di assegnazione** scegli come la **Frequenza di assegnazione** della [mappa della dashboard](../basics/dashboard)
+colora i territori:
+
+- i **mesi considerati**: si contano solo le assegnazioni iniziate in questi ultimi mesi;
+- le assegnazioni da cui un territorio è assegnato con frequenza **media**, e poi **frequente**: queste ultime devono
+  essere di più. Con meno assegnazioni, o nessuna, la frequenza è **bassa**. La barra sotto le disegna in scala mentre
+  scrivi.
 
 ## Campagne
 

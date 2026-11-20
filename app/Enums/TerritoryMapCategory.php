@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use App\Settings\TerritorySettings;
 use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
@@ -25,31 +26,46 @@ enum TerritoryMapCategory: string implements HasColor, HasLabel
     case IN_PROGRESS = 'in_progress';
     case WORKED = 'worked';
 
-    /**
-     * Number of assignments in the last 12 months from which a territory is assigned with a medium frequency.
-     */
-    public const MEDIUM_FREQUENCY_MIN_ASSIGNMENTS = 1;
-
-    /**
-     * Number of assignments in the last 12 months from which a territory is assigned frequently.
-     */
-    public const HIGH_FREQUENCY_MIN_ASSIGNMENTS = 2;
-
     public function getLabel(): string
     {
         return match ($this) {
             self::AVAILABLE => __('filament-widgets.territory_global_map.category_available'),
             self::NOT_AVAILABLE => __('filament-widgets.territory_global_map.category_not_available'),
-            self::LOW_FREQUENCY => __('filament-widgets.territory_global_map.category_low_frequency'),
-            self::MEDIUM_FREQUENCY => __('filament-widgets.territory_global_map.category_medium_frequency'),
-            self::HIGH_FREQUENCY => __('filament-widgets.territory_global_map.category_high_frequency', [
-                'count' => self::HIGH_FREQUENCY_MIN_ASSIGNMENTS,
-            ]),
+            self::LOW_FREQUENCY, self::MEDIUM_FREQUENCY, self::HIGH_FREQUENCY => $this->getFrequencyLabel(),
             self::OUT_FOR_OTHER_ASSIGNMENT => __('filament-widgets.territory_global_map.category_out_for_other_assignment'),
             self::TO_BE_ASSIGNED => __('filament-widgets.territory_global_map.category_to_be_assigned'),
             self::IN_PROGRESS => __('filament-widgets.territory_global_map.category_in_progress'),
             self::WORKED => __('filament-widgets.territory_global_map.category_worked'),
         };
+    }
+
+    /**
+     * Get the label of a frequency category, with the thresholds chosen on the Settings page.
+     */
+    private function getFrequencyLabel(): string
+    {
+        $thresholds = TerritorySettings::values('frequency_period_months', 'medium_frequency_min_assignments', 'high_frequency_min_assignments');
+        $medium = $thresholds['medium_frequency_min_assignments'];
+        $high = $thresholds['high_frequency_min_assignments'];
+
+        return match ($this) {
+            self::LOW_FREQUENCY => trans_choice('filament-widgets.territory_global_map.category_low_frequency', $medium, [
+                'period' => self::getFrequencyPeriod(),
+            ]),
+            self::MEDIUM_FREQUENCY => $high - $medium > 1
+                ? __('filament-widgets.territory_global_map.category_medium_frequency_range', ['min' => $medium, 'max' => $high - 1])
+                : trans_choice('filament-widgets.territory_global_map.category_medium_frequency', $medium),
+            default => __('filament-widgets.territory_global_map.category_high_frequency', ['count' => $high]),
+        };
+    }
+
+    /**
+     * Describe the period in which the assignments are counted to tell how frequently a territory is assigned (e.g. "in
+     * the last 12 months").
+     */
+    public static function getFrequencyPeriod(): string
+    {
+        return trans_choice('filament-widgets.territory_global_map.frequency_period', TerritorySettings::value('frequency_period_months'));
     }
 
     /**
@@ -76,13 +92,16 @@ enum TerritoryMapCategory: string implements HasColor, HasLabel
     }
 
     /**
-     * Get how frequently a territory is assigned from the number of its assignments started in the last 12 months.
+     * Get how frequently a territory is assigned from the number of its assignments started in the period chosen on the
+     * Settings page (`frequency_period_months`).
      */
     public static function fromRecentAssignmentsCount(int $recentAssignmentsCount): self
     {
+        $thresholds = TerritorySettings::values('medium_frequency_min_assignments', 'high_frequency_min_assignments');
+
         return match (true) {
-            $recentAssignmentsCount >= self::HIGH_FREQUENCY_MIN_ASSIGNMENTS => self::HIGH_FREQUENCY,
-            $recentAssignmentsCount >= self::MEDIUM_FREQUENCY_MIN_ASSIGNMENTS => self::MEDIUM_FREQUENCY,
+            $recentAssignmentsCount >= $thresholds['high_frequency_min_assignments'] => self::HIGH_FREQUENCY,
+            $recentAssignmentsCount >= $thresholds['medium_frequency_min_assignments'] => self::MEDIUM_FREQUENCY,
             default => self::LOW_FREQUENCY,
         };
     }

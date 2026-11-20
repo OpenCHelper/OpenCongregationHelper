@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Days after which assignments are out for too long and the day and time of the weekly reminders, from the Settings
   pages.
 - Days before their end from which campaigns are expiring and almost expired, from the Settings pages.
+- Months and number of assignments that set the assignment frequency on the dashboard map, from the Settings pages.
+- The installed app takes the primary colour chosen on the Settings pages.
 
 ### Changed
 
@@ -24,7 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   help texts under the "Offered" switch of publications and the role of department members.
 - The weekly reminders for the territories out for too long follow the timezone of the application (`APP_TIMEZONE`)
   instead of always Rome time: with `APP_TIMEZONE=UTC` they now arrive one or two hours later in Italy, unless the
-  time is changed from the Settings pages.
+  time is changed from the Settings pages. The publications received regularly are requested again at 9:00 in that
+  timezone too.
 
 ### Fixed
 

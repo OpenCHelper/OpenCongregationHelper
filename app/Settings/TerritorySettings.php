@@ -38,6 +38,21 @@ class TerritorySettings extends ConfigSettings
      */
     public string $stale_check_time = '09:00';
 
+    /**
+     * Months in which the assignments of a territory are counted to tell how frequently it is assigned (dashboard map).
+     */
+    public int $frequency_period_months = 12;
+
+    /**
+     * Assignments in the period from which a territory is assigned with a medium frequency (fewer: low frequency).
+     */
+    public int $medium_frequency_min_assignments = 1;
+
+    /**
+     * Assignments in the period from which a territory is assigned frequently.
+     */
+    public int $high_frequency_min_assignments = 2;
+
     public static function group(): string
     {
         return 'territories';

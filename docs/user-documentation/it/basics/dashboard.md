@@ -30,7 +30,7 @@ resti connesso.
 |---|---|
 | **Zona** (predefinita) | Il colore della **zona** del territorio. |
 | **Stato attuale** | 🟩 **disponibile** (non assegnato); ⬜ **non disponibile** (assegnato e non ancora riconsegnato). |
-| **Frequenza di assegnazione** | Quante volte il territorio è stato assegnato negli **ultimi 12 mesi**: 🟥 **bassa** (mai); 🟧 **media** (una volta); 🟩 **frequente** (due o più volte). |
+| **Frequenza di assegnazione** | Quante volte il territorio è stato assegnato negli **ultimi 12 mesi**: 🟥 **bassa** (mai); 🟧 **media** (una volta); 🟩 **frequente** (due o più volte). I super amministratori possono cambiare i mesi e le soglie nelle [Impostazioni](../administration/settings#territori). |
 | **Stato campagna** | L'avanzamento del territorio nella campagna scelta nel menu accanto: 🟥 **fuori per un'altra assegnazione** (assegnato al di fuori della campagna, quindi non ancora assegnabile per essa); ⬜ **da fare uscire**; 🟧 **in lavorazione** (assegnato per la campagna); 🟩 **lavorato** (riconsegnato per la campagna). |
 
 **Stato campagna** è disponibile solo se c'è una campagna non terminata. Mostra la campagna attiva iniziata per

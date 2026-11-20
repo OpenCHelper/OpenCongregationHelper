@@ -9,6 +9,8 @@ return [
     'units' => [
         'days_before_end' => 'días antes del final',
         'days_after_assignment' => 'días después de la asignación',
+        'assignments' => 'asignaciones',
+        'months' => 'meses',
     ],
 
     'stages' => [
@@ -18,6 +20,8 @@ return [
         'in_progress_note' => 'desde el día de la asignación',
         'end_date' => 'Fecha de fin',
         'assigned' => 'Asignada',
+        'low_frequency' => 'Baja',
+        'low_frequency_note' => 'menos asignaciones, también ninguna',
     ],
 
     'pages' => [
@@ -34,6 +38,8 @@ return [
         'maps_and_sharing' => 'Mapas y compartir',
         'stale_assignments' => 'Asignaciones fuera desde hace demasiado tiempo',
         'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan.',
+        'assignment_frequency' => 'Frecuencia de asignación',
+        'assignment_frequency_description' => 'Con qué frecuencia se asigna cada territorio, como se colorea en el mapa del panel: según el número de sus asignaciones en los últimos meses.',
     ],
 
     'fields' => [
@@ -70,6 +76,16 @@ return [
         'stale_check_time' => [
             'label' => 'Hora de los recordatorios',
             'helper' => 'En la zona horaria de la aplicación (`APP_TIMEZONE`). Los recordatorios se envían solo si el planificador se está ejecutando a esa hora, como tarea cron o como proceso permanente (p. ej. con Supervisor): consulta la guía de instalación.',
+        ],
+        'frequency_period_months' => [
+            'label' => 'Meses contados',
+            'helper' => 'Se cuentan las asignaciones iniciadas en estos últimos meses.',
+        ],
+        'medium_frequency_min_assignments' => [
+            'label' => 'Media',
+        ],
+        'high_frequency_min_assignments' => [
+            'label' => 'Frecuente',
         ],
     ],
 ];

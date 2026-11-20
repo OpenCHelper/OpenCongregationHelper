@@ -3,12 +3,14 @@
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Enums\CampaignStatus;
 use App\Enums\NavigationGroup;
+use App\Enums\TerritoryMapCategory;
 use App\Events\StaleAssignmentDetected;
 use App\Filament\Clusters\Settings\Pages\ManageCampaignSettings;
 use App\Filament\Clusters\Settings\Pages\ManageGeneralSettings;
 use App\Filament\Clusters\Settings\Pages\ManageTerritorySettings;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Filament\Widgets\TerritoryGlobalMap;
+use App\Http\Controllers\WebManifestController;
 use App\Jobs\DetectStaleAssignments;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
@@ -369,6 +371,76 @@ test('the stale assignment levels are shown in order, with a bar to scale', func
             __('settings.fields.dead_after_days.label'),
         ])
         ->assertSeeHtml('fi-settings-stages-bar');
+});
+
+test('the assignment frequency thresholds are stored', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSchemaStateSet([
+            'frequency_period_months' => 12,
+            'medium_frequency_min_assignments' => 1,
+            'high_frequency_min_assignments' => 2,
+        ])
+        ->fillForm([
+            'frequency_period_months' => '6',
+            'medium_frequency_min_assignments' => '2',
+            'high_frequency_min_assignments' => '4',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(storedSettings('territories'))->toMatchArray([
+        'frequency_period_months' => 6,
+        'medium_frequency_min_assignments' => 2,
+        'high_frequency_min_assignments' => 4,
+    ])
+        ->and(TerritoryMapCategory::fromRecentAssignmentsCount(1))->toBe(TerritoryMapCategory::LOW_FREQUENCY)
+        ->and(TerritoryMapCategory::fromRecentAssignmentsCount(3))->toBe(TerritoryMapCategory::MEDIUM_FREQUENCY)
+        ->and(TerritoryMapCategory::fromRecentAssignmentsCount(4))->toBe(TerritoryMapCategory::HIGH_FREQUENCY);
+});
+
+test('a territory is assigned frequently with more assignments than with a medium frequency', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['medium_frequency_min_assignments' => 3, 'high_frequency_min_assignments' => 3])
+        ->call('save')
+        ->assertHasFormErrors(['high_frequency_min_assignments']);
+
+    expect(app(TerritorySettings::class)->high_frequency_min_assignments)->toBe(2);
+});
+
+test('the assignment frequency must be counted over at least a month', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['frequency_period_months' => 0, 'medium_frequency_min_assignments' => 0])
+        ->call('save')
+        ->assertHasFormErrors(['frequency_period_months', 'medium_frequency_min_assignments']);
+});
+
+test('the assignment frequencies are shown in order, with a bar to scale', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSeeInOrder([
+            __('settings.sections.assignment_frequency'),
+            __('settings.stages.low_frequency'),
+            __('settings.fields.medium_frequency_min_assignments.label'),
+            __('settings.fields.high_frequency_min_assignments.label'),
+        ]);
+});
+
+test('the installed app takes the primary colour of the settings', function () {
+    expect(WebManifestController::themeColor())->toBe(WebManifestController::THEME_COLOR);
+
+    $settings = app(GeneralSettings::class);
+    $settings->primary_color = '#2563eb';
+    $settings->save();
+
+    $this->get(route('web-manifest'))->assertJson(['theme_color' => '#2563eb']);
+    $this->get(route('offline'))->assertSee('<meta name="theme-color" content="#2563eb">', escape: false);
 });
 
 test('the address of the Kingdom Hall is stored', function () {

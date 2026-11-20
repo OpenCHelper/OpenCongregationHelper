@@ -61,7 +61,8 @@ return Application::configure(basePath: dirname(__DIR__))
             UTC on the previews), and are not limited to that window: each
             installation runs the scheduler its own way (cron, a long-running
             process or an external service), and the page reminds the admin
-            that the scheduler must be running at that time.
+            that the scheduler must be running at that time. The publications
+            are renewed every day at 9:00 in the same timezone.
         */
         $schedule->job(new DetectStaleAssignments)
             ->weeklyOn(
@@ -75,7 +76,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Every day (not on the 1st of the month only), so that a day missed by the scheduler is caught up
         $schedule->job(new RenewPublicationSubscriptions)
             ->dailyAt('09:00')
-            ->timezone('Europe/Rome')
+            ->timezone(config('app.timezone'))
             ->withoutOverlapping()
             ->onOneServer();
         // ->onFailure(function (Stringable $output) {

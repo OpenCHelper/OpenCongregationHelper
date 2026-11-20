@@ -30,7 +30,7 @@ stay logged in.
 |---|---|
 | **Zone** (default) | The color of the territory's **zone**. |
 | **Current status** | 🟩 **available** (not assigned); ⬜ **not available** (assigned and not returned yet). |
-| **Assignment frequency** | How many times the territory was assigned in the **last 12 months**: 🟥 **low** (never); 🟧 **medium** (once); 🟩 **frequent** (twice or more). |
+| **Assignment frequency** | How many times the territory was assigned in the **last 12 months**: 🟥 **low** (never); 🟧 **medium** (once); 🟩 **frequent** (twice or more). The super administrators can change the months and the thresholds in the [Settings](../administration/settings#territories). |
 | **Campaign status** | The progress of the territory in the campaign chosen in the menu next to it: 🟥 **out for another assignment** (assigned outside of the campaign, so it cannot be assigned for it yet); ⬜ **to be assigned**; 🟧 **in progress** (assigned for the campaign); 🟩 **worked** (returned for the campaign). |
 
 **Campaign status** is only offered when there is a campaign that is not terminated. It shows the active campaign

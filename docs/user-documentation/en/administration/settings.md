@@ -16,7 +16,7 @@ role. The options are grouped by area, with one page each in the menu on the sid
 - **Kingdom Hall address**: the address of the Kingdom Hall of the congregation (optional);
 - **Logo**: shown in the top bar instead of the name (at most 2 MB);
 - **Primary colour**: the colour of the buttons, links and selected items, for the users who did not choose their own
-  in their UI preferences.
+  in their UI preferences. It also colours the bar of the [installed app](../basics/interface#installing-the-app).
 
 ## Territories
 
@@ -31,10 +31,18 @@ Under **Assignments out for too long** the levels are listed in order, each with
 them to scale while you type:
 
 - the days after which an assignment still in progress is out for too long and then lost: the latter must be more;
-- the **day** and **time** (in the timezone chosen on the **General** page) of the weekly reminders sent to the
+- the **day** and **time** (in the timezone of the application, `APP_TIMEZONE`) of the weekly reminders sent to the
   assignees of the assignments out for too long. They are sent only if the scheduler is running at that time, as a cron
   job or as a long-running process (e.g. with Supervisor); on a hosting without cron, the external service must call it
   then (see the [Setup guide](../setup)).
+
+Under **Assignment frequency** you choose how the **Assignment frequency** of the [dashboard map](../basics/dashboard)
+colours the territories:
+
+- the **months counted**: only the assignments started in these last months are counted;
+- the assignments from which a territory is assigned with a **medium** frequency, and then **frequently**: the latter
+  must be more. With fewer assignments, or none, the frequency is **low**. The bar below draws them to scale while you
+  type.
 
 ## Campaigns
 

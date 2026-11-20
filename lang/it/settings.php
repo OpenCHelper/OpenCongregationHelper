@@ -9,6 +9,8 @@ return [
     'units' => [
         'days_before_end' => 'giorni prima della fine',
         'days_after_assignment' => 'giorni dopo l\'assegnazione',
+        'assignments' => 'assegnazioni',
+        'months' => 'mesi',
     ],
 
     'stages' => [
@@ -18,6 +20,8 @@ return [
         'in_progress_note' => 'dal giorno dell\'assegnazione',
         'end_date' => 'Data di fine',
         'assigned' => 'Assegnata',
+        'low_frequency' => 'Bassa',
+        'low_frequency_note' => 'meno assegnazioni, anche nessuna',
     ],
 
     'pages' => [
@@ -34,6 +38,8 @@ return [
         'maps_and_sharing' => 'Mappe e condivisione',
         'stale_assignments' => 'Assegnazioni fuori da troppo tempo',
         'stale_assignments_description' => 'Le assegnazioni ancora in corso dopo questi giorni sono fuori da troppo tempo: una volta a settimana, ai loro assegnatari viene ricordato di restituirle.',
+        'assignment_frequency' => 'Frequenza di assegnazione',
+        'assignment_frequency_description' => 'Quanto spesso viene assegnato ogni territorio, come colorato sulla mappa della dashboard: in base al numero delle sue assegnazioni negli ultimi mesi.',
     ],
 
     'fields' => [
@@ -70,6 +76,16 @@ return [
         'stale_check_time' => [
             'label' => 'Ora dei promemoria',
             'helper' => 'Nel fuso orario dell\'applicazione (`APP_TIMEZONE`). I promemoria vengono inviati solo se a quell\'ora lo scheduler è in esecuzione, come cron job o come processo sempre attivo (es. con Supervisor): vedi la guida al setup.',
+        ],
+        'frequency_period_months' => [
+            'label' => 'Mesi considerati',
+            'helper' => 'Si contano le assegnazioni iniziate in questi ultimi mesi.',
+        ],
+        'medium_frequency_min_assignments' => [
+            'label' => 'Media',
+        ],
+        'high_frequency_min_assignments' => [
+            'label' => 'Frequente',
         ],
     ],
 ];

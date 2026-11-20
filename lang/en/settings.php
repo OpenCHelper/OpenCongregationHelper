@@ -9,6 +9,8 @@ return [
     'units' => [
         'days_before_end' => 'days before the end',
         'days_after_assignment' => 'days after the assignment',
+        'assignments' => 'assignments',
+        'months' => 'months',
     ],
 
     'stages' => [
@@ -18,6 +20,8 @@ return [
         'in_progress_note' => 'from the day of the assignment',
         'end_date' => 'End date',
         'assigned' => 'Assigned',
+        'low_frequency' => 'Low',
+        'low_frequency_note' => 'fewer assignments, or none',
     ],
 
     'pages' => [
@@ -34,6 +38,8 @@ return [
         'maps_and_sharing' => 'Maps and sharing',
         'stale_assignments' => 'Assignments out for too long',
         'stale_assignments_description' => 'Assignments still in progress after these days are out for too long: once a week, their assignees are reminded to return them.',
+        'assignment_frequency' => 'Assignment frequency',
+        'assignment_frequency_description' => 'How frequently each territory is assigned, as coloured on the dashboard map: by the number of its assignments in the last months.',
     ],
 
     'fields' => [
@@ -70,6 +76,16 @@ return [
         'stale_check_time' => [
             'label' => 'Time of the reminders',
             'helper' => 'In the timezone of the application (`APP_TIMEZONE`). The reminders are sent only if the scheduler is running at that time, as a cron job or as a long-running process (e.g. with Supervisor): see the setup guide.',
+        ],
+        'frequency_period_months' => [
+            'label' => 'Months counted',
+            'helper' => 'The assignments started in these last months are counted.',
+        ],
+        'medium_frequency_min_assignments' => [
+            'label' => 'Medium',
+        ],
+        'high_frequency_min_assignments' => [
+            'label' => 'Frequent',
         ],
     ],
 ];

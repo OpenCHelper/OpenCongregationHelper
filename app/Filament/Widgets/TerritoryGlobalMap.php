@@ -241,7 +241,7 @@ class TerritoryGlobalMap extends MapWidget
                 fn (Builder $query) => $query->withExists(['assignments as has_open_assignment' => $isAssignmentInProgress]),
             )
             ->when($this->mapMode === TerritoryMapMode::FREQUENCY, fn (Builder $query) => $query->withCount([
-                'assignments as recent_assignments_count' => fn (Builder $query) => $query->where('started_at', '>=', now()->subYear()),
+                'assignments as recent_assignments_count' => fn (Builder $query) => $query->where('started_at', '>=', now()->subMonthsNoOverflow(TerritorySettings::value('frequency_period_months'))),
             ]))
             ->when($this->mapMode === TerritoryMapMode::CAMPAIGN, fn (Builder $query) => $query->withExists([
                 'assignments as is_worked_in_campaign' => fn (Builder $query) => $query
@@ -288,6 +288,7 @@ class TerritoryGlobalMap extends MapWidget
 
         if ($this->mapMode === TerritoryMapMode::FREQUENCY) {
             $lines[] = e(__('filament-widgets.territory_global_map.popup_recent_assignments', [
+                'period' => TerritoryMapCategory::getFrequencyPeriod(),
                 'count' => (int) $territory->recent_assignments_count,
             ]));
         }

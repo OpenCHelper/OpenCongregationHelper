@@ -44,6 +44,13 @@ class ManageTerritorySettings extends AppSettingsPage
         ];
         $unit = __('settings.units.days_after_assignment');
 
+        $frequencyStages = [
+            ['name' => __('settings.stages.low_frequency'), 'color' => Color::Red[500]],
+            ['name' => __('settings.fields.medium_frequency_min_assignments.label'), 'color' => Color::Orange[500], 'field' => 'medium_frequency_min_assignments'],
+            ['name' => __('settings.fields.high_frequency_min_assignments.label'), 'color' => Color::Green[500], 'field' => 'high_frequency_min_assignments'],
+        ];
+        $assignmentsUnit = __('settings.units.assignments');
+
         return $schema
             ->components([
                 Section::make(__('settings.sections.maps_and_sharing'))
@@ -93,6 +100,27 @@ class ManageTerritorySettings extends AppSettingsPage
                             ->required()
                             ->regex('/^([01]\d|2[0-3]):[0-5]\d$/'),
                     ]),
+                Section::make(__('settings.sections.assignment_frequency'))
+                    ->description(__('settings.sections.assignment_frequency_description'))
+                    ->columnSpanFull()
+                    ->schema([
+                        TextInput::make('frequency_period_months')
+                            ->label(__('settings.fields.frequency_period_months.label'))
+                            ->helperText(__('settings.fields.frequency_period_months.helper').' '.$this->defaultHint((string) $this->defaultValue('frequency_period_months')))
+                            ->integer()
+                            ->required()
+                            ->minValue(1)
+                            ->maxValue(120)
+                            ->suffix(__('settings.units.months')),
+                        $this->stageRow($frequencyStages[0]['name'], $frequencyStages[0]['color'], __('settings.stages.low_frequency_note')),
+                        $this->stageInput('medium_frequency_min_assignments', $frequencyStages[1]['name'], $frequencyStages[1]['color'], $assignmentsUnit)
+                            ->minValue(1)
+                            ->maxValue(999),
+                        $this->stageInput('high_frequency_min_assignments', $frequencyStages[2]['name'], $frequencyStages[2]['color'], $assignmentsUnit)
+                            ->maxValue(999)
+                            ->gt('medium_frequency_min_assignments'),
+                        $this->stagesBar($frequencyStages, isCountdown: false, startLabel: '0', endLabel: ''),
+                    ]),
             ]);
     }
 
@@ -130,7 +158,7 @@ class ManageTerritorySettings extends AppSettingsPage
         $data['shared_pii'] = (bool) $data['shared_pii'];
         $data['stale_check_day'] = (int) $data['stale_check_day'];
 
-        foreach (['stale_after_days', 'dead_after_days'] as $property) {
+        foreach (['stale_after_days', 'dead_after_days', 'frequency_period_months', 'medium_frequency_min_assignments', 'high_frequency_min_assignments'] as $property) {
             $data[$property] = (int) $data[$property];
         }
 
