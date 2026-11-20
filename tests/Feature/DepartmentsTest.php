@@ -12,8 +12,12 @@ use App\Models\Department;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use App\Policies\Custom\DepartmentPolicy;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -276,4 +280,21 @@ test('the departments are sorted with the table prefix of the installation', fun
     }
 
     expect($sql)->toContain($connection->getQueryGrammar()->wrap('p45_departments').'.');
+});
+
+test('the policy of the departments is not replaced when the permissions are generated again', function () {
+    // `shield:generate` skips a model whose policy is registered from outside the path it writes to
+    expect(Gate::getPolicyFor(Department::class))->toBeInstanceOf(DepartmentPolicy::class)
+        ->and(class_exists(Utils::resolvePolicyFor(Department::class)))->toBeFalse();
+
+    $generated = app_path('Policies/DepartmentPolicy.php');
+
+    try {
+        $this->artisan('shield:generate', ['--resource' => 'DepartmentResource', '--option' => 'policies', '--panel' => 'app'])
+            ->assertSuccessful();
+
+        expect(File::exists($generated))->toBeFalse();
+    } finally {
+        File::delete($generated);
+    }
 });
