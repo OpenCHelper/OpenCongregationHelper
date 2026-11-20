@@ -27,19 +27,19 @@ beforeEach(function () {
 test('the migrations create the Bible, the periodicals and the publications in print since 2015, offered', function () {
     $publications = Publication::query()->ordered()->get();
 
-    expect($publications->pluck('code')->take(8)->all())->toBe(['nwt', 'nwtsty', 'w', 'w-lp', 'wp', 'g', 'mwb', 'mwb-lp'])
-        ->and($publications->pluck('renewal_months', 'code')->only(['nwt', 'w', 'w-lp', 'wp', 'g', 'mwb', 'mwb-lp'])->all())
-        ->toBe(['nwt' => null, 'w' => 1, 'w-lp' => 1, 'wp' => null, 'g' => null, 'mwb' => 2, 'mwb-lp' => 2])
+    expect($publications->pluck('code')->take(9)->all())->toBe(['nwt', 'nwtls', 'nwtpkt', 'nwtsty', 'w', 'wlp', 'wp', 'g', 'mwb'])
+        ->and($publications->pluck('renewal_months', 'code')->only(['nwt', 'nwtls', 'nwtpkt', 'w', 'wlp', 'wp', 'g', 'mwb'])->all())
+        ->toBe(['nwt' => null, 'nwtls' => null, 'nwtpkt' => null, 'w' => 1, 'wlp' => 1, 'wp' => null, 'g' => null, 'mwb' => 2])
         ->and($publications->countBy(fn (Publication $publication): string => $publication->category->value)->all())->toBe([
-            'bibles' => 2,
+            'bibles' => 4,
             'watchtower' => 3,
             'awake' => 1,
-            'meeting_workbooks' => 2,
+            'meeting_workbooks' => 1,
             'books' => 14,
             'brochures_and_booklets' => 7,
         ])
         // Only the periodicals renew
-        ->and($publications->filter->isRenewable()->pluck('code')->all())->toBe(['w', 'w-lp', 'mwb', 'mwb-lp'])
+        ->and($publications->filter->isRenewable()->pluck('code')->all())->toBe(['w', 'wlp', 'mwb'])
         ->and($publications->every(fn (Publication $publication): bool => $publication->is_active))->toBeTrue()
         ->and($publications->pluck('code')->duplicates()->all())->toBe([]);
 });
@@ -104,8 +104,8 @@ test('the publications are found by their name in any language', function () {
 
     Livewire::test(ManagePublications::class)
         ->searchTable('Atalaya')
-        ->assertCanSeeTableRecords(Publication::query()->whereIn('code', ['w', 'w-lp', 'wp'])->get())
-        ->assertCanNotSeeTableRecords(Publication::query()->whereIn('code', ['nwt', 'g', 'mwb', 'mwb-lp'])->get());
+        ->assertCanSeeTableRecords(Publication::query()->whereIn('code', ['w', 'wlp', 'wp'])->get())
+        ->assertCanNotSeeTableRecords(Publication::query()->whereIn('code', ['nwt', 'g', 'mwb'])->get());
 });
 
 test('a periodical can be deleted like any other publication, and is not created again', function () {
@@ -118,7 +118,7 @@ test('a periodical can be deleted like any other publication, and is not created
     $this->artisan('migrate')->assertSuccessful();
 
     expect(Publication::query()->where('code', 'g')->exists())->toBeFalse()
-        ->and(Publication::query()->count())->toBe(28);
+        ->and(Publication::query()->count())->toBe(29);
 });
 
 test('each language of the name shows the example in that language', function () {
@@ -145,7 +145,7 @@ test('the code of a publication is required and unique', function () {
         ->callMountedAction()
         ->assertHasFormErrors(['code' => 'unique']);
 
-    expect(Publication::query()->count())->toBe(29);
+    expect(Publication::query()->count())->toBe(30);
 });
 
 test('the renewal is shown only for the publications received regularly', function () {

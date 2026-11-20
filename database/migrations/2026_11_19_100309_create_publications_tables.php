@@ -27,6 +27,19 @@ return new class extends Migration
             'renewal_months' => null,
         ],
         [
+            'name' => ['en' => 'New World Translation of the Holy Scriptures (large print)', 'it' => 'Traduzione del Nuovo Mondo delle Sacre Scritture (caratteri grandi)', 'es' => 'La Biblia. Traducción del Nuevo Mundo (letra grande)'],
+            // The codes of the editions not in the index of the publications are the ones used by the congregations
+            'code' => 'nwtls',
+            'category' => 'bibles',
+            'renewal_months' => null,
+        ],
+        [
+            'name' => ['en' => 'New World Translation of the Holy Scriptures (pocket edition)', 'it' => 'Traduzione del Nuovo Mondo delle Sacre Scritture (formato tascabile)', 'es' => 'La Biblia. Traducción del Nuevo Mundo (edición de bolsillo)'],
+            'code' => 'nwtpkt',
+            'category' => 'bibles',
+            'renewal_months' => null,
+        ],
+        [
             'name' => ['en' => 'The Watchtower', 'it' => 'La Torre di Guardia', 'es' => 'La Atalaya'],
             'code' => 'w',
             'category' => 'watchtower',
@@ -34,8 +47,7 @@ return new class extends Migration
         ],
         [
             'name' => ['en' => 'The Watchtower (large print)', 'it' => 'La Torre di Guardia (caratteri grandi)', 'es' => 'La Atalaya (letra grande)'],
-            // Not in the index of the publications, which has no large-print codes: the one of the edition, with "-lp"
-            'code' => 'w-lp',
+            'code' => 'wlp',
             'category' => 'watchtower',
             'renewal_months' => 1,
         ],
@@ -54,13 +66,6 @@ return new class extends Migration
         [
             'name' => ['en' => 'Meeting Workbook', 'it' => 'Guida per l\'adunanza', 'es' => 'Guía de actividades'],
             'code' => 'mwb',
-            'category' => 'meeting_workbooks',
-            'renewal_months' => 2,
-        ],
-        [
-            'name' => ['en' => 'Meeting Workbook (large print)', 'it' => 'Guida per l\'adunanza (caratteri grandi)', 'es' => 'Guía de actividades (letra grande)'],
-            // Not in the index of the publications, which has no large-print codes: the one of the edition, with "-lp"
-            'code' => 'mwb-lp',
             'category' => 'meeting_workbooks',
             'renewal_months' => 2,
         ],
