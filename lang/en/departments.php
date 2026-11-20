@@ -5,6 +5,10 @@ return [
         'label' => 'Territory Department',
         'description' => 'Territories, zones, assignments and campaigns.',
     ],
+    'public_witnessing' => [
+        'label' => 'Public Witnessing',
+        'description' => 'Carts and displays: the inventory of their magnetic posters.',
+    ],
     'roles' => [
         'overseer' => 'Overseer',
         'assistant' => 'Assistant',

@@ -6,11 +6,11 @@ use App\Filament\Resources\Departments\DepartmentResource;
 use App\Filament\Resources\Departments\Pages\ListDepartments;
 use App\Filament\Resources\Departments\Pages\ViewDepartment;
 use App\Filament\Resources\Departments\RelationManagers\MembersRelationManager;
+use App\Filament\Resources\Posters\PosterResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Department;
-use App\Models\Territory;
-use App\Models\TerritoryZone;
+use App\Models\Poster;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
@@ -58,42 +58,43 @@ test('the departments are listed in the order of their keys, and cannot be creat
 
 test('the overseers of a department can fully manage its sections, and only them', function () {
     $member = User::factory()->create();
-    joinDepartment($member, DepartmentKey::Territories, DepartmentRole::Overseer);
+    joinDepartment($member, DepartmentKey::PublicWitnessing, DepartmentRole::Overseer);
 
     $this->actingAs($member);
 
-    expect($member->can('ForceDelete:Territory'))->toBeTrue()
-        ->and($member->can('ViewAny:TerritoryZone'))->toBeTrue()
-        ->and(TerritoryResource::canViewAny())->toBeTrue()
-        ->and(TerritoryResource::canCreate())->toBeTrue()
-        ->and(TerritoryResource::canDelete(Territory::factory()->for(TerritoryZone::factory(), 'territoryZone')->create()))->toBeTrue()
-        // The rest of the application needs a role, as before
-        ->and($member->can('ViewAny:Tag'))->toBeFalse()
+    expect($member->can('ForceDelete:Poster'))->toBeTrue()
+        ->and($member->can('ViewAny:StorageLocation'))->toBeTrue()
+        ->and(PosterResource::canViewAny())->toBeTrue()
+        ->and(PosterResource::canCreate())->toBeTrue()
+        ->and(PosterResource::canDelete(Poster::factory()->create()))->toBeTrue()
+        // Other departments and the administration need a role, as before
+        ->and($member->can('ViewAny:TerritoryZone'))->toBeFalse()
+        ->and(TerritoryResource::canViewAny())->toBeFalse()
         ->and($member->can('ViewAny:User'))->toBeFalse()
         ->and($member->can('ViewAny:Department'))->toBeFalse();
 });
 
 test('the assistants of a department manage its sections but cannot delete, unless their roles allow it', function () {
     $assistant = User::factory()->create();
-    joinDepartment($assistant, DepartmentKey::Territories);
-    $territory = Territory::factory()->for(TerritoryZone::factory(), 'territoryZone')->create();
+    joinDepartment($assistant, DepartmentKey::PublicWitnessing);
+    $poster = Poster::factory()->create();
 
     $this->actingAs($assistant);
 
-    expect(TerritoryResource::canViewAny())->toBeTrue()
-        ->and(TerritoryResource::canCreate())->toBeTrue()
-        ->and(TerritoryResource::canEdit($territory))->toBeTrue()
-        ->and(TerritoryResource::canDelete($territory))->toBeFalse()
-        ->and(TerritoryResource::canDeleteAny())->toBeFalse();
+    expect(PosterResource::canViewAny())->toBeTrue()
+        ->and(PosterResource::canCreate())->toBeTrue()
+        ->and(PosterResource::canEdit($poster))->toBeTrue()
+        ->and(PosterResource::canDelete($poster))->toBeFalse()
+        ->and(PosterResource::canDeleteAny())->toBeFalse();
 
     foreach (User::OVERSEER_ONLY_ACTIONS as $action) {
-        expect($assistant->can("{$action}:Territory"))->toBeFalse();
+        expect($assistant->can("{$action}:Poster"))->toBeFalse();
     }
 
     // The permissions of their roles still apply
-    $assistant->givePermissionTo(Permission::findOrCreate('Delete:Territory', 'web'));
+    $assistant->givePermissionTo(Permission::findOrCreate('Delete:Poster', 'web'));
 
-    expect($assistant->fresh()->can('Delete:Territory'))->toBeTrue();
+    expect($assistant->fresh()->can('Delete:Poster'))->toBeTrue();
 });
 
 test('the territory department grants the territories, zones, assignments, campaigns and global map', function () {
@@ -109,16 +110,16 @@ test('the territory department grants the territories, zones, assignments, campa
 
 test('users without departments keep the permissions of their roles', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo(Permission::findOrCreate('ViewAny:Territory', 'web'));
+    $user->givePermissionTo(Permission::findOrCreate('ViewAny:Poster', 'web'));
 
-    expect($user->can('ViewAny:Territory'))->toBeTrue()
-        ->and($user->can('Create:Territory'))->toBeFalse();
+    expect($user->can('ViewAny:Poster'))->toBeTrue()
+        ->and($user->can('Create:Poster'))->toBeFalse();
 });
 
 test('administrators can add members to a department with a role', function () {
     $this->actingAs($this->admin);
 
-    $department = Department::for(DepartmentKey::Territories);
+    $department = Department::for(DepartmentKey::PublicWitnessing);
     [$overseer, $assistant] = User::factory()->count(2)->create();
 
     Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class])
@@ -129,7 +130,8 @@ test('administrators can add members to a department with a role', function () {
         ->assertCanSeeTableRecords([$overseer, $assistant], inOrder: true);
 
     expect($department->overseers()->pluck('users.id')->all())->toBe([$overseer->id])
-        ->and($assistant->fresh()->isMemberOf(DepartmentKey::Territories))->toBeTrue();
+        ->and($assistant->fresh()->isMemberOf(DepartmentKey::PublicWitnessing))->toBeTrue()
+        ->and($assistant->fresh()->isMemberOf(DepartmentKey::Territories))->toBeFalse();
 });
 
 test('administrators can change the role of a member and remove them', function () {
@@ -150,25 +152,29 @@ test('administrators can change the role of a member and remove them', function 
     expect($department->members()->exists())->toBeFalse();
 });
 
-test('the overseers manage the members of their department', function () {
+test('the overseers manage the members of their own department only', function () {
     $overseer = User::factory()->create();
-    $department = joinDepartment($overseer, DepartmentKey::Territories, DepartmentRole::Overseer);
+    $department = joinDepartment($overseer, DepartmentKey::PublicWitnessing, DepartmentRole::Overseer);
+    $other = Department::for(DepartmentKey::Territories);
 
     $this->actingAs($overseer);
 
     expect($overseer->can('view', $department))->toBeTrue()
         ->and($overseer->can('update', $department))->toBeTrue()
+        ->and($overseer->can('view', $other))->toBeFalse()
+        ->and($overseer->can('update', $other))->toBeFalse()
         ->and(DepartmentResource::canViewAny())->toBeTrue();
 
     $newMember = User::factory()->create();
 
     $this->get(DepartmentResource::getUrl('view', ['record' => $department]))->assertOk();
+    $this->get(DepartmentResource::getUrl('view', ['record' => $other]))->assertForbidden();
 
     Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class])
         ->callAction(TestAction::make('attach')->table(), ['recordId' => [$newMember->id], 'role' => DepartmentRole::Assistant->value])
         ->assertHasNoFormErrors();
 
-    expect($newMember->fresh()->isMemberOf(DepartmentKey::Territories))->toBeTrue();
+    expect($newMember->fresh()->isMemberOf(DepartmentKey::PublicWitnessing))->toBeTrue();
 });
 
 test('the overseers add and manage assistants, but only the administrators appoint, change or remove overseers', function () {
@@ -231,7 +237,7 @@ test('the users to add are searched by name, not by email', function () {
 
 test('the assistants cannot manage the members of their department', function () {
     $assistant = User::factory()->create();
-    $department = joinDepartment($assistant, DepartmentKey::Territories);
+    $department = joinDepartment($assistant, DepartmentKey::PublicWitnessing);
 
     $this->actingAs($assistant);
 
@@ -258,10 +264,10 @@ test('the users list shows and filters the departments', function () {
 test('the department pages render', function () {
     $this->actingAs($this->admin);
 
-    $department = joinDepartment(User::factory()->create(['first_name' => 'Andrea']), DepartmentKey::Territories, DepartmentRole::Overseer);
+    $department = joinDepartment(User::factory()->create(['first_name' => 'Andrea']), DepartmentKey::PublicWitnessing, DepartmentRole::Overseer);
 
-    $this->get(DepartmentResource::getUrl())->assertOk()->assertSee(DepartmentKey::Territories->getLabel())->assertSee('Andrea');
-    $this->get(DepartmentResource::getUrl('view', ['record' => $department]))->assertOk()->assertSee(TerritoryResource::getNavigationLabel());
+    $this->get(DepartmentResource::getUrl())->assertOk()->assertSee(DepartmentKey::PublicWitnessing->getLabel())->assertSee('Andrea');
+    $this->get(DepartmentResource::getUrl('view', ['record' => $department]))->assertOk()->assertSee(PosterResource::getNavigationLabel());
 });
 
 test('the departments are sorted with the table prefix of the installation', function () {

@@ -5,6 +5,10 @@ return [
         'label' => 'Departamento de Territorios',
         'description' => 'Territorios, zonas, asignaciones y campañas.',
     ],
+    'public_witnessing' => [
+        'label' => 'Predicación pública',
+        'description' => 'Carritos y exhibidores: el inventario de sus carteles magnéticos.',
+    ],
     'roles' => [
         'overseer' => 'Responsable',
         'assistant' => 'Ayudante',

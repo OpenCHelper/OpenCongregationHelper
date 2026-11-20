@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Departments** (Administration → Departments): overseers and assistants who manage the sections of their
   department without needing a role, starting with the Territory Department; departments column and filter in the
   users list ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
+- **Posters inventory** (Public Witnessing → Posters): the magnetic posters of the displays, with their copies in
+  each storage place, titles in every language and import and export from a spreadsheet
+  ([#POSTERS_PR](https://github.com/OpenCHelper/OpenCongregationHelper/pull/POSTERS_PR)).
 
 ### Fixed
 

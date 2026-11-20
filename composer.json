@@ -36,6 +36,7 @@
         "outhebox/blade-flags": "^1.5",
         "pxlrbt/filament-environment-indicator": "^3.0",
         "rmsramos/activitylog": "^4.1",
+        "spatie/laravel-translatable": "^6.11",
         "stechstudio/filament-impersonate": "^5.7",
         "tapp/filament-maillog": "^2.0"
     },

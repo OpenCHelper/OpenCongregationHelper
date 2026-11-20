@@ -38,4 +38,57 @@ return [
             'image_private_host' => 'The image ":url" points to a private or reserved address.',
         ],
     ],
+    'poster' => [
+        'columns' => [
+            'code' => 'Code',
+            'title' => 'Title',
+            'storage' => 'Storage place',
+            'quantity' => 'Copies',
+            'notes' => 'Notes',
+        ],
+        'options' => [
+            'locale' => 'Language of the titles',
+            'locale_helper' => 'The language the titles in the file are written in: they are saved as its translation, keeping the other languages.',
+        ],
+        'examples' => [
+            'title' => 'Example poster',
+            'storage' => 'Storage place A',
+            'other_storage' => 'Storage place B',
+            'notes' => 'Example note',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'Your poster import has completed: :count row imported.|Your poster import has completed: :count rows imported.',
+                'failed_rows' => ':count row failed to import.|:count rows failed to import.',
+            ],
+        ],
+        'errors' => [
+            'unauthorized' => 'You are not allowed to import the poster ":title".',
+            'storage_create_unauthorized' => 'The storage place ":storage" does not exist and you are not allowed to create it.',
+            'quantity_without_storage' => 'The copies of the poster ":title" have no storage place.',
+        ],
+    ],
+    'errors' => [
+        'duplicate' => 'This row was imported at the same time by another part of the import: import the file again to update it.',
+    ],
+    'notifications' => [
+        'completed' => [
+            'body' => 'The import has completed: :count row imported.|The import has completed: :count rows imported.',
+            'failed_rows' => ':count row failed to import.|:count rows failed to import.',
+        ],
+    ],
+    'storage_location' => [
+        'columns' => [
+            'name' => 'Name',
+            'notes' => 'Notes',
+        ],
+        'examples' => [
+            'name' => 'Storage place A',
+            'other_name' => 'Storage place B',
+            'notes' => 'Example note',
+        ],
+        'errors' => [
+            'unauthorized' => 'You are not allowed to import the storage place ":name".',
+        ],
+    ],
 ];

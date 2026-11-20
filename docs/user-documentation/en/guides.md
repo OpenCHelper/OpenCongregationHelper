@@ -1,5 +1,5 @@
 ---
 type: group
 title: Guides
-order: 5
+order: 6
 ---

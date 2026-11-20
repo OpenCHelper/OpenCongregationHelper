@@ -38,4 +38,57 @@ return [
             'image_private_host' => 'L\'immagine ":url" punta a un indirizzo privato o riservato.',
         ],
     ],
+    'poster' => [
+        'columns' => [
+            'code' => 'Sigla',
+            'title' => 'Titolo',
+            'storage' => 'Deposito',
+            'quantity' => 'Copie',
+            'notes' => 'Note',
+        ],
+        'options' => [
+            'locale' => 'Lingua dei titoli',
+            'locale_helper' => 'La lingua in cui sono scritti i titoli nel file: vengono salvati come sua traduzione, conservando le altre lingue.',
+        ],
+        'examples' => [
+            'title' => 'Poster di esempio',
+            'storage' => 'Deposito A',
+            'other_storage' => 'Deposito B',
+            'notes' => 'Nota di esempio',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'L\'importazione dei poster è terminata: :count riga importata.|L\'importazione dei poster è terminata: :count righe importate.',
+                'failed_rows' => ':count riga non è stata importata.|:count righe non sono state importate.',
+            ],
+        ],
+        'errors' => [
+            'unauthorized' => 'Non hai il permesso di importare il poster ":title".',
+            'storage_create_unauthorized' => 'Il deposito ":storage" non esiste e non hai il permesso di crearlo.',
+            'quantity_without_storage' => 'Le copie del poster ":title" non hanno un deposito.',
+        ],
+    ],
+    'errors' => [
+        'duplicate' => 'Questa riga è stata importata nello stesso momento da un\'altra parte dell\'importazione: importa di nuovo il file per aggiornarla.',
+    ],
+    'notifications' => [
+        'completed' => [
+            'body' => 'L\'importazione è terminata: :count riga importata.|L\'importazione è terminata: :count righe importate.',
+            'failed_rows' => 'Non è stato possibile importare :count riga.|Non è stato possibile importare :count righe.',
+        ],
+    ],
+    'storage_location' => [
+        'columns' => [
+            'name' => 'Nome',
+            'notes' => 'Note',
+        ],
+        'examples' => [
+            'name' => 'Deposito A',
+            'other_name' => 'Deposito B',
+            'notes' => 'Nota di esempio',
+        ],
+        'errors' => [
+            'unauthorized' => 'Non hai il permesso di importare il deposito ":name".',
+        ],
+    ],
 ];
