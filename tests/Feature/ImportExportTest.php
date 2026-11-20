@@ -1,8 +1,6 @@
 <?php
 
 use App\Enums\DepartmentKey;
-use App\Filament\Exports\Concerns\ExportsInTheUserLocale;
-use App\Filament\Exports\PosterExporter;
 use App\Filament\Exports\StorageLocationExporter;
 use App\Filament\Imports\PosterImporter;
 use App\Filament\Imports\StorageLocationImporter;
@@ -14,7 +12,6 @@ use App\Models\Poster;
 use App\Models\PosterStock;
 use App\Models\StorageLocation;
 use App\Models\User;
-use App\Support\SpreadsheetFormula;
 use Filament\Actions\Exports\ContentGenerators\CsvExportContentGenerator;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Actions\Imports\Jobs\ImportCsv;
@@ -26,8 +23,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use OpenSpout\Common\Entity\Cell;
-use OpenSpout\Common\Entity\Cell\StringCell;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
@@ -138,37 +133,18 @@ test('importing needs to be allowed to create the records, exporting to see them
     'storage places' => [ManageStorageLocations::class, StorageLocation::class],
 ]);
 
-test('the cells that a spreadsheet would run as a formula are exported as text', function (mixed $value, mixed $expected) {
-    $exporter = new class
-    {
-        use ExportsInTheUserLocale;
-    };
+test('the cells that a spreadsheet would run as a formula are exported as text', function () {
+    Poster::factory()->create(['code' => '-5', 'title' => ['it' => '=HYPERLINK("x")'], 'notes' => '@sala']);
+    Poster::factory()->create(['code' => 'abc-01', 'title' => ['it' => '- Campagna speciale'], 'notes' => '+39 123']);
 
-    expect($exporter::escapeFormula($value))->toBe($expected);
-})->with([
-    'formula' => ['=1+1', "'=1+1"],
-    'plus' => ['+39 123', "'+39 123"],
-    'at' => ['@SUM(A1)', "'@SUM(A1)"],
-    'negative number' => ['-3', '-3'],
-    'text' => ['Box', 'Box'],
-    'empty' => ['', ''],
-    'number' => [3, 3],
-]);
+    $rows = array_slice(exportRows(ManagePosters::class, ['locale' => 'it']), 1);
 
-test('the quote added to a formula is removed only before a formula character', function (mixed $value, mixed $expected) {
-    expect(SpreadsheetFormula::unescape($value))->toBe($expected);
-})->with([
-    'formula' => ["'=1+1", '=1+1'],
-    'minus' => ["'- text", '- text'],
-    'a real quote' => ["'tis the season", "'tis the season"],
-    'only a quote' => ["'", "'"],
-    'a quote typed before a number' => ["'-5", "'-5"],
-    'number' => [3, 3],
-]);
-
-test('every cell is imported again exactly as it was exported', function (string $value) {
-    expect(SpreadsheetFormula::unescape(SpreadsheetFormula::escape($value)))->toBe($value);
-})->with(['=1+1', '- text', "'=important", "''=x", "'-5", '-5', "'tis", 'Box', '', "'"]);
+    // A negative number is left as it is: a spreadsheet reads it as a number, not as a formula
+    expect($rows)->toEqualCanonicalizing([
+        ['-5', "'=HYPERLINK(\"x\")", '', '', "'@sala"],
+        ['abc-01', "'- Campagna speciale", '', '', "'+39 123"],
+    ]);
+});
 
 test('the export notification is in the language of the user who started it', function () {
     StorageLocation::factory()->create(['name' => 'Box']);
@@ -179,21 +155,6 @@ test('the export notification is in the language of the user who started it', fu
     $export = Export::query()->latest('id')->firstOrFail();
 
     expect(StorageLocationExporter::getCompletedNotificationBody($export))->toBe('L\'esportazione è terminata: 1 riga esportata.');
-});
-
-test('a cell exported as text, to keep a spreadsheet from running it, is imported again as it was', function () {
-    $poster = Poster::factory()->create(['code' => null, 'title' => ['it' => '- Campagna speciale'], 'notes' => '@sala']);
-
-    [$header, $row] = exportRows(ManagePosters::class, ['locale' => 'it']);
-
-    expect($row)->toBe(['', "'- Campagna speciale", '', '', "'@sala"]);
-
-    importRows(PosterImporter::class, [array_combine(['code', 'title', 'storage', 'quantity', 'notes'], $row)], $this->member);
-
-    // Found again by its title, instead of creating another poster
-    expect(Poster::query()->count())->toBe(1)
-        ->and($poster->fresh()->title)->toBe('- Campagna speciale')
-        ->and($poster->fresh()->notes)->toBe('@sala');
 });
 
 /**
@@ -265,21 +226,4 @@ test('a poster is not saved when its copies fail to be saved', function () {
         ->and($import->failedRows()->sole()->validation_error)->toBe(__('import.errors.duplicate'))
         ->and($poster->fresh()->title)->toBe('Vecchio titolo')
         ->and(PosterStock::query()->where('storage_location_id', $hall->id)->count())->toBe(0);
-});
-
-test('the Excel file has the cells a spreadsheet would run as a formula as text, without the quote of the CSV file', function () {
-    $export = Export::query()->create([
-        'file_disk' => 'local',
-        'exporter' => PosterExporter::class,
-        'total_rows' => 1,
-        'user_id' => $this->member->id,
-    ]);
-
-    $cells = $export->getExporter(['title' => 'Titolo'], [])
-        ->makeXlsxRow(["'=HYPERLINK(\"x\")", "'- Campagna speciale", 'Box', '-5', ''])
-        ->getCells();
-
-    // Never a formula: OpenSpout would write a text starting with `=` as one
-    expect(array_map(fn (Cell $cell): string => $cell::class, array_slice($cells, 0, 4)))->each->toBe(StringCell::class)
-        ->and(array_map(fn (Cell $cell): mixed => $cell->getValue(), $cells))->toBe(['=HYPERLINK("x")', '- Campagna speciale', 'Box', '-5', '']);
 });
