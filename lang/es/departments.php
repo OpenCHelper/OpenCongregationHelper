@@ -20,7 +20,7 @@ return [
     'resource' => [
         'model_label' => 'Departamento',
         'plural_model_label' => 'Departamentos',
-        'list_subheading' => 'Los miembros de un departamento pueden gestionar sus secciones, sin necesitar un rol (solo los responsables eliminan). Abre un departamento para añadir o quitar sus miembros.',
+        'list_subheading' => 'Los miembros de un departamento gestionan sus secciones, incluso sin un rol.',
         'column_name' => 'Departamento',
         'column_sections' => 'Secciones',
         'column_overseers' => 'Responsables',

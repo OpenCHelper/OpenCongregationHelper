@@ -20,7 +20,7 @@ return [
     'resource' => [
         'model_label' => 'Department',
         'plural_model_label' => 'Departments',
-        'list_subheading' => 'The members of a department can manage its sections, without needing a role (only the overseers delete). Open a department to add or remove its members.',
+        'list_subheading' => 'The members of a department manage its sections, even without a role.',
         'column_name' => 'Department',
         'column_sections' => 'Sections',
         'column_overseers' => 'Overseers',

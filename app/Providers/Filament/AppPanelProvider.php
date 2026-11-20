@@ -90,6 +90,7 @@ class AppPanelProvider extends PanelProvider
                 'primary' => Color::Gray,
             ])
             ->themeSwitcher(false)
+            ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
             ->databaseNotifications()
             ->globalSearch(position: GlobalSearchPosition::Topbar)
