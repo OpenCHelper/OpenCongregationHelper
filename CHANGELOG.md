@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shorter descriptions on the departments and publications lists, and shorter help texts under the "Offered"
   switch of publications and the role of department members.
 
+### Fixed
+
+- The windows to add a new item in Italian are now titled "Crea …" instead of "Salva …" (e.g. "Crea Poster").
+
 ## [1.0.0-alpha11] - 2026-11-20
 
 ### Added

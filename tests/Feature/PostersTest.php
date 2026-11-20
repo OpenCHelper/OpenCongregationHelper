@@ -278,3 +278,17 @@ test('the picture of a poster is kept when the change is rolled back', function 
     Storage::disk('public')->assertExists('posters/old.png');
     expect($poster->fresh()->image_path)->toBe('posters/old.png');
 });
+
+test('the window to create a poster is titled with a verb in every language', function (string $locale, string $heading) {
+    App::setLocale($locale);
+
+    $page = Livewire::test(ManagePosters::class)
+        ->mountAction(TestAction::make('create'))
+        ->instance();
+
+    expect($page->getMountedAction()->getModalHeading())->toBe($heading);
+})->with([
+    'English' => ['en', 'Create Poster'],
+    'Italian' => ['it', 'Crea Poster'],
+    'Spanish' => ['es', 'Crear Cartel'],
+]);
