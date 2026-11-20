@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - The password reset and email verification emails are now in the language of the recipient, in Italian and
-  Spanish too, instead of always in English.
+  Spanish too, instead of always in English ([#42](https://github.com/OpenCHelper/OpenCongregationHelper/pull/42)).
 
 ### Security
 
