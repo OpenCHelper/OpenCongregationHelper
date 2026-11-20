@@ -2,6 +2,9 @@
 
 use App\Filament\Resources\Departments\DepartmentResource;
 use App\Filament\Resources\Posters\PosterResource;
+use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
+use App\Filament\Resources\Publications\PublicationResource;
+use App\Filament\Resources\PublicationSubscribers\PublicationSubscriberResource;
 use App\Filament\Resources\StorageLocations\StorageLocationResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\User;
@@ -123,6 +126,9 @@ test('documentation linked from the resources exists in every locale', function 
         DepartmentResource::class,
         PosterResource::class,
         StorageLocationResource::class,
+        PublicationSubscriberResource::class,
+        PublicationRequestResource::class,
+        PublicationResource::class,
     ];
 
     foreach (collect($resources)->flatMap(fn (string $resource): array => $resource::getDocumentation()) as $documentationId) {

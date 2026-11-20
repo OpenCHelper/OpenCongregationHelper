@@ -74,6 +74,24 @@ return [
             'failed_rows' => ':count row failed to import.|:count rows failed to import.',
         ],
     ],
+    'publication' => [
+        'columns' => [
+            'name' => 'Name (:language)',
+            'code' => 'Code',
+            'category' => 'Category',
+            'renewal_months' => 'Renews every (months)',
+            'is_active' => 'Offered',
+        ],
+        'examples' => [
+            'name' => 'Example publication',
+            'other_name' => 'Another publication',
+        ],
+        'errors' => [
+            'unauthorized' => 'You are not allowed to import the publication ":code".',
+            'name_missing' => 'The publication ":code" has no name.',
+            'category_unknown' => 'The category ":category" of the publication ":code" does not exist.',
+        ],
+    ],
     'storage_location' => [
         'columns' => [
             'name' => 'Name',

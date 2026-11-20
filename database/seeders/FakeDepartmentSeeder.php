@@ -26,6 +26,7 @@ class FakeDepartmentSeeder extends Seeder
 
         $this->addMembers(DepartmentKey::Territories, $territoryServants->all());
         $this->addMembers(DepartmentKey::PublicWitnessing, $others->slice(0, 2)->all());
+        $this->addMembers(DepartmentKey::Publications, $others->slice(2, 2)->all());
     }
 
     /**

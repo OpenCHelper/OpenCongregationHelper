@@ -11,6 +11,7 @@ Il lavoro della congregazione è organizzato in **reparti**, ognuno con la sua s
 |---------|---------|
 | **Reparto territori** | Territori, Zone, Assegnazioni, Campagne |
 | **Testimonianza pubblica** | [Poster e depositi in cui sono conservati](../public-witnessing/posters) |
+| **Pubblicazioni** | [Pubblicazioni periodiche](../publications/periodicals), [Richieste](../publications/requests), Elenco pubblicazioni |
 
 Apri **Amministrazione → Reparti** per vederli, con i loro responsabili e il numero di membri.
 
@@ -29,8 +30,8 @@ Ogni membro ha un **ruolo nel reparto**:
 
 - **Responsabile**: può anche eliminare nelle sue sezioni, e aggiungere e rimuovere gli assistenti del reparto (solo un
   amministratore nomina, cambia o rimuove i responsabili);
-- **Assistente**: gestisce le sezioni del reparto, ma non può eliminare (eliminando un elemento si può
-  perdere anche il suo storico), a meno che i suoi ruoli glielo permettano.
+- **Assistente**: gestisce le sezioni del reparto, ma non può eliminare (ad esempio una pubblicazione, che eliminerebbe
+  anche il suo storico), a meno che i suoi ruoli glielo permettano.
 
 ## Aggiungere o rimuovere membri
 

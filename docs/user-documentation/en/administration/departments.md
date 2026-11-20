@@ -11,6 +11,7 @@ The work of the congregation is organized in **departments**, each one with its 
 |------------|----------|
 | **Territory Department** | Territories, Zones, Assignments, Campaigns |
 | **Public Witnessing** | [Posters and their storage places](../public-witnessing/posters) |
+| **Publications** | [Regular publications](../publications/periodicals), [Requests](../publications/requests), Publication list |
 
 Open **Administration → Departments** to see them, with their overseers and the number of members.
 
@@ -28,8 +29,8 @@ Each member has a **role in the department**:
 
 - **Overseer**: can also delete in its sections, and add and remove the assistants of the department (only an
   administrator appoints, changes or removes the overseers);
-- **Assistant**: manages the sections of the department, but cannot delete (deleting a record can also delete its
-  history), unless their roles allow it.
+- **Assistant**: manages the sections of the department, but cannot delete (e.g. a publication, which would also
+  delete its history), unless their roles allow it.
 
 ## Adding or removing members
 

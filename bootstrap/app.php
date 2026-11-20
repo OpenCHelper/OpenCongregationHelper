@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\DetectStaleAssignments;
+use App\Jobs\RenewPublicationSubscriptions;
 use App\Settings\TerritorySettings;
 use BladeUI\Icons\Console\CacheCommand;
 use BladeUI\Icons\Console\ClearCommand;
@@ -68,6 +69,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 TerritorySettings::value('stale_check_time'),
             )
             ->timezone(config('app.timezone'))
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        // Every day (not on the 1st of the month only), so that a day missed by the scheduler is caught up
+        $schedule->job(new RenewPublicationSubscriptions)
+            ->dailyAt('09:00')
+            ->timezone('Europe/Rome')
             ->withoutOverlapping()
             ->onOneServer();
         // ->onFailure(function (Stringable $output) {
