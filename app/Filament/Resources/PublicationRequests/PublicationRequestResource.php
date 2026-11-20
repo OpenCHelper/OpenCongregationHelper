@@ -135,7 +135,8 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                     ->getOptionLabelFromRecordUsing(fn (User $record): string => $record->getFullName())
                     ->searchable(['first_name', 'last_name'])
                     ->preload()
-                    ->required()
+                    // Except for the requests kept after their publisher was deleted
+                    ->required(fn (?PublicationRequest $record): bool => ! ($record?->exists && $record->user_id === null))
                     // Not moved to another publisher: a renewal belongs to the publisher of its subscription, and a
                     // request edited from the history of a publisher stays in it
                     ->disabled(fn (string $operation, Component $livewire, ?PublicationRequest $record): bool => static::isPublisherLocked($operation, $livewire, $record))
@@ -191,6 +192,22 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                             ->helperText(fn (string $operation, Get $get): ?string => static::isRenewingFromTheForm($operation, $get)
                                 ? __('filament-resources.publication_request.field_requested_at_renews_helper')
                                 : null)
+                            // A regular publication requests each period once
+                            ->rule(fn (?PublicationRequest $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($record): void {
+                                if (! $record?->isRenewal()) {
+                                    return;
+                                }
+
+                                $alreadyRequested = PublicationRequest::query()
+                                    ->where('subscription_id', $record->subscription_id)
+                                    ->whereDate('requested_at', Carbon::parse($value)->toDateString())
+                                    ->whereKeyNot($record->getKey())
+                                    ->exists();
+
+                                if ($alreadyRequested) {
+                                    $fail(__('filament-resources.publication_request.validation_period_already_requested'));
+                                }
+                            })
                             ->required(),
                         DatePicker::make('ordered_at')
                             ->label(__('filament-resources.publication_request.field_ordered_at'))
@@ -215,7 +232,12 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
      */
     public static function isPublisherLocked(string $operation, Component $livewire, ?PublicationRequest $record): bool
     {
-        return $operation === 'edit' && ($livewire instanceof ManageUserPublicationRequests || (bool) $record?->isRenewal());
+        return $operation === 'edit' && (
+            $livewire instanceof ManageUserPublicationRequests
+            || (bool) $record?->isRenewal()
+            // The publisher was deleted: the request stays in the history without them
+            || ($record?->exists && $record->user_id === null)
+        );
     }
 
     /**
@@ -287,7 +309,8 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                     ->collapsible(),
                 Group::make('user_id')
                     ->label(__('filament-resources.publication_request.group_user'))
-                    ->getTitleFromRecordUsing(fn (PublicationRequest $record): string => $record->user->getFullName())
+                    ->getTitleFromRecordUsing(fn (PublicationRequest $record): string => $record->user?->getFullName()
+                        ?? __('filament-resources.publication_request.deleted_user'))
                     ->collapsible(),
             ])
             ->columns([
@@ -299,6 +322,7 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                 TextColumn::make('user.full_name')
                     ->label(__('filament-resources.publication_request.column_user'))
                     ->icon(Heroicon::OutlinedUser)
+                    ->placeholder(__('filament-resources.publication_request.deleted_user'))
                     ->searchable(['first_name', 'last_name'])
                     ->wrap(),
                 TextColumn::make('publication.name')

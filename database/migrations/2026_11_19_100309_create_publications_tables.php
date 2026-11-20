@@ -245,7 +245,8 @@ return new class extends Migration
 
         Schema::create('publication_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            // Kept when the publisher is deleted: the requests are the history of the publications
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('publication_id')->constrained()->cascadeOnDelete();
             $table->foreignId('subscription_id')->nullable()->comment('Requested again by this subscription')
                 ->constrained('publication_subscriptions')->nullOnDelete();
@@ -259,6 +260,8 @@ return new class extends Migration
 
             $table->index(['requested_at']);
             $table->index(['delivered_at']);
+            // A subscription requests each period once (the one-off requests have no subscription)
+            $table->unique(['subscription_id', 'requested_at']);
         });
 
         DB::table('publications')->insert(array_map(

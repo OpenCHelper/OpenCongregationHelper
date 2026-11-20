@@ -6,6 +6,7 @@ use Database\Factories\PosterFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -44,7 +45,8 @@ class Poster extends Model
 
     /**
      * Delete the picture of the poster from the disk when it is replaced, removed or the poster is deleted: it would
-     * otherwise stay there, still reachable by its address.
+     * otherwise stay there, still reachable by its address. Only once the change is committed, so that a rolled back
+     * change keeps the picture it still uses.
      */
     protected static function booted(): void
     {
@@ -52,13 +54,15 @@ class Poster extends Model
             $previous = $poster->getOriginal('image_path');
 
             if ($poster->wasChanged('image_path') && filled($previous)) {
-                Storage::disk('public')->delete($previous);
+                DB::afterCommit(fn () => Storage::disk('public')->delete($previous));
             }
         });
 
         static::deleted(function (self $poster): void {
-            if (filled($poster->image_path)) {
-                Storage::disk('public')->delete($poster->image_path);
+            $path = $poster->image_path;
+
+            if (filled($path)) {
+                DB::afterCommit(fn () => Storage::disk('public')->delete($path));
             }
         });
     }

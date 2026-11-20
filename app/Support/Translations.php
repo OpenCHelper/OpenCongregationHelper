@@ -35,8 +35,16 @@ class Translations
     }
 
     /**
+     * The character escaping the wildcards in `search()`: not a backslash, which MySQL and SQLite read differently.
+     */
+    private const LIKE_ESCAPE = '!';
+
+    /**
      * Search the attribute in every language, so that a translation missing in the language of the user (shown in
      * another one) is found too.
+     *
+     * Case-insensitive on every database: MySQL compares the values read from JSON as binary strings, so both sides
+     * are lowercased. The `%` and `_` typed are searched as they are, not as wildcards.
      *
      * @template TModel of Model
      *
@@ -45,9 +53,13 @@ class Translations
      */
     public static function search(Builder $query, string $attribute, string $search): Builder
     {
-        return $query->where(function (Builder $query) use ($attribute, $search): void {
+        $escape = self::LIKE_ESCAPE;
+        $pattern = '%'.str_replace([$escape, '%', '_'], [$escape.$escape, $escape.'%', $escape.'_'], mb_strtolower($search)).'%';
+        $grammar = $query->getQuery()->getGrammar();
+
+        return $query->where(function (Builder $query) use ($attribute, $pattern, $grammar, $escape): void {
             foreach (array_keys(static::getLocales()) as $locale) {
-                $query->orWhere("{$attribute}->{$locale}", 'like', "%{$search}%");
+                $query->orWhereRaw('lower('.$grammar->wrap("{$attribute}->{$locale}").") like ? escape '{$escape}'", [$pattern]);
             }
         });
     }

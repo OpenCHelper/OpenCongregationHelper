@@ -14,6 +14,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -187,6 +188,13 @@ test('the title of a poster follows the language of the user, and is found and s
         ->assertCanSeeTableRecords([$courses, $kingdom], inOrder: true)
         ->searchTable('Kingdom')
         ->assertCanSeeTableRecords([$kingdom])
+        ->assertCanNotSeeTableRecords([$courses, $english])
+        // Whatever the case
+        ->searchTable('kingdom')
+        ->assertCanSeeTableRecords([$kingdom])
+        ->assertCanNotSeeTableRecords([$courses, $english])
+        ->searchTable('REGNO DI dio')
+        ->assertCanSeeTableRecords([$kingdom])
         ->assertCanNotSeeTableRecords([$courses, $english]);
 });
 
@@ -250,4 +258,23 @@ test('the picture of a poster is deleted from the disk when replaced, removed or
     $poster->delete();
 
     Storage::disk('public')->assertMissing('posters/new.png');
+});
+
+test('the picture of a poster is kept when the change is rolled back', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('posters/old.png', 'old');
+    $poster = Poster::factory()->create(['image_path' => 'posters/old.png']);
+
+    DB::beginTransaction();
+    $poster->update(['image_path' => 'posters/new.png']);
+    DB::rollBack();
+
+    Storage::disk('public')->assertExists('posters/old.png');
+
+    DB::beginTransaction();
+    $poster->fresh()->delete();
+    DB::rollBack();
+
+    Storage::disk('public')->assertExists('posters/old.png');
+    expect($poster->fresh()->image_path)->toBe('posters/old.png');
 });
