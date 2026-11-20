@@ -9,8 +9,8 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Give some members to each department: the territory servants serve in the territory department, and two other
- * users (an overseer and an assistant) in each of the other departments.
+ * Give some members to each department: the territory servants serve in the territory department (the first one as
+ * overseer).
  */
 class FakeDepartmentSeeder extends Seeder
 {
