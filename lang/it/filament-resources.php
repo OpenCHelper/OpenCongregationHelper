@@ -448,7 +448,7 @@ return [
         'navigation_label' => 'Elenco pubblicazioni',
         'model_label' => 'Pubblicazione',
         'plural_model_label' => 'Pubblicazioni',
-        'list_subheading' => 'Le pubblicazioni che si possono ricevere su carta, per categoria. Trascinale per cambiarne l\'ordine nell\'elenco delle pubblicazioni periodiche.',
+        'list_subheading' => 'Le pubblicazioni che si possono ricevere su carta, per categoria.',
         'field_category' => 'Categoria',
         'categories' => [
             'bibles' => 'Bibbie',
@@ -470,7 +470,8 @@ return [
         'field_code_placeholder' => 'es. g',
         'field_code_helper' => 'La stessa in ogni lingua, mostrata nell\'intestazione della sua colonna al posto del nome.',
         'field_is_active' => 'Disponibile',
-        'field_is_active_helper' => 'Disattivala per non offrirla più: non si può più scegliere nelle pubblicazioni periodiche e nelle nuove richieste, e non viene più richiesta di nuovo per chi la riceveva regolarmente; le copie e le richieste già inserite vengono conservate.',
+        'field_is_active_helper' => 'Disattivala per non offrirla più: le copie e le richieste già inserite vengono conservate.',
+        'stop_offering_description' => 'Disattivala per non offrirla più: non si può più scegliere nelle pubblicazioni periodiche e nelle nuove richieste, e non viene più richiesta di nuovo per chi la riceveva regolarmente; le copie e le richieste già inserite vengono conservate.',
         'column_name' => 'Pubblicazione',
         'column_is_active' => 'Disponibile',
         'column_publishers' => 'Proclamatori',

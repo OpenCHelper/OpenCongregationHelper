@@ -20,7 +20,7 @@ return [
     'resource' => [
         'model_label' => 'Department',
         'plural_model_label' => 'Departments',
-        'list_subheading' => 'The members of a department can manage its sections, without needing a role (only the overseers delete). Open a department to add or remove its members.',
+        'list_subheading' => 'The members of a department manage its sections.',
         'column_name' => 'Department',
         'column_sections' => 'Sections',
         'column_overseers' => 'Overseers',
@@ -39,7 +39,7 @@ return [
         'column_email' => 'Email',
         'field_users' => 'Brothers',
         'field_role' => 'Role in the department',
-        'field_role_helper' => 'The overseers can also delete in its sections, and add and remove its assistants. Only an administrator appoints the overseers.',
+        'field_role_helper' => 'The overseers can also delete in its sections, and add and remove its assistants.',
         'action_add' => 'Add members',
         'action_add_heading' => 'Add members to :department',
         'action_add_submit' => 'Add',

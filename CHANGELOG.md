@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **UX improvements** for smaller and scaled screens: the sidebar can be collapsed to icons only on desktop too,
+  from the arrow next to the app name; shorter descriptions on the departments and publications lists, and shorter
+  help texts under the "Offered" switch of publications and the role of department members.
+
 ### Fixed
 
 - The windows to add a new item in Italian are now titled "Crea …" instead of "Salva …" (e.g. "Crea Poster").

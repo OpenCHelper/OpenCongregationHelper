@@ -448,7 +448,7 @@ return [
         'navigation_label' => 'Lista de publicaciones',
         'model_label' => 'Publicación',
         'plural_model_label' => 'Publicaciones',
-        'list_subheading' => 'Las publicaciones que se pueden recibir en papel, por categoría. Arrástralas para cambiar su orden en la lista de publicaciones periódicas.',
+        'list_subheading' => 'Las publicaciones que se pueden recibir en papel, por categoría.',
         'field_category' => 'Categoría',
         'categories' => [
             'bibles' => 'Biblias',
@@ -470,7 +470,8 @@ return [
         'field_code_placeholder' => 'p. ej. g',
         'field_code_helper' => 'El mismo en todos los idiomas, se muestra en el encabezado de su columna en lugar del nombre.',
         'field_is_active' => 'Disponible',
-        'field_is_active_helper' => 'Desactívala para dejar de ofrecerla: ya no se puede elegir en las publicaciones periódicas ni en las nuevas solicitudes, y ya no se vuelve a solicitar para quien la recibía con regularidad; las copias y solicitudes ya introducidas se conservan.',
+        'field_is_active_helper' => 'Desactívala para dejar de ofrecerla: las copias y solicitudes ya introducidas se conservan.',
+        'stop_offering_description' => 'Desactívala para dejar de ofrecerla: ya no se puede elegir en las publicaciones periódicas ni en las nuevas solicitudes, y ya no se vuelve a solicitar para quien la recibía con regularidad; las copias y solicitudes ya introducidas se conservan.',
         'column_name' => 'Publicación',
         'column_is_active' => 'Disponible',
         'column_publishers' => 'Publicadores',
