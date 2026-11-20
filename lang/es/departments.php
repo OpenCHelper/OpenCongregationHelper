@@ -20,7 +20,7 @@ return [
     'resource' => [
         'model_label' => 'Departamento',
         'plural_model_label' => 'Departamentos',
-        'list_subheading' => 'Los miembros de un departamento gestionan sus secciones, incluso sin un rol.',
+        'list_subheading' => 'Los miembros de un departamento gestionan sus secciones. Abre un departamento para editarlo.',
         'column_name' => 'Departamento',
         'column_sections' => 'Secciones',
         'column_overseers' => 'Responsables',

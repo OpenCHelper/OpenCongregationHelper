@@ -20,7 +20,7 @@ return [
     'resource' => [
         'model_label' => 'Reparto',
         'plural_model_label' => 'Reparti',
-        'list_subheading' => 'I membri di un reparto ne gestiscono le sezioni, anche senza un ruolo.',
+        'list_subheading' => 'I membri di un reparto ne gestiscono le sezioni. Apri un reparto per modificarlo.',
         'column_name' => 'Reparto',
         'column_sections' => 'Sezioni',
         'column_overseers' => 'Responsabili',
