@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Give some members to each department: the territory servants serve in the territory department (the first one as
- * overseer).
+ * overseer), and two other users (an overseer and an assistant) in each of the other departments.
  */
 class FakeDepartmentSeeder extends Seeder
 {
@@ -22,8 +22,10 @@ class FakeDepartmentSeeder extends Seeder
         $users = User::query()->whereKeyNot(1)->orderBy('id')->get();
 
         $territoryServants = $users->filter(fn (User $user): bool => $user->hasRole('territory_servant'))->values();
+        $others = $users->reject(fn (User $user): bool => $user->hasRole(['territory_servant', 'service_overseer']))->values();
 
         $this->addMembers(DepartmentKey::Territories, $territoryServants->all());
+        $this->addMembers(DepartmentKey::PublicWitnessing, $others->slice(0, 2)->all());
     }
 
     /**

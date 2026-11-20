@@ -25,6 +25,7 @@ class FakeDataSeeder extends Seeder
             FakeTerritorySeeder::class,
             FakeTerritoryAssignmentSeeder::class,
             FakeDepartmentSeeder::class,
+            FakePosterSeeder::class,
         ]);
     }
 }

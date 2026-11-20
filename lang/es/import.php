@@ -38,4 +38,54 @@ return [
             'image_private_host' => 'La imagen ":url" apunta a una dirección privada o reservada.',
         ],
     ],
+    'poster' => [
+        'columns' => [
+            'code' => 'Código',
+            'title' => 'Título',
+            'storage' => 'Depósito',
+            'quantity' => 'Copias',
+            'notes' => 'Notas',
+        ],
+        'options' => [
+            'locale' => 'Idioma de los títulos',
+            'locale_helper' => 'El idioma en que están escritos los títulos del archivo: se guardan como su traducción, conservando los demás idiomas.',
+        ],
+        'examples' => [
+            'title' => 'Póster de ejemplo',
+            'storage' => 'Depósito A',
+            'other_storage' => 'Depósito B',
+            'notes' => 'Nota de ejemplo',
+        ],
+        'notifications' => [
+            'completed' => [
+                'body' => 'La importación de carteles ha terminado: :count fila importada.|La importación de carteles ha terminado: :count filas importadas.',
+                'failed_rows' => 'No se ha podido importar :count fila.|No se han podido importar :count filas.',
+            ],
+        ],
+        'errors' => [
+            'unauthorized' => 'No tienes permiso para importar el cartel ":title".',
+            'storage_create_unauthorized' => 'El depósito ":storage" no existe y no tienes permiso para crearlo.',
+            'quantity_without_storage' => 'Las copias del cartel ":title" no tienen depósito.',
+        ],
+    ],
+    'notifications' => [
+        'completed' => [
+            'body' => 'La importación ha terminado: :count fila importada.|La importación ha terminado: :count filas importadas.',
+            'failed_rows' => 'No se ha podido importar :count fila.|No se han podido importar :count filas.',
+        ],
+    ],
+    'storage_location' => [
+        'columns' => [
+            'name' => 'Nombre',
+            'notes' => 'Notas',
+        ],
+        'examples' => [
+            'name' => 'Depósito A',
+            'other_name' => 'Depósito B',
+            'notes' => 'Nota de ejemplo',
+        ],
+        'errors' => [
+            'unauthorized' => 'No tienes permiso para importar el depósito ":name".',
+        ],
+    ],
 ];

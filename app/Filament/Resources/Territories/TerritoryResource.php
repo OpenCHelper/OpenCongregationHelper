@@ -328,6 +328,8 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                         FileUpload::make('image_file')
                                             ->label('Image from file')
                                             ->image()
+                                            // Not SVG, which can carry scripts run when the image is opened
+                                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
                                             ->panelLayout('integrated')
                                             ->imageEditor()
                                             ->openable()

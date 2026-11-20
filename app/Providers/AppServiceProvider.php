@@ -11,6 +11,7 @@ use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Filament\Actions\Exports\ExportColumn;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
@@ -135,6 +136,11 @@ class AppServiceProvider extends ServiceProvider
             ])) {
                 $component->timezone(Auth::user()?->timezone ?? config('app.timezone'));
             }
+        });
+
+        // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
+        ExportColumn::configureUsing(function (ExportColumn $column): void {
+            $column->preventFormulaInjection();
         });
     }
 }
