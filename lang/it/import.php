@@ -74,6 +74,24 @@ return [
             'failed_rows' => 'Non è stato possibile importare :count riga.|Non è stato possibile importare :count righe.',
         ],
     ],
+    'publication' => [
+        'columns' => [
+            'name' => 'Nome (:language)',
+            'code' => 'Sigla',
+            'category' => 'Categoria',
+            'renewal_months' => 'Si rinnova ogni (mesi)',
+            'is_active' => 'Disponibile',
+        ],
+        'examples' => [
+            'name' => 'Pubblicazione di esempio',
+            'other_name' => 'Un\'altra pubblicazione',
+        ],
+        'errors' => [
+            'unauthorized' => 'Non hai il permesso di importare la pubblicazione ":code".',
+            'name_missing' => 'La pubblicazione ":code" non ha un nome.',
+            'category_unknown' => 'La categoria ":category" della pubblicazione ":code" non esiste.',
+        ],
+    ],
     'storage_location' => [
         'columns' => [
             'name' => 'Nome',

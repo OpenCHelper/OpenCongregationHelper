@@ -9,6 +9,10 @@ return [
         'label' => 'Predicación pública',
         'description' => 'Carritos y exhibidores: el inventario de sus carteles magnéticos.',
     ],
+    'publications' => [
+        'label' => 'Publicaciones',
+        'description' => 'Las publicaciones, y quién las recibe en papel.',
+    ],
     'roles' => [
         'overseer' => 'Responsable',
         'assistant' => 'Ayudante',

@@ -74,6 +74,24 @@ return [
             'failed_rows' => 'No se ha podido importar :count fila.|No se han podido importar :count filas.',
         ],
     ],
+    'publication' => [
+        'columns' => [
+            'name' => 'Nombre (:language)',
+            'code' => 'Código',
+            'category' => 'Categoría',
+            'renewal_months' => 'Se renueva cada (meses)',
+            'is_active' => 'Disponible',
+        ],
+        'examples' => [
+            'name' => 'Publicación de ejemplo',
+            'other_name' => 'Otra publicación',
+        ],
+        'errors' => [
+            'unauthorized' => 'No tienes permiso para importar la publicación ":code".',
+            'name_missing' => 'La publicación ":code" no tiene nombre.',
+            'category_unknown' => 'La categoría ":category" de la publicación ":code" no existe.',
+        ],
+    ],
     'storage_location' => [
         'columns' => [
             'name' => 'Nombre',
