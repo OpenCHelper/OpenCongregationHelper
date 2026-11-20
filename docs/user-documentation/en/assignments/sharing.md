@@ -27,7 +27,8 @@ assignment.
 
 > 🔒 **Privacy:** by default the public page does **not** show the name of the assignee nor the territory notes, which
 > may contain personal information. The administrator can enable them from the [Settings](../administration/settings)
-> page.
+> page. The shared pages also ask search engines (e.g. Google) not to index them, so they don't show up in search
+> results.
 
 ## Stopping sharing
 

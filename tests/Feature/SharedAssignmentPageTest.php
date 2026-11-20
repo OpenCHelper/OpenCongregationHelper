@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\PreventSearchIndexing;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
@@ -50,4 +51,32 @@ test('shared assignment pages show personal data when enabled', function () {
         ->assertOk()
         ->assertSee('Mario Rossi')
         ->assertSee('Private territory notes');
+});
+
+test('shared assignment pages ask search engines not to index them', function () {
+    $this->withoutVite();
+
+    $this->get('/guest/shared-assignment/'.$this->sharedUrl->uid)
+        ->assertOk()
+        ->assertHeader('X-Robots-Tag', PreventSearchIndexing::DIRECTIVES)
+        ->assertSee('<meta name="robots" content="'.PreventSearchIndexing::DIRECTIVES.'">', escape: false);
+});
+
+test('shared links ask search engines not to index them', function () {
+    $this->get(route('share.redirect', $this->sharedUrl->uid))
+        ->assertRedirect()
+        ->assertHeader('X-Robots-Tag', PreventSearchIndexing::DIRECTIVES);
+});
+
+test('the crawlers can fetch the shared pages, so that they read that they must not index them', function () {
+    $rules = collect(file(public_path('robots.txt'), FILE_IGNORE_NEW_LINES))
+        ->reject(fn (string $line): bool => str_starts_with($line, '#'))
+        ->filter(fn (string $line): bool => str_starts_with(strtolower($line), 'disallow:'))
+        ->map(fn (string $line): string => trim(substr($line, strlen('disallow:'))));
+
+    expect($rules->filter())->toBeEmpty();
+});
+
+test('the pages of the application can still be indexed', function () {
+    $this->get('/')->assertHeaderMissing('X-Robots-Tag');
 });

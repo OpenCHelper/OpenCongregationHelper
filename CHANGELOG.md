@@ -35,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The windows to add a new item in Italian are now titled "Crea …" instead of "Salva …" (e.g. "Crea Poster").
 
+### Security
+
+- The shared pages ask search engines not to index them (`X-Robots-Tag` header and `robots` meta tag), so that they
+  don't show up in search results even when their links are posted somewhere public.
+
 ## [1.0.0-alpha11] - 2026-11-20
 
 ### Added

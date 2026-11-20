@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PublicStorageController;
 use App\Http\Controllers\WebManifestController;
+use App\Http\Middleware\PreventSearchIndexing;
 use App\Models\SharedUrl;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -64,4 +65,4 @@ Route::get('/share/{uuid}', function ($uuid) {
     }
 
     return redirect($redirectPath);
-})->name('share.redirect');
+})->middleware(PreventSearchIndexing::class)->name('share.redirect');
