@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The password reset and email verification emails are now in the language of the recipient, in Italian and
   Spanish too, instead of always in English.
 
+### Security
+
+- Territory images can no longer be SVG files, which can carry scripts: upload a PNG, JPEG or WebP picture instead
+  ([#46](https://github.com/OpenCHelper/OpenCongregationHelper/pull/46)).
+
 ## [1.0.0-alpha10] - 2026-11-18
 
 ### Added
