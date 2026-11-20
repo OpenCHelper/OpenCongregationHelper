@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-alpha11] - 2026-11-20
+
 ### Added
 
 - **Departments** (Administration → Departments): overseers and assistants who manage the sections of their
