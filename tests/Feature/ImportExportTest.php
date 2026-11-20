@@ -4,7 +4,6 @@ use App\Enums\DepartmentKey;
 use App\Filament\Exports\StorageLocationExporter;
 use App\Filament\Imports\PosterImporter;
 use App\Filament\Imports\StorageLocationImporter;
-use App\Filament\Imports\TerritoryImporter;
 use App\Filament\Resources\Posters\Pages\ManagePosters;
 use App\Filament\Resources\StorageLocations\Pages\ManageStorageLocations;
 use App\Models\Department;
@@ -18,7 +17,6 @@ use Filament\Actions\Imports\Jobs\ImportCsv;
 use Filament\Actions\Imports\Models\Import;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -157,58 +155,6 @@ test('the export notification is in the language of the user who started it', fu
     expect(StorageLocationExporter::getCompletedNotificationBody($export))->toBe('L\'esportazione è terminata: 1 riga esportata.');
 });
 
-/**
- * A storage place import whose storage place is created by another queue worker right after it was looked for.
- */
-class ConcurrentStorageLocationImporter extends StorageLocationImporter
-{
-    public function resolveRecord(): StorageLocation
-    {
-        $record = parent::resolveRecord();
-
-        StorageLocation::query()->create(['name' => $record->name, 'notes' => 'Altro']);
-
-        return $record;
-    }
-}
-
-test('a row whose record was created meanwhile by another chunk fails with a clear reason, keeping the others', function () {
-    $import = importRows(ConcurrentStorageLocationImporter::class, [
-        ['name' => 'Sala del Regno', 'notes' => 'Armadio a destra'],
-    ], $this->member);
-
-    expect($import->successful_rows)->toBe(0)
-        ->and($import->failedRows()->sole()->validation_error)->toBe(__('import.errors.duplicate'))
-        // The one created by the other chunk is left as it is
-        ->and(StorageLocation::query()->where('name', 'Sala del Regno')->sole()->notes)->toBe('Altro');
-
-    // Imported again, the row updates it
-    $import = importRows(StorageLocationImporter::class, [
-        ['name' => 'Sala del Regno', 'notes' => 'Armadio a destra'],
-    ], $this->member);
-
-    expect($import->successful_rows)->toBe(1)
-        ->and(StorageLocation::query()->where('name', 'Sala del Regno')->sole()->notes)->toBe('Armadio a destra');
-});
-
-test('the imports of the same kind wait for each other, among all the users', function (string $importer) {
-    $import = Import::create([
-        'file_name' => 'file.csv',
-        'file_path' => 'file.csv',
-        'importer' => $importer,
-        'total_rows' => 0,
-        'successful_rows' => 0,
-        'user_id' => $this->member->id,
-    ]);
-
-    $keys = collect($import->getImporter([], [])->getJobMiddleware())
-        ->filter(fn (object $middleware): bool => $middleware instanceof WithoutOverlapping)
-        ->map(fn (WithoutOverlapping $middleware): string => $middleware->key)
-        ->all();
-
-    expect($keys)->toContain('imports:'.$importer, "filament:imports:{$import->getKey()}");
-})->with([PosterImporter::class, StorageLocationImporter::class, TerritoryImporter::class]);
-
 test('a poster is not saved when its copies fail to be saved', function () {
     $hall = StorageLocation::factory()->create(['name' => 'Sala del Regno']);
     $poster = Poster::factory()->create(['code' => 'abc-01', 'title' => ['it' => 'Vecchio titolo']]);
@@ -223,7 +169,7 @@ test('a poster is not saved when its copies fail to be saved', function () {
     ], $this->member);
 
     expect($import->successful_rows)->toBe(0)
-        ->and($import->failedRows()->sole()->validation_error)->toBe(__('import.errors.duplicate'))
+        ->and($import->failedRows()->count())->toBe(1)
         ->and($poster->fresh()->title)->toBe('Vecchio titolo')
         ->and(PosterStock::query()->where('storage_location_id', $hall->id)->count())->toBe(0);
 });

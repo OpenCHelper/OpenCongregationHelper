@@ -3,7 +3,6 @@
 namespace App\Filament\Imports;
 
 use App\Filament\Imports\Concerns\ImportsInTheUserLocale;
-use App\Filament\Imports\Concerns\ReportsDuplicateRecords;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
@@ -28,7 +27,6 @@ use Throwable;
 class TerritoryImporter extends Importer
 {
     use ImportsInTheUserLocale;
-    use ReportsDuplicateRecords;
 
     /**
      * The maximum size of an image downloaded during the import, in bytes.
