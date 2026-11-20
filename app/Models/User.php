@@ -251,7 +251,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     {
         return $this->belongsToMany(Department::class)
             ->using(DepartmentMember::class)
-            ->withPivot('role')
+            ->withPivot('id', 'role')
             ->withTimestamps();
     }
 
