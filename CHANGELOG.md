@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of always Rome time: with `APP_TIMEZONE=UTC` they now arrive one or two hours later in Italy, unless the
   time is changed from the Settings pages.
 
+### Fixed
+
+- The windows to add a new item in Italian are now titled "Crea …" instead of "Salva …" (e.g. "Crea Poster").
+
 ## [1.0.0-alpha11] - 2026-11-20
 
 ### Added
