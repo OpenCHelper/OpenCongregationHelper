@@ -50,6 +50,7 @@ The tabs show the requests **To order or retrieve**, the ones **Ordered** and wa
 - The **Requests** button of a publisher in the [regular publications](periodicals), or of a publication in the
   **Publication list**, opens the history of that publisher or publication. The page of a user has a
   **Publication requests** tab too, like their assignments.
+- When a user is deleted, their requests stay in the history, shown as **Deleted publisher**.
 
 The renewed requests are made every day by the scheduler of the application (see the [setup guide](../setup)), on
 the 1st of the month of each period: a day missed is caught up the next one.

@@ -51,6 +51,7 @@ prendere.
 - Il pulsante **Richieste** di un proclamatore nelle [pubblicazioni periodiche](periodicals), o di una pubblicazione
   nell'**Elenco pubblicazioni**, apre lo storico di quel proclamatore o di quella pubblicazione. Anche la pagina di un
   utente ha la scheda **Richieste pubblicazioni**, come per le sue assegnazioni.
+- Quando un utente viene eliminato, le sue richieste restano nello storico, indicate come **Proclamatore eliminato**.
 
 Le richieste rinnovate vengono fatte ogni giorno dallo scheduler dell'applicazione (vedi la
 [guida all'installazione](../setup)), il 1° del mese di ogni periodo: un giorno saltato viene recuperato il successivo.
