@@ -61,7 +61,7 @@ dalle pagine [Impostazioni](administration/settings), senza modificare `.env`.
 |-----------|-------------|
 | `APP_URL` | Indirizzo pubblico dell'applicazione. Usato nelle email e nei link delle assegnazioni condivise. |
 | `APP_LOCALE` | Lingua predefinita (`en`, `it` o `es`). Ogni utente può poi scegliere la propria lingua. |
-| `APP_TIMEZONE` | Fuso orario usato per mostrare le date, e in cui si contano il giorno e l'ora dei promemoria settimanali (vedi le pagine [Impostazioni](administration/settings)). |
+| `APP_TIMEZONE` | Fuso orario usato per mostrare le date, e in cui si contano il giorno e l'ora dei promemoria settimanali (vedi le pagine [Impostazioni](administration/settings)) e l'ora del rinnovo giornaliero delle pubblicazioni (alle 9:00). |
 | `DB_PREFIX` / `DB_ENGINE` | Prefisso delle tabelle e motore di archiviazione, facoltativi, utili sui database condivisi: `db:wipe` e `migrate:fresh` eliminano allora solo le tabelle con questo prefisso. |
 | `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Nome (nome e cognome separati da uno spazio), email e password dell'utente **root**, creato la prima volta che il database viene popolato. |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Come vengono inviate le email. `failover` prova prima la funzione nativa `mail()` di PHP e in caso di errore scrive l'email nel log. |

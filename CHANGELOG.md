@@ -10,16 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Settings pages**: super administrators can change the default map centre and the personal data on shared pages
-  from **Administration → Settings**, without editing `.env`, which now only holds their defaults.
-- Logo and default primary colour of the application, from the Settings pages.
-- Address of the Kingdom Hall, on the General settings page.
+  from **Administration → Settings**, without editing `.env`, which now only holds their defaults
+  ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- Logo and default primary colour of the application, from the Settings pages
+  ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- Address of the Kingdom Hall, on the General settings page
+  ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - Days after which assignments are out for too long and the day and time of the weekly reminders, from the Settings
-  pages.
-- Days before their end from which campaigns are expiring and almost expired, from the Settings pages.
+  pages ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- Days before their end from which campaigns are expiring and almost expired, from the Settings pages
+  ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - Showing the personal data on shared pages is a clear choice between hiding them (recommended) and showing them,
-  which must be confirmed after reading what it means.
-- Months and number of assignments that set the assignment frequency on the dashboard map, from the Settings pages.
-- The installed app takes the primary colour chosen on the Settings pages.
+  which must be confirmed after reading what it means
+  ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- Months and number of assignments that set the assignment frequency on the dashboard map, from the Settings pages
+  ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- The installed app takes the primary colour chosen on the Settings pages
+  ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 
 ### Changed
 
@@ -29,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The weekly reminders for the territories out for too long follow the timezone of the application (`APP_TIMEZONE`)
   instead of always Rome time: with `APP_TIMEZONE=UTC` they now arrive one or two hours later in Italy, unless the
   time is changed from the Settings pages. The publications received regularly are requested again at 9:00 in that
-  timezone too.
+  timezone too ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 
 ### Fixed
 
@@ -38,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - The shared pages ask search engines not to index them (`X-Robots-Tag` header and `robots` meta tag), so that they
-  don't show up in search results even when their links are posted somewhere public.
+  don't show up in search results even when their links are posted somewhere public
+  ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 
 ## [1.0.0-alpha11] - 2026-11-20
 
