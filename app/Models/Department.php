@@ -79,7 +79,7 @@ class Department extends Model
     {
         return $this->belongsToMany(User::class)
             ->using(DepartmentMember::class)
-            ->withPivot('role')
+            ->withPivot('id', 'role')
             ->withTimestamps();
     }
 

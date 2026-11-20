@@ -9,6 +9,7 @@ use App\Filament\Resources\Departments\RelationManagers\MembersRelationManager;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Department;
+use App\Models\DepartmentMember;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
@@ -17,6 +18,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -284,4 +286,39 @@ test('the roles offer only the permissions on the departments that the policy ca
         ->firstWhere('resourceFqcn', DepartmentResource::class)['permissions'];
 
     expect(array_column($permissions, 'key'))->toBe(['ViewAny:Department', 'View:Department', 'Update:Department']);
+});
+
+test('the overseers list only the departments they oversee, the administrators all of them', function () {
+    $overseer = User::factory()->create();
+    $department = joinDepartment($overseer, DepartmentKey::Territories, DepartmentRole::Overseer);
+
+    $this->actingAs($overseer);
+
+    Livewire::test(ListDepartments::class)
+        ->assertCanSeeTableRecords([$department]);
+
+    $this->actingAs($this->admin);
+
+    Livewire::test(ListDepartments::class)
+        ->assertCanSeeTableRecords(Department::query()->get());
+});
+
+test('adding, changing and removing the members of a department is logged', function () {
+    $this->actingAs($this->admin);
+
+    $department = Department::for(DepartmentKey::Territories);
+    $member = User::factory()->create();
+
+    Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class])
+        ->callAction(TestAction::make('attach')->table(), ['recordId' => [$member->id], 'role' => DepartmentRole::Assistant->value])
+        ->callAction(TestAction::make('edit')->table($member), ['role' => DepartmentRole::Overseer->value])
+        ->callAction(TestAction::make('detach')->table($member));
+
+    $activities = Activity::query()->where('subject_type', (new DepartmentMember)->getMorphClass())->oldest('id')->get();
+
+    expect($activities->pluck('event')->all())->toBe(['created', 'updated', 'deleted'])
+        ->and($activities->pluck('causer_id')->unique()->all())->toBe([$this->admin->id])
+        ->and($activities[0]->properties['attributes'])->toMatchArray(['department_id' => $department->id, 'user_id' => $member->id, 'role' => 'assistant'])
+        ->and($activities[1]->properties['attributes'])->toBe(['role' => 'overseer'])
+        ->and($activities[2]->properties['old'])->toMatchArray(['user_id' => $member->id, 'role' => 'overseer']);
 });
