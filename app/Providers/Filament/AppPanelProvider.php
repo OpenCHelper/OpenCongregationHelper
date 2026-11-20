@@ -94,6 +94,7 @@ class AppPanelProvider extends PanelProvider
             ->brandLogo(fn (): ?string => filled($logo = GeneralSettings::value('logo')) ? Storage::disk('public')->url($logo) : null)
             ->brandLogoHeight('2rem')
             ->themeSwitcher(false)
+            ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
             ->databaseNotifications()
             ->globalSearch(position: GlobalSearchPosition::Topbar)

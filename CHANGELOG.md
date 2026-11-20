@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **UX improvements** for smaller and scaled screens: the sidebar can be collapsed to icons only on desktop too,
+  from the arrow next to the app name; shorter descriptions on the departments and publications lists, and shorter
+  help texts under the "Offered" switch of publications and the role of department members.
 - The weekly reminders for the territories out for too long follow the timezone of the application (`APP_TIMEZONE`)
   instead of always Rome time: with `APP_TIMEZONE=UTC` they now arrive one or two hours later in Italy, unless the
   time is changed from the Settings pages.

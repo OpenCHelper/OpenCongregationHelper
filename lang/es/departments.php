@@ -20,7 +20,7 @@ return [
     'resource' => [
         'model_label' => 'Departamento',
         'plural_model_label' => 'Departamentos',
-        'list_subheading' => 'Los miembros de un departamento pueden gestionar sus secciones, sin necesitar un rol (solo los responsables eliminan). Abre un departamento para añadir o quitar sus miembros.',
+        'list_subheading' => 'Los miembros de un departamento gestionan sus secciones.',
         'column_name' => 'Departamento',
         'column_sections' => 'Secciones',
         'column_overseers' => 'Responsables',
@@ -39,7 +39,7 @@ return [
         'column_email' => 'Correo electrónico',
         'field_users' => 'Hermanos',
         'field_role' => 'Rol en el departamento',
-        'field_role_helper' => 'Los responsables también pueden eliminar en sus secciones, y añadir y quitar sus ayudantes. Solo un administrador nombra a los responsables.',
+        'field_role_helper' => 'Los responsables también pueden eliminar en sus secciones, y añadir y quitar sus ayudantes.',
         'action_add' => 'Añadir miembros',
         'action_add_heading' => 'Añadir miembros a :department',
         'action_add_submit' => 'Añadir',

@@ -269,7 +269,7 @@ test('the department pages render', function () {
 
     $department = joinDepartment(User::factory()->create(['first_name' => 'Andrea']), DepartmentKey::PublicWitnessing, DepartmentRole::Overseer);
 
-    $this->get(DepartmentResource::getUrl())->assertOk()->assertSee(DepartmentKey::PublicWitnessing->getLabel())->assertSee('Andrea');
+    $this->get(DepartmentResource::getUrl())->assertOk()->assertSee(DepartmentKey::PublicWitnessing->getLabel())->assertSee('Andrea')->assertSee(__('departments.resource.list_subheading'));
     $this->get(DepartmentResource::getUrl('view', ['record' => $department]))->assertOk()->assertSee(PosterResource::getNavigationLabel());
 });
 
