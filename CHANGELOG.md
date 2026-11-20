@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Posters inventory** (Public Witnessing → Posters): the magnetic posters of the displays, with their copies in
   each storage place, titles in every language and import and export from a spreadsheet
   ([#POSTERS_PR](https://github.com/OpenCHelper/OpenCongregationHelper/pull/POSTERS_PR)).
+- **Publications**: the publication list, who receives publications on paper regularly and the requests of each
+  publisher, from requested to ordered and delivered, made again automatically every period
+  ([#PUBLICATIONS_PR](https://github.com/OpenCHelper/OpenCongregationHelper/pull/PUBLICATIONS_PR)).
 
 ### Fixed
 

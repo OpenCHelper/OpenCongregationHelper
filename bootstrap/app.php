@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\DetectStaleAssignments;
+use App\Jobs\RenewPublicationSubscriptions;
 use BladeUI\Icons\Console\CacheCommand;
 use BladeUI\Icons\Console\ClearCommand;
 use Illuminate\Console\Scheduling\Schedule;
@@ -57,6 +58,13 @@ return Application::configure(basePath: dirname(__DIR__))
         */
         $schedule->job(new DetectStaleAssignments)
             ->weeklyOn(Schedule::MONDAY, '09:00')
+            ->timezone('Europe/Rome')
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        // Every day (not on the 1st of the month only), so that a day missed by the scheduler is caught up
+        $schedule->job(new RenewPublicationSubscriptions)
+            ->dailyAt('09:00')
             ->timezone('Europe/Rome')
             ->withoutOverlapping()
             ->onOneServer();

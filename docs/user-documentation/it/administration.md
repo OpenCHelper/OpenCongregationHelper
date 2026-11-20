@@ -1,5 +1,5 @@
 ---
 type: group
 title: Amministrazione
-order: 5
+order: 6
 ---

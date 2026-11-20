@@ -53,7 +53,7 @@ test('the departments are listed in the order of their keys, and cannot be creat
         ->assertActionDoesNotExist('create');
 
     expect(DepartmentResource::canCreate())->toBeFalse()
-        ->and(DepartmentResource::canDelete(Department::for(DepartmentKey::Territories)))->toBeFalse();
+        ->and(DepartmentResource::canDelete(Department::for(DepartmentKey::Publications)))->toBeFalse();
 });
 
 test('the overseers of a department can fully manage its sections, and only them', function () {
@@ -68,7 +68,7 @@ test('the overseers of a department can fully manage its sections, and only them
         ->and(PosterResource::canCreate())->toBeTrue()
         ->and(PosterResource::canDelete(Poster::factory()->create()))->toBeTrue()
         // Other departments and the administration need a role, as before
-        ->and($member->can('ViewAny:TerritoryZone'))->toBeFalse()
+        ->and($member->can('ViewAny:PublicationSubscriber'))->toBeFalse()
         ->and(TerritoryResource::canViewAny())->toBeFalse()
         ->and($member->can('ViewAny:User'))->toBeFalse()
         ->and($member->can('ViewAny:Department'))->toBeFalse();
@@ -119,7 +119,7 @@ test('users without departments keep the permissions of their roles', function (
 test('administrators can add members to a department with a role', function () {
     $this->actingAs($this->admin);
 
-    $department = Department::for(DepartmentKey::PublicWitnessing);
+    $department = Department::for(DepartmentKey::Publications);
     [$overseer, $assistant] = User::factory()->count(2)->create();
 
     Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class])
@@ -130,7 +130,7 @@ test('administrators can add members to a department with a role', function () {
         ->assertCanSeeTableRecords([$overseer, $assistant], inOrder: true);
 
     expect($department->overseers()->pluck('users.id')->all())->toBe([$overseer->id])
-        ->and($assistant->fresh()->isMemberOf(DepartmentKey::PublicWitnessing))->toBeTrue()
+        ->and($assistant->fresh()->isMemberOf(DepartmentKey::Publications))->toBeTrue()
         ->and($assistant->fresh()->isMemberOf(DepartmentKey::Territories))->toBeFalse();
 });
 
@@ -138,7 +138,7 @@ test('administrators can change the role of a member and remove them', function 
     $this->actingAs($this->admin);
 
     $member = User::factory()->create();
-    $department = joinDepartment($member, DepartmentKey::Territories);
+    $department = joinDepartment($member, DepartmentKey::Publications);
 
     Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class])
         ->callAction(TestAction::make('edit')->table($member), ['role' => DepartmentRole::Overseer->value])
@@ -155,7 +155,7 @@ test('administrators can change the role of a member and remove them', function 
 test('the overseers manage the members of their own department only', function () {
     $overseer = User::factory()->create();
     $department = joinDepartment($overseer, DepartmentKey::PublicWitnessing, DepartmentRole::Overseer);
-    $other = Department::for(DepartmentKey::Territories);
+    $other = Department::for(DepartmentKey::Publications);
 
     $this->actingAs($overseer);
 
@@ -179,11 +179,11 @@ test('the overseers manage the members of their own department only', function (
 
 test('the overseers add and manage assistants, but only the administrators appoint, change or remove overseers', function () {
     $overseer = User::factory()->create();
-    $department = joinDepartment($overseer, DepartmentKey::Territories, DepartmentRole::Overseer);
+    $department = joinDepartment($overseer, DepartmentKey::Publications, DepartmentRole::Overseer);
     $otherOverseer = User::factory()->create();
-    joinDepartment($otherOverseer, DepartmentKey::Territories, DepartmentRole::Overseer);
+    joinDepartment($otherOverseer, DepartmentKey::Publications, DepartmentRole::Overseer);
     $assistant = User::factory()->create();
-    joinDepartment($assistant, DepartmentKey::Territories);
+    joinDepartment($assistant, DepartmentKey::Publications);
     [$newOverseer, $newAssistant] = User::factory()->count(2)->create();
 
     $this->actingAs($overseer);
@@ -204,9 +204,9 @@ test('the overseers add and manage assistants, but only the administrators appoi
     $component()->selectTableRecords([$otherOverseer, $assistant])->callAction(TestAction::make('detach')->table()->bulk());
 
     expect($department->overseers()->pluck('users.id')->sort()->values()->all())->toBe([$overseer->id, $otherOverseer->id])
-        ->and($newOverseer->fresh()->isMemberOf(DepartmentKey::Territories))->toBeFalse()
-        ->and($newAssistant->fresh()->isMemberOf(DepartmentKey::Territories))->toBeTrue()
-        ->and($assistant->fresh()->isMemberOf(DepartmentKey::Territories))->toBeFalse();
+        ->and($newOverseer->fresh()->isMemberOf(DepartmentKey::Publications))->toBeFalse()
+        ->and($newAssistant->fresh()->isMemberOf(DepartmentKey::Publications))->toBeTrue()
+        ->and($assistant->fresh()->isMemberOf(DepartmentKey::Publications))->toBeFalse();
 
     // An administrator can
     $this->actingAs($this->admin);
@@ -220,7 +220,7 @@ test('the overseers add and manage assistants, but only the administrators appoi
 
 test('the users to add are searched by name, not by email', function () {
     $overseer = User::factory()->create();
-    $department = joinDepartment($overseer, DepartmentKey::Territories, DepartmentRole::Overseer);
+    $department = joinDepartment($overseer, DepartmentKey::Publications, DepartmentRole::Overseer);
     User::factory()->create(['first_name' => 'Mario', 'last_name' => 'Rossi', 'email' => 'secret@example.com']);
 
     $this->actingAs($overseer);
@@ -251,12 +251,12 @@ test('the users list shows and filters the departments', function () {
     $this->actingAs($this->admin);
 
     $member = User::factory()->create();
-    joinDepartment($member, DepartmentKey::Territories);
+    joinDepartment($member, DepartmentKey::Publications);
     $other = User::factory()->create();
 
     Livewire::test(ListUsers::class)
-        ->assertTableColumnStateSet('departments', [DepartmentKey::Territories], $member)
-        ->filterTable('departments', [Department::for(DepartmentKey::Territories)->id])
+        ->assertTableColumnStateSet('departments', [DepartmentKey::Publications], $member)
+        ->filterTable('departments', [Department::for(DepartmentKey::Publications)->id])
         ->assertCanSeeTableRecords([$member])
         ->assertCanNotSeeTableRecords([$other]);
 });

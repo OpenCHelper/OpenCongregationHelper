@@ -9,6 +9,10 @@ return [
         'label' => 'Public Witnessing',
         'description' => 'Carts and displays: the inventory of their magnetic posters.',
     ],
+    'publications' => [
+        'label' => 'Publications',
+        'description' => 'The publications, and who receives them on paper.',
+    ],
     'roles' => [
         'overseer' => 'Overseer',
         'assistant' => 'Assistant',

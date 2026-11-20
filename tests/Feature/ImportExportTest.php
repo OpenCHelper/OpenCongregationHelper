@@ -1,17 +1,21 @@
 <?php
 
 use App\Enums\DepartmentKey;
+use App\Enums\PublicationCategory;
 use App\Filament\Exports\Concerns\ExportsInTheUserLocale;
 use App\Filament\Exports\PosterExporter;
 use App\Filament\Exports\StorageLocationExporter;
 use App\Filament\Imports\PosterImporter;
+use App\Filament\Imports\PublicationImporter;
 use App\Filament\Imports\StorageLocationImporter;
 use App\Filament\Imports\TerritoryImporter;
 use App\Filament\Resources\Posters\Pages\ManagePosters;
+use App\Filament\Resources\Publications\Pages\ManagePublications;
 use App\Filament\Resources\StorageLocations\Pages\ManageStorageLocations;
 use App\Models\Department;
 use App\Models\Poster;
 use App\Models\PosterStock;
+use App\Models\Publication;
 use App\Models\StorageLocation;
 use App\Models\User;
 use App\Support\SpreadsheetFormula;
@@ -36,9 +40,10 @@ beforeEach(function () {
 
     User::factory()->create(['id' => 1]);
 
-    // A member of the department, who can manage posters and storage places without a role
+    // A member of both departments, who can manage posters, storage places and publications without a role
     $this->member = User::factory()->create(['locale' => 'it']);
     Department::for(DepartmentKey::PublicWitnessing)->members()->attach($this->member);
+    Department::for(DepartmentKey::Publications)->members()->attach($this->member);
     $this->actingAs($this->member);
     App::setLocale('it');
 });
@@ -103,6 +108,47 @@ test('the posters are exported with a row for each storage place, like the impor
         ]);
 });
 
+test('the publication list is exported with the name in the language of the user first and in the others last', function () {
+    Publication::query()->delete();
+    Publication::factory()->create([
+        'name' => ['it' => 'Vivi felice per sempre!', 'en' => 'Enjoy Life Forever!'],
+        'code' => 'abc',
+        'category' => PublicationCategory::Books,
+        'renewal_months' => null,
+        'is_active' => false,
+    ]);
+
+    $rows = exportRows(ManagePublications::class);
+
+    expect($rows)->toBe([
+        ['Nome (Italiano)', 'Sigla', 'Categoria', 'Si rinnova ogni (mesi)', 'Disponibile', 'Nome (English)', 'Nome (Español)'],
+        ['Vivi felice per sempre!', 'abc', 'Libri', '', 'no', 'Enjoy Life Forever!', ''],
+    ]);
+});
+
+test('an exported publication list can be imported again, updating the publications by their code', function () {
+    $watchtower = Publication::query()->where('code', 'w')->sole();
+
+    $import = importRows(PublicationImporter::class, [
+        // An existing publication: the empty names keep their translation
+        ['name_it' => 'La Torre di Guardia (studio)', 'code' => 'w', 'category' => '', 'renewal_months' => '1', 'is_active' => 'no', 'name_en' => '', 'name_es' => ''],
+        // A new one, with the category in another language
+        ['name_it' => 'Vivi felice per sempre!', 'code' => 'abc', 'category' => 'Books', 'renewal_months' => '', 'is_active' => '', 'name_en' => 'Enjoy Life Forever!', 'name_es' => ''],
+        // Rows that cannot be imported
+        ['name_it' => '', 'code' => 'nameless', 'category' => '', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
+        ['name_it' => 'Sconosciuta', 'code' => 'unknown', 'category' => 'Fumetti', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
+    ], $this->member);
+
+    $abc = Publication::query()->where('code', 'abc')->sole();
+
+    expect($import->successful_rows)->toBe(2)
+        ->and($watchtower->fresh()->getTranslations('name'))->toEqual(['en' => 'The Watchtower', 'it' => 'La Torre di Guardia (studio)', 'es' => 'La Atalaya'])
+        ->and($watchtower->fresh())->category->toBe(PublicationCategory::Watchtower)->is_active->toBeFalse()->renewal_months->toBe(1)
+        ->and($abc)->category->toBe(PublicationCategory::Books)->is_active->toBeTrue()->renewal_months->toBeNull()
+        ->and($abc->getTranslations('name'))->toEqual(['it' => 'Vivi felice per sempre!', 'en' => 'Enjoy Life Forever!'])
+        ->and(Publication::query()->whereIn('code', ['nameless', 'unknown'])->exists())->toBeFalse();
+});
+
 test('the storage places are exported and imported again by their name', function () {
     StorageLocation::factory()->create(['name' => 'Sala del Regno', 'notes' => 'Armadio in fondo']);
 
@@ -135,6 +181,7 @@ test('importing needs to be allowed to create the records, exporting to see them
         ->assertActionVisible(TestAction::make('export'));
 })->with([
     'posters' => [ManagePosters::class, Poster::class],
+    'publications' => [ManagePublications::class, Publication::class],
     'storage places' => [ManageStorageLocations::class, StorageLocation::class],
 ]);
 
@@ -197,6 +244,40 @@ test('a cell exported as text, to keep a spreadsheet from running it, is importe
 });
 
 /**
+ * A publication import whose publication is created by another queue worker right after it was looked for.
+ */
+class ConcurrentPublicationImporter extends PublicationImporter
+{
+    public function resolveRecord(): Publication
+    {
+        $record = parent::resolveRecord();
+
+        Publication::query()->create(['name' => ['it' => 'Altro'], 'code' => $record->code, 'category' => PublicationCategory::Other]);
+
+        return $record;
+    }
+}
+
+test('a row whose record was created meanwhile by another chunk fails with a clear reason, keeping the others', function () {
+    $import = importRows(ConcurrentPublicationImporter::class, [
+        ['name_it' => 'Vivi felice per sempre!', 'code' => 'abc', 'category' => 'Libri', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
+    ], $this->member);
+
+    expect($import->successful_rows)->toBe(0)
+        ->and($import->failedRows()->sole()->validation_error)->toBe(__('import.errors.duplicate'))
+        // The one created by the other chunk is left as it is
+        ->and(Publication::query()->where('code', 'abc')->sole()->getTranslation('name', 'it'))->toBe('Altro');
+
+    // Imported again, the row updates it
+    $import = importRows(PublicationImporter::class, [
+        ['name_it' => 'Vivi felice per sempre!', 'code' => 'abc', 'category' => 'Libri', 'renewal_months' => '', 'is_active' => '', 'name_en' => '', 'name_es' => ''],
+    ], $this->member);
+
+    expect($import->successful_rows)->toBe(1)
+        ->and(Publication::query()->where('code', 'abc')->sole()->getTranslation('name', 'it'))->toBe('Vivi felice per sempre!');
+});
+
+/**
  * A storage place import whose storage place is created by another queue worker right after it was looked for.
  */
 class ConcurrentStorageLocationImporter extends StorageLocationImporter
@@ -211,7 +292,7 @@ class ConcurrentStorageLocationImporter extends StorageLocationImporter
     }
 }
 
-test('a row whose record was created meanwhile by another chunk fails with a clear reason, keeping the others', function () {
+test('a storage place created meanwhile by another chunk fails the row with a clear reason', function () {
     $import = importRows(ConcurrentStorageLocationImporter::class, [
         ['name' => 'Sala del Regno', 'notes' => 'Armadio a destra'],
     ], $this->member);
@@ -246,7 +327,7 @@ test('the imports of the same kind wait for each other, among all the users', fu
         ->all();
 
     expect($keys)->toContain('imports:'.$importer, "filament:imports:{$import->getKey()}");
-})->with([PosterImporter::class, StorageLocationImporter::class, TerritoryImporter::class]);
+})->with([PosterImporter::class, PublicationImporter::class, StorageLocationImporter::class, TerritoryImporter::class]);
 
 test('a poster is not saved when its copies fail to be saved', function () {
     $hall = StorageLocation::factory()->create(['name' => 'Sala del Regno']);
