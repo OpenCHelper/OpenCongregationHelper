@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Policies;
+namespace App\Policies\Custom;
 
 use App\Models\Department;
 use App\Models\User;
@@ -12,6 +12,9 @@ use Illuminate\Foundation\Auth\User as AuthUser;
 /**
  * The departments are defined by the application: they can't be created or deleted, only their members can be
  * changed (`update`), by the administrators and by the overseers of each department.
+ *
+ * Written by hand, so it lives outside `App\Policies` (registered in `AppServiceProvider`): `shield:generate` skips the
+ * models whose policy is registered from elsewhere, instead of replacing it with one checking the permissions only.
  */
 class DepartmentPolicy
 {

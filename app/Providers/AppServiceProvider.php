@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Console\Commands\PrefixAwareWipeCommand;
+use App\Models\Department;
 use App\Models\Tag;
 use App\Models\User;
 use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
+use App\Policies\Custom\DepartmentPolicy;
 use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
@@ -85,6 +87,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Activity::class, ActivityPolicy::class);
         Gate::policy(MailLog::class, MailLogPolicy::class);
         Gate::policy(Tag::class, TagPolicy::class);
+
+        // Written by hand (see the policy): kept out of `App\Policies`, so that `shield:generate` doesn't replace it
+        Gate::policy(Department::class, DepartmentPolicy::class);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $flags = collect(config('app.available_locales'))->mapWithKeys(function ($longName, $shortName) {
