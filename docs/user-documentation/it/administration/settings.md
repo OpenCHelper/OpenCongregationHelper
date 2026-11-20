@@ -2,7 +2,7 @@
 type: documentation
 icon: heroicon-o-adjustments-horizontal
 title: Impostazioni
-order: 4
+order: 5
 ---
 
 Le pagine **Impostazioni** permettono ai super amministratori di cambiare le opzioni dell'applicazione senza modificare

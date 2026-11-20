@@ -2,7 +2,7 @@
 type: documentation
 icon: heroicon-o-tag
 title: Tag
-order: 3
+order: 4
 ---
 
 I tag sono brevi etichette che aiutano a descrivere e trovare territori e zone, ad esempio *Condomini*, *Solo citofono*

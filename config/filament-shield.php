@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use App\Filament\Resources\Departments\DepartmentResource;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -140,7 +141,8 @@ return [
 
     'policies' => [
         'path' => app_path('Policies'),
-        'merge' => true,
+        // Off, so that the methods of a resource in `resources.manage` replace the ones below instead of adding to them
+        'merge' => false,
         'generate' => true,
         'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny', 'restore',
@@ -186,6 +188,12 @@ return [
     'resources' => [
         'subject' => 'model',
         'manage' => [
+            // The departments are defined by the application: only their members can be changed
+            DepartmentResource::class => [
+                'viewAny',
+                'view',
+                'update',
+            ],
             RoleResource::class => [
                 'viewAny',
                 'view',

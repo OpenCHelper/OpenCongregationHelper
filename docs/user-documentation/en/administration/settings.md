@@ -2,7 +2,7 @@
 type: documentation
 icon: heroicon-o-adjustments-horizontal
 title: Settings
-order: 4
+order: 5
 ---
 
 The **Settings** pages let the super administrators change the options of the application without editing the `.env`

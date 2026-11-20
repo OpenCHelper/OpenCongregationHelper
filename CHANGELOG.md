@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Departments** (Administration → Departments): overseers and assistants who manage the sections of their
+  department without needing a role, starting with the Territory Department; departments column and filter in the
+  users list ([#45](https://github.com/OpenCHelper/OpenCongregationHelper/pull/45)).
 - **Settings pages**: super administrators can change the default map centre and the personal data on shared pages
   from **Administration → Settings**, without editing `.env`, which now only holds their defaults.
 - Logo and default primary colour of the application, from the Settings pages.

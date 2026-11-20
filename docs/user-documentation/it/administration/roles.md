@@ -2,7 +2,7 @@
 type: documentation
 icon: heroicon-o-shield-check
 title: Ruoli e permessi
-order: 2
+order: 3
 ---
 
 Ciò che ogni utente può vedere e fare dipende dai suoi **ruoli**. Un ruolo è un insieme di **permessi** con un nome.
