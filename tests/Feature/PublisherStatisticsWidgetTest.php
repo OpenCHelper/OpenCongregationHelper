@@ -176,3 +176,15 @@ test('the percentages follow the locale of the user', function () {
         ->assertSee('(33,3%)')
         ->assertDontSee('(33.3%)');
 });
+
+test('every row has a dot, even when its zone has no colour', function () {
+    $colourlessZone = TerritoryZone::factory()->create(['name' => 'Colourless zone', 'color' => null]);
+    $colouredZone = TerritoryZone::factory()->create(['name' => 'Coloured zone']);
+    assignTerritoryTimes(Territory::factory()->for($colourlessZone, 'territoryZone')->create(), $this->publisher, 1);
+    assignTerritoryTimes(Territory::factory()->for($colouredZone, 'territoryZone')->create(), $this->publisher, 1);
+
+    $html = Livewire::test(PublisherStatistics::class, ['record' => $this->publisher])->html();
+
+    // 2 zones and 2 territories
+    expect(substr_count($html, 'fi-wi-publisher-statistics-dot'))->toBe(4);
+});

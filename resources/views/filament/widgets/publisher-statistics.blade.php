@@ -26,9 +26,9 @@
                 {{ __('filament-widgets.publisher_statistics.no_assignments') }}
             </p>
         @else
-            <div class="grid gap-6 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 @foreach ($sections as $section)
-                    <div>
+                    <div class="min-w-0">
                         <h3 class="text-sm font-semibold text-gray-950 dark:text-white">
                             {{ $section['heading'] }}
                         </h3>
@@ -43,9 +43,11 @@
                                         <span class="flex min-w-0 grow items-center gap-2">
                                             @if (filled($item['color'] ?? null))
                                                 <span
-                                                    class="inline-block size-3 shrink-0 rounded-full"
+                                                    class="fi-wi-publisher-statistics-dot inline-block size-3 shrink-0 rounded-full"
                                                     style="background-color: {{ $item['color'] }}"
                                                 ></span>
+                                            @else
+                                                <span class="fi-wi-publisher-statistics-dot inline-block size-3 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                                             @endif
 
                                             <span class="flex min-w-0 flex-col">
