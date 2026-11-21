@@ -18,6 +18,9 @@ proclamatore che non ha un account. Chi ha il link può vedere il territorio sen
 
 Il link resta lo stesso ogni volta che apri **Condividi** per quell'assegnazione.
 
+Anche i proclamatori possono condividere le assegnazioni affidate a loro (e smettere di condividerle), dal link nella
+notifica dell'assegnazione, anche se non possono vedere le altre assegnazioni.
+
 ## Cosa vede il destinatario
 
 La pagina pubblica mostra il nome del territorio, la zona, la mappa, l'immagine e la descrizione, la campagna e la data

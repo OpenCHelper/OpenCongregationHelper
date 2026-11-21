@@ -752,8 +752,9 @@ test('the router refuses invalid settings', function (array $options) {
  * Install the router of a space with the client of the `ftp-archive-deploy` action, on a fake FTP server serving the
  * given folder, returning the FTP commands it received.
  *
- * The fake `lftp` runs the `get` and `mirror` commands of the client on the folder: the router is uploaded with
- * `mirror` and its installed files are read with `get`.
+ * The fake `lftp` runs the commands of the client on the folder, one per line or separated by `;`, and exits with the
+ * status of the last one, like `lftp`: the router is uploaded with `put` under a temporary name then renamed into place
+ * with `mv` (which, like a real server, fails onto a folder), and its installed files are read with `get`.
  *
  * @return list<string>
  */
@@ -767,16 +768,27 @@ function installRouterOn(string $space, string $workDir): array
 
         file_put_contents($bin.'/lftp', <<<'BASH'
             #!/usr/bin/env bash
+            status=0
             while IFS= read -r line; do
-                [[ -z "$line" ]] && continue
-                printf '%s\n' "$line" >> "$FAKE_FTP_LOG"
-                eval "set -- $line"
-                case "$1" in
-                    get) [[ -f "${FAKE_FTP_ROOT}/$2" ]] && cp "${FAKE_FTP_ROOT}/$2" "$4" ;;
-                    mirror) cp -r "${@: -2:1}/." "${FAKE_FTP_ROOT}/" ;;
-                esac
+                IFS=';' read -ra commands <<< "$line"
+                for command in "${commands[@]}"; do
+                    eval "set -- $command"
+                    (( $# == 0 )) && continue
+                    command="${command#"${command%%[![:space:]]*}"}"
+                    printf '%s\n' "$command" >> "$FAKE_FTP_LOG"
+                    status=0
+                    case "$1" in
+                        get) cp "${FAKE_FTP_ROOT}/$2" "$4" 2> /dev/null || status=1 ;;
+                        put) cp "$2" "${FAKE_FTP_ROOT}/$4" || status=1 ;;
+                        mirror) mkdir -p "${FAKE_FTP_ROOT}/${@: -1}" && cp -r "${@: -2:1}/." "${FAKE_FTP_ROOT}/${@: -1}/" || status=1 ;;
+                        mkdir) mkdir -p "${FAKE_FTP_ROOT}/${@: -1}" ;;
+                        mv) [[ ! -d "${FAKE_FTP_ROOT}/$3" ]] && mv -T "${FAKE_FTP_ROOT}/$2" "${FAKE_FTP_ROOT}/$3" || status=1 ;;
+                        rm) rm -rf "${FAKE_FTP_ROOT:?}/${@: -1}" ;;
+                        cls) [[ -e "${FAKE_FTP_ROOT}/$2" ]] || status=1 ;;
+                    esac
+                done
             done
-            exit 0
+            exit "$status"
             BASH);
 
         // Required by the client, but not used to install the router
@@ -810,7 +822,17 @@ function installRouterOn(string $space, string $workDir): array
  */
 function uploadsRouter(array $commands): bool
 {
-    return collect($commands)->contains(fn (string $command): bool => str_starts_with($command, 'mirror --reverse'));
+    return collect($commands)->contains(fn (string $command): bool => str_starts_with($command, 'put '));
+}
+
+/**
+ * Files left on the space under a temporary name by the uploads of the router.
+ *
+ * @return list<string>
+ */
+function routerLeftovers(string $space): array
+{
+    return [...glob($space.'/.ftp-archive-deploy-*'), ...glob($space.'/previews/.ftp-archive-deploy-*')];
 }
 
 test('the router is uploaded when the space has none or an outdated one', function () {
@@ -820,12 +842,28 @@ test('the router is uploaded when the space has none or an outdated one', functi
         ->and(file_get_contents($this->root.'/space/.htaccess'))->toContain('RewriteRule ^(.*)$ test/public/$1 [L]')
         ->and(file_exists($this->root.'/space/previews/.htaccess'))->toBeTrue()
         ->and(file_exists($this->root.'/space/previews/404.php'))->toBeTrue()
-        ->and(file_exists($this->root.'/space/previews/robots.txt'))->toBeTrue();
+        ->and(file_exists($this->root.'/space/previews/robots.txt'))->toBeTrue()
+        ->and(routerLeftovers($this->root.'/space'))->toBe([]);
 
     file_put_contents($this->root.'/space/previews/.htaccess', "# outdated\n");
 
     expect(uploadsRouter(installRouterOn($this->root.'/space', $this->root)))->toBeTrue()
-        ->and(file_get_contents($this->root.'/space/previews/.htaccess'))->not->toContain('# outdated');
+        ->and(file_get_contents($this->root.'/space/previews/.htaccess'))->not->toContain('# outdated')
+        ->and(routerLeftovers($this->root.'/space'))->toBe([]);
+});
+
+test('each file of the router is uploaded under a temporary name, then renamed into place, the root one last', function () {
+    mkdir($this->root.'/space');
+
+    $commands = installRouterOn($this->root.'/space', $this->root);
+    $renames = collect($commands)->filter(fn (string $command): bool => str_starts_with($command, 'mv '))->values();
+
+    // A file being uploaded is truncated on the server for a moment: a `.htaccess` would then answer with a 404 to the
+    // deployments running at the same time (e.g. the previews of other PRs), whose uploads would also mix up
+    expect(collect($commands)->filter(fn (string $command): bool => str_starts_with($command, 'put '))->all())
+        ->each->toMatch("/ -o '(previews\\/)?\\.ftp-archive-deploy-[A-Za-z0-9]{16}\\.tmp'$/")
+        ->and($renames->all())->toHaveCount(4)
+        ->and($renames->last())->toEndWith(" '.htaccess'");
 });
 
 test('the router is not uploaded again when the installed one is up to date', function () {

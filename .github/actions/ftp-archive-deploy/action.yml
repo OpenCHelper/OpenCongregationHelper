@@ -13,6 +13,9 @@ description: >-
   with `router-previews`.
   Every deployment to the same space must then use the same router inputs (e.g. from repository variables).
 
+  Deployments to different targets of the same space can run at the same time: the files they share (the deployer and
+  the router) are uploaded under a temporary name, then renamed into place.
+
 inputs:
   ftp-server:
     description: "Hostname of the FTP server"

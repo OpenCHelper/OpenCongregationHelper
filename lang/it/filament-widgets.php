@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'publisher_statistics' => [
+        'heading' => 'Statistiche',
+        'assignments_count' => '{0} Nessuna assegnazione|{1} :count assegnazione|[2,*] :count assegnazioni',
+        'no_assignments' => 'Nessun territorio è stato ancora assegnato a questo proclamatore.',
+        'preferred_zones' => 'Zone preferite',
+        'preferred_zones_description' => 'Le zone di cui il proclamatore prende più spesso i territori.',
+        'preferred_territories' => 'Territori preferiti',
+        'preferred_territories_description' => '{1} Il territorio che il proclamatore prende più spesso.|[2,*] I :count territori che il proclamatore prende più spesso.',
+    ],
     'territory_global_map' => [
         'heading' => 'Mappa dei territori',
         'map_mode' => 'Colora i territori per',
@@ -28,5 +37,18 @@ return [
         'map_settings' => 'Impostazioni mappa',
         'map_style' => 'Stile mappa',
         'go_to_territory' => 'Vai al territorio',
+    ],
+    'territory_coverage' => [
+        'heading' => 'Copertura del territorio',
+        'period_label' => 'Periodo',
+        'period' => '{1} Ultimo mese|[2,*] Ultimi :count mesi',
+        'worked' => 'Territori lavorati almeno una volta',
+        'worked_excluding_campaigns' => 'Escluse le campagne',
+        'value' => ':percentage (:worked su :total)',
+        'least_recently_worked' => 'Mai lavorati o non lavorati da più tempo',
+        'never_worked' => 'Mai lavorato',
+        'in_progress' => 'In corso',
+        'last_worked' => ':date (:ago)',
+        'no_territories' => 'Non ci sono territori.',
     ],
 ];

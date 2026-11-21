@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\CampaignStatus;
+use App\Enums\DepartmentKey;
+use App\Notifications\TerritoryReturnRequestedNotification;
 use App\Observers\TerritoryAssignmentObserver;
 use App\Traits\HasGuestViewPage;
 use App\Traits\HasSharedUrl;
@@ -13,7 +15,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -49,6 +53,7 @@ class TerritoryAssignment extends Model
     protected $fillable = [
         'started_at',
         'ended_at',
+        'return_requested_at',
         'notes',
         'assignee_id',
         'territory_id',
@@ -127,6 +132,67 @@ class TerritoryAssignment extends Model
     }
 
     /**
+     * Whether the return of the assignment, still in progress, has been asked to the territory department.
+     */
+    public function isReturnRequested(): bool
+    {
+        return $this->ended_at === null && $this->return_requested_at !== null;
+    }
+
+    /**
+     * Whether the return of the assignment can be asked: it is still in progress and it was not asked already.
+     */
+    public function canRequestReturn(): bool
+    {
+        return $this->ended_at === null && $this->return_requested_at === null && ! $this->trashed();
+    }
+
+    /**
+     * Ask the territory department to close the assignment, notifying its members (but the one asking, if any).
+     *
+     * The request is recorded only once: asking again (e.g. from two devices at once) notifies nobody.
+     *
+     * @return bool Whether the return has been requested now.
+     */
+    public function requestReturn(?User $requester = null): bool
+    {
+        // Locked, so that only one of the requests made at the same time is recorded (and notified)
+        $requested = DB::transaction(function (): bool {
+            $assignment = static::query()->whereKey($this->getKey())->lockForUpdate()->first();
+
+            if ($assignment === null || ! $assignment->canRequestReturn()) {
+                return false;
+            }
+
+            $assignment->update(['return_requested_at' => now()]);
+            $this->setRawAttributes($assignment->getAttributes(), sync: true);
+
+            return true;
+        });
+
+        if (! $requested) {
+            return false;
+        }
+
+        $recipients = static::getReturnRequestRecipients()
+            ->reject(fn (User $user): bool => $requester !== null && $user->is($requester));
+
+        Notification::send($recipients, new TerritoryReturnRequestedNotification($this));
+
+        return true;
+    }
+
+    /**
+     * The users notified when the return of an assignment is asked: the members of the territory department.
+     *
+     * @return Collection<int, User>
+     */
+    public static function getReturnRequestRecipients(): Collection
+    {
+        return Department::for(DepartmentKey::Territories)->members()->get();
+    }
+
+    /**
      * Scope a query to only include the assignments in progress whose campaign has already ended.
      */
     public function scopeOverdue(Builder $query): void
@@ -177,6 +243,7 @@ class TerritoryAssignment extends Model
         return [
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
+            'return_requested_at' => 'datetime',
         ];
     }
 }

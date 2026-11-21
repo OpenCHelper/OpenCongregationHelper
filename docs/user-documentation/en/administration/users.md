@@ -46,6 +46,11 @@ Click a user to open their page:
   edit or delete here too. **Call** and **Open in Maps** start a phone call or open the address;
 - the **Assignments** tab lists the territories assigned to them.
 
+At the bottom of the **User** tab, **Statistics** shows the **Preferred zones** (every zone the publisher took
+territories in, with how many assignments and their share) and the **Preferred territories** (the 5 they take most
+often). In-progress and returned assignments are counted. Users who can't see all the assignments only see these
+statistics on their own page.
+
 ![User page](/docs/user-documentation/en/administration/assets/user-view.webp)
 
 ![Assignments of a user](/docs/user-documentation/en/administration/assets/user-assignments.webp)

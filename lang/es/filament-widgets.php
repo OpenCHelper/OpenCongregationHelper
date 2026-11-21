@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'publisher_statistics' => [
+        'heading' => 'Estadísticas',
+        'assignments_count' => '{0} Ninguna asignación|{1} :count asignación|[2,*] :count asignaciones',
+        'no_assignments' => 'Todavía no se ha asignado ningún territorio a este publicador.',
+        'preferred_zones' => 'Zonas preferidas',
+        'preferred_zones_description' => 'Las zonas cuyos territorios el publicador toma con más frecuencia.',
+        'preferred_territories' => 'Territorios preferidos',
+        'preferred_territories_description' => '{1} El territorio que el publicador toma con más frecuencia.|[2,*] Los :count territorios que el publicador toma con más frecuencia.',
+    ],
     'territory_global_map' => [
         'heading' => 'Mapa de territorios',
         'map_mode' => 'Colorear los territorios por',
@@ -28,5 +37,18 @@ return [
         'map_settings' => 'Configuración del Mapa',
         'map_style' => 'Estilo del Mapa',
         'go_to_territory' => 'Ir al territorio',
+    ],
+    'territory_coverage' => [
+        'heading' => 'Cobertura del territorio',
+        'period_label' => 'Periodo',
+        'period' => '{1} Último mes|[2,*] Últimos :count meses',
+        'worked' => 'Territorios trabajados al menos una vez',
+        'worked_excluding_campaigns' => 'Sin contar las campañas',
+        'value' => ':percentage (:worked de :total)',
+        'least_recently_worked' => 'Nunca trabajados o sin trabajar desde hace más tiempo',
+        'never_worked' => 'Nunca trabajado',
+        'in_progress' => 'En curso',
+        'last_worked' => ':date (:ago)',
+        'no_territories' => 'No hay territorios.',
     ],
 ];

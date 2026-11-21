@@ -19,6 +19,11 @@ class TerritorySettings extends ConfigSettings
     public ?bool $shared_pii;
 
     /**
+     * Whether whoever opens the public page of a shared assignment can ask the territory department to close it.
+     */
+    public ?bool $guest_returns;
+
+    /**
      * Days after which an assignment in progress is stale: its assignee is reminded to return it from then on.
      */
     public int $stale_after_days = 60;
@@ -27,6 +32,12 @@ class TerritorySettings extends ConfigSettings
      * Days after which an assignment in progress is considered lost.
      */
     public int $dead_after_days = 150;
+
+    /**
+     * Whether the summary of the stale assignments goes only to the overseers of the territory department, instead of
+     * all its members.
+     */
+    public bool $stale_summary_overseers_only = false;
 
     /**
      * Day of the week of the check of the stale assignments (0 = Sunday, 1 = Monday, …).
@@ -53,6 +64,18 @@ class TerritorySettings extends ConfigSettings
      */
     public int $high_frequency_min_assignments = 2;
 
+    /**
+     * Periods, in months, the territory coverage of the dashboard can be calculated on.
+     *
+     * @var list<int>
+     */
+    public array $coverage_periods_months = [6, 12, 24];
+
+    /**
+     * Period, in months, the territory coverage of the dashboard is calculated on by default (one of the periods).
+     */
+    public int $coverage_default_period_months = 12;
+
     public static function group(): string
     {
         return 'territories';
@@ -63,6 +86,7 @@ class TerritorySettings extends ConfigSettings
         return [
             'map_default_center' => 'filament-leaflet.default_map_center',
             'shared_pii' => 'app.enable_shared_pii',
+            'guest_returns' => 'app.guest_allow_returning_assignment',
         ];
     }
 }

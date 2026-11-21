@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'publisher_statistics' => [
+        'heading' => 'Statistics',
+        'assignments_count' => '{0} No assignments|{1} :count assignment|[2,*] :count assignments',
+        'no_assignments' => 'No territory has been assigned to this publisher yet.',
+        'preferred_zones' => 'Preferred zones',
+        'preferred_zones_description' => 'The zones whose territories the publisher takes most often.',
+        'preferred_territories' => 'Preferred territories',
+        'preferred_territories_description' => '{1} The territory the publisher takes most often.|[2,*] The :count territories the publisher takes most often.',
+    ],
     'territory_global_map' => [
         'heading' => 'Territory map',
         'map_mode' => 'Color the territories by',
@@ -28,5 +37,18 @@ return [
         'map_settings' => 'Map Settings',
         'map_style' => 'Map Style',
         'go_to_territory' => 'Go to territory',
+    ],
+    'territory_coverage' => [
+        'heading' => 'Territory coverage',
+        'period_label' => 'Period',
+        'period' => '{1} Last month|[2,*] Last :count months',
+        'worked' => 'Territories worked at least once',
+        'worked_excluding_campaigns' => 'Excluding campaigns',
+        'value' => ':percentage (:worked of :total)',
+        'least_recently_worked' => 'Never worked or not worked for the longest time',
+        'never_worked' => 'Never worked',
+        'in_progress' => 'In progress',
+        'last_worked' => ':date (:ago)',
+        'no_territories' => 'There are no territories.',
     ],
 ];

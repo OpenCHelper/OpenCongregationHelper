@@ -111,6 +111,20 @@ test('the territory department grants the territories, zones, assignments, campa
     expect($member->can('Update:Tag'))->toBeFalse();
 });
 
+test('the users are filtered by department and role', function () {
+    $overseer = User::factory()->create();
+    joinDepartment($overseer, DepartmentKey::Territories, DepartmentRole::Overseer);
+    $assistant = User::factory()->create();
+    joinDepartment($assistant, DepartmentKey::Territories);
+    $otherDepartment = User::factory()->create();
+    joinDepartment($otherDepartment, DepartmentKey::Publications, DepartmentRole::Overseer);
+
+    expect(User::inDepartment(DepartmentKey::Territories)->pluck('id')->all())
+        ->toEqualCanonicalizing([$overseer->id, $assistant->id])
+        ->and(User::inDepartment(DepartmentKey::Territories, DepartmentRole::Overseer)->pluck('id')->all())
+        ->toBe([$overseer->id]);
+});
+
 test('users without departments keep the permissions of their roles', function () {
     $user = User::factory()->create();
     $user->givePermissionTo(Permission::findOrCreate('ViewAny:Poster', 'web'));
