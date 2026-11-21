@@ -200,8 +200,22 @@ This site itself, along with all the PR previews, is hosted on Altervista.
 
 | Workflow | Deploys to |
 | --- | --- |
-| [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) | `https://pr-<N>.<site>`, a preview of every PR |
+| [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) | `https://pr-<N>.<site>`, a preview of each PR (see below) |
 | [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) | The [nightly demo](#demo), on every push to `main` |
+
+Which PRs get a preview is set by the `PREVIEW_MODE` repository variable, and by the labels of each PR:
+
+| `PREVIEW_MODE` | Previews |
+| --- | --- |
+| `opt-out` (default) | Every PR, unless it has the opt-out label |
+| `opt-in` | Only the PRs with the opt-in label |
+| `off` | None |
+
+The labels are `preview: on` (opt-in) and `preview: off` (opt-out), unless set otherwise by the
+`PREVIEW_OPT_IN_LABEL` and `PREVIEW_OPT_OUT_LABEL` repository variables. Adding or removing a label deploys or removes
+the preview right away; the opt-out label wins over the opt-in one. The workflow creates the labels when they are
+missing. While the last commit of a PR has `[skip ci]` in its message, GitHub ignores its label changes: run the
+workflow manually instead (`deploy` or `destroy` action, with the number of the PR).
 
 Other installations call the reusable
 [`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow from their own repository

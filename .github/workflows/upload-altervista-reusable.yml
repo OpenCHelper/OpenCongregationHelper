@@ -521,6 +521,9 @@ jobs:
         env:
           ARTISAN_LOG_FILE: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           ARTISAN_BASE_URL: ${{ steps.artisan-required-data.outputs.artisan-base-url }}
+          # Through the environment, not expanded into the script: they could contain shell code
+          LABEL: ${{ inputs.label }}
+          APP_ENVIRONMENT: ${{ steps.parse-environment.outputs.app_environment }}
         run: |
           declare -r github_sha_hash="$(git rev-parse HEAD)"
           declare -r github_sha_short="${github_sha_hash:0:7}"
@@ -532,8 +535,8 @@ jobs:
           ### Deployment details
           - **Commit**: \`${github_sha_short}\` (\`${github_sha_hash}\`)
           - **Branch**: \`${deployed_ref}\`
-          - **Target**: \`${{ inputs.label }}\`
-          - **Environment**: \`${{ steps.parse-environment.outputs.app_environment }}\`
+          - **Target**: \`${LABEL}\`
+          - **Environment**: \`${APP_ENVIRONMENT}\`
 
           ### Artisan Commands Execution
           - **Base URL**: \`${ARTISAN_BASE_URL}\`
