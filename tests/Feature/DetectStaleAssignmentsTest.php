@@ -1,14 +1,21 @@
 <?php
 
+use App\Enums\DepartmentKey;
+use App\Enums\DepartmentRole;
 use App\Events\StaleAssignmentDetected;
 use App\Jobs\DetectStaleAssignments;
+use App\Models\Department;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use App\Notifications\StaleAssignmentNotification;
+use App\Notifications\StaleAssignmentsDepartmentNotification;
+use App\Settings\TerritorySettings;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Event as ScheduledTask;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
@@ -98,4 +105,121 @@ test('the stale assignments job runs once a week when the scheduler is called as
         });
 
     expect($callsRunningTheTask)->toHaveCount(1);
+});
+
+test('the threshold of the stale assignments follows the settings', function () {
+    $settings = app(TerritorySettings::class);
+    $settings->stale_after_days = 30;
+    $settings->dead_after_days = 90;
+    $settings->save();
+
+    $assignee = User::factory()->create(['id' => 1]);
+    $zone = TerritoryZone::factory()->create();
+
+    $staleAssignment = TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for($zone, 'territoryZone')->create()->id,
+        'assignee_id' => $assignee->id,
+        'started_at' => now()->subDays(31),
+        'ended_at' => null,
+    ]);
+    TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for($zone, 'territoryZone')->create()->id,
+        'assignee_id' => $assignee->id,
+        'started_at' => now()->subDays(29),
+        'ended_at' => null,
+    ]);
+
+    Event::fake([StaleAssignmentDetected::class]);
+
+    (new DetectStaleAssignments)->handle();
+
+    Event::assertDispatchedTimes(StaleAssignmentDetected::class, 1);
+    Event::assertDispatched(StaleAssignmentDetected::class, fn (StaleAssignmentDetected $event): bool => $event->assignment->is($staleAssignment));
+});
+
+test('the territory department receives one summary of the stale assignments, besides the assignees', function () {
+    Notification::fake();
+
+    $assignee = User::factory()->create(['id' => 1]);
+    $zone = TerritoryZone::factory()->create();
+
+    $overseer = User::factory()->create();
+    $assistant = User::factory()->create();
+    $virtualMember = User::factory()->create(['can_login' => false]);
+    $otherDepartmentMember = User::factory()->create();
+
+    Department::for(DepartmentKey::Territories)->members()->attach([
+        $overseer->id => ['role' => DepartmentRole::Overseer],
+        $assistant->id => ['role' => DepartmentRole::Assistant],
+        $virtualMember->id => ['role' => DepartmentRole::Assistant],
+    ]);
+    Department::for(DepartmentKey::Publications)->members()->attach($otherDepartmentMember, ['role' => DepartmentRole::Overseer]);
+
+    $staleAssignments = collect([61, 200])->map(fn (int $days): TerritoryAssignment => TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for($zone, 'territoryZone')->create()->id,
+        'assignee_id' => $assignee->id,
+        'started_at' => now()->subDays($days),
+        'ended_at' => null,
+    ]));
+    TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for($zone, 'territoryZone')->create()->id,
+        'assignee_id' => $assignee->id,
+        'started_at' => now()->subDays(10),
+        'ended_at' => null,
+    ]);
+
+    (new DetectStaleAssignments)->handle();
+
+    Notification::assertSentToTimes($assignee, StaleAssignmentNotification::class, 2);
+
+    foreach ([$overseer, $assistant] as $member) {
+        Notification::assertSentToTimes($member, StaleAssignmentsDepartmentNotification::class, 1);
+        Notification::assertSentTo(
+            $member,
+            StaleAssignmentsDepartmentNotification::class,
+            fn (StaleAssignmentsDepartmentNotification $notification): bool => $notification->assignments->modelKeys() === $staleAssignments->pluck('id')->all()
+                && $notification->staleAfterDays === 60,
+        );
+    }
+
+    Notification::assertNotSentTo($virtualMember, StaleAssignmentsDepartmentNotification::class);
+    Notification::assertNotSentTo($otherDepartmentMember, StaleAssignmentsDepartmentNotification::class);
+    Notification::assertNotSentTo($assignee, StaleAssignmentsDepartmentNotification::class);
+});
+
+test('the territory department receives no summary without stale assignments', function () {
+    Notification::fake();
+
+    User::factory()->create(['id' => 1]);
+    $member = User::factory()->create();
+    Department::for(DepartmentKey::Territories)->members()->attach($member, ['role' => DepartmentRole::Overseer]);
+
+    (new DetectStaleAssignments)->handle();
+
+    Notification::assertNothingSentTo($member);
+});
+
+test('the summary of the territory department lists every stale assignment, the oldest first', function () {
+    $member = User::factory()->create(['id' => 1, 'first_name' => 'Department', 'last_name' => 'Member']);
+    $assignee = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
+    $zone = TerritoryZone::factory()->create();
+
+    $createAssignment = fn (string $territory, int $days): TerritoryAssignment => TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for($zone, 'territoryZone')->create(['name' => $territory])->id,
+        'assignee_id' => $assignee->id,
+        'started_at' => now()->subDays($days),
+        'ended_at' => null,
+    ]);
+
+    $assignments = new EloquentCollection([$createAssignment('Recent territory', 70), $createAssignment('Old territory', 120)]);
+
+    $mail = (new StaleAssignmentsDepartmentNotification($assignments, 60))->toMail($member);
+
+    $lines = implode("\n", $mail->introLines);
+
+    expect($mail->subject)->toBe(__('filament-resources.mailables.stale_assignments_department_subject', ['count' => 2]))
+        ->and($lines)->toContain('60')
+        ->toContain(__('filament-resources.mailables.stale_assignments_department_line', ['territory' => 'Old territory', 'assignee' => 'John Doe', 'days' => 120]))
+        ->toContain(__('filament-resources.mailables.stale_assignments_department_line', ['territory' => 'Recent territory', 'assignee' => 'John Doe', 'days' => 70]))
+        ->and(strpos($lines, 'Old territory'))->toBeLessThan(strpos($lines, 'Recent territory'));
 });

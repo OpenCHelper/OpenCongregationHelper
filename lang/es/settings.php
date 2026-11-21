@@ -37,7 +37,7 @@ return [
         'shared_pages_privacy' => 'Privacidad de las páginas compartidas',
         'shared_pages_privacy_description' => 'Lo que muestra la página pública de una asignación compartida a cualquiera que tenga su enlace.',
         'stale_assignments' => 'Asignaciones fuera desde hace demasiado tiempo',
-        'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan.',
+        'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan y el departamento de territorios recibe un resumen por correo.',
         'assignment_frequency' => 'Frecuencia de asignación',
         'assignment_frequency_description' => 'Con qué frecuencia se asigna cada territorio, como se colorea en el mapa del panel: según el número de sus asignaciones en los últimos meses.',
     ],

@@ -37,7 +37,7 @@ return [
         'shared_pages_privacy' => 'Privacy delle pagine condivise',
         'shared_pages_privacy_description' => 'Cosa mostra la pagina pubblica di un\'assegnazione condivisa a chiunque ne abbia il link.',
         'stale_assignments' => 'Assegnazioni fuori da troppo tempo',
-        'stale_assignments_description' => 'Le assegnazioni ancora in corso dopo questi giorni sono fuori da troppo tempo: una volta a settimana, ai loro assegnatari viene ricordato di restituirle.',
+        'stale_assignments_description' => 'Le assegnazioni ancora in corso dopo questi giorni sono fuori da troppo tempo: una volta a settimana, ai loro assegnatari viene ricordato di restituirle e il reparto territori ne riceve un riepilogo via email.',
         'assignment_frequency' => 'Frequenza di assegnazione',
         'assignment_frequency_description' => 'Quanto spesso viene assegnato ogni territorio, come colorato sulla mappa della dashboard: in base al numero delle sue assegnazioni negli ultimi mesi.',
     ],

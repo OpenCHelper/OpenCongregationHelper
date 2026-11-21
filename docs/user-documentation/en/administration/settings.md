@@ -39,9 +39,10 @@ them to scale while you type:
 
 - the days after which an assignment still in progress is out for too long and then lost: the latter must be more;
 - the **day** and **time** (in the timezone of the application, `APP_TIMEZONE`) of the weekly reminders sent to the
-  assignees of the assignments out for too long. They are sent only if the scheduler is running at that time, as a cron
-  job or as a long-running process (e.g. with Supervisor); on a hosting without cron, the external service must call it
-  then (see the [Setup guide](../setup)).
+  assignees of the assignments out for too long. The members of the territory department (see
+  **Departments**) receive a summary of all of them by email at the same time. They are sent only if the scheduler is
+  running at that time, as a cron job or as a long-running process (e.g. with Supervisor); on a hosting without cron,
+  the external service must call it then (see the [Setup guide](../setup)).
 
 Under **Assignment frequency** you choose how the **Assignment frequency** of the [dashboard map](../basics/dashboard)
 colours the territories:

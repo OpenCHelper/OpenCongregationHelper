@@ -37,7 +37,7 @@ return [
         'shared_pages_privacy' => 'Privacy of shared pages',
         'shared_pages_privacy_description' => 'What the public page of a shared assignment shows to anyone who has its link.',
         'stale_assignments' => 'Assignments out for too long',
-        'stale_assignments_description' => 'Assignments still in progress after these days are out for too long: once a week, their assignees are reminded to return them.',
+        'stale_assignments_description' => 'Assignments still in progress after these days are out for too long: once a week, their assignees are reminded to return them and the territory department receives a summary by email.',
         'assignment_frequency' => 'Assignment frequency',
         'assignment_frequency_description' => 'How frequently each territory is assigned, as coloured on the dashboard map: by the number of its assignments in the last months.',
     ],
