@@ -40,6 +40,8 @@ return [
         'stale_assignments_description' => 'Assignments still in progress after these days are out for too long: once a week, their assignees are reminded to return them.',
         'assignment_frequency' => 'Assignment frequency',
         'assignment_frequency_description' => 'How frequently each territory is assigned, as coloured on the dashboard map: by the number of its assignments in the last months.',
+        'territory_coverage' => 'Territory coverage',
+        'territory_coverage_description' => 'The periods the dashboard can show the share of territories worked in.',
     ],
 
     'fields' => [
@@ -98,6 +100,14 @@ return [
         ],
         'high_frequency_min_assignments' => [
             'label' => 'Frequent',
+        ],
+        'coverage_periods_months' => [
+            'label' => 'Periods',
+            'placeholder' => 'Months, e.g. 12',
+            'helper' => 'In months: press Enter after each one.',
+        ],
+        'coverage_default_period_months' => [
+            'label' => 'Period shown by default',
         ],
     ],
 ];
