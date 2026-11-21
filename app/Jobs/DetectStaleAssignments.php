@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\DepartmentKey;
+use App\Enums\DepartmentRole;
 use App\Events\StaleAssignmentDetected;
 use App\Models\TerritoryAssignment;
 use App\Models\User;
@@ -81,7 +82,7 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
 
     /**
      * Send the members of the territory department (who can log in) a summary of the stale assignments, so that they
-     * can follow up with the assignees.
+     * can follow up with the assignees: all of them, or only the overseers (see the Settings page).
      *
      * @param  Collection<int, TerritoryAssignment>  $staleAssignments
      */
@@ -92,7 +93,10 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
         }
 
         $members = User::query()
-            ->inDepartment(DepartmentKey::Territories)
+            ->inDepartment(
+                DepartmentKey::Territories,
+                TerritorySettings::value('stale_summary_overseers_only') ? DepartmentRole::Overseer : null,
+            )
             ->where('can_login', true)
             ->get();
 

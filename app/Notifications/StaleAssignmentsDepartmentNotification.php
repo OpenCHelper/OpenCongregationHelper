@@ -4,20 +4,27 @@ namespace App\Notifications;
 
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\TerritoryAssignment;
+use App\Models\User;
+use App\Notifications\Concerns\SendsWebPush;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification as FilamentNotification;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
+use NotificationChannels\WebPush\WebPushChannel;
 
 /**
- * The weekly summary of the assignments out for too long, sent by email to the members of the territory department so
- * that they can follow up with the assignees.
+ * The weekly summary of the assignments out for too long, sent by email and in the app to the members of the territory
+ * department so that they can follow up with the assignees.
  */
 class StaleAssignmentsDepartmentNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use SendsWebPush;
 
     /**
      * Create a new notification instance.
@@ -38,7 +45,13 @@ class StaleAssignmentsDepartmentNotification extends Notification implements Sho
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $channels = ['mail', 'database'];
+
+        if ($this->isWebPushAvailable($notifiable)) {
+            $channels[] = WebPushChannel::class;
+        }
+
+        return $channels;
     }
 
     /**
@@ -81,5 +94,25 @@ class StaleAssignmentsDepartmentNotification extends Notification implements Sho
         return [
             //
         ];
+    }
+
+    public function toDatabase(User $notifiable): array
+    {
+        return FilamentNotification::make()
+            ->title(__('filament-resources.database_notifications.stale_assignments_department_title', [
+                'count' => $this->assignments->count(),
+            ]))
+            ->body(__('filament-resources.database_notifications.stale_assignments_department_body', [
+                'days' => $this->staleAfterDays,
+            ]))
+            ->icon(Heroicon::OutlinedMap)
+            ->warning()
+            ->actions([
+                Action::make('view')
+                    ->icon(Heroicon::OutlinedEye)
+                    ->url(TerritoryAssignmentResource::getUrl('index'))
+                    ->label(__('filament-resources.database_notifications.action_view')),
+            ])
+            ->getDatabaseMessage();
     }
 }

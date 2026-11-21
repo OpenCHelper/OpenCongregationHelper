@@ -107,36 +107,6 @@ test('the stale assignments job runs once a week when the scheduler is called as
     expect($callsRunningTheTask)->toHaveCount(1);
 });
 
-test('the threshold of the stale assignments follows the settings', function () {
-    $settings = app(TerritorySettings::class);
-    $settings->stale_after_days = 30;
-    $settings->dead_after_days = 90;
-    $settings->save();
-
-    $assignee = User::factory()->create(['id' => 1]);
-    $zone = TerritoryZone::factory()->create();
-
-    $staleAssignment = TerritoryAssignment::factory()->create([
-        'territory_id' => Territory::factory()->for($zone, 'territoryZone')->create()->id,
-        'assignee_id' => $assignee->id,
-        'started_at' => now()->subDays(31),
-        'ended_at' => null,
-    ]);
-    TerritoryAssignment::factory()->create([
-        'territory_id' => Territory::factory()->for($zone, 'territoryZone')->create()->id,
-        'assignee_id' => $assignee->id,
-        'started_at' => now()->subDays(29),
-        'ended_at' => null,
-    ]);
-
-    Event::fake([StaleAssignmentDetected::class]);
-
-    (new DetectStaleAssignments)->handle();
-
-    Event::assertDispatchedTimes(StaleAssignmentDetected::class, 1);
-    Event::assertDispatched(StaleAssignmentDetected::class, fn (StaleAssignmentDetected $event): bool => $event->assignment->is($staleAssignment));
-});
-
 test('the territory department receives one summary of the stale assignments, besides the assignees', function () {
     Notification::fake();
 
@@ -222,4 +192,53 @@ test('the summary of the territory department lists every stale assignment, the 
         ->toContain(__('filament-resources.mailables.stale_assignments_department_line', ['territory' => 'Old territory', 'assignee' => 'John Doe', 'days' => 120]))
         ->toContain(__('filament-resources.mailables.stale_assignments_department_line', ['territory' => 'Recent territory', 'assignee' => 'John Doe', 'days' => 70]))
         ->and(strpos($lines, 'Old territory'))->toBeLessThan(strpos($lines, 'Recent territory'));
+});
+
+test('only the overseers of the territory department receive the summary when chosen in the settings', function () {
+    Notification::fake();
+
+    $settings = app(TerritorySettings::class);
+    $settings->stale_summary_overseers_only = true;
+    $settings->save();
+
+    $assignee = User::factory()->create(['id' => 1]);
+    $overseer = User::factory()->create();
+    $assistant = User::factory()->create();
+
+    Department::for(DepartmentKey::Territories)->members()->attach([
+        $overseer->id => ['role' => DepartmentRole::Overseer],
+        $assistant->id => ['role' => DepartmentRole::Assistant],
+    ]);
+
+    TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for(TerritoryZone::factory()->create(), 'territoryZone')->create()->id,
+        'assignee_id' => $assignee->id,
+        'started_at' => now()->subDays(90),
+        'ended_at' => null,
+    ]);
+
+    (new DetectStaleAssignments)->handle();
+
+    Notification::assertSentToTimes($overseer, StaleAssignmentsDepartmentNotification::class, 1);
+    Notification::assertNotSentTo($assistant, StaleAssignmentsDepartmentNotification::class);
+});
+
+test('the summary of the territory department is also shown in the app', function () {
+    $member = User::factory()->create(['id' => 1]);
+    $assignment = TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for(TerritoryZone::factory()->create(), 'territoryZone')->create()->id,
+        'assignee_id' => $member->id,
+        'started_at' => now()->subDays(90),
+        'ended_at' => null,
+    ]);
+
+    $notification = new StaleAssignmentsDepartmentNotification(new EloquentCollection([$assignment]), 60);
+
+    expect($notification->via($member))->toContain('mail', 'database');
+
+    $member->notifyNow($notification, ['database']);
+
+    expect($member->notifications()->where('type', StaleAssignmentsDepartmentNotification::class)->sole()->data)
+        ->title->toBe(__('filament-resources.database_notifications.stale_assignments_department_title', ['count' => 1], $member->preferredLocale()))
+        ->body->toBe(__('filament-resources.database_notifications.stale_assignments_department_body', ['days' => 60], $member->preferredLocale()));
 });

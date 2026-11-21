@@ -27,8 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - The installed app takes the primary colour chosen on the Settings pages
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
-- Weekly email to the members of the territory department listing the territories out for too long, with their
-  assignees, so that they can follow up.
+- Weekly summary, by email and in the app, to the members of the territory department listing the territories out
+  for too long, with their assignees, so that they can follow up; it can be limited to the overseers from the
+  Settings pages.
 
 ### Changed
 

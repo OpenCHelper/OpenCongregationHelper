@@ -61,6 +61,8 @@ return [
         'territory_returned_error_body' => 'An error occurred while returning the territory.',
         'stale_assignment_title' => 'Territory out for :days days',
         'stale_assignment_body' => 'If you have finished it, remember to return it.',
+        'stale_assignments_department_title' => 'Territories out for too long: :count',
+        'stale_assignments_department_body' => 'Out for more than :days days: you may want to follow up with their assignees.',
         'campaign_created_title' => 'New campaign!',
         'campaign_created_body' => 'A new campaign has been created: :campaign',
         'assignment_success_title' => 'Territory assigned',

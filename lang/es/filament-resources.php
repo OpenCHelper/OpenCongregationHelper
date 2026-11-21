@@ -61,6 +61,8 @@ return [
         'territory_returned_error_body' => 'Ocurrió un error al devolver el territorio.',
         'stale_assignment_title' => 'Territorio pendiente por :days días',
         'stale_assignment_body' => 'Si lo has terminado, recuerda devolverlo.',
+        'stale_assignments_department_title' => 'Territorios fuera desde hace demasiado tiempo: :count',
+        'stale_assignments_department_body' => 'Fuera desde hace más de :days días: quizá quieras hablar con sus asignados.',
         'campaign_created_title' => '¡Nueva campaña!',
         'campaign_created_body' => 'Se ha creado una nueva campaña: :campaign',
         'assignment_success_title' => 'Territorio asignado',

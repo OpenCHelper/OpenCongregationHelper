@@ -62,6 +62,8 @@ return [
         'territory_returned_error_body' => 'Si è verificato un errore durante la riconsegna del territorio.',
         'stale_assignment_title' => 'Territorio fuori da :days giorni',
         'stale_assignment_body' => 'Se lo hai terminato, ricordati di riconsegnarlo.',
+        'stale_assignments_department_title' => 'Territori fuori da troppo tempo: :count',
+        'stale_assignments_department_body' => 'Fuori da più di :days giorni: potresti sentire i loro assegnatari.',
         'campaign_created_title' => 'Nuova campagna!',
         'campaign_created_body' => 'È stata creata una nuova campagna: :campaign',
         'assignment_success_title' => 'Territorio assegnato',

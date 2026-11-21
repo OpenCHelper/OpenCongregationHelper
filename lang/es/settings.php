@@ -37,7 +37,7 @@ return [
         'shared_pages_privacy' => 'Privacidad de las páginas compartidas',
         'shared_pages_privacy_description' => 'Lo que muestra la página pública de una asignación compartida a cualquiera que tenga su enlace.',
         'stale_assignments' => 'Asignaciones fuera desde hace demasiado tiempo',
-        'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan y el departamento de territorios recibe un resumen por correo.',
+        'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan y el departamento de territorios recibe un resumen por correo y en la aplicación.',
         'assignment_frequency' => 'Frecuencia de asignación',
         'assignment_frequency_description' => 'Con qué frecuencia se asigna cada territorio, como se colorea en el mapa del panel: según el número de sus asignaciones en los últimos meses.',
     ],
@@ -88,6 +88,12 @@ return [
         'stale_check_time' => [
             'label' => 'Hora de los recordatorios',
             'helper' => 'En la zona horaria de la aplicación (`APP_TIMEZONE`). Los recordatorios se envían solo si el planificador se está ejecutando a esa hora, como tarea cron o como proceso permanente (p. ej. con Supervisor): consulta la guía de instalación.',
+        ],
+        'stale_summary_recipients' => [
+            'label' => 'Destinatarios del resumen',
+            'helper' => 'Quién en el departamento de territorios recibe el resumen semanal de las asignaciones fuera desde hace demasiado tiempo, por correo y en la aplicación.',
+            'members' => 'Todos los miembros del departamento',
+            'overseers' => 'Solo los responsables',
         ],
         'frequency_period_months' => [
             'label' => 'Meses contados',
