@@ -71,10 +71,13 @@
                                 $url = $this->getTerritoryUrl($territory);
                             @endphp
 
-                            <li class="flex items-center justify-between gap-3 py-2 text-sm">
-                                <span class="min-w-0 truncate">
+                            <li class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2 text-sm">
+                                <span
+                                    class="min-w-0 max-w-full truncate"
+                                    title="{{ $territory->name }}"
+                                >
                                     @if ($url)
-                                        <x-filament::link :href="$url">{{ $territory->name }}</x-filament::link>
+                                        <a href="{{ $url }}" class="font-medium text-primary-600 hover:underline dark:text-primary-400">{{ $territory->name }}</a>
                                     @else
                                         <span class="font-medium text-gray-950 dark:text-white">{{ $territory->name }}</span>
                                     @endif

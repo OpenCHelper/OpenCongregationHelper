@@ -228,3 +228,41 @@ test('the territories in progress are marked as such in the list', function () {
     Livewire::test(TerritoryCoverage::class)
         ->assertSeeInOrder(['Out now', __('filament-widgets.territory_coverage.in_progress')]);
 });
+
+test('the period counts whole calendar months, also at the end of a month', function (string $today, int $months, string $returnedAt) {
+    $this->travelTo(Carbon::parse($today.' 12:00:00'));
+    ($this->assign)(($this->territory)('Returned'), Carbon::parse($returnedAt)->subDays(10)->toDateString(), $returnedAt);
+
+    $settings = app(TerritorySettings::class);
+    $settings->coverage_periods_months = [1, 6, 12];
+    $settings->save();
+
+    expect(Livewire::test(TerritoryCoverage::class)->set('months', $months)->instance()->getCoverage()['worked'])->toBe(1);
+})->with([
+    'last month on 31 March' => ['2026-03-31', 1, '2026-03-01'],
+    'last 6 months on 31 August' => ['2026-08-31', 6, '2026-03-01'],
+]);
+
+test('the percentage is formatted in the language of the user', function (string $locale, string $expected) {
+    app()->setLocale($locale);
+    foreach (range(1, 9) as $number) {
+        $territory = ($this->territory)("Territory {$number}");
+
+        if ($number === 1) {
+            ($this->assign)($territory, '2026-03-01', '2026-03-20');
+        }
+    }
+
+    expect(Livewire::test(TerritoryCoverage::class)->instance()->getCoverage()['label'])->toStartWith($expected);
+})->with([
+    'English' => ['en', '11.1%'],
+    'Italian' => ['it', '11,1%'],
+    'Spanish' => ['es', '11,1'],
+]);
+
+test('long territory names are truncated with their full name as tooltip', function () {
+    ($this->territory)('Country Club Road (east)');
+
+    Livewire::test(TerritoryCoverage::class)
+        ->assertSeeHtml('title="Country Club Road (east)"');
+});

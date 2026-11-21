@@ -171,7 +171,7 @@ class ManageTerritorySettings extends AppSettingsPage
                             ->label(__('settings.fields.coverage_default_period_months.label'))
                             ->helperText($this->defaultHint((string) $this->defaultValue('coverage_default_period_months')))
                             ->options(fn (Get $get): array => collect(self::normalizePeriods((array) $get('coverage_periods_months')))
-                                ->mapWithKeys(fn (int $months): array => [$months => $months.' '.__('settings.units.months')])
+                                ->mapWithKeys(fn (int $months): array => [$months => trans_choice('filament-widgets.territory_coverage.period', $months, ['count' => $months])])
                                 ->all())
                             ->required()
                             ->native(false),

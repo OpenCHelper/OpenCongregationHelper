@@ -148,7 +148,7 @@ class TerritoryCoverage extends Widget
      */
     protected function getPeriodStart(): Carbon
     {
-        return now()->subMonths($this->months ?? $this->getDefaultPeriod());
+        return now()->subMonthsNoOverflow($this->months ?? $this->getDefaultPeriod());
     }
 
     /**
@@ -173,7 +173,7 @@ class TerritoryCoverage extends Widget
             'total' => $total,
             'percentage' => $percentage,
             'label' => __('filament-widgets.territory_coverage.value', [
-                'percentage' => Number::percentage($percentage, maxPrecision: 1),
+                'percentage' => Number::percentage($percentage, maxPrecision: 1, locale: app()->getLocale()),
                 'worked' => $worked,
                 'total' => $total,
             ]),

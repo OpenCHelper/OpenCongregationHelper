@@ -574,3 +574,13 @@ test('the periods of the territory coverage must be months and include the defau
     'zero months' => [['coverage_periods_months' => ['0', '12']], 'coverage_periods_months.0'],
     'default not among the periods' => [['coverage_periods_months' => ['6', '24'], 'coverage_default_period_months' => '12'], 'coverage_default_period_months'],
 ]);
+
+test('the default period of the territory coverage is labelled with the right plural', function () {
+    actingAsSuperAdmin();
+    app()->setLocale('it');
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['coverage_periods_months' => ['1', '12']])
+        ->assertSee(trans_choice('filament-widgets.territory_coverage.period', 1, ['count' => 1]))
+        ->assertDontSee('1 '.__('settings.units.months'));
+});
