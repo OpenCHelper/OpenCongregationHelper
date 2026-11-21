@@ -2,7 +2,11 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Auth\MultiFactor\Contracts\MultiFactorAuthenticationProvider;
+use Filament\Facades\Filament;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
 class EditProfile extends Page
@@ -34,5 +38,18 @@ class EditProfile extends Page
     public static function getNavigationSort(): ?int
     {
         return 1;
+    }
+
+    /**
+     * The management of the two-factor authentication (Filament), as on the profile page of Filament: the users can
+     * enable it even when the Security settings do not require it.
+     */
+    public function multiFactorAuthentication(Schema $schema): Schema
+    {
+        return $schema
+            ->components(collect(Filament::getMultiFactorAuthenticationProviders())
+                ->map(fn (MultiFactorAuthenticationProvider $provider): Group => Group::make($provider->getManagementSchemaComponents())
+                    ->statePath($provider->getId()))
+                ->all());
     }
 }

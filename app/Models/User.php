@@ -7,6 +7,10 @@ use App\Enums\DepartmentKey;
 use App\Enums\DepartmentRole;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
@@ -36,7 +40,7 @@ use Spatie\Permission\Traits\HasRoles;
 use STS\FilamentImpersonate\Facades\Impersonation;
 
 #[ObservedBy([UserObserver::class])]
-class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocalePreference, HasName, HasTenants, MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasLocalePreference, HasName, HasTenants, MustVerifyEmail
 {
     use HasApiTokens;
 
@@ -47,6 +51,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
     use HasPushSubscriptions;
     use HasRoles;
     use HasTeams;
+    use InteractsWithAppAuthentication;
+    use InteractsWithAppAuthenticationRecovery;
     use LogsActivity;
     use Notifiable;
     use TwoFactorAuthenticatable;
@@ -82,6 +88,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
         'remember_token',
         'two_factor_recovery_codes',
         'two_factor_secret',
+    ];
+
+    /**
+     * The default values of the attributes, so that the two-factor authentication can be read from a user just created
+     * (the missing attributes are not lazily loaded).
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'app_authentication_secret' => null,
+        'app_authentication_recovery_codes' => null,
     ];
 
     /**
