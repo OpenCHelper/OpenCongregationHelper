@@ -166,6 +166,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Return Requests From Shared Pages
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, whoever opens the publicly shared page of an assignment
+    | (guest panel, no account needed) can ask the territory department to
+    | close it, as the assignee can from the application.
+    |
+    */
+
+    'guest_allow_returning_assignment' => (bool) env('GUEST_ALLOW_RETURNING_ASSIGNMENT', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Initial Root User
     |--------------------------------------------------------------------------
     |

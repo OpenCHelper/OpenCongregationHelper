@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Weekly summary, by email and in the app, to the members of the territory department listing the territories out
   for too long, with their assignees, so that they can follow up; it can be limited to the overseers from the
   Settings pages ([#54](https://github.com/OpenCHelper/OpenCongregationHelper/pull/54)).
+- **Return requests**: publishers can ask the territory department to close their assignment with one click, and
+  its members are notified; also from shared links, when enabled from the Settings pages (default from
+  `GUEST_ALLOW_RETURNING_ASSIGNMENT`) ([#56](https://github.com/OpenCHelper/OpenCongregationHelper/pull/56)).
 
 ### Changed
 

@@ -54,8 +54,8 @@ INITIAL_ROOT_PASSWORD="password"
 
 ### Impostazioni principali
 
-`MAP_DEFAULT_CENTER` e `ENABLE_SHARED_PII` sono solo i valori predefiniti: i super amministratori possono cambiarli
-dalle pagine [Impostazioni](administration/settings), senza modificare `.env`.
+`MAP_DEFAULT_CENTER`, `ENABLE_SHARED_PII` e `GUEST_ALLOW_RETURNING_ASSIGNMENT` sono solo i valori predefiniti: i super
+amministratori possono cambiarli dalle pagine [Impostazioni](administration/settings), senza modificare `.env`.
 
 | Variabile | Descrizione |
 |-----------|-------------|
@@ -68,6 +68,7 @@ dalle pagine [Impostazioni](administration/settings), senza modificare `.env`.
 | `QUEUE_CONNECTION` | `database` (consigliato in produzione) o `sync` (le email vengono inviate subito, durante la richiesta). |
 | `ARTISAN_CRON_TOKEN` | Segreto richiesto dagli endpoint che elaborano la coda e le attività pianificate. Se vuoto, gli endpoint sono disabilitati. |
 | `ENABLE_SHARED_PII` | Se `true`, la pagina pubblica di un'assegnazione condivisa mostra anche il nome dell'assegnatario e le note del territorio. Predefinito: `false`. |
+| `GUEST_ALLOW_RETURNING_ASSIGNMENT` | Se `true`, chi apre la pagina pubblica di un'assegnazione condivisa può chiedere al reparto territori di chiuderla (come può fare l'assegnatario dall'applicazione). Predefinito: `false`. |
 | `DEMO_PREFILL_LOGIN_CREDENTIALS` | **Solo per installazioni dimostrative**, con dati fittizi: se `true`, la pagina di accesso è precompilata con le credenziali dell'utente **root**, quindi chiunque può accedere come root. Non attivarla mai su un'installazione con dati reali. Sempre ignorata quando `APP_ENV` è `production`. Predefinito: `false`. |
 | `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | File usati per mostrare il branch e il commit Git nella barra laterale sui server senza `git`. |
 

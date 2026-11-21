@@ -13,6 +13,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -107,6 +108,11 @@ class ManageTerritorySettings extends AppSettingsPage
                                     $this->mountAction('confirmSharedPii');
                                 }
                             }),
+                        Toggle::make('guest_returns')
+                            ->label(__('settings.fields.guest_returns.label'))
+                            ->helperText(__('settings.fields.guest_returns.helper').' '.$this->defaultHint(
+                                $this->defaultValue('guest_returns') ? __('settings.fields.guest_returns.enabled') : __('settings.fields.guest_returns.disabled'),
+                            )),
                     ]),
                 Section::make(__('settings.sections.stale_assignments'))
                     ->description(__('settings.sections.stale_assignments_description'))
@@ -262,6 +268,7 @@ class ManageTerritorySettings extends AppSettingsPage
     {
         $data['map_default_center'] = self::parseCoordinates((string) $data['map_default_center']);
         $data['shared_pii'] = $data['shared_pii'] === 'show';
+        $data['guest_returns'] = (bool) $data['guest_returns'];
         $data['stale_check_day'] = (int) $data['stale_check_day'];
         $data['coverage_periods_months'] = self::normalizePeriods((array) $data['coverage_periods_months']);
         $data['stale_summary_overseers_only'] = $data['stale_summary_recipients'] === 'overseers';

@@ -34,6 +34,9 @@ un'[assegnazione condivisa](../assignments/sharing) a chiunque ne abbia il link:
   è d'accordo e le note non contengono dati personali. Prima di sceglierlo ti viene chiesto di confermare di aver capito
   cosa comporta: se annulli, i dati personali restano nascosti.
 
+Lì scegli anche se chiunque apra la pagina pubblica può **chiedere di riconsegnare** il territorio, senza un account:
+i membri del reparto territori ricevono allora una notifica, come quando lo chiede l'assegnatario dall'applicazione.
+
 In **Assegnazioni fuori da troppo tempo** i livelli sono elencati in ordine, ognuno con il suo colore, e la barra sotto
 li disegna in scala mentre scrivi:
 

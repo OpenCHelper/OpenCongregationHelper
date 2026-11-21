@@ -35,7 +35,7 @@ return [
         'congregation' => 'Congregación',
         'maps' => 'Mapas',
         'shared_pages_privacy' => 'Privacidad de las páginas compartidas',
-        'shared_pages_privacy_description' => 'Lo que muestra la página pública de una asignación compartida a cualquiera que tenga su enlace.',
+        'shared_pages_privacy_description' => 'Lo que muestra y permite hacer la página pública de una asignación compartida a cualquiera que tenga su enlace.',
         'stale_assignments' => 'Asignaciones fuera desde hace demasiado tiempo',
         'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan y el departamento de territorios recibe un resumen por correo y en la aplicación.',
         'assignment_frequency' => 'Frecuencia de asignación',
@@ -77,6 +77,12 @@ return [
             'understood' => 'Entiendo que cualquiera con un enlace compartido verá estos datos, y la congregación está de acuerdo.',
             'understood_required' => 'Confirma que entiendes lo que supone mostrar los datos personales.',
             'confirm' => 'Mostrar los datos personales',
+        ],
+        'guest_returns' => [
+            'label' => 'Solicitar la devolución desde las páginas compartidas',
+            'helper' => 'Cualquiera que abra la página pública de una asignación compartida puede pedir al departamento de territorios que la cierre, sin una cuenta.',
+            'enabled' => 'Activado',
+            'disabled' => 'Desactivado',
         ],
         'stale_after_days' => [
             'label' => 'Fuera demasiado tiempo',

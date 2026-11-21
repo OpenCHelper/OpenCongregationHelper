@@ -2,9 +2,11 @@
 
 namespace App\Filament\Guest\Pages;
 
+use App\Filament\Resources\TerritoryAssignments\Actions\RequestReturnAction;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\SharedUrl;
 use App\Models\TerritoryAssignment;
+use Filament\Actions\Action;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
 use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Page;
@@ -43,6 +45,22 @@ class ViewSharedAssignment extends Page implements HasInfolists
         $territoryName = $this->assignment->territory?->name ?? __('filament-resources.territory_assignment.info_territory_placeholder');
 
         return ucfirst(__('filament-resources.territory_assignment.model_label').': '.$territoryName);
+    }
+
+    /**
+     * @return array<Action>
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            RequestReturnAction::make()
+                ->record($this->assignment)
+                // A block, not an arrow function: what `after()` returns is sent back to the browser, and the refreshed
+                // assignment would expose its personal data (assignee, notes) that the page hides
+                ->after(function (): void {
+                    $this->assignment->refresh();
+                }),
+        ];
     }
 
     public function assignmentInfolist(Schema $schema): Schema

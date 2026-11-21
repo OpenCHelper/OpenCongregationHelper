@@ -19,6 +19,11 @@ class TerritorySettings extends ConfigSettings
     public ?bool $shared_pii;
 
     /**
+     * Whether whoever opens the public page of a shared assignment can ask the territory department to close it.
+     */
+    public ?bool $guest_returns;
+
+    /**
      * Days after which an assignment in progress is stale: its assignee is reminded to return it from then on.
      */
     public int $stale_after_days = 60;
@@ -81,6 +86,7 @@ class TerritorySettings extends ConfigSettings
         return [
             'map_default_center' => 'filament-leaflet.default_map_center',
             'shared_pii' => 'app.enable_shared_pii',
+            'guest_returns' => 'app.guest_allow_returning_assignment',
         ];
     }
 }

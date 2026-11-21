@@ -43,6 +43,23 @@ class TerritoryAssignmentObserver
         if ($territoryAssignment->isDirty(['ended_at', 'territory_id'])) {
             $this->ensureTerritoryIsNotAlreadyAssigned($territoryAssignment);
         }
+
+        $this->forgetOutdatedReturnRequest($territoryAssignment);
+    }
+
+    /**
+     * A return request belongs to the assignment as it was asked: it is forgotten when the assignment is reopened
+     * (its end date cleared) or given to someone else, so that the callout goes away and the return can be asked again.
+     */
+    private function forgetOutdatedReturnRequest(TerritoryAssignment $territoryAssignment): void
+    {
+        $isReopened = $territoryAssignment->isDirty('ended_at')
+            && $territoryAssignment->ended_at === null
+            && $territoryAssignment->getOriginal('ended_at') !== null;
+
+        if ($isReopened || $territoryAssignment->isDirty('assignee_id')) {
+            $territoryAssignment->return_requested_at = null;
+        }
     }
 
     /**
