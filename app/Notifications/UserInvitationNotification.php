@@ -29,7 +29,7 @@ class UserInvitationNotification extends Notification
     {
         $token = Password::broker(ResetPassword::INVITATION_PASSWORD_BROKER)->createToken($user);
 
-        $user->notify(new static($token));
+        $user->notify(new self($token));
     }
 
     /**

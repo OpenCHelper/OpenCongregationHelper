@@ -172,9 +172,9 @@ test('administrators can set the password of a new user instead of sending an in
 
     Livewire::test(CreateUser::class)
         ->fillForm(['can_login' => true])
-        ->assertFormFieldHidden('password')
+        ->assertSchemaComponentHidden('password', 'form')
         ->fillForm(['password_setup' => PasswordSetup::Password])
-        ->assertFormFieldVisible('password');
+        ->assertSchemaComponentVisible('password', 'form');
 
     createUserThatCanLogIn(['password_setup' => PasswordSetup::Password, 'password' => null])
         ->assertHasFormErrors(['password' => 'required']);
@@ -199,7 +199,7 @@ test('creating a virtual user sends no invitation', function () {
             'email' => 'new.user@example.com',
             'can_login' => false,
         ])
-        ->assertFormFieldHidden('password_setup')
+        ->assertSchemaComponentHidden('password_setup', 'form')
         ->call('create')
         ->assertHasNoFormErrors();
 
@@ -214,10 +214,10 @@ test('allowing access to a virtual user without a password sends them an invitat
     $virtualUser = User::factory()->create(['can_login' => false, 'password' => null]);
 
     Livewire::test(EditUser::class, ['record' => $virtualUser->id])
-        ->assertFormFieldHidden('password_setup')
+        ->assertSchemaComponentHidden('password_setup', 'form')
         ->fillForm(['can_login' => true])
-        ->assertFormFieldVisible('password_setup')
-        ->assertFormFieldHidden('password')
+        ->assertSchemaComponentVisible('password_setup', 'form')
+        ->assertSchemaComponentHidden('password', 'form')
         ->call('save')
         ->assertHasNoFormErrors()
         ->assertNotified(__('filament-resources.user.invitation_sent', ['email' => $virtualUser->email]));
@@ -235,7 +235,7 @@ test('editing a user who already has a password sends no invitation', function (
     foreach ([$this->user, $formerUser] as $user) {
         Livewire::test(EditUser::class, ['record' => $user->id])
             ->fillForm(['can_login' => true])
-            ->assertFormFieldHidden('password_setup')
+            ->assertSchemaComponentHidden('password_setup', 'form')
             ->call('save')
             ->assertHasNoFormErrors();
 
