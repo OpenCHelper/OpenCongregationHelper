@@ -37,7 +37,7 @@ return [
         'shared_pages_privacy' => 'Privacy of shared pages',
         'shared_pages_privacy_description' => 'What the public page of a shared assignment shows to anyone who has its link.',
         'stale_assignments' => 'Assignments out for too long',
-        'stale_assignments_description' => 'Assignments still in progress after these days are out for too long: once a week, their assignees are reminded to return them.',
+        'stale_assignments_description' => 'Assignments still in progress after these days are out for too long: once a week, their assignees are reminded to return them and the territory department receives a summary by email and in the app.',
         'assignment_frequency' => 'Assignment frequency',
         'assignment_frequency_description' => 'How frequently each territory is assigned, as coloured on the dashboard map: by the number of its assignments in the last months.',
         'territory_coverage' => 'Territory coverage',
@@ -90,6 +90,12 @@ return [
         'stale_check_time' => [
             'label' => 'Time of the reminders',
             'helper' => 'In the timezone of the application (`APP_TIMEZONE`). The reminders are sent only if the scheduler is running at that time, as a cron job or as a long-running process (e.g. with Supervisor): see the setup guide.',
+        ],
+        'stale_summary_recipients' => [
+            'label' => 'Recipients of the summary',
+            'helper' => 'Who in the territory department receives the weekly summary of the assignments out for too long, by email and in the app.',
+            'members' => 'All department members',
+            'overseers' => 'Overseers only',
         ],
         'frequency_period_months' => [
             'label' => 'Months counted',

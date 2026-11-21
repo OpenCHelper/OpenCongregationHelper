@@ -15,6 +15,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -253,6 +254,19 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocale
             ->using(DepartmentMember::class)
             ->withPivot('id', 'role')
             ->withTimestamps();
+    }
+
+    /**
+     * Scope a query to only include the users serving in the given department (with the given role, when given).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInDepartment(Builder $query, DepartmentKey $department, ?DepartmentRole $role = null): void
+    {
+        $query->whereHas('departments', function (Builder $query) use ($department, $role): void {
+            $query->where('key', $department->value)
+                ->when($role, fn (Builder $query) => $query->where('department_user.role', $role->value));
+        });
     }
 
     /**

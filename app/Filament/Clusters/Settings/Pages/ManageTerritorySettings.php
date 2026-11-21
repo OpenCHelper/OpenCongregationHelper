@@ -133,6 +133,15 @@ class ManageTerritorySettings extends AppSettingsPage
                             ->type('time')
                             ->required()
                             ->regex('/^([01]\d|2[0-3]):[0-5]\d$/'),
+                        Select::make('stale_summary_recipients')
+                            ->label(__('settings.fields.stale_summary_recipients.label'))
+                            ->helperText(__('settings.fields.stale_summary_recipients.helper').' '.$this->defaultHint(
+                                self::staleSummaryRecipientOptions()[$this->defaultValue('stale_summary_overseers_only') ? 'overseers' : 'members'],
+                            ))
+                            ->options(self::staleSummaryRecipientOptions())
+                            ->required()
+                            ->native(false)
+                            ->columnSpanFull(),
                     ]),
                 Section::make(__('settings.sections.assignment_frequency'))
                     ->description(__('settings.sections.assignment_frequency_description'))
@@ -217,6 +226,19 @@ class ManageTerritorySettings extends AppSettingsPage
     }
 
     /**
+     * Who in the territory department receives the summary of the stale assignments.
+     *
+     * @return array{members: string, overseers: string}
+     */
+    public static function staleSummaryRecipientOptions(): array
+    {
+        return [
+            'members' => __('settings.fields.stale_summary_recipients.members'),
+            'overseers' => __('settings.fields.stale_summary_recipients.overseers'),
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
@@ -226,6 +248,8 @@ class ManageTerritorySettings extends AppSettingsPage
         $data['map_default_center'] = self::formatCoordinates($data['map_default_center']);
         $data['shared_pii'] = $data['shared_pii'] ? 'show' : 'hide';
         $data['coverage_periods_months'] = array_map('strval', self::normalizePeriods((array) $data['coverage_periods_months']));
+        $data['stale_summary_recipients'] = $data['stale_summary_overseers_only'] ? 'overseers' : 'members';
+        unset($data['stale_summary_overseers_only']);
 
         return $data;
     }
@@ -240,6 +264,8 @@ class ManageTerritorySettings extends AppSettingsPage
         $data['shared_pii'] = $data['shared_pii'] === 'show';
         $data['stale_check_day'] = (int) $data['stale_check_day'];
         $data['coverage_periods_months'] = self::normalizePeriods((array) $data['coverage_periods_months']);
+        $data['stale_summary_overseers_only'] = $data['stale_summary_recipients'] === 'overseers';
+        unset($data['stale_summary_recipients']);
 
         foreach (['stale_after_days', 'dead_after_days', 'frequency_period_months', 'medium_frequency_min_assignments', 'high_frequency_min_assignments', 'coverage_default_period_months'] as $property) {
             $data[$property] = (int) $data[$property];

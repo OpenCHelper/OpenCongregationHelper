@@ -40,9 +40,11 @@ li disegna in scala mentre scrivi:
 - i giorni dopo cui un'assegnazione ancora in corso è fuori da troppo tempo e poi persa: questi ultimi devono essere di
   più;
 - il **giorno** e l'**ora** (nel fuso orario dell'applicazione, `APP_TIMEZONE`) dei promemoria settimanali inviati agli
-  assegnatari delle assegnazioni fuori da troppo tempo. Vengono inviati solo se a quell'ora lo scheduler è in
+  assegnatari delle assegnazioni fuori da troppo tempo. Allo stesso momento i membri del reparto territori (vedi
+  **Reparti**) ne ricevono un riepilogo via email e nell'app. Vengono inviati solo se a quell'ora lo scheduler è in
   esecuzione, come cron job o come processo sempre attivo (es. con Supervisor); su un hosting senza cron, il servizio
-  esterno deve chiamarlo a quell'ora (vedi la [Guida al setup](../setup)).
+  esterno deve chiamarlo a quell'ora (vedi la [Guida al setup](../setup));
+- i **Destinatari del riepilogo**: tutti i membri del reparto territori (predefinito) o solo i suoi responsabili.
 
 In **Frequenza di assegnazione** scegli come la **Frequenza di assegnazione** della [mappa della dashboard](../basics/dashboard)
 colora i territori:

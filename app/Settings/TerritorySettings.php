@@ -29,6 +29,12 @@ class TerritorySettings extends ConfigSettings
     public int $dead_after_days = 150;
 
     /**
+     * Whether the summary of the stale assignments goes only to the overseers of the territory department, instead of
+     * all its members.
+     */
+    public bool $stale_summary_overseers_only = false;
+
+    /**
      * Day of the week of the check of the stale assignments (0 = Sunday, 1 = Monday, …).
      */
     public int $stale_check_day = Schedule::MONDAY;
