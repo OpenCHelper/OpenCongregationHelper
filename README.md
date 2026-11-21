@@ -213,7 +213,8 @@ Which PRs get a preview is set by the `PREVIEW_MODE` repository variable, and by
 
 The labels are `preview: on` (opt-in) and `preview: off` (opt-out), unless set otherwise by the
 `PREVIEW_OPT_IN_LABEL` and `PREVIEW_OPT_OUT_LABEL` repository variables. Adding or removing a label deploys or removes
-the preview right away; the opt-out label wins over the opt-in one.
+the preview right away; the opt-out label wins over the opt-in one. The workflow creates the labels when they are
+missing.
 
 Other installations call the reusable
 [`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow from their own repository

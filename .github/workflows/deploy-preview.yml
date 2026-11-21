@@ -83,12 +83,40 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+      # Creating the labels (see below)
+      issues: write
       pull-requests: read
     outputs:
       action: ${{ steps.decide.outputs.action }}
       pr: ${{ steps.decide.outputs.pr }}
       keep: ${{ steps.decide.outputs.keep }}
     steps:
+      # Only the missing ones, so that their colour and description can be changed on GitHub. Not in the runs of PRs from
+      # forks or started by Dependabot, whose token is read-only, and never failing the run: the labels are a convenience
+      - name: Create the opt-in/out labels
+        if: >-
+          github.event_name != 'pull_request'
+          || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          existing="$(gh label list --repo "$GITHUB_REPOSITORY" --limit 1000 --json name --jq '.[].name')"
+
+          create () {
+            if grep -qxF "$1" <<< "$existing"; then
+              return
+            fi
+            if gh label create "$1" --repo "$GITHUB_REPOSITORY" --color "$2" --description "$3"; then
+              echo "Created the '${1}' label."
+            else
+              echo "::warning::Could not create the '${1}' label: create it on GitHub (Issues > Labels)."
+            fi
+          }
+
+          create "$opt_in_label" 0E8A16 "Deploy a preview of this PR"
+          create "$opt_out_label" B60205 "No preview for this PR"
+
       - name: Decide what to do
         id: decide
         env:
