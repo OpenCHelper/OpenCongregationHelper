@@ -25,3 +25,5 @@
 - The concurrency group is on the `deploy` and `destroy` jobs, not on the workflow, so that runs with nothing to do
   never cancel them. cron-job.org rate limits its API (HTTP 429): deployments and single removals only warn, and the
   weekly cleanup removes the cron jobs left behind.
+- While a PR's head commit has `[skip ci]`, GitHub runs no `pull_request` workflow for it, label changes included: to
+  deploy or remove its preview then, run `deploy-preview.yml` manually (`action` deploy/destroy, `pr` number).
