@@ -12,6 +12,7 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Auth;
 
 class ViewTerritoryAssignment extends ViewRecord
 {
@@ -40,6 +41,15 @@ class ViewTerritoryAssignment extends ViewRecord
         return static::getResource()::canAccess() ? $breadcrumbs : array_values($breadcrumbs);
     }
 
+    /**
+     * Whether the user can share the assignment, or stop sharing it: only those allowed to view the assignments, as
+     * before the assignees could open their own (a public link must not be created, or revoked, by the assignee alone).
+     */
+    public static function canManageSharing(): bool
+    {
+        return Auth::user()?->can('View:TerritoryAssignment') ?? false;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -50,6 +60,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ->label(__('filament-resources.territory_assignment.action_copy.label'))
                     ->tooltip(__('filament-resources.territory_assignment.action_copy.tooltip'))
                     ->icon(Heroicon::OutlinedShare)
+                    ->authorize(fn (): bool => static::canManageSharing())
                     ->modalHeading(__('filament-resources.territory_assignment.share_modal.title'))
                     ->modalDescription(__('filament-resources.territory_assignment.share_modal.description'))
                     ->modalSubmitAction(false)
@@ -116,6 +127,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ])
                     ->extraModalFooterActions([
                         Action::make('stop_sharing')
+                            ->authorize(fn (): bool => static::canManageSharing())
                             ->requiresConfirmation()
                             ->cancelParentActions()
                             ->label(__('filament-resources.territory_assignment.share_modal.stop_sharing'))

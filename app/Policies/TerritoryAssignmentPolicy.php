@@ -37,12 +37,12 @@ class TerritoryAssignmentPolicy
     }
 
     /**
-     * Only the assignee can ask the territory department to close their assignment, while it is still in progress.
+     * Only the assignee can ask the territory department to close their assignment (`TerritoryAssignment::requestReturn()`
+     * tells whether it can still be asked).
      */
     public function requestReturn(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        return $territoryAssignment->assignee_id === $authUser->getKey()
-            && $territoryAssignment->canRequestReturn();
+        return $territoryAssignment->assignee_id === $authUser->getKey();
     }
 
     public function delete(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool

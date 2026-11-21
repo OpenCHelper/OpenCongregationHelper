@@ -17,6 +17,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
@@ -196,6 +197,50 @@ test('the notification tells the department which territory to close and who has
         ->and($database['actions'][0]['url'])->toContain('/territory-assignments/'.$this->assignment->id);
 });
 
+test('a publisher who reaches their assignment only as its assignee cannot share it or stop sharing it', function () {
+    $this->assignment->share();
+    $this->actingAs($this->assignee);
+
+    Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
+        ->assertActionHidden('share')
+        ->mountAction('share')
+        ->assertActionNotMounted('share');
+
+    expect($this->assignment->fresh()->shared)->not->toBeNull();
+});
+
+test('the users allowed to view the assignments can still share them', function () {
+    $staff = User::factory()->create(['can_login' => true]);
+    $staff->givePermissionTo([
+        Permission::findOrCreate('ViewAny:TerritoryAssignment', 'web'),
+        Permission::findOrCreate('View:TerritoryAssignment', 'web'),
+    ]);
+    $this->actingAs($staff);
+
+    Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
+        ->assertActionVisible('share')
+        ->mountAction('share')
+        ->assertActionMounted('share');
+
+    expect($this->assignment->fresh()->shared)->not->toBeNull();
+});
+
+test('asking again from a page opened before the return was asked tells it was already asked', function (string $meanwhile) {
+    $this->actingAs($this->assignee);
+
+    $staleTab = Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
+        ->mountAction('requestReturn');
+
+    match ($meanwhile) {
+        'asked' => $this->assignment->requestReturn($this->assignee),
+        'returned' => $this->assignment->update(['ended_at' => now()]),
+    };
+
+    $staleTab->callMountedAction()
+        ->assertNotified(__('filament-resources.territory_assignment.request_return_failure'))
+        ->assertActionNotMounted('requestReturn');
+})->with(['asked', 'returned']);
+
 describe('from the shared link', function () {
     beforeEach(function () {
         Filament::setCurrentPanel('guest');
@@ -240,6 +285,18 @@ describe('from the shared link', function () {
         'enabled over the environment' => [false, true],
         'disabled over the environment' => [true, false],
     ]);
+
+    test('asking again from a shared page opened before the return was asked tells it was already asked', function () {
+        config(['app.guest_allow_returning_assignment' => true]);
+
+        $staleTab = Livewire::test(ViewSharedAssignment::class, ['record' => $this->sharedUrl->uid])
+            ->mountAction('requestReturn');
+
+        $this->assignment->requestReturn();
+
+        $staleTab->callMountedAction()
+            ->assertNotified(__('filament-resources.territory_assignment.request_return_failure'));
+    });
 
     test('the department cannot close the assignment from the shared link', function () {
         config(['app.guest_allow_returning_assignment' => true]);
