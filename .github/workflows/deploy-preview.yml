@@ -751,8 +751,13 @@ jobs:
             echo "EOF_EXCLUDE"
           } >> "$GITHUB_OUTPUT"
 
+      # cron-job.org rate limits its API (HTTP 429, already retried for ~30s by the action): for a single PR, its preview
+      # is still removed, with a warning, and the weekly cleanup removes the cron jobs left behind. The cleanup itself
+      # fails instead, so that jobs that can never be removed do not go unnoticed
       - name: Remove the cron jobs of the previews
+        id: cron
         if: ${{ !cancelled() && steps.cron-folders.outputs.folders != '' }}
+        continue-on-error: ${{ needs.decide.outputs.action == 'destroy' }}
         uses: LukeSavefrogs/cron-job-org-action@v2
         with:
           api-key: ${{ secrets.CRON_JOB_ORG_API_KEY }}
@@ -801,3 +806,7 @@ jobs:
         with:
           pr: ${{ steps.remove.outputs.pr }}
           status: removed
+          warning: >-
+            ${{ steps.cron.outcome == 'failure'
+              && 'The cron jobs could not be removed from cron-job.org (e.g. rate limit): the weekly cleanup removes them.'
+              || '' }}

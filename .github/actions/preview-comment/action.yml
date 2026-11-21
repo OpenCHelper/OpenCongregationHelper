@@ -20,7 +20,7 @@ inputs:
     required: false
     default: ""
   warning:
-    description: "Warning shown under a ready preview (e.g. a part of the deployment that failed without blocking it)."
+    description: "Warning shown under a ready or removed preview (e.g. a part of it that failed without blocking it)."
     required: false
     default: ""
 runs:
@@ -57,7 +57,9 @@ runs:
             ].join('\n'),
             failed: `❌ The deployment of ${commit} failed: see the [workflow run](${run}).`,
             cancelled: `⏹️ The deployment of ${commit} was cancelled (e.g. by a newer push).`,
-            removed: '🗑️ The preview was removed, together with its database tables and its cron jobs.',
+            removed: PREVIEW_WARNING
+              ? `🗑️ The preview was removed, together with its database tables.\n\n⚠️ ${PREVIEW_WARNING} ([workflow run](${run}))`
+              : '🗑️ The preview was removed, together with its database tables and its cron jobs.',
           };
 
           const body = `${marker}\n### Preview\n\n${messages[PREVIEW_STATUS] ?? PREVIEW_STATUS}`;
