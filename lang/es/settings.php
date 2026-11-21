@@ -64,9 +64,12 @@ return [
         ],
         'sharing_enabled' => [
             'label' => 'Compartir asignaciones',
-            'helper' => 'Quien puede abrir una asignación puede crear un enlace público a ella, para quienes no tienen una cuenta. Si se desactiva, no se puede crear ningún enlace y los existentes dejan de funcionar hasta que se vuelva a activar.',
+            'helper' => 'Quien puede abrir una asignación puede crear un enlace público a ella, para quienes no tienen una cuenta. Al desactivarlo se eliminan todos los enlaces existentes: dejan de funcionar, aunque se vuelva a activar.',
             'enabled' => 'Activado',
             'disabled' => 'Desactivado',
+            'confirm_heading' => '¿Desactivar el uso compartido?',
+            'confirm_description' => '{1} Al guardar se elimina el :count enlace compartido existente: quien lo tenga ya no podrá abrir la asignación, aunque se vuelva a activar el uso compartido.|[2,*] Al guardar se eliminan los :count enlaces compartidos existentes: quien los tenga ya no podrá abrir las asignaciones, aunque se vuelva a activar el uso compartido.',
+            'confirm' => 'Desactivar el uso compartido',
         ],
         'shared_pii' => [
             'hide' => 'Ocultar los datos personales',

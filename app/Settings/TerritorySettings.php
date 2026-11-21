@@ -14,8 +14,8 @@ class TerritorySettings extends ConfigSettings
     public ?array $map_default_center;
 
     /**
-     * Whether assignments can be shared through a public link. While disabled, no link can be created and the existing
-     * ones stop working, without being deleted: enabling it again restores them.
+     * Whether assignments can be shared through a public link. Disabling it deletes the existing links (see
+     * `DeleteSharedUrlsWhenSharingIsDisabled`), and no link can be created until it is enabled again.
      */
     public bool $sharing_enabled = true;
 

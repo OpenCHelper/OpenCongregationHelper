@@ -64,9 +64,12 @@ return [
         ],
         'sharing_enabled' => [
             'label' => 'Share assignments',
-            'helper' => 'Who can open an assignment can create a public link to it, for those without an account. When disabled, no link can be created and the existing ones stop working until it is enabled again.',
+            'helper' => 'Who can open an assignment can create a public link to it, for those without an account. Disabling it deletes all the existing links: they stop working, even if it is enabled again.',
             'enabled' => 'Enabled',
             'disabled' => 'Disabled',
+            'confirm_heading' => 'Disable sharing?',
+            'confirm_description' => '{1} Saving deletes the :count existing shared link: whoever has it can no longer open the assignment, even if sharing is enabled again.|[2,*] Saving deletes the :count existing shared links: whoever has them can no longer open the assignments, even if sharing is enabled again.',
+            'confirm' => 'Disable sharing',
         ],
         'shared_pii' => [
             'hide' => 'Hide personal data',

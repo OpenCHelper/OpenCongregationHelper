@@ -27,7 +27,9 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 
 In **Privacy delle pagine condivise** scegli prima se le assegnazioni possono essere [condivise](../assignments/sharing)
 (**Condivisione delle assegnazioni**, attiva per impostazione predefinita). Se disattivata, **Condividi** non viene più
-offerto e i link esistenti smettono di funzionare, senza essere eliminati: riattivandola tornano a funzionare.
+offerto a nessuno e i link esistenti vengono eliminati al salvataggio: smettono di funzionare per sempre, anche se la
+condivisione viene riattivata. Se ce ne sono, ti viene chiesto prima di confermare. Le opzioni seguenti sono mostrate
+solo mentre la condivisione è attiva.
 
 Poi scegli cosa mostra la pagina pubblica di un'assegnazione condivisa a chiunque ne abbia il link:
 

@@ -109,26 +109,50 @@ test('the shared links work while sharing is enabled', function () {
         ->assertOk();
 });
 
-test('the shared links stop working while sharing is disabled, and work again once it is enabled', function () {
+test('disabling sharing deletes the shared links, which do not work again once it is enabled', function () {
     $this->withoutVite();
     $sharedUrl = $this->assignment->share();
+    $otherSharedUrl = TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for(TerritoryZone::factory(), 'territoryZone')->create()->id,
+        'assignee_id' => $this->assignee->id,
+        'ended_at' => null,
+    ])->share();
 
     setSharingEnabled(false);
 
+    expect(SharedUrl::query()->count())->toBe(0)
+        ->and($this->assignment->fresh()->shared)->toBeNull()
+        ->and(TerritoryAssignment::query()->count())->toBe(2);
+
     $this->get(route('share.redirect', $sharedUrl->uid))->assertNotFound();
     $this->get('/guest/shared-assignment/'.$sharedUrl->uid)->assertNotFound();
-    $this->get('/guest/shared-resource/'.$sharedUrl->uid)->assertNotFound();
-
-    expect(Gate::forUser(null)->allows('view', $sharedUrl))->toBeFalse()
-        ->and(SharedUrl::whereKey($sharedUrl->getKey())->exists())->toBeTrue();
+    $this->get('/guest/shared-resource/'.$otherSharedUrl->uid)->assertNotFound();
 
     setSharingEnabled(true);
 
-    $this->get(route('share.redirect', $sharedUrl->uid))
-        ->assertRedirect('/guest/shared-assignment/'.$sharedUrl->uid);
-    $this->get('/guest/shared-assignment/'.$sharedUrl->uid)
-        ->assertOk()
-        ->assertSee('Shared territory');
+    $this->get(route('share.redirect', $sharedUrl->uid))->assertNotFound();
+    $this->get('/guest/shared-assignment/'.$sharedUrl->uid)->assertNotFound();
+});
+
+test('the shared links are kept while sharing stays enabled', function () {
+    $sharedUrl = $this->assignment->share();
+
+    setSharingEnabled(true);
+
+    expect(SharedUrl::whereKey($sharedUrl->getKey())->exists())->toBeTrue();
+});
+
+test('the shared links of a page opened before sharing was disabled do not work', function () {
+    $this->withoutVite();
+    $sharedUrl = $this->assignment->share();
+
+    // As if the setting were changed while the link is followed: the pages refuse it before looking it up
+    $settings = app(TerritorySettings::class);
+    $settings->sharing_enabled = false;
+
+    expect(Gate::forUser(null)->allows('view', $sharedUrl))->toBeFalse();
+    $this->get(route('share.redirect', $sharedUrl->uid))->assertNotFound();
+    $this->get('/guest/shared-assignment/'.$sharedUrl->uid)->assertNotFound();
 });
 
 test('the return cannot be asked from a shared page opened before sharing was disabled', function () {
@@ -153,6 +177,7 @@ test('super administrators can disable and enable sharing from the territory set
         ->assertSee(__('settings.fields.sharing_enabled.label'))
         ->assertSchemaStateSet(['sharing_enabled' => true])
         ->fillForm(['sharing_enabled' => false])
+        ->assertActionNotMounted('confirmDisableSharing')
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -168,8 +193,43 @@ test('super administrators can disable and enable sharing from the territory set
     expect(SharedUrl::isSharingEnabled())->toBeTrue();
 });
 
+test('disabling sharing while links exist must be confirmed, and then deletes them on save', function () {
+    actingAsSharingSuperAdmin();
+    $this->assignment->share();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['sharing_enabled' => false])
+        ->assertActionMounted('confirmDisableSharing')
+        // Still enabled until confirmed
+        ->assertSet('data.sharing_enabled', true)
+        ->assertMountedActionModalSee(trans_choice('settings.fields.sharing_enabled.confirm_description', 1, ['count' => 1]))
+        ->callMountedAction()
+        ->assertSet('data.sharing_enabled', false)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(SharedUrl::isSharingEnabled())->toBeFalse()
+        ->and(SharedUrl::query()->exists())->toBeFalse();
+});
+
+test('the shared links are kept when disabling sharing is cancelled', function () {
+    actingAsSharingSuperAdmin();
+    $this->assignment->share();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['sharing_enabled' => false])
+        ->assertActionMounted('confirmDisableSharing')
+        ->unmountAction()
+        ->assertSet('data.sharing_enabled', true)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(SharedUrl::isSharingEnabled())->toBeTrue()
+        ->and(SharedUrl::query()->count())->toBe(1);
+});
+
 test('the setting is labelled in every language of the application', function (string $locale) {
-    foreach (['label', 'helper', 'enabled', 'disabled'] as $key) {
+    foreach (['label', 'helper', 'enabled', 'disabled', 'confirm_heading', 'confirm_description', 'confirm'] as $key) {
         expect(trans()->hasForLocale("settings.fields.sharing_enabled.$key", $locale))->toBeTrue();
     }
 })->with(['en', 'es', 'it']);

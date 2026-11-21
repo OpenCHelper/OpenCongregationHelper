@@ -26,8 +26,9 @@ role. The options are grouped by area, with one page each in the menu on the sid
   `41.159063, -74.255188`). Afterwards the maps open on the territories.
 
 Under **Privacy of shared pages** you first choose whether assignments can be [shared](../assignments/sharing) at all
-(**Share assignments**, enabled by default). When disabled, **Share** is no longer offered and the existing links stop
-working, without being deleted: enabling it again restores them.
+(**Share assignments**, enabled by default). When disabled, **Share** is no longer offered to anyone and the existing
+links are deleted when you save: they stop working for good, even if sharing is enabled again. If there are any, you are
+asked to confirm first. The options below are shown only while sharing is enabled.
 
 Then you choose what the public page of a shared assignment shows to anyone who has its link:
 

@@ -64,9 +64,12 @@ return [
         ],
         'sharing_enabled' => [
             'label' => 'Condivisione delle assegnazioni',
-            'helper' => 'Chi può aprire un\'assegnazione può crearne un link pubblico, per chi non ha un account. Se disattivata, non si possono creare link e quelli esistenti smettono di funzionare finché non viene riattivata.',
+            'helper' => 'Chi può aprire un\'assegnazione può crearne un link pubblico, per chi non ha un account. Disattivandola si eliminano tutti i link esistenti: smettono di funzionare, anche se viene riattivata.',
             'enabled' => 'Attiva',
             'disabled' => 'Disattiva',
+            'confirm_heading' => 'Disattivare la condivisione?',
+            'confirm_description' => '{1} Salvando si elimina il link condiviso esistente: chi lo ha non potrà più aprire l\'assegnazione, anche se la condivisione viene riattivata.|[2,*] Salvando si eliminano i :count link condivisi esistenti: chi li ha non potrà più aprire le assegnazioni, anche se la condivisione viene riattivata.',
+            'confirm' => 'Disattiva la condivisione',
         ],
         'shared_pii' => [
             'hide' => 'Nascondi i dati personali',

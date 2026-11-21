@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\AppSettingsPage;
+use App\Models\SharedUrl;
 use App\Settings\TerritorySettings;
 use BackedEnum;
 use Carbon\Carbon;
@@ -86,7 +87,14 @@ class ManageTerritorySettings extends AppSettingsPage
                             ->helperText(__('settings.fields.sharing_enabled.helper').' '.$this->defaultHint(
                                 $this->defaultValue('sharing_enabled') ? __('settings.fields.sharing_enabled.enabled') : __('settings.fields.sharing_enabled.disabled'),
                             ))
-                            ->live(),
+                            ->live()
+                            ->afterStateUpdated(function (?bool $state, ?bool $old, Set $set): void {
+                                // Disabled only once confirmed (see `confirmDisableSharingAction()`), as saving it deletes the shared links
+                                if (! $state && $old && SharedUrl::query()->exists()) {
+                                    $set('sharing_enabled', true);
+                                    $this->mountAction('confirmDisableSharing');
+                                }
+                            }),
                         // Kept while sharing is disabled, so that enabling it again restores them
                         Radio::make('shared_pii')
                             ->visible(fn (Get $get): bool => (bool) $get('sharing_enabled'))
@@ -227,6 +235,23 @@ class ManageTerritorySettings extends AppSettingsPage
             ->modalSubmitActionLabel(__('settings.fields.shared_pii.confirm'))
             ->action(function (): void {
                 $this->data['shared_pii'] = 'show';
+            });
+    }
+
+    /**
+     * Confirm that sharing must be disabled, after reading that saving it deletes the existing shared links.
+     */
+    public function confirmDisableSharingAction(): Action
+    {
+        return Action::make('confirmDisableSharing')
+            ->requiresConfirmation()
+            ->color('danger')
+            ->modalIcon(Heroicon::OutlinedExclamationTriangle)
+            ->modalHeading(__('settings.fields.sharing_enabled.confirm_heading'))
+            ->modalDescription(fn (): string => trans_choice('settings.fields.sharing_enabled.confirm_description', $count = SharedUrl::query()->count(), ['count' => $count]))
+            ->modalSubmitActionLabel(__('settings.fields.sharing_enabled.confirm'))
+            ->action(function (): void {
+                $this->data['sharing_enabled'] = false;
             });
     }
 
