@@ -24,13 +24,20 @@ Non tutti quelli che lavorano i territori devono usare l'applicazione:
 
 1. Clicca **Nuovo**.
 2. Compila **Nome**, **Cognome** ed **Email**.
-3. Per permettere alla persona di accedere, spunta **Permetti accesso**, poi imposta una **Password** e i **Ruoli**.
+3. Per permettere alla persona di accedere, spunta **Permetti accesso**, scegli i **Ruoli** e
+   l'**Impostazione password**:
+   - **Invia un'email di invito** (predefinito): la persona riceve un link per scegliere la sua password;
+   - **Imposta ora una password**: scrivi tu la password e comunicala alla persona.
 4. Clicca **Crea**.
 
 ![Nuovo utente](/docs/user-documentation/it/administration/assets/user-create.webp)
 
 > ℹ️ **Nota:** solo i super amministratori possono assegnare i ruoli. Quando modifichi un utente, lascia vuota la
 > **Password** per mantenere quella attuale.
+
+Il link dell'invito scade dopo 6 ore: dopo, la persona può riceverne uno nuovo con **Password dimenticata?** nella
+[pagina di accesso](../basics/logging-in). La stessa scelta compare quando spunti **Permetti accesso** per un utente
+virtuale che non ha mai avuto una password.
 
 ## Pagina dell'utente
 

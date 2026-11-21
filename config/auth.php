@@ -99,6 +99,15 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        // Invitations sent to the users created by administrators, to choose their password: their tokens are kept in
+        // their own table, so that they can last longer without extending the normal password resets
+        'invitations' => [
+            'provider' => 'users',
+            'table' => 'user_invitation_tokens',
+            'expire' => 360,
+            'throttle' => 60,
+        ],
     ],
 
     /*

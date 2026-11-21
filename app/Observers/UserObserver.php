@@ -2,8 +2,10 @@
 
 namespace App\Observers;
 
+use App\Filament\Pages\Auth\ResetPassword;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Password;
 
 class UserObserver
 {
@@ -44,6 +46,12 @@ class UserObserver
     {
         if ($user->wasChanged('can_login') && $user->isVirtual()) {
             $user->pushSubscriptions()->delete();
+        }
+
+        // Once the password is set another way ("Forgot password?", an administrator...), an unused invitation must
+        // not be able to replace it
+        if ($user->wasChanged('password')) {
+            Password::broker(ResetPassword::INVITATION_PASSWORD_BROKER)->deleteToken($user);
         }
 
         // Handle role protection after update

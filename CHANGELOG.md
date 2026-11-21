@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - The installed app takes the primary colour chosen on the Settings pages
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- **User invitations**: when creating a user who can log in, or allowing access to a virtual user without a password,
+  administrators can send an email with a link to choose the password (valid for 6 hours) instead of setting it.
 
 ### Changed
 
@@ -47,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The shared pages ask search engines not to index them (`X-Robots-Tag` header and `robots` meta tag), so that they
   don't show up in search results even when their links are posted somewhere public
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- Passwords set by administrators in the user form follow the same rules as the ones users choose themselves.
 
 ## [1.0.0-alpha11] - 2026-11-20
 

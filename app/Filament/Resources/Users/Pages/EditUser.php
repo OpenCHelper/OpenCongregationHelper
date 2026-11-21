@@ -2,13 +2,30 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\Pages\Concerns\SendsUserInvitation;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord
 {
+    use SendsUserInvitation;
+
     protected static string $resource = UserResource::class;
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return $this->pullPasswordSetup($data);
+    }
+
+    protected function afterSave(): void
+    {
+        $this->sendInvitationIfChosen();
+    }
 
     protected function getHeaderActions(): array
     {
