@@ -37,9 +37,11 @@ return [
         'shared_pages_privacy' => 'Privacy delle pagine condivise',
         'shared_pages_privacy_description' => 'Cosa mostra e permette di fare la pagina pubblica di un\'assegnazione condivisa a chiunque ne abbia il link.',
         'stale_assignments' => 'Assegnazioni fuori da troppo tempo',
-        'stale_assignments_description' => 'Le assegnazioni ancora in corso dopo questi giorni sono fuori da troppo tempo: una volta a settimana, ai loro assegnatari viene ricordato di restituirle.',
+        'stale_assignments_description' => 'Le assegnazioni ancora in corso dopo questi giorni sono fuori da troppo tempo: una volta a settimana, ai loro assegnatari viene ricordato di restituirle e il reparto territori ne riceve un riepilogo via email e nell\'app.',
         'assignment_frequency' => 'Frequenza di assegnazione',
         'assignment_frequency_description' => 'Quanto spesso viene assegnato ogni territorio, come colorato sulla mappa della dashboard: in base al numero delle sue assegnazioni negli ultimi mesi.',
+        'territory_coverage' => 'Copertura del territorio',
+        'territory_coverage_description' => 'I periodi su cui la dashboard può mostrare la parte di territori lavorati.',
     ],
 
     'fields' => [
@@ -95,6 +97,12 @@ return [
             'label' => 'Ora dei promemoria',
             'helper' => 'Nel fuso orario dell\'applicazione (`APP_TIMEZONE`). I promemoria vengono inviati solo se a quell\'ora lo scheduler è in esecuzione, come cron job o come processo sempre attivo (es. con Supervisor): vedi la guida al setup.',
         ],
+        'stale_summary_recipients' => [
+            'label' => 'Destinatari del riepilogo',
+            'helper' => 'Chi nel reparto territori riceve il riepilogo settimanale delle assegnazioni fuori da troppo tempo, via email e nell\'app.',
+            'members' => 'Tutti i membri del reparto',
+            'overseers' => 'Solo i responsabili',
+        ],
         'frequency_period_months' => [
             'label' => 'Mesi considerati',
             'helper' => 'Si contano le assegnazioni iniziate in questi ultimi mesi.',
@@ -104,6 +112,14 @@ return [
         ],
         'high_frequency_min_assignments' => [
             'label' => 'Frequente',
+        ],
+        'coverage_periods_months' => [
+            'label' => 'Periodi',
+            'placeholder' => 'Mesi, ad es. 12',
+            'helper' => 'In mesi: premi Invio dopo ognuno.',
+        ],
+        'coverage_default_period_months' => [
+            'label' => 'Periodo mostrato di default',
         ],
     ],
 ];

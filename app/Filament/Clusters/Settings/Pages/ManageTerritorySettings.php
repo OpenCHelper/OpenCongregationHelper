@@ -11,9 +11,11 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
@@ -137,6 +139,15 @@ class ManageTerritorySettings extends AppSettingsPage
                             ->type('time')
                             ->required()
                             ->regex('/^([01]\d|2[0-3]):[0-5]\d$/'),
+                        Select::make('stale_summary_recipients')
+                            ->label(__('settings.fields.stale_summary_recipients.label'))
+                            ->helperText(__('settings.fields.stale_summary_recipients.helper').' '.$this->defaultHint(
+                                self::staleSummaryRecipientOptions()[$this->defaultValue('stale_summary_overseers_only') ? 'overseers' : 'members'],
+                            ))
+                            ->options(self::staleSummaryRecipientOptions())
+                            ->required()
+                            ->native(false)
+                            ->columnSpanFull(),
                     ]),
                 Section::make(__('settings.sections.assignment_frequency'))
                     ->description(__('settings.sections.assignment_frequency_description'))
@@ -158,6 +169,27 @@ class ManageTerritorySettings extends AppSettingsPage
                             ->maxValue(999)
                             ->gt('medium_frequency_min_assignments'),
                         $this->stagesBar($frequencyStages, isCountdown: false, startLabel: '0', endLabel: ''),
+                    ]),
+                Section::make(__('settings.sections.territory_coverage'))
+                    ->description(__('settings.sections.territory_coverage_description'))
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->schema([
+                        TagsInput::make('coverage_periods_months')
+                            ->label(__('settings.fields.coverage_periods_months.label'))
+                            ->placeholder(__('settings.fields.coverage_periods_months.placeholder'))
+                            ->helperText(__('settings.fields.coverage_periods_months.helper').' '.$this->defaultHint(implode(', ', $this->defaultValue('coverage_periods_months'))))
+                            ->required()
+                            ->nestedRecursiveRules(['integer', 'min:1', 'max:120'])
+                            ->live(),
+                        Select::make('coverage_default_period_months')
+                            ->label(__('settings.fields.coverage_default_period_months.label'))
+                            ->helperText($this->defaultHint((string) $this->defaultValue('coverage_default_period_months')))
+                            ->options(fn (Get $get): array => collect(self::normalizePeriods((array) $get('coverage_periods_months')))
+                                ->mapWithKeys(fn (int $months): array => [$months => trans_choice('filament-widgets.territory_coverage.period', $months, ['count' => $months])])
+                                ->all())
+                            ->required()
+                            ->native(false),
                     ]),
             ]);
     }
@@ -200,6 +232,19 @@ class ManageTerritorySettings extends AppSettingsPage
     }
 
     /**
+     * Who in the territory department receives the summary of the stale assignments.
+     *
+     * @return array{members: string, overseers: string}
+     */
+    public static function staleSummaryRecipientOptions(): array
+    {
+        return [
+            'members' => __('settings.fields.stale_summary_recipients.members'),
+            'overseers' => __('settings.fields.stale_summary_recipients.overseers'),
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
@@ -208,6 +253,9 @@ class ManageTerritorySettings extends AppSettingsPage
         $data = parent::mutateFormDataBeforeFill($data);
         $data['map_default_center'] = self::formatCoordinates($data['map_default_center']);
         $data['shared_pii'] = $data['shared_pii'] ? 'show' : 'hide';
+        $data['coverage_periods_months'] = array_map('strval', self::normalizePeriods((array) $data['coverage_periods_months']));
+        $data['stale_summary_recipients'] = $data['stale_summary_overseers_only'] ? 'overseers' : 'members';
+        unset($data['stale_summary_overseers_only']);
 
         return $data;
     }
@@ -222,12 +270,32 @@ class ManageTerritorySettings extends AppSettingsPage
         $data['shared_pii'] = $data['shared_pii'] === 'show';
         $data['guest_returns'] = (bool) $data['guest_returns'];
         $data['stale_check_day'] = (int) $data['stale_check_day'];
+        $data['coverage_periods_months'] = self::normalizePeriods((array) $data['coverage_periods_months']);
+        $data['stale_summary_overseers_only'] = $data['stale_summary_recipients'] === 'overseers';
+        unset($data['stale_summary_recipients']);
 
-        foreach (['stale_after_days', 'dead_after_days', 'frequency_period_months', 'medium_frequency_min_assignments', 'high_frequency_min_assignments'] as $property) {
+        foreach (['stale_after_days', 'dead_after_days', 'frequency_period_months', 'medium_frequency_min_assignments', 'high_frequency_min_assignments', 'coverage_default_period_months'] as $property) {
             $data[$property] = (int) $data[$property];
         }
 
         return parent::mutateFormDataBeforeSave($data);
+    }
+
+    /**
+     * The valid periods, in months, sorted and without duplicates.
+     *
+     * @param  array<int, mixed>  $periods
+     * @return list<int>
+     */
+    public static function normalizePeriods(array $periods): array
+    {
+        return collect($periods)
+            ->filter(fn (mixed $months): bool => filter_var($months, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 120]]) !== false)
+            ->map(fn (mixed $months): int => (int) $months)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
     }
 
     /**
