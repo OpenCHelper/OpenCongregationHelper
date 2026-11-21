@@ -28,6 +28,10 @@ return [
     */
     'expected_structure' => null,
 
+    /*
+    | PROVISIONAL: the positions below were estimated without the official form at hand, and still need to be
+    | calibrated against it (upload it, download a record, and move the boxes until the text sits in the cells).
+    */
     'layout' => [
         // Page of the template to fill (the first one is 1)
         'template_page' => 1,
