@@ -35,7 +35,7 @@ return [
         'congregation' => 'Congregation',
         'maps' => 'Maps',
         'shared_pages_privacy' => 'Privacy of shared pages',
-        'shared_pages_privacy_description' => 'What the public page of a shared assignment shows to anyone who has its link.',
+        'shared_pages_privacy_description' => 'What the public page of a shared assignment shows, and lets do, to anyone who has its link.',
         'stale_assignments' => 'Assignments out for too long',
         'stale_assignments_description' => 'Assignments still in progress after these days are out for too long: once a week, their assignees are reminded to return them.',
         'assignment_frequency' => 'Assignment frequency',
@@ -75,6 +75,12 @@ return [
             'understood' => 'I understand that anyone with a shared link will see this data, and the congregation has agreed to it.',
             'understood_required' => 'Confirm that you understand what showing the personal data means.',
             'confirm' => 'Show personal data',
+        ],
+        'guest_returns' => [
+            'label' => 'Ask to return from shared pages',
+            'helper' => 'Anyone who opens the public page of a shared assignment can ask the territory department to close it, without an account.',
+            'enabled' => 'Enabled',
+            'disabled' => 'Disabled',
         ],
         'stale_after_days' => [
             'label' => 'Out for too long',

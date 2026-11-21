@@ -231,10 +231,48 @@ class TerritoryAssignmentResource extends Resource
             ]);
     }
 
+    /**
+     * Banner telling that the return of the assignment has been asked to the territory department, with the button to
+     * close it for those who can.
+     */
+    public static function getReturnRequestedCallout(): Callout
+    {
+        return Callout::make(fn (TerritoryAssignment $record): ?string => $record->isReturnRequested()
+            ? __('filament-resources.territory_assignment.return_requested_heading', [
+                'date' => $record->return_requested_at->format('d/m/Y H:i'),
+            ])
+            : null)
+            ->key('returnRequestedCallout')
+            ->description(__('filament-resources.territory_assignment.return_requested_description'))
+            ->icon(Heroicon::OutlinedArchiveBoxArrowDown)
+            ->info()
+            ->visible(fn (TerritoryAssignment $record): bool => $record->isReturnRequested())
+            ->columnSpanFull()
+            ->actions([
+                Action::make('returnRequestedAssignment')
+                    ->button()
+                    ->label(__('filament-resources.territory_assignment.action_end_assignment'))
+                    ->icon(Heroicon::OutlinedArchiveBoxArrowDown)
+                    ->requiresConfirmation()
+                    ->modalHeading(__('filament-resources.territory_assignment.action_end_assignment'))
+                    ->modalSubmitActionLabel(__('filament-resources.territory_assignment.action_end'))
+                    ->authorize(fn (TerritoryAssignment $record): bool => Gate::allows('update', $record))
+                    ->action(function (TerritoryAssignment $record): void {
+                        $record->update(['ended_at' => now()]);
+
+                        Notification::make()
+                            ->success()
+                            ->title(__('filament-resources.territory_assignment.return_success'))
+                            ->send();
+                    }),
+            ]);
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema
             ->components([
+                static::getReturnRequestedCallout(),
                 static::getCampaignDeadlineCallout(),
                 Section::make(__('filament-resources.territory_assignment.section_territory_info'))
                     ->description(__('filament-resources.territory_assignment.section_territory_info_description'))

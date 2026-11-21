@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\TerritoryAssignments\Pages;
 
+use App\Filament\Resources\TerritoryAssignments\Actions\RequestReturnAction;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
+use App\Models\TerritoryAssignment;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\TextInput;
@@ -11,20 +13,58 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Auth;
 
 class ViewTerritoryAssignment extends ViewRecord
 {
     protected static string $resource = TerritoryAssignmentResource::class;
 
+    /**
+     * The assignees can open their own assignments without being allowed to list them (e.g. from a notification): the
+     * access to the assignment itself is still checked by the `view` policy, and the query of the resource only finds
+     * the assignments the user can see (their own, unless allowed to list all of them).
+     */
+    public static function authorizeResourceAccess(): void
+    {
+        //
+    }
+
+    /**
+     * The breadcrumbs of the list of the assignments, not linked for the users who cannot open it (e.g. an assignee
+     * opening their own assignment).
+     *
+     * @return array<int|string, string>
+     */
+    public function getResourceBreadcrumbs(): array
+    {
+        $breadcrumbs = parent::getResourceBreadcrumbs();
+
+        return static::getResource()::canAccess() ? $breadcrumbs : array_values($breadcrumbs);
+    }
+
+    /**
+     * Whether the user can share the assignment, or stop sharing it: those allowed to view the assignments, and its
+     * assignee (e.g. to pass the territory on to someone without an account).
+     */
+    public static function canManageSharing(TerritoryAssignment $assignment): bool
+    {
+        $user = Auth::user();
+
+        return $user !== null
+            && ($user->can('View:TerritoryAssignment') || $assignment->assignee_id === $user->getKey());
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            RequestReturnAction::make(),
             ActionGroup::make([
                 Action::make('share')
                     ->color('primary')
                     ->label(__('filament-resources.territory_assignment.action_copy.label'))
                     ->tooltip(__('filament-resources.territory_assignment.action_copy.tooltip'))
                     ->icon(Heroicon::OutlinedShare)
+                    ->authorize(fn (): bool => static::canManageSharing($this->getRecord()))
                     ->modalHeading(__('filament-resources.territory_assignment.share_modal.title'))
                     ->modalDescription(__('filament-resources.territory_assignment.share_modal.description'))
                     ->modalSubmitAction(false)
@@ -91,6 +131,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ])
                     ->extraModalFooterActions([
                         Action::make('stop_sharing')
+                            ->authorize(fn (): bool => static::canManageSharing($this->getRecord()))
                             ->requiresConfirmation()
                             ->cancelParentActions()
                             ->label(__('filament-resources.territory_assignment.share_modal.stop_sharing'))
