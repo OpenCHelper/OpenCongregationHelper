@@ -306,6 +306,26 @@ test('the stale assignment levels are used to find the assignments out for too l
     Event::assertDispatched(StaleAssignmentDetected::class, fn (StaleAssignmentDetected $event): bool => $event->assignment->is($staleAssignment));
 });
 
+test('the recipients of the stale assignments summary are stored', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSchemaStateSet(['stale_summary_recipients' => 'members'])
+        ->fillForm(['stale_summary_recipients' => 'overseers'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(TerritorySettings::class)->stale_summary_overseers_only)->toBeTrue();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSchemaStateSet(['stale_summary_recipients' => 'overseers'])
+        ->fillForm(['stale_summary_recipients' => 'members'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(TerritorySettings::class)->stale_summary_overseers_only)->toBeFalse();
+});
+
 test('the stale assignment levels must grow', function () {
     actingAsSuperAdmin();
 
