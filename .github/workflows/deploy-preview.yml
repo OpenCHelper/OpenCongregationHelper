@@ -21,8 +21,8 @@ name: Deploy (PR previews)
 # Repository variables: SPACE_DEFAULT_ENVIRONMENT, SPACE_PHP_HANDLER (the router of the space, shared with TEST).
 #
 # Which PRs get a preview: the `PREVIEW_MODE` repository variable sets the default, the labels of each PR override it.
-#   - `all` (default): every PR, unless it has the `no-preview` label (opt-out);
-#   - `labeled`: only the PRs with the `preview` label (opt-in);
+#   - `opt-out` (default): every PR, unless it has the `no-preview` label;
+#   - `opt-in`: only the PRs with the `preview` label;
 #   - `off`: none (e.g. while the space is unavailable).
 # `no-preview` wins over `preview`. Adding or removing a label deploys or removes the preview right away, and the
 # weekly cleanup removes the previews of the PRs that no longer want one (e.g. after switching the mode to `off`).
@@ -67,7 +67,7 @@ env:
   cron_folder_prefix: "(Preview) PR-"
   cron_schedule: "*/5 8-22 * * 1-5"
   cron_timezone: Europe/Rome
-  # Labels of a PR to opt in to its preview (needed with `PREVIEW_MODE=labeled`) or out of it (see the top)
+  # Labels of a PR to opt in to its preview (needed with `PREVIEW_MODE=opt-in`) or out of it (see the top)
   preview_label: preview
   no_preview_label: no-preview
 
@@ -90,7 +90,7 @@ jobs:
         id: decide
         env:
           GH_TOKEN: ${{ github.token }}
-          MODE: ${{ vars.PREVIEW_MODE || 'all' }}
+          MODE: ${{ vars.PREVIEW_MODE || 'opt-out' }}
           EVENT_NAME: ${{ github.event_name }}
           EVENT_ACTION: ${{ github.event.action }}
           EVENT_PR: ${{ github.event.pull_request.number }}
@@ -101,13 +101,13 @@ jobs:
           INPUT_ACTION: ${{ inputs.action }}
           INPUT_PR: ${{ inputs.pr }}
         run: |
-          if [[ ! "$MODE" =~ ^(all|labeled|off)$ ]]; then
-            echo "::error::Invalid PREVIEW_MODE repository variable '${MODE}': use all, labeled or off."
+          if [[ ! "$MODE" =~ ^(opt-in|opt-out|off)$ ]]; then
+            echo "::error::Invalid PREVIEW_MODE repository variable '${MODE}': use opt-in, opt-out or off."
             exit 1
           fi
 
           # Whether a PR with the given labels (JSON array of names) wants a preview
-          wants='def wants: ($mode != "off") and (index($opt_out) | not) and ($mode == "all" or (index($opt_in) != null));'
+          wants='def wants: ($mode != "off") and (index($opt_out) | not) and ($mode == "opt-out" or (index($opt_in) != null));'
           wants () {
             jq -e --arg mode "$MODE" --arg opt_in "$preview_label" --arg opt_out "$no_preview_label" \
               "${wants} wants" <<< "$1" > /dev/null

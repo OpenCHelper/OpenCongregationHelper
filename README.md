@@ -207,8 +207,8 @@ Which PRs get a preview is set by the `PREVIEW_MODE` repository variable, and by
 
 | `PREVIEW_MODE` | Previews |
 | --- | --- |
-| `all` (default) | Every PR, unless it has the `no-preview` label (opt-out) |
-| `labeled` | Only the PRs with the `preview` label (opt-in) |
+| `opt-out` (default) | Every PR, unless it has the `no-preview` label |
+| `opt-in` | Only the PRs with the `preview` label |
 | `off` | None |
 
 Adding or removing a label deploys or removes the preview right away; `no-preview` wins over `preview`.
