@@ -173,3 +173,28 @@ test('the expected structure is the one of the official form', function () {
         ->and($expected['grid']['rows'])->toHaveCount(42)
         ->and($expected['grid']['columns'])->toHaveCount(8);
 });
+
+test('a form whose table matches the configured one is not reported, whatever the number types', function () {
+    // As measured, the grid is made of floats, while the configuration may list integers (e.g. 24 for 24.0)
+    $expected = S13TemplateStructure::expected();
+    $measured = [...$expected, 'grid' => [
+        'columns' => array_map(fn (int|float $position): float => (float) $position, $expected['grid']['columns']),
+        'rows' => array_map(fn (int|float $position): float => (float) $position, $expected['grid']['rows']),
+    ]];
+
+    expect(S13TemplateStructure::differences($measured))->toBe([]);
+});
+
+test('a table moved by less than the tolerance is not reported, but a moved line is', function () {
+    $expected = S13TemplateStructure::expected();
+    $grid = $expected['grid'];
+
+    $nudged = array_map(fn (int|float $position): float => $position + 0.2, $grid['rows']);
+    expect(S13TemplateStructure::differences([...$expected, 'grid' => [...$grid, 'rows' => $nudged]]))->toBe([]);
+
+    $moved = $grid['columns'];
+    $moved[0] += 3;
+    expect(S13TemplateStructure::differences([...$expected, 'grid' => [...$grid, 'columns' => $moved]]))->toBe([__('s13.structure.grid')]);
+
+    expect(S13TemplateStructure::differences([...$expected, 'grid' => [...$grid, 'rows' => array_slice($grid['rows'], 1)]]))->toBe([__('s13.structure.grid')]);
+});

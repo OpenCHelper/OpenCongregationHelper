@@ -28,6 +28,12 @@ class S13TemplateStructure
     public const ISSUES_URL = 'https://github.com/OpenCHelper/OpenCongregationHelper/issues/new';
 
     /**
+     * How far (in millimetres) a line of the table may be from where it is expected: the positions are measured and
+     * rounded to the half millimetre, so a line near a rounding edge may land on either side of it.
+     */
+    public const GRID_TOLERANCE = 0.5;
+
+    /**
      * Read the structure of a PDF: its pages, the size of the page that is filled (in millimetres, rounded), the names
      * of its form fields, sorted, and the lines of its table.
      *
@@ -97,11 +103,34 @@ class S13TemplateStructure
             $differences[] = __('s13.structure.added_fields', ['fields' => self::summarize($added)]);
         }
 
-        if ($structure['grid'] !== ($expected['grid'] ?? $structure['grid'])) {
+        if (isset($expected['grid']) && ! self::gridsMatch($structure['grid'], $expected['grid'])) {
             $differences[] = __('s13.structure.grid');
         }
 
         return $differences;
+    }
+
+    /**
+     * Whether two tables have the same lines, each within the tolerance of its counterpart.
+     *
+     * @param  array{columns: list<int|float>, rows: list<int|float>}  $grid
+     * @param  array{columns: list<int|float>, rows: list<int|float>}  $expected
+     */
+    public static function gridsMatch(array $grid, array $expected): bool
+    {
+        foreach (['columns', 'rows'] as $lines) {
+            if (count($grid[$lines]) !== count($expected[$lines])) {
+                return false;
+            }
+
+            foreach (array_map(null, $grid[$lines], $expected[$lines]) as [$position, $expectedPosition]) {
+                if (abs((float) $position - (float) $expectedPosition) > self::GRID_TOLERANCE + 1e-9) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
