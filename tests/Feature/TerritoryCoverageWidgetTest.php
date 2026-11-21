@@ -7,6 +7,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use App\Settings\TerritorySettings;
 use Filament\Facades\Filament;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
@@ -41,7 +42,7 @@ test('the dashboard shows the territory coverage widget', function () {
         ->assertSee(__('filament-widgets.territory_coverage.heading'));
 });
 
-test('the coverage counts the territories with an assignment returned in the period', function () {
+test('the coverage counts the territories with an assignment returned in the period or in progress', function () {
     $worked = ($this->territory)('Worked');
     $workedTwice = ($this->territory)('Worked twice');
     $workedLongAgo = ($this->territory)('Worked long ago');
@@ -57,10 +58,19 @@ test('the coverage counts the territories with an assignment returned in the per
     $coverage = Livewire::test(TerritoryCoverage::class)->instance()->getCoverage();
 
     expect($coverage)
-        ->worked->toBe(2)
+        ->worked->toBe(3)
         ->total->toBe(5)
-        ->percentage->toBe(40.0)
-        ->label->toBe(__('filament-widgets.territory_coverage.value', ['percentage' => '40%', 'worked' => 2, 'total' => 5]));
+        ->percentage->toBe(60.0)
+        ->label->toBe(__('filament-widgets.territory_coverage.value', ['percentage' => '60%', 'worked' => 3, 'total' => 5]));
+});
+
+test('an assignment in progress counts however long ago it started, but not before it starts', function () {
+    ($this->assign)(($this->territory)('Out for long'), '2023-01-01', null);
+    ($this->assign)(($this->territory)('Not started yet'), '2026-07-01', null);
+
+    expect(Livewire::test(TerritoryCoverage::class)->set('months', 6)->instance()->getCoverage())
+        ->worked->toBe(1)
+        ->total->toBe(2);
 });
 
 test('the coverage ignores deleted and inconsistent assignments and deleted territories', function () {
@@ -96,6 +106,8 @@ test('the coverage depends on the chosen period', function (int $months, int $ex
 ]);
 
 test('the period defaults to 12 months and only accepts the offered periods', function () {
+    expect(Livewire::test(TerritoryCoverage::class)->instance()->getPeriodOptions())->toHaveKeys([6, 12, 24]);
+
     Livewire::test(TerritoryCoverage::class)
         ->assertSet('months', 12)
         ->set('months', 7)
@@ -108,14 +120,18 @@ test('the coverage excluding campaigns ignores the assignments of campaigns', fu
     $campaign = Campaign::factory()->create();
 
     $workedForCampaign = ($this->territory)('Campaign');
+    $inProgressForCampaign = ($this->territory)('Campaign in progress');
     $worked = ($this->territory)('Regular');
+    $inProgress = ($this->territory)('Regular in progress');
     ($this->assign)($workedForCampaign, '2026-03-01', '2026-03-20', $campaign);
+    ($this->assign)($inProgressForCampaign, '2026-05-01', null, $campaign);
     ($this->assign)($worked, '2026-03-01', '2026-03-20');
+    ($this->assign)($inProgress, '2026-05-01', null);
 
     $widget = Livewire::test(TerritoryCoverage::class)->instance();
 
-    expect($widget->getCoverage())->worked->toBe(2)->total->toBe(2)
-        ->and($widget->getCoverageExcludingCampaigns())->worked->toBe(1)->total->toBe(2)->percentage->toBe(50.0);
+    expect($widget->getCoverage())->worked->toBe(4)->total->toBe(4)
+        ->and($widget->getCoverageExcludingCampaigns())->worked->toBe(2)->total->toBe(4)->percentage->toBe(50.0);
 });
 
 test('the percentage is rounded down so that 100% means every territory was worked', function () {
@@ -137,7 +153,7 @@ test('no territory gives a coverage of zero', function () {
         ->percentage->toBe(0.0);
 });
 
-test('the territories never worked come first, then those not worked for the longest time', function () {
+test('the territories never worked come first, then those not worked for the longest time, and those in progress last', function () {
     $recent = ($this->territory)('Recent');
     $old = ($this->territory)('Old');
     $older = ($this->territory)('Older');
@@ -159,7 +175,7 @@ test('the territories never worked come first, then those not worked for the lon
         ->pluck('name')
         ->all();
 
-    expect($names)->toBe(['In progress only', 'Never A', 'Never B', 'Older', 'Old']);
+    expect($names)->toBe(['Never A', 'Never B', 'Older', 'Old', 'Recent']);
 });
 
 test('the widget lists the territories never worked or not worked for the longest time', function () {
@@ -175,4 +191,40 @@ test('the widget lists the territories never worked or not worked for the longes
             Carbon::parse('2025-02-01')->isoFormat('LL'),
         ])
         ->assertSee(__('filament-widgets.territory_coverage.value', ['percentage' => '0%', 'worked' => 0, 'total' => 2]));
+});
+
+test('the periods and the default one are the ones of the settings', function () {
+    $settings = app(TerritorySettings::class);
+    $settings->coverage_periods_months = [3, 36];
+    $settings->coverage_default_period_months = 36;
+    $settings->save();
+
+    $territory = ($this->territory)('Two years ago');
+    ($this->assign)($territory, '2024-05-01', '2024-06-01');
+
+    Livewire::test(TerritoryCoverage::class)
+        ->assertSet('months', 36)
+        ->assertSee(trans_choice('filament-widgets.territory_coverage.period', 3, ['count' => 3]))
+        ->assertDontSee(trans_choice('filament-widgets.territory_coverage.period', 12, ['count' => 12]))
+        ->assertSee(__('filament-widgets.territory_coverage.value', ['percentage' => '100%', 'worked' => 1, 'total' => 1]))
+        ->set('months', 12)
+        ->assertSet('months', 36)
+        ->set('months', 3)
+        ->assertSee(__('filament-widgets.territory_coverage.value', ['percentage' => '0%', 'worked' => 0, 'total' => 1]));
+});
+
+test('a period no longer offered falls back on the default one', function () {
+    $settings = app(TerritorySettings::class);
+    $settings->coverage_periods_months = [6, 18];
+    $settings->coverage_default_period_months = 18;
+    $settings->save();
+
+    Livewire::test(TerritoryCoverage::class, ['months' => 12])->assertSet('months', 18);
+});
+
+test('the territories in progress are marked as such in the list', function () {
+    ($this->assign)(($this->territory)('Out now'), '2026-05-01', null);
+
+    Livewire::test(TerritoryCoverage::class)
+        ->assertSeeInOrder(['Out now', __('filament-widgets.territory_coverage.in_progress')]);
 });

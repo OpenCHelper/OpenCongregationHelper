@@ -38,6 +38,7 @@ return [
         'value' => ':percentage (:worked de :total)',
         'least_recently_worked' => 'Nunca trabajados o sin trabajar desde hace más tiempo',
         'never_worked' => 'Nunca trabajado',
+        'in_progress' => 'En curso',
         'last_worked' => ':date (:ago)',
         'no_territories' => 'No hay territorios.',
     ],

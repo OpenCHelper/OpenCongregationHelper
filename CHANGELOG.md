@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Territory coverage** on the dashboard: the percentage of territories worked at least once in the last 6, 12 or
-  24 months (also excluding campaigns) and the 5 territories never worked or not worked for the longest time
-  ([#17](https://github.com/OpenCHelper/OpenCongregationHelper/issues/17)).
+  24 months (also excluding campaigns) and the 5 territories never worked or not worked for the longest time; the
+  periods can be changed from the Settings pages ([#17](https://github.com/OpenCHelper/OpenCongregationHelper/issues/17)).
 - **Settings pages**: super administrators can change the default map centre and the personal data on shared pages
   from **Administration → Settings**, without editing `.env`, which now only holds their defaults
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).

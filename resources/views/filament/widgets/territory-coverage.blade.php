@@ -84,7 +84,11 @@
                                     @endif
                                 </span>
 
-                                @if ($lastWorkedAt)
+                                @if ($territory->is_in_progress)
+                                    <x-filament::badge color="info">
+                                        {{ __('filament-widgets.territory_coverage.in_progress') }}
+                                    </x-filament::badge>
+                                @elseif ($lastWorkedAt)
                                     <span class="shrink-0 text-gray-500 dark:text-gray-400" title="{{ $lastWorkedAt->isoFormat('LL') }}">
                                         {{ __('filament-widgets.territory_coverage.last_worked', ['date' => $lastWorkedAt->isoFormat('LL'), 'ago' => $lastWorkedAt->diffForHumans()]) }}
                                     </span>

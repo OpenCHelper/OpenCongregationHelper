@@ -21,14 +21,15 @@ The statistics refresh automatically every few seconds.
 ## Territory coverage
 
 How much of the territory was worked in the period chosen in the menu at the top right (the **last 6, 12 or 24
-months**, 12 by default). The selection is remembered while you stay logged in.
+months**, 12 by default: the super administrators can change them in the
+[Settings](../administration/settings#territories)). The selection is remembered while you stay logged in.
 
-- **Territories worked at least once**: the percentage and the number of territories with at least one assignment
-  **returned** in the period, e.g. *97% (240 of 243)*. Assignments still in progress do not count. The percentage is
-  rounded down, so 100% means that every territory was worked.
+- **Territories worked at least once**: the percentage and the number of territories with at least one assignment in
+  the period, e.g. *97% (240 of 243)*: an assignment **returned** in the period, or still **in progress**. The
+  percentage is rounded down, so 100% means that every territory was worked.
 - **Excluding campaigns**: the same figure, counting only the assignments that are not part of a campaign.
-- **Never worked or not worked for the longest time**: the 5 territories that were never returned, then those
-  returned the longest ago, with the date of their last return.
+- **Never worked or not worked for the longest time**: the 5 territories never assigned, then those returned the
+  longest ago, with the date of their last return. Territories in progress come last.
 
 > 💡 **Tip:** the whole territory should be covered at least once a year: keep an eye on the 12-month figure and
 > assign the territories at the top of the list first.

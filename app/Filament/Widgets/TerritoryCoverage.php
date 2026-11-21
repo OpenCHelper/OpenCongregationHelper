@@ -4,6 +4,8 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\Territory;
+use App\Models\TerritoryAssignment;
+use App\Settings\TerritorySettings;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -12,20 +14,11 @@ use Illuminate\Support\Number;
 use Livewire\Attributes\Session;
 
 /**
- * How much of the territory was worked (at least one returned assignment) in a period of time,
- * and the territories never worked or not worked for the longest time.
+ * How much of the territory was worked in a period of time (at least one assignment overlapping it: started before its
+ * end, and in progress or returned in it), and the territories never worked or not worked for the longest time.
  */
 class TerritoryCoverage extends Widget
 {
-    /**
-     * The periods, in months, the user can choose from.
-     *
-     * @var list<int>
-     */
-    public const PERIODS = [6, 12, 24];
-
-    public const DEFAULT_PERIOD = 12;
-
     /**
      * How many of the territories not worked for the longest time are listed.
      */
@@ -36,13 +29,14 @@ class TerritoryCoverage extends Widget
     protected int|string|array $columnSpan = 'full';
 
     /**
-     * The period, in months, remembered for the whole session.
+     * The period, in months, remembered for the whole session (the default one of the settings until chosen).
      */
     #[Session]
-    public int $months = self::DEFAULT_PERIOD;
+    public ?int $months = null;
 
     /**
-     * The territories with the end of their last returned assignment, loaded once per request.
+     * The territories with the end of their last returned assignment and whether they are in progress, loaded once
+     * per request.
      *
      * @var Collection<int, Territory>|null
      */
@@ -63,9 +57,38 @@ class TerritoryCoverage extends Widget
      */
     public function getPeriodOptions(): array
     {
-        return collect(self::PERIODS)
+        return collect($this->getPeriods())
             ->mapWithKeys(fn (int $months): array => [$months => trans_choice('filament-widgets.territory_coverage.period', $months, ['count' => $months])])
             ->all();
+    }
+
+    /**
+     * The periods, in months, the user can choose from (from the settings).
+     *
+     * @return list<int>
+     */
+    public function getPeriods(): array
+    {
+        $periods = collect(TerritorySettings::value('coverage_periods_months'))
+            ->map(fn (mixed $months): int => (int) $months)
+            ->filter(fn (int $months): bool => $months > 0)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        return $periods !== [] ? $periods : TerritorySettings::defaultValue('coverage_periods_months');
+    }
+
+    /**
+     * The period, in months, shown until the user chooses another one (from the settings).
+     */
+    public function getDefaultPeriod(): int
+    {
+        $periods = $this->getPeriods();
+        $default = (int) TerritorySettings::value('coverage_default_period_months');
+
+        return in_array($default, $periods, true) ? $default : $periods[0];
     }
 
     /**
@@ -75,7 +98,7 @@ class TerritoryCoverage extends Widget
      */
     public function getCoverage(): array
     {
-        return $this->coverageOf('last_worked_at');
+        return $this->coverageOf('last_worked_at', 'is_in_progress');
     }
 
     /**
@@ -85,11 +108,12 @@ class TerritoryCoverage extends Widget
      */
     public function getCoverageExcludingCampaigns(): array
     {
-        return $this->coverageOf('last_worked_outside_campaigns_at');
+        return $this->coverageOf('last_worked_outside_campaigns_at', 'is_in_progress_outside_campaigns');
     }
 
     /**
-     * The territories never worked first, then those whose last returned assignment ended the longest ago.
+     * The territories never worked first, then those whose last returned assignment ended the longest ago, and last
+     * those in progress (being worked now).
      *
      * @return Collection<int, Territory>
      */
@@ -97,6 +121,7 @@ class TerritoryCoverage extends Widget
     {
         return $this->getTerritories()
             ->sortBy([
+                fn (Territory $a, Territory $b): int => (bool) $a->is_in_progress <=> (bool) $b->is_in_progress,
                 fn (Territory $a, Territory $b): int => ($a->last_worked_at !== null) <=> ($b->last_worked_at !== null),
                 fn (Territory $a, Territory $b): int => (string) $a->last_worked_at <=> (string) $b->last_worked_at,
                 fn (Territory $a, Territory $b): int => strnatcasecmp((string) $a->name, (string) $b->name),
@@ -123,21 +148,21 @@ class TerritoryCoverage extends Widget
      */
     protected function getPeriodStart(): Carbon
     {
-        return now()->subMonths($this->months);
+        return now()->subMonths($this->months ?? $this->getDefaultPeriod());
     }
 
     /**
      * @return array{worked: int, total: int, percentage: float, label: string}
      */
-    protected function coverageOf(string $lastWorkedAttribute): array
+    protected function coverageOf(string $lastWorkedAttribute, string $inProgressAttribute): array
     {
         $territories = $this->getTerritories();
         $periodStart = $this->getPeriodStart();
 
         $total = $territories->count();
         $worked = $territories
-            ->filter(fn (Territory $territory): bool => $territory->{$lastWorkedAttribute} !== null
-                && Carbon::parse($territory->{$lastWorkedAttribute})->greaterThanOrEqualTo($periodStart))
+            ->filter(fn (Territory $territory): bool => (bool) $territory->{$inProgressAttribute}
+                || ($territory->{$lastWorkedAttribute} !== null && Carbon::parse($territory->{$lastWorkedAttribute})->greaterThanOrEqualTo($periodStart)))
             ->count();
 
         // Rounded down, so that 100% is only shown when every territory was worked
@@ -165,13 +190,28 @@ class TerritoryCoverage extends Widget
             ->with('territoryZone:id,name')
             ->withMax(['assignments as last_worked_at' => fn (Builder $query) => $query->returned()], 'ended_at')
             ->withMax(['assignments as last_worked_outside_campaigns_at' => fn (Builder $query) => $query->returned()->whereNull('campaign_id')], 'ended_at')
+            ->withExists([
+                'assignments as is_in_progress' => fn (Builder $query) => $this->inProgress($query),
+                'assignments as is_in_progress_outside_campaigns' => fn (Builder $query) => $this->inProgress($query)->whereNull('campaign_id'),
+            ])
             ->get();
+    }
+
+    /**
+     * Restrict the query to the assignments in progress that have already started.
+     *
+     * @param  Builder<TerritoryAssignment>  $query
+     * @return Builder<TerritoryAssignment>
+     */
+    protected function inProgress(Builder $query): Builder
+    {
+        return $query->whereNull('ended_at')->where('started_at', '<=', now());
     }
 
     protected function normalizePeriod(): void
     {
-        if (! in_array($this->months, self::PERIODS, true)) {
-            $this->months = self::DEFAULT_PERIOD;
+        if (! in_array($this->months, $this->getPeriods(), true)) {
+            $this->months = $this->getDefaultPeriod();
         }
     }
 }

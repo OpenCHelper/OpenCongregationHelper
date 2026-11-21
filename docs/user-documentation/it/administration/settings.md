@@ -52,6 +52,12 @@ colora i territori:
   essere di più. Con meno assegnazioni, o nessuna, la frequenza è **bassa**. La barra sotto le disegna in scala mentre
   scrivi.
 
+In **Copertura del territorio** scegli i periodi della [copertura del territorio](../basics/dashboard#copertura-del-territorio)
+della dashboard:
+
+- i **periodi**, in mesi, offerti nel suo menu (6, 12 e 24 di default): premi Invio dopo ognuno;
+- il **periodo mostrato di default** (12 mesi di default), uno dei periodi.
+
 ## Campagne
 
 ![Impostazioni delle campagne](/docs/user-documentation/it/administration/assets/settings-campaigns.webp)
