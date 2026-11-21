@@ -1,15 +1,20 @@
 <?php
 
+use App\Enums\PasswordSetup;
+use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\User;
-use App\Notifications\SetPasswordNotification;
-use Filament\Auth\Pages\PasswordReset\ResetPassword;
+use App\Notifications\UserInvitationNotification;
 use Filament\Facades\Filament;
+use Illuminate\Contracts\Auth\PasswordBroker;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -61,86 +66,120 @@ test('editing a user with a new password updates it', function () {
     expect(Hash::check('new-password', $this->user->refresh()->password))->toBeTrue();
 });
 
-test('creating a user that can log in without a password emails them a link to set it', function () {
-    Notification::fake();
-    $this->actingAs($this->manager);
-
-    Livewire::test(CreateUser::class)
+/**
+ * Fill the form to create a user that can log in.
+ *
+ * @param  array<string, mixed>  $data
+ */
+function createUserThatCanLogIn(array $data = []): Testable
+{
+    return Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'New',
             'last_name' => 'User',
             'email' => 'new.user@example.com',
             'can_login' => true,
-            'password' => null,
+            ...$data,
         ])
-        ->call('create')
+        ->call('create');
+}
+
+test('creating a user that can log in sends them an invitation by default', function () {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    createUserThatCanLogIn()
         ->assertHasNoFormErrors()
-        ->assertNotified(__('filament-resources.user.set_password_link_sent', ['email' => 'new.user@example.com']));
+        ->assertNotified(__('filament-resources.user.invitation_sent', ['email' => 'new.user@example.com']));
 
     $user = User::query()->where('email', 'new.user@example.com')->sole();
 
-    expect($user->password)->not->toBeNull();
+    expect($user->password)->toBeNull();
 
-    Notification::assertSentTo($user, SetPasswordNotification::class, function (SetPasswordNotification $notification) use ($user): bool {
-        $url = $notification->toMail($user)->actionUrl;
+    Notification::assertSentTo($user, UserInvitationNotification::class, function (UserInvitationNotification $notification) use ($user): bool {
+        $request = Request::create($notification->toMail($user)->actionUrl);
 
-        return Password::broker()->tokenExists($user, $notification->token)
-            && str_starts_with($url, Filament::getPanel('app')->getUrl())
-            && str_contains($url, urlencode($user->email));
+        return Password::broker('invitations')->tokenExists($user, $notification->token)
+            && ! Password::broker()->tokenExists($user, $notification->token)
+            && URL::hasValidSignature($request)
+            && $request->query('invitation') === '1';
     });
 });
 
-test('the link emailed to a new user lets them set their password', function () {
+test('the invitation lets the user choose their password for 6 hours', function (int $hoursLater, bool $isValid) {
     Notification::fake();
     $this->actingAs($this->manager);
 
-    Livewire::test(CreateUser::class)
-        ->fillForm([
-            'first_name' => 'New',
-            'last_name' => 'User',
-            'email' => 'new.user@example.com',
-            'can_login' => true,
-        ])
-        ->call('create')
-        ->assertHasNoFormErrors();
+    createUserThatCanLogIn()->assertHasNoFormErrors();
 
     $user = User::query()->where('email', 'new.user@example.com')->sole();
-    $token = Notification::sent($user, SetPasswordNotification::class)->sole()->token;
+    $token = Notification::sent($user, UserInvitationNotification::class)->sole()->token;
 
     auth()->logout();
+    $this->travel($hoursLater)->hours();
 
-    Livewire::test(ResetPassword::class, ['email' => $user->email, 'token' => $token])
+    Livewire::withQueryParams(['invitation' => 1])
+        ->test(ResetPassword::class, ['email' => $user->email, 'token' => $token])
         ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
         ->call('resetPassword')
-        ->assertHasNoFormErrors();
+        ->assertNotified(__($isValid ? PasswordBroker::PASSWORD_RESET : PasswordBroker::INVALID_TOKEN));
 
-    expect(Hash::check('chosen-password', $user->refresh()->password))->toBeTrue();
+    expect($user->refresh()->password !== null && Hash::check('chosen-password', $user->password))->toBe($isValid);
+})->with([
+    'right away' => [0, true],
+    'after 5 hours' => [5, true],
+    'after 7 hours' => [7, false],
+]);
+
+test('normal password resets still expire after an hour', function () {
+    $token = Password::broker()->createToken($this->user);
+
+    $this->travel(2)->hours();
+
+    Livewire::test(ResetPassword::class, ['email' => $this->user->email, 'token' => $token])
+        ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+        ->call('resetPassword')
+        ->assertNotified(__(PasswordBroker::INVALID_TOKEN));
+
+    expect(Hash::check('original-password', $this->user->refresh()->password))->toBeTrue();
 });
 
-test('the set password email is sent in the preferred language of the user', function () {
+test('invitation tokens are not accepted as normal password reset tokens', function () {
+    $token = Password::broker('invitations')->createToken($this->user);
+
+    Livewire::test(ResetPassword::class, ['email' => $this->user->email, 'token' => $token])
+        ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+        ->call('resetPassword')
+        ->assertNotified(__(PasswordBroker::INVALID_TOKEN));
+
+    expect(Hash::check('original-password', $this->user->refresh()->password))->toBeTrue();
+});
+
+test('the invitation is sent in the preferred language of the user', function () {
     $user = User::factory()->create(['locale' => 'it', 'can_login' => true]);
 
-    SetPasswordNotification::sendTo($user);
+    UserInvitationNotification::sendTo($user);
 
     $email = Mail::mailer()->getSymfonyTransport()->messages()->sole()->getOriginalMessage();
 
     expect($email->getSubject())->toBe('Il tuo account '.config('app.name'))
-        ->and($email->getHtmlBody())->toContain('Imposta password');
+        ->and($email->getHtmlBody())->toContain('Scegli la password')->toContain('6 ore');
 });
 
-test('creating a user with a password sets it and sends no email', function () {
+test('administrators can set the password of a new user instead of sending an invitation', function () {
     Notification::fake();
     $this->actingAs($this->manager);
 
     Livewire::test(CreateUser::class)
-        ->fillForm([
-            'first_name' => 'New',
-            'last_name' => 'User',
-            'email' => 'new.user@example.com',
-            'can_login' => true,
-            'password' => 'chosen-password',
-        ])
-        ->call('create')
+        ->fillForm(['can_login' => true])
+        ->assertFormFieldHidden('password')
+        ->fillForm(['password_setup' => PasswordSetup::Password])
+        ->assertFormFieldVisible('password');
+
+    createUserThatCanLogIn(['password_setup' => PasswordSetup::Password, 'password' => null])
+        ->assertHasFormErrors(['password' => 'required']);
+
+    createUserThatCanLogIn(['password_setup' => PasswordSetup::Password, 'password' => 'chosen-password'])
         ->assertHasNoFormErrors();
 
     $user = User::query()->where('email', 'new.user@example.com')->sole();
@@ -149,7 +188,7 @@ test('creating a user with a password sets it and sends no email', function () {
     Notification::assertNothingSent();
 });
 
-test('creating a virtual user sends no email', function () {
+test('creating a virtual user sends no invitation', function () {
     Notification::fake();
     $this->actingAs($this->manager);
 
@@ -160,10 +199,49 @@ test('creating a virtual user sends no email', function () {
             'email' => 'new.user@example.com',
             'can_login' => false,
         ])
+        ->assertFormFieldHidden('password_setup')
         ->call('create')
         ->assertHasNoFormErrors();
 
     expect(User::query()->where('email', 'new.user@example.com')->sole()->password)->toBeNull();
+    Notification::assertNothingSent();
+});
+
+test('allowing access to a virtual user without a password sends them an invitation', function () {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    $virtualUser = User::factory()->create(['can_login' => false, 'password' => null]);
+
+    Livewire::test(EditUser::class, ['record' => $virtualUser->id])
+        ->assertFormFieldHidden('password_setup')
+        ->fillForm(['can_login' => true])
+        ->assertFormFieldVisible('password_setup')
+        ->assertFormFieldHidden('password')
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertNotified(__('filament-resources.user.invitation_sent', ['email' => $virtualUser->email]));
+
+    expect($virtualUser->refresh()->can_login)->toBeTrue();
+    Notification::assertSentTo($virtualUser, UserInvitationNotification::class);
+});
+
+test('editing a user who already has a password sends no invitation', function () {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    $formerUser = User::factory()->create(['can_login' => false, 'password' => 'original-password']);
+
+    foreach ([$this->user, $formerUser] as $user) {
+        Livewire::test(EditUser::class, ['record' => $user->id])
+            ->fillForm(['can_login' => true])
+            ->assertFormFieldHidden('password_setup')
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect(Hash::check('original-password', $user->refresh()->password))->toBeTrue();
+    }
+
     Notification::assertNothingSent();
 });
 

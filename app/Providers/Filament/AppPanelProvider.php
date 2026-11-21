@@ -7,6 +7,7 @@ use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Enums\NavigationGroup as EnumsNavigationGroup;
 use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\CreateTeam;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\EditTeam;
@@ -85,7 +86,7 @@ class AppPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->login(Login::class)
-            ->passwordReset()
+            ->passwordReset(resetAction: ResetPassword::class)
             ->emailVerification(isRequired: false)
             ->viteTheme('resources/css/filament/app/theme.css')
             ->colors([

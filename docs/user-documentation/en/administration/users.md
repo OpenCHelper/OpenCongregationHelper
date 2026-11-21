@@ -24,15 +24,19 @@ Not everybody who works the territories needs to use the application:
 
 1. Click **New user**.
 2. Fill in **First Name**, **Last Name** and **Email**.
-3. To let the person log in, tick **Allow access** and choose the **Roles**. Leave **Password** empty to email the
-   person a link to choose their own password, or type one to set it yourself.
+3. To let the person log in, tick **Allow access**, choose the **Roles** and the **Password setup**:
+   - **Send an invitation email** (default): the person receives a link to choose their own password;
+   - **Set a password now**: type the password and give it to the person yourself.
 4. Click **Create**.
 
 ![New user](/docs/user-documentation/en/administration/assets/user-create.webp)
 
 > ℹ️ **Note:** only super administrators can assign roles. When editing a user, leave **Password** empty to keep the
-> current one. The link to choose the password expires after an hour: if it does, the person can get a new one with
-> **Forgot password?** on the [login page](../basics/logging-in).
+> current one.
+
+The invitation link expires after 6 hours: after that, the person can get a new link with **Forgot password?** on the
+[login page](../basics/logging-in). The same choice appears when you tick **Allow access** for a virtual user who never
+had a password.
 
 ## User page
 

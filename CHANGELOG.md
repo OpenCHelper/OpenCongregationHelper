@@ -27,7 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - The installed app takes the primary colour chosen on the Settings pages
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
-- Leave the password empty when creating a user to email them a link to choose their own password.
+- **User invitations**: when creating a user who can log in, or allowing access to a virtual user without a password,
+  administrators can send an email with a link to choose the password (valid for 6 hours) instead of setting it.
 
 ### Changed
 
