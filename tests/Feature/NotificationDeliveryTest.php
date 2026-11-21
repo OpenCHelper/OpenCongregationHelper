@@ -4,6 +4,7 @@ use App\Models\Campaign;
 use App\Models\User;
 use App\Notifications\CampaignCreatedNotification;
 use App\Notifications\StaleAssignmentNotification;
+use App\Notifications\StaleAssignmentsDepartmentNotification;
 use App\Notifications\TerritoryAssignedNotification;
 use App\Notifications\TerritoryReturnedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,6 +15,7 @@ test('notifications are queued instead of being sent during the request', functi
 })->with([
     CampaignCreatedNotification::class,
     StaleAssignmentNotification::class,
+    StaleAssignmentsDepartmentNotification::class,
     TerritoryAssignedNotification::class,
     TerritoryReturnedNotification::class,
 ]);
