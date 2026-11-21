@@ -53,9 +53,9 @@ permissions:
 
 # One deployment or removal per PR at a time: a newer one (a push, closing the PR, a label, a manual run) cancels the
 # one in progress. The concurrency group is on the `deploy` and `destroy` jobs, not on the workflow, so that a run with
-# nothing to do (e.g. a push to a PR without a preview, or any other label) cannot cancel them. Should two runs of a PR
-# start within seconds (e.g. a push and a label), the last to reach its job wins: the weekly cleanup removes a preview
-# deployed against labels that no longer want one.
+# nothing to do (e.g. a push to a PR without a preview, or any other label) cannot cancel them. Runs reach these jobs
+# in the order in which their `decide` job ends, so the `deploy` job always deploys the latest commit of the PR, and
+# only if its current labels still want a preview.
 
 env:
   # Tables of the previews are prefixed with `p<N>_`, which must stay within 6 characters (see `SpaceDeployer`)
@@ -122,6 +122,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_ACTION: ${{ github.event.action }}
           EVENT_PR: ${{ github.event.pull_request.number }}
+          EVENT_STATE: ${{ github.event.pull_request.state }}
           EVENT_LABEL: ${{ github.event.label.name }}
           EVENT_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
           IS_FORK: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
@@ -129,14 +130,20 @@ jobs:
           INPUT_ACTION: ${{ inputs.action }}
           INPUT_PR: ${{ inputs.pr }}
         run: |
+          # The settings of the previews are checked only to deploy or to follow a label: a wrong setting must never
+          # stop the previews of the closed PRs from being removed
+          config_error=""
           if [[ ! "$MODE" =~ ^(opt-in|opt-out|off)$ ]]; then
-            echo "::error::Invalid PREVIEW_MODE repository variable '${MODE}': use opt-in, opt-out or off."
-            exit 1
+            config_error="Invalid PREVIEW_MODE repository variable '${MODE}': use opt-in, opt-out or off."
+          elif [[ "$opt_in_label" == "$opt_out_label" ]]; then
+            config_error="The PREVIEW_OPT_IN_LABEL and PREVIEW_OPT_OUT_LABEL repository variables must be different labels."
           fi
-          if [[ "$opt_in_label" == "$opt_out_label" ]]; then
-            echo "::error::The PREVIEW_OPT_IN_LABEL and PREVIEW_OPT_OUT_LABEL repository variables must be different labels."
-            exit 1
-          fi
+          check_config () {
+            if [[ -n "$config_error" ]]; then
+              echo "::error::${config_error}"
+              exit 1
+            fi
+          }
 
           # Whether a PR with the given labels (JSON array of names) wants a preview
           # shellcheck disable=SC2016 # A jq program: its variables are jq's, passed with `--arg`
@@ -158,9 +165,15 @@ jobs:
               ;&
             workflow_dispatch)
               if [[ "$INPUT_ACTION" == "cleanup" ]]; then
-                keep="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 1000 --json number,labels \
-                  | jq -r --arg mode "$MODE" --arg opt_in "$opt_in_label" --arg opt_out "$opt_out_label" \
-                    "${wants}"' .[] | select([.labels[].name] | wants) | .number' | paste -sd ' ')"
+                open_prs="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 1000 --json number,labels)"
+                if [[ -n "$config_error" ]]; then
+                  # Only the previews of the closed PRs, without knowing which open ones want one
+                  echo "::error::${config_error} Only the previews of the closed PRs are removed."
+                  keep="$(jq -r '.[].number' <<< "$open_prs" | paste -sd ' ')"
+                else
+                  keep="$(jq -r --arg mode "$MODE" --arg opt_in "$opt_in_label" --arg opt_out "$opt_out_label" \
+                    "${wants}"' .[] | select([.labels[].name] | wants) | .number' <<< "$open_prs" | paste -sd ' ')"
+                fi
                 echo "keep=${keep}" >> "$GITHUB_OUTPUT"
                 decide cleanup "" "keeping the previews of ${keep:-no PR}"
                 exit 0
@@ -172,6 +185,7 @@ jobs:
               fi
 
               if [[ "$INPUT_ACTION" == "deploy" ]]; then
+                check_config
                 labels="$(gh pr view "$INPUT_PR" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]')"
                 if ! wants "$labels"; then
                   echo "::error::PR #${INPUT_PR} does not want a preview (PREVIEW_MODE=${MODE}): add the '${opt_in_label}' label (and remove '${opt_out_label}'), or change PREVIEW_MODE. Otherwise the weekly cleanup would remove it."
@@ -189,11 +203,15 @@ jobs:
                 decide none "$EVENT_PR" "PR from a fork or run by Dependabot"
               elif [[ "$EVENT_ACTION" == "closed" ]]; then
                 decide destroy "$EVENT_PR"
+              elif [[ "$EVENT_STATE" != "open" ]]; then
+                # e.g. a label changed on a closed or merged PR, whose preview was removed when it was closed
+                decide none "$EVENT_PR" "the PR is not open"
               elif [[ "$EVENT_ACTION" == "labeled" || "$EVENT_ACTION" == "unlabeled" ]]; then
                 if [[ "$EVENT_LABEL" != "$opt_in_label" && "$EVENT_LABEL" != "$opt_out_label" ]]; then
                   decide none "$EVENT_PR" "the '${EVENT_LABEL}' label does not affect the preview"
                   exit 0
                 fi
+                check_config
 
                 # The labels before the event: only a change of whether the PR wants a preview does something
                 if [[ "$EVENT_ACTION" == "labeled" ]]; then
@@ -211,7 +229,7 @@ jobs:
                 else
                   decide destroy "$EVENT_PR" "opted out"
                 fi
-              elif wants "$EVENT_LABELS"; then
+              elif check_config && wants "$EVENT_LABELS"; then
                 decide deploy "$EVENT_PR"
               else
                 decide none "$EVENT_PR" "the PR does not want a preview (labels: '${opt_in_label}' to opt in, '${opt_out_label}' to opt out)"
@@ -251,30 +269,28 @@ jobs:
         id: resolve
         env:
           GH_TOKEN: ${{ github.token }}
-          EVENT_PR: ${{ github.event.pull_request.number }}
-          EVENT_SHA: ${{ github.event.pull_request.head.sha }}
-          EVENT_BRANCH: ${{ github.event.pull_request.head.ref }}
-          INPUT_PR: ${{ inputs.pr }}
+          PR: ${{ needs.decide.outputs.pr }}
           CRON_JOB_ORG_API_KEY: ${{ secrets.CRON_JOB_ORG_API_KEY }}
         run: |
-          if [[ -n "$EVENT_PR" ]]; then
-            pr="$EVENT_PR" sha="$EVENT_SHA" branch="$EVENT_BRANCH"
-          else
-            if [[ ! "$INPUT_PR" =~ ^[0-9]+$ ]]; then
-              echo "::error::The 'pr' input must be the number of the PR to deploy."
-              exit 1
-            fi
-
-            pr_details="$(gh pr view "$INPUT_PR" --repo "$GITHUB_REPOSITORY" --json headRefOid,headRefName,state,isCrossRepository)"
-            if [[ "$(jq -r '.state' <<< "$pr_details")" != "OPEN" ]] || [[ "$(jq -r '.isCrossRepository' <<< "$pr_details")" == "true" ]]; then
-              echo "::error::PR #${INPUT_PR} must be open and come from a branch of this repository."
-              exit 1
-            fi
-
-            pr="$INPUT_PR"
-            sha="$(jq -r '.headRefOid' <<< "$pr_details")"
-            branch="$(jq -r '.headRefName' <<< "$pr_details")"
+          # The PR as it is now, not as it was when the run started: runs of the same PR reach this job in the order in
+          # which their `decide` job ends, so an older run may cancel a newer one here, and must then deploy the latest
+          # commit, and only if the PR still wants a preview (e.g. not after a label turned it off in the meantime)
+          pr="$PR"
+          pr_details="$(gh pr view "$pr" --repo "$GITHUB_REPOSITORY" --json headRefOid,headRefName,state,isCrossRepository,labels)"
+          if [[ "$(jq -r '.state' <<< "$pr_details")" != "OPEN" ]] || [[ "$(jq -r '.isCrossRepository' <<< "$pr_details")" == "true" ]]; then
+            echo "::error::PR #${pr} must be open and come from a branch of this repository."
+            exit 1
           fi
+          # shellcheck disable=SC2016 # A jq program: its variables are jq's, passed with `--arg`
+          if ! jq -e --arg mode "$preview_mode" --arg opt_in "$opt_in_label" --arg opt_out "$opt_out_label" \
+            '[.labels[].name] | ($mode != "off") and (index($opt_out) | not) and ($mode == "opt-out" or (index($opt_in) != null))' \
+            <<< "$pr_details" > /dev/null; then
+            echo "::error::PR #${pr} no longer wants a preview (its labels changed): not deployed. If it is still live, remove it by running this workflow with the destroy action."
+            exit 1
+          fi
+
+          sha="$(jq -r '.headRefOid' <<< "$pr_details")"
+          branch="$(jq -r '.headRefName' <<< "$pr_details")"
 
           if (( pr > max_pr_number )); then
             echo "::error::PR numbers above ${max_pr_number} are not supported: the table prefix would be too long."
@@ -820,5 +836,5 @@ jobs:
           opt-out-label: ${{ env.opt_out_label }}
           warning: >-
             ${{ steps.cron.outcome == 'failure'
-              && 'The cron jobs could not be removed from cron-job.org (e.g. rate limit): the weekly cleanup removes them.'
+              && 'The cron jobs could not be removed from cron-job.org (e.g. rate limit): re-run the workflow, or let the weekly cleanup remove them once the PR is closed or no longer wants a preview.'
               || '' }}

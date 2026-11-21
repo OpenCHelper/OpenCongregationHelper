@@ -83,8 +83,16 @@ runs:
           const on = `\`${OPT_IN_LABEL}\``;
           const off = `\`${OPT_OUT_LABEL}\``;
           let hint = '';
+          let pr = null;
           if (PREVIEW_MODE) {
-            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: issue_number });
+            try {
+              ({ data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: issue_number }));
+            } catch (error) {
+              // Only a hint: never a reason to fail the deployment
+              core.warning(`Could not read PR #${issue_number}, the comment has no hint (${error.message}).`);
+            }
+          }
+          if (pr) {
             const labels = pr.labels.map((label) => label.name);
             const wanted = PREVIEW_MODE !== 'off' && !labels.includes(OPT_OUT_LABEL)
               && (PREVIEW_MODE === 'opt-out' || labels.includes(OPT_IN_LABEL));
