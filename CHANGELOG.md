@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - The installed app takes the primary colour chosen on the Settings pages
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- **Publisher statistics** on the publisher's page: the zones and territories they take most often.
 
 ### Changed
 
