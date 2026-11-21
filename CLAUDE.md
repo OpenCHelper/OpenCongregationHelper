@@ -27,3 +27,5 @@
   weekly cleanup removes the cron jobs left behind.
 - While a PR's head commit has `[skip ci]`, GitHub runs no `pull_request` workflow for it, label changes included: to
   deploy or remove its preview then, run `deploy-preview.yml` manually (`action` deploy/destroy, `pr` number).
+- Before creating a PR, or updating one that has neither preview label, always ask the user whether its preview
+  should be enabled or disabled, then set the matching label (`preview: on` / `preview: off`) on the PR.
