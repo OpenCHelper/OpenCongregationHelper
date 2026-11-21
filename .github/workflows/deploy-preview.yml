@@ -21,10 +21,11 @@ name: Deploy (PR previews)
 # Repository variables: SPACE_DEFAULT_ENVIRONMENT, SPACE_PHP_HANDLER (the router of the space, shared with TEST).
 #
 # Which PRs get a preview: the `PREVIEW_MODE` repository variable sets the default, the labels of each PR override it.
-#   - `opt-out` (default): every PR, unless it has the `no-preview` label;
-#   - `opt-in`: only the PRs with the `preview` label;
+#   - `opt-out` (default): every PR, unless it has the opt-out label;
+#   - `opt-in`: only the PRs with the opt-in label;
 #   - `off`: none (e.g. while the space is unavailable).
-# `no-preview` wins over `preview`. Adding or removing a label deploys or removes the preview right away, and the
+# The labels are set by the `PREVIEW_OPT_IN_LABEL` (default: `preview`) and `PREVIEW_OPT_OUT_LABEL` (default:
+# `no-preview`) repository variables, and must be different. The opt-out label wins over the opt-in one. Adding or removing a label deploys or removes the preview right away, and the
 # weekly cleanup removes the previews of the PRs that no longer want one (e.g. after switching the mode to `off`).
 
 on:
@@ -50,12 +51,13 @@ permissions:
 
 # One run per PR at a time: a newer run (a push, closing the PR, a label, a manual run) cancels the one in progress.
 # Except adding or removing any other label, which does nothing and gets its own group, so as not to cancel a
-# deployment (the names of the labels must match the `preview_label` and `no_preview_label` below).
+# deployment (the defaults of the labels must match the `opt_in_label` and `opt_out_label` below).
 concurrency:
   group: >-
     preview-${{ github.event.pull_request.number || inputs.pr || 'cleanup' }}${{
       (github.event.action == 'labeled' || github.event.action == 'unlabeled')
-        && github.event.label.name != 'preview' && github.event.label.name != 'no-preview'
+        && github.event.label.name != (vars.PREVIEW_OPT_IN_LABEL || 'preview')
+        && github.event.label.name != (vars.PREVIEW_OPT_OUT_LABEL || 'no-preview')
         && format('-ignored-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
@@ -68,8 +70,8 @@ env:
   cron_schedule: "*/5 8-22 * * 1-5"
   cron_timezone: Europe/Rome
   # Labels of a PR to opt in to its preview (needed with `PREVIEW_MODE=opt-in`) or out of it (see the top)
-  preview_label: preview
-  no_preview_label: no-preview
+  opt_in_label: ${{ vars.PREVIEW_OPT_IN_LABEL || 'preview' }}
+  opt_out_label: ${{ vars.PREVIEW_OPT_OUT_LABEL || 'no-preview' }}
 
 jobs:
   # What to do, before touching the secrets of the PREVIEW environment: `deploy` or `destroy` the preview of `pr`,
@@ -105,11 +107,15 @@ jobs:
             echo "::error::Invalid PREVIEW_MODE repository variable '${MODE}': use opt-in, opt-out or off."
             exit 1
           fi
+          if [[ "$opt_in_label" == "$opt_out_label" ]]; then
+            echo "::error::The PREVIEW_OPT_IN_LABEL and PREVIEW_OPT_OUT_LABEL repository variables must be different labels."
+            exit 1
+          fi
 
           # Whether a PR with the given labels (JSON array of names) wants a preview
           wants='def wants: ($mode != "off") and (index($opt_out) | not) and ($mode == "opt-out" or (index($opt_in) != null));'
           wants () {
-            jq -e --arg mode "$MODE" --arg opt_in "$preview_label" --arg opt_out "$no_preview_label" \
+            jq -e --arg mode "$MODE" --arg opt_in "$opt_in_label" --arg opt_out "$opt_out_label" \
               "${wants} wants" <<< "$1" > /dev/null
           }
 
@@ -126,7 +132,7 @@ jobs:
             workflow_dispatch)
               if [[ "$INPUT_ACTION" == "cleanup" ]]; then
                 keep="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 1000 --json number,labels \
-                  | jq -r --arg mode "$MODE" --arg opt_in "$preview_label" --arg opt_out "$no_preview_label" \
+                  | jq -r --arg mode "$MODE" --arg opt_in "$opt_in_label" --arg opt_out "$opt_out_label" \
                     "${wants}"' .[] | select([.labels[].name] | wants) | .number' | paste -sd ' ')"
                 echo "keep=${keep}" >> "$GITHUB_OUTPUT"
                 decide cleanup "" "keeping the previews of ${keep:-no PR}"
@@ -141,7 +147,7 @@ jobs:
               if [[ "$INPUT_ACTION" == "deploy" ]]; then
                 labels="$(gh pr view "$INPUT_PR" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]')"
                 if ! wants "$labels"; then
-                  echo "::error::PR #${INPUT_PR} does not want a preview (PREVIEW_MODE=${MODE}): add the '${preview_label}' label (and remove '${no_preview_label}'), or change PREVIEW_MODE. Otherwise the weekly cleanup would remove it."
+                  echo "::error::PR #${INPUT_PR} does not want a preview (PREVIEW_MODE=${MODE}): add the '${opt_in_label}' label (and remove '${opt_out_label}'), or change PREVIEW_MODE. Otherwise the weekly cleanup would remove it."
                   exit 1
                 fi
               fi
@@ -157,7 +163,7 @@ jobs:
               elif [[ "$EVENT_ACTION" == "closed" ]]; then
                 decide destroy "$EVENT_PR"
               elif [[ "$EVENT_ACTION" == "labeled" || "$EVENT_ACTION" == "unlabeled" ]]; then
-                if [[ "$EVENT_LABEL" != "$preview_label" && "$EVENT_LABEL" != "$no_preview_label" ]]; then
+                if [[ "$EVENT_LABEL" != "$opt_in_label" && "$EVENT_LABEL" != "$opt_out_label" ]]; then
                   decide none "$EVENT_PR" "the '${EVENT_LABEL}' label does not affect the preview"
                   exit 0
                 fi
@@ -181,7 +187,7 @@ jobs:
               elif wants "$EVENT_LABELS"; then
                 decide deploy "$EVENT_PR"
               else
-                decide none "$EVENT_PR" "the PR does not want a preview (labels: '${preview_label}' to opt in, '${no_preview_label}' to opt out)"
+                decide none "$EVENT_PR" "the PR does not want a preview (labels: '${opt_in_label}' to opt in, '${opt_out_label}' to opt out)"
               fi
               ;;
 
