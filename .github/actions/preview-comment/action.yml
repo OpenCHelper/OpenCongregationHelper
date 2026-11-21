@@ -78,24 +78,31 @@ runs:
               : '🗑️ The preview was removed, together with its database tables and its cron jobs.',
           };
 
-          // How to turn the preview off (or back on, once removed), following the mode of the repository
+          // How to turn the preview off, or back on, following the mode of the repository and the current labels of the
+          // PR (e.g. a deployment cancelled by the opt-out label gets the hint to turn it back on). None once it is closed
           const on = `\`${OPT_IN_LABEL}\``;
           const off = `\`${OPT_OUT_LABEL}\``;
           let hint = '';
-          if (PREVIEW_STATUS !== 'removed') {
-            hint = {
-              'opt-out': `To remove this preview, add the ${off} label.`,
-              'opt-in': `To remove this preview, remove the ${on} label (or add ${off}).`,
-            }[PREVIEW_MODE] ?? '';
-          } else if (PREVIEW_MODE) {
-            // Not once the PR is closed or merged
+          if (PREVIEW_MODE) {
             const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: issue_number });
-            if (pr.state === 'open') {
-              hint = {
-                'opt-out': `To deploy it again, remove the ${off} label.`,
-                'opt-in': `To deploy it again, add the ${on} label (without ${off}).`,
-                off: 'Previews are turned off for the whole repository (`PREVIEW_MODE` variable).',
-              }[PREVIEW_MODE] ?? '';
+            const labels = pr.labels.map((label) => label.name);
+            const wanted = PREVIEW_MODE !== 'off' && !labels.includes(OPT_OUT_LABEL)
+              && (PREVIEW_MODE === 'opt-out' || labels.includes(OPT_IN_LABEL));
+
+            if (pr.state !== 'open') {
+              hint = '';
+            } else if (PREVIEW_MODE === 'off') {
+              hint = 'Previews are turned off for the whole repository (`PREVIEW_MODE` variable).';
+            } else if (wanted && PREVIEW_STATUS !== 'removed') {
+              hint = PREVIEW_MODE === 'opt-out'
+                ? `To remove this preview, add the ${off} label.`
+                : `To remove this preview, remove the ${on} label (or add ${off}).`;
+            } else if (!wanted) {
+              const steps = PREVIEW_MODE === 'opt-out' ? [] : labels.includes(OPT_IN_LABEL) ? [] : [`add the ${on} label`];
+              if (labels.includes(OPT_OUT_LABEL)) {
+                steps.push(`remove the ${off} label`);
+              }
+              hint = `To deploy it again, ${steps.join(' and ')}.`;
             }
           }
 
