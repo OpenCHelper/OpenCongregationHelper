@@ -266,3 +266,13 @@ test('long territory names are truncated with their full name as tooltip', funct
     Livewire::test(TerritoryCoverage::class)
         ->assertSeeHtml('title="Country Club Road (east)"');
 });
+
+test('the columns of the widget never grow wider than the screen', function () {
+    ($this->territory)('Country Club Road (east) and Old Mill Road');
+
+    // Without an explicit single column, the implicit one is as wide as the longest (non-wrapping) territory name
+    Livewire::test(TerritoryCoverage::class)
+        ->assertSeeHtml('grid grid-cols-1 gap-6 md:grid-cols-2')
+        ->assertSeeHtml('class="flex min-w-0 flex-col gap-4"')
+        ->assertSeeHtml('class="min-w-0" data-least-recently-worked');
+});

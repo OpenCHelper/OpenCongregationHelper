@@ -21,8 +21,8 @@
             </x-filament::input.wrapper>
         </x-slot>
 
-        <div class="grid gap-6 md:grid-cols-2">
-            <div class="flex flex-col gap-4">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div class="flex min-w-0 flex-col gap-4">
                 <div>
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
                         {{ __('filament-widgets.territory_coverage.worked') }}
@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <div>
+            <div class="min-w-0" data-least-recently-worked>
                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {{ __('filament-widgets.territory_coverage.least_recently_worked') }}
                 </div>
