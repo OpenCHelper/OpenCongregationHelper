@@ -1,5 +1,6 @@
 @php
     $assignmentsCount = $this->getAssignmentsCount();
+    $preferredTerritories = $this->getPreferredTerritories();
     $sections = [
         [
             'heading' => __('filament-widgets.publisher_statistics.preferred_zones'),
@@ -8,8 +9,8 @@
         ],
         [
             'heading' => __('filament-widgets.publisher_statistics.preferred_territories'),
-            'description' => trans_choice('filament-widgets.publisher_statistics.preferred_territories_description', $this::PREFERRED_TERRITORIES_LIMIT),
-            'items' => $this->getPreferredTerritories(),
+            'description' => trans_choice('filament-widgets.publisher_statistics.preferred_territories_description', $preferredTerritories->count()),
+            'items' => $preferredTerritories,
         ],
     ];
 @endphp
@@ -38,8 +39,8 @@
                         <ol class="mt-3 flex flex-col gap-3">
                             @foreach ($section['items'] as $item)
                                 <li>
-                                    <div class="flex items-center justify-between gap-3 text-sm">
-                                        <span class="flex min-w-0 items-center gap-2">
+                                    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm">
+                                        <span class="flex min-w-0 grow items-center gap-2">
                                             @if (filled($item['color'] ?? null))
                                                 <span
                                                     class="inline-block size-3 shrink-0 rounded-full"
@@ -67,9 +68,9 @@
                                             </span>
                                         </span>
 
-                                        <span class="shrink-0 text-gray-700 dark:text-gray-300">
+                                        <span class="ms-auto shrink-0 text-gray-700 dark:text-gray-300">
                                             {{ trans_choice('filament-widgets.publisher_statistics.assignments_count', $item['count']) }}
-                                            <span class="text-gray-500 dark:text-gray-400">({{ \Illuminate\Support\Number::percentage($item['percentage'], maxPrecision: 1) }})</span>
+                                            <span class="text-gray-500 dark:text-gray-400">({{ \Illuminate\Support\Number::percentage($item['percentage'], maxPrecision: 1, locale: app()->getLocale()) }})</span>
                                         </span>
                                     </div>
 

@@ -22,9 +22,9 @@ class ViewUser extends ViewRecord
 
     protected function getFooterWidgets(): array
     {
-        return [
-            PublisherStatistics::class,
-        ];
+        return PublisherStatistics::canViewStatisticsOf($this->getRecord())
+            ? [PublisherStatistics::class]
+            : [];
     }
 
     protected function getHeaderActions(): array

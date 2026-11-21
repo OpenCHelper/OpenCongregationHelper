@@ -126,14 +126,53 @@ test('deleted assignments are ignored and deleted territories are not linked', f
         ->url->toBeNull();
 });
 
-test('users who cannot see all the assignments only get statistics of their own', function () {
+test('users who cannot see all the assignments do not get statistics of other publishers', function () {
     $zone = TerritoryZone::factory()->create();
     assignTerritoryTimes(Territory::factory()->for($zone, 'territoryZone')->create(), $this->publisher, 2);
 
     $viewer = User::factory()->create();
-    $viewer->givePermissionTo(Permission::findOrCreate('View:User', 'web'));
+    foreach (['ViewAny:User', 'View:User'] as $permission) {
+        $viewer->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
     $this->actingAs($viewer);
 
+    Livewire::test(ViewUser::class, ['record' => $this->publisher->getRouteKey()])
+        ->assertOk()
+        ->assertDontSeeLivewire(PublisherStatistics::class);
+});
+
+test('users who cannot see all the assignments get the statistics of their own', function () {
+    $zone = TerritoryZone::factory()->create();
+    $viewer = User::factory()->create();
+    foreach (['ViewAny:User', 'View:User'] as $permission) {
+        $viewer->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+    assignTerritoryTimes(Territory::factory()->for($zone, 'territoryZone')->create(['name' => 'Own territory']), $viewer, 2);
+    $this->actingAs($viewer);
+
+    Livewire::test(ViewUser::class, ['record' => $viewer->getRouteKey()])
+        ->assertSeeLivewire(PublisherStatistics::class);
+
+    Livewire::test(PublisherStatistics::class, ['record' => $viewer])
+        ->assertSee('Own territory');
+});
+
+test('the territories description counts the territories listed', function () {
+    $zone = TerritoryZone::factory()->create();
+    assignTerritoryTimes(Territory::factory()->for($zone, 'territoryZone')->create(), $this->publisher, 2);
+
     Livewire::test(PublisherStatistics::class, ['record' => $this->publisher])
-        ->assertSee(__('filament-widgets.publisher_statistics.no_assignments'));
+        ->assertSee(trans_choice('filament-widgets.publisher_statistics.preferred_territories_description', 1))
+        ->assertDontSee(trans_choice('filament-widgets.publisher_statistics.preferred_territories_description', PublisherStatistics::PREFERRED_TERRITORIES_LIMIT));
+});
+
+test('the percentages follow the locale of the user', function () {
+    app()->setLocale('it');
+    $zone = TerritoryZone::factory()->create();
+    assignTerritoryTimes(Territory::factory()->for($zone, 'territoryZone')->create(), $this->publisher, 1);
+    assignTerritoryTimes(Territory::factory()->for($zone, 'territoryZone')->create(), $this->publisher, 2);
+
+    Livewire::test(PublisherStatistics::class, ['record' => $this->publisher])
+        ->assertSee('(33,3%)')
+        ->assertDontSee('(33.3%)');
 });

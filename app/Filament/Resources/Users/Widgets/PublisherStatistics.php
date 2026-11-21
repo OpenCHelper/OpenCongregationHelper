@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Statistics about the territories a publisher takes: the zones and the territories they are assigned most often.
@@ -31,6 +32,15 @@ class PublisherStatistics extends Widget
      * The total number of assignments, computed once per request.
      */
     protected ?int $assignmentsCount = null;
+
+    /**
+     * Whether the current user can see the statistics of the given publisher: those who cannot see all the assignments
+     * only see their own, since the statistics of the others would always look empty.
+     */
+    public static function canViewStatisticsOf(Model $publisher): bool
+    {
+        return TerritoryAssignmentResource::canViewAllAssignments() || $publisher->is(Auth::user());
+    }
 
     /**
      * The total number of assignments of the publisher (in progress or returned).
