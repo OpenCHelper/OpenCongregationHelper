@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - The installed app takes the primary colour chosen on the Settings pages
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- **Return requests**: publishers can ask the territory department to close their assignment with one click, and
+  its members are notified; also from shared links, when `GUEST_ALLOW_RETURNING_ASSIGNMENT` is enabled.
 
 ### Changed
 
