@@ -41,6 +41,11 @@ Clicca un utente per aprirne la pagina:
   l'indirizzo;
 - la scheda **Assegnazioni** elenca i territori assegnati all'utente.
 
+In fondo alla scheda **Utente**, **Statistiche** mostra le **Zone preferite** (ogni zona in cui il proclamatore ha
+preso territori, con il numero di assegnazioni e la loro percentuale) e i **Territori preferiti** (i 5 che prende più
+spesso). Sono contate le assegnazioni in corso e quelle restituite. Chi non può vedere tutte le assegnazioni vede
+queste statistiche solo nella propria pagina.
+
 ![Pagina dell'utente](/docs/user-documentation/it/administration/assets/user-view.webp)
 
 ![Assegnazioni di un utente](/docs/user-documentation/it/administration/assets/user-assignments.webp)
