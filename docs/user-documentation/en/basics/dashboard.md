@@ -18,6 +18,21 @@ The dashboard is the first page you see after logging in. It gives an overview o
 
 The statistics refresh automatically every few seconds.
 
+## Territory coverage
+
+How much of the territory was worked in the period chosen in the menu at the top right (the **last 6, 12 or 24
+months**, 12 by default). The selection is remembered while you stay logged in.
+
+- **Territories worked at least once**: the percentage and the number of territories with at least one assignment
+  **returned** in the period, e.g. *97% (240 of 243)*. Assignments still in progress do not count. The percentage is
+  rounded down, so 100% means that every territory was worked.
+- **Excluding campaigns**: the same figure, counting only the assignments that are not part of a campaign.
+- **Never worked or not worked for the longest time**: the 5 territories that were never returned, then those
+  returned the longest ago, with the date of their last return.
+
+> 💡 **Tip:** the whole territory should be covered at least once a year: keep an eye on the 12-month figure and
+> assign the territories at the top of the list first.
+
 ## Territory map
 
 The map shows every **residential** territory that has a map. Commercial territories and territories without a map

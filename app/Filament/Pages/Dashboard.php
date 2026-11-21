@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\TerritoryCoverage;
 use App\Filament\Widgets\TerritoryGlobalMap;
 use Filament\Support\Icons\Heroicon;
 
@@ -18,6 +19,7 @@ class Dashboard extends \Filament\Pages\Dashboard
     {
         return [
             StatsOverview::class,
+            TerritoryCoverage::class,
             TerritoryGlobalMap::class,
         ];
     }

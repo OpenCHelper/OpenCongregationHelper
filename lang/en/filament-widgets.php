@@ -29,4 +29,16 @@ return [
         'map_style' => 'Map Style',
         'go_to_territory' => 'Go to territory',
     ],
+    'territory_coverage' => [
+        'heading' => 'Territory coverage',
+        'period_label' => 'Period',
+        'period' => '{1} Last month|[2,*] Last :count months',
+        'worked' => 'Territories worked at least once',
+        'worked_excluding_campaigns' => 'Excluding campaigns',
+        'value' => ':percentage (:worked of :total)',
+        'least_recently_worked' => 'Never worked or not worked for the longest time',
+        'never_worked' => 'Never worked',
+        'last_worked' => ':date (:ago)',
+        'no_territories' => 'There are no territories.',
+    ],
 ];

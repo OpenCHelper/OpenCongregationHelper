@@ -18,6 +18,21 @@ La dashboard è la prima pagina che vedi dopo l'accesso. Offre una panoramica de
 
 Le statistiche si aggiornano automaticamente ogni pochi secondi.
 
+## Copertura del territorio
+
+Quanta parte del territorio è stata lavorata nel periodo scelto nel menu in alto a destra (gli **ultimi 6, 12 o 24
+mesi**, 12 di default). La scelta viene ricordata finché resti connesso.
+
+- **Territori lavorati almeno una volta**: la percentuale e il numero di territori con almeno un'assegnazione
+  **riconsegnata** nel periodo, ad es. *97% (240 su 243)*. Le assegnazioni ancora in corso non contano. La percentuale
+  è arrotondata per difetto, quindi 100% significa che ogni territorio è stato lavorato.
+- **Escluse le campagne**: lo stesso dato, contando solo le assegnazioni che non fanno parte di una campagna.
+- **Mai lavorati o non lavorati da più tempo**: i 5 territori mai riconsegnati, poi quelli riconsegnati da più tempo,
+  con la data dell'ultima riconsegna.
+
+> 💡 **Suggerimento:** l'intero territorio dovrebbe essere percorso almeno una volta all'anno: tieni d'occhio il dato
+> dei 12 mesi e assegna per primi i territori in cima all'elenco.
+
 ## Mappa dei territori
 
 La mappa mostra ogni territorio **residenziale** che ha una mappa. I territori commerciali e quelli senza mappa non
