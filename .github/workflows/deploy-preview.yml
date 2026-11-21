@@ -70,6 +70,8 @@ env:
   cron_folder_prefix: "(Preview) PR-"
   cron_schedule: "*/5 8-22 * * 1-5"
   cron_timezone: Europe/Rome
+  # Which PRs get a preview (see the top)
+  preview_mode: ${{ vars.PREVIEW_MODE || 'opt-out' }}
   # Labels of a PR to opt in to its preview (needed with `PREVIEW_MODE=opt-in`) or out of it (see the top)
   opt_in_label: "${{ vars.PREVIEW_OPT_IN_LABEL || 'preview: on' }}"
   opt_out_label: "${{ vars.PREVIEW_OPT_OUT_LABEL || 'preview: off' }}"
@@ -121,7 +123,7 @@ jobs:
         id: decide
         env:
           GH_TOKEN: ${{ github.token }}
-          MODE: ${{ vars.PREVIEW_MODE || 'opt-out' }}
+          MODE: ${{ env.preview_mode }}
           EVENT_NAME: ${{ github.event_name }}
           EVENT_ACTION: ${{ github.event.action }}
           EVENT_PR: ${{ github.event.pull_request.number }}
@@ -325,6 +327,9 @@ jobs:
           status: deploying
           url: ${{ steps.resolve.outputs.url }}
           sha: ${{ steps.resolve.outputs.sha }}
+          mode: ${{ env.preview_mode }}
+          opt-in-label: ${{ env.opt_in_label }}
+          opt-out-label: ${{ env.opt_out_label }}
 
       - name: Install packages
         run: sudo apt-get update && sudo apt-get install -y jq lftp zip
@@ -618,6 +623,9 @@ jobs:
           url: ${{ steps.resolve.outputs.url }}
           sha: ${{ steps.resolve.outputs.sha }}
           login: ${{ vars.ROOT_EMAIL || 'root@example.com' }}
+          mode: ${{ env.preview_mode }}
+          opt-in-label: ${{ env.opt_in_label }}
+          opt-out-label: ${{ env.opt_out_label }}
           warning: >-
             ${{ steps.cron-result.outputs.created == 'false'
               && 'The cron jobs could not be created on cron-job.org: the scheduler and the queue do not run. Re-run the workflow to retry.'
@@ -806,6 +814,9 @@ jobs:
         with:
           pr: ${{ steps.remove.outputs.pr }}
           status: removed
+          mode: ${{ env.preview_mode }}
+          opt-in-label: ${{ env.opt_in_label }}
+          opt-out-label: ${{ env.opt_out_label }}
           warning: >-
             ${{ steps.cron.outcome == 'failure'
               && 'The cron jobs could not be removed from cron-job.org (e.g. rate limit): the weekly cleanup removes them.'

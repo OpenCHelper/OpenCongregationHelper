@@ -23,6 +23,18 @@ inputs:
     description: "Warning shown under a ready or removed preview (e.g. a part of it that failed without blocking it)."
     required: false
     default: ""
+  mode:
+    description: "`PREVIEW_MODE` of the repository (opt-out, opt-in, off), to explain how to turn the preview on or off. Empty for no hint."
+    required: false
+    default: ""
+  opt-in-label:
+    description: "Label of a PR opting in to its preview."
+    required: false
+    default: "preview: on"
+  opt-out-label:
+    description: "Label of a PR opting out of its preview."
+    required: false
+    default: "preview: off"
 runs:
   using: "composite"
   steps:
@@ -35,10 +47,14 @@ runs:
         PREVIEW_SHA: ${{ inputs.sha }}
         PREVIEW_LOGIN: ${{ inputs.login }}
         PREVIEW_WARNING: ${{ inputs.warning }}
+        PREVIEW_MODE: ${{ inputs.mode }}
+        OPT_IN_LABEL: ${{ inputs.opt-in-label }}
+        OPT_OUT_LABEL: ${{ inputs.opt-out-label }}
       with:
         script: |
           const marker = '<!-- preview-deployment -->';
           const { PR_NUMBER, PREVIEW_STATUS, PREVIEW_URL, PREVIEW_SHA, PREVIEW_LOGIN, PREVIEW_WARNING } = process.env;
+          const { PREVIEW_MODE, OPT_IN_LABEL, OPT_OUT_LABEL } = process.env;
           const issue_number = Number(PR_NUMBER);
           const commit = PREVIEW_SHA ? `\`${PREVIEW_SHA.slice(0, 7)}\`` : 'the latest commit';
           const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
@@ -56,13 +72,37 @@ runs:
               '> (names, addresses, phone numbers, notes...), only dummy data. The data is reset on every push.',
             ].join('\n'),
             failed: `❌ The deployment of ${commit} failed: see the [workflow run](${run}).`,
-            cancelled: `⏹️ The deployment of ${commit} was cancelled (e.g. by a newer push).`,
+            cancelled: `⏹️ The deployment of ${commit} was cancelled (e.g. by a newer push or a change of the preview labels).`,
             removed: PREVIEW_WARNING
               ? `🗑️ The preview was removed, together with its database tables.\n\n⚠️ ${PREVIEW_WARNING} ([workflow run](${run}))`
               : '🗑️ The preview was removed, together with its database tables and its cron jobs.',
           };
 
-          const body = `${marker}\n### Preview\n\n${messages[PREVIEW_STATUS] ?? PREVIEW_STATUS}`;
+          // How to turn the preview off (or back on, once removed), following the mode of the repository
+          const on = `\`${OPT_IN_LABEL}\``;
+          const off = `\`${OPT_OUT_LABEL}\``;
+          let hint = '';
+          if (PREVIEW_STATUS !== 'removed') {
+            hint = {
+              'opt-out': `To remove this preview, add the ${off} label.`,
+              'opt-in': `To remove this preview, remove the ${on} label (or add ${off}).`,
+            }[PREVIEW_MODE] ?? '';
+          } else if (PREVIEW_MODE) {
+            // Not once the PR is closed or merged
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: issue_number });
+            if (pr.state === 'open') {
+              hint = {
+                'opt-out': `To deploy it again, remove the ${off} label.`,
+                'opt-in': `To deploy it again, add the ${on} label (without ${off}).`,
+                off: 'Previews are turned off for the whole repository (`PREVIEW_MODE` variable).',
+              }[PREVIEW_MODE] ?? '';
+            }
+          }
+
+          const body = [
+            `${marker}\n### Preview\n\n${messages[PREVIEW_STATUS] ?? PREVIEW_STATUS}`,
+            ...(hint ? [`<sub>💡 ${hint}</sub>`] : []),
+          ].join('\n\n');
 
           const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number });
           const existing = comments.find((comment) => comment.body?.startsWith(marker));
