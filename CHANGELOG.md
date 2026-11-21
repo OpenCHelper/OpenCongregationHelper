@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Optional `ARTISAN_CRON_TOKEN` secret for the PR previews and Nightly: a fixed token for their cron jobs, which are
+  then created only by the first deployment of a preview, avoiding the rate limits of cron-job.org
+  ([#11](https://github.com/OpenCHelper/OpenCongregationHelper/pull/11)).
 - **Settings pages**: super administrators can change the default map centre and the personal data on shared pages
   from **Administration → Settings**, without editing `.env`, which now only holds their defaults
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
