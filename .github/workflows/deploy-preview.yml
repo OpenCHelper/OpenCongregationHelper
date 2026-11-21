@@ -24,9 +24,10 @@ name: Deploy (PR previews)
 #   - `opt-out` (default): every PR, unless it has the opt-out label;
 #   - `opt-in`: only the PRs with the opt-in label;
 #   - `off`: none (e.g. while the space is unavailable).
-# The labels are set by the `PREVIEW_OPT_IN_LABEL` (default: `preview`) and `PREVIEW_OPT_OUT_LABEL` (default:
-# `no-preview`) repository variables, and must be different. The opt-out label wins over the opt-in one. Adding or removing a label deploys or removes the preview right away, and the
-# weekly cleanup removes the previews of the PRs that no longer want one (e.g. after switching the mode to `off`).
+# The labels are set by the `PREVIEW_OPT_IN_LABEL` (default: `preview: on`) and `PREVIEW_OPT_OUT_LABEL` (default:
+# `preview: off`) repository variables, and must be different. The opt-out label wins over the opt-in one. Adding or
+# removing a label deploys or removes the preview right away, and the weekly cleanup removes the previews of the PRs
+# that no longer want one (e.g. after switching the mode to `off`).
 
 on:
   pull_request:
@@ -56,8 +57,8 @@ concurrency:
   group: >-
     preview-${{ github.event.pull_request.number || inputs.pr || 'cleanup' }}${{
       (github.event.action == 'labeled' || github.event.action == 'unlabeled')
-        && github.event.label.name != (vars.PREVIEW_OPT_IN_LABEL || 'preview')
-        && github.event.label.name != (vars.PREVIEW_OPT_OUT_LABEL || 'no-preview')
+        && github.event.label.name != (vars.PREVIEW_OPT_IN_LABEL || 'preview: on')
+        && github.event.label.name != (vars.PREVIEW_OPT_OUT_LABEL || 'preview: off')
         && format('-ignored-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
@@ -70,8 +71,8 @@ env:
   cron_schedule: "*/5 8-22 * * 1-5"
   cron_timezone: Europe/Rome
   # Labels of a PR to opt in to its preview (needed with `PREVIEW_MODE=opt-in`) or out of it (see the top)
-  opt_in_label: ${{ vars.PREVIEW_OPT_IN_LABEL || 'preview' }}
-  opt_out_label: ${{ vars.PREVIEW_OPT_OUT_LABEL || 'no-preview' }}
+  opt_in_label: "${{ vars.PREVIEW_OPT_IN_LABEL || 'preview: on' }}"
+  opt_out_label: "${{ vars.PREVIEW_OPT_OUT_LABEL || 'preview: off' }}"
 
 jobs:
   # What to do, before touching the secrets of the PREVIEW environment: `deploy` or `destroy` the preview of `pr`,
