@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TerritoryAssignments\Pages;
 
+use App\Filament\Resources\TerritoryAssignments\Actions\RequestReturnAction;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -19,6 +20,7 @@ class ViewTerritoryAssignment extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            RequestReturnAction::make(),
             ActionGroup::make([
                 Action::make('share')
                     ->color('primary')

@@ -32,6 +32,15 @@ class TerritoryAssignmentPolicy
         return $authUser->can('Update:TerritoryAssignment');
     }
 
+    /**
+     * Only the assignee can ask the territory department to close their assignment, while it is still in progress.
+     */
+    public function requestReturn(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
+    {
+        return $territoryAssignment->assignee_id === $authUser->getKey()
+            && $territoryAssignment->canRequestReturn();
+    }
+
     public function delete(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
         return $authUser->can('Delete:TerritoryAssignment');
