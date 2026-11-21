@@ -6,6 +6,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use App\Support\S13TemplateStructure;
 use App\Support\TerritoryAssignmentRecord;
 use App\Support\TerritoryAssignmentRecordPdf;
 use Filament\Facades\Filament;
@@ -27,6 +28,9 @@ beforeEach(function () {
     User::factory()->create(['id' => 1]);
 
     $this->zone = TerritoryZone::factory()->create();
+
+    // The blank template stands in for the official form
+    config(['s13.expected_structure' => S13TemplateStructure::fromPdf(blankS13Template())]);
 });
 
 /**
@@ -99,6 +103,20 @@ test('the record takes a page of the template for each page of rows', function (
     ]);
 
     expect(pdfPageCount(TerritoryAssignmentRecordPdf::render(2026)))->toBe(2);
+});
+
+test('texts too long for their boxes are wrapped, shrunk and cut', function () {
+    TerritoryAssignmentRecordPdf::storeTemplate(blankS13Template());
+
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create(['name' => str_repeat('Supercalifragilistic ', 10)]);
+    TerritoryAssignment::factory()->create([
+        'territory_id' => $territory->id,
+        'assignee_id' => User::factory()->create(['first_name' => str_repeat('Bartholomew', 5), 'last_name' => 'Doe'])->id,
+        'started_at' => '2025-10-01',
+        'ended_at' => null,
+    ]);
+
+    expect(pdfPageCount(TerritoryAssignmentRecordPdf::render(2026)))->toBe(1);
 });
 
 test('only PDF files are valid templates', function () {

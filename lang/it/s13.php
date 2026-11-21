@@ -36,6 +36,7 @@ return [
         'size' => 'Dimensioni della pagina: :actual invece di :expected',
         'missing_fields' => 'Campi mancanti: :fields',
         'added_fields' => 'Campi nuovi: :fields',
+        'grid' => 'Le linee della tabella sono in punti diversi',
         'and_more' => 'e altri :count',
     ],
 ];

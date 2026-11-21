@@ -131,7 +131,7 @@ class DownloadTerritoryAssignmentRecordAction extends Action
     /**
      * A warning about a template whose structure differs from the expected one, with the link to report it.
      *
-     * @param  Closure(Get): ?array{structure: array{pages: int, width: float, height: float, fields: list<string>}, differences: list<string>, file_name: ?string}  $inspection
+     * @param  Closure(Get): ?array{structure: array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}, differences: list<string>, file_name: ?string}  $inspection
      */
     protected static function structureCallout(string $key, string $heading, Closure $inspection): Callout
     {
@@ -160,7 +160,7 @@ class DownloadTerritoryAssignmentRecordAction extends Action
     /**
      * The structure of a template and its differences from the expected one (null if it is not a valid PDF).
      *
-     * @return array{structure: array{pages: int, width: float, height: float, fields: list<string>}, differences: list<string>, file_name: ?string}|null
+     * @return array{structure: array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}, differences: list<string>, file_name: ?string}|null
      */
     protected static function inspect(string $contents, ?string $fileName = null): ?array
     {
@@ -180,7 +180,7 @@ class DownloadTerritoryAssignmentRecordAction extends Action
     /**
      * Inspect the uploaded template, if any.
      *
-     * @return array{structure: array{pages: int, width: float, height: float, fields: list<string>}, differences: list<string>, file_name: ?string}|null
+     * @return array{structure: array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}, differences: list<string>, file_name: ?string}|null
      */
     protected static function inspectUpload(mixed $state): ?array
     {

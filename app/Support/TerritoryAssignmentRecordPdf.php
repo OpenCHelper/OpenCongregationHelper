@@ -90,7 +90,7 @@ class TerritoryAssignmentRecordPdf
             $pdf->SetFont($layout['font'], '', $layout['font_size']);
 
             $box = $layout['service_year'];
-            self::write($pdf, (string) $serviceYear, $box['x'], $box['y'], $box['width'], $box['height'], $layout);
+            self::write($pdf, (string) $serviceYear, $box['x'], $box['y'], $box['width'], $box['height'], $layout, $box['font_size'] ?? null);
 
             foreach ($lines->values() as $index => $line) {
                 self::writeLine($pdf, $line, $layout['first_row_y'] + $index * $layout['row_height'], $layout);
@@ -145,11 +145,12 @@ class TerritoryAssignmentRecordPdf
     }
 
     /**
-     * Write a text centred in a box, shrinking it when it is too wide.
+     * Write a text centred in a box: shrunk, and wrapped on several lines where the box is tall enough, until it fits,
+     * or else cut.
      *
      * @param  array<string, mixed>  $layout
      */
-    protected static function write(Fpdi $pdf, string $text, float $x, float $y, float $width, float $height, array $layout): void
+    protected static function write(Fpdi $pdf, string $text, float $x, float $y, float $width, float $height, array $layout, ?float $fontSize = null): void
     {
         if ($text === '') {
             return;
@@ -158,15 +159,109 @@ class TerritoryAssignmentRecordPdf
         // The core fonts of FPDF are encoded in Windows-1252
         $text = (string) iconv('UTF-8', 'windows-1252//TRANSLIT', $text);
         $availableWidth = $width - 2 * $layout['padding'];
-        $fontSize = $layout['font_size'];
+        $initialFontSize = $fontSize ?? $layout['font_size'];
 
-        while ($fontSize > $layout['min_font_size'] && $pdf->GetStringWidth($text) > $availableWidth) {
-            $pdf->SetFontSize(--$fontSize);
+        $lines = null;
+        $maxLines = 1;
+
+        // Whole words first, down to the smallest size, then broken words
+        foreach ([false, true] as $breakWords) {
+            for ($size = $initialFontSize; $size >= $layout['min_font_size']; $size--) {
+                $pdf->SetFontSize($size);
+                $lineHeight = $size * 25.4 / 72 * 1.15;
+                $maxLines = max(1, (int) floor(($height - $layout['padding']) / $lineHeight));
+                $lines = self::wrap($pdf, $text, $availableWidth, $breakWords);
+
+                if ($lines !== null && count($lines) <= $maxLines) {
+                    break 2;
+                }
+            }
         }
 
-        $pdf->SetXY($x + $layout['padding'], $y);
-        $pdf->Cell($availableWidth, $height, $text, 0, 0, 'C');
+        // Still too long at the smallest size: cut
+        if ($lines === null || count($lines) > $maxLines) {
+            $size = $layout['min_font_size'];
+            $pdf->SetFontSize($size);
+            $lines = self::wrap($pdf, $text, $availableWidth) ?? [$text];
+        }
+
+        $pdf->SetFontSize($size);
+        $lineHeight = $size * 25.4 / 72 * 1.15;
+        $maxLines = max(1, (int) floor(($height - $layout['padding']) / $lineHeight));
+
+        if (count($lines) > $maxLines) {
+            $lines = array_slice($lines, 0, $maxLines);
+            $lines[$maxLines - 1] = self::cut($pdf, $lines[$maxLines - 1].'…', $availableWidth);
+        }
+
+        $top = $y + ($height - count($lines) * $lineHeight) / 2;
+
+        foreach ($lines as $index => $line) {
+            $pdf->SetXY($x + $layout['padding'], $top + $index * $lineHeight);
+            $pdf->Cell($availableWidth, $lineHeight, $line, 0, 0, 'C');
+        }
+
         $pdf->SetFontSize($layout['font_size']);
+    }
+
+    /**
+     * Split a text in the lines that fit in a width, breaking the words too long for a line if allowed (else null).
+     *
+     * @return list<string>|null
+     */
+    protected static function wrap(Fpdi $pdf, string $text, float $width, bool $breakWords = true): ?array
+    {
+        $lines = [];
+        $line = '';
+
+        foreach (preg_split('/\s+/', trim($text)) ?: [] as $word) {
+            $candidate = $line === '' ? $word : "{$line} {$word}";
+
+            if ($pdf->GetStringWidth($candidate) <= $width) {
+                $line = $candidate;
+
+                continue;
+            }
+
+            if ($line !== '') {
+                $lines[] = $line;
+            }
+
+            if (! $breakWords && $pdf->GetStringWidth($word) > $width) {
+                return null;
+            }
+
+            // A word wider than a whole line is broken where it does not fit anymore
+            while ($pdf->GetStringWidth($word) > $width && strlen($word) > 1) {
+                $part = self::cut($pdf, $word, $width);
+                $lines[] = $part;
+                $word = substr($word, strlen($part));
+            }
+
+            $line = $word;
+        }
+
+        if ($line !== '') {
+            $lines[] = $line;
+        }
+
+        return $lines;
+    }
+
+    /**
+     * The longest start of a text that fits in a width (at least its first character).
+     */
+    protected static function cut(Fpdi $pdf, string $text, float $width): string
+    {
+        $ellipsis = str_ends_with($text, '…') ? '…' : '';
+        $text = $ellipsis !== '' ? substr($text, 0, -strlen('…')) : $text;
+        $ellipsis = (string) iconv('UTF-8', 'windows-1252', $ellipsis);
+
+        while (strlen($text) > 1 && $pdf->GetStringWidth($text.$ellipsis) > $width) {
+            $text = substr($text, 0, -1);
+        }
+
+        return rtrim($text).$ellipsis;
     }
 
     protected static function formatDate(?Carbon $date): string

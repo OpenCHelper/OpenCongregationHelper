@@ -36,6 +36,7 @@ return [
         'size' => 'Page size: :actual instead of :expected',
         'missing_fields' => 'Missing fields: :fields',
         'added_fields' => 'New fields: :fields',
+        'grid' => 'The lines of the table are in different places',
         'and_more' => 'and :count more',
     ],
 ];

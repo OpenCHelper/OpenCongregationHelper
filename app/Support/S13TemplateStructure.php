@@ -10,6 +10,8 @@ use setasign\Fpdi\PdfParser\Type\PdfDictionary;
 use setasign\Fpdi\PdfParser\Type\PdfHexString;
 use setasign\Fpdi\PdfParser\Type\PdfString;
 use setasign\Fpdi\PdfParser\Type\PdfType;
+use setasign\Fpdi\PdfReader\PdfReader;
+use Throwable;
 
 /**
  * The structure of an S-13 template: what the record relies on to be written in the right places.
@@ -26,29 +28,31 @@ class S13TemplateStructure
     public const ISSUES_URL = 'https://github.com/OpenCHelper/OpenCongregationHelper/issues/new';
 
     /**
-     * Read the structure of a PDF: its pages, the size of the page that is filled (in millimetres, rounded) and the
-     * names of its form fields, sorted.
+     * Read the structure of a PDF: its pages, the size of the page that is filled (in millimetres, rounded), the names
+     * of its form fields, sorted, and the lines of its table.
      *
-     * @return array{pages: int, width: float, height: float, fields: list<string>}
+     * @return array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}
      */
     public static function fromPdf(string $contents): array
     {
         $pdf = new Fpdi;
         $pages = $pdf->setSourceFile(StreamReader::createByString($contents));
-        $size = $pdf->getTemplateSize($pdf->importPage(min($pages, (int) config('s13.layout.template_page'))));
+        $page = min($pages, (int) config('s13.layout.template_page'));
+        $size = $pdf->getTemplateSize($pdf->importPage($page));
 
         return [
             'pages' => $pages,
             'width' => round($size['width']),
             'height' => round($size['height']),
             'fields' => self::fieldNames($contents),
+            'grid' => self::grid($contents, $page, $size['height']),
         ];
     }
 
     /**
      * The structure the layout was made for, if known.
      *
-     * @return array{pages: int, width: float, height: float, fields: list<string>}|null
+     * @return array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}|null
      */
     public static function expected(): ?array
     {
@@ -58,7 +62,7 @@ class S13TemplateStructure
     /**
      * Describe how a structure differs from the expected one (none while the expected one is not known).
      *
-     * @param  array{pages: int, width: float, height: float, fields: list<string>}  $structure
+     * @param  array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}  $structure
      * @return list<string>
      */
     public static function differences(array $structure): array
@@ -93,13 +97,17 @@ class S13TemplateStructure
             $differences[] = __('s13.structure.added_fields', ['fields' => self::summarize($added)]);
         }
 
+        if ($structure['grid'] !== ($expected['grid'] ?? $structure['grid'])) {
+            $differences[] = __('s13.structure.grid');
+        }
+
         return $differences;
     }
 
     /**
      * The link to a new issue, pre-filled with the structure of the template and its differences from the expected one.
      *
-     * @param  array{pages: int, width: float, height: float, fields: list<string>}  $structure
+     * @param  array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}  $structure
      * @param  list<string>  $differences
      */
     public static function issueUrl(array $structure, array $differences, ?string $fileName = null): string
@@ -126,6 +134,46 @@ class S13TemplateStructure
             'labels' => 'enhancement',
             'body' => $body,
         ], '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * The lines of the table of a page, which the layout is aligned to: where its vertical lines are from the left
+     * border of the page, and its horizontal ones from the top, in millimetres (rounded to the half millimetre).
+     *
+     * The forms draw their lines as thin filled rectangles, which do not depend on the language of the form.
+     *
+     * @return array{columns: list<float>, rows: list<float>}
+     */
+    protected static function grid(string $contents, int $page, float $pageHeight): array
+    {
+        try {
+            $stream = (new PdfReader(new PdfParser(StreamReader::createByString($contents))))->getPage($page)->getContentStream();
+        } catch (Throwable) {
+            return ['columns' => [], 'rows' => []];
+        }
+
+        $millimetres = fn (float $points): float => round($points * 25.4 / 72 * 2) / 2;
+        $columns = [];
+        $rows = [];
+
+        preg_match_all('/(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+re\s+[fF]\*?(?![\w])/', $stream, $rectangles, PREG_SET_ORDER);
+
+        foreach ($rectangles as [, $x, $y, $width, $height]) {
+            [$x, $y, $width, $height] = [(float) $x, (float) $y, abs((float) $width), abs((float) $height)];
+
+            if ($width < 2 && $height > 5) {
+                $columns[] = $millimetres($x + $width / 2);
+            } elseif ($height < 2 && $width > 5) {
+                $rows[] = round(($pageHeight - $millimetres($y + $height / 2)) * 2) / 2;
+            }
+        }
+
+        $columns = array_values(array_unique($columns, SORT_REGULAR));
+        $rows = array_values(array_unique($rows, SORT_REGULAR));
+        sort($columns);
+        sort($rows);
+
+        return ['columns' => $columns, 'rows' => $rows];
     }
 
     /**
