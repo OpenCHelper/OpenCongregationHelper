@@ -131,6 +131,40 @@ test('the invitation lets the user choose their password for 6 hours', function 
     'after 7 hours' => [7, false],
 ]);
 
+test('an unused invitation stops working once the password is set another way', function (string $setBy) {
+    $user = User::factory()->create(['can_login' => true, 'password' => null]);
+    $invitationToken = Password::broker('invitations')->createToken($user);
+
+    if ($setBy === 'user') {
+        Livewire::test(ResetPassword::class, ['email' => $user->email, 'token' => Password::broker()->createToken($user)])
+            ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+            ->call('resetPassword')
+            ->assertNotified(__(PasswordBroker::PASSWORD_RESET));
+    } else {
+        $this->actingAs($this->manager);
+
+        Livewire::test(EditUser::class, ['record' => $user->id])
+            ->fillForm(['password' => 'chosen-password'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        auth()->logout();
+    }
+
+    expect(Password::broker('invitations')->tokenExists($user, $invitationToken))->toBeFalse();
+
+    Livewire::withQueryParams(['invitation' => 1])
+        ->test(ResetPassword::class, ['email' => $user->email, 'token' => $invitationToken])
+        ->fillForm(['password' => 'invitation-password', 'passwordConfirmation' => 'invitation-password'])
+        ->call('resetPassword')
+        ->assertNotified(__(PasswordBroker::INVALID_TOKEN));
+
+    expect(Hash::check('chosen-password', $user->refresh()->password))->toBeTrue();
+})->with([
+    'by the user with "Forgot password?"' => 'user',
+    'by an administrator' => 'administrator',
+]);
+
 test('normal password resets still expire after an hour', function () {
     $token = Password::broker()->createToken($this->user);
 
