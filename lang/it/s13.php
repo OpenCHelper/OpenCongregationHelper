@@ -16,8 +16,8 @@ return [
         'template' => [
             'label' => 'Modulo S-13 ufficiale',
             'replace_label' => 'Sostituisci il modulo S-13 ufficiale',
-            'helper' => 'Il PDF compilabile dell\'S-13 (Registro delle assegnazioni dei territori), scaricato da JW Hub, nella lingua della congregazione.',
-            'invalid' => 'Questo file non è un PDF compilabile: carica l\'S-13 scaricato da JW Hub.',
+            'helper' => 'Il PDF dell\'S-13 (Registro delle assegnazioni dei territori), scaricato da JW Hub, nella lingua della congregazione.',
+            'invalid' => 'Questo file non è un PDF utilizzabile: carica l\'S-13 scaricato da JW Hub.',
         ],
     ],
     'template' => [

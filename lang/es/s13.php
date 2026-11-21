@@ -16,8 +16,8 @@ return [
         'template' => [
             'label' => 'Formulario S-13 oficial',
             'replace_label' => 'Reemplazar el formulario S-13 oficial',
-            'helper' => 'El PDF rellenable del S-13 (Registro de asignación de territorios), descargado de JW Hub, en el idioma de la congregación.',
-            'invalid' => 'Este archivo no es un PDF que se pueda rellenar: sube el S-13 descargado de JW Hub.',
+            'helper' => 'El PDF del S-13 (Registro de asignación de territorios), descargado de JW Hub, en el idioma de la congregación.',
+            'invalid' => 'Este archivo no es un PDF que se pueda usar: sube el S-13 descargado de JW Hub.',
         ],
     ],
     'template' => [

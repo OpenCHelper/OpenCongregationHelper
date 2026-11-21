@@ -16,8 +16,8 @@ return [
         'template' => [
             'label' => 'Official S-13 form',
             'replace_label' => 'Replace the official S-13 form',
-            'helper' => 'The fillable PDF of the S-13 (Territory Assignment Record), downloaded from JW Hub, in the language of the congregation.',
-            'invalid' => 'This file is not a PDF that can be filled: upload the S-13 downloaded from JW Hub.',
+            'helper' => 'The PDF of the S-13 (Territory Assignment Record), downloaded from JW Hub, in the language of the congregation.',
+            'invalid' => 'This file is not a PDF that can be used: upload the S-13 downloaded from JW Hub.',
         ],
     ],
     'template' => [
