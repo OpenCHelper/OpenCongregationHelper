@@ -1,0 +1,13 @@
+# Settings of zizmor (https://docs.zizmor.sh/configuration/), the GitHub Actions linter run by CodeFactor on every PR.
+# Each ignored finding is an accepted risk, with its reason:
+rules:
+  dangerous-triggers:
+    ignore:
+      # `issue_comment` and the other comment triggers: only users with write access (and, when set, those listed in
+      # `CLAUDE_ALLOWED_USERS`) can start Claude, on the code of the default branch (the ref of comment events)
+      - claude.yml
+  secrets-inherit:
+    ignore:
+      # The reusable deployment workflow reads the secrets of its GitHub environment, which a caller can only pass on
+      # with `secrets: inherit` (see `upload-altervista-reusable.yml`)
+      - deploy-nightly.yml
