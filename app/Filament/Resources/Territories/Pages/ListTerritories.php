@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Territories\Pages;
 
 use App\Filament\Imports\TerritoryImporter;
+use App\Filament\Resources\Territories\Actions\DownloadTerritoryAssignmentRecordAction;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Models\Territory;
 use Filament\Actions\CreateAction;
@@ -44,6 +45,7 @@ class ListTerritories extends ListRecords
                 ->pluralModelLabel(__('filament-resources.territory.plural_model_label'))
                 ->authorize(fn (): bool => Gate::allows('create', Territory::class))
                 ->importer(TerritoryImporter::class),
+            DownloadTerritoryAssignmentRecordAction::make(),
         ];
     }
 }
