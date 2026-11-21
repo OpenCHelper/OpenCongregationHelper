@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - The installed app takes the primary colour chosen on the Settings pages
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- PR previews can be turned on or off for each PR with the `preview` (opt-in) and `no-preview` (opt-out) labels,
+  and for the whole repository with the `PREVIEW_MODE` variable (`all`, `labeled` or `off`).
 
 ### Changed
 

@@ -203,6 +203,16 @@ This site itself, along with all the PR previews, is hosted on Altervista.
 | [`deploy-preview.yml`](.github/workflows/deploy-preview.yml) | `https://pr-<N>.<site>`, a preview of every PR |
 | [`deploy-nightly.yml`](.github/workflows/deploy-nightly.yml) | The [nightly demo](#demo), on every push to `main` |
 
+Which PRs get a preview is set by the `PREVIEW_MODE` repository variable, and by the labels of each PR:
+
+| `PREVIEW_MODE` | Previews |
+| --- | --- |
+| `all` (default) | Every PR, unless it has the `no-preview` label (opt-out) |
+| `labeled` | Only the PRs with the `preview` label (opt-in) |
+| `off` | None |
+
+Adding or removing a label deploys or removes the preview right away; `no-preview` wins over `preview`.
+
 Other installations call the reusable
 [`upload-altervista-reusable.yml`](.github/workflows/upload-altervista-reusable.yml) workflow from their own repository
 (see its inputs).

@@ -67,6 +67,9 @@ runs:
 
           if (existing) {
             await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+          } else if (PREVIEW_STATUS === 'removed') {
+            // e.g. closing a PR that never had a preview (opted out, or `PREVIEW_MODE` other than `all`)
+            core.info('No preview comment to update.');
           } else {
             await github.rest.issues.createComment({ ...context.repo, issue_number, body });
           }
