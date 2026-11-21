@@ -17,6 +17,16 @@ class ViewTerritoryAssignment extends ViewRecord
 {
     protected static string $resource = TerritoryAssignmentResource::class;
 
+    /**
+     * The assignees can open their own assignments without being allowed to list them (e.g. from a notification): the
+     * access to the assignment itself is still checked by the `view` policy, and the query of the resource only finds
+     * the assignments the user can see (their own, unless allowed to list all of them).
+     */
+    public static function authorizeResourceAccess(): void
+    {
+        //
+    }
+
     protected function getHeaderActions(): array
     {
         return [

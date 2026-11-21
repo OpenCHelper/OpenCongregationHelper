@@ -17,9 +17,13 @@ class TerritoryAssignmentPolicy
         return $authUser->can('ViewAny:TerritoryAssignment');
     }
 
+    /**
+     * The assignees can always open their own assignments (e.g. from a notification), even without the permission.
+     */
     public function view(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        return $authUser->can('View:TerritoryAssignment');
+        return $authUser->can('View:TerritoryAssignment')
+            || $territoryAssignment->assignee_id === $authUser->getKey();
     }
 
     public function create(AuthUser $authUser): bool

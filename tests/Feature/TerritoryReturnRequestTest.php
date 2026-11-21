@@ -4,6 +4,7 @@ use App\Enums\DepartmentKey;
 use App\Enums\DepartmentRole;
 use App\Filament\Guest\Pages\ViewSharedAssignment;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\Department;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
@@ -14,7 +15,6 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
@@ -24,11 +24,6 @@ beforeEach(function () {
     User::factory()->create(['id' => 1]);
 
     $this->assignee = User::factory()->create(['can_login' => true, 'first_name' => 'Mario', 'last_name' => 'Rossi']);
-    // Needed by the pages of the assignments, besides being the assignee
-    $this->assignee->givePermissionTo([
-        Permission::findOrCreate('ViewAny:TerritoryAssignment', 'web'),
-        Permission::findOrCreate('View:TerritoryAssignment', 'web'),
-    ]);
 
     $this->overseer = User::factory()->create(['can_login' => true]);
     $this->assistant = User::factory()->create(['can_login' => true]);
@@ -64,6 +59,37 @@ test('the assignee can ask the territory department to close the assignment', fu
 
     Notification::assertSentTo([$this->overseer, $this->assistant], TerritoryReturnRequestedNotification::class);
     Notification::assertNotSentTo($this->assignee, TerritoryReturnRequestedNotification::class);
+});
+
+test('a publisher without permissions on the assignments opens their own assignment, but no one else\'s', function () {
+    $this->withoutVite();
+
+    $otherAssignment = TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for(TerritoryZone::factory(), 'territoryZone')->create()->id,
+        'assignee_id' => User::factory()->create()->id,
+        'ended_at' => null,
+    ]);
+
+    $this->actingAs($this->assignee);
+
+    $this->get(TerritoryAssignmentResource::getUrl('view', ['record' => $this->assignment]))
+        ->assertOk()
+        ->assertSee('Territory to return');
+    // Not even found: the assignments of the others are left out of the query, so their existence is not revealed
+    $this->get(TerritoryAssignmentResource::getUrl('view', ['record' => $otherAssignment]))
+        ->assertNotFound();
+    $this->get(TerritoryAssignmentResource::getUrl())
+        ->assertForbidden();
+
+    expect(TerritoryAssignmentResource::canViewAllAssignments())->toBeFalse()
+        ->and(TerritoryAssignmentResource::getEloquentQuery()->pluck('id')->all())->toBe([$this->assignment->id]);
+});
+
+test('the policy lets only the assignee view an assignment without the permission', function () {
+    $publisher = User::factory()->create(['can_login' => true]);
+
+    expect($this->assignee->can('view', $this->assignment))->toBeTrue()
+        ->and($publisher->can('view', $this->assignment))->toBeFalse();
 });
 
 test('only the members of the territory department are notified, not the one asking', function () {
