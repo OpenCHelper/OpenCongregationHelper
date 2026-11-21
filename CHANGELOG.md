@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Return requests**: publishers can ask the territory department to close their assignment with one click, and
   its members are notified; also from shared links, when enabled from the Settings pages (default from
   `GUEST_ALLOW_RETURNING_ASSIGNMENT`) ([#56](https://github.com/OpenCHelper/OpenCongregationHelper/pull/56)).
+- **Publisher statistics** on the publisher's page: the zones and territories they take most often
+  ([#55](https://github.com/OpenCHelper/OpenCongregationHelper/pull/55)).
 
 ### Changed
 

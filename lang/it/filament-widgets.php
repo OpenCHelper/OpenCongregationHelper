@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'publisher_statistics' => [
+        'heading' => 'Statistiche',
+        'assignments_count' => '{0} Nessuna assegnazione|{1} :count assegnazione|[2,*] :count assegnazioni',
+        'no_assignments' => 'Nessun territorio è stato ancora assegnato a questo proclamatore.',
+        'preferred_zones' => 'Zone preferite',
+        'preferred_zones_description' => 'Le zone di cui il proclamatore prende più spesso i territori.',
+        'preferred_territories' => 'Territori preferiti',
+        'preferred_territories_description' => '{1} Il territorio che il proclamatore prende più spesso.|[2,*] I :count territori che il proclamatore prende più spesso.',
+    ],
     'territory_global_map' => [
         'heading' => 'Mappa dei territori',
         'map_mode' => 'Colora i territori per',

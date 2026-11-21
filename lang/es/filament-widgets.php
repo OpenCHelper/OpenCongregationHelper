@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'publisher_statistics' => [
+        'heading' => 'Estadísticas',
+        'assignments_count' => '{0} Ninguna asignación|{1} :count asignación|[2,*] :count asignaciones',
+        'no_assignments' => 'Todavía no se ha asignado ningún territorio a este publicador.',
+        'preferred_zones' => 'Zonas preferidas',
+        'preferred_zones_description' => 'Las zonas cuyos territorios el publicador toma con más frecuencia.',
+        'preferred_territories' => 'Territorios preferidos',
+        'preferred_territories_description' => '{1} El territorio que el publicador toma con más frecuencia.|[2,*] Los :count territorios que el publicador toma con más frecuencia.',
+    ],
     'territory_global_map' => [
         'heading' => 'Mapa de territorios',
         'map_mode' => 'Colorear los territorios por',
