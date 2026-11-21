@@ -55,7 +55,8 @@ permissions:
 # one in progress. The concurrency group is on the `deploy` and `destroy` jobs, not on the workflow, so that a run with
 # nothing to do (e.g. a push to a PR without a preview, or any other label) cannot cancel them. Runs reach these jobs
 # in the order in which their `decide` job ends, so the `deploy` job always deploys the latest commit of the PR, and
-# only if its current labels still want a preview.
+# only if its current labels still want a preview. Deployments of different PRs run at the same time: the files they
+# share on the space (the deployer and the router) are installed atomically by the `ftp-archive-deploy` action.
 
 env:
   # Tables of the previews are prefixed with `p<N>_`, which must stay within 6 characters (see `SpaceDeployer`)
