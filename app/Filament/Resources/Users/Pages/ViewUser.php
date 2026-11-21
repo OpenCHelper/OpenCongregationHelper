@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Resources\Users\Widgets\PublisherStatistics;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -17,6 +18,13 @@ class ViewUser extends ViewRecord
     public static function getNavigationLabel(): string
     {
         return __('filament-pages.view_user');
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return PublisherStatistics::canViewStatisticsOf($this->getRecord())
+            ? [PublisherStatistics::class]
+            : [];
     }
 
     protected function getHeaderActions(): array
