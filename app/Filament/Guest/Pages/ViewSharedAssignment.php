@@ -55,7 +55,11 @@ class ViewSharedAssignment extends Page implements HasInfolists
         return [
             RequestReturnAction::make()
                 ->record($this->assignment)
-                ->after(fn () => $this->assignment->refresh()),
+                // A block, not an arrow function: what `after()` returns is sent back to the browser, and the refreshed
+                // assignment would expose its personal data (assignee, notes) that the page hides
+                ->after(function (): void {
+                    $this->assignment->refresh();
+                }),
         ];
     }
 

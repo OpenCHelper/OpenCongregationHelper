@@ -77,7 +77,7 @@ return [
             'confirm' => 'Mostrar los datos personales',
         ],
         'guest_returns' => [
-            'label' => 'Pedir devolver desde las páginas compartidas',
+            'label' => 'Solicitar la devolución desde las páginas compartidas',
             'helper' => 'Cualquiera que abra la página pública de una asignación compartida puede pedir al departamento de territorios que la cierre, sin una cuenta.',
             'enabled' => 'Activado',
             'disabled' => 'Desactivado',

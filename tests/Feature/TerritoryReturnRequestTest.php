@@ -262,6 +262,24 @@ test('asking again from a page opened before the return was asked tells it was a
         ->assertActionNotMounted('requestReturn');
 })->with(['asked', 'returned']);
 
+test('reopening a returned assignment forgets its return request', function () {
+    $this->assignment->requestReturn($this->assignee);
+    $this->assignment->update(['ended_at' => now()]);
+
+    $this->assignment->update(['ended_at' => null]);
+
+    expect($this->assignment->fresh()->return_requested_at)->toBeNull()
+        ->and($this->assignment->fresh()->canRequestReturn())->toBeTrue();
+});
+
+test('giving the assignment to someone else forgets its pending return request', function () {
+    $this->assignment->requestReturn($this->assignee);
+
+    $this->assignment->update(['assignee_id' => User::factory()->create()->id]);
+
+    expect($this->assignment->fresh()->return_requested_at)->toBeNull();
+});
+
 describe('from the shared link', function () {
     beforeEach(function () {
         Filament::setCurrentPanel('guest');
@@ -318,6 +336,23 @@ describe('from the shared link', function () {
         $staleTab->callMountedAction()
             ->assertNotified(__('filament-resources.territory_assignment.request_return_failure'));
     });
+
+    test('asking to return from the shared link sends back none of the data of the assignment', function (bool $alreadyAsked) {
+        config(['app.guest_allow_returning_assignment' => true]);
+        $this->assignment->update(['notes' => 'Private assignment notes']);
+
+        $component = Livewire::test(ViewSharedAssignment::class, ['record' => $this->sharedUrl->uid])
+            ->mountAction('requestReturn');
+
+        if ($alreadyAsked) {
+            $this->assignment->requestReturn();
+        }
+
+        $result = $component->instance()->callMountedAction();
+
+        expect($result)->toBeNull()
+            ->and(json_encode($component->instance()->getMountedAction()?->toArray() ?? []))->not->toContain('Private assignment notes');
+    })->with(['first time' => false, 'already asked' => true]);
 
     test('the department cannot close the assignment from the shared link', function () {
         config(['app.guest_allow_returning_assignment' => true]);
