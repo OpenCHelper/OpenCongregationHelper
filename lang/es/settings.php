@@ -40,6 +40,8 @@ return [
         'stale_assignments_description' => 'Las asignaciones todavía en curso después de estos días están fuera desde hace demasiado tiempo: una vez por semana, se recuerda a sus asignados que las devuelvan y el departamento de territorios recibe un resumen por correo y en la aplicación.',
         'assignment_frequency' => 'Frecuencia de asignación',
         'assignment_frequency_description' => 'Con qué frecuencia se asigna cada territorio, como se colorea en el mapa del panel: según el número de sus asignaciones en los últimos meses.',
+        'territory_coverage' => 'Cobertura del territorio',
+        'territory_coverage_description' => 'Los periodos en los que el panel puede mostrar la parte de territorios trabajados.',
     ],
 
     'fields' => [
@@ -104,6 +106,14 @@ return [
         ],
         'high_frequency_min_assignments' => [
             'label' => 'Frecuente',
+        ],
+        'coverage_periods_months' => [
+            'label' => 'Periodos',
+            'placeholder' => 'Meses, p. ej. 12',
+            'helper' => 'En meses: pulsa Intro después de cada uno.',
+        ],
+        'coverage_default_period_months' => [
+            'label' => 'Periodo mostrado por defecto',
         ],
     ],
 ];

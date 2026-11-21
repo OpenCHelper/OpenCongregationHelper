@@ -53,6 +53,12 @@ colours the territories:
   must be more. With fewer assignments, or none, the frequency is **low**. The bar below draws them to scale while you
   type.
 
+Under **Territory coverage** you choose the periods of the [territory coverage](../basics/dashboard#territory-coverage)
+of the dashboard:
+
+- the **periods**, in months, offered in its menu (6, 12 and 24 by default): press Enter after each one;
+- the **period shown by default** (12 months by default), one of the periods.
+
 ## Campaigns
 
 ![Campaign settings](/docs/user-documentation/en/administration/assets/settings-campaigns.webp)

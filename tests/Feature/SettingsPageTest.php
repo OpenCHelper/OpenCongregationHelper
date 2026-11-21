@@ -557,3 +557,50 @@ test('several settings read at once fall back on the environment too', function 
         'stale_after_days' => 60,
     ]);
 });
+
+test('the periods of the territory coverage are stored sorted and without duplicates', function () {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertSchemaStateSet([
+            'coverage_periods_months' => ['6', '12', '24'],
+            'coverage_default_period_months' => 12,
+        ])
+        ->fillForm([
+            'coverage_periods_months' => ['36', '3', '12', '3'],
+            'coverage_default_period_months' => '36',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(storedSettings('territories'))->toMatchArray([
+        'coverage_periods_months' => [3, 12, 36],
+        'coverage_default_period_months' => 36,
+    ]);
+});
+
+test('the periods of the territory coverage must be months and include the default one', function (array $data, string $field) {
+    actingAsSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm($data)
+        ->call('save')
+        ->assertHasFormErrors([$field]);
+
+    expect(app(TerritorySettings::class)->coverage_periods_months)->toBe([6, 12, 24]);
+})->with([
+    'no period' => [['coverage_periods_months' => []], 'coverage_periods_months'],
+    'not a number' => [['coverage_periods_months' => ['6', 'year']], 'coverage_periods_months.1'],
+    'zero months' => [['coverage_periods_months' => ['0', '12']], 'coverage_periods_months.0'],
+    'default not among the periods' => [['coverage_periods_months' => ['6', '24'], 'coverage_default_period_months' => '12'], 'coverage_default_period_months'],
+]);
+
+test('the default period of the territory coverage is labelled with the right plural', function () {
+    actingAsSuperAdmin();
+    app()->setLocale('it');
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['coverage_periods_months' => ['1', '12']])
+        ->assertSee(trans_choice('filament-widgets.territory_coverage.period', 1, ['count' => 1]))
+        ->assertDontSee('1 '.__('settings.units.months'));
+});
