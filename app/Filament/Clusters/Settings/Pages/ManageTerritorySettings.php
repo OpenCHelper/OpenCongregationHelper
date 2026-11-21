@@ -85,8 +85,12 @@ class ManageTerritorySettings extends AppSettingsPage
                             ->label(__('settings.fields.sharing_enabled.label'))
                             ->helperText(__('settings.fields.sharing_enabled.helper').' '.$this->defaultHint(
                                 $this->defaultValue('sharing_enabled') ? __('settings.fields.sharing_enabled.enabled') : __('settings.fields.sharing_enabled.disabled'),
-                            )),
+                            ))
+                            ->live(),
+                        // Kept while sharing is disabled, so that enabling it again restores them
                         Radio::make('shared_pii')
+                            ->visible(fn (Get $get): bool => (bool) $get('sharing_enabled'))
+                            ->dehydratedWhenHidden()
                             ->hiddenLabel()
                             ->options([
                                 'hide' => __('settings.fields.shared_pii.hide'),
@@ -114,6 +118,8 @@ class ManageTerritorySettings extends AppSettingsPage
                                 }
                             }),
                         Toggle::make('guest_returns')
+                            ->visible(fn (Get $get): bool => (bool) $get('sharing_enabled'))
+                            ->dehydratedWhenHidden()
                             ->label(__('settings.fields.guest_returns.label'))
                             ->helperText(__('settings.fields.guest_returns.helper').' '.$this->defaultHint(
                                 $this->defaultValue('guest_returns') ? __('settings.fields.guest_returns.enabled') : __('settings.fields.guest_returns.disabled'),

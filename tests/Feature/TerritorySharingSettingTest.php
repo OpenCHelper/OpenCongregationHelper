@@ -173,3 +173,41 @@ test('the setting is labelled in every language of the application', function (s
         expect(trans()->hasForLocale("settings.fields.sharing_enabled.$key", $locale))->toBeTrue();
     }
 })->with(['en', 'es', 'it']);
+
+test('the options of the shared pages are shown only while sharing is enabled', function () {
+    actingAsSharingSuperAdmin();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertFormFieldVisible('shared_pii')
+        ->assertFormFieldVisible('guest_returns')
+        ->fillForm(['sharing_enabled' => false])
+        ->assertFormFieldHidden('shared_pii')
+        ->assertFormFieldHidden('guest_returns')
+        ->fillForm(['sharing_enabled' => true])
+        ->assertFormFieldVisible('shared_pii')
+        ->assertFormFieldVisible('guest_returns');
+});
+
+test('the options of the shared pages are kept while sharing is disabled', function () {
+    actingAsSharingSuperAdmin();
+    $settings = app(TerritorySettings::class);
+    $settings->shared_pii = true;
+    $settings->guest_returns = true;
+    $settings->save();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->fillForm(['sharing_enabled' => false])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $settings = app(TerritorySettings::class)->refresh();
+
+    expect($settings->sharing_enabled)->toBeFalse()
+        ->and($settings->shared_pii)->toBeTrue()
+        ->and($settings->guest_returns)->toBeTrue();
+
+    Livewire::test(ManageTerritorySettings::class)
+        ->assertFormFieldHidden('shared_pii')
+        ->fillForm(['sharing_enabled' => true])
+        ->assertSchemaStateSet(['shared_pii' => 'show', 'guest_returns' => true]);
+});
