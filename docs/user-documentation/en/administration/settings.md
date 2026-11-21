@@ -25,8 +25,11 @@ role. The options are grouped by area, with one page each in the menu on the sid
 - **Default map centre**: where the maps open while no territory has a map yet, as `latitude, longitude` (e.g.
   `41.159063, -74.255188`). Afterwards the maps open on the territories.
 
-Under **Privacy of shared pages** you choose what the public page of a [shared assignment](../assignments/sharing) shows
-to anyone who has its link:
+Under **Privacy of shared pages** you first choose whether assignments can be [shared](../assignments/sharing) at all
+(**Share assignments**, enabled by default). When disabled, **Share** is no longer offered and the existing links stop
+working, without being deleted: enabling it again restores them.
+
+Then you choose what the public page of a shared assignment shows to anyone who has its link:
 
 - **Hide personal data** (recommended): only the territory, its map and the dates;
 - **Show personal data**: also the name of the assignee and the notes of the territory, which may describe

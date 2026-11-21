@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Settings\TerritorySettings;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -9,6 +10,14 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class SharedUrl extends Model
 {
     use HasUuids;
+
+    /**
+     * Whether sharing is enabled: while it is not, no link can be created and the existing ones do not open.
+     */
+    public static function isSharingEnabled(): bool
+    {
+        return (bool) TerritorySettings::value('sharing_enabled');
+    }
 
     /**
      * The attributes that are mass assignable.

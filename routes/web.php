@@ -50,6 +50,8 @@ Route::get('/team-invitations/{invitation}', [TeamInvitationController::class, '
 
 // Share route that redirects to Filament Guest panel
 Route::get('/share/{uuid}', function ($uuid) {
+    abort_unless(SharedUrl::isSharingEnabled(), 404);
+
     $sharedUrl = SharedUrl::where('uid', $uuid)->first();
 
     if (! $sharedUrl || ! $sharedUrl->shareable) {

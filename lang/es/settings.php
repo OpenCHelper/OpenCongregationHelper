@@ -62,6 +62,12 @@ return [
             'helper' => 'Dónde se abren los mapas mientras ningún territorio tiene un mapa, como "latitud, longitud".',
             'invalid' => 'Escribe las coordenadas como "latitud, longitud" (p. ej. 41.159063, -74.255188).',
         ],
+        'sharing_enabled' => [
+            'label' => 'Compartir asignaciones',
+            'helper' => 'Quien puede abrir una asignación puede crear un enlace público a ella, para quienes no tienen una cuenta. Si se desactiva, no se puede crear ningún enlace y los existentes dejan de funcionar hasta que se vuelva a activar.',
+            'enabled' => 'Activado',
+            'disabled' => 'Desactivado',
+        ],
         'shared_pii' => [
             'hide' => 'Ocultar los datos personales',
             'hide_description' => 'Solo el territorio, su mapa y las fechas: el asignado y las notas se quedan en la aplicación.',

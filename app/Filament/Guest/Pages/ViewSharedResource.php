@@ -44,6 +44,9 @@ class ViewSharedResource extends Page implements HasInfolists
 
     public function mount(string $record): void
     {
+        // The links are kept while sharing is disabled, so that enabling it again restores them
+        abort_unless(SharedUrl::isSharingEnabled(), 404);
+
         $this->sharedUrl = SharedUrl::where('uid', $record)->firstOrFail();
 
         if (! $this->sharedUrl->shareable) {

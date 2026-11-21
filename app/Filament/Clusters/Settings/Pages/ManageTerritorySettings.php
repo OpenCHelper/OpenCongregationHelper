@@ -81,6 +81,11 @@ class ManageTerritorySettings extends AppSettingsPage
                     ->icon(Heroicon::OutlinedShieldCheck)
                     ->columnSpanFull()
                     ->schema([
+                        Toggle::make('sharing_enabled')
+                            ->label(__('settings.fields.sharing_enabled.label'))
+                            ->helperText(__('settings.fields.sharing_enabled.helper').' '.$this->defaultHint(
+                                $this->defaultValue('sharing_enabled') ? __('settings.fields.sharing_enabled.enabled') : __('settings.fields.sharing_enabled.disabled'),
+                            )),
                         Radio::make('shared_pii')
                             ->hiddenLabel()
                             ->options([
@@ -268,6 +273,7 @@ class ManageTerritorySettings extends AppSettingsPage
     {
         $data['map_default_center'] = self::parseCoordinates((string) $data['map_default_center']);
         $data['shared_pii'] = $data['shared_pii'] === 'show';
+        $data['sharing_enabled'] = (bool) $data['sharing_enabled'];
         $data['guest_returns'] = (bool) $data['guest_returns'];
         $data['stale_check_day'] = (int) $data['stale_check_day'];
         $data['coverage_periods_months'] = self::normalizePeriods((array) $data['coverage_periods_months']);
