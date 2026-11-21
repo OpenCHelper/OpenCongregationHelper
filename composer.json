@@ -37,6 +37,9 @@
         "outhebox/blade-flags": "^1.5",
         "pxlrbt/filament-environment-indicator": "^3.0",
         "rmsramos/activitylog": "^4.1",
+        "setasign/fpdf": "^1.9",
+        "setasign/fpdi": "^2.6",
+        "setasign/tfpdf": "^1.34",
         "spatie/laravel-translatable": "^6.11",
         "stechstudio/filament-impersonate": "^5.7",
         "tapp/filament-maillog": "^2.0"
