@@ -3,8 +3,13 @@
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\User;
+use App\Notifications\SetPasswordNotification;
+use Filament\Auth\Pages\PasswordReset\ResetPassword;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -56,7 +61,8 @@ test('editing a user with a new password updates it', function () {
     expect(Hash::check('new-password', $this->user->refresh()->password))->toBeTrue();
 });
 
-test('a password is required when creating a user that can log in', function () {
+test('creating a user that can log in without a password emails them a link to set it', function () {
+    Notification::fake();
     $this->actingAs($this->manager);
 
     Livewire::test(CreateUser::class)
@@ -68,7 +74,108 @@ test('a password is required when creating a user that can log in', function () 
             'password' => null,
         ])
         ->call('create')
-        ->assertHasFormErrors(['password' => 'required']);
+        ->assertHasNoFormErrors()
+        ->assertNotified(__('filament-resources.user.set_password_link_sent', ['email' => 'new.user@example.com']));
+
+    $user = User::query()->where('email', 'new.user@example.com')->sole();
+
+    expect($user->password)->not->toBeNull();
+
+    Notification::assertSentTo($user, SetPasswordNotification::class, function (SetPasswordNotification $notification) use ($user): bool {
+        $url = $notification->toMail($user)->actionUrl;
+
+        return Password::broker()->tokenExists($user, $notification->token)
+            && str_starts_with($url, Filament::getPanel('app')->getUrl())
+            && str_contains($url, urlencode($user->email));
+    });
+});
+
+test('the link emailed to a new user lets them set their password', function () {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    Livewire::test(CreateUser::class)
+        ->fillForm([
+            'first_name' => 'New',
+            'last_name' => 'User',
+            'email' => 'new.user@example.com',
+            'can_login' => true,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $user = User::query()->where('email', 'new.user@example.com')->sole();
+    $token = Notification::sent($user, SetPasswordNotification::class)->sole()->token;
+
+    auth()->logout();
+
+    Livewire::test(ResetPassword::class, ['email' => $user->email, 'token' => $token])
+        ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+        ->call('resetPassword')
+        ->assertHasNoFormErrors();
+
+    expect(Hash::check('chosen-password', $user->refresh()->password))->toBeTrue();
+});
+
+test('the set password email is sent in the preferred language of the user', function () {
+    $user = User::factory()->create(['locale' => 'it', 'can_login' => true]);
+
+    SetPasswordNotification::sendTo($user);
+
+    $email = Mail::mailer()->getSymfonyTransport()->messages()->sole()->getOriginalMessage();
+
+    expect($email->getSubject())->toBe('Il tuo account '.config('app.name'))
+        ->and($email->getHtmlBody())->toContain('Imposta password');
+});
+
+test('creating a user with a password sets it and sends no email', function () {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    Livewire::test(CreateUser::class)
+        ->fillForm([
+            'first_name' => 'New',
+            'last_name' => 'User',
+            'email' => 'new.user@example.com',
+            'can_login' => true,
+            'password' => 'chosen-password',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $user = User::query()->where('email', 'new.user@example.com')->sole();
+
+    expect(Hash::check('chosen-password', $user->password))->toBeTrue();
+    Notification::assertNothingSent();
+});
+
+test('creating a virtual user sends no email', function () {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    Livewire::test(CreateUser::class)
+        ->fillForm([
+            'first_name' => 'New',
+            'last_name' => 'User',
+            'email' => 'new.user@example.com',
+            'can_login' => false,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(User::query()->where('email', 'new.user@example.com')->sole()->password)->toBeNull();
+    Notification::assertNothingSent();
+});
+
+test('passwords set by administrators follow the password policy', function () {
+    $this->actingAs($this->manager);
+
+    Livewire::test(EditUser::class, ['record' => $this->user->id])
+        ->fillForm(['password' => 'short'])
+        ->call('save')
+        ->assertHasFormErrors(['password']);
+
+    expect(Hash::check('original-password', $this->user->refresh()->password))->toBeTrue();
 });
 
 test('a user cannot be created with the email of another user', function () {

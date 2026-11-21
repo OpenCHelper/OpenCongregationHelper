@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Password;
 use Override;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use UnitEnum;
@@ -121,14 +122,17 @@ class UserResource extends Resource
                             ->disabled(fn (Get $get, ?User $record) => $get('can_login') === false || $record?->isRootUserProtected()
                             )
                             ->password()
-                            // Only required when creating a user: on edit, an empty value keeps the current password
-                            ->required(fn (string $operation, Get $get): bool => $operation === 'create' && (bool) $get('can_login'))
+                            // When creating a user, an empty value emails them a link to set their own password (see
+                            // `CreateUser`); on edit, it keeps the current password
                             ->dehydrated(fn (?string $state): bool => filled($state))
+                            ->rule(Password::default())
                             ->maxLength(255)
-                            ->helperText(fn (?User $record) => $record?->isRootUserProtected()
-                                ? __('profile.root_user_protection.password_change_not_allowed')
-                                : null
-                            ),
+                            ->helperText(fn (string $operation, ?User $record) => match (true) {
+                                (bool) $record?->isRootUserProtected() => __('profile.root_user_protection.password_change_not_allowed'),
+                                $operation === 'create' => __('filament-resources.user.field_password_create_helper'),
+                                $operation === 'edit' => __('filament-resources.user.field_password_edit_helper'),
+                                default => null,
+                            }),
                         Select::make('roles')
                             ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Get $get) => $get('can_login') === false)
