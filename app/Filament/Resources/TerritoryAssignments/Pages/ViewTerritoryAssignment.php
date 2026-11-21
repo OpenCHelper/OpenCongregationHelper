@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TerritoryAssignments\Pages;
 
 use App\Filament\Resources\TerritoryAssignments\Actions\RequestReturnAction;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
+use App\Models\TerritoryAssignment;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\TextInput;
@@ -42,12 +43,15 @@ class ViewTerritoryAssignment extends ViewRecord
     }
 
     /**
-     * Whether the user can share the assignment, or stop sharing it: only those allowed to view the assignments, as
-     * before the assignees could open their own (a public link must not be created, or revoked, by the assignee alone).
+     * Whether the user can share the assignment, or stop sharing it: those allowed to view the assignments, and its
+     * assignee (e.g. to pass the territory on to someone without an account).
      */
-    public static function canManageSharing(): bool
+    public static function canManageSharing(TerritoryAssignment $assignment): bool
     {
-        return Auth::user()?->can('View:TerritoryAssignment') ?? false;
+        $user = Auth::user();
+
+        return $user !== null
+            && ($user->can('View:TerritoryAssignment') || $assignment->assignee_id === $user->getKey());
     }
 
     protected function getHeaderActions(): array
@@ -60,7 +64,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ->label(__('filament-resources.territory_assignment.action_copy.label'))
                     ->tooltip(__('filament-resources.territory_assignment.action_copy.tooltip'))
                     ->icon(Heroicon::OutlinedShare)
-                    ->authorize(fn (): bool => static::canManageSharing())
+                    ->authorize(fn (): bool => static::canManageSharing($this->getRecord()))
                     ->modalHeading(__('filament-resources.territory_assignment.share_modal.title'))
                     ->modalDescription(__('filament-resources.territory_assignment.share_modal.description'))
                     ->modalSubmitAction(false)
@@ -127,7 +131,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ])
                     ->extraModalFooterActions([
                         Action::make('stop_sharing')
-                            ->authorize(fn (): bool => static::canManageSharing())
+                            ->authorize(fn (): bool => static::canManageSharing($this->getRecord()))
                             ->requiresConfirmation()
                             ->cancelParentActions()
                             ->label(__('filament-resources.territory_assignment.share_modal.stop_sharing'))

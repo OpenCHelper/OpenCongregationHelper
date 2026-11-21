@@ -197,16 +197,37 @@ test('the notification tells the department which territory to close and who has
         ->and($database['actions'][0]['url'])->toContain('/territory-assignments/'.$this->assignment->id);
 });
 
-test('a publisher who reaches their assignment only as its assignee cannot share it or stop sharing it', function () {
-    $this->assignment->share();
+test('a publisher without permissions can share their own assignment, and stop sharing it', function () {
     $this->actingAs($this->assignee);
 
     Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
-        ->assertActionHidden('share')
+        ->assertActionVisible('share')
         ->mountAction('share')
-        ->assertActionNotMounted('share');
+        ->assertActionMounted('share');
 
     expect($this->assignment->fresh()->shared)->not->toBeNull();
+
+    Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
+        ->callAction(['share', 'stop_sharing'])
+        ->assertNotified(__('filament-resources.territory_assignment.share_modal.stop_sharing_success'));
+
+    expect($this->assignment->fresh()->shared)->toBeNull();
+});
+
+test('only those allowed to view the assignments and the assignee can share an assignment', function () {
+    $otherPublisher = User::factory()->create(['can_login' => true]);
+    $this->actingAs($otherPublisher);
+
+    expect(ViewTerritoryAssignment::canManageSharing($this->assignment))->toBeFalse();
+
+    // Nor can they open the assignment, to reach the actions
+    $this->withoutVite()
+        ->get(TerritoryAssignmentResource::getUrl('view', ['record' => $this->assignment]))
+        ->assertNotFound();
+
+    $this->actingAs($this->assignee);
+
+    expect(ViewTerritoryAssignment::canManageSharing($this->assignment))->toBeTrue();
 });
 
 test('the users allowed to view the assignments can still share them', function () {
