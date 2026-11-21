@@ -1,7 +1,8 @@
 name: Deploy (PR previews)
 
-# Every open PR gets its own preview, like Vercel/Render: https://pr-<N>.<site>.altervista.org, redeployed with fresh
-# dummy data on every push and removed when the PR is closed or merged.
+# Every open PR gets its own preview (unless turned off, see below), like Vercel/Render:
+# https://pr-<N>.<site>.altervista.org, redeployed with fresh dummy data on every push and removed when the PR is closed
+# or merged.
 #
 # All the previews share one Altervista space and database (a dedicated one, or the TEST one: see the README): each one
 # lives in `previews/pr-<N>/` and prefixes its tables with `p<N>_` (`DB_PREFIX`). The release is uploaded through FTP
@@ -33,7 +34,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, closed, labeled, unlabeled]
   schedule:
-    # Weekly removal of the previews of PRs that are no longer open (e.g. a failed teardown)
+    # Weekly removal of the previews of PRs no longer open or no longer wanting one (e.g. a failed teardown)
     - cron: "17 3 * * 1"
   workflow_dispatch:
     inputs:
