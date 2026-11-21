@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'publisher_statistics' => [
+        'heading' => 'Statistics',
+        'assignments_count' => '{0} No assignments|{1} :count assignment|[2,*] :count assignments',
+        'no_assignments' => 'No territory has been assigned to this publisher yet.',
+        'preferred_zones' => 'Preferred zones',
+        'preferred_zones_description' => 'The zones whose territories the publisher takes most often.',
+        'preferred_territories' => 'Preferred territories',
+        'preferred_territories_description' => '{1} The territory the publisher takes most often.|[2,*] The :count territories the publisher takes most often.',
+    ],
     'territory_global_map' => [
         'heading' => 'Territory map',
         'map_mode' => 'Color the territories by',
