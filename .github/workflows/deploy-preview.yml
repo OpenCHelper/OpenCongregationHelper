@@ -142,6 +142,7 @@ jobs:
           fi
 
           # Whether a PR with the given labels (JSON array of names) wants a preview
+          # shellcheck disable=SC2016 # A jq program: its variables are jq's, passed with `--arg`
           wants='def wants: ($mode != "off") and (index($opt_out) | not) and ($mode == "opt-out" or (index($opt_in) != null));'
           wants () {
             jq -e --arg mode "$MODE" --arg opt_in "$opt_in_label" --arg opt_out "$opt_out_label" \
@@ -679,7 +680,7 @@ jobs:
             echo "pr=${PR}" >> "$GITHUB_OUTPUT"
           else
             # Previews (and leftovers) of the PRs that are no longer open or no longer want one (see the `decide` job)
-            keep_slugs="$(printf 'pr-%s\n' $KEEP)"
+            keep_slugs="$(tr ' ' '\n' <<< "$KEEP" | sed '/^$/d; s/^/pr-/')"
             slugs="$(jq -r '(.previews + (.leftovers | map(sub("\\.(next|old|zip)$"; "")))) | unique | .[]' <<< "$listing" \
               | grep -vxF -f <(printf '%s\n' "$keep_slugs") || true)"
           fi
@@ -739,7 +740,7 @@ jobs:
           else
             folders="${cron_folder_prefix}*"
             if [[ -n "$KEEP" ]]; then
-              exclude="$(printf '%s\n' $KEEP | sed "s/^/${cron_folder_prefix}/")"
+              exclude="$(tr ' ' '\n' <<< "$KEEP" | sed "/^\$/d; s/^/${cron_folder_prefix}/")"
             fi
           fi
 
