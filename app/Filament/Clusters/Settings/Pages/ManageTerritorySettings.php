@@ -12,6 +12,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -105,6 +106,11 @@ class ManageTerritorySettings extends AppSettingsPage
                                     $this->mountAction('confirmSharedPii');
                                 }
                             }),
+                        Toggle::make('guest_returns')
+                            ->label(__('settings.fields.guest_returns.label'))
+                            ->helperText(__('settings.fields.guest_returns.helper').' '.$this->defaultHint(
+                                $this->defaultValue('guest_returns') ? __('settings.fields.guest_returns.enabled') : __('settings.fields.guest_returns.disabled'),
+                            )),
                     ]),
                 Section::make(__('settings.sections.stale_assignments'))
                     ->description(__('settings.sections.stale_assignments_description'))
@@ -214,6 +220,7 @@ class ManageTerritorySettings extends AppSettingsPage
     {
         $data['map_default_center'] = self::parseCoordinates((string) $data['map_default_center']);
         $data['shared_pii'] = $data['shared_pii'] === 'show';
+        $data['guest_returns'] = (bool) $data['guest_returns'];
         $data['stale_check_day'] = (int) $data['stale_check_day'];
 
         foreach (['stale_after_days', 'dead_after_days', 'frequency_period_months', 'medium_frequency_min_assignments', 'high_frequency_min_assignments'] as $property) {

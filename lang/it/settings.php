@@ -35,7 +35,7 @@ return [
         'congregation' => 'Congregazione',
         'maps' => 'Mappe',
         'shared_pages_privacy' => 'Privacy delle pagine condivise',
-        'shared_pages_privacy_description' => 'Cosa mostra la pagina pubblica di un\'assegnazione condivisa a chiunque ne abbia il link.',
+        'shared_pages_privacy_description' => 'Cosa mostra e permette di fare la pagina pubblica di un\'assegnazione condivisa a chiunque ne abbia il link.',
         'stale_assignments' => 'Assegnazioni fuori da troppo tempo',
         'stale_assignments_description' => 'Le assegnazioni ancora in corso dopo questi giorni sono fuori da troppo tempo: una volta a settimana, ai loro assegnatari viene ricordato di restituirle.',
         'assignment_frequency' => 'Frequenza di assegnazione',
@@ -75,6 +75,12 @@ return [
             'understood' => 'Ho capito che chiunque abbia un link condiviso vedrà questi dati, e la congregazione è d\'accordo.',
             'understood_required' => 'Conferma di aver capito cosa comporta mostrare i dati personali.',
             'confirm' => 'Mostra i dati personali',
+        ],
+        'guest_returns' => [
+            'label' => 'Richiesta di riconsegna dalle pagine condivise',
+            'helper' => 'Chiunque apra la pagina pubblica di un\'assegnazione condivisa può chiedere al reparto territori di chiuderla, senza un account.',
+            'enabled' => 'Attiva',
+            'disabled' => 'Disattiva',
         ],
         'stale_after_days' => [
             'label' => 'Fuori da troppo tempo',

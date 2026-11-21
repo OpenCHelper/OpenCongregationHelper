@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TerritoryAssignments\Actions;
 
 use App\Models\TerritoryAssignment;
 use App\Models\User;
+use App\Settings\TerritorySettings;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
@@ -14,8 +15,8 @@ use Illuminate\Support\Facades\Gate;
 /**
  * Ask the territory department to close an assignment still in progress, with one click.
  *
- * Available to the assignee, and on the shared page of the assignment (no account needed) when
- * `GUEST_ALLOW_RETURNING_ASSIGNMENT` is enabled.
+ * Available to the assignee, and on the shared page of the assignment (no account needed) when enabled from the
+ * Settings pages (or with `GUEST_ALLOW_RETURNING_ASSIGNMENT`).
  */
 class RequestReturnAction extends Action
 {
@@ -65,7 +66,7 @@ class RequestReturnAction extends Action
     public static function canRequestReturn(TerritoryAssignment $assignment): bool
     {
         if (Filament::getCurrentPanel()?->getId() === 'guest') {
-            return config('app.guest_allow_returning_assignment')
+            return TerritorySettings::value('guest_returns')
                 && $assignment->shared !== null
                 && $assignment->canRequestReturn();
         }

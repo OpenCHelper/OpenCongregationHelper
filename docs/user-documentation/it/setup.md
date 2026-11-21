@@ -54,8 +54,8 @@ INITIAL_ROOT_PASSWORD="password"
 
 ### Impostazioni principali
 
-`MAP_DEFAULT_CENTER` e `ENABLE_SHARED_PII` sono solo i valori predefiniti: i super amministratori possono cambiarli
-dalle pagine [Impostazioni](administration/settings), senza modificare `.env`.
+`MAP_DEFAULT_CENTER`, `ENABLE_SHARED_PII` e `GUEST_ALLOW_RETURNING_ASSIGNMENT` sono solo i valori predefiniti: i super
+amministratori possono cambiarli dalle pagine [Impostazioni](administration/settings), senza modificare `.env`.
 
 | Variabile | Descrizione |
 |-----------|-------------|

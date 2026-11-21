@@ -2,6 +2,7 @@
 
 use App\Enums\DepartmentKey;
 use App\Enums\DepartmentRole;
+use App\Filament\Clusters\Settings\Pages\ManageTerritorySettings;
 use App\Filament\Guest\Pages\ViewSharedAssignment;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
@@ -11,6 +12,7 @@ use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
 use App\Notifications\TerritoryReturnRequestedNotification;
+use App\Settings\TerritorySettings;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
@@ -225,6 +227,20 @@ describe('from the shared link', function () {
         Notification::assertSentTo([$this->overseer, $this->assistant], TerritoryReturnRequestedNotification::class);
     });
 
+    test('the setting changed from the Settings pages wins over the environment', function (bool $configured, bool $stored) {
+        config(['app.guest_allow_returning_assignment' => $configured]);
+        $settings = app(TerritorySettings::class);
+        $settings->guest_returns = $stored;
+        $settings->save();
+
+        $component = Livewire::test(ViewSharedAssignment::class, ['record' => $this->sharedUrl->uid]);
+
+        $stored ? $component->assertActionVisible('requestReturn') : $component->assertActionHidden('requestReturn');
+    })->with([
+        'enabled over the environment' => [false, true],
+        'disabled over the environment' => [true, false],
+    ]);
+
     test('the department cannot close the assignment from the shared link', function () {
         config(['app.guest_allow_returning_assignment' => true]);
         $this->assignment->requestReturn();
@@ -232,5 +248,34 @@ describe('from the shared link', function () {
         Livewire::test(ViewSharedAssignment::class, ['record' => $this->sharedUrl->uid])
             ->assertActionHidden('requestReturn')
             ->assertActionHidden(TestAction::make('returnRequestedAssignment')->schemaComponent('returnRequestedCallout', 'assignmentInfolist'));
+    });
+});
+
+describe('on the Settings pages', function () {
+    beforeEach(function () {
+        $superAdmin = User::factory()->create(['can_login' => true]);
+        $superAdmin->assignRole(Role::findOrCreate('super_admin', 'web'));
+        $this->actingAs($superAdmin);
+    });
+
+    test('the setting shows the value of the environment until changed', function (bool $configured) {
+        config(['app.guest_allow_returning_assignment' => $configured]);
+
+        Livewire::test(ManageTerritorySettings::class)
+            ->assertSee(__('settings.fields.guest_returns.label'))
+            ->assertSchemaStateSet(['guest_returns' => $configured]);
+
+        expect(TerritorySettings::value('guest_returns'))->toBe($configured);
+    })->with([true, false]);
+
+    test('the super administrators enable the return requests from the shared pages', function () {
+        config(['app.guest_allow_returning_assignment' => false]);
+
+        Livewire::test(ManageTerritorySettings::class)
+            ->fillForm(['guest_returns' => true])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect(TerritorySettings::value('guest_returns'))->toBeTrue();
     });
 });
