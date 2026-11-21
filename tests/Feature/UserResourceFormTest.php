@@ -165,6 +165,38 @@ test('an unused invitation stops working once the password is set another way', 
     'by an administrator' => 'administrator',
 ]);
 
+test('the password reset page talks about choosing a password only when opened from an invitation', function (bool $isInvitation, array $texts, string $notification) {
+    app()->setLocale('en');
+
+    $user = User::factory()->create(['can_login' => true, 'password' => null]);
+    $token = Password::broker($isInvitation ? 'invitations' : null)->createToken($user);
+
+    Livewire::withQueryParams($isInvitation ? ['invitation' => 1] : [])
+        ->test(ResetPassword::class, ['email' => $user->email, 'token' => $token])
+        ->assertSeeInOrder($texts)
+        ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+        ->call('resetPassword')
+        ->assertNotified($notification);
+})->with([
+    'invitation' => [true, ['Choose your password', 'Set password'], 'Your password has been set. You can now sign in.'],
+    'normal reset' => [false, ['Reset your password', 'Reset password'], 'Your password has been reset.'],
+]);
+
+test('an expired invitation still shows a translated error', function () {
+    app()->setLocale('en');
+
+    $user = User::factory()->create(['can_login' => true, 'password' => null]);
+    $token = Password::broker('invitations')->createToken($user);
+
+    $this->travel(7)->hours();
+
+    Livewire::withQueryParams(['invitation' => 1])
+        ->test(ResetPassword::class, ['email' => $user->email, 'token' => $token])
+        ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+        ->call('resetPassword')
+        ->assertNotified('This password reset token is invalid.');
+});
+
 test('normal password resets still expire after an hour', function () {
     $token = Password::broker()->createToken($this->user);
 
