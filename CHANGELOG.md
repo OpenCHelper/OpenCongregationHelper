@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Territory coverage** on the dashboard: the percentage of territories worked at least once in the last 6, 12 or
+  24 months (also excluding campaigns) and the 5 territories never worked or not worked for the longest time; the
+  periods can be changed from the Settings pages ([#51](https://github.com/OpenCHelper/OpenCongregationHelper/pull/51)).
 - **Settings pages**: super administrators can change the default map centre and the personal data on shared pages
   from **Administration → Settings**, without editing `.env`, which now only holds their defaults
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
@@ -27,7 +30,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - The installed app takes the primary colour chosen on the Settings pages
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
-- **Publisher statistics** on the publisher's page: the zones and territories they take most often.
+- Weekly summary, by email and in the app, to the members of the territory department listing the territories out
+  for too long, with their assignees, so that they can follow up; it can be limited to the overseers from the
+  Settings pages ([#54](https://github.com/OpenCHelper/OpenCongregationHelper/pull/54)).
+- **Return requests**: publishers can ask the territory department to close their assignment with one click, and
+  its members are notified; also from shared links, when enabled from the Settings pages (default from
+  `GUEST_ALLOW_RETURNING_ASSIGNMENT`) ([#56](https://github.com/OpenCHelper/OpenCongregationHelper/pull/56)).
+- **Publisher statistics** on the publisher's page: the zones and territories they take most often
+  ([#55](https://github.com/OpenCHelper/OpenCongregationHelper/pull/55)).
 
 ### Changed
 

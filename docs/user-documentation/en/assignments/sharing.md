@@ -18,6 +18,9 @@ have an account. Whoever has the link can see the territory without logging in.
 
 The link stays the same every time you open **Share** for that assignment.
 
+Publishers can also share the assignments given to them (and stop sharing them), from the link in the notification
+of the assignment, even if they cannot see the other assignments.
+
 ## What the recipient sees
 
 The public page shows the territory name, its zone, map, image and description, the campaign and the start date of the

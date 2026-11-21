@@ -38,4 +38,17 @@ return [
         'map_style' => 'Stile mappa',
         'go_to_territory' => 'Vai al territorio',
     ],
+    'territory_coverage' => [
+        'heading' => 'Copertura del territorio',
+        'period_label' => 'Periodo',
+        'period' => '{1} Ultimo mese|[2,*] Ultimi :count mesi',
+        'worked' => 'Territori lavorati almeno una volta',
+        'worked_excluding_campaigns' => 'Escluse le campagne',
+        'value' => ':percentage (:worked su :total)',
+        'least_recently_worked' => 'Mai lavorati o non lavorati da più tempo',
+        'never_worked' => 'Mai lavorato',
+        'in_progress' => 'In corso',
+        'last_worked' => ':date (:ago)',
+        'no_territories' => 'Non ci sono territori.',
+    ],
 ];

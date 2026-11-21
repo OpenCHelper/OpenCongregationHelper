@@ -69,26 +69,42 @@ set -o nounset
 declare -r MAX_ATTEMPTS=4
 
 # The deployer bundled with this script, installed in a folder named after a hash of its files: every run talks to the
-# version matching its own client, even when runs with different versions overlap
+# version matching its own client, even when runs with different versions overlap. The hash covers the way it is
+# installed too (`atomic`), so that the folders installed before it was atomic are never reused
 SERVER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/server" && pwd)"
 ROUTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/router" && pwd)"
-DEPLOYER_VERSION="$(cd "$SERVER_DIR" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-12)"
+DEPLOYER_VERSION="$(cd "$SERVER_DIR" && { echo atomic; find . -type f -print0 | sort -z | xargs -0 sha256sum; } | sha256sum | cut -c1-12)"
 declare -r SERVER_DIR ROUTER_DIR DEPLOYER_VERSION
 declare -r DEPLOYER_PATH="_deployer/${DEPLOYER_VERSION}"
 
 # Read by the `EXIT` trap, which runs after `main` has returned: not local
-ftp_hostname="" ftp_username="" ftp_password="" token_id="" token_file="" token=""
+ftp_hostname="" ftp_username="" ftp_password="" token_id="" token_file="" token="" remote_temporary=""
 base_url="" verbose=false server_budget="" server_time_limit="" default_environment="" php_handler="" document_root="public"
 router_previews=false
 repository_url="${GITHUB_SERVER_URL:+${GITHUB_REPOSITORY:+${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}}}"
 keep=() reuse=() exclude=() include=() exclude_from=""
 
-remove_token () {
+# Remove the token, and what an interrupted upload left on the server (a file or folder under a temporary name)
+clean_up () {
+    remove_remote_temporary
+
     [[ -n "$token_file" ]] && rm -f "$token_file"
     [[ -z "$token_id" ]] && return 0
 
     ftp <<< "rm -f '${DEPLOYER_PATH}/tokens/${token_id}'" > /dev/null \
         || printf "Failed to remove the token from the server\n" >&2
+}
+
+remove_remote_temporary () {
+    [[ -z "$remote_temporary" ]] && return 0
+
+    ftp <<< "rm -r -f '${remote_temporary}'" > /dev/null 2>&1 \
+        || printf "Failed to remove '%s' from the server\n" "$remote_temporary" >&2
+    remote_temporary=""
+}
+
+random_string () {
+    tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c "$1"
 }
 
 # Run the lftp commands of the standard input on the FTP server
@@ -98,9 +114,33 @@ ftp () {
         -u "$ftp_username" --env-password "$ftp_hostname"
 }
 
-# Install the bundled deployer on the server (only the files that changed are uploaded)
+# Whether the bundled deployer is installed on the server
+deployer_is_installed () {
+    ftp <<< "cls '${DEPLOYER_PATH}/index.php'" > /dev/null 2>&1
+}
+
+# Install the bundled deployer on the server, unless it is already there. Runs deploying at the same time (e.g. the
+# previews of several PRs) share its folder, which never changes once installed: it is uploaded to a folder of its own,
+# then renamed at once, so that no run ever sees (or overwrites) a partial installation
 install_deployer () {
-    if ! ftp <<< "mkdir -p -f '${DEPLOYER_PATH}/tokens'; mirror --reverse --no-perms '${SERVER_DIR}' '${DEPLOYER_PATH}'" > /dev/null; then
+    deployer_is_installed && return 0
+
+    remote_temporary="_deployer/.${DEPLOYER_VERSION}.tmp-$(random_string 16)"
+
+    if ! ftp <<< "mkdir -p -f '${remote_temporary}/tokens'; mirror --reverse --no-perms '${SERVER_DIR}' '${remote_temporary}'" > /dev/null; then
+        printf "Failed to upload the deployer to the server\n" >&2
+        remove_remote_temporary
+        return 1
+    fi
+
+    # Fails when another run installed it in the meantime: the installed one is used (with the same files)
+    if ftp <<< "mv '${remote_temporary}' '${DEPLOYER_PATH}'" > /dev/null 2>&1; then
+        remote_temporary=""
+    else
+        remove_remote_temporary
+    fi
+
+    if ! deployer_is_installed; then
         printf "Failed to install the deployer on the server\n" >&2
         return 1
     fi
@@ -108,15 +148,14 @@ install_deployer () {
 
 # Upload a random token for the requests to the deployer, deleted when the script exits
 upload_token () {
-    token="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 64)"
-    token_id="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 32)"
+    token="$(random_string 64)"
+    token_id="$(random_string 32)"
 
     if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
         printf '::add-mask::%s\n' "$token" >&2
     fi
 
     token_file="$(mktemp)" && printf '%s' "$token" > "$token_file"
-    trap remove_token EXIT
 
     if ! ftp <<< "put '$token_file' -o '${DEPLOYER_PATH}/tokens/${token_id}'" > /dev/null; then
         printf "Failed to upload the token to the server\n" >&2
@@ -329,17 +368,46 @@ install_router () {
     folder="$(mktemp -d)"
     render_router "$folder" || status=$?
 
-    # Every deployment installs the router, but uploading a `.htaccess` truncates it on the server for a moment, during
-    # which every environment of the space answers with a 404: a deployment running at the same time (e.g. the preview
-    # of another PR) would fail. The router is uploaded only when it differs from the installed one.
+    # Every deployment installs the router: it is uploaded only when it differs from the installed one
     if (( status == 0 )) && router_is_installed "$folder"; then
         printf "The router of the space is already up to date\n" >&2
     elif (( status == 0 )); then
-        ftp <<< "mirror --reverse --no-perms --verbose '${folder}' ." || status=$?
+        upload_router "$folder" || status=$?
     fi
 
     rm -rf "$folder"
     return "$status"
+}
+
+# Upload the router rendered in the given folder, each file under a temporary name, then renamed over the installed
+# one. A file being uploaded is truncated on the server for a moment (a `.htaccess` then makes every environment of the
+# space answer with a 404), and runs uploading it at the same time (e.g. the previews of several PRs) would overwrite
+# each other's upload. The root `.htaccess`, which routes to the others, comes last.
+upload_router () {
+    local folder="$1" path directory
+
+    while IFS= read -r path; do
+        directory="$(dirname "$path")"
+        remote_temporary="${directory}/.ftp-archive-deploy-$(random_string 16).tmp"
+        remote_temporary="${remote_temporary#./}"
+        printf "Uploading '%s'\n" "$path" >&2
+
+        if ! ftp <<< "mkdir -p -f '${directory}'; put '${folder}/${path}' -o '${remote_temporary}'" > /dev/null; then
+            printf "Failed to upload '%s'\n" "$path" >&2
+            remove_remote_temporary
+            return 1
+        fi
+
+        # Some FTP servers do not rename over an existing file: it is removed first then (a brief 404 for a `.htaccess`)
+        if ! ftp <<< "mv '${remote_temporary}' '${path}'" > /dev/null 2>&1 \
+            && ! ftp <<< "rm -f '${path}'; mv '${remote_temporary}' '${path}'" > /dev/null; then
+            printf "Failed to replace '%s'\n" "$path" >&2
+            remove_remote_temporary
+            return 1
+        fi
+
+        remote_temporary=""
+    done < <(cd "$folder" && find . -type f | sed 's|^\./||' | sort -r)
 }
 
 # Whether the files of the router rendered in the given folder are the ones installed on the server, byte for byte
@@ -520,6 +588,8 @@ main () {
         printf "The FTP credentials are required\n" >&2
         return 1
     fi
+
+    trap clean_up EXIT
 
     if [[ "$action" == "install-router" ]]; then
         install_router

@@ -54,8 +54,8 @@ INITIAL_ROOT_PASSWORD="password"
 
 ### Main settings
 
-`MAP_DEFAULT_CENTER` and `ENABLE_SHARED_PII` are only the defaults: the super administrators can change them from the
-[Settings](administration/settings) pages, without editing `.env`.
+`MAP_DEFAULT_CENTER`, `ENABLE_SHARED_PII` and `GUEST_ALLOW_RETURNING_ASSIGNMENT` are only the defaults: the super
+administrators can change them from the [Settings](administration/settings) pages, without editing `.env`.
 
 | Variable | Description |
 |----------|-------------|
@@ -68,6 +68,7 @@ INITIAL_ROOT_PASSWORD="password"
 | `QUEUE_CONNECTION` | `database` (recommended in production) or `sync` (emails are sent immediately, during the request). |
 | `ARTISAN_CRON_TOKEN` | Secret required by the endpoints that process the queue and the scheduled jobs. If empty, those endpoints are disabled. |
 | `ENABLE_SHARED_PII` | When `true`, the public page of a shared assignment also shows the assignee's name and the territory notes. Defaults to `false`. |
+| `GUEST_ALLOW_RETURNING_ASSIGNMENT` | When `true`, whoever opens the public page of a shared assignment can ask the territory department to close it (as the assignee can from the application). Defaults to `false`. |
 | `DEMO_PREFILL_LOGIN_CREDENTIALS` | **Demo installations only**, with dummy data: when `true`, the login page is pre-filled with the credentials of the **root** user, so anyone can log in as root. Never enable it on an installation with real data. Always ignored when `APP_ENV` is `production`. Defaults to `false`. |
 | `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | Files used to show the Git branch and commit in the sidebar on servers without `git`. |
 
