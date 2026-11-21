@@ -50,17 +50,11 @@ on:
 permissions:
   contents: read
 
-# One run per PR at a time: a newer run (a push, closing the PR, a label, a manual run) cancels the one in progress.
-# Except adding or removing any other label, which does nothing and gets its own group, so as not to cancel a
-# deployment (the defaults of the labels must match the `opt_in_label` and `opt_out_label` below).
-concurrency:
-  group: >-
-    preview-${{ github.event.pull_request.number || inputs.pr || 'cleanup' }}${{
-      (github.event.action == 'labeled' || github.event.action == 'unlabeled')
-        && github.event.label.name != (vars.PREVIEW_OPT_IN_LABEL || 'preview: on')
-        && github.event.label.name != (vars.PREVIEW_OPT_OUT_LABEL || 'preview: off')
-        && format('-ignored-{0}', github.run_id) || '' }}
-  cancel-in-progress: true
+# One deployment or removal per PR at a time: a newer one (a push, closing the PR, a label, a manual run) cancels the
+# one in progress. The concurrency group is on the `deploy` and `destroy` jobs, not on the workflow, so that a run with
+# nothing to do (e.g. a push to a PR without a preview, or any other label) cannot cancel them. Should two runs of a PR
+# start within seconds (e.g. a push and a label), the last to reach its job wins: the weekly cleanup removes a preview
+# deployed against labels that no longer want one.
 
 env:
   # Tables of the previews are prefixed with `p<N>_`, which must stay within 6 characters (see `SpaceDeployer`)
@@ -232,6 +226,9 @@ jobs:
     name: Deploy preview
     needs: decide
     if: needs.decide.outputs.action == 'deploy'
+    concurrency:
+      group: preview-${{ needs.decide.outputs.pr }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -635,6 +632,9 @@ jobs:
     name: Remove previews
     needs: decide
     if: needs.decide.outputs.action == 'destroy' || needs.decide.outputs.action == 'cleanup'
+    concurrency:
+      group: preview-${{ needs.decide.outputs.pr || 'cleanup' }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
