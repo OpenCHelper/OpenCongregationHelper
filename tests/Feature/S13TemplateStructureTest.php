@@ -131,7 +131,7 @@ test('a template with a different structure is uploaded only once confirmed', fu
         ->fillForm($data)
         ->assertSchemaComponentVisible('uploaded_structure_warning', 'mountedActionSchema0')
         ->assertSchemaComponentHidden('stored_structure_warning', 'mountedActionSchema0')
-        ->assertFormFieldVisible('accept_structure_changes', 'mountedActionSchema0')
+        ->assertSchemaComponentVisible('accept_structure_changes', 'mountedActionSchema0')
         ->callMountedAction()
         ->assertHasFormErrors(['accept_structure_changes' => 'accepted']);
 
@@ -156,7 +156,7 @@ test('a template with the expected structure is uploaded without warnings', func
         ->mountAction(DownloadTerritoryAssignmentRecordAction::getDefaultName())
         ->fillForm(['template' => UploadedFile::fake()->createWithContent('S-13_I.pdf', s13FormPdf())])
         ->assertSchemaComponentHidden('uploaded_structure_warning', 'mountedActionSchema0')
-        ->assertFormFieldHidden('accept_structure_changes', 'mountedActionSchema0')
+        ->assertSchemaComponentHidden('accept_structure_changes', 'mountedActionSchema0')
         ->callMountedAction()
         ->assertHasNoFormErrors();
 
