@@ -238,14 +238,14 @@ test('the options of the shared pages are shown only while sharing is enabled', 
     actingAsSharingSuperAdmin();
 
     Livewire::test(ManageTerritorySettings::class)
-        ->assertFormFieldVisible('shared_pii')
-        ->assertFormFieldVisible('guest_returns')
+        ->assertSchemaComponentVisible('shared_pii', 'form')
+        ->assertSchemaComponentVisible('guest_returns', 'form')
         ->fillForm(['sharing_enabled' => false])
-        ->assertFormFieldHidden('shared_pii')
-        ->assertFormFieldHidden('guest_returns')
+        ->assertSchemaComponentHidden('shared_pii', 'form')
+        ->assertSchemaComponentHidden('guest_returns', 'form')
         ->fillForm(['sharing_enabled' => true])
-        ->assertFormFieldVisible('shared_pii')
-        ->assertFormFieldVisible('guest_returns');
+        ->assertSchemaComponentVisible('shared_pii', 'form')
+        ->assertSchemaComponentVisible('guest_returns', 'form');
 });
 
 test('the options of the shared pages are kept while sharing is disabled', function () {
@@ -267,7 +267,7 @@ test('the options of the shared pages are kept while sharing is disabled', funct
         ->and($settings->guest_returns)->toBeTrue();
 
     Livewire::test(ManageTerritorySettings::class)
-        ->assertFormFieldHidden('shared_pii')
+        ->assertSchemaComponentHidden('shared_pii', 'form')
         ->fillForm(['sharing_enabled' => true])
         ->assertSchemaStateSet(['shared_pii' => 'show', 'guest_returns' => true]);
 });
