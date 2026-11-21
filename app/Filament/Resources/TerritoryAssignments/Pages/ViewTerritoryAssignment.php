@@ -27,6 +27,19 @@ class ViewTerritoryAssignment extends ViewRecord
         //
     }
 
+    /**
+     * The breadcrumbs of the list of the assignments, not linked for the users who cannot open it (e.g. an assignee
+     * opening their own assignment).
+     *
+     * @return array<int|string, string>
+     */
+    public function getResourceBreadcrumbs(): array
+    {
+        $breadcrumbs = parent::getResourceBreadcrumbs();
+
+        return static::getResource()::canAccess() ? $breadcrumbs : array_values($breadcrumbs);
+    }
+
     protected function getHeaderActions(): array
     {
         return [

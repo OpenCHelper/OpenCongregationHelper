@@ -85,6 +85,22 @@ test('a publisher without permissions on the assignments opens their own assignm
         ->and(TerritoryAssignmentResource::getEloquentQuery()->pluck('id')->all())->toBe([$this->assignment->id]);
 });
 
+test('the breadcrumb links to the list of the assignments only for the users who can open it', function () {
+    $this->actingAs($this->assignee);
+
+    $assigneeBreadcrumbs = Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
+        ->instance()
+        ->getBreadcrumbs();
+
+    expect($assigneeBreadcrumbs)->not->toHaveKey(TerritoryAssignmentResource::getUrl())
+        ->and($assigneeBreadcrumbs)->toContain(TerritoryAssignmentResource::getBreadcrumb());
+
+    $this->actingAs($this->overseer);
+
+    expect(Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])->instance()->getBreadcrumbs())
+        ->toHaveKey(TerritoryAssignmentResource::getUrl());
+});
+
 test('the policy lets only the assignee view an assignment without the permission', function () {
     $publisher = User::factory()->create(['can_login' => true]);
 
