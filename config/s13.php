@@ -48,7 +48,9 @@ return [
         // Page of the template to fill (the first one is 1)
         'template_page' => 1,
 
-        'font' => 'Helvetica',
+        // TrueType font (embedded as a subset) covering the scripts of the names: Liberation Sans covers the Latin, Greek
+        // and Cyrillic ones, and has the same metrics as Helvetica, the font of the form
+        'font' => resource_path('fonts/LiberationSans-Regular.ttf'),
         'font_size' => 8,
         // Text too long for its box is wrapped and shrunk down to this size, then cut
         'min_font_size' => 5,

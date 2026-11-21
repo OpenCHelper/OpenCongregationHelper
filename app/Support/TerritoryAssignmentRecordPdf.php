@@ -5,9 +5,11 @@ namespace App\Support;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use setasign\Fpdi\Fpdi;
 use setasign\Fpdi\PdfParser\StreamReader;
+use setasign\Fpdi\Tfpdf\Fpdi as UnicodeFpdi;
 use Throwable;
 
 /**
@@ -74,7 +76,7 @@ class TerritoryAssignmentRecordPdf
         /** @var array<string, mixed> $layout */
         $layout = config('s13.layout');
 
-        $pdf = new Fpdi;
+        $pdf = self::newPdf($layout);
         $pdf->SetAutoPageBreak(false);
         $pdf->SetMargins(0, 0);
         $pdf->setSourceFile(StreamReader::createByString(self::template()));
@@ -87,7 +89,7 @@ class TerritoryAssignmentRecordPdf
         foreach ($pages->whenEmpty(fn ($pages) => $pages->push(collect())) as $lines) {
             $pdf->AddPage($templateSize['orientation'], [$templateSize['width'], $templateSize['height']]);
             $pdf->useTemplate($templateId);
-            $pdf->SetFont($layout['font'], '', $layout['font_size']);
+            $pdf->SetFont('s13', '', $layout['font_size']);
 
             $box = $layout['service_year'];
             self::write($pdf, (string) $serviceYear, $box['x'], $box['y'], $box['width'], $box['height'], $layout, $box['font_size'] ?? null);
@@ -126,7 +128,7 @@ class TerritoryAssignmentRecordPdf
      * @param  array{territory: string, last_completed_at: ?Carbon, assignments: list<array{assignee: string, assigned_at: Carbon, completed_at: ?Carbon}>}  $line
      * @param  array<string, mixed>  $layout
      */
-    protected static function writeLine(Fpdi $pdf, array $line, float $top, array $layout): void
+    protected static function writeLine(UnicodeFpdi $pdf, array $line, float $top, array $layout): void
     {
         $height = $layout['row_height'];
         $halfHeight = $height / 2;
@@ -150,14 +152,12 @@ class TerritoryAssignmentRecordPdf
      *
      * @param  array<string, mixed>  $layout
      */
-    protected static function write(Fpdi $pdf, string $text, float $x, float $y, float $width, float $height, array $layout, ?float $fontSize = null): void
+    protected static function write(UnicodeFpdi $pdf, string $text, float $x, float $y, float $width, float $height, array $layout, ?float $fontSize = null): void
     {
         if ($text === '') {
             return;
         }
 
-        // The core fonts of FPDF are encoded in Windows-1252
-        $text = (string) iconv('UTF-8', 'windows-1252//TRANSLIT', $text);
         $availableWidth = $width - 2 * $layout['padding'];
         $initialFontSize = $fontSize ?? $layout['font_size'];
 
@@ -209,7 +209,7 @@ class TerritoryAssignmentRecordPdf
      *
      * @return list<string>|null
      */
-    protected static function wrap(Fpdi $pdf, string $text, float $width, bool $breakWords = true): ?array
+    protected static function wrap(UnicodeFpdi $pdf, string $text, float $width, bool $breakWords = true): ?array
     {
         $lines = [];
         $line = '';
@@ -232,10 +232,10 @@ class TerritoryAssignmentRecordPdf
             }
 
             // A word wider than a whole line is broken where it does not fit anymore
-            while ($pdf->GetStringWidth($word) > $width && strlen($word) > 1) {
+            while ($pdf->GetStringWidth($word) > $width && mb_strlen($word) > 1) {
                 $part = self::cut($pdf, $word, $width);
                 $lines[] = $part;
-                $word = substr($word, strlen($part));
+                $word = mb_substr($word, mb_strlen($part));
             }
 
             $line = $word;
@@ -251,17 +251,47 @@ class TerritoryAssignmentRecordPdf
     /**
      * The longest start of a text that fits in a width (at least its first character).
      */
-    protected static function cut(Fpdi $pdf, string $text, float $width): string
+    protected static function cut(UnicodeFpdi $pdf, string $text, float $width): string
     {
         $ellipsis = str_ends_with($text, '…') ? '…' : '';
-        $text = $ellipsis !== '' ? substr($text, 0, -strlen('…')) : $text;
-        $ellipsis = (string) iconv('UTF-8', 'windows-1252', $ellipsis);
+        $text = $ellipsis !== '' ? mb_substr($text, 0, -1) : $text;
 
-        while (strlen($text) > 1 && $pdf->GetStringWidth($text.$ellipsis) > $width) {
-            $text = substr($text, 0, -1);
+        while (mb_strlen($text) > 1 && $pdf->GetStringWidth($text.$ellipsis) > $width) {
+            $text = mb_substr($text, 0, -1);
         }
 
         return rtrim($text).$ellipsis;
+    }
+
+    /**
+     * A PDF writing with the font of the layout, a TrueType font embedded as a subset of the characters it writes, so
+     * that any script it covers can be written (unlike the core fonts of PDF, limited to Windows-1252).
+     *
+     * @param  array<string, mixed>  $layout
+     */
+    protected static function newPdf(array $layout): UnicodeFpdi
+    {
+        // tFPDF reads the fonts from (and caches their metrics in) the "unifont" folder of its font path
+        $fontDirectory = storage_path('framework/cache/s13-fonts/');
+        $fontFile = (string) $layout['font'];
+        $cachedFontFile = $fontDirectory.'unifont/'.basename($fontFile);
+
+        if (! File::exists($cachedFontFile) || File::size($cachedFontFile) !== File::size($fontFile)) {
+            File::ensureDirectoryExists(dirname($cachedFontFile));
+            File::copy($fontFile, $cachedFontFile);
+        }
+
+        $pdf = new class($fontDirectory) extends UnicodeFpdi
+        {
+            public function __construct(string $fontDirectory)
+            {
+                parent::__construct();
+                $this->fontpath = $fontDirectory;
+            }
+        };
+        $pdf->AddFont('s13', '', basename($fontFile), true);
+
+        return $pdf;
     }
 
     protected static function formatDate(?Carbon $date): string

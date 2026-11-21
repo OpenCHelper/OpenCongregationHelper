@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use setasign\Fpdi\Fpdi;
+use setasign\Fpdi\PdfParser\PdfParser;
 use setasign\Fpdi\PdfParser\StreamReader;
+use setasign\Fpdi\PdfReader\PdfReader;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -117,6 +119,28 @@ test('texts too long for their boxes are wrapped, shrunk and cut', function () {
     ]);
 
     expect(pdfPageCount(TerritoryAssignmentRecordPdf::render(2026)))->toBe(1);
+});
+
+test('non-Latin names are written as they are', function () {
+    TerritoryAssignmentRecordPdf::storeTemplate(blankS13Template());
+
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create(['name' => 'Ζώνη Αθήνα']);
+    TerritoryAssignment::factory()->create([
+        'territory_id' => $territory->id,
+        'assignee_id' => User::factory()->create(['first_name' => 'Москва', 'last_name' => 'Иванов'])->id,
+        'started_at' => '2025-10-01',
+        'ended_at' => null,
+    ]);
+
+    $page = (new PdfReader(new PdfParser(StreamReader::createByString(TerritoryAssignmentRecordPdf::render(2026)))))
+        ->getPage(1)
+        ->getContentStream();
+
+    // The text of a Unicode font is written as UTF-16 (big-endian) characters
+    expect($page)->toContain(mb_convert_encoding('Ζώνη', 'UTF-16BE', 'UTF-8'))
+        ->toContain(mb_convert_encoding('Москва', 'UTF-16BE', 'UTF-8'))
+        ->toContain(mb_convert_encoding('Иванов', 'UTF-16BE', 'UTF-8'))
+        ->not->toContain('????');
 });
 
 test('only PDF files are valid templates', function () {
