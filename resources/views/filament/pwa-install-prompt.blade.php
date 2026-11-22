@@ -6,7 +6,9 @@
       Alpine starts, and the "Install" button opens the native prompt of the browser.
     - iOS has no install prompt: the steps to add the app to the home screen are shown instead.
 
-    Nothing is shown when the app already runs installed, or for some days after the user dismissed the offer.
+    It opens by itself unless the app already runs installed or the user dismissed the offer in the last days, and on
+    request from the user menu and the profile (`open-pwa-install` event), whose entries show only while the
+    `pwaInstall` store says that the app can be installed.
 
     The `fullScreenPrompt` store holds the full-screen dialog that is open (this one or the offer to enable the push
     notifications, `livewire.push-notifications-prompt`), so that they take turns instead of opening over each other.
@@ -14,6 +16,7 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.store('fullScreenPrompt', { current: null });
+        Alpine.store('pwaInstall', { available: false, installed: false });
     });
 
     window.addEventListener('beforeinstallprompt', (event) => {
@@ -30,11 +33,15 @@
         dismissDays: @js(\App\Providers\Filament\AppPanelProvider::PWA_INSTALL_DISMISS_DAYS),
         canPrompt: false,
         isIos: false,
+        requested: false,
         init() {
             this.$watch('wantsOpen', () => this.claim());
             this.$watch('$store.fullScreenPrompt.current', () => this.claim());
+            this.$watch('isAvailable', (isAvailable) => this.$store.pwaInstall.available = isAvailable);
 
-            if (this.isInstalled() || this.wasDismissedRecently()) {
+            if (this.isInstalled()) {
+                this.$store.pwaInstall.installed = true;
+
                 return;
             }
 
@@ -43,13 +50,24 @@
 
             this.isIos = isAppleMobile && ! ('BeforeInstallPromptEvent' in window);
             this.canPrompt = !! window.pwaInstallPrompt;
+            this.requested = ! this.wasDismissedRecently();
+            this.$store.pwaInstall.available = this.isAvailable;
 
             window.addEventListener('pwa-installable', () => this.canPrompt = true);
-            window.addEventListener('appinstalled', () => this.close());
+            window.addEventListener('open-pwa-install', () => this.requested = true);
+            window.addEventListener('appinstalled', () => {
+                this.$store.pwaInstall.installed = true;
+                this.canPrompt = false;
+                this.isIos = false;
+                this.close();
+            });
             this.claim();
         },
-        get wantsOpen() {
+        get isAvailable() {
             return this.canPrompt || this.isIos;
+        },
+        get wantsOpen() {
+            return this.requested && this.isAvailable;
         },
         get isOpen() {
             return this.$store.fullScreenPrompt.current === this.name;
@@ -85,7 +103,9 @@
             prompt.prompt();
             const { outcome } = await prompt.userChoice;
 
+            // The browser lets each captured prompt be shown once: it fires a new one on a next visit.
             window.pwaInstallPrompt = null;
+            this.canPrompt = false;
             outcome === 'accepted' ? this.close() : this.dismiss();
         },
         dismiss() {
@@ -96,8 +116,7 @@
             this.close();
         },
         close() {
-            this.canPrompt = false;
-            this.isIos = false;
+            this.requested = false;
         },
     }"
     x-show="isOpen"

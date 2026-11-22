@@ -19,7 +19,13 @@ return [
         'ios_share' => 'Share',
         'ios_steps_after' => 'then "Add to Home Screen" to open it like any other app.',
         'action' => 'Install',
-        'later' => 'You can also enable the notifications later from your profile.',
+        'later' => 'You can install it later from the user menu or your profile, where you can also turn on the notifications.',
+        'menu_label' => 'Install app',
+        'profile' => [
+            'title' => 'Install the app',
+            'description' => 'Open it from your home screen or desktop, in its own window, like any other app.',
+            'installed' => 'The app is installed on this device.',
+        ],
         'dismiss' => 'Not now',
     ],
     'notifications' => [

@@ -19,7 +19,13 @@ return [
         'ios_share' => 'Condividi',
         'ios_steps_after' => 'e poi "Aggiungi alla schermata Home" per aprirla come qualsiasi altra app.',
         'action' => 'Installa',
-        'later' => 'Puoi anche attivare le notifiche più tardi dal tuo profilo.',
+        'later' => 'Puoi installarla più tardi dal menu utente o dal tuo profilo, dove puoi anche attivare le notifiche.',
+        'menu_label' => 'Installa app',
+        'profile' => [
+            'title' => 'Installa l\'app',
+            'description' => 'Aprila dalla schermata Home o dal desktop, in una sua finestra, come qualsiasi altra app.',
+            'installed' => 'L\'app è installata su questo dispositivo.',
+        ],
         'dismiss' => 'Non ora',
     ],
     'notifications' => [

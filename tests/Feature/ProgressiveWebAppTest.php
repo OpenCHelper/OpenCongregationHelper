@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\EditProfile;
 use App\Http\Controllers\WebManifestController;
 use App\Models\User;
 use App\Support\ServiceWorker;
@@ -141,6 +142,28 @@ it('offers to install the app in a full-screen dialog that recommends it for the
         ->assertSee(__('pwa.install.benefits.home_screen.title'))
         ->assertSee(__('pwa.install.later'))
         ->assertSee(__('pwa.install.dismiss'));
+});
+
+it('lets users install the app later from the user menu and the profile', function () {
+    $user = User::factory()->create(['can_login' => true, 'email_verified_at' => now()]);
+
+    $this->actingAs($user)
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee("window.addEventListener('open-pwa-install'", escape: false)
+        ->assertSee("Alpine.store('pwaInstall', { available: false, installed: false })", escape: false)
+        ->assertSee('x-show="$store.pwaInstall.available"', escape: false)
+        ->assertSee(__('pwa.install.menu_label'))
+        ->assertSee(__('pwa.install.later'));
+
+    $this->actingAs($user)
+        ->get(EditProfile::getUrl())
+        ->assertOk()
+        ->assertSee('app-pwa-install-section', escape: false)
+        ->assertSee(__('pwa.install.profile.title'))
+        ->assertSee(__('pwa.install.profile.installed'))
+        ->assertSee("\$dispatch('open-pwa-install')", escape: false);
 });
 
 it('does not offer to install the app on the other pages', function (string $uri) {

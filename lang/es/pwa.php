@@ -19,7 +19,13 @@ return [
         'ios_share' => 'Compartir',
         'ios_steps_after' => 'y luego "Añadir a pantalla de inicio" para abrirla como cualquier otra app.',
         'action' => 'Instalar',
-        'later' => 'También puedes activar las notificaciones más tarde desde tu perfil.',
+        'later' => 'Puedes instalarla más tarde desde el menú de usuario o tu perfil, donde también puedes activar las notificaciones.',
+        'menu_label' => 'Instalar app',
+        'profile' => [
+            'title' => 'Instalar la app',
+            'description' => 'Ábrela desde la pantalla de inicio o el escritorio, en su propia ventana, como cualquier otra app.',
+            'installed' => 'La app está instalada en este dispositivo.',
+        ],
         'dismiss' => 'Ahora no',
     ],
     'notifications' => [

@@ -130,6 +130,12 @@ class AppPanelProvider extends PanelProvider
                     ->label(fn (): string => __('filament-ui-switcher::filament-ui-switcher.modal.heading'))
                     ->icon(Heroicon::OutlinedCog6Tooth)
                     ->alpineClickHandler("\$dispatch('open-modal', { id: 'ui-switcher-modal' })"),
+                // Opens the offer to install the app (`filament.pwa-install-prompt`), only while the browser can install it
+                Action::make('installApp')
+                    ->label(fn (): string => __('pwa.install.menu_label'))
+                    ->icon(Heroicon::OutlinedArrowDownTray)
+                    ->alpineClickHandler("\$dispatch('open-pwa-install')")
+                    ->extraAttributes(['x-show' => '$store.pwaInstall.available', 'x-cloak' => true]),
                 Action::make('versionInfo')
                     ->label(fn (): string => __('filament-resources.version_info.menu_label'))
                     ->icon(Heroicon::OutlinedInformationCircle)
