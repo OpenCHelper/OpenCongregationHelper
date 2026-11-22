@@ -6,6 +6,7 @@ use AchyutN\FilamentLogViewer\FilamentLogViewer;
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Enums\NavigationGroup as EnumsNavigationGroup;
 use App\Filament\Pages\ApiTokens;
+use App\Filament\Pages\Auth\EmailVerificationPrompt;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\CreateTeam;
 use App\Filament\Pages\EditProfile;
@@ -91,7 +92,7 @@ class AppPanelProvider extends PanelProvider
             ->passwordReset()
             // Both are always required at the level of the routes, so that their middleware runs on every page: the
             // middleware then reads the Security settings on each request (cached routes stay valid when they change).
-            ->emailVerification()
+            ->emailVerification(EmailVerificationPrompt::class)
             ->emailVerifiedMiddlewareName(EnsureEmailIsVerifiedWhenRequired::class)
             ->multiFactorAuthentication([
                 AppAuthentication::make()->recoverable(),

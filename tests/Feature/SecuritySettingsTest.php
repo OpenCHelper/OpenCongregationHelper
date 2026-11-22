@@ -5,7 +5,9 @@ use App\Filament\Pages\EditProfile;
 use App\Models\User;
 use App\Settings\SecuritySettings;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Auth\Notifications\VerifyEmail;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
@@ -96,4 +98,30 @@ test('users with two-factor authentication can use the app when it is required',
     $this->actingAs($user)
         ->get(EditProfile::getUrl())
         ->assertOk();
+});
+
+test('the confirmation email is sent once per session when the verification page opens', function () {
+    Notification::fake();
+    setSecuritySettings(requireEmailVerification: true);
+
+    $user = User::factory()->create(['can_login' => true, 'email_verified_at' => null]);
+    $promptUrl = Filament::getPanel('app')->getEmailVerificationPromptUrl();
+
+    $this->actingAs($user)->get($promptUrl)->assertOk();
+    $this->get($promptUrl)->assertOk();
+
+    Notification::assertSentToTimes($user, VerifyEmail::class, 1);
+});
+
+test('no confirmation email is sent to users whose email is already confirmed', function () {
+    Notification::fake();
+    setSecuritySettings(requireEmailVerification: true);
+
+    $user = User::factory()->verified()->create(['can_login' => true]);
+
+    $this->actingAs($user)
+        ->get(Filament::getPanel('app')->getEmailVerificationPromptUrl())
+        ->assertRedirect();
+
+    Notification::assertNothingSentTo($user);
 });
