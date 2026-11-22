@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Pages\Auth\ResetPassword;
+use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
@@ -8,8 +9,10 @@ use App\Models\User;
 use App\Notifications\UserInvitationNotification;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 
@@ -184,4 +187,95 @@ test('users who cannot update users cannot resend invitations', function () {
         ->call('callMountedAction');
 
     Notification::assertNothingSent();
+});
+
+/**
+ * Save the edit form of a user with the given changes.
+ *
+ * @param  array<string, mixed>  $changes
+ */
+function saveUser(User $user, array $changes): Testable
+{
+    return Livewire::test(EditUser::class, ['record' => $user->id])
+        ->fillForm($changes)
+        ->call('save')
+        ->assertHasNoFormErrors();
+}
+
+test('switching the email back and forth sends one invitation per cooldown', function () {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    $originalEmail = $this->invitedUser->email;
+
+    saveUser($this->invitedUser, ['email' => 'corrected@example.com'])
+        ->assertNotified(__('filament-resources.user.invitation_sent', ['email' => 'corrected@example.com']));
+
+    saveUser($this->invitedUser, ['email' => $originalEmail])
+        ->assertNotified(__('filament-resources.user.invitation_cooldown'));
+
+    // The change is saved, the link sent to the previous address no longer works, and the invitation can be resent
+    $user = $this->invitedUser->refresh();
+
+    expect($user->email)->toBe($originalEmail)
+        ->and($user->isAwaitingInvitation())->toBeTrue()
+        ->and(DB::table('user_invitation_tokens')->count())->toBe(0);
+    Notification::assertSentToTimes($user, UserInvitationNotification::class, 1);
+
+    $this->travel(61)->seconds();
+
+    saveUser($user, ['email' => 'corrected@example.com'])
+        ->assertNotified(__('filament-resources.user.invitation_sent', ['email' => 'corrected@example.com']));
+
+    Notification::assertSentToTimes($user, UserInvitationNotification::class, 2);
+});
+
+test('removing and giving back access sends one invitation per cooldown', function () {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    $virtualUser = User::factory()->create(['can_login' => false, 'password' => null]);
+
+    saveUser($virtualUser, ['can_login' => true])
+        ->assertNotified(__('filament-resources.user.invitation_sent', ['email' => $virtualUser->email]));
+    saveUser($virtualUser, ['can_login' => false]);
+    saveUser($virtualUser, ['can_login' => true])
+        ->assertNotified(__('filament-resources.user.invitation_cooldown'));
+
+    expect($virtualUser->refresh()->can_login)->toBeTrue();
+    Notification::assertSentToTimes($virtualUser, UserInvitationNotification::class, 1);
+});
+
+test('the resend action and the user form share the cooldown', function (string $first) {
+    Notification::fake();
+    $this->actingAs($this->manager);
+
+    $resend = fn () => Livewire::test(ViewUser::class, ['record' => $this->invitedUser->id])->callAction('resendInvitation');
+    $correctEmail = fn () => saveUser($this->invitedUser->refresh(), ['email' => fake()->unique()->safeEmail()]);
+
+    if ($first === 'resend') {
+        $resend()->assertNotified(__('filament-resources.user.invitation_sent', ['email' => $this->invitedUser->email]));
+        $correctEmail()->assertNotified(__('filament-resources.user.invitation_cooldown'));
+    } else {
+        $correctEmail();
+        $resend()->assertNotified(__('filament-resources.user.resend_invitation_throttled', ['seconds' => 60]));
+    }
+
+    Notification::assertSentToTimes($this->invitedUser, UserInvitationNotification::class, 1);
+})->with(['resend', 'form']);
+
+test('creating users is never held back by the cooldown', function () {
+    Notification::fake();
+    $this->manager->givePermissionTo(Permission::create(['name' => 'Create:User']));
+    $this->actingAs($this->manager);
+
+    foreach (['first@example.com', 'second@example.com'] as $email) {
+        Livewire::test(CreateUser::class)
+            ->fillForm(['first_name' => 'New', 'last_name' => 'User', 'email' => $email, 'can_login' => true])
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertNotified(__('filament-resources.user.invitation_sent', ['email' => $email]));
+    }
+
+    Notification::assertCount(2);
 });

@@ -375,6 +375,7 @@ return [
         'field_can_login_helper' => 'Seleziona per permettere all\'utente di accedere al sistema.',
         'field_can_login_invitation_helper' => 'Riceverà un\'email per scegliere la sua password.',
         'invitation_sent' => 'È stato inviato a :email un invito a scegliere la password.',
+        'invitation_cooldown' => 'Le modifiche sono state salvate, ma non è stato inviato nessun invito: ne è stato inviato uno meno di un minuto fa. Usa "Invia di nuovo l\'invito" tra un minuto.',
         'field_email_invitation_helper' => 'Questo utente non ha ancora scelto la sua password: se modifichi l\'email, l\'invito viene inviato di nuovo al nuovo indirizzo.',
         'action_resend_invitation' => 'Invia di nuovo l\'invito',
         'resend_invitation_modal_heading' => 'Inviare di nuovo l\'invito?',

@@ -37,7 +37,9 @@ vecchio indirizzo smette di funzionare.
 
 Il link dell'invito scade dopo 6 ore. Finché la persona non ha scelto la sua password, puoi inviarle un nuovo link con
 **Invia di nuovo l'invito**, nella pagina dell'utente o nell'elenco degli utenti (il link precedente smette di
-funzionare, e tra due inviti devi attendere un minuto). La persona può anche riceverne uno nuovo con
+funzionare). Un utente riceve al massimo un invito al minuto, in qualunque modo venga inviato: se entro quel minuto salvi
+modifiche che ne invierebbero uno (es. correggi di nuovo l'**Email**), vengono salvate ma non viene inviata nessuna
+email, e puoi usare **Invia di nuovo l'invito** un minuto dopo. La persona può anche riceverne uno nuovo con
 **Hai smarrito la password?** nella [pagina di accesso](../basics/logging-in).
 
 Gli amministratori non possono impostare o modificare la password di un utente: ognuno sceglie la sua, con l'invito, con

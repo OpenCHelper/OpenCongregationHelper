@@ -42,7 +42,15 @@ trait SendsUserInvitation
             return;
         }
 
-        UserInvitationNotification::sendTo($this->record);
+        if (! UserInvitationNotification::sendTo($this->record)) {
+            // The changes are saved all the same: the invitation can be sent again once the cooldown is over
+            Notification::make()
+                ->warning()
+                ->title(__('filament-resources.user.invitation_cooldown'))
+                ->send();
+
+            return;
+        }
 
         Notification::make()
             ->success()

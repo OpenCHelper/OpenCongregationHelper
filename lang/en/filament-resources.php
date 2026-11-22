@@ -374,6 +374,7 @@ return [
         'field_can_login_helper' => 'Check to allow the user to access the system.',
         'field_can_login_invitation_helper' => 'They will receive an email to choose their password.',
         'invitation_sent' => 'An invitation to choose the password has been sent to :email.',
+        'invitation_cooldown' => 'The changes have been saved, but no invitation was sent: one was sent less than a minute ago. Use "Resend invitation" in a minute.',
         'field_email_invitation_helper' => 'This user has not chosen their password yet: if you change the email, the invitation is sent again to the new address.',
         'action_resend_invitation' => 'Resend invitation',
         'resend_invitation_modal_heading' => 'Resend the invitation?',

@@ -35,9 +35,10 @@ The invitation is also sent when you tick **Allow access** for a virtual user wh
 correct the **Email** of a user who has not chosen their password yet: the link sent to the old address stops working.
 
 The invitation link expires after 6 hours. Until the person has chosen their password, you can send a new link with
-**Resend invitation**, on the user's page or in the users list (the previous link stops working, and you must wait a
-minute between two invitations). The person can also get a new link with **Forgot password?** on the
-[login page](../basics/logging-in).
+**Resend invitation**, on the user's page or in the users list (the previous link stops working). A user gets at most
+one invitation a minute, however it is sent: if you save changes that would send one within that minute (e.g. you
+correct the **Email** again), they are saved but no email is sent, and you can use **Resend invitation** a minute
+later. The person can also get a new link with **Forgot password?** on the [login page](../basics/logging-in).
 
 Administrators cannot set or change the password of a user: people choose their own, with the invitation, with
 **Forgot password?** on the login page, or from their profile.

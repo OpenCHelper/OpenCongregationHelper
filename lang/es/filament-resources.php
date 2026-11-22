@@ -375,6 +375,7 @@ return [
         'field_can_login_helper' => 'Marca para permitir que el usuario acceda al sistema.',
         'field_can_login_invitation_helper' => 'Recibirá un correo para elegir su contraseña.',
         'invitation_sent' => 'Se ha enviado a :email una invitación para elegir la contraseña.',
+        'invitation_cooldown' => 'Los cambios se han guardado, pero no se ha enviado ninguna invitación: se envió una hace menos de un minuto. Usa "Reenviar invitación" dentro de un minuto.',
         'field_email_invitation_helper' => 'Este usuario aún no ha elegido su contraseña: si cambias el correo, la invitación se envía de nuevo a la nueva dirección.',
         'action_resend_invitation' => 'Reenviar invitación',
         'resend_invitation_modal_heading' => '¿Reenviar la invitación?',
