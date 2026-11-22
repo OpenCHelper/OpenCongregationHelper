@@ -37,3 +37,7 @@ assignment.
 
 Open **Actions → Share** again and click **Stop Sharing**, then confirm. The link stops working immediately. If you
 share the assignment again later, a new link is created.
+
+The super administrators can also turn sharing off for everyone, from the
+[settings](../administration/settings#territories): **Share** is then no longer offered and all the existing links are
+deleted.

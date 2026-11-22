@@ -25,8 +25,12 @@ role. The options are grouped by area, with one page each in the menu on the sid
 - **Default map centre**: where the maps open while no territory has a map yet, as `latitude, longitude` (e.g.
   `41.159063, -74.255188`). Afterwards the maps open on the territories.
 
-Under **Privacy of shared pages** you choose what the public page of a [shared assignment](../assignments/sharing) shows
-to anyone who has its link:
+Under **Privacy of shared pages** you first choose whether assignments can be [shared](../assignments/sharing) at all
+(**Share assignments**, enabled by default). When disabled, **Share** is no longer offered to anyone and the existing
+links are deleted when you save: they stop working for good, even if sharing is enabled again. If there are any, you are
+asked to confirm first. The options below are shown only while sharing is enabled.
+
+Then you choose what the public page of a shared assignment shows to anyone who has its link:
 
 - **Hide personal data** (recommended): only the territory, its map and the dates;
 - **Show personal data**: also the name of the assignee and the notes of the territory, which may describe
@@ -74,7 +78,8 @@ Click **Save changes** to apply them: they take effect immediately, for every us
 
 ## Default values
 
-Under each option, **Default** shows its value before it is changed here: for the map centre and the personal data, the
-value set in `.env` by whoever installed the application (see the [Setup guide](../setup)). These two options keep
-following `.env` until they are changed here; to make one follow `.env` again, set it back to its default value and
-save. The name, language and timezone of the application are set only in `.env`.
+Under each option, **Default** shows its value before it is changed here: for the map centre, the personal data and the
+return requests from the public page, the value set in `.env` by whoever installed the application (see the [Setup
+guide](../setup)). These three options keep following `.env` until they are changed here; to make one follow `.env`
+again, set it back to its default value and save. The name, language and timezone of the application are set only in
+`.env`.

@@ -6,6 +6,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use App\Settings\TerritorySettings;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 
@@ -32,7 +33,7 @@ test('stale assignments whose territory or zone was deleted are skipped', functi
 
     Event::fake([StaleAssignmentDetected::class]);
 
-    (new DetectStaleAssignments)->handle();
+    (new DetectStaleAssignments)->handle(app(TerritorySettings::class));
 
     Event::assertDispatchedTimes(StaleAssignmentDetected::class, 1);
     Event::assertDispatched(StaleAssignmentDetected::class, fn (StaleAssignmentDetected $event): bool => $event->assignment->is($staleAssignment));

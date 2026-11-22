@@ -149,7 +149,7 @@ class Campaign extends Model
     public function scopeExpiring(Builder $query): void
     {
         $query->where('valid_until', '>', now())
-            ->where('valid_until', '<=', now()->addDays(CampaignSettings::value('expiring_days')));
+            ->where('valid_until', '<=', now()->addDays(app(CampaignSettings::class)->expiring_days));
     }
 
     /**

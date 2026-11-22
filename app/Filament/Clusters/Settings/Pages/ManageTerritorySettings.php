@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Settings\Pages;
 
 use App\Filament\Clusters\Settings\AppSettingsPage;
+use App\Models\SharedUrl;
 use App\Settings\TerritorySettings;
 use BackedEnum;
 use Carbon\Carbon;
@@ -81,7 +82,23 @@ class ManageTerritorySettings extends AppSettingsPage
                     ->icon(Heroicon::OutlinedShieldCheck)
                     ->columnSpanFull()
                     ->schema([
+                        Toggle::make('sharing_enabled')
+                            ->label(__('settings.fields.sharing_enabled.label'))
+                            ->helperText(__('settings.fields.sharing_enabled.helper').' '.$this->defaultHint(
+                                $this->defaultValue('sharing_enabled') ? __('settings.fields.sharing_enabled.enabled') : __('settings.fields.sharing_enabled.disabled'),
+                            ))
+                            ->live()
+                            ->afterStateUpdated(function (?bool $state, ?bool $old, Set $set): void {
+                                // Disabled only once confirmed (see `confirmDisableSharingAction()`), as saving it deletes the shared links
+                                if (! $state && $old && SharedUrl::query()->exists()) {
+                                    $set('sharing_enabled', true);
+                                    $this->mountAction('confirmDisableSharing');
+                                }
+                            }),
+                        // Kept while sharing is disabled, so that enabling it again restores them
                         Radio::make('shared_pii')
+                            ->visible(fn (Get $get): bool => (bool) $get('sharing_enabled'))
+                            ->dehydratedWhenHidden()
                             ->hiddenLabel()
                             ->options([
                                 'hide' => __('settings.fields.shared_pii.hide'),
@@ -109,6 +126,8 @@ class ManageTerritorySettings extends AppSettingsPage
                                 }
                             }),
                         Toggle::make('guest_returns')
+                            ->visible(fn (Get $get): bool => (bool) $get('sharing_enabled'))
+                            ->dehydratedWhenHidden()
                             ->label(__('settings.fields.guest_returns.label'))
                             ->helperText(__('settings.fields.guest_returns.helper').' '.$this->defaultHint(
                                 $this->defaultValue('guest_returns') ? __('settings.fields.guest_returns.enabled') : __('settings.fields.guest_returns.disabled'),
@@ -220,6 +239,23 @@ class ManageTerritorySettings extends AppSettingsPage
     }
 
     /**
+     * Confirm that sharing must be disabled, after reading that saving it deletes the existing shared links.
+     */
+    public function confirmDisableSharingAction(): Action
+    {
+        return Action::make('confirmDisableSharing')
+            ->requiresConfirmation()
+            ->color('danger')
+            ->modalIcon(Heroicon::OutlinedExclamationTriangle)
+            ->modalHeading(__('settings.fields.sharing_enabled.confirm_heading'))
+            ->modalDescription(fn (): string => trans_choice('settings.fields.sharing_enabled.confirm_description', $count = SharedUrl::query()->count(), ['count' => $count]))
+            ->modalSubmitActionLabel(__('settings.fields.sharing_enabled.confirm'))
+            ->action(function (): void {
+                $this->data['sharing_enabled'] = false;
+            });
+    }
+
+    /**
      * The days of the week, keyed by number (0 = Sunday), in the language of the user.
      *
      * @return array<int, string>
@@ -268,6 +304,7 @@ class ManageTerritorySettings extends AppSettingsPage
     {
         $data['map_default_center'] = self::parseCoordinates((string) $data['map_default_center']);
         $data['shared_pii'] = $data['shared_pii'] === 'show';
+        $data['sharing_enabled'] = (bool) $data['sharing_enabled'];
         $data['guest_returns'] = (bool) $data['guest_returns'];
         $data['stale_check_day'] = (int) $data['stale_check_day'];
         $data['coverage_periods_months'] = self::normalizePeriods((array) $data['coverage_periods_months']);

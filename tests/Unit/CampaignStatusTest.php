@@ -2,6 +2,11 @@
 
 use App\Enums\CampaignStatus;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+// The thresholds come from the settings, read from the database
+pest()->extend(TestCase::class)->use(RefreshDatabase::class);
 
 beforeEach(function () {
     Carbon::setTestNow('2026-03-15 10:00:00');

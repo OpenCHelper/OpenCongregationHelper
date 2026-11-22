@@ -11,17 +11,23 @@ class TerritorySettings extends ConfigSettings
      *
      * @var float[]|null
      */
-    public ?array $map_default_center;
+    public ?array $map_default_center = null;
+
+    /**
+     * Whether assignments can be shared through a public link. Disabling it deletes the existing links (see
+     * `DeleteSharedUrlsWhenSharingIsDisabled`), and no link can be created until it is enabled again.
+     */
+    public bool $sharing_enabled = true;
 
     /**
      * Whether the public page of a shared assignment shows the assignee and the notes of the territory.
      */
-    public ?bool $shared_pii;
+    public ?bool $shared_pii = null;
 
     /**
      * Whether whoever opens the public page of a shared assignment can ask the territory department to close it.
      */
-    public ?bool $guest_returns;
+    public ?bool $guest_returns = null;
 
     /**
      * Days after which an assignment in progress is stale: its assignee is reminded to return it from then on.

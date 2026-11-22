@@ -75,6 +75,15 @@ return [
             'helper' => 'Dove si aprono le mappe finché nessun territorio ha una mappa, come "latitudine, longitudine".',
             'invalid' => 'Scrivi le coordinate come "latitudine, longitudine" (es. 41.159063, -74.255188).',
         ],
+        'sharing_enabled' => [
+            'label' => 'Condivisione delle assegnazioni',
+            'helper' => 'Chi può aprire un\'assegnazione può crearne un link pubblico, per chi non ha un account. Disattivandola si eliminano tutti i link esistenti: smettono di funzionare, anche se viene riattivata.',
+            'enabled' => 'Attiva',
+            'disabled' => 'Disattiva',
+            'confirm_heading' => 'Disattivare la condivisione?',
+            'confirm_description' => '{1} Salvando si elimina il link condiviso esistente: chi lo ha non potrà più aprire l\'assegnazione, anche se la condivisione viene riattivata.|[2,*] Salvando si eliminano i :count link condivisi esistenti: chi li ha non potrà più aprire le assegnazioni, anche se la condivisione viene riattivata.',
+            'confirm' => 'Disattiva la condivisione',
+        ],
         'shared_pii' => [
             'hide' => 'Nascondi i dati personali',
             'hide_description' => 'Solo il territorio, la sua mappa e le date: l\'assegnatario e le note restano nell\'app.',

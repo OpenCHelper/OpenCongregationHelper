@@ -75,6 +75,15 @@ return [
             'helper' => 'Where the maps open while no territory has a map yet, as "latitude, longitude".',
             'invalid' => 'Write the coordinates as "latitude, longitude" (e.g. 41.159063, -74.255188).',
         ],
+        'sharing_enabled' => [
+            'label' => 'Share assignments',
+            'helper' => 'Who can open an assignment can create a public link to it, for those without an account. Disabling it deletes all the existing links: they stop working, even if it is enabled again.',
+            'enabled' => 'Enabled',
+            'disabled' => 'Disabled',
+            'confirm_heading' => 'Disable sharing?',
+            'confirm_description' => '{1} Saving deletes the :count existing shared link: whoever has it can no longer open the assignment, even if sharing is enabled again.|[2,*] Saving deletes the :count existing shared links: whoever has them can no longer open the assignments, even if sharing is enabled again.',
+            'confirm' => 'Disable sharing',
+        ],
         'shared_pii' => [
             'hide' => 'Hide personal data',
             'hide_description' => 'Only the territory, its map and the dates: the assignee and the notes stay inside the app.',

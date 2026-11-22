@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\SharedUrl;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Str;
@@ -32,9 +33,15 @@ trait HasSharedUrl
      *
      * If a shared URL already exists, it will return that.
      * Otherwise, it will create a new shared URL.
+     *
+     * @throws AuthorizationException While sharing is disabled from the territory settings.
      */
     public function share(): SharedUrl
     {
+        if (! SharedUrl::isSharingEnabled()) {
+            throw new AuthorizationException('Sharing is disabled.');
+        }
+
         $this->load('shared');
 
         if ($this->shared?->exists()) {

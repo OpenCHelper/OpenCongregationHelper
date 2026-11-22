@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TerritoryAssignments\Actions;
 
+use App\Models\SharedUrl;
 use App\Models\TerritoryAssignment;
 use App\Models\User;
 use App\Settings\TerritorySettings;
@@ -71,7 +72,8 @@ class RequestReturnAction extends Action
     public static function canRequestReturn(TerritoryAssignment $assignment): bool
     {
         if (Filament::getCurrentPanel()?->getId() === 'guest') {
-            return TerritorySettings::value('guest_returns')
+            return app(TerritorySettings::class)->guest_returns
+                && SharedUrl::isSharingEnabled()
                 && $assignment->shared !== null;
         }
 
