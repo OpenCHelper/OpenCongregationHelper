@@ -51,10 +51,12 @@ return [
         'require_two_factor' => [
             'label' => 'Exigir la autenticación en dos pasos',
             'helper' => 'Los usuarios deben configurar la autenticación en dos pasos con una aplicación de autenticación antes de usar la aplicación. Si está desactivada, aún pueden activarla desde su perfil.',
+            'root_required' => 'Configura primero la autenticación en dos pasos para el usuario root, para que no pueda quedarse bloqueado.',
         ],
         'require_email_verification' => [
             'label' => 'Exigir la confirmación del correo electrónico',
             'helper' => 'Los usuarios deben confirmar su dirección de correo electrónico, desde el enlace que reciben, antes de usar la aplicación.',
+            'root_required' => 'Confirma primero la dirección de correo electrónico del usuario root, para que no pueda quedarse bloqueado.',
         ],
         'kingdom_hall_address' => [
             'label' => 'Dirección del Salón del Reino',

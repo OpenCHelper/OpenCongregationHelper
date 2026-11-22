@@ -35,10 +35,39 @@ test('two-factor authentication and email confirmation are not required by defau
         ->and(SecuritySettings::value('require_email_verification'))->toBeFalse();
 });
 
-test('the security settings are stored from their page', function () {
+/**
+ * Create the root user (ID 1), with or without two-factor authentication and a confirmed email.
+ */
+function createRootUser(bool $withTwoFactor = true, bool $withVerifiedEmail = true): User
+{
+    $root = User::factory()->create([
+        'id' => 1,
+        'can_login' => true,
+        'email_verified_at' => $withVerifiedEmail ? now() : null,
+    ]);
+
+    if ($withTwoFactor) {
+        $root->saveAppAuthenticationSecret(AppAuthentication::make()->generateSecret());
+    }
+
+    return $root;
+}
+
+/**
+ * Log in as a super administrator other than the root user.
+ */
+function actingAsSecuritySuperAdmin(): User
+{
     $superAdmin = User::factory()->create(['can_login' => true]);
     $superAdmin->assignRole(Role::create(['name' => 'super_admin', 'guard_name' => 'web']));
-    $this->actingAs($superAdmin);
+    test()->actingAs($superAdmin);
+
+    return $superAdmin;
+}
+
+test('the security settings are stored from their page', function () {
+    createRootUser();
+    actingAsSecuritySuperAdmin();
 
     Livewire::test(ManageSecuritySettings::class)
         ->assertSchemaStateSet(['require_two_factor' => false, 'require_email_verification' => false])
@@ -124,4 +153,45 @@ test('no confirmation email is sent to users whose email is already confirmed', 
         ->assertRedirect();
 
     Notification::assertNothingSentTo($user);
+});
+
+test('two-factor authentication cannot be required while the root user has not set it up', function () {
+    createRootUser(withTwoFactor: false);
+    actingAsSecuritySuperAdmin();
+
+    Livewire::test(ManageSecuritySettings::class)
+        ->fillForm(['require_two_factor' => true])
+        ->call('save')
+        ->assertHasFormErrors(['require_two_factor'])
+        ->assertSee(__('settings.fields.require_two_factor.root_required'));
+
+    expect(app(SecuritySettings::class)->refresh()->require_two_factor)->toBeFalse();
+});
+
+test('email confirmation cannot be required while the root user has not confirmed its email', function () {
+    createRootUser(withVerifiedEmail: false);
+    actingAsSecuritySuperAdmin();
+
+    Livewire::test(ManageSecuritySettings::class)
+        ->fillForm(['require_email_verification' => true])
+        ->call('save')
+        ->assertHasFormErrors(['require_email_verification'])
+        ->assertSee(__('settings.fields.require_email_verification.root_required'));
+
+    expect(app(SecuritySettings::class)->refresh()->require_email_verification)->toBeFalse();
+});
+
+test('the requirements can always be turned off, whatever the root user has', function () {
+    createRootUser(withTwoFactor: false, withVerifiedEmail: false);
+    setSecuritySettings(requireTwoFactor: true, requireEmailVerification: true);
+    actingAsSecuritySuperAdmin();
+
+    Livewire::test(ManageSecuritySettings::class)
+        ->fillForm(['require_two_factor' => false, 'require_email_verification' => false])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(SecuritySettings::class)->refresh())
+        ->require_two_factor->toBeFalse()
+        ->require_email_verification->toBeFalse();
 });

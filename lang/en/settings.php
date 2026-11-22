@@ -51,10 +51,12 @@ return [
         'require_two_factor' => [
             'label' => 'Require two-factor authentication',
             'helper' => 'Users must set up two-factor authentication with an authenticator app before using the app. When off, they can still enable it from their profile.',
+            'root_required' => 'Set up two-factor authentication for the root user first, so that it cannot be locked out.',
         ],
         'require_email_verification' => [
             'label' => 'Require email confirmation',
             'helper' => 'Users must confirm their email address, from the link sent to them, before using the app.',
+            'root_required' => 'Confirm the email address of the root user first, so that it cannot be locked out.',
         ],
         'kingdom_hall_address' => [
             'label' => 'Kingdom Hall address',

@@ -186,6 +186,22 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * Get the root user (user with ID 1), if it exists.
+     */
+    public static function rootUser(): ?self
+    {
+        return static::query()->find(1);
+    }
+
+    /**
+     * Check if the user has set up two-factor authentication (with an authenticator app).
+     */
+    public function hasTwoFactorAuthentication(): bool
+    {
+        return filled($this->getAppAuthenticationSecret());
+    }
+
+    /**
      * Check if the root user's login information should be protected.
      * Only protects in non-production environments.
      */
