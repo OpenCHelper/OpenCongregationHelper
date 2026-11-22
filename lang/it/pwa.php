@@ -19,6 +19,7 @@ return [
         'ios_share' => 'Condividi',
         'ios_steps_after' => 'e poi "Aggiungi alla schermata Home" per aprirla come qualsiasi altra app.',
         'action' => 'Installa',
+        'later' => 'Puoi anche attivare le notifiche più tardi dal tuo profilo.',
         'dismiss' => 'Non ora',
     ],
     'offline' => [

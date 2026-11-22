@@ -19,6 +19,7 @@ return [
         'ios_share' => 'Share',
         'ios_steps_after' => 'then "Add to Home Screen" to open it like any other app.',
         'action' => 'Install',
+        'later' => 'You can also enable the notifications later from your profile.',
         'dismiss' => 'Not now',
     ],
     'offline' => [

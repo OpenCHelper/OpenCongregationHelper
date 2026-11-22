@@ -142,6 +142,10 @@
             <x-filament::button x-on:click="dismiss()" size="lg" color="gray" class="w-full">
                 {{ __('pwa.install.dismiss') }}
             </x-filament::button>
+
+            <p class="text-center text-xs text-gray-500 dark:text-gray-400">
+                {{ __('pwa.install.later') }}
+            </p>
         </div>
     </div>
 </div>

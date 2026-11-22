@@ -139,6 +139,7 @@ it('offers to install the app in a full-screen dialog that recommends it for the
         ->assertSee(__('pwa.install.description', ['app' => config('app.name')]))
         ->assertSee(__('pwa.install.benefits.notifications.title'))
         ->assertSee(__('pwa.install.benefits.home_screen.title'))
+        ->assertSee(__('pwa.install.later'))
         ->assertSee(__('pwa.install.dismiss'));
 });
 

@@ -19,6 +19,7 @@ return [
         'ios_share' => 'Compartir',
         'ios_steps_after' => 'y luego "Añadir a pantalla de inicio" para abrirla como cualquier otra app.',
         'action' => 'Instalar',
+        'later' => 'También puedes activar las notificaciones más tarde desde tu perfil.',
         'dismiss' => 'Ahora no',
     ],
     'offline' => [
