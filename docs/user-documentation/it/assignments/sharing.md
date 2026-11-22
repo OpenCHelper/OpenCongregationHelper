@@ -37,3 +37,7 @@ di inizio dell'assegnazione.
 
 Apri di nuovo **Azioni → Condividi**, clicca **Interrompi condivisione** e conferma. Il link smette subito di
 funzionare. Se in seguito condividi di nuovo l'assegnazione, viene creato un nuovo link.
+
+I super amministratori possono anche disattivare la condivisione per tutti, dalle
+[impostazioni](../administration/settings#territori): **Condividi** non viene più offerto e tutti i link esistenti
+vengono eliminati.
