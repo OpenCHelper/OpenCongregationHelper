@@ -17,5 +17,6 @@ return [
         'heading' => 'Elige tu contraseña',
         'submit' => 'Establecer contraseña',
         'notification' => 'Tu contraseña se ha establecido. Ya puedes iniciar sesión.',
+        'invalid' => 'Esta invitación ya no es válida. Pide una nueva, o usa "¿Ha olvidado su contraseña?" en la página de inicio de sesión.',
     ],
 ];

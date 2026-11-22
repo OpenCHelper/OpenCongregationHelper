@@ -46,12 +46,16 @@ class ResetPassword extends BaseResetPassword
     public function resetPassword(): ?PasswordResetResponse
     {
         if ($this->isInvitation) {
-            // The success notification is the translation of the broker status: for this request only, it confirms
-            // that the password has been chosen instead of reset. The group is loaded first, so that its other lines
-            // (e.g. an invalid token) are still translated
+            // The notifications are the translations of the broker statuses: for this request only, they talk about the
+            // invitation instead of a password reset (the password has been chosen, or the invitation is no longer
+            // valid). The group is loaded first, so that its other lines (e.g. the throttling) are still translated
             $translator = app('translator');
             $translator->load('*', 'passwords', app()->getLocale());
-            $translator->addLines([Password::PASSWORD_RESET => __('filament-pages.invitation.notification')], app()->getLocale());
+            $translator->addLines([
+                Password::PASSWORD_RESET => __('filament-pages.invitation.notification'),
+                Password::INVALID_TOKEN => __('filament-pages.invitation.invalid'),
+                Password::INVALID_USER => __('filament-pages.invitation.invalid'),
+            ], app()->getLocale());
         }
 
         $response = parent::resetPassword();

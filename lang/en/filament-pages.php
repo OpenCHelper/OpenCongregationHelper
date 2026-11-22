@@ -17,5 +17,6 @@ return [
         'heading' => 'Choose your password',
         'submit' => 'Set password',
         'notification' => 'Your password has been set. You can now sign in.',
+        'invalid' => 'This invitation is no longer valid. Ask for a new one, or use "Forgot password?" on the sign-in page.',
     ],
 ];

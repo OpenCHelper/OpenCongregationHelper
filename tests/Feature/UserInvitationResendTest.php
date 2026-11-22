@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Notifications\UserInvitationNotification;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Livewire\Livewire;
@@ -57,7 +56,7 @@ test('correcting the email of a user who has not chosen their password sends the
             ->test(ResetPassword::class, ['email' => $email === 'previous' ? $previousUser->email : $user->email, 'token' => $previousToken])
             ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
             ->call('resetPassword')
-            ->assertNotified(__($email === 'previous' ? PasswordBroker::INVALID_USER : PasswordBroker::INVALID_TOKEN));
+            ->assertNotified(__('filament-pages.invitation.invalid'));
     }
 
     expect($user->refresh()->password)->toBeNull();

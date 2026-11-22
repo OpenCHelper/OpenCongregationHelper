@@ -17,5 +17,6 @@ return [
         'heading' => 'Scegli la tua password',
         'submit' => 'Imposta password',
         'notification' => 'La tua password è stata impostata. Ora puoi accedere.',
+        'invalid' => 'Questo invito non è più valido. Chiedine uno nuovo, oppure usa "Hai smarrito la password?" nella pagina di accesso.',
     ],
 ];

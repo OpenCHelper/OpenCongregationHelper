@@ -170,7 +170,7 @@ test('an unused invitation stops working once the password is set another way', 
         ->test(ResetPassword::class, ['email' => $user->email, 'token' => $invitationToken])
         ->fillForm(['password' => 'invitation-password', 'passwordConfirmation' => 'invitation-password'])
         ->call('resetPassword')
-        ->assertNotified(__(PasswordBroker::INVALID_TOKEN));
+        ->assertNotified(__('filament-pages.invitation.invalid'));
 
     expect(Hash::check('chosen-password', $user->refresh()->password))->toBeTrue();
 })->with([
@@ -195,7 +195,7 @@ test('the password reset page talks about choosing a password only when opened f
     'normal reset' => [false, ['Reset your password', 'Reset password'], 'Your password has been reset.'],
 ]);
 
-test('an expired invitation still shows a translated error', function () {
+test('an expired invitation says it is no longer valid', function () {
     app()->setLocale('en');
 
     $user = User::factory()->create(['can_login' => true, 'password' => null]);
@@ -207,7 +207,7 @@ test('an expired invitation still shows a translated error', function () {
         ->test(ResetPassword::class, ['email' => $user->email, 'token' => $token])
         ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
         ->call('resetPassword')
-        ->assertNotified('This password reset token is invalid.');
+        ->assertNotified('This invitation is no longer valid. Ask for a new one, or use "Forgot password?" on the sign-in page.');
 });
 
 test('normal password resets still expire after an hour', function () {
@@ -400,4 +400,38 @@ test('a normal password reset does not confirm the email', function () {
         ->assertNotified(__(PasswordBroker::PASSWORD_RESET));
 
     expect($user->refresh()->hasVerifiedEmail())->toBeFalse();
+});
+
+test('an invitation link that is no longer valid says so instead of talking about a password reset', function (string $case) {
+    app()->setLocale('en');
+
+    $user = User::factory()->create(['can_login' => true, 'password' => null]);
+    $token = Password::broker('invitations')->createToken($user);
+    $email = $user->email;
+
+    if ($case === 'used') {
+        Livewire::withQueryParams(['invitation' => 1])
+            ->test(ResetPassword::class, ['email' => $email, 'token' => $token])
+            ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+            ->call('resetPassword')
+            ->assertNotified(__('filament-pages.invitation.notification'));
+    } else {
+        // Sent to the previous address, before the email was corrected
+        $user->update(['email' => 'corrected@example.com']);
+    }
+
+    Livewire::withQueryParams(['invitation' => 1])
+        ->test(ResetPassword::class, ['email' => $email, 'token' => $token])
+        ->fillForm(['password' => 'other-password', 'passwordConfirmation' => 'other-password'])
+        ->call('resetPassword')
+        ->assertNotified(__('filament-pages.invitation.invalid'));
+})->with(['used', 'sent to an old email']);
+
+test('a normal password reset with an invalid token keeps the standard message', function () {
+    app()->setLocale('en');
+
+    Livewire::test(ResetPassword::class, ['email' => $this->user->email, 'token' => 'invalid-token'])
+        ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+        ->call('resetPassword')
+        ->assertNotified('This password reset token is invalid.');
 });

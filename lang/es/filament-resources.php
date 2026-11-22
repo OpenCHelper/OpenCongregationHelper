@@ -54,7 +54,7 @@ return [
         'invitation_subject' => 'Tu cuenta de :app',
         'invitation_body' => 'Se ha creado una cuenta para ti en :app. Haz clic en el botón de abajo para elegir tu contraseña.',
         'invitation_action' => 'Elegir contraseña',
-        'invitation_expiration' => 'Este enlace caducará en :time. Después, puedes obtener uno nuevo con "¿Olvidaste tu contraseña?" en la página de inicio de sesión.',
+        'invitation_expiration' => 'Este enlace caducará en :time. Después, puedes obtener uno nuevo con "¿Ha olvidado su contraseña?" en la página de inicio de sesión.',
     ],
     'database_notifications' => [
         'territory_assigned_title' => 'Territorio :territory asignado',

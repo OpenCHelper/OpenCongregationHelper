@@ -54,7 +54,7 @@ return [
         'invitation_subject' => 'Il tuo account :app',
         'invitation_body' => 'È stato creato un account per te su :app. Clicca il pulsante qui sotto per scegliere la tua password.',
         'invitation_action' => 'Scegli la password',
-        'invitation_expiration' => 'Questo link scadrà tra :time. Dopo, potrai riceverne uno nuovo con "Password dimenticata?" nella pagina di accesso.',
+        'invitation_expiration' => 'Questo link scadrà tra :time. Dopo, potrai riceverne uno nuovo con "Hai smarrito la password?" nella pagina di accesso.',
     ],
     'database_notifications' => [
         'action_view' => 'Vedi',
