@@ -1,31 +1,31 @@
-name: "\U0001F680 Suggerisci un miglioramento"
-description: Spiega come una funzionalità già esistente potrebbe essere migliorata
+name: "\U0001F680 Suggest an enhancement"
+description: Explain how an existing feature could be improved
 labels: ["enhancement"]
 body:
   - type: input
     id: feature
     attributes:
-      label: Funzionalità da migliorare
-      description: Quale funzionalità o pagina dell'app riguarda il suggerimento?
-      placeholder: "Es. assegnazione dei territori, dashboard, notifiche..."
+      label: Feature to improve
+      description: Which feature or page of the app is the suggestion about?
+      placeholder: "E.g. territory assignments, dashboard, notifications..."
     validations:
       required: true
   - type: textarea
     id: current
     attributes:
-      label: Come funziona oggi
-      description: Descrivi il comportamento attuale e cosa non ti convince.
+      label: How it works today
+      description: Describe the current behavior and what does not convince you.
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Come potrebbe essere migliorata
-      description: Descrivi il miglioramento che proponi e perché sarebbe utile.
+      label: How it could be improved
+      description: Describe the enhancement you propose and why it would be useful.
     validations:
       required: true
   - type: textarea
     id: context
     attributes:
-      label: Altre informazioni
-      description: Screenshot, bozze o qualsiasi altro dettaglio utile.
+      label: Additional information
+      description: Screenshots, sketches or any other useful detail.

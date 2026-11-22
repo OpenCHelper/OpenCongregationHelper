@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
-  - name: "\U0001F4D6 Guida utente"
+  - name: "\U0001F4D6 User guide"
     url: https://github.com/OpenCHelper/OpenCongregationHelper/tree/main/docs/user-documentation
-    about: Consulta la guida utente, disponibile anche nell'app con il pulsante Aiuto
-  - name: "\U0001F9EA Demo pubblica"
+    about: Read the user guide, also available in the app with the Help button
+  - name: "\U0001F9EA Public demo"
     url: https://ochdemo.altervista.org
-    about: Prova l'app con dati fittizi per verificare se un problema si ripete
+    about: Try the app with dummy data to check whether a problem happens there too

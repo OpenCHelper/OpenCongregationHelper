@@ -1,63 +1,63 @@
-name: "\U0001F4A5 Segnala un bug"
-description: Segnala un bug per aiutarci a migliorare
+name: "\U0001F4A5 Report a bug"
+description: Report a bug to help us improve
 title: "[BUG] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Descrivi in modo **chiaro ed esauriente** quale problema hai incontrato.
-        Non includere dati reali della congregazione (nomi, indirizzi, numeri di telefono...) né screenshot che li mostrino.
+        Describe the problem you ran into **clearly and thoroughly**.
+        Do not include real congregation data (names, addresses, phone numbers...) or screenshots that show it.
   - type: textarea
     id: description
     attributes:
-      label: Descrizione del problema
-      description: Cosa è successo?
+      label: Description of the problem
+      description: What happened?
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Passaggi per riprodurre il bug
-      description: Cosa stavi facendo, su cosa hai cliccato, ecc.
+      label: Steps to reproduce
+      description: What you were doing, what you clicked on, etc.
       placeholder: |
-        1. Vai su '...'
-        2. Clicca su '...'
-        3. Si vede l'errore '...'
+        1. Go to '...'
+        2. Click on '...'
+        3. See the error '...'
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Comportamento atteso
-      description: Cosa ti aspettavi che succedesse?
+      label: Expected behavior
+      description: What did you expect to happen?
     validations:
       required: true
   - type: textarea
     id: screenshots
     attributes:
-      label: Screenshot
-      description: Se possibile, aggiungi uno o più screenshot del problema (puoi trascinarli qui).
+      label: Screenshots
+      description: If possible, add one or more screenshots of the problem (you can drag them here).
   - type: dropdown
     id: instance
     attributes:
-      label: Dove hai incontrato il problema?
+      label: Where did you run into the problem?
       options:
-        - Installazione della mia congregazione
-        - Demo pubblica (ochdemo.altervista.org)
-        - Demo nightly (ochtest.altervista.org)
-        - Altro
+        - My congregation's installation
+        - Public demo (ochdemo.altervista.org)
+        - Nightly demo (ochtest.altervista.org)
+        - Other
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: Versione
-      description: La versione dell'app in uso, se la conosci.
-      placeholder: "Es. v1.0.0-alpha11"
+      label: Version
+      description: The version of the app in use, if you know it.
+      placeholder: "E.g. v1.0.0-alpha11"
   - type: input
     id: environment
     attributes:
-      label: Dispositivo e browser
-      description: Sistema operativo, dispositivo e browser su cui si è verificato il problema.
-      placeholder: "Es. Android 15, Chrome 142"
+      label: Device and browser
+      description: Operating system, device and browser on which the problem occurred.
+      placeholder: "E.g. Android 15, Chrome 142"
