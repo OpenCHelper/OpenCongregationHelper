@@ -22,6 +22,27 @@ return [
         'later' => 'You can also enable the notifications later from your profile.',
         'dismiss' => 'Not now',
     ],
+    'notifications' => [
+        'title' => 'Turn on notifications',
+        'description' => 'Get the notifications of :app right on this device, even when the app is closed.',
+        'benefits' => [
+            'assignments' => [
+                'title' => 'Territory assignments',
+                'description' => 'Know right away when a territory is assigned to you.',
+            ],
+            'reminders' => [
+                'title' => 'Reminders',
+                'description' => 'Be reminded of the territories you have had for a long time.',
+            ],
+            'campaigns' => [
+                'title' => 'Campaigns',
+                'description' => 'Hear about new campaigns as soon as they start.',
+            ],
+        ],
+        'action' => 'Turn on notifications',
+        'dismiss' => 'Not now',
+        'later' => 'Your browser will ask you to allow them. You can turn them off at any time from your profile.',
+    ],
     'offline' => [
         'title' => 'You are offline',
         'description' => 'This page cannot be loaded without an internet connection. Check your connection and try again.',

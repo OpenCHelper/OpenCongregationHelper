@@ -22,6 +22,27 @@ return [
         'later' => 'Puoi anche attivare le notifiche più tardi dal tuo profilo.',
         'dismiss' => 'Non ora',
     ],
+    'notifications' => [
+        'title' => 'Attiva le notifiche',
+        'description' => 'Ricevi le notifiche di :app direttamente su questo dispositivo, anche quando l\'app è chiusa.',
+        'benefits' => [
+            'assignments' => [
+                'title' => 'Assegnazioni dei territori',
+                'description' => 'Sappi subito quando ti viene assegnato un territorio.',
+            ],
+            'reminders' => [
+                'title' => 'Promemoria',
+                'description' => 'Ricevi un promemoria per i territori che hai da molto tempo.',
+            ],
+            'campaigns' => [
+                'title' => 'Campagne',
+                'description' => 'Scopri le nuove campagne non appena iniziano.',
+            ],
+        ],
+        'action' => 'Attiva le notifiche',
+        'dismiss' => 'Non ora',
+        'later' => 'Il browser ti chiederà di consentirle. Puoi disattivarle in qualsiasi momento dal tuo profilo.',
+    ],
     'offline' => [
         'title' => 'Sei offline',
         'description' => 'Questa pagina non può essere caricata senza una connessione a internet. Controlla la connessione e riprova.',

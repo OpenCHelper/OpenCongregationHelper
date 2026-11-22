@@ -51,6 +51,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -163,6 +164,11 @@ class AppPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn (): ?View => Filament::auth()->check() && WebPush::isConfigured() ? view('filament.push-logout') : null,
+            )
+            // Offer to enable the push notifications on the device once logged in, taking turns with the offer to install
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): ?string => Filament::auth()->check() && WebPush::canSubscribe() ? Blade::render("@livewire('push-notifications-prompt')") : null,
             )
             // Registered after the plugins, so that the help menu stays after the environment indicator.
             ->bootUsing(function (): void {

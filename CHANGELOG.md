@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Full-screen dialog, once logged in, that offers to turn on the push notifications on the device; it takes turns
+  with the offer to install the app and can be dismissed for 30 days.
+
 ### Changed
 
 - The offer to install the app is now a full-screen dialog that recommends it as the best way to use the app,

@@ -3,6 +3,7 @@
 use App\Filament\Pages\EditProfile;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Livewire\ProfilePushNotifications;
+use App\Livewire\PushNotificationsPrompt;
 use App\Models\Campaign;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
@@ -167,6 +168,83 @@ test('the profile offers to enable push notifications only when they are configu
     'configured' => true,
     'not configured' => false,
 ]);
+
+test('a full-screen dialog offers to enable push notifications once logged in, only when they can be', function (bool $isConfigured, bool $isImpersonating) {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    if (! $isConfigured) {
+        config(['webpush.vapid.public_key' => null]);
+    }
+
+    Impersonation::partialMock()->shouldReceive('isImpersonating')->andReturn($isImpersonating);
+
+    $response = $this->actingAs($this->user)->followingRedirects()->get('/app')->assertOk();
+
+    $isConfigured && ! $isImpersonating
+        ? $response->assertSee('app-push-notifications-prompt fixed inset-0', escape: false)
+            ->assertSee('...pushSubscription(', escape: false)
+            ->assertSee(__('pwa.notifications.title'))
+            ->assertSee(__('pwa.notifications.action'))
+            ->assertSee(__('pwa.notifications.dismiss'))
+            ->assertSee(__('pwa.notifications.later'))
+        : $response->assertDontSee('app-push-notifications-prompt', escape: false);
+})->with([
+    'configured' => [true, false],
+    'not configured' => [false, false],
+    'impersonating' => [true, true],
+]);
+
+test('the dialog takes turns with the offer to install the app', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->actingAs($this->user)
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee("Alpine.store('fullScreenPrompt', { current: null })", escape: false)
+        ->assertSee("name: 'pwa-install'", escape: false)
+        ->assertSee("name: 'push-notifications'", escape: false);
+});
+
+test('the dialog does not show on the login page', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->get('/app/login')->assertOk()->assertDontSee('app-push-notifications-prompt', escape: false);
+});
+
+test('users can enable push notifications on a device from the dialog', function () {
+    $this->actingAs($this->user);
+
+    Livewire::test(PushNotificationsPrompt::class)
+        ->call('subscribe', $this->subscription)
+        ->assertHasNoErrors();
+
+    expect($this->user->pushSubscriptions()->sole()->endpoint)->toBe('https://push.example.com/send/abc123');
+});
+
+test('the dialog cannot enable push notifications while impersonating', function () {
+    Impersonation::shouldReceive('isImpersonating')->andReturn(true);
+    $this->actingAs($this->user);
+
+    Livewire::test(PushNotificationsPrompt::class)
+        ->call('subscribe', $this->subscription)
+        ->assertNotFound();
+
+    expect($this->user->pushSubscriptions()->exists())->toBeFalse();
+});
+
+test('the push subscription script is loaded in the panels', function () {
+    expect(public_path('js/app/push-subscription.js'))->toBeFile()
+        ->and(file_get_contents(resource_path('js/push-subscription.js')))
+        ->toContain('window.pushSubscription = (publicKey) =>')
+        ->toContain('this.$wire.subscribe(');
+});
 
 test('users can enable push notifications on a device', function () {
     $this->actingAs($this->user);

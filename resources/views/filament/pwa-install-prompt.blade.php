@@ -7,8 +7,15 @@
     - iOS has no install prompt: the steps to add the app to the home screen are shown instead.
 
     Nothing is shown when the app already runs installed, or for some days after the user dismissed the offer.
+
+    The `fullScreenPrompt` store holds the full-screen dialog that is open (this one or the offer to enable the push
+    notifications, `livewire.push-notifications-prompt`), so that they take turns instead of opening over each other.
 --}}
 <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('fullScreenPrompt', { current: null });
+    });
+
     window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
         window.pwaInstallPrompt = event;
@@ -18,11 +25,15 @@
 
 <div
     x-data="{
+        name: 'pwa-install',
         dismissedKey: 'pwa-install-dismissed-at',
         dismissDays: @js(\App\Providers\Filament\AppPanelProvider::PWA_INSTALL_DISMISS_DAYS),
         canPrompt: false,
         isIos: false,
         init() {
+            this.$watch('wantsOpen', () => this.claim());
+            this.$watch('$store.fullScreenPrompt.current', () => this.claim());
+
             if (this.isInstalled() || this.wasDismissedRecently()) {
                 return;
             }
@@ -35,9 +46,22 @@
 
             window.addEventListener('pwa-installable', () => this.canPrompt = true);
             window.addEventListener('appinstalled', () => this.close());
+            this.claim();
+        },
+        get wantsOpen() {
+            return this.canPrompt || this.isIos;
         },
         get isOpen() {
-            return this.canPrompt || this.isIos;
+            return this.$store.fullScreenPrompt.current === this.name;
+        },
+        claim() {
+            const store = this.$store.fullScreenPrompt;
+
+            if (this.wantsOpen && store.current === null) {
+                store.current = this.name;
+            } else if (! this.wantsOpen && store.current === this.name) {
+                store.current = null;
+            }
         },
         isInstalled() {
             return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
