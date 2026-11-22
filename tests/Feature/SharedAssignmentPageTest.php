@@ -25,6 +25,9 @@ beforeEach(function () {
     ]);
 
     $this->sharedUrl = $this->assignment->share();
+
+    // Sharing loads the settings: forget them, so that they follow the configuration set by each test
+    app()->forgetScopedInstances();
 });
 
 test('shared assignment pages render with the built frontend assets', function () {

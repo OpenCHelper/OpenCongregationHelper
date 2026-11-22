@@ -25,8 +25,13 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 - **Centro predefinito delle mappe**: dove si aprono le mappe finché nessun territorio ha una mappa, come
   `latitudine, longitudine` (es. `41.159063, -74.255188`). In seguito le mappe si aprono sui territori.
 
-In **Privacy delle pagine condivise** scegli cosa mostra la pagina pubblica di
-un'[assegnazione condivisa](../assignments/sharing) a chiunque ne abbia il link:
+In **Privacy delle pagine condivise** scegli prima se le assegnazioni possono essere [condivise](../assignments/sharing)
+(**Condivisione delle assegnazioni**, attiva per impostazione predefinita). Se disattivata, **Condividi** non viene più
+offerto a nessuno e i link esistenti vengono eliminati al salvataggio: smettono di funzionare per sempre, anche se la
+condivisione viene riattivata. Se ce ne sono, ti viene chiesto prima di confermare. Le opzioni seguenti sono mostrate
+solo mentre la condivisione è attiva.
+
+Poi scegli cosa mostra la pagina pubblica di un'assegnazione condivisa a chiunque ne abbia il link:
 
 - **Nascondi i dati personali** (consigliato): solo il territorio, la sua mappa e le date;
 - **Mostra i dati personali**: anche il nome dell'assegnatario e le note del territorio, che possono descrivere dei

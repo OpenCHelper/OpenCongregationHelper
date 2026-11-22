@@ -285,6 +285,9 @@ describe('from the shared link', function () {
         Filament::setCurrentPanel('guest');
 
         $this->sharedUrl = $this->assignment->share();
+
+        // Sharing loads the settings: forget them, so that they follow the configuration set by each test
+        app()->forgetScopedInstances();
     });
 
     test('the return cannot be asked unless enabled', function () {
