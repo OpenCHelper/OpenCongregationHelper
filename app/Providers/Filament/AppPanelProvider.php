@@ -91,7 +91,7 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Gray,
             ])
-            ->brandLogo(fn (): ?string => filled($logo = app(GeneralSettings::class)->logo) ? Storage::disk('public')->url($logo) : null)
+            ->brandLogo(fn (GeneralSettings $settings): ?string => filled($logo = $settings->logo) ? Storage::disk('public')->url($logo) : null)
             ->brandLogoHeight('2rem')
             ->themeSwitcher(false)
             ->sidebarCollapsibleOnDesktop()

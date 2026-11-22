@@ -300,7 +300,7 @@ test('the stale assignment levels are used to find the assignments out for too l
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(array_column((new DetectStaleAssignments)->getStaleLevels(), 'days'))->toBe([30, 75]);
+    expect(array_column((new DetectStaleAssignments)->getStaleLevels(app(TerritorySettings::class)), 'days'))->toBe([30, 75]);
 
     $assignee = User::factory()->create();
     $zone = TerritoryZone::factory()->create();
@@ -317,7 +317,7 @@ test('the stale assignment levels are used to find the assignments out for too l
 
     Event::fake([StaleAssignmentDetected::class]);
 
-    (new DetectStaleAssignments)->handle();
+    (new DetectStaleAssignments)->handle(app(TerritorySettings::class));
 
     Event::assertDispatchedTimes(StaleAssignmentDetected::class, 1);
     Event::assertDispatched(StaleAssignmentDetected::class, fn (StaleAssignmentDetected $event): bool => $event->assignment->is($staleAssignment));
@@ -380,7 +380,7 @@ test('equal stale assignment levels are both kept', function () {
     $settings->dead_after_days = 90;
     $settings->save();
 
-    expect((new DetectStaleAssignments)->getStaleLevels())->toHaveKeys(['stale', 'dead']);
+    expect((new DetectStaleAssignments)->getStaleLevels(app(TerritorySettings::class)))->toHaveKeys(['stale', 'dead']);
 });
 
 test('the stale assignments can be checked on any day and at any time', function () {

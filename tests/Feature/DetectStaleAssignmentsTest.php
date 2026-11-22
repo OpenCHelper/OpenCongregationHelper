@@ -55,7 +55,7 @@ test('only assignments in progress for more than 60 days are reported as stale',
 
     Event::fake([StaleAssignmentDetected::class]);
 
-    (new DetectStaleAssignments)->handle();
+    (new DetectStaleAssignments)->handle(app(TerritorySettings::class));
 
     Event::assertDispatchedTimes(StaleAssignmentDetected::class, 2);
     Event::assertDispatched(StaleAssignmentDetected::class, fn (StaleAssignmentDetected $event): bool => $event->assignment->is($staleAssignment));
@@ -138,7 +138,7 @@ test('the territory department receives one summary of the stale assignments, be
         'ended_at' => null,
     ]);
 
-    (new DetectStaleAssignments)->handle();
+    (new DetectStaleAssignments)->handle(app(TerritorySettings::class));
 
     Notification::assertSentToTimes($assignee, StaleAssignmentNotification::class, 2);
 
@@ -164,7 +164,7 @@ test('the territory department receives no summary without stale assignments', f
     $member = User::factory()->create();
     Department::for(DepartmentKey::Territories)->members()->attach($member, ['role' => DepartmentRole::Overseer]);
 
-    (new DetectStaleAssignments)->handle();
+    (new DetectStaleAssignments)->handle(app(TerritorySettings::class));
 
     Notification::assertNothingSentTo($member);
 });
@@ -217,7 +217,7 @@ test('only the overseers of the territory department receive the summary when ch
         'ended_at' => null,
     ]);
 
-    (new DetectStaleAssignments)->handle();
+    (new DetectStaleAssignments)->handle(app(TerritorySettings::class));
 
     Notification::assertSentToTimes($overseer, StaleAssignmentsDepartmentNotification::class, 1);
     Notification::assertNotSentTo($assistant, StaleAssignmentsDepartmentNotification::class);
