@@ -123,7 +123,7 @@ test('the territory settings are stored and used', function () {
         'shared_pii' => true,
     ])
         ->and(MapCenter::resolve())->toBe([39.8017, -89.6436])
-        ->and(TerritorySettings::value('shared_pii'))->toBeTrue();
+        ->and(app(TerritorySettings::class)->shared_pii)->toBeTrue();
 });
 
 test('showing the personal data on the shared pages must be confirmed', function () {
@@ -153,7 +153,7 @@ test('the personal data stay hidden when their confirmation is cancelled', funct
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(TerritorySettings::value('shared_pii'))->toBeFalse();
+    expect(app(TerritorySettings::class)->shared_pii)->toBeFalse();
 });
 
 test('hiding the personal data again needs no confirmation', function () {
@@ -168,7 +168,7 @@ test('hiding the personal data again needs no confirmation', function () {
         ->assertHasNoFormErrors();
 
     expect(storedSettings('territories')['shared_pii'])->toBeFalse()
-        ->and(TerritorySettings::value('shared_pii'))->toBeFalse();
+        ->and(app(TerritorySettings::class)->shared_pii)->toBeFalse();
 });
 
 test('the settings set back to their default follow the environment again', function () {
@@ -187,7 +187,23 @@ test('the settings set back to their default follow the environment again', func
         ->assertHasNoFormErrors();
 
     expect(storedSettings('territories')['map_default_center'])->toBeNull()
-        ->and(TerritorySettings::value('map_default_center'))->toBe($default);
+        ->and(app(TerritorySettings::class)->map_default_center)->toBe($default);
+});
+
+test('a setting saved with the value of the environment follows it again', function () {
+    config(['app.enable_shared_pii' => true]);
+
+    $settings = app(TerritorySettings::class);
+    $settings->shared_pii = true;
+    $settings->save();
+
+    expect(storedSettings('territories')['shared_pii'])->toBeNull()
+        ->and($settings->shared_pii)->toBeTrue();
+
+    config(['app.enable_shared_pii' => false]);
+    app()->forgetScopedInstances();
+
+    expect(app(TerritorySettings::class)->shared_pii)->toBeFalse();
 });
 
 test('the default map centre must be valid coordinates', function (string $coordinates) {
@@ -206,12 +222,13 @@ test('the default map centre must be valid coordinates', function (string $coord
     'longitude out of range' => '41, 181',
 ]);
 
-test('the settings follow the environment before they are migrated', function () {
+test('the settings have their default values before they are migrated', function () {
     DB::table('settings')->delete();
     app()->forgetScopedInstances();
 
-    expect(TerritorySettings::value('map_default_center'))->toBe(config('filament-leaflet.default_map_center'))
-        ->and(CampaignSettings::value('expiring_days'))->toBe(7);
+    expect(app(TerritorySettings::class)->map_default_center)->toBeNull()
+        ->and(app(TerritorySettings::class)->stale_after_days)->toBe(60)
+        ->and(app(CampaignSettings::class)->expiring_days)->toBe(7);
 });
 
 test('the logo and the primary colour are applied to the panel', function () {
@@ -550,8 +567,14 @@ test('the global map opens on the default centre of the settings', function () {
         ->toBe([39.8017, -89.6436]);
 });
 
-test('several settings read at once fall back on the environment too', function () {
-    expect(TerritorySettings::values('map_default_center', 'shared_pii', 'stale_after_days'))->toBe([
+test('the settings read from the same object fall back on the environment too', function () {
+    $settings = app(TerritorySettings::class);
+
+    expect([
+        'map_default_center' => $settings->map_default_center,
+        'shared_pii' => $settings->shared_pii,
+        'stale_after_days' => $settings->stale_after_days,
+    ])->toBe([
         'map_default_center' => config('filament-leaflet.default_map_center'),
         'shared_pii' => config('app.enable_shared_pii'),
         'stale_after_days' => 60,

@@ -44,9 +44,9 @@ enum TerritoryMapCategory: string implements HasColor, HasLabel
      */
     private function getFrequencyLabel(): string
     {
-        $thresholds = TerritorySettings::values('frequency_period_months', 'medium_frequency_min_assignments', 'high_frequency_min_assignments');
-        $medium = $thresholds['medium_frequency_min_assignments'];
-        $high = $thresholds['high_frequency_min_assignments'];
+        $settings = app(TerritorySettings::class);
+        $medium = $settings->medium_frequency_min_assignments;
+        $high = $settings->high_frequency_min_assignments;
 
         return match ($this) {
             self::LOW_FREQUENCY => trans_choice('filament-widgets.territory_global_map.category_low_frequency', $medium, [
@@ -65,7 +65,7 @@ enum TerritoryMapCategory: string implements HasColor, HasLabel
      */
     public static function getFrequencyPeriod(): string
     {
-        return trans_choice('filament-widgets.territory_global_map.frequency_period', TerritorySettings::value('frequency_period_months'));
+        return trans_choice('filament-widgets.territory_global_map.frequency_period', app(TerritorySettings::class)->frequency_period_months);
     }
 
     /**
@@ -97,11 +97,11 @@ enum TerritoryMapCategory: string implements HasColor, HasLabel
      */
     public static function fromRecentAssignmentsCount(int $recentAssignmentsCount): self
     {
-        $thresholds = TerritorySettings::values('medium_frequency_min_assignments', 'high_frequency_min_assignments');
+        $settings = app(TerritorySettings::class);
 
         return match (true) {
-            $recentAssignmentsCount >= $thresholds['high_frequency_min_assignments'] => self::HIGH_FREQUENCY,
-            $recentAssignmentsCount >= $thresholds['medium_frequency_min_assignments'] => self::MEDIUM_FREQUENCY,
+            $recentAssignmentsCount >= $settings->high_frequency_min_assignments => self::HIGH_FREQUENCY,
+            $recentAssignmentsCount >= $settings->medium_frequency_min_assignments => self::MEDIUM_FREQUENCY,
             default => self::LOW_FREQUENCY,
         };
     }

@@ -50,7 +50,7 @@ class MapCenter
 
         if ($centers === []) {
             /** @var array{float, float} $default */
-            $default = TerritorySettings::value('map_default_center');
+            $default = app(TerritorySettings::class)->map_default_center;
 
             return $default;
         }

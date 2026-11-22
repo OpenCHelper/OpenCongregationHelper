@@ -36,16 +36,16 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
      */
     public function getStaleLevels(): array
     {
-        $days = TerritorySettings::values('stale_after_days', 'dead_after_days');
+        $settings = app(TerritorySettings::class);
 
         return [
             'stale' => [
-                'days' => $days['stale_after_days'],
+                'days' => $settings->stale_after_days,
                 'description' => 'Assignment is stale',
                 'color' => 'yellow',
             ],
             'dead' => [
-                'days' => $days['dead_after_days'],
+                'days' => $settings->dead_after_days,
                 'description' => 'Assignment is dead',
                 'color' => 'black',
             ],
@@ -95,7 +95,7 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
         $members = User::query()
             ->inDepartment(
                 DepartmentKey::Territories,
-                TerritorySettings::value('stale_summary_overseers_only') ? DepartmentRole::Overseer : null,
+                app(TerritorySettings::class)->stale_summary_overseers_only ? DepartmentRole::Overseer : null,
             )
             ->where('can_login', true)
             ->get();

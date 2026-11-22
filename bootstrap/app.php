@@ -6,6 +6,7 @@ use App\Settings\TerritorySettings;
 use BladeUI\Icons\Console\CacheCommand;
 use BladeUI\Icons\Console\ClearCommand;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -64,11 +65,16 @@ return Application::configure(basePath: dirname(__DIR__))
             that the scheduler must be running at that time. The publications
             are renewed every day at 9:00 in the same timezone.
         */
+        try {
+            $territorySettings = app(TerritorySettings::class);
+            $staleCheck = [$territorySettings->stale_check_day, $territorySettings->stale_check_time];
+        } catch (QueryException) {
+            // Every Artisan command defines the schedule, `migrate` too: before the first one there is no `settings` table
+            $staleCheck = [TerritorySettings::defaultValue('stale_check_day'), TerritorySettings::defaultValue('stale_check_time')];
+        }
+
         $schedule->job(new DetectStaleAssignments)
-            ->weeklyOn(
-                TerritorySettings::value('stale_check_day'),
-                TerritorySettings::value('stale_check_time'),
-            )
+            ->weeklyOn(...$staleCheck)
             ->timezone(config('app.timezone'))
             ->withoutOverlapping()
             ->onOneServer();

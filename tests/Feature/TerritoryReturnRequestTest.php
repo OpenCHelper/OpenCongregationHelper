@@ -378,7 +378,7 @@ describe('on the Settings pages', function () {
             ->assertSee(__('settings.fields.guest_returns.label'))
             ->assertSchemaStateSet(['guest_returns' => $configured]);
 
-        expect(TerritorySettings::value('guest_returns'))->toBe($configured);
+        expect(app(TerritorySettings::class)->guest_returns)->toBe($configured);
     })->with([true, false]);
 
     test('the super administrators enable the return requests from the shared pages', function () {
@@ -389,6 +389,6 @@ describe('on the Settings pages', function () {
             ->call('save')
             ->assertHasNoFormErrors();
 
-        expect(TerritorySettings::value('guest_returns'))->toBeTrue();
+        expect(app(TerritorySettings::class)->guest_returns)->toBeTrue();
     });
 });

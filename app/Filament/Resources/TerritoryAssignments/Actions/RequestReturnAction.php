@@ -71,7 +71,7 @@ class RequestReturnAction extends Action
     public static function canRequestReturn(TerritoryAssignment $assignment): bool
     {
         if (Filament::getCurrentPanel()?->getId() === 'guest') {
-            return TerritorySettings::value('guest_returns')
+            return app(TerritorySettings::class)->guest_returns
                 && $assignment->shared !== null;
         }
 

@@ -69,7 +69,7 @@ class TerritoryCoverage extends Widget
      */
     public function getPeriods(): array
     {
-        $periods = collect(TerritorySettings::value('coverage_periods_months'))
+        $periods = collect(app(TerritorySettings::class)->coverage_periods_months)
             ->map(fn (mixed $months): int => (int) $months)
             ->filter(fn (int $months): bool => $months > 0)
             ->unique()
@@ -86,7 +86,7 @@ class TerritoryCoverage extends Widget
     public function getDefaultPeriod(): int
     {
         $periods = $this->getPeriods();
-        $default = (int) TerritorySettings::value('coverage_default_period_months');
+        $default = (int) app(TerritorySettings::class)->coverage_default_period_months;
 
         return in_array($default, $periods, true) ? $default : $periods[0];
     }
