@@ -12,23 +12,23 @@ class SharedUrlPolicy
      */
     public function viewAny(?User $user): bool
     {
-        return true;
+        return SharedUrl::isSharingEnabled();
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determine whether the user can view the model: not while sharing is disabled, so that its link stops working.
      */
     public function view(?User $user, SharedUrl $sharedUrl): bool
     {
-        return true;
+        return SharedUrl::isSharingEnabled();
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the user can create models: not while sharing is disabled.
      */
     public function create(User $user): bool
     {
-        return true;
+        return SharedUrl::isSharingEnabled();
     }
 
     /**

@@ -26,9 +26,12 @@ return [
         'general' => 'General',
         'territories' => 'Territories',
         'campaigns' => 'Campaigns',
+        'security' => 'Security',
     ],
 
     'sections' => [
+        'account_requirements' => 'Account requirements',
+        'account_requirements_description' => 'What the users must do before they can use the app.',
         'campaign_expiry' => 'Campaign expiry',
         'campaign_expiry_description' => 'As its end date gets closer, an active campaign becomes expiring and then almost expired.',
         'appearance' => 'Appearance',
@@ -45,6 +48,16 @@ return [
     ],
 
     'fields' => [
+        'require_two_factor' => [
+            'label' => 'Require two-factor authentication',
+            'helper' => 'Users must set up two-factor authentication with an authenticator app before using the app. When off, they can still enable it from their profile.',
+            'root_required' => 'Set up two-factor authentication for the root user first, so that it cannot be locked out.',
+        ],
+        'require_email_verification' => [
+            'label' => 'Require email confirmation',
+            'helper' => 'Users must confirm their email address, from the link sent to them, before using the app.',
+            'root_required' => 'Confirm the email address of the root user first, so that it cannot be locked out.',
+        ],
         'kingdom_hall_address' => [
             'label' => 'Kingdom Hall address',
             'placeholder' => 'Street, number, postcode and city',
@@ -61,6 +74,15 @@ return [
             'label' => 'Default map centre',
             'helper' => 'Where the maps open while no territory has a map yet, as "latitude, longitude".',
             'invalid' => 'Write the coordinates as "latitude, longitude" (e.g. 41.159063, -74.255188).',
+        ],
+        'sharing_enabled' => [
+            'label' => 'Share assignments',
+            'helper' => 'Who can open an assignment can create a public link to it, for those without an account. Disabling it deletes all the existing links: they stop working, even if it is enabled again.',
+            'enabled' => 'Enabled',
+            'disabled' => 'Disabled',
+            'confirm_heading' => 'Disable sharing?',
+            'confirm_description' => '{1} Saving deletes the :count existing shared link: whoever has it can no longer open the assignment, even if sharing is enabled again.|[2,*] Saving deletes the :count existing shared links: whoever has them can no longer open the assignments, even if sharing is enabled again.',
+            'confirm' => 'Disable sharing',
         ],
         'shared_pii' => [
             'hide' => 'Hide personal data',

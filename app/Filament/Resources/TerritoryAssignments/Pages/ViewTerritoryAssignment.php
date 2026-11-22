@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TerritoryAssignments\Pages;
 
 use App\Filament\Resources\TerritoryAssignments\Actions\RequestReturnAction;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
+use App\Models\SharedUrl;
 use App\Models\TerritoryAssignment;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -44,13 +45,14 @@ class ViewTerritoryAssignment extends ViewRecord
 
     /**
      * Whether the user can share the assignment, or stop sharing it: those allowed to view the assignments, and its
-     * assignee (e.g. to pass the territory on to someone without an account).
+     * assignee (e.g. to pass the territory on to someone without an account), while sharing is enabled.
      */
     public static function canManageSharing(TerritoryAssignment $assignment): bool
     {
         $user = Auth::user();
 
         return $user !== null
+            && SharedUrl::isSharingEnabled()
             && ($user->can('View:TerritoryAssignment') || $assignment->assignee_id === $user->getKey());
     }
 
@@ -64,6 +66,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ->label(__('filament-resources.territory_assignment.action_copy.label'))
                     ->tooltip(__('filament-resources.territory_assignment.action_copy.tooltip'))
                     ->icon(Heroicon::OutlinedShare)
+                    ->visible(fn (): bool => SharedUrl::isSharingEnabled())
                     ->authorize(fn (): bool => static::canManageSharing($this->getRecord()))
                     ->modalHeading(__('filament-resources.territory_assignment.share_modal.title'))
                     ->modalDescription(__('filament-resources.territory_assignment.share_modal.description'))

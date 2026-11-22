@@ -34,18 +34,16 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
      *
      * @return array<string, array{days: int, description: string, color: string}>
      */
-    public function getStaleLevels(): array
+    public function getStaleLevels(TerritorySettings $settings): array
     {
-        $days = TerritorySettings::values('stale_after_days', 'dead_after_days');
-
         return [
             'stale' => [
-                'days' => $days['stale_after_days'],
+                'days' => $settings->stale_after_days,
                 'description' => 'Assignment is stale',
                 'color' => 'yellow',
             ],
             'dead' => [
-                'days' => $days['dead_after_days'],
+                'days' => $settings->dead_after_days,
                 'description' => 'Assignment is dead',
                 'color' => 'black',
             ],
@@ -55,12 +53,12 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(TerritorySettings $settings): void
     {
         Log::info('DetectStaleAssignments job started.');
 
         // An assignment is stale when it has been open for longer than the lowest stale level
-        $staleAfterDays = min(array_column($this->getStaleLevels(), 'days'));
+        $staleAfterDays = min(array_column($this->getStaleLevels($settings), 'days'));
 
         $staleAssignments = new Collection;
 
@@ -75,7 +73,7 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
                 $staleAssignments->push($assignment);
             });
 
-        $this->notifyTerritoryDepartment($staleAssignments, $staleAfterDays);
+        $this->notifyTerritoryDepartment($staleAssignments, $staleAfterDays, $settings);
 
         Log::info('DetectStaleAssignments job completed.');
     }
@@ -86,7 +84,7 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
      *
      * @param  Collection<int, TerritoryAssignment>  $staleAssignments
      */
-    protected function notifyTerritoryDepartment(Collection $staleAssignments, int $staleAfterDays): void
+    protected function notifyTerritoryDepartment(Collection $staleAssignments, int $staleAfterDays, TerritorySettings $settings): void
     {
         if ($staleAssignments->isEmpty()) {
             return;
@@ -95,7 +93,7 @@ class DetectStaleAssignments implements ShouldBeUnique, ShouldQueue
         $members = User::query()
             ->inDepartment(
                 DepartmentKey::Territories,
-                TerritorySettings::value('stale_summary_overseers_only') ? DepartmentRole::Overseer : null,
+                $settings->stale_summary_overseers_only ? DepartmentRole::Overseer : null,
             )
             ->where('can_login', true)
             ->get();

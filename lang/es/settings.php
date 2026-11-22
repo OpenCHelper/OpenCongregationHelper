@@ -26,9 +26,12 @@ return [
         'general' => 'Generales',
         'territories' => 'Territorios',
         'campaigns' => 'Campañas',
+        'security' => 'Seguridad',
     ],
 
     'sections' => [
+        'account_requirements' => 'Requisitos de las cuentas',
+        'account_requirements_description' => 'Lo que deben hacer los usuarios antes de poder usar la aplicación.',
         'campaign_expiry' => 'Vencimiento de las campañas',
         'campaign_expiry_description' => 'A medida que se acerca su fecha de fin, una campaña activa pasa a estar por vencer y luego casi vencida.',
         'appearance' => 'Apariencia',
@@ -45,6 +48,16 @@ return [
     ],
 
     'fields' => [
+        'require_two_factor' => [
+            'label' => 'Exigir la autenticación en dos pasos',
+            'helper' => 'Los usuarios deben configurar la autenticación en dos pasos con una aplicación de autenticación antes de usar la aplicación. Si está desactivada, aún pueden activarla desde su perfil.',
+            'root_required' => 'Configura primero la autenticación en dos pasos para el usuario root, para que no pueda quedarse bloqueado.',
+        ],
+        'require_email_verification' => [
+            'label' => 'Exigir la confirmación del correo electrónico',
+            'helper' => 'Los usuarios deben confirmar su dirección de correo electrónico, desde el enlace que reciben, antes de usar la aplicación.',
+            'root_required' => 'Confirma primero la dirección de correo electrónico del usuario root, para que no pueda quedarse bloqueado.',
+        ],
         'kingdom_hall_address' => [
             'label' => 'Dirección del Salón del Reino',
             'placeholder' => 'Calle, número, código postal y ciudad',
@@ -61,6 +74,15 @@ return [
             'label' => 'Centro predeterminado de los mapas',
             'helper' => 'Dónde se abren los mapas mientras ningún territorio tiene un mapa, como "latitud, longitud".',
             'invalid' => 'Escribe las coordenadas como "latitud, longitud" (p. ej. 41.159063, -74.255188).',
+        ],
+        'sharing_enabled' => [
+            'label' => 'Compartir asignaciones',
+            'helper' => 'Quien puede abrir una asignación puede crear un enlace público a ella, para quienes no tienen una cuenta. Al desactivarlo se eliminan todos los enlaces existentes: dejan de funcionar, aunque se vuelva a activar.',
+            'enabled' => 'Activado',
+            'disabled' => 'Desactivado',
+            'confirm_heading' => '¿Desactivar el uso compartido?',
+            'confirm_description' => '{1} Al guardar se elimina el :count enlace compartido existente: quien lo tenga ya no podrá abrir la asignación, aunque se vuelva a activar el uso compartido.|[2,*] Al guardar se eliminan los :count enlaces compartidos existentes: quien los tenga ya no podrá abrir las asignaciones, aunque se vuelva a activar el uso compartido.',
+            'confirm' => 'Desactivar el uso compartido',
         ],
         'shared_pii' => [
             'hide' => 'Ocultar los datos personales',

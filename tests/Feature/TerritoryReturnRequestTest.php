@@ -285,6 +285,9 @@ describe('from the shared link', function () {
         Filament::setCurrentPanel('guest');
 
         $this->sharedUrl = $this->assignment->share();
+
+        // Sharing loads the settings: forget them, so that they follow the configuration set by each test
+        app()->forgetScopedInstances();
     });
 
     test('the return cannot be asked unless enabled', function () {
@@ -378,7 +381,7 @@ describe('on the Settings pages', function () {
             ->assertSee(__('settings.fields.guest_returns.label'))
             ->assertSchemaStateSet(['guest_returns' => $configured]);
 
-        expect(TerritorySettings::value('guest_returns'))->toBe($configured);
+        expect(app(TerritorySettings::class)->guest_returns)->toBe($configured);
     })->with([true, false]);
 
     test('the super administrators enable the return requests from the shared pages', function () {
@@ -389,6 +392,6 @@ describe('on the Settings pages', function () {
             ->call('save')
             ->assertHasNoFormErrors();
 
-        expect(TerritorySettings::value('guest_returns'))->toBeTrue();
+        expect(app(TerritorySettings::class)->guest_returns)->toBeTrue();
     });
 });

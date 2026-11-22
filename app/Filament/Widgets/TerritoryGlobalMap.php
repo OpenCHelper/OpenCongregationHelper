@@ -55,6 +55,16 @@ class TerritoryGlobalMap extends MapWidget
      */
     protected ?Collection $territories = null;
 
+    /**
+     * The territory settings, injected on every request.
+     */
+    protected TerritorySettings $territorySettings;
+
+    public function boot(TerritorySettings $territorySettings): void
+    {
+        $this->territorySettings = $territorySettings;
+    }
+
     public function mount(): void
     {
         $this->normalizeSelection();
@@ -81,7 +91,7 @@ class TerritoryGlobalMap extends MapWidget
     #[Override]
     protected function getMapCenter(): array
     {
-        return $this->evaluate($this->mapCenter) ?? TerritorySettings::value('map_default_center');
+        return $this->evaluate($this->mapCenter) ?? $this->territorySettings->map_default_center;
     }
 
     #[Override]
@@ -241,7 +251,7 @@ class TerritoryGlobalMap extends MapWidget
                 fn (Builder $query) => $query->withExists(['assignments as has_open_assignment' => $isAssignmentInProgress]),
             )
             ->when($this->mapMode === TerritoryMapMode::FREQUENCY, fn (Builder $query) => $query->withCount([
-                'assignments as recent_assignments_count' => fn (Builder $query) => $query->where('started_at', '>=', now()->subMonthsNoOverflow(TerritorySettings::value('frequency_period_months'))),
+                'assignments as recent_assignments_count' => fn (Builder $query) => $query->where('started_at', '>=', now()->subMonthsNoOverflow($this->territorySettings->frequency_period_months)),
             ]))
             ->when($this->mapMode === TerritoryMapMode::CAMPAIGN, fn (Builder $query) => $query->withExists([
                 'assignments as is_worked_in_campaign' => fn (Builder $query) => $query

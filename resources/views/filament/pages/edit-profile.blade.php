@@ -11,8 +11,14 @@
         @livewire(Laravel\Jetstream\Http\Livewire\UpdatePasswordForm::class)
     @endif
 
-    @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
-        @livewire(Laravel\Jetstream\Http\Livewire\TwoFactorAuthenticationForm::class)
+    @if (Filament\Facades\Filament::hasMultiFactorAuthentication())
+        <x-filament::section
+            aside
+            :heading="__('profile.two_factor_authentication.title')"
+            :description="__('profile.two_factor_authentication.description')"
+        >
+            {{ $this->multiFactorAuthentication }}
+        </x-filament::section>
     @endif
 
     @livewire(Laravel\Jetstream\Http\Livewire\LogoutOtherBrowserSessionsForm::class)

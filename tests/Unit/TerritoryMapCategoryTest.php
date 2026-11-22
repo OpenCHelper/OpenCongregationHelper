@@ -2,6 +2,11 @@
 
 use App\Enums\TerritoryMapCategory;
 use App\Enums\TerritoryMapMode;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+// The thresholds come from the settings, read from the database
+pest()->extend(TestCase::class)->use(RefreshDatabase::class);
 
 test('the current status depends on whether an assignment is in progress', function () {
     expect(TerritoryMapCategory::fromOpenAssignment(false))->toBe(TerritoryMapCategory::AVAILABLE)

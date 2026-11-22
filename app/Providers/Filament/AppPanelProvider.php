@@ -6,12 +6,15 @@ use AchyutN\FilamentLogViewer\FilamentLogViewer;
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Enums\NavigationGroup as EnumsNavigationGroup;
 use App\Filament\Pages\ApiTokens;
+use App\Filament\Pages\Auth\EmailVerificationPrompt;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\CreateTeam;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\EditTeam;
 use App\Filament\Pages\Logs;
+use App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired;
+use App\Http\Middleware\EnsureMultiFactorAuthenticationWhenRequired;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
 use App\Settings\GeneralSettings;
@@ -21,6 +24,7 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Detection\MobileDetect;
 use DiscoveryDesign\FilamentGaze\FilamentGazePlugin;
 use Filament\Actions\Action;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Enums\GlobalSearchPosition;
 use Filament\Events\TenantSet;
 use Filament\Facades\Filament;
@@ -87,12 +91,19 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->login(Login::class)
             ->passwordReset(resetAction: ResetPassword::class)
-            ->emailVerification(isRequired: false)
+            // Both are always required at the level of the routes, so that their middleware runs on every page: the
+            // middleware then reads the Security settings on each request (cached routes stay valid when they change).
+            ->emailVerification(EmailVerificationPrompt::class)
+            ->emailVerifiedMiddlewareName(EnsureEmailIsVerifiedWhenRequired::class)
+            ->multiFactorAuthentication([
+                AppAuthentication::make()->recoverable(),
+            ], isRequired: true)
+            ->multiFactorAuthenticationRequiredMiddlewareName(EnsureMultiFactorAuthenticationWhenRequired::class)
             ->viteTheme('resources/css/filament/app/theme.css')
             ->colors([
                 'primary' => Color::Gray,
             ])
-            ->brandLogo(fn (): ?string => filled($logo = GeneralSettings::value('logo')) ? Storage::disk('public')->url($logo) : null)
+            ->brandLogo(fn (GeneralSettings $settings): ?string => filled($logo = $settings->logo) ? Storage::disk('public')->url($logo) : null)
             ->brandLogoHeight('2rem')
             ->themeSwitcher(false)
             ->sidebarCollapsibleOnDesktop()
@@ -188,7 +199,7 @@ class AppPanelProvider extends PanelProvider
                     ->slideOverPreviews(),
                 FilamentUiSwitcherPlugin::make()
                     // The primary colour of the users who did not choose one in their UI preferences
-                    ->defaults(fn (): array => array_filter(['color' => GeneralSettings::value('primary_color')]))
+                    ->defaults(fn (): array => array_filter(['color' => app(GeneralSettings::class)->primary_color]))
                     ->iconRenderHook(self::UI_PREFERENCES_RENDER_HOOK)
                     ->withModeSwitcher(),
             ])

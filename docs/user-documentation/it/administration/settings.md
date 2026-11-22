@@ -25,8 +25,13 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 - **Centro predefinito delle mappe**: dove si aprono le mappe finché nessun territorio ha una mappa, come
   `latitudine, longitudine` (es. `41.159063, -74.255188`). In seguito le mappe si aprono sui territori.
 
-In **Privacy delle pagine condivise** scegli cosa mostra la pagina pubblica di
-un'[assegnazione condivisa](../assignments/sharing) a chiunque ne abbia il link:
+In **Privacy delle pagine condivise** scegli prima se le assegnazioni possono essere [condivise](../assignments/sharing)
+(**Condivisione delle assegnazioni**, attiva per impostazione predefinita). Se disattivata, **Condividi** non viene più
+offerto a nessuno e i link esistenti vengono eliminati al salvataggio: smettono di funzionare per sempre, anche se la
+condivisione viene riattivata. Se ce ne sono, ti viene chiesto prima di confermare. Le opzioni seguenti sono mostrate
+solo mentre la condivisione è attiva.
+
+Poi scegli cosa mostra la pagina pubblica di un'assegnazione condivisa a chiunque ne abbia il link:
 
 - **Nascondi i dati personali** (consigliato): solo il territorio, la sua mappa e le date;
 - **Mostra i dati personali**: anche il nome dell'assegnatario e le note del territorio, che possono descrivere dei
@@ -71,12 +76,35 @@ I giorni prima della fine da cui una campagna è **in scadenza** e **quasi scadu
 Gli stati sono elencati in ordine, con i colori dei badge delle campagne, e la barra sotto li disegna in scala mentre
 scrivi.
 
+## Sicurezza
+
+![Impostazioni di sicurezza](/docs/user-documentation/it/administration/assets/settings-security.webp)
+
+In **Requisiti degli account** scegli cosa deve fare ogni utente prima di usare l'applicazione. Entrambi sono
+disattivati in modo predefinito:
+
+- **Richiedi l'autenticazione a due fattori**: agli utenti che non l'hanno configurata viene chiesto di farlo, con
+  un'app di autenticazione, prima di poter aprire qualsiasi pagina. Se disattivata, ogni utente può comunque attivarla
+  dal proprio [profilo](../basics/profile#autenticazione-a-due-fattori);
+- **Richiedi la conferma dell'indirizzo email**: agli utenti con l'indirizzo email non confermato viene chiesto di
+  confermarlo, dal link ricevuto via email, prima di poter aprire qualsiasi pagina. L'email viene inviata quando
+  arrivano per la prima volta su quella pagina; da lì possono chiederne un'altra.
+
+Agli utenti che hanno già effettuato l'accesso viene chiesto alla pagina successiva. Con entrambi attivi, prima
+confermano l'email, poi configurano l'autenticazione a due fattori.
+
+> ⚠️ **Attenzione:** perché l'utente root (il primo utente creato durante l'installazione) non resti mai bloccato fuori,
+> un requisito si può attivare solo quando l'utente root lo soddisfa: configura prima l'autenticazione a due fattori o
+> conferma l'indirizzo email dell'utente root. Disattivare un requisito è sempre possibile. Inoltre all'utente root non
+> viene mai chiesto di confermare l'email, anche se la cambia in seguito, così che possa sempre raggiungere queste
+> impostazioni.
+
 Clicca **Salva** per applicarle: hanno effetto subito, per tutti gli utenti.
 
 ## Valori predefiniti
 
-Sotto ogni opzione, **Predefinito** mostra il suo valore prima che venga cambiato qui: per il centro delle mappe e i
-dati personali, il valore impostato nel file `.env` da chi ha installato l'applicazione (vedi la [Guida al
-setup](../setup)). Queste due opzioni continuano a seguire il file `.env` finché non vengono cambiate qui; per farne
-seguire di nuovo il file `.env` a una, reimpostala al suo valore predefinito e salva. Il nome, la lingua e il fuso
-orario dell'applicazione si impostano solo nel file `.env`.
+Sotto ogni opzione, **Predefinito** mostra il suo valore prima che venga cambiato qui: per il centro delle mappe, i
+dati personali e le richieste di riconsegna dalla pagina pubblica, il valore impostato nel file `.env` da chi ha
+installato l'applicazione (vedi la [Guida al setup](../setup)). Queste tre opzioni continuano a seguire il file `.env`
+finché non vengono cambiate qui; per farne seguire di nuovo il file `.env` a una, reimpostala al suo valore
+predefinito e salva. Il nome, la lingua e il fuso orario dell'applicazione si impostano solo nel file `.env`.

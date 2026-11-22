@@ -26,9 +26,12 @@ return [
         'general' => 'Generali',
         'territories' => 'Territori',
         'campaigns' => 'Campagne',
+        'security' => 'Sicurezza',
     ],
 
     'sections' => [
+        'account_requirements' => 'Requisiti degli account',
+        'account_requirements_description' => 'Cosa devono fare gli utenti prima di poter usare l\'app.',
         'campaign_expiry' => 'Scadenza delle campagne',
         'campaign_expiry_description' => 'Man mano che si avvicina la data di fine, una campagna attiva diventa in scadenza e poi quasi scaduta.',
         'appearance' => 'Aspetto',
@@ -45,6 +48,16 @@ return [
     ],
 
     'fields' => [
+        'require_two_factor' => [
+            'label' => 'Richiedi l\'autenticazione a due fattori',
+            'helper' => 'Gli utenti devono configurare l\'autenticazione a due fattori con un\'app di autenticazione prima di usare l\'app. Se disattivata, possono comunque attivarla dal proprio profilo.',
+            'root_required' => 'Configura prima l\'autenticazione a due fattori per l\'utente root, così che non possa restare bloccato fuori.',
+        ],
+        'require_email_verification' => [
+            'label' => 'Richiedi la conferma dell\'indirizzo email',
+            'helper' => 'Gli utenti devono confermare il proprio indirizzo email, dal link che ricevono, prima di usare l\'app.',
+            'root_required' => 'Conferma prima l\'indirizzo email dell\'utente root, così che non possa restare bloccato fuori.',
+        ],
         'kingdom_hall_address' => [
             'label' => 'Indirizzo della Sala del Regno',
             'placeholder' => 'Via, numero civico, CAP e città',
@@ -61,6 +74,15 @@ return [
             'label' => 'Centro predefinito delle mappe',
             'helper' => 'Dove si aprono le mappe finché nessun territorio ha una mappa, come "latitudine, longitudine".',
             'invalid' => 'Scrivi le coordinate come "latitudine, longitudine" (es. 41.159063, -74.255188).',
+        ],
+        'sharing_enabled' => [
+            'label' => 'Condivisione delle assegnazioni',
+            'helper' => 'Chi può aprire un\'assegnazione può crearne un link pubblico, per chi non ha un account. Disattivandola si eliminano tutti i link esistenti: smettono di funzionare, anche se viene riattivata.',
+            'enabled' => 'Attiva',
+            'disabled' => 'Disattiva',
+            'confirm_heading' => 'Disattivare la condivisione?',
+            'confirm_description' => '{1} Salvando si elimina il link condiviso esistente: chi lo ha non potrà più aprire l\'assegnazione, anche se la condivisione viene riattivata.|[2,*] Salvando si eliminano i :count link condivisi esistenti: chi li ha non potrà più aprire le assegnazioni, anche se la condivisione viene riattivata.',
+            'confirm' => 'Disattiva la condivisione',
         ],
         'shared_pii' => [
             'hide' => 'Nascondi i dati personali',

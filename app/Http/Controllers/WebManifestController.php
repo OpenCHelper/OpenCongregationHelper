@@ -26,7 +26,7 @@ class WebManifestController extends Controller
      */
     public static function themeColor(): string
     {
-        return GeneralSettings::value('primary_color') ?? self::THEME_COLOR;
+        return app(GeneralSettings::class)->primary_color ?? self::THEME_COLOR;
     }
 
     public function __invoke(): JsonResponse

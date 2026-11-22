@@ -25,8 +25,12 @@ role. The options are grouped by area, with one page each in the menu on the sid
 - **Default map centre**: where the maps open while no territory has a map yet, as `latitude, longitude` (e.g.
   `41.159063, -74.255188`). Afterwards the maps open on the territories.
 
-Under **Privacy of shared pages** you choose what the public page of a [shared assignment](../assignments/sharing) shows
-to anyone who has its link:
+Under **Privacy of shared pages** you first choose whether assignments can be [shared](../assignments/sharing) at all
+(**Share assignments**, enabled by default). When disabled, **Share** is no longer offered to anyone and the existing
+links are deleted when you save: they stop working for good, even if sharing is enabled again. If there are any, you are
+asked to confirm first. The options below are shown only while sharing is enabled.
+
+Then you choose what the public page of a shared assignment shows to anyone who has its link:
 
 - **Hide personal data** (recommended): only the territory, its map and the dates;
 - **Show personal data**: also the name of the assignee and the notes of the territory, which may describe
@@ -70,11 +74,34 @@ The days before its end from which a campaign is **expiring** and **almost expir
 statuses are listed in order, with the colours of the campaign badges, and the bar below draws them to scale while you
 type.
 
+## Security
+
+![Security settings](/docs/user-documentation/en/administration/assets/settings-security.webp)
+
+Under **Account requirements** you choose what every user must do before using the application. Both are disabled by
+default:
+
+- **Require two-factor authentication**: the users who have not set it up are asked to do it, with an authenticator
+  app, before they can open any page. When disabled, each user can still enable it from their
+  [profile](../basics/profile#two-factor-authentication);
+- **Require email confirmation**: the users whose email address is not confirmed are asked to confirm it, from the link
+  sent to them by email, before they can open any page. The email is sent when they first reach that page; they can
+  ask for it again from there.
+
+The users already logged in are asked at their next page. With both enabled, they first confirm their email, then set
+up two-factor authentication.
+
+> ⚠️ **Warning:** so that the root user (the first user created during the installation) can never be locked out, a
+> requirement can be enabled only once the root user meets it: set up two-factor authentication or confirm the email
+> address of the root user first. Disabling a requirement is always possible. The root user is also never asked to
+> confirm its email, even if it changes it later, so that it can always reach these settings.
+
 Click **Save changes** to apply them: they take effect immediately, for every user.
 
 ## Default values
 
-Under each option, **Default** shows its value before it is changed here: for the map centre and the personal data, the
-value set in `.env` by whoever installed the application (see the [Setup guide](../setup)). These two options keep
-following `.env` until they are changed here; to make one follow `.env` again, set it back to its default value and
-save. The name, language and timezone of the application are set only in `.env`.
+Under each option, **Default** shows its value before it is changed here: for the map centre, the personal data and the
+return requests from the public page, the value set in `.env` by whoever installed the application (see the [Setup
+guide](../setup)). These three options keep following `.env` until they are changed here; to make one follow `.env`
+again, set it back to its default value and save. The name, language and timezone of the application are set only in
+`.env`.

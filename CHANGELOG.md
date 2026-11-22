@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - Logo and default primary colour of the application, from the Settings pages
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
+- Setting to turn the sharing of assignments off: no link can then be created and the existing ones are deleted
+  ([#58](https://github.com/OpenCHelper/OpenCongregationHelper/pull/58)).
 - Address of the Kingdom Hall, on the General settings page
   ([#43](https://github.com/OpenCHelper/OpenCongregationHelper/pull/43)).
 - Days after which assignments are out for too long and the day and time of the weekly reminders, from the Settings
@@ -41,6 +43,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **User invitations**: users created with access, and virtual users without a password who are given access, receive
   an email with a link to choose their password (valid for 6 hours). Administrators no longer set passwords
   ([#52](https://github.com/OpenCHelper/OpenCongregationHelper/pull/52)).
+- **Two-factor authentication** with an authenticator app, which every user can enable from their profile
+  ([#60](https://github.com/OpenCHelper/OpenCongregationHelper/pull/60)).
+- **Security settings**: super administrators can require every user to set up two-factor authentication and to
+  confirm their email address before using the app; both are off by default and can be turned on only once the root
+  user meets them ([#60](https://github.com/OpenCHelper/OpenCongregationHelper/pull/60)).
 
 ### Changed
 
