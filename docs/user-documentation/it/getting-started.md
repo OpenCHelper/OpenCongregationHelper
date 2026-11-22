@@ -41,7 +41,9 @@ sta lavorando, da quando e quali sono stati percorsi. Funziona nel browser, anch
 
 ## Come posso contribuire?
 
-- Segnala bug o suggerisci nuove funzionalità tramite la sezione [Issues](https://github.com/OpenCHelper/OpenCongregationHelper/issues);
+- Segnala bug o suggerisci nuove funzionalità tramite la sezione [Issues](https://github.com/OpenCHelper/OpenCongregationHelper/issues):
+  per segnalare un bug dall'applicazione, apri il menu utente, clicca **Informazioni** e poi **Segnala un bug**, che
+  compila per te i dettagli della tua installazione;
 - Se possiedi le competenze di programmazione necessarie, puoi contribuire inviando delle [Pull Request](https://github.com/OpenCHelper/OpenCongregationHelper/pulls);
 - Aiuta a tradurre l'interfaccia utente in altre lingue o a migliorare quelle esistenti.
 

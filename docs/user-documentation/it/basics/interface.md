@@ -19,7 +19,8 @@ Tutte le pagine dell'applicazione condividono la stessa struttura.
 3. **Ricerca globale**: cerca contemporaneamente tra territori, zone e campagne (vedi sotto).
 4. **Lingua**: cambia la lingua dell'interfaccia (inglese, italiano o spagnolo).
 5. **Notifiche**: la campanella mostra il numero di notifiche non lette (vedi [Notifiche](notifications)).
-6. **Menu utente**: il tuo [profilo](profile), l'aspetto dell'interfaccia (vedi sotto) e il pulsante **Disconnetti**.
+6. **Menu utente**: il tuo [profilo](profile), l'aspetto dell'interfaccia (vedi sotto), **Informazioni** (la versione
+   dell'applicazione e il pulsante **Segnala un bug**) e il pulsante **Disconnetti**.
 7. **Documentazione**: apre questa guida. Sopra il pulsante è indicata la versione dell'applicazione.
 8. **Azioni della pagina**: i pulsanti principali della pagina corrente (es. **Nuovo**).
 
