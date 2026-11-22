@@ -7,6 +7,7 @@ use App\Enums\TerritoryMapCategory;
 use App\Events\StaleAssignmentDetected;
 use App\Filament\Clusters\Settings\Pages\ManageCampaignSettings;
 use App\Filament\Clusters\Settings\Pages\ManageGeneralSettings;
+use App\Filament\Clusters\Settings\Pages\ManageSecuritySettings;
 use App\Filament\Clusters\Settings\Pages\ManageTerritorySettings;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Filament\Widgets\TerritoryGlobalMap;
@@ -71,6 +72,7 @@ test('super administrators can open the settings pages', function (string $page)
     'general' => ManageGeneralSettings::class,
     'territories' => ManageTerritorySettings::class,
     'campaigns' => ManageCampaignSettings::class,
+    'security' => ManageSecuritySettings::class,
 ]);
 
 test('other users cannot open the settings pages', function (string $page) {
@@ -81,6 +83,7 @@ test('other users cannot open the settings pages', function (string $page) {
     'general' => ManageGeneralSettings::class,
     'territories' => ManageTerritorySettings::class,
     'campaigns' => ManageCampaignSettings::class,
+    'security' => ManageSecuritySettings::class,
 ]);
 
 test('the settings are listed in the administration navigation group', function () {
@@ -88,6 +91,7 @@ test('the settings are listed in the administration navigation group', function 
         ->and(ManageGeneralSettings::getCluster())->toBe(SettingsCluster::class)
         ->and(ManageTerritorySettings::getCluster())->toBe(SettingsCluster::class)
         ->and(ManageCampaignSettings::getCluster())->toBe(SettingsCluster::class)
+        ->and(ManageSecuritySettings::getCluster())->toBe(SettingsCluster::class)
         ->and(ManageGeneralSettings::getUrl())->toEndWith('/settings/general');
 });
 

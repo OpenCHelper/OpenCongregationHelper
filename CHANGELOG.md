@@ -40,6 +40,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `GUEST_ALLOW_RETURNING_ASSIGNMENT`) ([#56](https://github.com/OpenCHelper/OpenCongregationHelper/pull/56)).
 - **Publisher statistics** on the publisher's page: the zones and territories they take most often
   ([#55](https://github.com/OpenCHelper/OpenCongregationHelper/pull/55)).
+- **Two-factor authentication** with an authenticator app, which every user can enable from their profile
+  ([#60](https://github.com/OpenCHelper/OpenCongregationHelper/pull/60)).
+- **Security settings**: super administrators can require every user to set up two-factor authentication and to
+  confirm their email address before using the app; both are off by default and can be turned on only once the root
+  user meets them ([#60](https://github.com/OpenCHelper/OpenCongregationHelper/pull/60)).
 
 ### Changed
 

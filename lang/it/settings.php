@@ -26,9 +26,12 @@ return [
         'general' => 'Generali',
         'territories' => 'Territori',
         'campaigns' => 'Campagne',
+        'security' => 'Sicurezza',
     ],
 
     'sections' => [
+        'account_requirements' => 'Requisiti degli account',
+        'account_requirements_description' => 'Cosa devono fare gli utenti prima di poter usare l\'app.',
         'campaign_expiry' => 'Scadenza delle campagne',
         'campaign_expiry_description' => 'Man mano che si avvicina la data di fine, una campagna attiva diventa in scadenza e poi quasi scaduta.',
         'appearance' => 'Aspetto',
@@ -45,6 +48,16 @@ return [
     ],
 
     'fields' => [
+        'require_two_factor' => [
+            'label' => 'Richiedi l\'autenticazione a due fattori',
+            'helper' => 'Gli utenti devono configurare l\'autenticazione a due fattori con un\'app di autenticazione prima di usare l\'app. Se disattivata, possono comunque attivarla dal proprio profilo.',
+            'root_required' => 'Configura prima l\'autenticazione a due fattori per l\'utente root, così che non possa restare bloccato fuori.',
+        ],
+        'require_email_verification' => [
+            'label' => 'Richiedi la conferma dell\'indirizzo email',
+            'helper' => 'Gli utenti devono confermare il proprio indirizzo email, dal link che ricevono, prima di usare l\'app.',
+            'root_required' => 'Conferma prima l\'indirizzo email dell\'utente root, così che non possa restare bloccato fuori.',
+        ],
         'kingdom_hall_address' => [
             'label' => 'Indirizzo della Sala del Regno',
             'placeholder' => 'Via, numero civico, CAP e città',

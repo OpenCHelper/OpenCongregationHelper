@@ -74,6 +74,28 @@ The days before its end from which a campaign is **expiring** and **almost expir
 statuses are listed in order, with the colours of the campaign badges, and the bar below draws them to scale while you
 type.
 
+## Security
+
+![Security settings](/docs/user-documentation/en/administration/assets/settings-security.webp)
+
+Under **Account requirements** you choose what every user must do before using the application. Both are disabled by
+default:
+
+- **Require two-factor authentication**: the users who have not set it up are asked to do it, with an authenticator
+  app, before they can open any page. When disabled, each user can still enable it from their
+  [profile](../basics/profile#two-factor-authentication);
+- **Require email confirmation**: the users whose email address is not confirmed are asked to confirm it, from the link
+  sent to them by email, before they can open any page. The email is sent when they first reach that page; they can
+  ask for it again from there.
+
+The users already logged in are asked at their next page. With both enabled, they first confirm their email, then set
+up two-factor authentication.
+
+> ⚠️ **Warning:** so that the root user (the first user created during the installation) can never be locked out, a
+> requirement can be enabled only once the root user meets it: set up two-factor authentication or confirm the email
+> address of the root user first. Disabling a requirement is always possible. The root user is also never asked to
+> confirm its email, even if it changes it later, so that it can always reach these settings.
+
 Click **Save changes** to apply them: they take effect immediately, for every user.
 
 ## Default values

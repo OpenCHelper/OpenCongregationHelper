@@ -45,6 +45,20 @@ Vedi [Notifiche](notifications#notifiche-push).
 Inserisci la **Password attuale**, poi due volte la **Nuova password** e clicca **Salva**. Usa una password lunga e
 casuale.
 
+## Autenticazione a due fattori
+
+Proteggi il tuo account con un codice di un'app di autenticazione sul telefono (ad esempio Google Authenticator,
+Microsoft Authenticator o Authy), chiesto dopo la password a ogni accesso.
+
+1. In **App di autenticazione**, clicca **Configurazione**.
+2. Inquadra il codice QR con l'app di autenticazione (o inserisci la chiave mostrata sotto).
+3. Salva i **codici di recupero** in un posto sicuro: ognuno ti permette di accedere una volta se perdi il telefono.
+4. Inserisci il codice di 6 cifre mostrato dall'app per confermare.
+
+Da allora puoi **Rigenerare i codici di recupero** o **Disabilitare** l'autenticazione a due fattori dalla stessa
+sezione. Se gli amministratori la richiedono (vedi [Impostazioni](../administration/settings#sicurezza)), ti viene
+chiesto di configurarla prima di usare l'applicazione, e non puoi usarla senza.
+
 ## Sessioni del browser
 
 Elenca i dispositivi su cui hai effettuato l'accesso. Clicca **Disconnetti altre sessioni del browser** (e conferma con
