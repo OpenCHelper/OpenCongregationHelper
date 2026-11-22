@@ -54,6 +54,13 @@ class UserObserver
             Password::broker(ResetPassword::INVITATION_PASSWORD_BROKER)->deleteToken($user);
         }
 
+        // An invitation sent to the previous email must not work anymore: a new one is sent to the new email when needed
+        if ($user->wasChanged('email')) {
+            $previousUser = (clone $user)->setAttribute('email', $user->getOriginal('email'));
+
+            Password::broker(ResetPassword::INVITATION_PASSWORD_BROKER)->deleteToken($previousUser);
+        }
+
         // Handle role protection after update
         if ($user->isRootUserProtected()) {
             // If roles were modified, we need to check if we should revert them

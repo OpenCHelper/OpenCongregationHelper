@@ -256,6 +256,15 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return ! $this->can_login;
     }
 
+    /**
+     * Whether the user can log in but has not chosen their password yet, from the invitation sent when they were given
+     * access (see `UserInvitationNotification`).
+     */
+    public function isAwaitingInvitation(): bool
+    {
+        return $this->can_login && blank($this->password) && ! $this->isRootUser();
+    }
+
     public function assignments(): HasMany
     {
         return $this->hasMany(TerritoryAssignment::class, 'assignee_id');

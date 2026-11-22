@@ -27,7 +27,11 @@ trait SendsUserInvitation
     {
         unset($data['password']);
 
-        $this->shouldSendInvitation = UserResource::willSendInvitation((bool) ($data['can_login'] ?? false), $record);
+        $this->shouldSendInvitation = UserResource::willSendInvitation(
+            (bool) ($data['can_login'] ?? false),
+            $record,
+            isset($data['email']) ? (string) $data['email'] : null,
+        );
 
         return $data;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\Pages\Concerns\SendsUserInvitation;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\DeleteAction;
@@ -30,6 +31,7 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ResendInvitationAction::make(),
             DeleteAction::make()
                 ->visible(function () {
                     $record = $this->record;

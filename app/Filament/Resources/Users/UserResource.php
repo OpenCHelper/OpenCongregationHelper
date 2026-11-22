@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users;
 
 use App\Enums\DepartmentKey;
 use App\Enums\NavigationGroup;
+use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -80,12 +81,22 @@ class UserResource extends Resource
 
     /**
      * Whether saving the form sends the user an invitation to choose their password: when a user is given access and
-     * has no password yet, i.e. when creating one, or when allowing access to a user who never had it. Administrators
-     * never set passwords themselves.
+     * has no password yet, i.e. when creating one, or when allowing access to a user who never had it, and when the
+     * email of a user who has not chosen their password yet is corrected (the previous invitation went to the old
+     * address). Administrators never set passwords themselves.
      */
-    public static function willSendInvitation(bool $canLogin, ?User $record): bool
+    public static function willSendInvitation(bool $canLogin, ?User $record, ?string $email = null): bool
     {
-        return $canLogin && ($record === null || (! $record->can_login && blank($record->password)));
+        if (! $canLogin) {
+            return false;
+        }
+
+        if ($record === null) {
+            return true;
+        }
+
+        return blank($record->password)
+            && (! $record->can_login || ($email !== null && $email !== $record->email));
     }
 
     public static function form(Schema $schema): Schema
@@ -110,10 +121,11 @@ class UserResource extends Resource
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
                             ->disabled(fn (?User $record) => $record?->isRootUserProtected())
-                            ->helperText(fn (?User $record) => $record?->isRootUserProtected()
-                                ? __('profile.root_user_protection.generic_field_disabled')
-                                : null
-                            ),
+                            ->helperText(fn (?User $record) => match (true) {
+                                (bool) $record?->isRootUserProtected() => __('profile.root_user_protection.generic_field_disabled'),
+                                (bool) $record?->isAwaitingInvitation() => __('filament-resources.user.field_email_invitation_helper'),
+                                default => null,
+                            }),
                     ]),
                 Section::make(__('filament-resources.user.section_login_info'))
                     ->schema([
@@ -226,6 +238,7 @@ class UserResource extends Resource
                     ->falseLabel(__('filament-resources.user.filter_access_enabled_disabled')),
             ])
             ->recordActions([
+                ResendInvitationAction::make(),
                 Impersonate::make()
                     ->requiresConfirmation()
                     ->redirectTo('/'),
