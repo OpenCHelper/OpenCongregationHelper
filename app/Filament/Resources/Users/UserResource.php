@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users;
 
 use App\Enums\DepartmentKey;
 use App\Enums\NavigationGroup;
+use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -78,6 +79,26 @@ class UserResource extends Resource
         return $currentUser instanceof User && $currentUser->hasRole('super_admin');
     }
 
+    /**
+     * Whether saving the form sends the user an invitation to choose their password: when a user is given access and
+     * has no password yet, i.e. when creating one, or when allowing access to a user who never had it, and when the
+     * email of a user who has not chosen their password yet is corrected (the previous invitation went to the old
+     * address). Administrators never set passwords themselves.
+     */
+    public static function willSendInvitation(bool $canLogin, ?User $record, ?string $email = null): bool
+    {
+        if (! $canLogin) {
+            return false;
+        }
+
+        if ($record === null) {
+            return true;
+        }
+
+        return blank($record->password)
+            && (! $record->can_login || ($email !== null && $email !== $record->email));
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -100,35 +121,24 @@ class UserResource extends Resource
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
                             ->disabled(fn (?User $record) => $record?->isRootUserProtected())
-                            ->helperText(fn (?User $record) => $record?->isRootUserProtected()
-                                ? __('profile.root_user_protection.generic_field_disabled')
-                                : null
-                            ),
+                            ->helperText(fn (?User $record) => match (true) {
+                                (bool) $record?->isRootUserProtected() => __('profile.root_user_protection.generic_field_disabled'),
+                                (bool) $record?->isAwaitingInvitation() => __('filament-resources.user.field_email_invitation_helper'),
+                                default => null,
+                            }),
                     ]),
                 Section::make(__('filament-resources.user.section_login_info'))
                     ->schema([
                         Checkbox::make('can_login')
                             ->live()
                             ->label(__('filament-resources.user.field_can_login'))
-                            ->helperText(fn (?User $record) => $record?->isRootUserProtected()
-                                ? __('profile.root_user_protection.generic_field_disabled')
-                                : __('filament-resources.user.field_can_login_helper')
-                            )
+                            ->helperText(fn (Get $get, ?User $record) => match (true) {
+                                (bool) $record?->isRootUserProtected() => __('profile.root_user_protection.generic_field_disabled'),
+                                static::willSendInvitation((bool) $get('can_login'), $record) => __('filament-resources.user.field_can_login_helper')
+                                    .' '.__('filament-resources.user.field_can_login_invitation_helper'),
+                                default => __('filament-resources.user.field_can_login_helper'),
+                            })
                             ->disabled(fn (?User $record) => $record?->isRootUserProtected()),
-                        TextInput::make('password')
-                            ->label(__('filament-resources.user.field_password'))
-                            ->hiddenOn('view')
-                            ->disabled(fn (Get $get, ?User $record) => $get('can_login') === false || $record?->isRootUserProtected()
-                            )
-                            ->password()
-                            // Only required when creating a user: on edit, an empty value keeps the current password
-                            ->required(fn (string $operation, Get $get): bool => $operation === 'create' && (bool) $get('can_login'))
-                            ->dehydrated(fn (?string $state): bool => filled($state))
-                            ->maxLength(255)
-                            ->helperText(fn (?User $record) => $record?->isRootUserProtected()
-                                ? __('profile.root_user_protection.password_change_not_allowed')
-                                : null
-                            ),
                         Select::make('roles')
                             ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Get $get) => $get('can_login') === false)
@@ -228,6 +238,7 @@ class UserResource extends Resource
                     ->falseLabel(__('filament-resources.user.filter_access_enabled_disabled')),
             ])
             ->recordActions([
+                ResendInvitationAction::make(),
                 Impersonate::make()
                     ->requiresConfirmation()
                     ->redirectTo('/'),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\Users\Widgets\PublisherStatistics;
 use App\Models\User;
@@ -30,6 +31,7 @@ class ViewUser extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            ResendInvitationAction::make(),
             Impersonate::make()
                 ->record($this->getRecord())
                 ->redirectTo('/'),

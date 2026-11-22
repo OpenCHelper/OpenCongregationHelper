@@ -24,13 +24,26 @@ Non tutti quelli che lavorano i territori devono usare l'applicazione:
 
 1. Clicca **Nuovo**.
 2. Compila **Nome**, **Cognome** ed **Email**.
-3. Per permettere alla persona di accedere, spunta **Permetti accesso**, poi imposta una **Password** e i **Ruoli**.
-4. Clicca **Crea**.
+3. Per permettere alla persona di accedere, spunta **Permetti accesso** e scegli i **Ruoli**.
+4. Clicca **Crea**: se hai permesso l'accesso, la persona riceve un'email con un link per scegliere la sua password.
 
 ![Nuovo utente](/docs/user-documentation/it/administration/assets/user-create.webp)
 
-> ℹ️ **Nota:** solo i super amministratori possono assegnare i ruoli. Quando modifichi un utente, lascia vuota la
-> **Password** per mantenere quella attuale.
+> ℹ️ **Nota:** solo i super amministratori possono assegnare i ruoli.
+
+L'invito viene inviato anche quando spunti **Permetti accesso** per un utente virtuale che non ha mai avuto una
+password, e quando correggi l'**Email** di un utente che non ha ancora scelto la sua password: il link inviato al
+vecchio indirizzo smette di funzionare.
+
+Il link dell'invito scade dopo 6 ore. Finché la persona non ha scelto la sua password, puoi inviarle un nuovo link con
+**Invia di nuovo l'invito**, nella pagina dell'utente o nell'elenco degli utenti (il link precedente smette di
+funzionare). Un utente riceve al massimo un invito al minuto, in qualunque modo venga inviato: se entro quel minuto salvi
+modifiche che ne invierebbero uno (es. correggi di nuovo l'**Email**), vengono salvate ma non viene inviata nessuna
+email, e puoi usare **Invia di nuovo l'invito** un minuto dopo. La persona può anche riceverne uno nuovo con
+**Hai smarrito la password?** nella [pagina di accesso](../basics/logging-in).
+
+Gli amministratori non possono impostare o modificare la password di un utente: ognuno sceglie la sua, con l'invito, con
+**Hai smarrito la password?** nella pagina di accesso o dal suo profilo.
 
 ## Pagina dell'utente
 
