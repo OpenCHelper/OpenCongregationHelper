@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The offer to install the app is now a full-screen dialog that recommends it as the best way to use the app,
+  since it brings its notifications to the device.
+
 ## [1.0.0-alpha12] - 2026-11-22
 
 ### Added
