@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Users;
 
 use App\Enums\DepartmentKey;
 use App\Enums\NavigationGroup;
-use App\Enums\PasswordSetup;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -18,7 +17,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -39,7 +37,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Password;
 use Override;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use UnitEnum;
@@ -82,20 +79,13 @@ class UserResource extends Resource
     }
 
     /**
-     * Whether the administrator chooses how the password is set ({@see PasswordSetup}): when a user is given access and
-     * has no password yet, i.e. when creating one, or when allowing access to a user who never had it.
+     * Whether saving the form sends the user an invitation to choose their password: when a user is given access and
+     * has no password yet, i.e. when creating one, or when allowing access to a user who never had it. Administrators
+     * never set passwords themselves.
      */
-    public static function isChoosingPasswordSetup(Get $get, ?User $record): bool
+    public static function willSendInvitation(bool $canLogin, ?User $record): bool
     {
-        return (bool) $get('can_login')
-            && ($record === null || (! $record->can_login && blank($record->password)));
-    }
-
-    public static function getPasswordSetup(Get $get): ?PasswordSetup
-    {
-        $passwordSetup = $get('password_setup');
-
-        return $passwordSetup instanceof PasswordSetup ? $passwordSetup : PasswordSetup::tryFrom((string) $passwordSetup);
+        return $canLogin && ($record === null || (! $record->can_login && blank($record->password)));
     }
 
     public static function form(Schema $schema): Schema
@@ -130,38 +120,13 @@ class UserResource extends Resource
                         Checkbox::make('can_login')
                             ->live()
                             ->label(__('filament-resources.user.field_can_login'))
-                            ->helperText(fn (?User $record) => $record?->isRootUserProtected()
-                                ? __('profile.root_user_protection.generic_field_disabled')
-                                : __('filament-resources.user.field_can_login_helper')
-                            )
-                            ->disabled(fn (?User $record) => $record?->isRootUserProtected()),
-                        Radio::make('password_setup')
-                            ->label(__('filament-resources.user.field_password_setup'))
-                            ->options(PasswordSetup::class)
-                            ->afterStateHydrated(fn (Radio $component, $state) => $component->state($state ?? PasswordSetup::Invitation))
-                            ->visible(fn (Get $get, ?User $record): bool => static::isChoosingPasswordSetup($get, $record))
-                            ->required()
-                            ->live(),
-                        TextInput::make('password')
-                            ->label(__('filament-resources.user.field_password'))
-                            ->hiddenOn('view')
-                            ->visible(fn (Get $get, ?User $record): bool => ! static::isChoosingPasswordSetup($get, $record)
-                                || static::getPasswordSetup($get) === PasswordSetup::Password
-                            )
-                            ->disabled(fn (Get $get, ?User $record) => $get('can_login') === false || $record?->isRootUserProtected()
-                            )
-                            ->password()
-                            ->required(fn (Get $get, ?User $record): bool => static::isChoosingPasswordSetup($get, $record))
-                            // On edit, an empty value keeps the current password
-                            ->dehydrated(fn (?string $state): bool => filled($state))
-                            ->rule(Password::default())
-                            ->maxLength(255)
                             ->helperText(fn (Get $get, ?User $record) => match (true) {
-                                (bool) $record?->isRootUserProtected() => __('profile.root_user_protection.password_change_not_allowed'),
-                                static::isChoosingPasswordSetup($get, $record) => null,
-                                filled($record?->password) => __('filament-resources.user.field_password_edit_helper'),
-                                default => null,
-                            }),
+                                (bool) $record?->isRootUserProtected() => __('profile.root_user_protection.generic_field_disabled'),
+                                static::willSendInvitation((bool) $get('can_login'), $record) => __('filament-resources.user.field_can_login_helper')
+                                    .' '.__('filament-resources.user.field_can_login_invitation_helper'),
+                                default => __('filament-resources.user.field_can_login_helper'),
+                            })
+                            ->disabled(fn (?User $record) => $record?->isRootUserProtected()),
                         Select::make('roles')
                             ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Get $get) => $get('can_login') === false)

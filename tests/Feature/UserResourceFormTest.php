@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\PasswordSetup;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
@@ -14,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\URL;
+use Laravel\Jetstream\Http\Livewire\UpdatePasswordForm;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -41,30 +41,32 @@ beforeEach(function () {
     ]);
 });
 
-test('editing a user without typing a password keeps the current password', function () {
+test('administrators cannot set the password of a user', function (string $page) {
+    Notification::fake();
     $this->actingAs($this->manager);
 
-    Livewire::test(EditUser::class, ['record' => $this->user->id])
-        ->fillForm(['first_name' => 'Updated'])
-        ->call('save')
+    $test = $page === 'create'
+        ? Livewire::test(CreateUser::class)->fillForm([
+            'first_name' => 'New',
+            'last_name' => 'User',
+            'email' => 'new.user@example.com',
+            'can_login' => true,
+        ])
+        : Livewire::test(EditUser::class, ['record' => $this->user->id])->fillForm(['first_name' => 'Updated']);
+
+    $test->assertSchemaComponentDoesNotExist('password', 'form')
+        ->assertSchemaComponentDoesNotExist('password_setup', 'form')
+        // A value forced into the form state, bypassing the interface, is ignored too
+        ->set('data.password', 'forced-password')
+        ->call($page === 'create' ? 'create' : 'save')
         ->assertHasNoFormErrors();
 
-    $this->user->refresh();
-
-    expect($this->user->first_name)->toBe('Updated')
-        ->and(Hash::check('original-password', $this->user->password))->toBeTrue();
-});
-
-test('editing a user with a new password updates it', function () {
-    $this->actingAs($this->manager);
-
-    Livewire::test(EditUser::class, ['record' => $this->user->id])
-        ->fillForm(['password' => 'new-password'])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    expect(Hash::check('new-password', $this->user->refresh()->password))->toBeTrue();
-});
+    if ($page === 'create') {
+        expect(User::query()->where('email', 'new.user@example.com')->sole()->password)->toBeNull();
+    } else {
+        expect(Hash::check('original-password', $this->user->refresh()->password))->toBeTrue();
+    }
+})->with(['create', 'edit']);
 
 /**
  * Fill the form to create a user that can log in.
@@ -84,9 +86,14 @@ function createUserThatCanLogIn(array $data = []): Testable
         ->call('create');
 }
 
-test('creating a user that can log in sends them an invitation by default', function () {
+test('creating a user that can log in sends them an invitation', function () {
     Notification::fake();
     $this->actingAs($this->manager);
+
+    Livewire::test(CreateUser::class)
+        ->assertDontSee(__('filament-resources.user.field_can_login_invitation_helper'))
+        ->fillForm(['can_login' => true])
+        ->assertSee(__('filament-resources.user.field_can_login_invitation_helper'));
 
     createUserThatCanLogIn()
         ->assertHasNoFormErrors()
@@ -132,21 +139,25 @@ test('the invitation lets the user choose their password for 6 hours', function 
 ]);
 
 test('an unused invitation stops working once the password is set another way', function (string $setBy) {
-    $user = User::factory()->create(['can_login' => true, 'password' => null]);
+    $user = User::factory()->create(['can_login' => true, 'password' => $setBy === 'profile' ? 'password' : null]);
     $invitationToken = Password::broker('invitations')->createToken($user);
 
-    if ($setBy === 'user') {
+    if ($setBy === 'reset') {
         Livewire::test(ResetPassword::class, ['email' => $user->email, 'token' => Password::broker()->createToken($user)])
             ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
             ->call('resetPassword')
             ->assertNotified(__(PasswordBroker::PASSWORD_RESET));
     } else {
-        $this->actingAs($this->manager);
+        $this->actingAs($user);
 
-        Livewire::test(EditUser::class, ['record' => $user->id])
-            ->fillForm(['password' => 'chosen-password'])
-            ->call('save')
-            ->assertHasNoFormErrors();
+        Livewire::test(UpdatePasswordForm::class)
+            ->set('state', [
+                'current_password' => 'password',
+                'password' => 'chosen-password',
+                'password_confirmation' => 'chosen-password',
+            ])
+            ->call('updatePassword')
+            ->assertHasNoErrors();
 
         auth()->logout();
     }
@@ -161,8 +172,8 @@ test('an unused invitation stops working once the password is set another way', 
 
     expect(Hash::check('chosen-password', $user->refresh()->password))->toBeTrue();
 })->with([
-    'by the user with "Forgot password?"' => 'user',
-    'by an administrator' => 'administrator',
+    'with "Forgot password?"' => 'reset',
+    'from the profile page' => 'profile',
 ]);
 
 test('the password reset page talks about choosing a password only when opened from an invitation', function (bool $isInvitation, array $texts, string $notification) {
@@ -232,28 +243,6 @@ test('the invitation is sent in the preferred language of the user', function ()
         ->and($email->getHtmlBody())->toContain('Scegli la password')->toContain('6 ore');
 });
 
-test('administrators can set the password of a new user instead of sending an invitation', function () {
-    Notification::fake();
-    $this->actingAs($this->manager);
-
-    Livewire::test(CreateUser::class)
-        ->fillForm(['can_login' => true])
-        ->assertSchemaComponentHidden('password', 'form')
-        ->fillForm(['password_setup' => PasswordSetup::Password])
-        ->assertSchemaComponentVisible('password', 'form');
-
-    createUserThatCanLogIn(['password_setup' => PasswordSetup::Password, 'password' => null])
-        ->assertHasFormErrors(['password' => 'required']);
-
-    createUserThatCanLogIn(['password_setup' => PasswordSetup::Password, 'password' => 'chosen-password'])
-        ->assertHasNoFormErrors();
-
-    $user = User::query()->where('email', 'new.user@example.com')->sole();
-
-    expect(Hash::check('chosen-password', $user->password))->toBeTrue();
-    Notification::assertNothingSent();
-});
-
 test('creating a virtual user sends no invitation', function () {
     Notification::fake();
     $this->actingAs($this->manager);
@@ -265,7 +254,6 @@ test('creating a virtual user sends no invitation', function () {
             'email' => 'new.user@example.com',
             'can_login' => false,
         ])
-        ->assertSchemaComponentHidden('password_setup', 'form')
         ->call('create')
         ->assertHasNoFormErrors();
 
@@ -280,10 +268,9 @@ test('allowing access to a virtual user without a password sends them an invitat
     $virtualUser = User::factory()->create(['can_login' => false, 'password' => null]);
 
     Livewire::test(EditUser::class, ['record' => $virtualUser->id])
-        ->assertSchemaComponentHidden('password_setup', 'form')
+        ->assertDontSee(__('filament-resources.user.field_can_login_invitation_helper'))
         ->fillForm(['can_login' => true])
-        ->assertSchemaComponentVisible('password_setup', 'form')
-        ->assertSchemaComponentHidden('password', 'form')
+        ->assertSee(__('filament-resources.user.field_can_login_invitation_helper'))
         ->call('save')
         ->assertHasNoFormErrors()
         ->assertNotified(__('filament-resources.user.invitation_sent', ['email' => $virtualUser->email]));
@@ -301,7 +288,7 @@ test('editing a user who already has a password sends no invitation', function (
     foreach ([$this->user, $formerUser] as $user) {
         Livewire::test(EditUser::class, ['record' => $user->id])
             ->fillForm(['can_login' => true])
-            ->assertSchemaComponentHidden('password_setup', 'form')
+            ->assertDontSee(__('filament-resources.user.field_can_login_invitation_helper'))
             ->call('save')
             ->assertHasNoFormErrors();
 
@@ -309,17 +296,6 @@ test('editing a user who already has a password sends no invitation', function (
     }
 
     Notification::assertNothingSent();
-});
-
-test('passwords set by administrators follow the password policy', function () {
-    $this->actingAs($this->manager);
-
-    Livewire::test(EditUser::class, ['record' => $this->user->id])
-        ->fillForm(['password' => 'short'])
-        ->call('save')
-        ->assertHasFormErrors(['password']);
-
-    expect(Hash::check('original-password', $this->user->refresh()->password))->toBeTrue();
 });
 
 test('a user cannot be created with the email of another user', function () {

@@ -48,7 +48,7 @@ class UserObserver
             $user->pushSubscriptions()->delete();
         }
 
-        // Once the password is set another way ("Forgot password?", an administrator...), an unused invitation must
+        // Once the password is set another way ("Forgot password?", the profile page...), an unused invitation must
         // not be able to replace it
         if ($user->wasChanged('password')) {
             Password::broker(ResetPassword::INVITATION_PASSWORD_BROKER)->deleteToken($user);

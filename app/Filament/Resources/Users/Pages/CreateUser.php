@@ -18,11 +18,11 @@ class CreateUser extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        return $this->pullPasswordSetup($data);
+        return $this->prepareInvitation($data, null);
     }
 
     protected function afterCreate(): void
     {
-        $this->sendInvitationIfChosen();
+        $this->sendInvitationIfNeeded();
     }
 }

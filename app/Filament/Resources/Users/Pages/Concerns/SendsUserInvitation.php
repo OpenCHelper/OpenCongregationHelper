@@ -2,15 +2,14 @@
 
 namespace App\Filament\Resources\Users\Pages\Concerns;
 
-use App\Enums\PasswordSetup;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Notifications\UserInvitationNotification;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Arr;
 
 /**
- * Sends the invitation to choose their password to a user given access from the user form, when the administrator
- * chose {@see PasswordSetup::Invitation} (see `UserResource::isChoosingPasswordSetup()`).
+ * Sends the invitation to choose their password to a user given access from the user form (see
+ * {@see UserResource::willSendInvitation()}). Administrators never set passwords: users choose their own.
  *
  * @property User $record
  */
@@ -19,26 +18,21 @@ trait SendsUserInvitation
     protected bool $shouldSendInvitation = false;
 
     /**
-     * Remove the password setup choice from the data saved on the user, and remember whether to send the invitation.
+     * Remember whether to send the invitation, and drop any password from the data saved on the user.
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
-    protected function pullPasswordSetup(array $data): array
+    protected function prepareInvitation(array $data, ?User $record): array
     {
-        $passwordSetup = Arr::pull($data, 'password_setup');
+        unset($data['password']);
 
-        $this->shouldSendInvitation = ($passwordSetup instanceof PasswordSetup ? $passwordSetup : PasswordSetup::tryFrom((string) $passwordSetup))
-            === PasswordSetup::Invitation;
-
-        if ($this->shouldSendInvitation) {
-            unset($data['password']);
-        }
+        $this->shouldSendInvitation = UserResource::willSendInvitation((bool) ($data['can_login'] ?? false), $record);
 
         return $data;
     }
 
-    protected function sendInvitationIfChosen(): void
+    protected function sendInvitationIfNeeded(): void
     {
         if (! $this->shouldSendInvitation) {
             return;

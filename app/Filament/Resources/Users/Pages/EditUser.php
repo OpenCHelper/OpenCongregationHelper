@@ -19,12 +19,12 @@ class EditUser extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        return $this->pullPasswordSetup($data);
+        return $this->prepareInvitation($data, $this->record);
     }
 
     protected function afterSave(): void
     {
-        $this->sendInvitationIfChosen();
+        $this->sendInvitationIfNeeded();
     }
 
     protected function getHeaderActions(): array
