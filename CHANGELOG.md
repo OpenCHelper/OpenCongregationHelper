@@ -41,8 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Publisher statistics** on the publisher's page: the zones and territories they take most often
   ([#55](https://github.com/OpenCHelper/OpenCongregationHelper/pull/55)).
 - **User invitations**: users created with access, and virtual users without a password who are given access, receive
-  an email with a link to choose their password (valid for 6 hours), which also confirms their email address.
-  Administrators no longer set passwords ([#52](https://github.com/OpenCHelper/OpenCongregationHelper/pull/52)).
+  an email with a link to choose their password (valid for 6 hours), which also confirms their email address. It is
+  sent again to the new address when the email of a user who has not chosen their password yet is corrected, and
+  "Resend invitation" sends a new one. Administrators no longer set passwords
+  ([#52](https://github.com/OpenCHelper/OpenCongregationHelper/pull/52)).
 - **Two-factor authentication** with an authenticator app, which every user can enable from their profile
   ([#60](https://github.com/OpenCHelper/OpenCongregationHelper/pull/60)).
 - **Security settings**: super administrators can require every user to set up two-factor authentication and to

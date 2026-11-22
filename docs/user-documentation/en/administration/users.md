@@ -31,9 +31,13 @@ Not everybody who works the territories needs to use the application:
 
 > ℹ️ **Note:** only super administrators can assign roles.
 
-The invitation link expires after 6 hours: after that, the person can get a new link with **Forgot password?** on the
-[login page](../basics/logging-in). The invitation is also sent when you tick **Allow access** for a virtual user who
-never had a password.
+The invitation is also sent when you tick **Allow access** for a virtual user who never had a password, and when you
+correct the **Email** of a user who has not chosen their password yet: the link sent to the old address stops working.
+
+The invitation link expires after 6 hours. Until the person has chosen their password, you can send a new link with
+**Resend invitation**, on the user's page or in the users list (the previous link stops working, and you must wait a
+minute between two invitations). The person can also get a new link with **Forgot password?** on the
+[login page](../basics/logging-in).
 
 Administrators cannot set or change the password of a user: people choose their own, with the invitation, with
 **Forgot password?** on the login page, or from their profile.

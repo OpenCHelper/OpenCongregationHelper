@@ -31,9 +31,14 @@ Non tutti quelli che lavorano i territori devono usare l'applicazione:
 
 > ℹ️ **Nota:** solo i super amministratori possono assegnare i ruoli.
 
-Il link dell'invito scade dopo 6 ore: dopo, la persona può riceverne uno nuovo con **Password dimenticata?** nella
-[pagina di accesso](../basics/logging-in). L'invito viene inviato anche quando spunti **Permetti accesso** per un utente
-virtuale che non ha mai avuto una password.
+L'invito viene inviato anche quando spunti **Permetti accesso** per un utente virtuale che non ha mai avuto una
+password, e quando correggi l'**Email** di un utente che non ha ancora scelto la sua password: il link inviato al
+vecchio indirizzo smette di funzionare.
+
+Il link dell'invito scade dopo 6 ore. Finché la persona non ha scelto la sua password, puoi inviarle un nuovo link con
+**Invia di nuovo l'invito**, nella pagina dell'utente o nell'elenco degli utenti (il link precedente smette di
+funzionare, e tra due inviti devi attendere un minuto). La persona può anche riceverne uno nuovo con
+**Password dimenticata?** nella [pagina di accesso](../basics/logging-in).
 
 Gli amministratori non possono impostare o modificare la password di un utente: ognuno sceglie la sua, con l'invito, con
 **Password dimenticata?** nella pagina di accesso o dal suo profilo.
