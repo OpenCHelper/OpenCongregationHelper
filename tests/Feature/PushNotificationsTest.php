@@ -16,6 +16,7 @@ use App\Notifications\TerritoryReturnedNotification;
 use App\Notifications\TestPushNotification;
 use App\Support\WebPush;
 use Filament\Facades\Filament;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Notifications\Notification as BaseNotification;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -240,8 +241,16 @@ test('the dialog cannot enable push notifications while impersonating', function
 });
 
 test('the push subscription script is loaded in the panels', function () {
-    expect(public_path('js/app/push-subscription.js'))->toBeFile()
-        ->and(file_get_contents(resource_path('js/push-subscription.js')))
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->actingAs($this->user)
+        ->get(EditProfile::getUrl())
+        ->assertOk()
+        ->assertSee(FilamentAsset::getScriptSrc('push-subscription'), escape: false);
+
+    expect(file_get_contents(resource_path('js/push-subscription.js')))
         ->toContain('window.pushSubscription = (publicKey) =>')
         ->toContain('this.$wire.subscribe(');
 });
