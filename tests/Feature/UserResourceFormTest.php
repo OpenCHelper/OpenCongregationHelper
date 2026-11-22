@@ -1,10 +1,12 @@
 <?php
 
 use App\Filament\Pages\Auth\ResetPassword;
+use App\Filament\Pages\EditProfile;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\User;
 use App\Notifications\UserInvitationNotification;
+use App\Settings\SecuritySettings;
 use Filament\Facades\Filament;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Http\Request;
@@ -349,4 +351,53 @@ test('super administrators can assign roles', function () {
         ->assertHasNoFormErrors();
 
     expect($this->user->refresh()->hasRole('editor'))->toBeTrue();
+});
+
+test('an invited user can choose their password and set up two-factor authentication when the security settings require them', function () {
+    Notification::fake();
+
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $settings = app(SecuritySettings::class);
+    $settings->require_two_factor = true;
+    $settings->require_email_verification = true;
+    $settings->save();
+
+    $this->actingAs($this->manager);
+    createUserThatCanLogIn()->assertHasNoFormErrors();
+    auth()->logout();
+
+    $user = User::query()->where('email', 'new.user@example.com')->sole();
+    $notification = Notification::sent($user, UserInvitationNotification::class)->sole();
+
+    expect($user->hasVerifiedEmail())->toBeFalse();
+
+    // The invitation page is open to guests, whatever the requirements
+    $this->get($notification->toMail($user)->actionUrl)->assertOk();
+
+    Livewire::withQueryParams(['invitation' => 1])
+        ->test(ResetPassword::class, ['email' => $user->email, 'token' => $notification->token])
+        ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+        ->call('resetPassword')
+        ->assertNotified(__(PasswordBroker::PASSWORD_RESET));
+
+    // The invitation proved that the email belongs to the user, so only the two-factor set-up is left
+    expect($user->refresh()->hasVerifiedEmail())->toBeTrue();
+
+    $this->actingAs($user)
+        ->get(EditProfile::getUrl())
+        ->assertRedirect(Filament::getPanel('app')->getSetUpRequiredMultiFactorAuthenticationUrl());
+});
+
+test('a normal password reset does not confirm the email', function () {
+    $user = User::factory()->create(['can_login' => true, 'email_verified_at' => null]);
+
+    Livewire::test(ResetPassword::class, ['email' => $user->email, 'token' => Password::broker()->createToken($user)])
+        ->fillForm(['password' => 'chosen-password', 'passwordConfirmation' => 'chosen-password'])
+        ->call('resetPassword')
+        ->assertNotified(__(PasswordBroker::PASSWORD_RESET));
+
+    expect($user->refresh()->hasVerifiedEmail())->toBeFalse();
 });

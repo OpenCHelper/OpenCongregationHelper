@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse;
 use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
@@ -53,7 +54,19 @@ class ResetPassword extends BaseResetPassword
             $translator->addLines([Password::PASSWORD_RESET => __('filament-pages.invitation.notification')], app()->getLocale());
         }
 
-        return parent::resetPassword();
+        $response = parent::resetPassword();
+
+        // The invitation was sent to the email of the user, so choosing the password from it confirms the address too:
+        // no further confirmation email is needed when the Security settings require one
+        if ($this->isInvitation && $response !== null) {
+            $user = User::query()->where('email', $this->email)->first();
+
+            if ($user !== null && ! $user->hasVerifiedEmail()) {
+                $user->markEmailAsVerified();
+            }
+        }
+
+        return $response;
     }
 
     public function getTitle(): string|Htmlable
