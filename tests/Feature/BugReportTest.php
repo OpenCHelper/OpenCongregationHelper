@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\BugReport;
+use Composer\InstalledVersions;
 use Filament\Facades\Filament;
 use Filament\Livewire\Topbar;
 use Illuminate\Http\Request;
@@ -39,6 +40,7 @@ test('the bug report link opens the issue form prefilled with the details of the
             'instance' => 'https://congregation.example.org:8443',
             'app_environment' => 'staging',
             'version' => '9.8.7',
+            'stack' => 'PHP '.PHP_VERSION.', Laravel '.app()->version().', Filament '.ltrim((string) InstalledVersions::getPrettyVersion('filament/filament'), 'v'),
             'browser' => 'Mozilla/5.0 (Test)',
         ]);
 });
@@ -54,6 +56,12 @@ test('the browser is left empty when unknown', function () {
     parse_str((string) parse_url(BugReport::url(bugReportRequest(userAgent: '')), PHP_URL_QUERY), $query);
 
     expect($query)->not->toHaveKey('browser');
+});
+
+test('the versions of the stack are reported also in production', function () {
+    app()->detectEnvironment(fn (): string => 'production');
+
+    expect(BugReport::stack())->toMatch('/^PHP \\d+\\.\\d+\\.\\d+, Laravel \\d+\\.\\d+\\.\\d+, Filament \\d+\\.\\d+\\.\\d+/');
 });
 
 test('the version includes the build outside production', function () {

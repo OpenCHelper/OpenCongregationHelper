@@ -17,19 +17,25 @@ class AppVersions
      */
     public static function all(): array
     {
-        $versions = [];
+        $versions = app()->isProduction() ? [] : self::stack();
 
-        if (! app()->isProduction()) {
-            $versions = [
-                'Laravel' => (string) InstalledVersions::getPrettyVersion('laravel/framework'),
-                'Filament' => (string) InstalledVersions::getPrettyVersion('filament/filament'),
-                'PHP' => PHP_VERSION,
-            ];
-        }
+        $versions['App'] = ltrim((string) config('app.version'), 'v');
 
-        $versions['App'] = (string) config('app.version');
+        return $versions;
+    }
 
-        return array_map(fn (string $version): string => ltrim($version, 'v'), $versions);
+    /**
+     * Versions of the stack the app runs on.
+     *
+     * @return array{Laravel: string, Filament: string, PHP: string}
+     */
+    public static function stack(): array
+    {
+        return array_map(fn (string $version): string => ltrim($version, 'v'), [
+            'Laravel' => (string) InstalledVersions::getPrettyVersion('laravel/framework'),
+            'Filament' => (string) InstalledVersions::getPrettyVersion('filament/filament'),
+            'PHP' => PHP_VERSION,
+        ]);
     }
 
     /**

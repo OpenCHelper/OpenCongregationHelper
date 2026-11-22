@@ -15,8 +15,8 @@ class BugReport
     public const TEMPLATE = '3-bug_report.yml';
 
     /**
-     * URL of a new bug report, with the address and environment of the installation, the version of the app and the
-     * browser of the request already filled in.
+     * URL of a new bug report, with the address and environment of the installation, the versions of the app and of
+     * its stack and the browser of the request already filled in.
      */
     public static function url(Request $request): string
     {
@@ -25,6 +25,7 @@ class BugReport
             'instance' => $request->getSchemeAndHttpHost(),
             'app_environment' => app()->environment(),
             'version' => self::version(),
+            'stack' => self::stack(),
             'browser' => $request->userAgent(),
         ], filled(...));
 
@@ -44,5 +45,15 @@ class BugReport
         }
 
         return $version.' ('.($build['branch'] ?? '').'#'.substr($build['commit'], 0, 7).')';
+    }
+
+    /**
+     * Versions of PHP, Laravel and Filament, also in production.
+     */
+    public static function stack(): string
+    {
+        $stack = AppVersions::stack();
+
+        return implode(', ', array_map(fn (string $name): string => $name.' '.$stack[$name], ['PHP', 'Laravel', 'Filament']));
     }
 }

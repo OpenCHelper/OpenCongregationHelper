@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Report a bug** button in the **About** modal: it opens the bug report form on GitHub prefilled with the address
-  and environment of the installation, the version of the app and the browser
+  and environment of the installation, the versions of the app, PHP, Laravel and Filament and the browser
   ([#61](https://github.com/OpenCHelper/OpenCongregationHelper/pull/61)).
 - **Territory coverage** on the dashboard: the percentage of territories worked at least once in the last 6, 12 or
   24 months (also excluding campaigns) and the 5 territories never worked or not worked for the longest time; the
