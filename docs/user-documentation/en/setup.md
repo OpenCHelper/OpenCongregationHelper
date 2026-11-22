@@ -56,6 +56,8 @@ INITIAL_ROOT_PASSWORD="password"
 
 `MAP_DEFAULT_CENTER`, `ENABLE_SHARED_PII` and `GUEST_ALLOW_RETURNING_ASSIGNMENT` are only the defaults: the super
 administrators can change them from the [Settings](administration/settings) pages, without editing `.env`.
+If the settings cache is enabled (`SETTINGS_CACHE_ENABLED=true`), run `php artisan settings:clear-cache` after
+changing them in `.env`, or the settings not changed from those pages keep the previous value.
 
 | Variable | Description |
 |----------|-------------|
