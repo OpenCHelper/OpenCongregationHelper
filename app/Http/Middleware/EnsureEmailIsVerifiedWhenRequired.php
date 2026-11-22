@@ -17,12 +17,14 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class EnsureEmailIsVerifiedWhenRequired extends EnsureEmailIsVerified
 {
+    public function __construct(protected SecuritySettings $settings) {}
+
     /**
      * @param  Closure(Request): (Response)  $next
      */
     public function handle($request, Closure $next, $redirectToRoute = null): mixed
     {
-        if (! SecuritySettings::value('require_email_verification')) {
+        if (! $this->settings->require_email_verification) {
             return $next($request);
         }
 

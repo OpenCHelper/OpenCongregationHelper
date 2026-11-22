@@ -16,9 +16,11 @@ use Illuminate\Http\Request;
  */
 class EnsureMultiFactorAuthenticationWhenRequired extends EnsureMultiFactorAuthenticationIsEnabled
 {
+    public function __construct(protected SecuritySettings $settings) {}
+
     public function handle(Request $request, Closure $next): mixed
     {
-        if (! SecuritySettings::value('require_two_factor')) {
+        if (! $this->settings->require_two_factor) {
             return $next($request);
         }
 

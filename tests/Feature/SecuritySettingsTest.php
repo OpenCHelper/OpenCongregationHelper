@@ -31,8 +31,9 @@ function setSecuritySettings(bool $requireTwoFactor = false, bool $requireEmailV
 }
 
 test('two-factor authentication and email confirmation are not required by default', function () {
-    expect(SecuritySettings::value('require_two_factor'))->toBeFalse()
-        ->and(SecuritySettings::value('require_email_verification'))->toBeFalse();
+    expect(app(SecuritySettings::class))
+        ->require_two_factor->toBeFalse()
+        ->require_email_verification->toBeFalse();
 });
 
 /**
