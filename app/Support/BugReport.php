@@ -48,12 +48,12 @@ class BugReport
     }
 
     /**
-     * Versions of PHP, Laravel and Filament, also in production.
+     * Versions of PHP, Laravel and Filament (also in production), as a Markdown list with the versions as code.
      */
     public static function stack(): string
     {
         $stack = AppVersions::stack();
 
-        return implode(', ', array_map(fn (string $name): string => $name.' '.$stack[$name], ['PHP', 'Laravel', 'Filament']));
+        return implode("\n", array_map(fn (string $name): string => "- {$name}: `{$stack[$name]}`", ['PHP', 'Laravel', 'Filament']));
     }
 }

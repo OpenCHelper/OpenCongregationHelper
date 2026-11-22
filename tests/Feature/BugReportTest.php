@@ -40,7 +40,7 @@ test('the bug report link opens the issue form prefilled with the details of the
             'instance' => 'https://congregation.example.org:8443',
             'app_environment' => 'staging',
             'version' => '9.8.7',
-            'stack' => 'PHP '.PHP_VERSION.', Laravel '.app()->version().', Filament '.ltrim((string) InstalledVersions::getPrettyVersion('filament/filament'), 'v'),
+            'stack' => '- PHP: `'.PHP_VERSION."`\n- Laravel: `".app()->version()."`\n- Filament: `".ltrim((string) InstalledVersions::getPrettyVersion('filament/filament'), 'v').'`',
             'browser' => 'Mozilla/5.0 (Test)',
         ]);
 });
@@ -61,7 +61,11 @@ test('the browser is left empty when unknown', function () {
 test('the versions of the stack are reported also in production', function () {
     app()->detectEnvironment(fn (): string => 'production');
 
-    expect(BugReport::stack())->toMatch('/^PHP \\d+\\.\\d+\\.\\d+, Laravel \\d+\\.\\d+\\.\\d+, Filament \\d+\\.\\d+\\.\\d+/');
+    expect(explode("\n", BugReport::stack()))->sequence(
+        fn ($line) => $line->toMatch('/^- PHP: `\\d+\\.\\d+\\.\\d+`$/'),
+        fn ($line) => $line->toMatch('/^- Laravel: `\\d+\\.\\d+\\.\\d+`$/'),
+        fn ($line) => $line->toMatch('/^- Filament: `\\d+\\.\\d+\\.\\d+`$/'),
+    );
 });
 
 test('the version includes the build outside production', function () {

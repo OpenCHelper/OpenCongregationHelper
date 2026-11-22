@@ -58,12 +58,15 @@ body:
       label: Version
       description: The version of the app in use, if you know it.
       placeholder: "E.g. v1.0.0-alpha11"
-  - type: input
+  - type: textarea
     id: stack
     attributes:
       label: PHP, Laravel and Filament versions
       description: The versions the app runs on, if you know them.
-      placeholder: "E.g. PHP 8.3.6, Laravel 12.72.0, Filament 5.11.3"
+      placeholder: |
+        - PHP: `8.3.6`
+        - Laravel: `12.72.0`
+        - Filament: `5.11.3`
   - type: input
     id: browser
     attributes:
