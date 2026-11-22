@@ -91,6 +91,7 @@ test('users with an unverified email can use the app when the email confirmation
 
 test('users with an unverified email must confirm it when the email confirmation is required', function () {
     setSecuritySettings(requireEmailVerification: true);
+    createRootUser(); // So that the users below are not the root user, never blocked
 
     $this->actingAs(User::factory()->create(['can_login' => true, 'email_verified_at' => null]))
         ->get(EditProfile::getUrl())
@@ -195,4 +196,16 @@ test('the requirements can always be turned off, whatever the root user has', fu
     expect(app(SecuritySettings::class)->refresh())
         ->require_two_factor->toBeFalse()
         ->require_email_verification->toBeFalse();
+});
+
+test('the root user is never blocked by the email confirmation requirement', function () {
+    setSecuritySettings(requireEmailVerification: true);
+
+    // E.g. after changing its email while the requirement was already on
+    $root = createRootUser(withVerifiedEmail: false);
+    $root->assignRole(Role::create(['name' => 'super_admin', 'guard_name' => 'web']));
+
+    $this->actingAs($root)
+        ->get(ManageSecuritySettings::getUrl())
+        ->assertOk();
 });

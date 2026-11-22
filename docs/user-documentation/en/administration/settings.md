@@ -93,7 +93,8 @@ up two-factor authentication.
 
 > ⚠️ **Warning:** so that the root user (the first user created during the installation) can never be locked out, a
 > requirement can be enabled only once the root user meets it: set up two-factor authentication or confirm the email
-> address of the root user first. Disabling a requirement is always possible.
+> address of the root user first. Disabling a requirement is always possible. The root user is also never asked to
+> confirm its email, even if it changes it later, so that it can always reach these settings.
 
 Click **Save changes** to apply them: they take effect immediately, for every user.
 

@@ -93,9 +93,11 @@ disattivati in modo predefinito:
 Agli utenti che hanno già effettuato l'accesso viene chiesto alla pagina successiva. Con entrambi attivi, prima
 confermano l'email, poi configurano l'autenticazione a due fattori.
 
-> ⚠️ **Attenzione:** perché l'utente root (il primo utente creato durante l'installazione) non resti mai bloccato
-> fuori, un requisito si può attivare solo quando l'utente root lo soddisfa: configura prima l'autenticazione a due
-> fattori o conferma l'indirizzo email dell'utente root. Disattivare un requisito è sempre possibile.
+> ⚠️ **Attenzione:** perché l'utente root (il primo utente creato durante l'installazione) non resti mai bloccato fuori,
+> un requisito si può attivare solo quando l'utente root lo soddisfa: configura prima l'autenticazione a due fattori o
+> conferma l'indirizzo email dell'utente root. Disattivare un requisito è sempre possibile. Inoltre all'utente root non
+> viene mai chiesto di confermare l'email, anche se la cambia in seguito, così che possa sempre raggiungere queste
+> impostazioni.
 
 Clicca **Salva** per applicarle: hanno effetto subito, per tutti gli utenti.
 
