@@ -50,11 +50,11 @@ enum CampaignStatus: string
         }
 
         $daysRemaining = now()->diffInDays($validUntil);
-        $thresholds = CampaignSettings::values('almost_expired_days', 'expiring_days');
+        $settings = app(CampaignSettings::class);
 
         return match (true) {
-            $daysRemaining <= $thresholds['almost_expired_days'] => self::ALMOST_EXPIRED,
-            $daysRemaining <= $thresholds['expiring_days'] => self::IS_EXPIRING,
+            $daysRemaining <= $settings->almost_expired_days => self::ALMOST_EXPIRED,
+            $daysRemaining <= $settings->expiring_days => self::IS_EXPIRING,
             default => self::ACTIVE,
         };
     }

@@ -91,7 +91,7 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Gray,
             ])
-            ->brandLogo(fn (): ?string => filled($logo = GeneralSettings::value('logo')) ? Storage::disk('public')->url($logo) : null)
+            ->brandLogo(fn (GeneralSettings $settings): ?string => filled($logo = $settings->logo) ? Storage::disk('public')->url($logo) : null)
             ->brandLogoHeight('2rem')
             ->themeSwitcher(false)
             ->sidebarCollapsibleOnDesktop()
@@ -187,7 +187,7 @@ class AppPanelProvider extends PanelProvider
                     ->slideOverPreviews(),
                 FilamentUiSwitcherPlugin::make()
                     // The primary colour of the users who did not choose one in their UI preferences
-                    ->defaults(fn (): array => array_filter(['color' => GeneralSettings::value('primary_color')]))
+                    ->defaults(fn (): array => array_filter(['color' => app(GeneralSettings::class)->primary_color]))
                     ->iconRenderHook(self::UI_PREFERENCES_RENDER_HOOK)
                     ->withModeSwitcher(),
             ])

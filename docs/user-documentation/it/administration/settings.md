@@ -80,8 +80,8 @@ Clicca **Salva** per applicarle: hanno effetto subito, per tutti gli utenti.
 
 ## Valori predefiniti
 
-Sotto ogni opzione, **Predefinito** mostra il suo valore prima che venga cambiato qui: per il centro delle mappe e i
-dati personali, il valore impostato nel file `.env` da chi ha installato l'applicazione (vedi la [Guida al
-setup](../setup)). Queste due opzioni continuano a seguire il file `.env` finché non vengono cambiate qui; per farne
-seguire di nuovo il file `.env` a una, reimpostala al suo valore predefinito e salva. Il nome, la lingua e il fuso
-orario dell'applicazione si impostano solo nel file `.env`.
+Sotto ogni opzione, **Predefinito** mostra il suo valore prima che venga cambiato qui: per il centro delle mappe, i
+dati personali e le richieste di riconsegna dalla pagina pubblica, il valore impostato nel file `.env` da chi ha
+installato l'applicazione (vedi la [Guida al setup](../setup)). Queste tre opzioni continuano a seguire il file `.env`
+finché non vengono cambiate qui; per farne seguire di nuovo il file `.env` a una, reimpostala al suo valore
+predefinito e salva. Il nome, la lingua e il fuso orario dell'applicazione si impostano solo nel file `.env`.

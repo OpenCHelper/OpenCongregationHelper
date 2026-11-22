@@ -16,7 +16,7 @@ class SharedUrl extends Model
      */
     public static function isSharingEnabled(): bool
     {
-        return (bool) TerritorySettings::value('sharing_enabled');
+        return (bool) app(TerritorySettings::class)->sharing_enabled;
     }
 
     /**

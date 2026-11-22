@@ -55,7 +55,7 @@ function actingAsSharingSuperAdmin(): User
 }
 
 test('sharing is enabled by default', function () {
-    expect(TerritorySettings::value('sharing_enabled'))->toBeTrue()
+    expect(app(TerritorySettings::class)->sharing_enabled)->toBeTrue()
         ->and(SharedUrl::isSharingEnabled())->toBeTrue();
 });
 

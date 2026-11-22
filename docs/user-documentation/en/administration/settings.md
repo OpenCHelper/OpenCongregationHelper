@@ -78,7 +78,8 @@ Click **Save changes** to apply them: they take effect immediately, for every us
 
 ## Default values
 
-Under each option, **Default** shows its value before it is changed here: for the map centre and the personal data, the
-value set in `.env` by whoever installed the application (see the [Setup guide](../setup)). These two options keep
-following `.env` until they are changed here; to make one follow `.env` again, set it back to its default value and
-save. The name, language and timezone of the application are set only in `.env`.
+Under each option, **Default** shows its value before it is changed here: for the map centre, the personal data and the
+return requests from the public page, the value set in `.env` by whoever installed the application (see the [Setup
+guide](../setup)). These three options keep following `.env` until they are changed here; to make one follow `.env`
+again, set it back to its default value and save. The name, language and timezone of the application are set only in
+`.env`.

@@ -141,7 +141,7 @@ class TerritoryAssignmentResource extends Resource
     public static function shouldHidePersonalData(): bool
     {
         return Filament::getCurrentPanel()?->getId() === 'guest'
-            && ! TerritorySettings::value('shared_pii');
+            && ! app(TerritorySettings::class)->shared_pii;
     }
 
     /**

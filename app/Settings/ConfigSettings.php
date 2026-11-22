@@ -2,11 +2,13 @@
 
 namespace App\Settings;
 
+use App\Settings\Casts\ConfigFallbackCast;
+
 /**
  * Settings whose properties fall back on configuration values.
  *
- * A property listed in `configKeys()` is `null` while it was never changed from the Settings pages (or was set back to
- * its default): its value is then the one of the configuration, i.e. of `.env`.
+ * A property listed in `configKeys()` is stored as `null` while it was never changed from the Settings pages (or was
+ * set back to its default): it then reads as the value of the configuration, i.e. of `.env` (see `ConfigFallbackCast`).
  */
 abstract class ConfigSettings extends AppSettings
 {
@@ -18,27 +20,14 @@ abstract class ConfigSettings extends AppSettings
     abstract public static function configKeys(): array;
 
     /**
-     * Get the value of a setting: the one changed from the Settings pages, or the configured one.
+     * @return array<string, ConfigFallbackCast>
      */
-    public static function value(string $property): mixed
+    public static function casts(): array
     {
-        return parent::value($property) ?? static::configuredValue($property);
-    }
-
-    /**
-     * Get the values of several settings at once, keyed by property, each falling back on its configured value.
-     *
-     * @return array<string, mixed>
-     */
-    public static function values(string ...$properties): array
-    {
-        $values = parent::values(...$properties);
-
-        foreach ($values as $property => $value) {
-            $values[$property] = $value ?? static::configuredValue($property);
-        }
-
-        return $values;
+        return array_map(
+            fn (string $configKey): ConfigFallbackCast => new ConfigFallbackCast($configKey),
+            static::configKeys(),
+        );
     }
 
     /**
