@@ -19,6 +19,7 @@ use App\Listeners\SwitchTeam;
 use App\Models\Team;
 use App\Settings\GeneralSettings;
 use App\Support\AppVersions;
+use App\Support\BugReport;
 use App\Support\WebPush;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Detection\MobileDetect;
@@ -139,6 +140,14 @@ class AppPanelProvider extends PanelProvider
                         'build' => AppVersions::build(),
                     ]))
                     ->modalSubmitAction(false)
+                    ->extraModalFooterActions([
+                        Action::make('reportBug')
+                            ->label(fn (): string => __('filament-resources.bug_report.button_label'))
+                            ->icon(Heroicon::OutlinedBugAnt)
+                            ->color('gray')
+                            ->url(fn (): string => BugReport::url(request()))
+                            ->openUrlInNewTab(),
+                    ])
                     ->modalCancelActionLabel(fn (): string => __('filament-actions::view.single.modal.actions.close.label')),
             ])
             ->renderHook(

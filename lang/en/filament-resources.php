@@ -16,6 +16,9 @@ return [
         'date' => 'Date',
         'unknown' => 'Unknown',
     ],
+    'bug_report' => [
+        'button_label' => 'Report a bug',
+    ],
     'stats_widget' => [
         'territories' => 'Territories',
         'total_territories_description' => 'Total number of territories',
