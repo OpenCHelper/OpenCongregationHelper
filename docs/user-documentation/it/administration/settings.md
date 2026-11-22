@@ -76,6 +76,27 @@ I giorni prima della fine da cui una campagna è **in scadenza** e **quasi scadu
 Gli stati sono elencati in ordine, con i colori dei badge delle campagne, e la barra sotto li disegna in scala mentre
 scrivi.
 
+## Sicurezza
+
+![Impostazioni di sicurezza](/docs/user-documentation/it/administration/assets/settings-security.webp)
+
+In **Requisiti degli account** scegli cosa deve fare ogni utente prima di usare l'applicazione. Entrambi sono
+disattivati in modo predefinito:
+
+- **Richiedi l'autenticazione a due fattori**: agli utenti che non l'hanno configurata viene chiesto di farlo, con
+  un'app di autenticazione, prima di poter aprire qualsiasi pagina. Se disattivata, ogni utente può comunque attivarla
+  dal proprio [profilo](../basics/profile#autenticazione-a-due-fattori);
+- **Richiedi la conferma dell'indirizzo email**: agli utenti con l'indirizzo email non confermato viene chiesto di
+  confermarlo, dal link ricevuto via email, prima di poter aprire qualsiasi pagina. L'email viene inviata quando
+  arrivano per la prima volta su quella pagina; da lì possono chiederne un'altra.
+
+Agli utenti che hanno già effettuato l'accesso viene chiesto alla pagina successiva. Con entrambi attivi, prima
+confermano l'email, poi configurano l'autenticazione a due fattori.
+
+> ⚠️ **Attenzione:** perché l'utente root (il primo utente creato durante l'installazione) non resti mai bloccato
+> fuori, un requisito si può attivare solo quando l'utente root lo soddisfa: configura prima l'autenticazione a due
+> fattori o conferma l'indirizzo email dell'utente root. Disattivare un requisito è sempre possibile.
+
 Clicca **Salva** per applicarle: hanno effetto subito, per tutti gli utenti.
 
 ## Valori predefiniti

@@ -44,6 +44,20 @@ See [Notifications](notifications#push-notifications).
 
 Enter your **Current password**, then the **New password** twice and click **Save**. Use a long, random password.
 
+## Two-factor authentication
+
+Protect your account with a code from an authenticator app on your phone (for example Google Authenticator, Microsoft
+Authenticator or Authy), asked after your password at every login.
+
+1. Under **Authenticator app**, click **Set up**.
+2. Scan the QR code with the authenticator app (or type the key shown below it).
+3. Save the **recovery codes** somewhere safe: each one lets you log in once if you lose your phone.
+4. Enter the 6-digit code shown by the app to confirm.
+
+From then on you can **Regenerate recovery codes** or **Turn off** two-factor authentication from the same section. If
+the administrators require it (see [Settings](../administration/settings#security)), you are asked to set it up before
+using the application, and you cannot use it without.
+
 ## Browser sessions
 
 Lists the devices where you are logged in. Click **Log out other browser sessions** (and confirm with your password) if
