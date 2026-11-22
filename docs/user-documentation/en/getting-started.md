@@ -41,7 +41,9 @@ them, since when, and which ones have been covered. It runs in the browser and a
 
 ## How can I contribute?
 
-- Report bugs or suggest features using the [Issues](https://github.com/OpenCHelper/OpenCongregationHelper/issues);
+- Report bugs or suggest features using the [Issues](https://github.com/OpenCHelper/OpenCongregationHelper/issues):
+  to report a bug from the application, open the user menu, click **About** and then **Report a bug**, which fills in
+  the details of your installation for you;
 - If you have the required programming skills, you can contribute by making [Pull Requests](https://github.com/OpenCHelper/OpenCongregationHelper/pulls);
 - Help translate the UI in other languages, or improve existing ones.
 

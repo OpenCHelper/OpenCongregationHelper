@@ -19,7 +19,8 @@ Every page of the application shares the same layout.
 3. **Global search**: searches territories, zones and campaigns at once (see below).
 4. **Language**: switches the language of the interface (English, Italian or Spanish).
 5. **Notifications**: the bell shows the number of unread notifications (see [Notifications](notifications)).
-6. **User menu**: your [profile](profile), the look of the interface (see below) and the **Sign out** button.
+6. **User menu**: your [profile](profile), the look of the interface (see below), **About** (the version of the
+   application, and the **Report a bug** button) and the **Sign out** button.
 7. **Documentation**: opens this guide. Above it you can read the version of the application.
 8. **Page actions**: the main buttons of the current page (e.g. **New territory**).
 

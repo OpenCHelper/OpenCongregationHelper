@@ -38,25 +38,35 @@ body:
     attributes:
       label: Screenshots
       description: If possible, add one or more screenshots of the problem (you can drag them here).
-  - type: dropdown
+  - type: input
     id: instance
     attributes:
       label: Where did you run into the problem?
-      options:
-        - My congregation's installation
-        - Public demo (ochdemo.altervista.org)
-        - Nightly demo (ochtest.altervista.org)
-        - Other
-    validations:
-      required: true
+      description: Address of the installation (e.g. your congregation's, or one of the demos). Remove it if you prefer not to share it.
+      placeholder: "E.g. https://ochdemo.altervista.org"
+  - type: input
+    id: app_environment
+    attributes:
+      label: Environment
+      description: Environment of the app (`APP_ENV`), if you know it.
+      placeholder: "E.g. production"
   - type: input
     id: version
     attributes:
       label: Version
       description: The version of the app in use, if you know it.
       placeholder: "E.g. v1.0.0-alpha11"
-  - type: input
-    id: environment
+  - type: textarea
+    id: stack
+    attributes:
+      label: PHP, Laravel and Filament versions
+      description: The versions the app runs on, if you know them.
+      placeholder: |
+        - PHP: `8.3.6`
+        - Laravel: `12.72.0`
+        - Filament: `5.11.3`
+  - type: textarea
+    id: browser
     attributes:
       label: Device and browser
       description: Operating system, device and browser on which the problem occurred.
