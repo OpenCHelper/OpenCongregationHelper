@@ -44,8 +44,6 @@ body:
       label: Where did you run into the problem?
       description: Address of the installation (e.g. your congregation's, or one of the demos). Remove it if you prefer not to share it.
       placeholder: "E.g. https://ochdemo.altervista.org"
-    validations:
-      required: true
   - type: input
     id: app_environment
     attributes:
