@@ -1,0 +1,63 @@
+name: "\U0001F4A5 Segnala un bug"
+description: Segnala un bug per aiutarci a migliorare
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Descrivi in modo **chiaro ed esauriente** quale problema hai incontrato.
+        Non includere dati reali della congregazione (nomi, indirizzi, numeri di telefono...) né screenshot che li mostrino.
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrizione del problema
+      description: Cosa è successo?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passaggi per riprodurre il bug
+      description: Cosa stavi facendo, su cosa hai cliccato, ecc.
+      placeholder: |
+        1. Vai su '...'
+        2. Clicca su '...'
+        3. Si vede l'errore '...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento atteso
+      description: Cosa ti aspettavi che succedesse?
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshot
+      description: Se possibile, aggiungi uno o più screenshot del problema (puoi trascinarli qui).
+  - type: dropdown
+    id: instance
+    attributes:
+      label: Dove hai incontrato il problema?
+      options:
+        - Installazione della mia congregazione
+        - Demo pubblica (ochdemo.altervista.org)
+        - Demo nightly (ochtest.altervista.org)
+        - Altro
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versione
+      description: La versione dell'app in uso, se la conosci.
+      placeholder: "Es. v1.0.0-alpha11"
+  - type: input
+    id: environment
+    attributes:
+      label: Dispositivo e browser
+      description: Sistema operativo, dispositivo e browser su cui si è verificato il problema.
+      placeholder: "Es. Android 15, Chrome 142"

@@ -1,0 +1,33 @@
+name: "✨ Proponi una nuova funzionalità"
+description: Proponi una funzionalità che oggi non esiste
+labels: ["new feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la proposta! Se invece vuoi migliorare una funzionalità che esiste già, usa il modulo **🚀 Suggerisci un miglioramento**.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Quale esigenza risolverebbe?
+      description: Descrivi il problema o la situazione della congregazione che oggi l'app non permette di gestire.
+      placeholder: "Es. oggi non posso..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Come dovrebbe funzionare?
+      description: Descrivi la funzionalità che immagini, chi la userebbe e in quali pagine.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative valutate
+      description: Come gestisci oggi questa esigenza? Hai pensato ad altre soluzioni?
+  - type: textarea
+    id: context
+    attributes:
+      label: Altre informazioni
+      description: Screenshot, bozze, esempi da altre applicazioni o qualsiasi altro dettaglio utile.
