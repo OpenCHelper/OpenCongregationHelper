@@ -42,7 +42,8 @@
         "setasign/tfpdf": "^1.34",
         "spatie/laravel-translatable": "^6.11",
         "stechstudio/filament-impersonate": "^5.7",
-        "tapp/filament-maillog": "^2.0"
+        "tapp/filament-maillog": "^2.0",
+        "tecnickcom/tc-lib-pdf-parser": "^3.16"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5",
