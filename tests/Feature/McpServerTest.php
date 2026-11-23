@@ -125,6 +125,21 @@ test('an assistant without a token is told where to authorize', function () {
         ->assertJsonPath('code_challenge_methods_supported', ['S256']);
 });
 
+test('the keys work when the hosting does not apply their permissions (e.g. Altervista)', function () {
+    allowAiAssistants();
+
+    $keys = dirname(Passport::keyPath('oauth-private.key'));
+    chmod($keys.'/oauth-private.key', 0644);
+    chmod($keys.'/oauth-public.key', 0644);
+
+    try {
+        mcpRequest('initialize')->assertUnauthorized();
+    } finally {
+        chmod($keys.'/oauth-private.key', 0600);
+        chmod($keys.'/oauth-public.key', 0600);
+    }
+});
+
 test('the assistants can register themselves as OAuth clients', function (string $redirectUri) {
     allowAiAssistants();
 

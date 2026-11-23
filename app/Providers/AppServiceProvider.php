@@ -180,6 +180,10 @@ class AppServiceProvider extends ServiceProvider
      */
     private function configureAiAssistants(): void
     {
+        // The keys are kept in `storage/` like the `.env` file, outside of `public/` (see the root `.htaccess`), but shared
+        // hosting (e.g. Altervista) ignores `chmod`: the check of their permissions would fail every request with a 500
+        Passport::$validateKeyPermissions = false;
+
         Passport::tokensExpireIn(CarbonInterval::hours(1));
         Passport::refreshTokensExpireIn(CarbonInterval::days(90));
 
