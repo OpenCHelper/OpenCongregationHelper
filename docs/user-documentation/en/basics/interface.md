@@ -19,8 +19,9 @@ Every page of the application shares the same layout.
 3. **Global search**: searches territories, zones and campaigns at once (see below).
 4. **Language**: switches the language of the interface (English, Italian or Spanish).
 5. **Notifications**: the bell shows the number of unread notifications (see [Notifications](notifications)).
-6. **User menu**: your [profile](profile), the look of the interface (see below), **About** (the version of the
-   application, and the **Report a bug** button) and the **Sign out** button.
+6. **User menu**: your [profile](profile), the look of the interface (see below), **Install app** (see
+   [Installing the app](#installing-the-app)), **About** (the version of the application, and the **Report a bug**
+   button) and the **Sign out** button.
 7. **Documentation**: opens this guide. Above it you can read the version of the application.
 8. **Page actions**: the main buttons of the current page (e.g. **New territory**).
 
@@ -86,10 +87,17 @@ Forms and dialogs open as panels sliding from the side, which are easier to use 
 
 ## Installing the app
 
-You can install the application on your smartphone or computer, to open it from the home screen or the desktop in its
-own window. After you log in, a box at the bottom of the page offers to install it:
+Installing the application on your smartphone or computer is the recommended way to use it: you open it from the home
+screen or the desktop, in its own window, like any other app. On iPhone and iPad it is also needed to receive
+[push notifications](notifications#push-notifications).
+
+Right after you log in, a full-screen page offers to install it:
 
 - on **Android** and in **Chrome** or **Edge** on computers, click **Install** and confirm;
 - on **iPhone** and **iPad**, tap the **Share** button of Safari, then **Add to Home Screen**.
 
-Click **Not now** to hide the box: it comes back after 30 days. It is not shown when the app is already installed.
+Click **Not now** to close it: it is offered again after 30 days. It is not shown when the app is already installed, or
+when the browser cannot install it (e.g. Firefox, or Safari on a computer).
+
+To install it later, click **Install app** in the user menu, or **Install** in the **Install the app** section of your
+[profile](profile). Both appear only when the browser can install the application.

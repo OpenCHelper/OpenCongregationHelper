@@ -25,6 +25,13 @@ tuo [profilo](profile).
 Le notifiche push compaiono sul telefono o sul computer come quelle di qualsiasi altra app, anche ad applicazione
 chiusa. Cliccandone una si apre il territorio o l'assegnazione collegata.
 
+Subito dopo l'accesso, una pagina a schermo intero propone di attivarle sul dispositivo che stai usando: clicca
+**Attiva le notifiche** e consentile quando il browser lo chiede. Se clicchi **Non ora**, viene riproposta dopo 30
+giorni. Compare dopo la proposta di installare l'app (vedi [Installare l'app](interface#installare-lapp)), e solo se il
+dispositivo può riceverle e non sono già attive.
+
+Puoi anche attivarle, o disattivarle, dal tuo profilo in qualsiasi momento:
+
 1. Apri il tuo [profilo](profile) sul dispositivo su cui vuoi riceverle.
 2. In **Notifiche push**, clicca **Attiva su questo dispositivo** e consenti le notifiche quando il browser lo chiede.
 3. Clicca **Invia una notifica di prova** per verificare che arrivino.

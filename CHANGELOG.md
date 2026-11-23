@@ -10,14 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Full-screen dialog, right after logging in, that offers to turn on the push notifications on the device; it takes
-  turns with the offer to install the app and can be dismissed for 30 days.
+  turns with the offer to install the app and can be dismissed for 30 days
+  ([#62](https://github.com/OpenCHelper/OpenCongregationHelper/pull/62)).
 - **Install app** entry in the user menu and section in the profile, to install the app after dismissing the offer;
-  they show only when the browser can install it.
+  they show only when the browser can install it ([#62](https://github.com/OpenCHelper/OpenCongregationHelper/pull/62)).
 
 ### Changed
 
 - The offer to install the app is now a full-screen dialog, right after logging in, that recommends it as the best
-  way to use the app.
+  way to use the app ([#62](https://github.com/OpenCHelper/OpenCongregationHelper/pull/62)).
 
 ## [1.0.0-alpha12] - 2026-11-22
 
