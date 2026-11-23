@@ -84,6 +84,12 @@ class AppPanelProvider extends PanelProvider
      */
     public const PWA_INSTALL_DISMISS_DAYS = 30;
 
+    /**
+     * Session key set when the user logs in (see `OfferFullScreenPromptsAfterLogin`), and taken by the first page, which
+     * opens the offer to install the app by itself.
+     */
+    public const PWA_INSTALL_OFFER_SESSION_KEY = 'pwa_install_prompt.offer';
+
     public function panel(Panel $panel): Panel
     {
         $detect = new MobileDetect;
@@ -162,11 +168,16 @@ class AppPanelProvider extends PanelProvider
                 PanelsRenderHook::LAYOUT_END,
                 fn (): string => '<div class="app-ui-preferences">'.FilamentView::renderHook(self::UI_PREFERENCES_RENDER_HOOK)->toHtml().'</div>',
             )
-            // Offer to install the app once logged in (on the login page it would cover the form), at the start of the
-            // body to catch the event of the browser early.
+            // Offer to install the app on the first page after logging in (on the login page it would cover the form),
+            // at the start of the body to catch the event of the browser early. Rendered on the other pages too, where it
+            // opens only from the user menu and the profile.
             ->renderHook(
                 PanelsRenderHook::BODY_START,
-                fn (): ?View => Filament::auth()->check() ? view('filament.pwa-install-prompt') : null,
+                fn (): ?View => Filament::auth()->check()
+                    ? view('filament.pwa-install-prompt', [
+                        'offerAfterLogin' => (bool) session()->pull(self::PWA_INSTALL_OFFER_SESSION_KEY),
+                    ])
+                    : null,
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,

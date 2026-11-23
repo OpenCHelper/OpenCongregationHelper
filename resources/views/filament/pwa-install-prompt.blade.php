@@ -6,9 +6,10 @@
       Alpine starts, and the "Install" button opens the native prompt of the browser.
     - iOS has no install prompt: the steps to add the app to the home screen are shown instead.
 
-    It opens by itself unless the app already runs installed or the user dismissed the offer in the last days, and on
-    request from the user menu and the profile (`open-pwa-install` event), whose entries show only while the
-    `pwaInstall` store says that the app can be installed.
+    It opens by itself on the first page after logging in (`$offerAfterLogin`, see `OfferFullScreenPromptsAfterLogin`),
+    unless the app already runs installed or the user dismissed the offer in the last days, and on request from the
+    user menu and the profile (`open-pwa-install` event), whose entries show only while the `pwaInstall` store says
+    that the app can be installed.
 
     The `fullScreenPrompt` store holds the full-screen dialog that is open (this one or the offer to enable the push
     notifications, `livewire.push-notifications-prompt`), so that they take turns instead of opening over each other.
@@ -33,6 +34,7 @@
         dismissDays: @js(\App\Providers\Filament\AppPanelProvider::PWA_INSTALL_DISMISS_DAYS),
         canPrompt: false,
         isIos: false,
+        offerAfterLogin: @js($offerAfterLogin ?? false),
         requested: false,
         init() {
             this.$watch('wantsOpen', () => this.claim());
@@ -50,7 +52,7 @@
 
             this.isIos = isAppleMobile && ! ('BeforeInstallPromptEvent' in window);
             this.canPrompt = !! window.pwaInstallPrompt;
-            this.requested = ! this.wasDismissedRecently();
+            this.requested = this.offerAfterLogin && ! this.wasDismissedRecently();
             this.$store.pwaInstall.available = this.isAvailable;
 
             // Claimed right away, before the offer to enable the push notifications, which waits for this event

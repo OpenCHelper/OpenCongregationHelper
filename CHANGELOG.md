@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The offer to install the app is now a full-screen dialog that recommends it as the best way to use the app.
+- The offer to install the app is now a full-screen dialog, right after logging in, that recommends it as the best
+  way to use the app.
 
 ## [1.0.0-alpha12] - 2026-11-22
 

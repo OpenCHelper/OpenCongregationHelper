@@ -1,9 +1,12 @@
 <?php
 
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\EditProfile;
 use App\Http\Controllers\WebManifestController;
 use App\Models\User;
 use App\Support\ServiceWorker;
+use Filament\Facades\Filament;
+use Livewire\Livewire;
 
 beforeEach(function () {
     // Render the real assets when they are built (as in CI), and fake them otherwise (e.g. on a fresh clone)
@@ -144,6 +147,34 @@ it('offers to install the app in a full-screen dialog that recommends it', funct
         ->assertSee('x-show="isIos"', escape: false)
         ->assertSee(__('pwa.install.later'))
         ->assertSee(__('pwa.install.dismiss'));
+});
+
+it('opens the offer to install the app by itself only on the first page after logging in', function () {
+    Filament::setCurrentPanel('app');
+    $user = User::factory()->withPassword('a-password')->create(['can_login' => true, 'email_verified_at' => now()]);
+
+    Livewire::test(Login::class)
+        ->fillForm(['email' => $user->email, 'password' => 'a-password'])
+        ->call('authenticate')
+        ->assertHasNoErrors();
+
+    $this->followingRedirects()->get('/app')->assertOk()->assertSee('offerAfterLogin: true', escape: false);
+
+    // Still rendered, to be opened from the user menu and the profile
+    $this->followingRedirects()->get('/app')->assertOk()
+        ->assertSee('app-pwa-install', escape: false)
+        ->assertSee('offerAfterLogin: false', escape: false);
+});
+
+it('does not open the offer to install the app by itself for users already logged in', function () {
+    $user = User::factory()->create(['can_login' => true, 'email_verified_at' => now()]);
+
+    $this->actingAs($user)
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee('offerAfterLogin: false', escape: false)
+        ->assertSee('this.requested = this.offerAfterLogin && ! this.wasDismissedRecently()', escape: false);
 });
 
 it('lets users install the app later from the user menu and the profile', function () {

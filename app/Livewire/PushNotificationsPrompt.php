@@ -9,7 +9,7 @@ use Livewire\Component;
 
 /**
  * Full-screen dialog that offers to enable the push notifications on the current device, on the first page after
- * logging in (see `OfferPushNotificationsAfterLogin`).
+ * logging in (see `OfferFullScreenPromptsAfterLogin`).
  *
  * Only the browser knows whether the device can receive them and is subscribed: the dialog opens only when it can and
  * is not, and the user has not dismissed it recently. The section of the profile enables them too.
