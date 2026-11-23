@@ -35,6 +35,12 @@ Per aggiungere un contatto:
 Usa **Visualizza**, **Modifica** ed **Elimina** accanto a ogni contatto per gestirlo. Visualizzando un contatto, i
 pulsanti **Chiama** e **Apri in Maps** avviano una telefonata o aprono l'indirizzo nell'app delle mappe.
 
+## Installa l'app
+
+Clicca **Installa** per installare l'applicazione su questo dispositivo e aprirla come qualsiasi altra app (vedi
+[Installare l'app](interface#installare-lapp)). La sezione compare solo quando il browser può installarla, e indica
+quando l'applicazione è già installata.
+
 ## Notifiche push
 
 Ricevi le notifiche anche su questo dispositivo, pure ad applicazione chiusa: clicca **Attiva su questo dispositivo**.

@@ -20,7 +20,7 @@ test('the user menu has the same items in every language', function (string $loc
 
     // Filament adds a header with the name of the user when no item is named `profile`
     expect(array_keys(Filament::getPanel('app')->getUserMenuItems()))
-        ->toBe(['profile', 'uiPreferences', 'versionInfo', 'logout']);
+        ->toBe(['profile', 'uiPreferences', 'installApp', 'versionInfo', 'logout']);
 })->with(['en', 'it', 'es']);
 
 test('the UI preferences are picked from the user menu, the language from the top bar', function () {

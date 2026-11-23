@@ -35,6 +35,12 @@ To add a contact:
 Use **View**, **Edit** and **Delete** next to each contact to manage it. When viewing a contact, the **Call** and
 **Open in Maps** buttons start a phone call or open the address in your maps app.
 
+## Install the app
+
+Click **Install** to install the application on this device, to open it like any other app (see
+[Installing the app](interface#installing-the-app)). The section appears only when the browser can install it, and says
+so when the application is already installed.
+
 ## Push notifications
 
 Receive the notifications on this device too, even when the application is closed: click **Enable on this device**.

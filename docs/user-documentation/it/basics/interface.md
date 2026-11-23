@@ -19,8 +19,9 @@ Tutte le pagine dell'applicazione condividono la stessa struttura.
 3. **Ricerca globale**: cerca contemporaneamente tra territori, zone e campagne (vedi sotto).
 4. **Lingua**: cambia la lingua dell'interfaccia (inglese, italiano o spagnolo).
 5. **Notifiche**: la campanella mostra il numero di notifiche non lette (vedi [Notifiche](notifications)).
-6. **Menu utente**: il tuo [profilo](profile), l'aspetto dell'interfaccia (vedi sotto), **Informazioni** (la versione
-   dell'applicazione e il pulsante **Segnala un bug**) e il pulsante **Disconnetti**.
+6. **Menu utente**: il tuo [profilo](profile), l'aspetto dell'interfaccia (vedi sotto), **Installa app** (vedi
+   [Installare l'app](#installare-lapp)), **Informazioni** (la versione dell'applicazione e il pulsante **Segnala un
+   bug**) e il pulsante **Disconnetti**.
 7. **Documentazione**: apre questa guida. Sopra il pulsante è indicata la versione dell'applicazione.
 8. **Azioni della pagina**: i pulsanti principali della pagina corrente (es. **Nuovo**).
 
@@ -86,10 +87,17 @@ raggiungere le altre voci del menu. Moduli e finestre si aprono come pannelli la
 
 ## Installare l'app
 
-Puoi installare l'applicazione sullo smartphone o sul computer, per aprirla dalla schermata Home o dal desktop in una
-sua finestra. Dopo l'accesso, un riquadro in fondo alla pagina propone di installarla:
+Installare l'applicazione sullo smartphone o sul computer è il modo consigliato per usarla: la apri dalla schermata
+Home o dal desktop, in una sua finestra, come qualsiasi altra app. Su iPhone e iPad serve anche per ricevere le
+[notifiche push](notifications#notifiche-push).
+
+Subito dopo l'accesso, una pagina a schermo intero propone di installarla:
 
 - su **Android** e in **Chrome** o **Edge** sui computer, clicca **Installa** e conferma;
 - su **iPhone** e **iPad**, tocca il pulsante **Condividi** di Safari, poi **Aggiungi alla schermata Home**.
 
-Clicca **Non ora** per nascondere il riquadro: ricompare dopo 30 giorni. Non è mostrato se l'app è già installata.
+Clicca **Non ora** per chiuderla: viene riproposta dopo 30 giorni. Non è mostrata se l'app è già installata, o se il
+browser non può installarla (es. Firefox, o Safari sui computer).
+
+Per installarla in seguito, clicca **Installa app** nel menu utente, oppure **Installa** nella sezione
+**Installa l'app** del tuo [profilo](profile). Entrambi compaiono solo quando il browser può installare l'applicazione.

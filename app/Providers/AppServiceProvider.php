@@ -57,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Js::make('filament-sidebar-fix', __DIR__.'/../../resources/js/filament-sidebar-fix.js'),
             Js::make('filament-map-picker-fix', __DIR__.'/../../resources/js/filament-map-picker-fix.js'),
+            Js::make('push-subscription', __DIR__.'/../../resources/js/push-subscription.js'),
         ]);
 
         // Make every panel installable as a Progressive Web App (manifest, icons and service worker)
