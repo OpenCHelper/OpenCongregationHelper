@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
@@ -59,6 +60,21 @@ class AppServiceProvider extends ServiceProvider
             Js::make('filament-map-picker-fix', __DIR__.'/../../resources/js/filament-map-picker-fix.js'),
             Js::make('push-subscription', __DIR__.'/../../resources/js/push-subscription.js'),
         ]);
+
+        // The map picker (`dotswan/filament-map-picker`) and the maps of `eduardoribeirodev/filament-leaflet` each
+        // bundle their own Leaflet and set it as `window.L`, which their plugins (e.g. Geoman) use: loaded on the
+        // same page, the one loaded last replaces the other, and the shapes drawn on a map are made with the other
+        // Leaflet (drawing fails). Each script is then loaded only by the pages that show one of its maps.
+        $this->loadMapScriptOnRequest(
+            'eduardoribeirodev/filament-leaflet',
+            ['filament-leaflet::components.map'],
+            'filament.leaflet-map-assets',
+        );
+        $this->loadMapScriptOnRequest(
+            'dotswan/filament-map-picker',
+            ['map-picker::fields.osm-map-picker', 'map-picker::infolists.osm-map-entry'],
+            'filament.map-picker-assets',
+        );
 
         // Make every panel installable as a Progressive Web App (manifest, icons and service worker)
         FilamentView::registerRenderHook(
@@ -142,6 +158,25 @@ class AppServiceProvider extends ServiceProvider
         // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
         ExportColumn::configureUsing(function (ExportColumn $column): void {
             $column->preventFormulaInjection();
+        });
+    }
+
+    /**
+     * Load the scripts of a map plugin only on the pages that show one of its maps, instead of on every page.
+     *
+     * The views that render the maps render the given assets view, whose `@assets` block Livewire adds to the page
+     * once, before the map is initialised (see `filament/partials/script-loaded-on-request.blade.php`).
+     *
+     * @param  list<string>  $mapViews
+     */
+    private function loadMapScriptOnRequest(string $package, array $mapViews, string $assetsView): void
+    {
+        foreach (FilamentAsset::getScripts([$package]) as $script) {
+            $script->loadedOnRequest();
+        }
+
+        View::composer($mapViews, function () use ($assetsView): void {
+            view($assetsView)->render();
         });
     }
 }
