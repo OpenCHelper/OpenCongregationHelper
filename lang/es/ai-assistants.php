@@ -14,6 +14,15 @@ return [
         'impersonating' => 'Solo el propio usuario puede conectar un asistente de IA, no mientras se le suplanta.',
     ],
 
+    'kinds' => [
+        'territory' => 'Territorio',
+        'zone' => 'Zona',
+        'campaign' => 'Campaña',
+        'person' => 'Persona',
+        'publication' => 'Publicación',
+        'assignment' => 'Asignación',
+    ],
+
     'profile' => [
         'title' => 'Asistentes de IA',
         'description' => 'Conecta un asistente de IA, como ChatGPT o Claude, para preguntarle por los territorios o para que los gestione por ti.',

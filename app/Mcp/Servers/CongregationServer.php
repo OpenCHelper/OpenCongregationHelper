@@ -4,6 +4,7 @@ namespace App\Mcp\Servers;
 
 use App\Mcp\Tools\AssignTerritoryTool;
 use App\Mcp\Tools\CreatePublicationRequestTool;
+use App\Mcp\Tools\FetchTool;
 use App\Mcp\Tools\GetMyAccountTool;
 use App\Mcp\Tools\GetOverviewTool;
 use App\Mcp\Tools\GetTerritoryTool;
@@ -16,6 +17,7 @@ use App\Mcp\Tools\ListTerritoriesTool;
 use App\Mcp\Tools\ListTerritoryZonesTool;
 use App\Mcp\Tools\RequestTerritoryReturnTool;
 use App\Mcp\Tools\ReturnTerritoryTool;
+use App\Mcp\Tools\SearchTool;
 use App\Mcp\Tools\UpdatePublicationRequestStatusTool;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
@@ -48,6 +50,8 @@ class CongregationServer extends Server
     protected array $tools = [
         GetMyAccountTool::class,
         GetOverviewTool::class,
+        SearchTool::class,
+        FetchTool::class,
         ListTerritoriesTool::class,
         GetTerritoryTool::class,
         ListTerritoryZonesTool::class,

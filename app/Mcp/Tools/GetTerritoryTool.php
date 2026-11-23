@@ -36,11 +36,7 @@ class GetTerritoryTool extends CongregationTool
     {
         $validated = $request->validate(['territory_id' => ['required', 'integer']]);
 
-        $territory = Territory::query()
-            ->with(['territoryZone', 'currentAssignment.campaign', 'tags'])
-            ->withMax(['assignments as last_returned_at' => fn (Builder $query) => $query->returned()], 'ended_at')
-            ->withCount('assignments')
-            ->find($validated['territory_id']);
+        $territory = static::query()->find($validated['territory_id']);
 
         if ($territory === null) {
             return $this->notFound('territory');
@@ -48,6 +44,29 @@ class GetTerritoryTool extends CongregationTool
 
         Gate::authorize('view', $territory);
 
+        return $this->respond($this->details($territory));
+    }
+
+    /**
+     * The query of the territories, with what their details show.
+     *
+     * @return Builder<Territory>
+     */
+    public static function query(): Builder
+    {
+        return Territory::query()
+            ->with(['territoryZone', 'currentAssignment.campaign', 'tags'])
+            ->withMax(['assignments as last_returned_at' => fn (Builder $query) => $query->returned()], 'ended_at')
+            ->withCount('assignments');
+    }
+
+    /**
+     * The details of a territory (loaded by `query()`), its latest assignments too when the user can see them.
+     *
+     * @return array<string, mixed>
+     */
+    public function details(Territory $territory): array
+    {
         $details = [
             ...McpPresenter::territory($territory),
             'description' => $territory->description ?: null,
@@ -68,7 +87,7 @@ class GetTerritoryTool extends CongregationTool
                 ->all();
         }
 
-        return $this->respond(array_filter($details, fn (mixed $value): bool => $value !== null));
+        return array_filter($details, fn (mixed $value): bool => $value !== null);
     }
 
     public function schema(JsonSchema $schema): array

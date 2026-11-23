@@ -166,6 +166,14 @@ final class McpPresenter
         ], fn (mixed $value): bool => $value !== null);
     }
 
+    /**
+     * The name of a kind of record (`search` and `fetch`), in the language of the user.
+     */
+    public static function kindLabel(string $kind): string
+    {
+        return __("ai-assistants.kinds.{$kind}");
+    }
+
     public static function date(mixed $date): ?string
     {
         if ($date === null) {

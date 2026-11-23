@@ -14,6 +14,15 @@ return [
         'impersonating' => 'An AI assistant can only be connected by the user, not while impersonating them.',
     ],
 
+    'kinds' => [
+        'territory' => 'Territory',
+        'zone' => 'Zone',
+        'campaign' => 'Campaign',
+        'person' => 'Person',
+        'publication' => 'Publication',
+        'assignment' => 'Assignment',
+    ],
+
     'profile' => [
         'title' => 'AI assistants',
         'description' => 'Connect an AI assistant, such as ChatGPT or Claude, to ask it about the territories or to have it manage them for you.',

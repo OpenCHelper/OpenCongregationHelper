@@ -5,6 +5,7 @@ use App\Enums\DepartmentRole;
 use App\Mcp\Servers\CongregationServer;
 use App\Mcp\Tools\AssignTerritoryTool;
 use App\Mcp\Tools\CreatePublicationRequestTool;
+use App\Mcp\Tools\FetchTool;
 use App\Mcp\Tools\GetMyAccountTool;
 use App\Mcp\Tools\GetOverviewTool;
 use App\Mcp\Tools\GetTerritoryTool;
@@ -14,6 +15,7 @@ use App\Mcp\Tools\ListPublicationRequestsTool;
 use App\Mcp\Tools\ListTerritoriesTool;
 use App\Mcp\Tools\RequestTerritoryReturnTool;
 use App\Mcp\Tools\ReturnTerritoryTool;
+use App\Mcp\Tools\SearchTool;
 use App\Mcp\Tools\UpdatePublicationRequestStatusTool;
 use App\Models\Campaign;
 use App\Models\Department;
@@ -70,7 +72,7 @@ function mcpAssignment(Territory $territory, User $assignee, array $attributes =
 test('a publisher without permissions is only offered the tools about their own account', function () {
     CongregationServer::actingAs($this->publisher)
         ->tools()
-        ->assertRegistered([GetMyAccountTool::class, RequestTerritoryReturnTool::class])
+        ->assertRegistered([GetMyAccountTool::class, RequestTerritoryReturnTool::class, SearchTool::class, FetchTool::class])
         ->assertNotRegistered([ListTerritoriesTool::class, AssignTerritoryTool::class, ReturnTerritoryTool::class, ListPeopleTool::class, ListPublicationRequestsTool::class]);
 });
 
@@ -325,4 +327,66 @@ test('the publication requests can be recorded and marked as ordered and deliver
         ->assertStructuredContentPath('requests.0.status', 'delivered');
 
     expect($request->refresh()->delivered_at)->not->toBeNull();
+});
+
+test('the search finds the records the user can see, to read with fetch', function () {
+    $territory = mcpTerritory(['name' => 'Via Roma']);
+    mcpTerritory(['name' => 'Piazza Garibaldi']);
+    mcpAssignment($territory, $this->publisher);
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(SearchTool::class, ['query' => 'roma'])
+        ->assertOk()
+        ->assertStructuredContentCount(1, 'results')
+        ->assertStructuredContentPath('results.0.id', "territory:{$territory->id}")
+        ->assertStructuredContentPath('results.0.title', __('ai-assistants.kinds.territory').': Via Roma');
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(SearchTool::class, ['query' => 'Mario Rossi'])
+        ->assertStructuredContentPath('results.0.id', "person:{$this->publisher->id}");
+
+    $fetched = CongregationServer::actingAs($this->overseer)
+        ->tool(FetchTool::class, ['id' => "territory:{$territory->id}"])
+        ->assertOk()
+        ->assertStructuredContentPaths(['id' => "territory:{$territory->id}", 'title' => __('ai-assistants.kinds.territory').': Via Roma', 'metadata.kind' => 'territory'])
+        ->assertSee('Mario Rossi');
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(FetchTool::class, ['id' => "person:{$this->publisher->id}"])
+        ->assertOk()
+        ->assertSee('Via Roma')
+        ->assertDontSee($this->publisher->email);
+});
+
+test('the search and fetch only show what the user can see', function () {
+    $territory = mcpTerritory(['name' => 'Via Roma']);
+    $mine = mcpAssignment($territory, $this->publisher);
+    $someoneElses = mcpAssignment(mcpTerritory(['name' => 'Via Milano']), $this->overseer);
+
+    CongregationServer::actingAs($this->publisher)
+        ->tool(SearchTool::class, ['query' => 'via'])
+        ->assertOk()
+        ->assertStructuredContentPath('results', []);
+
+    CongregationServer::actingAs($this->publisher)
+        ->tool(FetchTool::class, ['id' => "territory:{$territory->id}"])
+        ->assertHasErrors(['No territory found']);
+
+    CongregationServer::actingAs($this->publisher)
+        ->tool(FetchTool::class, ['id' => "assignment:{$someoneElses->id}"])
+        ->assertHasErrors(['No assignment found']);
+
+    // Their own assignments and account are theirs to read
+    CongregationServer::actingAs($this->publisher)
+        ->tool(FetchTool::class, ['id' => "assignment:{$mine->id}"])
+        ->assertOk()
+        ->assertSee('Via Roma');
+
+    CongregationServer::actingAs($this->publisher)
+        ->tool(FetchTool::class, ['id' => "person:{$this->publisher->id}"])
+        ->assertOk();
+
+    CongregationServer::actingAs($this->publisher)
+        ->tool(FetchTool::class, ['id' => 'nonsense'])
+        ->assertHasErrors(['Unknown id']);
 });
