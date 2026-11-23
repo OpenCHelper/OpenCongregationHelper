@@ -245,7 +245,8 @@ test('the dialog takes turns with the offer to install the app', function () {
         ->assertOk()
         ->assertSee("Alpine.store('fullScreenPrompt', { current: null })", escape: false)
         ->assertSee("name: 'pwa-install'", escape: false)
-        ->assertSee("name: 'push-notifications'", escape: false);
+        ->assertSee("name: 'push-notifications'", escape: false)
+        ->assertSee('Promise.all([this.refreshStatus(), this.waitForInstallOffer()])', escape: false);
 });
 
 test('the dialog does not show on the login page', function () {

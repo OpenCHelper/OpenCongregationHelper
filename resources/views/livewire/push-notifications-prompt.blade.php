@@ -2,7 +2,8 @@
     Offer to enable the push notifications on the current device (see `resources/js/push-subscription.js`) in a
     full-screen dialog, on the first page after logging in (`App\Livewire\PushNotificationsPrompt`), like the offer
     to install the app (`filament.pwa-install-prompt`): the two take turns through the `fullScreenPrompt` store, so
-    that only one is open at a time.
+    that only one is open at a time, and this one waits for the browser to tell whether the app can be installed, so
+    that the offer to install opens first.
 
     Nothing is shown when the device cannot receive them (e.g. on iOS before installing the app), is already subscribed,
     blocks them, or for some days after the user dismissed the offer.
@@ -14,6 +15,7 @@
         dismissedKey: 'push-notifications-prompt-dismissed-at',
         dismissDays: @js(\App\Livewire\PushNotificationsPrompt::DISMISS_DAYS),
         wantsOpen: false,
+        installOfferWaitMs: 4000,
         async init() {
             this.$watch('wantsOpen', () => this.claim());
             this.$watch('$store.fullScreenPrompt.current', () => this.claim());
@@ -22,8 +24,27 @@
                 return;
             }
 
-            await this.refreshStatus();
+            await Promise.all([this.refreshStatus(), this.waitForInstallOffer()]);
             this.wantsOpen = this.status === 'disabled';
+        },
+        // Chromium announces that the app can be installed (`beforeinstallprompt`) only a moment after the page loads:
+        // wait for it (or for a few seconds, when the app cannot be installed), so that the offer to install opens first
+        waitForInstallOffer() {
+            if (! ('BeforeInstallPromptEvent' in window) || window.pwaInstallPrompt || this.isInstalled()) {
+                return Promise.resolve();
+            }
+
+            return new Promise((resolve) => {
+                const timeout = setTimeout(done, this.installOfferWaitMs);
+
+                function done() {
+                    clearTimeout(timeout);
+                    window.removeEventListener('pwa-installable', done);
+                    resolve();
+                }
+
+                window.addEventListener('pwa-installable', done);
+            });
         },
         get isOpen() {
             return this.$store.fullScreenPrompt.current === this.name;

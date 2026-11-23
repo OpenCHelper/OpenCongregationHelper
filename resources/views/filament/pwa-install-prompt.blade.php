@@ -53,7 +53,11 @@
             this.requested = ! this.wasDismissedRecently();
             this.$store.pwaInstall.available = this.isAvailable;
 
-            window.addEventListener('pwa-installable', () => this.canPrompt = true);
+            // Claimed right away, before the offer to enable the push notifications, which waits for this event
+            window.addEventListener('pwa-installable', () => {
+                this.canPrompt = true;
+                this.claim();
+            });
             window.addEventListener('open-pwa-install', () => this.requested = true);
             window.addEventListener('appinstalled', () => {
                 this.$store.pwaInstall.installed = true;
