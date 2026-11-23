@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
@@ -58,6 +59,18 @@ class AppServiceProvider extends ServiceProvider
             Js::make('filament-sidebar-fix', __DIR__.'/../../resources/js/filament-sidebar-fix.js'),
             Js::make('filament-map-picker-fix', __DIR__.'/../../resources/js/filament-map-picker-fix.js'),
         ]);
+
+        // The map picker (`dotswan/filament-map-picker`) and the maps of `eduardoribeirodev/filament-leaflet` each
+        // bundle their own Leaflet and set it as `window.L`: loaded on the same page, the second one replaces the
+        // first, and the shapes drawn on the map picker are made with the other Leaflet (drawing fails). The maps'
+        // script is then loaded only by the pages that show one of them (see `filament/leaflet-map-assets.blade.php`).
+        foreach (FilamentAsset::getScripts(['eduardoribeirodev/filament-leaflet']) as $script) {
+            $script->loadedOnRequest();
+        }
+
+        View::composer('filament-leaflet::components.map', function (): void {
+            view('filament.leaflet-map-assets')->render();
+        });
 
         // Make every panel installable as a Progressive Web App (manifest, icons and service worker)
         FilamentView::registerRenderHook(

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Drawing a territory's map in the territory form, where clicking on the map added no points.
+
 ## [1.0.0-alpha12] - 2026-11-22
 
 ### Added
