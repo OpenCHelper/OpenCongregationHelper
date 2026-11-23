@@ -103,23 +103,20 @@ class TerritoryAssignmentRecordPdf
     }
 
     /**
-     * Split the rows of the record in the lines of the table: a territory assigned more times than the columns of a
-     * line continues on the next one.
+     * The lines of the table, one for each territory: a territory assigned more times than the columns of a line shows
+     * only its latest assignments (the table has no room for the others).
      *
      * @param  iterable<int, array{territory: string, last_completed_at: ?Carbon, assignments: list<array{assignee: string, assigned_at: Carbon, completed_at: ?Carbon}>}>  $rows
      * @return Collection<int, array{territory: string, last_completed_at: ?Carbon, assignments: list<array{assignee: string, assigned_at: Carbon, completed_at: ?Carbon}>}>
      */
     public static function lines(iterable $rows, int $assignmentsPerLine): Collection
     {
-        return collect($rows)->flatMap(function (array $row) use ($assignmentsPerLine): array {
-            $chunks = array_chunk($row['assignments'], $assignmentsPerLine) ?: [[]];
-
-            return array_map(fn (array $assignments, int $index): array => [
-                'territory' => $row['territory'],
-                'last_completed_at' => $index === 0 ? $row['last_completed_at'] : null,
-                'assignments' => $assignments,
-            ], $chunks, array_keys($chunks));
-        })->values();
+        return collect($rows)
+            ->map(fn (array $row): array => [
+                ...$row,
+                'assignments' => array_slice($row['assignments'], -$assignmentsPerLine),
+            ])
+            ->values();
     }
 
     /**

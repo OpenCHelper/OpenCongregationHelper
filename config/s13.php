@@ -10,7 +10,7 @@
 |
 | Each territory takes one row of the table, split in two lines: the assignee is written on the upper one, and the
 | dates on which the territory was assigned and completed side by side on the lower one. A territory assigned more
-| times than the columns of a row continues on the next row.
+| times than the columns of a row shows only its latest assignments.
 |
 */
 

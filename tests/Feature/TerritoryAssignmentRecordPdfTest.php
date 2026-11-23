@@ -76,19 +76,23 @@ function actingAsS13User(array $permissions, ?string $role = null): User
     return $user;
 }
 
-test('a territory assigned more times than the columns of a line continues on the next one', function () {
-    $assignment = ['assignee' => 'John Doe', 'assigned_at' => Carbon::parse('2025-10-01'), 'completed_at' => null];
+test('a territory assigned more times than the columns of a line shows only its latest assignments', function () {
+    $assignments = array_map(fn (int $month): array => [
+        'assignee' => "Assignee {$month}",
+        'assigned_at' => Carbon::create(2025, $month, 1),
+        'completed_at' => null,
+    ], range(9, 12));
+    array_unshift($assignments, ['assignee' => 'Oldest', 'assigned_at' => Carbon::create(2025, 9, 1), 'completed_at' => null]);
 
     $lines = TerritoryAssignmentRecordPdf::lines([
-        ['territory' => '1', 'last_completed_at' => Carbon::parse('2025-05-01'), 'assignments' => array_fill(0, 5, $assignment)],
+        ['territory' => '1', 'last_completed_at' => Carbon::parse('2025-05-01'), 'assignments' => $assignments],
         ['territory' => '2', 'last_completed_at' => null, 'assignments' => []],
     ], 4);
 
-    expect($lines->pluck('territory')->all())->toBe(['1', '1', '2'])
-        ->and(count($lines[0]['assignments']))->toBe(4)
-        ->and(count($lines[1]['assignments']))->toBe(1)
-        ->and($lines[0]['last_completed_at'])->not->toBeNull()
-        ->and($lines[1]['last_completed_at'])->toBeNull();
+    expect($lines->pluck('territory')->all())->toBe(['1', '2'])
+        ->and(array_column($lines[0]['assignments'], 'assignee'))->toBe(['Assignee 9', 'Assignee 10', 'Assignee 11', 'Assignee 12'])
+        ->and($lines[0]['last_completed_at']?->toDateString())->toBe('2025-05-01')
+        ->and($lines[1]['assignments'])->toBe([]);
 });
 
 test('the record takes a page of the template for each page of rows', function () {
