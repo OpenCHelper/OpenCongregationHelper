@@ -1,6 +1,6 @@
 {{--
     Offer to install the Progressive Web App (see `<x-pwa-head />`) in a full-screen dialog over the pages of the app
-    panel: it is the recommended way to use the app, as it brings the notifications of the app to the device.
+    panel: it is the recommended way to use the app (and, on iOS, the only one with notifications).
 
     - Chromium browsers (Chrome, Edge, Android) fire `beforeinstallprompt`: it is captured as soon as possible, before
       Alpine starts, and the "Install" button opens the native prompt of the browser.
@@ -148,11 +148,13 @@
             </p>
 
             <ul class="mt-8 w-full space-y-5 text-start">
+                {{-- Elsewhere the notifications do not need the app to be installed: they are offered after logging in --}}
                 @foreach ([
-                    'heroicon-o-bell-alert' => 'notifications',
-                    'heroicon-o-device-phone-mobile' => 'home_screen',
-                ] as $icon => $benefit)
-                    <li class="flex gap-4">
+                    'home_screen' => 'heroicon-o-device-phone-mobile',
+                    'own_window' => 'heroicon-o-arrows-pointing-out',
+                    'ios_notifications' => 'heroicon-o-bell-alert',
+                ] as $benefit => $icon)
+                    <li @if ($benefit === 'ios_notifications') x-show="isIos" @endif class="flex gap-4">
                         <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600 dark:bg-primary-400/10 dark:text-primary-400">
                             <x-filament::icon :icon="$icon" class="size-5" />
                         </span>

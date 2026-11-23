@@ -4,15 +4,19 @@ return [
     'install' => [
         'recommended' => 'Consigliato',
         'title' => 'Installa :app',
-        'description' => 'È il modo migliore per usare :app: ricevi le sue notifiche direttamente sul tuo dispositivo.',
+        'description' => 'È il modo migliore per usare :app: funziona come qualsiasi altra app sul tuo dispositivo.',
         'benefits' => [
-            'notifications' => [
-                'title' => 'Notifiche sul tuo dispositivo',
-                'description' => 'Sappi subito quando ti viene assegnato un territorio o quando qualcosa richiede la tua attenzione.',
-            ],
             'home_screen' => [
                 'title' => 'Sempre a portata di mano',
-                'description' => 'Aprila dalla schermata Home o dal desktop, in una sua finestra, come qualsiasi altra app.',
+                'description' => 'Aprila dalla schermata Home o dal desktop, come qualsiasi altra app.',
+            ],
+            'own_window' => [
+                'title' => 'Più spazio',
+                'description' => 'Si apre in una sua finestra, senza la barra degli indirizzi e le schede del browser.',
+            ],
+            'ios_notifications' => [
+                'title' => 'Notifiche su iPhone e iPad',
+                'description' => 'Lì le notifiche dell\'app funzionano solo dopo averla installata.',
             ],
         ],
         'ios_steps_before' => 'Tocca',

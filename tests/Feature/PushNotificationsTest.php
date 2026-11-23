@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Livewire\ProfilePushNotifications;
@@ -18,6 +19,7 @@ use App\Support\WebPush;
 use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Notifications\Notification as BaseNotification;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use NotificationChannels\WebPush\WebPushChannel;
@@ -170,7 +172,7 @@ test('the profile offers to enable push notifications only when they are configu
     'not configured' => false,
 ]);
 
-test('a full-screen dialog offers to enable push notifications once logged in, only when they can be', function (bool $isConfigured, bool $isImpersonating) {
+test('a full-screen dialog offers to enable push notifications after logging in, only when they can be', function (bool $isConfigured, bool $isImpersonating) {
     if (! frontendAssetsAreAvailable()) {
         $this->withoutVite();
     }
@@ -181,7 +183,11 @@ test('a full-screen dialog offers to enable push notifications once logged in, o
 
     Impersonation::partialMock()->shouldReceive('isImpersonating')->andReturn($isImpersonating);
 
-    $response = $this->actingAs($this->user)->followingRedirects()->get('/app')->assertOk();
+    $response = $this->actingAs($this->user)
+        ->withSession([PushNotificationsPrompt::OFFER_SESSION_KEY => true])
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk();
 
     $isConfigured && ! $isImpersonating
         ? $response->assertSee('app-push-notifications-prompt fixed inset-0', escape: false)
@@ -197,12 +203,43 @@ test('a full-screen dialog offers to enable push notifications once logged in, o
     'impersonating' => [true, true],
 ]);
 
+test('the dialog is offered only on the first page after logging in', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->user->update(['password' => Hash::make('a-password')]);
+
+    Livewire::test(Login::class)
+        ->fillForm(['email' => $this->user->email, 'password' => 'a-password'])
+        ->call('authenticate')
+        ->assertHasNoErrors();
+
+    $this->assertAuthenticatedAs($this->user);
+
+    $this->followingRedirects()->get('/app')->assertOk()->assertSee('app-push-notifications-prompt', escape: false);
+    $this->followingRedirects()->get('/app')->assertOk()->assertDontSee('app-push-notifications-prompt', escape: false);
+});
+
+test('the dialog is not offered to users already logged in', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->actingAs($this->user)
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertDontSee('app-push-notifications-prompt', escape: false);
+});
+
 test('the dialog takes turns with the offer to install the app', function () {
     if (! frontendAssetsAreAvailable()) {
         $this->withoutVite();
     }
 
     $this->actingAs($this->user)
+        ->withSession([PushNotificationsPrompt::OFFER_SESSION_KEY => true])
         ->followingRedirects()
         ->get('/app')
         ->assertOk()

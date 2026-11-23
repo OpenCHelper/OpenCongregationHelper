@@ -4,15 +4,19 @@ return [
     'install' => [
         'recommended' => 'Recommended',
         'title' => 'Install :app',
-        'description' => 'It is the best way to use :app: you get its notifications right on your device.',
+        'description' => 'It is the best way to use :app: it works like any other app on your device.',
         'benefits' => [
-            'notifications' => [
-                'title' => 'Notifications on your device',
-                'description' => 'Know right away when a territory is assigned to you or something needs your attention.',
-            ],
             'home_screen' => [
                 'title' => 'Always at hand',
-                'description' => 'Open it from your home screen or desktop, in its own window, like any other app.',
+                'description' => 'Open it from your home screen or desktop, like any other app.',
+            ],
+            'own_window' => [
+                'title' => 'More room',
+                'description' => 'It opens in its own window, without the address bar and tabs of the browser.',
+            ],
+            'ios_notifications' => [
+                'title' => 'Notifications on iPhone and iPad',
+                'description' => 'There, the notifications of the app work only once it is installed.',
             ],
         ],
         'ios_steps_before' => 'Tap',

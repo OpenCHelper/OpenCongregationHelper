@@ -1,7 +1,8 @@
 {{--
     Offer to enable the push notifications on the current device (see `resources/js/push-subscription.js`) in a
-    full-screen dialog, like the offer to install the app (`filament.pwa-install-prompt`): the two take turns through
-    the `fullScreenPrompt` store, so that only one is open at a time.
+    full-screen dialog, on the first page after logging in (`App\Livewire\PushNotificationsPrompt`), like the offer
+    to install the app (`filament.pwa-install-prompt`): the two take turns through the `fullScreenPrompt` store, so
+    that only one is open at a time.
 
     Nothing is shown when the device cannot receive them (e.g. on iOS before installing the app), is already subscribed,
     blocks them, or for some days after the user dismissed the offer.

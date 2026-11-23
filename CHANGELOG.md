@@ -9,15 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Full-screen dialog, once logged in, that offers to turn on the push notifications on the device; it takes turns
-  with the offer to install the app and can be dismissed for 30 days.
+- Full-screen dialog, right after logging in, that offers to turn on the push notifications on the device; it takes
+  turns with the offer to install the app and can be dismissed for 30 days.
 - **Install app** entry in the user menu and section in the profile, to install the app after dismissing the offer;
   they show only when the browser can install it.
 
 ### Changed
 
-- The offer to install the app is now a full-screen dialog that recommends it as the best way to use the app,
-  since it brings its notifications to the device.
+- The offer to install the app is now a full-screen dialog that recommends it as the best way to use the app.
 
 ## [1.0.0-alpha12] - 2026-11-22
 

@@ -16,6 +16,7 @@ use App\Filament\Pages\Logs;
 use App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired;
 use App\Http\Middleware\EnsureMultiFactorAuthenticationWhenRequired;
 use App\Listeners\SwitchTeam;
+use App\Livewire\PushNotificationsPrompt;
 use App\Models\Team;
 use App\Settings\GeneralSettings;
 use App\Support\AppVersions;
@@ -171,10 +172,15 @@ class AppPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn (): ?View => Filament::auth()->check() && WebPush::isConfigured() ? view('filament.push-logout') : null,
             )
-            // Offer to enable the push notifications on the device once logged in, taking turns with the offer to install
+            // Offer to enable the push notifications on the device on the first page after logging in, taking turns with
+            // the offer to install
             ->renderHook(
                 PanelsRenderHook::BODY_END,
-                fn (): ?string => Filament::auth()->check() && WebPush::canSubscribe() ? Blade::render("@livewire('push-notifications-prompt')") : null,
+                fn (): ?string => Filament::auth()->check()
+                    && WebPush::canSubscribe()
+                    && session()->pull(PushNotificationsPrompt::OFFER_SESSION_KEY)
+                        ? Blade::render("@livewire('push-notifications-prompt')")
+                        : null,
             )
             // Registered after the plugins, so that the help menu stays after the environment indicator.
             ->bootUsing(function (): void {

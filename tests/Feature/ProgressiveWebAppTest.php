@@ -126,7 +126,7 @@ it('offers to install the app in the app panel, once logged in', function () {
         ->assertSee(__('pwa.install.dismiss'));
 });
 
-it('offers to install the app in a full-screen dialog that recommends it for the notifications', function () {
+it('offers to install the app in a full-screen dialog that recommends it', function () {
     $user = User::factory()->create(['can_login' => true, 'email_verified_at' => now()]);
 
     $this->actingAs($user)
@@ -138,8 +138,10 @@ it('offers to install the app in a full-screen dialog that recommends it for the
         ->assertSee('x-trap.inert.noscroll="isOpen"', escape: false)
         ->assertSee(__('pwa.install.recommended'))
         ->assertSee(__('pwa.install.description', ['app' => config('app.name')]))
-        ->assertSee(__('pwa.install.benefits.notifications.title'))
         ->assertSee(__('pwa.install.benefits.home_screen.title'))
+        ->assertSee(__('pwa.install.benefits.own_window.title'))
+        ->assertSee(__('pwa.install.benefits.ios_notifications.title'))
+        ->assertSee('x-show="isIos"', escape: false)
         ->assertSee(__('pwa.install.later'))
         ->assertSee(__('pwa.install.dismiss'));
 });
