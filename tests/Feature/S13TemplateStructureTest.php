@@ -3,6 +3,7 @@
 use App\Filament\Resources\Territories\Actions\DownloadTerritoryAssignmentRecordAction;
 use App\Filament\Resources\Territories\Pages\ListTerritories;
 use App\Models\User;
+use App\Support\S13Layout;
 use App\Support\S13TemplateStructure;
 use App\Support\TerritoryAssignmentRecord;
 use App\Support\TerritoryAssignmentRecordPdf;
@@ -81,31 +82,30 @@ test('the structure of a template lists its pages, page size and form fields', f
     ]);
 });
 
-test('a template is not compared while the expected structure is unknown', function () {
-    config(['s13.expected_structure' => null]);
-
-    expect(S13TemplateStructure::differences(S13TemplateStructure::fromPdf(s13FormPdf())))->toBe([]);
+test('a template is compared with the structure of the official form by default', function () {
+    expect(S13TemplateStructure::differences(S13TemplateStructure::fromPdf(blankS13Template())))->toBe([])
+        ->and(S13TemplateStructure::differences(S13TemplateStructure::fromPdf(s13FormPdf())))->not->toBe([]);
 });
 
 test('the differences from the expected structure are described', function () {
-    config(['s13.expected_structure' => [
+    $expected = [
         'pages' => 2,
         'width' => 210,
         'height' => 297,
         'fields' => ['Row1.Date', 'Terr', 'Year'],
         'grid' => ['columns' => [10.0], 'rows' => [20.0, 31.0]],
-    ]]);
+    ];
 
-    expect(S13TemplateStructure::differences(S13TemplateStructure::fromPdf(s13FormPdf())))->toBe([
+    expect(S13TemplateStructure::differences(S13TemplateStructure::fromPdf(s13FormPdf()), $expected))->toBe([
         __('s13.structure.pages', ['expected' => 2, 'actual' => 1]),
         __('s13.structure.missing_fields', ['fields' => 'Year']),
         __('s13.structure.added_fields', ['fields' => 'Row1.Name']),
         __('s13.structure.grid'),
     ]);
 
-    config(['s13.expected_structure' => S13TemplateStructure::fromPdf(s13FormPdf())]);
+    $structure = S13TemplateStructure::fromPdf(s13FormPdf());
 
-    expect(S13TemplateStructure::differences(S13TemplateStructure::fromPdf(s13FormPdf())))->toBe([]);
+    expect(S13TemplateStructure::differences($structure, $structure))->toBe([]);
 });
 
 test('the report of a changed template is a pre-filled issue', function () {
@@ -118,7 +118,6 @@ test('the report of a changed template is a pre-filled issue', function () {
 });
 
 test('a template with a different structure is uploaded only once confirmed', function () {
-    config(['s13.expected_structure' => [...S13TemplateStructure::fromPdf(s13FormPdf()), 'fields' => ['Terr', 'Year']]]);
     actingAsS13SuperAdmin();
 
     $data = [
@@ -149,12 +148,11 @@ test('a template with a different structure is uploaded only once confirmed', fu
 });
 
 test('a template with the expected structure is uploaded without warnings', function () {
-    config(['s13.expected_structure' => S13TemplateStructure::fromPdf(s13FormPdf())]);
     actingAsS13SuperAdmin();
 
     Livewire::test(ListTerritories::class)
         ->mountAction(DownloadTerritoryAssignmentRecordAction::getDefaultName())
-        ->fillForm(['template' => UploadedFile::fake()->createWithContent('S-13_I.pdf', s13FormPdf())])
+        ->fillForm(['template' => UploadedFile::fake()->createWithContent('S-13_I.pdf', blankS13Template())])
         ->assertSchemaComponentHidden('uploaded_structure_warning', 'mountedActionSchema0')
         ->assertSchemaComponentHidden('accept_structure_changes', 'mountedActionSchema0')
         ->callMountedAction()
@@ -164,7 +162,7 @@ test('a template with the expected structure is uploaded without warnings', func
 });
 
 test('the expected structure is the one of the official form', function () {
-    $expected = S13TemplateStructure::expected();
+    $expected = S13Layout::EXPECTED_STRUCTURE;
 
     // The table of the S-13 1/22: 20 rows of two lines under a header of two lines, and four columns of assignments
     expect($expected)->not->toBeNull()
@@ -176,7 +174,7 @@ test('the expected structure is the one of the official form', function () {
 
 test('a form whose table matches the configured one is not reported, whatever the number types', function () {
     // As measured, the grid is made of floats, while the configuration may list integers (e.g. 24 for 24.0)
-    $expected = S13TemplateStructure::expected();
+    $expected = S13Layout::EXPECTED_STRUCTURE;
     $measured = [...$expected, 'grid' => [
         'columns' => array_map(fn (int|float $position): float => (float) $position, $expected['grid']['columns']),
         'rows' => array_map(fn (int|float $position): float => (float) $position, $expected['grid']['rows']),
@@ -186,7 +184,7 @@ test('a form whose table matches the configured one is not reported, whatever th
 });
 
 test('a table moved by less than the tolerance is not reported, but a moved line is', function () {
-    $expected = S13TemplateStructure::expected();
+    $expected = S13Layout::EXPECTED_STRUCTURE;
     $grid = $expected['grid'];
 
     $nudged = array_map(fn (int|float $position): float => $position + 0.2, $grid['rows']);

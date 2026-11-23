@@ -6,7 +6,6 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
-use App\Support\S13TemplateStructure;
 use App\Support\TerritoryAssignmentRecord;
 use App\Support\TerritoryAssignmentRecordPdf;
 use Filament\Facades\Filament;
@@ -30,21 +29,7 @@ beforeEach(function () {
     User::factory()->create(['id' => 1]);
 
     $this->zone = TerritoryZone::factory()->create();
-
-    // The blank template stands in for the official form
-    config(['s13.expected_structure' => S13TemplateStructure::fromPdf(blankS13Template())]);
 });
-
-/**
- * A blank A4 PDF, standing in for the official S-13 form.
- */
-function blankS13Template(): string
-{
-    $pdf = new Fpdi;
-    $pdf->AddPage();
-
-    return $pdf->Output('S');
-}
 
 /**
  * The number of pages of a PDF.

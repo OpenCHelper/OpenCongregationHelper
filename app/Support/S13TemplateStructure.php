@@ -17,7 +17,7 @@ use Throwable;
  * The structure of an S-13 template: what the record relies on to be written in the right places.
  *
  * The official form is published (and occasionally revised) on JW Hub, so it is uploaded by the users instead of being
- * shipped with the application. Its structure is compared with the one the layout of `config/s13.php` was made for, so
+ * shipped with the application. Its structure is compared with the one the layout of `S13Layout` was made for, so
  * that a revised form is noticed before a misaligned record is printed.
  */
 class S13TemplateStructure
@@ -43,7 +43,7 @@ class S13TemplateStructure
     {
         $pdf = new Fpdi;
         $pages = $pdf->setSourceFile(StreamReader::createByString($contents));
-        $page = min($pages, (int) config('s13.layout.template_page'));
+        $page = min($pages, (int) S13Layout::LAYOUT['template_page']);
         $size = $pdf->getTemplateSize($pdf->importPage($page));
 
         return [
@@ -56,28 +56,15 @@ class S13TemplateStructure
     }
 
     /**
-     * The structure the layout was made for, if known.
-     *
-     * @return array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}|null
-     */
-    public static function expected(): ?array
-    {
-        return config('s13.expected_structure');
-    }
-
-    /**
-     * Describe how a structure differs from the expected one (none while the expected one is not known).
+     * Describe how a structure differs from the expected one (by default, the one the layout was made for).
      *
      * @param  array{pages: int, width: float, height: float, fields: list<string>, grid: array{columns: list<float>, rows: list<float>}}  $structure
+     * @param  array{pages: int, width: int|float, height: int|float, fields: list<string>, grid: array{columns: list<int|float>, rows: list<int|float>}}|null  $expected
      * @return list<string>
      */
-    public static function differences(array $structure): array
+    public static function differences(array $structure, ?array $expected = null): array
     {
-        $expected = self::expected();
-
-        if ($expected === null) {
-            return [];
-        }
+        $expected ??= S13Layout::EXPECTED_STRUCTURE;
 
         $differences = [];
 
@@ -103,7 +90,7 @@ class S13TemplateStructure
             $differences[] = __('s13.structure.added_fields', ['fields' => self::summarize($added)]);
         }
 
-        if (isset($expected['grid']) && ! self::gridsMatch($structure['grid'], $expected['grid'])) {
+        if (! self::gridsMatch($structure['grid'], $expected['grid'])) {
             $differences[] = __('s13.structure.grid');
         }
 
@@ -142,7 +129,7 @@ class S13TemplateStructure
     public static function issueUrl(array $structure, array $differences, ?string $fileName = null): string
     {
         $body = implode("\n", [
-            'The structure of the S-13 template downloaded from JW Hub differs from the one the S-13 layout (`config/s13.php`) was made for.',
+            'The structure of the S-13 template downloaded from JW Hub differs from the one the S-13 layout (`S13Layout`) was made for.',
             '',
             '**Template**: '.($fileName ?? 'S-13.pdf'),
             '**Application version**: '.config('app.version', 'unknown'),

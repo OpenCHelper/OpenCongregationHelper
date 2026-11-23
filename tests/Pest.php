@@ -1,7 +1,9 @@
 <?php
 
+use App\Support\S13Layout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Vite;
+use setasign\Fpdi\Fpdi;
 use Tests\TestCase;
 
 /*
@@ -57,4 +59,25 @@ function something()
 function frontendAssetsAreAvailable(): bool
 {
     return Vite::isRunningHot() || Vite::manifestHash() !== null;
+}
+
+/**
+ * An A4 PDF with only the lines of the table of the official S-13 form (see `S13Layout::EXPECTED_STRUCTURE`), standing
+ * in for the form, which is not shipped with the application.
+ */
+function blankS13Template(): string
+{
+    $pdf = new Fpdi;
+    $pdf->AddPage();
+    $grid = S13Layout::EXPECTED_STRUCTURE['grid'];
+
+    foreach ($grid['columns'] as $x) {
+        $pdf->Rect($x - 0.1, 50, 0.2, 200, 'F');
+    }
+
+    foreach ($grid['rows'] as $y) {
+        $pdf->Rect(20, $y - 0.1, 150, 0.2, 'F');
+    }
+
+    return $pdf->Output('S');
 }

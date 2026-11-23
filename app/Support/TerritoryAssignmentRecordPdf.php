@@ -16,10 +16,17 @@ use Throwable;
  * The Territory Assignment Record (S-13) of a service year, written on the official template.
  *
  * The template is the PDF downloadable from JW Hub, uploaded by a super administrator; where the data is written on it
- * is configured in `config/s13.php`.
+ * is set by `S13Layout`.
  */
 class TerritoryAssignmentRecordPdf
 {
+    /**
+     * Where the uploaded form is kept: on the private disk, never shipped with the application.
+     */
+    public const TEMPLATE_DISK = 'local';
+
+    public const TEMPLATE_PATH = 'templates/S-13.pdf';
+
     /**
      * Whether the template was uploaded.
      */
@@ -52,7 +59,7 @@ class TerritoryAssignmentRecordPdf
         try {
             $pdf = new Fpdi;
 
-            return $pdf->setSourceFile(StreamReader::createByString($contents)) >= (int) config('s13.layout.template_page');
+            return $pdf->setSourceFile(StreamReader::createByString($contents)) >= (int) S13Layout::LAYOUT['template_page'];
         } catch (Throwable) {
             return false;
         }
@@ -73,8 +80,7 @@ class TerritoryAssignmentRecordPdf
      */
     public static function render(int $serviceYear): string
     {
-        /** @var array<string, mixed> $layout */
-        $layout = config('s13.layout');
+        $layout = S13Layout::LAYOUT;
 
         $pdf = self::newPdf($layout);
         $pdf->SetAutoPageBreak(false);
@@ -270,7 +276,7 @@ class TerritoryAssignmentRecordPdf
     {
         // tFPDF reads the fonts from (and caches their metrics in) the "unifont" folder of its font path
         $fontDirectory = storage_path('framework/cache/s13-fonts/');
-        $fontFile = (string) $layout['font'];
+        $fontFile = resource_path((string) $layout['font']);
         $cachedFontFile = $fontDirectory.'unifont/'.basename($fontFile);
 
         if (! File::exists($cachedFontFile) || File::size($cachedFontFile) !== File::size($fontFile)) {
@@ -298,11 +304,11 @@ class TerritoryAssignmentRecordPdf
 
     protected static function disk(): Filesystem
     {
-        return Storage::disk(config('s13.template.disk'));
+        return Storage::disk(self::TEMPLATE_DISK);
     }
 
     protected static function templatePath(): string
     {
-        return config('s13.template.path');
+        return self::TEMPLATE_PATH;
     }
 }
