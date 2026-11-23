@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Buttons of the full-screen offers to turn on the notifications and to install the app hidden behind the address
+  bar of the browser, when it is at the bottom of the screen.
 - Drawing a territory's map in the territory form, where clicking on the map added no points
   ([#63](https://github.com/OpenCHelper/OpenCongregationHelper/pull/63)).
 

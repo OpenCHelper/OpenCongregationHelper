@@ -94,9 +94,9 @@
     aria-modal="true"
     aria-labelledby="push-notifications-prompt-title"
     aria-describedby="push-notifications-prompt-description"
-    class="app-push-notifications-prompt fixed inset-0 z-50 overflow-y-auto bg-white dark:bg-gray-950"
+    class="app-push-notifications-prompt fixed inset-x-0 top-0 z-50 h-dvh overflow-y-auto bg-white dark:bg-gray-950"
 >
-    <div class="mx-auto flex min-h-full max-w-md flex-col px-6 pt-[max(3rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+    <div class="mx-auto flex min-h-full max-w-md flex-col px-6 pt-[max(3rem,env(safe-area-inset-top))]">
         <div class="flex flex-1 flex-col items-center justify-center text-center">
             <span class="flex size-24 items-center justify-center rounded-full bg-primary-50 text-primary-600 ring-8 ring-primary-50/50 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/5">
                 <x-filament::icon icon="heroicon-o-bell-alert" class="size-12" />
@@ -135,7 +135,7 @@
             </ul>
         </div>
 
-        <div class="mt-10 flex flex-col gap-3">
+        <div class="sticky bottom-0 -mx-6 mt-6 flex flex-col gap-3 border-t border-gray-950/5 bg-white px-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] dark:border-white/10 dark:bg-gray-950">
             <p x-show="status === 'error'" class="text-center text-sm text-danger-600 dark:text-danger-400">
                 {{ __('profile.push_notifications.error') }}
             </p>
