@@ -62,15 +62,19 @@ test('the territory form loads only the script of the map picker', function (str
     expect(substr_count($response->getContent(), $this->mapPickerScript))->toBe(1);
 })->with(['create', 'edit']);
 
-test('the territory form in a modal loads the script of the map picker', function () {
-    $component = Livewire::test(ManageZoneTerritories::class, ['record' => TerritoryZone::factory()->create()->getKey()]);
+test('the territory form in a modal loads the script of the map picker', function (string $action) {
+    $zone = TerritoryZone::factory()->create();
+    $territory = Territory::factory()->withMap()->for($zone, 'territoryZone')->create();
+
+    $component = Livewire::test(ManageZoneTerritories::class, ['record' => $zone->getKey()]);
 
     expect($component->snapshot['memo']['assets'] ?? [])->toBe([]);
 
-    $component->mountAction(TestAction::make('create')->table());
+    // The create action is in the header of the table, the others on its records
+    $component->mountAction(TestAction::make($action)->table($action === 'create' ? true : $territory));
 
     expect($component->snapshot['memo']['assets'] ?? [])->toBe([mapAssetsKey('map-picker-assets')]);
-});
+})->with(['create', 'edit', 'view']);
 
 test('the page of an assignment loads only the script of its map', function () {
     $assignment = TerritoryAssignment::factory()->create([
@@ -79,6 +83,23 @@ test('the page of an assignment loads only the script of its map', function () {
     ]);
 
     $response = $this->get(TerritoryAssignmentResource::getUrl('view', ['record' => $assignment]))
+        ->assertOk()
+        ->assertSeeInOrder([$this->leafletMapScript, '/livewire.js'], escape: false)
+        ->assertDontSee($this->mapPickerScript, escape: false);
+
+    expect(substr_count($response->getContent(), $this->leafletMapScript))->toBe(1);
+});
+
+test('the shared page of an assignment loads only the script of its map', function () {
+    $assignment = TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->withMap()->for(TerritoryZone::factory(), 'territoryZone')->create()->getKey(),
+        'assignee_id' => User::factory()->create()->getKey(),
+    ]);
+    $sharedUrl = $assignment->share();
+
+    auth()->logout();
+
+    $response = $this->get('/guest/shared-assignment/'.$sharedUrl->uid)
         ->assertOk()
         ->assertSeeInOrder([$this->leafletMapScript, '/livewire.js'], escape: false)
         ->assertDontSee($this->mapPickerScript, escape: false);
