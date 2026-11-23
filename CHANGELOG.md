@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **AI assistants**: connect ChatGPT, Claude and other assistants from the profile, to ask about the territories or
+  have them assigned and returned, with the same permissions as the user; off until a super administrator allows them
+  in the Security settings ([#64](https://github.com/OpenCHelper/OpenCongregationHelper/pull/64)).
+
 ## [1.0.0-alpha13] - 2026-11-23
 
 ### Added
