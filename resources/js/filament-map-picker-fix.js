@@ -10,13 +10,16 @@
  * is visible, the map is created again if the picker removed it, or resized to its container otherwise (the
  * container can change size while it is hidden).
  *
+ * The picker's script is loaded only with a map picker (see `AppServiceProvider`), also after Livewire has started
+ * (e.g. in a modal): it is wrapped each time the script defines `window.mapPicker`, which it announces with the
+ * `map-script-loaded` event.
+ *
  * @see {@link https://github.com/dotswan/filament-map-picker/blob/master/resources/js/index.js|Map picker script (`attach()`)}
  */
-document.addEventListener('alpine:init', () => {
-    // The picker defines `window.mapPicker` on `livewire:init`, which Livewire dispatches before starting Alpine.
+window.addEventListener('map-script-loaded', () => {
     const createMapPicker = window.mapPicker;
 
-    if (typeof createMapPicker !== 'function') {
+    if (typeof createMapPicker !== 'function' || createMapPicker.isWrappedByMapPickerFix) {
         return;
     }
 
@@ -54,4 +57,6 @@ document.addEventListener('alpine:init', () => {
 
         return picker;
     };
+
+    window.mapPicker.isWrappedByMapPickerFix = true;
 });
