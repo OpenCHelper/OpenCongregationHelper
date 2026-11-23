@@ -15,6 +15,7 @@ use Laravel\Passport\Token;
 use Livewire\Livewire;
 use phpseclib4\Crypt\RSA;
 use Spatie\Permission\Models\Role;
+use STS\FilamentImpersonate\ImpersonateManager;
 
 beforeEach(function () {
     usePassportTestKeys();
@@ -245,7 +246,7 @@ test('an administrator impersonating a user cannot approve an assistant for them
     $admin->assignRole(Role::findOrCreate('super_admin'));
 
     // As the impersonation of the panel: logged in as the user, with the administrator remembered in the session
-    $this->actingAs($this->user)->withSession([STS\FilamentImpersonate\ImpersonateManager::SESSION_KEY => $admin->id]);
+    $this->actingAs($this->user)->withSession([ImpersonateManager::SESSION_KEY => $admin->id]);
 
     $this->get('/oauth/authorize?'.http_build_query([
         'client_id' => $client->id,
