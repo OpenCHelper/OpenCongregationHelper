@@ -32,6 +32,8 @@ return [
     'sections' => [
         'account_requirements' => 'Requisiti degli account',
         'account_requirements_description' => 'Cosa devono fare gli utenti prima di poter usare l\'app.',
+        'ai_assistants' => 'Assistenti IA',
+        'ai_assistants_description' => 'Se gli utenti possono collegare all\'app degli assistenti IA (es. ChatGPT, Claude).',
         'campaign_expiry' => 'Scadenza delle campagne',
         'campaign_expiry_description' => 'Man mano che si avvicina la data di fine, una campagna attiva diventa in scadenza e poi quasi scaduta.',
         'appearance' => 'Aspetto',
@@ -57,6 +59,10 @@ return [
             'label' => 'Richiedi la conferma dell\'indirizzo email',
             'helper' => 'Gli utenti devono confermare il proprio indirizzo email, dal link che ricevono, prima di usare l\'app.',
             'root_required' => 'Conferma prima l\'indirizzo email dell\'utente root, così che non possa restare bloccato fuori.',
+        ],
+        'ai_assistants_enabled' => [
+            'label' => 'Consenti gli assistenti IA',
+            'helper' => 'Ogni utente può collegare un assistente IA dal proprio profilo: può leggere e modificare ciò che può quell\'utente (es. territori, assegnazioni), quindi i dati vengono inviati al fornitore dell\'assistente. Disattivandolo, vengono scollegati tutti.',
         ],
         'kingdom_hall_address' => [
             'label' => 'Indirizzo della Sala del Regno',

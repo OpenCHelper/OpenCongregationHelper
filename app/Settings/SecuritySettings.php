@@ -15,6 +15,12 @@ class SecuritySettings extends AppSettings
      */
     public bool $require_email_verification = false;
 
+    /**
+     * Whether the users can connect AI assistants (e.g. ChatGPT, Claude) to the app through its MCP server, letting
+     * them read and change what the user can (see `routes/ai.php`).
+     */
+    public bool $ai_assistants_enabled = false;
+
     public static function group(): string
     {
         return 'security';

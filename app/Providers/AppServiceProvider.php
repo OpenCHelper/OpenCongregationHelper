@@ -9,8 +9,11 @@ use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
 use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
+use App\Support\AiAssistantConnections;
+use App\Support\UserLocale;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Carbon\CarbonInterval;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Assets\Js;
@@ -19,18 +22,24 @@ use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Columns\TextColumn;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Translatable\Facades\Translatable;
+use STS\FilamentImpersonate\Facades\Impersonation;
 use Tapp\FilamentMailLog\Models\MailLog;
 
 class AppServiceProvider extends ServiceProvider
@@ -155,10 +164,36 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        $this->configureAiAssistants();
+
         // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
         ExportColumn::configureUsing(function (ExportColumn $column): void {
             $column->preventFormulaInjection();
         });
+    }
+
+    /**
+     * The OAuth authorization server (Passport) of the AI assistants connected to the MCP server (see `routes/ai.php`).
+     *
+     * The access tokens are short-lived and renewed by the assistants with their refresh token: an assistant unused for
+     * longer than the refresh tokens must be authorized again. A revoked token stops working right away anyway.
+     */
+    private function configureAiAssistants(): void
+    {
+        Passport::tokensExpireIn(CarbonInterval::hours(1));
+        Passport::refreshTokensExpireIn(CarbonInterval::days(90));
+
+        // The page where the user approves an assistant, which only the user can do (not an administrator
+        // impersonating them), while the assistants are allowed
+        Passport::authorizationView(function (array $parameters): HttpResponse {
+            abort_unless(AiAssistantConnections::enabled(), 404);
+            abort_if(Impersonation::isImpersonating(), 403, __('ai-assistants.authorize.impersonating'));
+
+            // In the language of the user, as the page is outside of the panel (which applies it)
+            return UserLocale::run($parameters['user'], fn (): HttpResponse => response()->view('mcp.authorize', $parameters));
+        });
+
+        RateLimiter::for('mcp', fn (Request $request): Limit => Limit::perMinute(120)->by($request->user()?->getAuthIdentifier() ?: $request->ip()));
     }
 
     /**

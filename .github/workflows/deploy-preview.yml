@@ -521,6 +521,9 @@ jobs:
             # The `public/storage` link is never deployed (the build's one would be uploaded as a plain folder)
             artisan storage:link --force
 
+            # The keys signing the OAuth tokens of the AI assistants (MCP), kept between deployments (`storage/*.key`)
+            artisan app:ensure-passport-keys
+
             artisan config:cache
             artisan event:cache
             artisan route:cache

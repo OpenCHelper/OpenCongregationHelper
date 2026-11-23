@@ -32,6 +32,8 @@ return [
     'sections' => [
         'account_requirements' => 'Account requirements',
         'account_requirements_description' => 'What the users must do before they can use the app.',
+        'ai_assistants' => 'AI assistants',
+        'ai_assistants_description' => 'Whether the users can connect AI assistants (e.g. ChatGPT, Claude) to the app.',
         'campaign_expiry' => 'Campaign expiry',
         'campaign_expiry_description' => 'As its end date gets closer, an active campaign becomes expiring and then almost expired.',
         'appearance' => 'Appearance',
@@ -57,6 +59,10 @@ return [
             'label' => 'Require email confirmation',
             'helper' => 'Users must confirm their email address, from the link sent to them, before using the app.',
             'root_required' => 'Confirm the email address of the root user first, so that it cannot be locked out.',
+        ],
+        'ai_assistants_enabled' => [
+            'label' => 'Allow AI assistants',
+            'helper' => 'Each user can connect an AI assistant from their profile: it can read and change what that user can (e.g. territories, assignments), so the data is sent to the provider of the assistant. Turning it off disconnects all of them.',
         ],
         'kingdom_hall_address' => [
             'label' => 'Kingdom Hall address',
