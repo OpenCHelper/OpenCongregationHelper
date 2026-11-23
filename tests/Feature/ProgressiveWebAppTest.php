@@ -136,7 +136,7 @@ it('offers to install the app in a full-screen dialog that recommends it', funct
         ->followingRedirects()
         ->get('/app')
         ->assertOk()
-        ->assertSee('app-pwa-install fixed inset-0', escape: false)
+        ->assertSee('app-pwa-install fixed inset-x-0 top-0 z-50 h-dvh', escape: false)
         ->assertSee('aria-modal="true"', escape: false)
         ->assertSee('x-trap.inert.noscroll="isOpen"', escape: false)
         ->assertSee(__('pwa.install.recommended'))

@@ -192,7 +192,7 @@ test('a full-screen dialog offers to enable push notifications after logging in,
         ->assertOk();
 
     $isConfigured && ! $isImpersonating
-        ? $response->assertSee('app-push-notifications-prompt fixed inset-0', escape: false)
+        ? $response->assertSee('app-push-notifications-prompt fixed inset-x-0 top-0 z-50 h-dvh', escape: false)
             ->assertSee('...pushSubscription(', escape: false)
             ->assertSee(__('pwa.notifications.title'))
             ->assertSee(__('pwa.notifications.action'))

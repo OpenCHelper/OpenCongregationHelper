@@ -134,9 +134,9 @@
     aria-modal="true"
     aria-labelledby="pwa-install-title"
     aria-describedby="pwa-install-description"
-    class="app-pwa-install fixed inset-0 z-50 overflow-y-auto bg-white dark:bg-gray-950"
+    class="app-pwa-install fixed inset-x-0 top-0 z-50 h-dvh overflow-y-auto bg-white dark:bg-gray-950"
 >
-    <div class="mx-auto flex min-h-full max-w-md flex-col px-6 pt-[max(3rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+    <div class="mx-auto flex min-h-full max-w-md flex-col px-6 pt-[max(3rem,env(safe-area-inset-top))]">
         <div class="flex flex-1 flex-col items-center justify-center text-center">
             <img src="{{ asset('icons/icon.svg') }}" alt="" class="size-24 rounded-3xl shadow-lg ring-1 ring-gray-950/5 dark:ring-white/10">
 
@@ -179,7 +179,7 @@
             </ul>
         </div>
 
-        <div class="mt-10 flex flex-col gap-3">
+        <div class="sticky bottom-0 -mx-6 mt-6 flex flex-col gap-3 border-t border-gray-950/5 bg-white px-6 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] dark:border-white/10 dark:bg-gray-950">
             <p x-show="isIos" class="rounded-xl bg-gray-50 p-4 text-center text-sm text-gray-700 ring-1 ring-gray-950/5 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
                 {{ __('pwa.install.ios_steps_before') }}
                 <x-filament::icon icon="heroicon-o-arrow-up-on-square" class="inline size-5 align-text-bottom" :label="__('pwa.install.ios_share')" />
