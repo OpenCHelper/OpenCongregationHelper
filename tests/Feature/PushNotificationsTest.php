@@ -1,8 +1,10 @@
 <?php
 
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Livewire\ProfilePushNotifications;
+use App\Livewire\PushNotificationsPrompt;
 use App\Models\Campaign;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
@@ -13,9 +15,13 @@ use App\Notifications\StaleAssignmentNotification;
 use App\Notifications\TerritoryAssignedNotification;
 use App\Notifications\TerritoryReturnedNotification;
 use App\Notifications\TestPushNotification;
+use App\Providers\Filament\AppPanelProvider;
+use App\Settings\SecuritySettings;
 use App\Support\WebPush;
 use Filament\Facades\Filament;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Notifications\Notification as BaseNotification;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use NotificationChannels\WebPush\WebPushChannel;
@@ -167,6 +173,165 @@ test('the profile offers to enable push notifications only when they are configu
     'configured' => true,
     'not configured' => false,
 ]);
+
+test('a full-screen dialog offers to enable push notifications after logging in, only when they can be', function (bool $isConfigured, bool $isImpersonating) {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    if (! $isConfigured) {
+        config(['webpush.vapid.public_key' => null]);
+    }
+
+    Impersonation::partialMock()->shouldReceive('isImpersonating')->andReturn($isImpersonating);
+
+    $response = $this->actingAs($this->user)
+        ->withSession([PushNotificationsPrompt::OFFER_SESSION_KEY => true])
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk();
+
+    $isConfigured && ! $isImpersonating
+        ? $response->assertSee('app-push-notifications-prompt fixed inset-0', escape: false)
+            ->assertSee('...pushSubscription(', escape: false)
+            ->assertSee(__('pwa.notifications.title'))
+            ->assertSee(__('pwa.notifications.action'))
+            ->assertSee(__('pwa.notifications.dismiss'))
+            ->assertSee(__('pwa.notifications.later'))
+        : $response->assertDontSee('app-push-notifications-prompt', escape: false);
+})->with([
+    'configured' => [true, false],
+    'not configured' => [false, false],
+    'impersonating' => [true, true],
+]);
+
+test('the dialog is offered only on the first page after logging in', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->user->update(['password' => Hash::make('a-password')]);
+
+    Livewire::test(Login::class)
+        ->fillForm(['email' => $this->user->email, 'password' => 'a-password'])
+        ->call('authenticate')
+        ->assertHasNoErrors();
+
+    $this->assertAuthenticatedAs($this->user);
+
+    $this->followingRedirects()->get('/app')->assertOk()->assertSee('app-push-notifications-prompt', escape: false);
+    $this->followingRedirects()->get('/app')->assertOk()->assertDontSee('app-push-notifications-prompt', escape: false);
+});
+
+test('the offers after logging in wait for the first page of the app, after the email confirmation', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $settings = app(SecuritySettings::class);
+    $settings->require_email_verification = true;
+    $settings->save();
+
+    $user = User::factory()->create(['can_login' => true, 'email_verified_at' => null]);
+    $offers = [
+        AppPanelProvider::PWA_INSTALL_OFFER_SESSION_KEY => true,
+        PushNotificationsPrompt::OFFER_SESSION_KEY => true,
+    ];
+
+    // The panel sends the user to the confirmation of the email address, which must not take the offers
+    $this->actingAs($user)
+        ->withSession($offers)
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee(__('filament-panels::auth/pages/email-verification/email-verification-prompt.heading'))
+        ->assertSee('offerAfterLogin: false', escape: false)
+        ->assertDontSee('app-push-notifications-prompt', escape: false)
+        ->assertSessionHas(AppPanelProvider::PWA_INSTALL_OFFER_SESSION_KEY)
+        ->assertSessionHas(PushNotificationsPrompt::OFFER_SESSION_KEY);
+
+    $user->markEmailAsVerified();
+
+    $this->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee('offerAfterLogin: true', escape: false)
+        ->assertSee('app-push-notifications-prompt', escape: false)
+        ->assertSessionMissing(AppPanelProvider::PWA_INSTALL_OFFER_SESSION_KEY)
+        ->assertSessionMissing(PushNotificationsPrompt::OFFER_SESSION_KEY);
+});
+
+test('the dialog is not offered to users already logged in', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->actingAs($this->user)
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertDontSee('app-push-notifications-prompt', escape: false);
+});
+
+test('the dialog takes turns with the offer to install the app', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->actingAs($this->user)
+        ->withSession([PushNotificationsPrompt::OFFER_SESSION_KEY => true])
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee("Alpine.store('fullScreenPrompt', { current: null })", escape: false)
+        ->assertSee("name: 'pwa-install'", escape: false)
+        ->assertSee("name: 'push-notifications'", escape: false)
+        ->assertSee('Promise.all([this.refreshStatus(), this.waitForInstallOffer()])', escape: false);
+});
+
+test('the dialog does not show on the login page', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->get('/app/login')->assertOk()->assertDontSee('app-push-notifications-prompt', escape: false);
+});
+
+test('users can enable push notifications on a device from the dialog', function () {
+    $this->actingAs($this->user);
+
+    Livewire::test(PushNotificationsPrompt::class)
+        ->call('subscribe', $this->subscription)
+        ->assertHasNoErrors();
+
+    expect($this->user->pushSubscriptions()->sole()->endpoint)->toBe('https://push.example.com/send/abc123');
+});
+
+test('the dialog cannot enable push notifications while impersonating', function () {
+    Impersonation::shouldReceive('isImpersonating')->andReturn(true);
+    $this->actingAs($this->user);
+
+    Livewire::test(PushNotificationsPrompt::class)
+        ->call('subscribe', $this->subscription)
+        ->assertNotFound();
+
+    expect($this->user->pushSubscriptions()->exists())->toBeFalse();
+});
+
+test('the push subscription script is loaded in the panels', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $this->actingAs($this->user)
+        ->get(EditProfile::getUrl())
+        ->assertOk()
+        ->assertSee(FilamentAsset::getScriptSrc('push-subscription'), escape: false);
+
+    expect(file_get_contents(resource_path('js/push-subscription.js')))
+        ->toContain('window.pushSubscription = (publicKey) =>')
+        ->toContain('this.$wire.subscribe(');
+});
 
 test('users can enable push notifications on a device', function () {
     $this->actingAs($this->user);

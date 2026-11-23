@@ -16,6 +16,7 @@ use App\Filament\Pages\Logs;
 use App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired;
 use App\Http\Middleware\EnsureMultiFactorAuthenticationWhenRequired;
 use App\Listeners\SwitchTeam;
+use App\Livewire\PushNotificationsPrompt;
 use App\Models\Team;
 use App\Settings\GeneralSettings;
 use App\Support\AppVersions;
@@ -51,6 +52,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -81,6 +83,28 @@ class AppPanelProvider extends PanelProvider
      * Days during which the offer to install the app is not shown again, after the user dismissed it.
      */
     public const PWA_INSTALL_DISMISS_DAYS = 30;
+
+    /**
+     * Session key set when the user logs in (see `OfferFullScreenPromptsAfterLogin`), and taken by the first page, which
+     * opens the offer to install the app by itself.
+     */
+    public const PWA_INSTALL_OFFER_SESSION_KEY = 'pwa_install_prompt.offer';
+
+    /**
+     * Take the flag that a full-screen offer sets when the user logs in (see `OfferFullScreenPromptsAfterLogin`), so that
+     * only the first page after logging in opens it.
+     *
+     * The pages of the authentication (e.g. the email confirmation or the set-up of the required two-factor
+     * authentication, where the panel sends some users right after logging in) leave it to the first page of the app.
+     */
+    public static function takeLoginOffer(string $sessionKey): bool
+    {
+        if (request()->routeIs('filament.*.auth.*')) {
+            return false;
+        }
+
+        return (bool) session()->pull($sessionKey);
+    }
 
     public function panel(Panel $panel): Panel
     {
@@ -129,6 +153,12 @@ class AppPanelProvider extends PanelProvider
                     ->label(fn (): string => __('filament-ui-switcher::filament-ui-switcher.modal.heading'))
                     ->icon(Heroicon::OutlinedCog6Tooth)
                     ->alpineClickHandler("\$dispatch('open-modal', { id: 'ui-switcher-modal' })"),
+                // Opens the offer to install the app (`filament.pwa-install-prompt`), only while the browser can install it
+                Action::make('installApp')
+                    ->label(fn (): string => __('pwa.install.menu_label'))
+                    ->icon(Heroicon::OutlinedArrowDownTray)
+                    ->alpineClickHandler("\$dispatch('open-pwa-install')")
+                    ->extraAttributes(['x-show' => '$store.pwaInstall.available', 'x-cloak' => true]),
                 Action::make('versionInfo')
                     ->label(fn (): string => __('filament-resources.version_info.menu_label'))
                     ->icon(Heroicon::OutlinedInformationCircle)
@@ -154,15 +184,30 @@ class AppPanelProvider extends PanelProvider
                 PanelsRenderHook::LAYOUT_END,
                 fn (): string => '<div class="app-ui-preferences">'.FilamentView::renderHook(self::UI_PREFERENCES_RENDER_HOOK)->toHtml().'</div>',
             )
-            // Offer to install the app once logged in (on the login page it would cover the form), at the start of the
-            // body to catch the event of the browser early.
+            // Offer to install the app on the first page after logging in (on the login page it would cover the form),
+            // at the start of the body to catch the event of the browser early. Rendered on the other pages too, where it
+            // opens only from the user menu and the profile.
             ->renderHook(
                 PanelsRenderHook::BODY_START,
-                fn (): ?View => Filament::auth()->check() ? view('filament.pwa-install-prompt') : null,
+                fn (): ?View => Filament::auth()->check()
+                    ? view('filament.pwa-install-prompt', [
+                        'offerAfterLogin' => self::takeLoginOffer(self::PWA_INSTALL_OFFER_SESSION_KEY),
+                    ])
+                    : null,
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn (): ?View => Filament::auth()->check() && WebPush::isConfigured() ? view('filament.push-logout') : null,
+            )
+            // Offer to enable the push notifications on the device on the first page after logging in, taking turns with
+            // the offer to install
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): ?string => Filament::auth()->check()
+                    && WebPush::canSubscribe()
+                    && self::takeLoginOffer(PushNotificationsPrompt::OFFER_SESSION_KEY)
+                        ? Blade::render("@livewire('push-notifications-prompt')")
+                        : null,
             )
             // Registered after the plugins, so that the help menu stays after the environment indicator.
             ->bootUsing(function (): void {

@@ -25,6 +25,13 @@ bar), **by email** and, if you enable them, as **push notifications** on your de
 Push notifications appear on your phone or computer like those of any other app, even when the application is closed.
 Clicking one opens the related territory or assignment.
 
+Right after you log in, a full-screen page offers to turn them on for the device you are using: click **Turn on
+notifications** and allow them when the browser asks. If you click **Not now**, it is offered again after 30 days. It
+appears after the offer to install the app (see [Installing the app](interface#installing-the-app)), and only when the
+device can receive them and they are not on yet.
+
+You can also turn them on, or off, from your profile at any time:
+
 1. Open your [profile](profile) on the device where you want to receive them.
 2. In **Push notifications**, click **Enable on this device** and allow the notifications when the browser asks.
 3. Click **Send a test notification** to check that they arrive.
