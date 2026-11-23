@@ -80,6 +80,30 @@ test('a territory assigned more times than the columns of a line shows only its 
         ->and($lines[1]['assignments'])->toBe([]);
 });
 
+test('the last date completed carries over the last return of the assignments not shown', function () {
+    $assignment = fn (string $assignee, string $assignedAt, ?string $completedAt): array => [
+        'assignee' => $assignee,
+        'assigned_at' => Carbon::parse($assignedAt),
+        'completed_at' => $completedAt !== null ? Carbon::parse($completedAt) : null,
+    ];
+
+    $lines = TerritoryAssignmentRecordPdf::lines([[
+        'territory' => '1',
+        'last_completed_at' => Carbon::parse('2025-07-15'),
+        'assignments' => [
+            $assignment('Rossi', '2025-09-03', '2025-10-10'),
+            $assignment('Bianchi', '2025-10-15', '2025-11-28'),
+            $assignment('Verdi', '2025-12-02', '2026-01-20'),
+            $assignment('Neri', '2026-01-25', '2026-03-05'),
+            $assignment('Russo', '2026-03-10', '2026-04-30'),
+            $assignment('Gallo', '2026-05-05', null),
+        ],
+    ]], 4);
+
+    expect(array_column($lines[0]['assignments'], 'assignee'))->toBe(['Verdi', 'Neri', 'Russo', 'Gallo'])
+        ->and($lines[0]['last_completed_at']?->toDateString())->toBe('2025-11-28');
+});
+
 test('the record takes a page of the template for each page of rows', function () {
     TerritoryAssignmentRecordPdf::storeTemplate(blankS13Template());
 

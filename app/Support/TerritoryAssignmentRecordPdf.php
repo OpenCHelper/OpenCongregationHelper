@@ -142,16 +142,29 @@ class TerritoryAssignmentRecordPdf
      * The lines of the table, one for each territory: a territory assigned more times than the columns of a line shows
      * only its latest assignments (the table has no room for the others).
      *
+     * As when a new sheet of the form is started by hand, the date on which the territory was last completed is then
+     * the last one before the assignments shown: the latest return of the assignments not shown, if any.
+     *
      * @param  iterable<int, array{territory: string, last_completed_at: ?Carbon, assignments: list<array{assignee: string, assigned_at: Carbon, completed_at: ?Carbon}>}>  $rows
      * @return Collection<int, array{territory: string, last_completed_at: ?Carbon, assignments: list<array{assignee: string, assigned_at: Carbon, completed_at: ?Carbon}>}>
      */
     public static function lines(iterable $rows, int $assignmentsPerLine): Collection
     {
         return collect($rows)
-            ->map(fn (array $row): array => [
-                ...$row,
-                'assignments' => array_slice($row['assignments'], -$assignmentsPerLine),
-            ])
+            ->map(function (array $row) use ($assignmentsPerLine): array {
+                $hidden = array_slice($row['assignments'], 0, max(0, count($row['assignments']) - $assignmentsPerLine));
+                $lastCompletedAt = collect($hidden)
+                    ->pluck('completed_at')
+                    ->push($row['last_completed_at'])
+                    ->filter()
+                    ->max();
+
+                return [
+                    ...$row,
+                    'last_completed_at' => $lastCompletedAt,
+                    'assignments' => array_slice($row['assignments'], -$assignmentsPerLine),
+                ];
+            })
             ->values();
     }
 
