@@ -15,6 +15,8 @@ use App\Notifications\StaleAssignmentNotification;
 use App\Notifications\TerritoryAssignedNotification;
 use App\Notifications\TerritoryReturnedNotification;
 use App\Notifications\TestPushNotification;
+use App\Providers\Filament\AppPanelProvider;
+use App\Settings\SecuritySettings;
 use App\Support\WebPush;
 use Filament\Facades\Filament;
 use Filament\Support\Facades\FilamentAsset;
@@ -219,6 +221,44 @@ test('the dialog is offered only on the first page after logging in', function (
 
     $this->followingRedirects()->get('/app')->assertOk()->assertSee('app-push-notifications-prompt', escape: false);
     $this->followingRedirects()->get('/app')->assertOk()->assertDontSee('app-push-notifications-prompt', escape: false);
+});
+
+test('the offers after logging in wait for the first page of the app, after the email confirmation', function () {
+    if (! frontendAssetsAreAvailable()) {
+        $this->withoutVite();
+    }
+
+    $settings = app(SecuritySettings::class);
+    $settings->require_email_verification = true;
+    $settings->save();
+
+    $user = User::factory()->create(['can_login' => true, 'email_verified_at' => null]);
+    $offers = [
+        AppPanelProvider::PWA_INSTALL_OFFER_SESSION_KEY => true,
+        PushNotificationsPrompt::OFFER_SESSION_KEY => true,
+    ];
+
+    // The panel sends the user to the confirmation of the email address, which must not take the offers
+    $this->actingAs($user)
+        ->withSession($offers)
+        ->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee(__('filament-panels::auth/pages/email-verification/email-verification-prompt.heading'))
+        ->assertSee('offerAfterLogin: false', escape: false)
+        ->assertDontSee('app-push-notifications-prompt', escape: false)
+        ->assertSessionHas(AppPanelProvider::PWA_INSTALL_OFFER_SESSION_KEY)
+        ->assertSessionHas(PushNotificationsPrompt::OFFER_SESSION_KEY);
+
+    $user->markEmailAsVerified();
+
+    $this->followingRedirects()
+        ->get('/app')
+        ->assertOk()
+        ->assertSee('offerAfterLogin: true', escape: false)
+        ->assertSee('app-push-notifications-prompt', escape: false)
+        ->assertSessionMissing(AppPanelProvider::PWA_INSTALL_OFFER_SESSION_KEY)
+        ->assertSessionMissing(PushNotificationsPrompt::OFFER_SESSION_KEY);
 });
 
 test('the dialog is not offered to users already logged in', function () {

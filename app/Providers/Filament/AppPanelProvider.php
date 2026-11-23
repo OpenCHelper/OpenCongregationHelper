@@ -90,6 +90,22 @@ class AppPanelProvider extends PanelProvider
      */
     public const PWA_INSTALL_OFFER_SESSION_KEY = 'pwa_install_prompt.offer';
 
+    /**
+     * Take the flag that a full-screen offer sets when the user logs in (see `OfferFullScreenPromptsAfterLogin`), so that
+     * only the first page after logging in opens it.
+     *
+     * The pages of the authentication (e.g. the email confirmation or the set-up of the required two-factor
+     * authentication, where the panel sends some users right after logging in) leave it to the first page of the app.
+     */
+    public static function takeLoginOffer(string $sessionKey): bool
+    {
+        if (request()->routeIs('filament.*.auth.*')) {
+            return false;
+        }
+
+        return (bool) session()->pull($sessionKey);
+    }
+
     public function panel(Panel $panel): Panel
     {
         $detect = new MobileDetect;
@@ -175,7 +191,7 @@ class AppPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_START,
                 fn (): ?View => Filament::auth()->check()
                     ? view('filament.pwa-install-prompt', [
-                        'offerAfterLogin' => (bool) session()->pull(self::PWA_INSTALL_OFFER_SESSION_KEY),
+                        'offerAfterLogin' => self::takeLoginOffer(self::PWA_INSTALL_OFFER_SESSION_KEY),
                     ])
                     : null,
             )
@@ -189,7 +205,7 @@ class AppPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn (): ?string => Filament::auth()->check()
                     && WebPush::canSubscribe()
-                    && session()->pull(PushNotificationsPrompt::OFFER_SESSION_KEY)
+                    && self::takeLoginOffer(PushNotificationsPrompt::OFFER_SESSION_KEY)
                         ? Blade::render("@livewire('push-notifications-prompt')")
                         : null,
             )
