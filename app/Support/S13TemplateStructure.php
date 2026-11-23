@@ -28,10 +28,17 @@ class S13TemplateStructure
     public const ISSUES_URL = 'https://github.com/OpenCHelper/OpenCongregationHelper/issues/new';
 
     /**
-     * How far (in millimetres) a line of the table may be from where it is expected: the positions are measured and
-     * rounded to the half millimetre, so a line near a rounding edge may land on either side of it.
+     * How far (in millimetres) a line of the table may be from where it is expected, once the whole table is moved: the
+     * positions are measured and rounded to the half millimetre, so a line near a rounding edge may land on either side
+     * of it.
      */
     public const GRID_TOLERANCE = 0.5;
+
+    /**
+     * How far (in millimetres) the table may be moved: less than a line of a row, so that a table with a line more or
+     * less is not taken for a moved one.
+     */
+    public const MAX_OFFSET = 4.0;
 
     /**
      * Read the structure of a PDF: its pages, the size of the page that is filled (in millimetres, rounded), the names
@@ -41,6 +48,7 @@ class S13TemplateStructure
      */
     public static function fromPdf(string $contents): array
     {
+        $contents = ClassicPdf::from($contents);
         $pdf = new Fpdi;
         $pages = $pdf->setSourceFile(StreamReader::createByString($contents));
         $page = min($pages, (int) S13Layout::LAYOUT['template_page']);
@@ -90,7 +98,7 @@ class S13TemplateStructure
             $differences[] = __('s13.structure.added_fields', ['fields' => self::summarize($added)]);
         }
 
-        if (! self::gridsMatch($structure['grid'], $expected['grid'])) {
+        if (self::offset($structure['grid'], $expected['grid']) === null) {
             $differences[] = __('s13.structure.grid');
         }
 
@@ -98,26 +106,60 @@ class S13TemplateStructure
     }
 
     /**
-     * Whether two tables have the same lines, each within the tolerance of its counterpart.
+     * How far the table of a form is from where the layout expects it, as [x, y] in millimetres (null if the table has
+     * not the same shape: other columns, rows or sizes).
+     *
+     * The table is compared line by line: the columns, and the lines of the rows of territories (the last ones of the
+     * page; the lines of the header change with the language of the form). The same edition of the form in another
+     * language has the same table, only moved by a millimetre or two, which the layout follows.
      *
      * @param  array{columns: list<int|float>, rows: list<int|float>}  $grid
-     * @param  array{columns: list<int|float>, rows: list<int|float>}  $expected
+     * @param  array{columns: list<int|float>, rows: list<int|float>}|null  $expected
+     * @return array{x: float, y: float}|null
      */
-    public static function gridsMatch(array $grid, array $expected): bool
+    public static function offset(array $grid, ?array $expected = null): ?array
     {
-        foreach (['columns', 'rows'] as $lines) {
-            if (count($grid[$lines]) !== count($expected[$lines])) {
-                return false;
-            }
+        $expected ??= S13Layout::EXPECTED_STRUCTURE['grid'];
+        $bodyLines = min(2 * (int) S13Layout::LAYOUT['rows_per_page'], count($expected['rows']));
 
-            foreach (array_map(null, $grid[$lines], $expected[$lines]) as [$position, $expectedPosition]) {
-                if (abs((float) $position - (float) $expectedPosition) > self::GRID_TOLERANCE + 1e-9) {
-                    return false;
-                }
+        if (count($grid['columns']) !== count($expected['columns']) || count($grid['rows']) < $bodyLines) {
+            return null;
+        }
+
+        $x = self::uniformShift($grid['columns'], $expected['columns']);
+        $y = self::uniformShift(array_slice($grid['rows'], -$bodyLines), array_slice($expected['rows'], -$bodyLines));
+
+        if ($x === null || $y === null || abs($x) > self::MAX_OFFSET || abs($y) > self::MAX_OFFSET) {
+            return null;
+        }
+
+        return ['x' => $x, 'y' => $y];
+    }
+
+    /**
+     * The shift that moves each expected position onto the actual one, if they are all moved alike (within the
+     * tolerance).
+     *
+     * @param  list<int|float>  $positions
+     * @param  list<int|float>  $expected
+     */
+    protected static function uniformShift(array $positions, array $expected): ?float
+    {
+        if ($positions === []) {
+            return 0.0;
+        }
+
+        $shifts = array_map(fn (int|float $position, int|float $expectedPosition): float => (float) $position - (float) $expectedPosition, $positions, $expected);
+        sort($shifts);
+        $median = $shifts[intdiv(count($shifts), 2)];
+
+        foreach ($shifts as $shift) {
+            if (abs($shift - $median) > self::GRID_TOLERANCE + 1e-9) {
+                return null;
             }
         }
 
-        return true;
+        return $median;
     }
 
     /**
@@ -162,25 +204,15 @@ class S13TemplateStructure
      */
     protected static function grid(string $contents, int $page, float $pageHeight): array
     {
-        try {
-            $stream = (new PdfReader(new PdfParser(StreamReader::createByString($contents))))->getPage($page)->getContentStream();
-        } catch (Throwable) {
-            return ['columns' => [], 'rows' => []];
-        }
-
-        $millimetres = fn (float $points): float => round($points * 25.4 / 72 * 2) / 2;
+        $halfMillimetre = fn (float $millimetres): float => round($millimetres * 2) / 2;
         $columns = [];
         $rows = [];
 
-        preg_match_all('/(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+re\s+[fF]\*?(?![\w])/', $stream, $rectangles, PREG_SET_ORDER);
-
-        foreach ($rectangles as [, $x, $y, $width, $height]) {
-            [$x, $y, $width, $height] = [(float) $x, (float) $y, abs((float) $width), abs((float) $height)];
-
-            if ($width < 2 && $height > 5) {
-                $columns[] = $millimetres($x + $width / 2);
-            } elseif ($height < 2 && $width > 5) {
-                $rows[] = round(($pageHeight - $millimetres($y + $height / 2)) * 2) / 2;
+        foreach (self::lines($contents, $page, $pageHeight) as $line) {
+            if ($line['vertical']) {
+                $columns[] = $halfMillimetre($line['x']);
+            } else {
+                $rows[] = $halfMillimetre($line['y']);
             }
         }
 
@@ -190,6 +222,69 @@ class S13TemplateStructure
         sort($rows);
 
         return ['columns' => $columns, 'rows' => $rows];
+    }
+
+    /**
+     * The line on which the service year is written: the topmost horizontal line of the page, as its left end, width
+     * and height from the top, in millimetres (null if the page has no line).
+     *
+     * @return array{x: float, width: float, y: float}|null
+     */
+    public static function serviceYearLine(string $contents): ?array
+    {
+        $contents = ClassicPdf::from($contents);
+
+        try {
+            $pdf = new Fpdi;
+            $pages = $pdf->setSourceFile(StreamReader::createByString($contents));
+            $page = min($pages, (int) S13Layout::LAYOUT['template_page']);
+            $pageHeight = $pdf->getTemplateSize($pdf->importPage($page))['height'];
+        } catch (Throwable) {
+            return null;
+        }
+
+        $topmost = collect(self::lines($contents, $page, $pageHeight))
+            ->reject(fn (array $line): bool => $line['vertical'])
+            ->sortBy('y')
+            ->first();
+
+        return $topmost === null ? null : ['x' => $topmost['x'], 'width' => $topmost['length'], 'y' => $topmost['y']];
+    }
+
+    /**
+     * The lines of a page: the forms draw them as thin filled rectangles, which do not depend on the language of the
+     * form. Each line is given by its middle (x for a vertical line, y for a horizontal one, from the top), its start (y
+     * for a vertical line, x for a horizontal one) and its length, in millimetres.
+     *
+     * @return list<array{vertical: bool, x: float, y: float, length: float}>
+     */
+    protected static function lines(string $contents, int $page, float $pageHeight): array
+    {
+        try {
+            $stream = (new PdfReader(new PdfParser(StreamReader::createByString($contents))))->getPage($page)->getContentStream();
+        } catch (Throwable) {
+            return [];
+        }
+
+        $millimetres = fn (float $points): float => $points * 25.4 / 72;
+        $lines = [];
+
+        preg_match_all('/(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+re\s+[fF]\*?(?![\w])/', $stream, $rectangles, PREG_SET_ORDER);
+
+        foreach ($rectangles as [, $x, $y, $width, $height]) {
+            [$x, $y, $width, $height] = [(float) $x, (float) $y, (float) $width, (float) $height];
+            // Normalise rectangles drawn with a negative width or height
+            [$x, $width] = $width < 0 ? [$x + $width, -$width] : [$x, $width];
+            [$y, $height] = $height < 0 ? [$y + $height, -$height] : [$y, $height];
+
+            if ($width < 2 && $height > 5) {
+                $lines[] = ['vertical' => true, 'x' => $millimetres($x + $width / 2), 'y' => $pageHeight - $millimetres($y + $height), 'length' => $millimetres($height)];
+            } elseif ($height < 2 && $width > 5) {
+                $lines[] = ['vertical' => false, 'x' => $millimetres($x), 'y' => $pageHeight - $millimetres($y + $height / 2), 'length' => $millimetres($width)];
+            }
+        }
+
+        return $lines;
     }
 
     /**

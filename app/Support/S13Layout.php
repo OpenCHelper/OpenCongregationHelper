@@ -29,7 +29,8 @@ final class S13Layout
         // Text too long for its box is wrapped and shrunk down to this size, then cut
         'min_font_size' => 5,
 
-        'service_year' => ['x' => 49.95, 'y' => 28.9, 'width' => 22.8, 'height' => 5.47, 'font_size' => 11],
+        // Box of the service year, above its line (whose middle is at line_y): the box follows the line of the form
+        'service_year' => ['x' => 49.95, 'y' => 28.9, 'width' => 22.8, 'height' => 5.47, 'font_size' => 11, 'line_y' => 34.55],
 
         // Top of the first row of the table, and height of each row (both of its lines)
         'first_row_y' => 49.54,

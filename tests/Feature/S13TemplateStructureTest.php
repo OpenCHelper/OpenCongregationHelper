@@ -3,6 +3,7 @@
 use App\Filament\Resources\Territories\Actions\DownloadTerritoryAssignmentRecordAction;
 use App\Filament\Resources\Territories\Pages\ListTerritories;
 use App\Models\User;
+use App\Support\ClassicPdf;
 use App\Support\S13Layout;
 use App\Support\S13TemplateStructure;
 use App\Support\TerritoryAssignmentRecord;
@@ -194,5 +195,60 @@ test('a table moved by less than the tolerance is not reported, but a moved line
     $moved[0] += 3;
     expect(S13TemplateStructure::differences([...$expected, 'grid' => [...$grid, 'columns' => $moved]]))->toBe([__('s13.structure.grid')]);
 
-    expect(S13TemplateStructure::differences([...$expected, 'grid' => [...$grid, 'rows' => array_slice($grid['rows'], 1)]]))->toBe([__('s13.structure.grid')]);
+    expect(S13TemplateStructure::differences([...$expected, 'grid' => [...$grid, 'rows' => array_slice($grid['rows'], 0, -1)]]))->toBe([__('s13.structure.grid')]);
+});
+
+test('the same table moved, as in another language of the form, is not reported and gives its offset', function () {
+    $grid = S13Layout::EXPECTED_STRUCTURE['grid'];
+
+    // As the S-13-E 1/22: the table is 1 mm more to the right and 2 mm lower, under a header of other lines
+    $english = [
+        'columns' => array_map(fn (float $x): float => $x + 1, $grid['columns']),
+        'rows' => [34.0, 39.0, 44.0, ...array_map(fn (float $y): float => $y + 2, array_slice($grid['rows'], 2))],
+    ];
+
+    expect(S13TemplateStructure::offset($english))->toBe(['x' => 1.0, 'y' => 2.0])
+        ->and(S13TemplateStructure::differences([...S13Layout::EXPECTED_STRUCTURE, 'grid' => $english]))->toBe([]);
+
+    $shiftedTooFar = ['columns' => $grid['columns'], 'rows' => array_map(fn (float $y): float => $y + 5.5, $grid['rows'])];
+    expect(S13TemplateStructure::offset($shiftedTooFar))->toBeNull();
+});
+
+test('the layout follows the table and the service year line of the form', function () {
+    $grid = S13Layout::EXPECTED_STRUCTURE['grid'];
+    $moved = [
+        'columns' => array_map(fn (float $x): float => $x + 1, $grid['columns']),
+        'rows' => array_map(fn (float $y): float => $y + 2, $grid['rows']),
+    ];
+
+    $layout = TerritoryAssignmentRecordPdf::layoutFor($moved, ['x' => 42.4, 'width' => 19.6, 'y' => 34.2]);
+    $expected = S13Layout::LAYOUT;
+
+    expect($layout['territory']['x'])->toBe($expected['territory']['x'] + 1)
+        ->and($layout['assignments_x'])->toBe($expected['assignments_x'] + 1)
+        ->and($layout['first_row_y'])->toBe($expected['first_row_y'] + 2)
+        ->and($layout['service_year']['x'])->toBe(42.4)
+        ->and($layout['service_year']['width'])->toBe(19.6)
+        ->and($layout['service_year']['y'])->toEqualWithDelta($expected['service_year']['y'] - 0.35, 1e-9)
+        // A table of another shape is not moved
+        ->and(TerritoryAssignmentRecordPdf::layoutFor(['columns' => [10.0], 'rows' => [20.0]])['first_row_y'])->toBe($expected['first_row_y']);
+});
+
+test('a form whose cross-reference is a compressed stream is rewritten so that it can be read', function () {
+    $compressed = compressedXrefS13Template();
+
+    expect(ClassicPdf::isReadable($compressed))->toBeFalse()
+        ->and(ClassicPdf::isReadable(ClassicPdf::from($compressed)))->toBeTrue()
+        ->and(TerritoryAssignmentRecordPdf::isValidTemplate($compressed))->toBeTrue()
+        ->and(S13TemplateStructure::differences(S13TemplateStructure::fromPdf($compressed)))->toBe([])
+        ->and(S13TemplateStructure::serviceYearLine($compressed)['x'])->toEqualWithDelta(49.96, 0.01);
+
+    TerritoryAssignmentRecordPdf::storeTemplate($compressed);
+
+    expect(ClassicPdf::isReadable(TerritoryAssignmentRecordPdf::template()))->toBeTrue()
+        ->and(TerritoryAssignmentRecordPdf::render(TerritoryAssignmentRecord::serviceYearOf()))->toStartWith('%PDF-');
+});
+
+test('a readable form is kept as it is', function () {
+    expect(ClassicPdf::from(blankS13Template()))->toBe(blankS13Template());
 });

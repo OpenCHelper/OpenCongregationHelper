@@ -40,7 +40,8 @@ class TerritoryAssignmentRecordPdf
      */
     public static function storeTemplate(string $contents): void
     {
-        self::disk()->put(self::templatePath(), $contents);
+        // Stored as FPDI can read it
+        self::disk()->put(self::templatePath(), ClassicPdf::from($contents));
     }
 
     /**
@@ -59,10 +60,38 @@ class TerritoryAssignmentRecordPdf
         try {
             $pdf = new Fpdi;
 
-            return $pdf->setSourceFile(StreamReader::createByString($contents)) >= (int) S13Layout::LAYOUT['template_page'];
+            return $pdf->setSourceFile(StreamReader::createByString(ClassicPdf::from($contents))) >= (int) S13Layout::LAYOUT['template_page'];
         } catch (Throwable) {
             return false;
         }
+    }
+
+    /**
+     * The layout, moved to where the table and the line of the service year of the form are (e.g. the same form in
+     * another language): the table is unchanged when it has not the expected shape (a form used although it differs).
+     *
+     * @param  array{columns: list<int|float>, rows: list<int|float>}  $grid
+     * @param  array{x: float, width: float, y: float}|null  $serviceYearLine
+     * @return array<string, mixed>
+     */
+    public static function layoutFor(array $grid, ?array $serviceYearLine = null): array
+    {
+        $layout = S13Layout::LAYOUT;
+        $offset = S13TemplateStructure::offset($grid) ?? ['x' => 0.0, 'y' => 0.0];
+
+        $layout['territory']['x'] += $offset['x'];
+        $layout['last_completed']['x'] += $offset['x'];
+        $layout['assignments_x'] += $offset['x'];
+        $layout['first_row_y'] += $offset['y'];
+
+        // A line far from the expected one is not the line of the service year
+        if ($serviceYearLine !== null && abs($serviceYearLine['y'] - $layout['service_year']['line_y']) < 10) {
+            $layout['service_year']['y'] += $serviceYearLine['y'] - $layout['service_year']['line_y'];
+            $layout['service_year']['x'] = $serviceYearLine['x'];
+            $layout['service_year']['width'] = $serviceYearLine['width'];
+        }
+
+        return $layout;
     }
 
     /**
@@ -80,12 +109,13 @@ class TerritoryAssignmentRecordPdf
      */
     public static function render(int $serviceYear): string
     {
-        $layout = S13Layout::LAYOUT;
+        $template = ClassicPdf::from(self::template());
+        $layout = self::layoutFor(S13TemplateStructure::fromPdf($template)['grid'], S13TemplateStructure::serviceYearLine($template));
 
         $pdf = self::newPdf($layout);
         $pdf->SetAutoPageBreak(false);
         $pdf->SetMargins(0, 0);
-        $pdf->setSourceFile(StreamReader::createByString(self::template()));
+        $pdf->setSourceFile(StreamReader::createByString($template));
         $templateId = $pdf->importPage((int) $layout['template_page']);
         $templateSize = $pdf->getTemplateSize($templateId);
 
