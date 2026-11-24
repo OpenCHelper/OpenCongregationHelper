@@ -152,6 +152,7 @@ return [
         'image_separator' => '— o —',
         'field_image_file' => 'Imagen desde archivo',
         'tab_image' => 'Imagen',
+        'image_alt' => 'Imagen del territorio',
         'tab_map' => 'Mapa',
         'status_all' => 'Todos',
         'status_assigned' => 'Asignados',
