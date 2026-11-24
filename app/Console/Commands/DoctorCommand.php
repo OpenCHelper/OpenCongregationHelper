@@ -76,27 +76,26 @@ class DoctorCommand extends Command
 
     private function checkConfiguration(): void
     {
-        $this->report('Application key (APP_KEY)', filled(config('app.key')) ? self::OK : self::ERROR,
-            filled(config('app.key')) ? '' : 'run `php artisan key:generate`');
+        $isProduction = $this->laravel->environment('production');
+
+        $this->check('Application key (APP_KEY)', filled(config('app.key')), self::ERROR,
+            'run `php artisan key:generate`');
 
         $url = (string) config('app.url');
-        $urlIsDefault = blank($url) || str_contains($url, 'localhost');
-        $this->report('Application URL (APP_URL)', $urlIsDefault && $this->laravel->environment('production') ? self::ERROR : ($urlIsDefault ? self::WARNING : self::OK),
-            $urlIsDefault ? 'set it to the public address: the links in the emails use it' : $url);
+        $this->check('Application URL (APP_URL)', filled($url) && ! str_contains($url, 'localhost'),
+            $isProduction ? self::ERROR : self::WARNING, 'set it to the public address: the links in the emails use it', $url);
 
-        $this->report('Debug mode (APP_DEBUG)', config('app.debug') && $this->laravel->environment('production') ? self::WARNING : self::OK,
-            config('app.debug') && $this->laravel->environment('production') ? 'turn it off in production: errors would show internal details' : '');
+        $this->check('Debug mode (APP_DEBUG)', ! ($isProduction && config('app.debug')), self::WARNING,
+            'turn it off in production: errors would show internal details');
 
-        $this->report('Queue and scheduler endpoints (ARTISAN_CRON_TOKEN)', filled(config('app.artisan_cron_token')) ? self::OK : self::WARNING,
-            filled(config('app.artisan_cron_token')) ? '' : 'disabled: without a shell, the queued emails and the scheduled tasks never run');
+        $this->check('Queue and scheduler endpoints (ARTISAN_CRON_TOKEN)', filled(config('app.artisan_cron_token')),
+            self::WARNING, 'disabled: without a shell, the queued emails and the scheduled tasks never run');
 
-        $mailIsSet = filled(config('mail.default')) && filled(config('mail.from.address'));
-        $this->report('Email (MAIL_MAILER, MAIL_FROM_ADDRESS)', $mailIsSet ? self::OK : self::WARNING,
-            $mailIsSet ? (string) config('mail.default') : 'the notification emails cannot be sent');
+        $this->check('Email (MAIL_MAILER, MAIL_FROM_ADDRESS)', filled(config('mail.default')) && filled(config('mail.from.address')),
+            self::WARNING, 'the notification emails cannot be sent', (string) config('mail.default'));
 
-        $rootIsSet = filled(config('app.initial_root_user.email')) && filled(config('app.initial_root_user.password'));
-        $this->report('Initial root user (INITIAL_ROOT_*)', $rootIsSet ? self::OK : self::WARNING,
-            $rootIsSet ? '' : 'needed by `och:install` on a new installation, and by `och:recover-root`');
+        $this->check('Initial root user (INITIAL_ROOT_*)', filled(config('app.initial_root_user.email')) && filled(config('app.initial_root_user.password')),
+            self::WARNING, 'needed by `och:install` on a new installation, and by `och:recover-root`');
     }
 
     private function checkDatabase(Migrator $migrator): bool
@@ -123,31 +122,27 @@ class DoctorCommand extends Command
             ->diff($ran)
             ->count();
 
-        $this->report('Migrations', $pending === 0 ? self::OK : self::ERROR,
-            $pending === 0 ? '' : "{$pending} pending: run `php artisan och:deploy`");
+        $this->check('Migrations', $pending === 0, self::ERROR, "{$pending} pending: run `php artisan och:deploy`");
 
         return $pending === 0;
     }
 
     private function checkFiles(): void
     {
-        $link = public_path('storage');
-        $this->report('Public storage link (public/storage)', is_link($link) ? self::OK : self::WARNING,
-            is_link($link) ? '' : 'missing: the uploaded files cannot be shown, run `php artisan storage:link`');
+        $this->check('Public storage link (public/storage)', is_link(public_path('storage')), self::WARNING,
+            'missing: the uploaded files cannot be shown, run `php artisan storage:link`');
 
-        $keysExist = file_exists(Passport::keyPath('oauth-private.key')) && file_exists(Passport::keyPath('oauth-public.key'));
-        $this->report('Keys of the AI assistants', $keysExist ? self::OK : self::WARNING,
-            $keysExist ? '' : 'missing: the AI assistants cannot connect, run `php artisan och:install`');
+        $this->check('Keys of the AI assistants', file_exists(Passport::keyPath('oauth-private.key')) && file_exists(Passport::keyPath('oauth-public.key')),
+            self::WARNING, 'missing: the AI assistants cannot connect, run `php artisan och:install`');
 
-        $this->report('Writable storage', is_writable(storage_path('framework')) && is_writable(storage_path('logs')) ? self::OK : self::ERROR,
-            is_writable(storage_path('framework')) && is_writable(storage_path('logs')) ? '' : 'storage/framework and storage/logs must be writable');
+        $this->check('Writable storage', is_writable(storage_path('framework')) && is_writable(storage_path('logs')),
+            self::ERROR, 'storage/framework and storage/logs must be writable');
     }
 
     private function checkUsers(): void
     {
         $root = User::rootUser();
-        $this->report('Root user (ID 1)', $root !== null ? self::OK : self::ERROR,
-            $root?->email ?? 'missing: run `php artisan och:install`');
+        $this->check('Root user (ID 1)', $root !== null, self::ERROR, 'missing: run `php artisan och:install`', (string) $root?->email);
 
         if ($root !== null && ! $root->can_login) {
             $this->report('Root user can log in', self::WARNING, 'login disabled: run `php artisan och:recover-root` if nobody else can manage the users');
@@ -157,8 +152,19 @@ class DoctorCommand extends Command
             ->where('name', Utils::getSuperAdminName())
             ->first()?->users()->count() ?? 0;
 
-        $this->report('Super administrators', $superAdmins > 0 ? self::OK : self::ERROR,
-            $superAdmins > 0 ? (string) $superAdmins : 'nobody can manage the application: run `php artisan och:install`');
+        $this->check('Super administrators', $superAdmins > 0, self::ERROR,
+            'nobody can manage the application: run `php artisan och:install`', (string) $superAdmins);
+    }
+
+    /**
+     * Report a check: OK (with the `$passedDetails`) when it `$passes`, otherwise the `$failedStatus` (an error or a
+     * warning) with what to do about it.
+     */
+    private function check(string $check, bool $passes, string $failedStatus, string $failedDetails, string $passedDetails = ''): void
+    {
+        $passes
+            ? $this->report($check, self::OK, $passedDetails)
+            : $this->report($check, $failedStatus, $failedDetails);
     }
 
     private function report(string $check, string $status, string $details = ''): void
