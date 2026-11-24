@@ -99,6 +99,16 @@ confermano l'email, poi configurano l'autenticazione a due fattori.
 > viene mai chiesto di confermare l'email, anche se la cambia in seguito, così che possa sempre raggiungere queste
 > impostazioni.
 
+In **Assistenti IA**, **Consenti gli assistenti IA** permette agli utenti di collegare all'applicazione un assistente
+IA (es. ChatGPT, Claude o Gemini), dal proprio [profilo](../basics/profile#assistenti-ia). È disattivato in modo
+predefinito:
+
+- ogni assistente lavora per conto dell'utente che lo ha collegato, e può leggere e modificare solo ciò che può
+  quell'utente (ha gli stessi ruoli e permessi), quindi ciò che legge viene inviato all'azienda che fornisce
+  l'assistente;
+- disattivandolo, vengono scollegati subito tutti gli assistenti: gli utenti dovranno approvarli di nuovo quando verrà
+  riattivato.
+
 Clicca **Salva** per applicarle: hanno effetto subito, per tutti gli utenti.
 
 ## Valori predefiniti

@@ -46,6 +46,31 @@ quando l'applicazione è già installata.
 Ricevi le notifiche anche su questo dispositivo, pure ad applicazione chiusa: clicca **Attiva su questo dispositivo**.
 Vedi [Notifiche](notifications#notifiche-push).
 
+## Assistenti IA
+
+Collega un assistente IA, come ChatGPT, Claude o Gemini, per chiedergli dei territori (es. *"Quali territori non sono
+stati percorsi da sei mesi?"*) o per fargli assegnare e restituire i territori per te. La sezione compare solo quando
+gli amministratori consentono gli assistenti IA (vedi [Impostazioni](../administration/settings#sicurezza)).
+
+![Assistenti IA](/docs/user-documentation/it/basics/assets/profile-ai-assistants.webp)
+
+1. Copia l'**Indirizzo del server (MCP)** con il pulsante accanto.
+2. Aggiungilo al tuo assistente:
+    - **Claude**: in *Impostazioni*, *Connettori*, aggiungi un connettore personalizzato con questo indirizzo;
+    - **ChatGPT**: in *Impostazioni*, *App*, attiva la modalità sviluppatore nelle impostazioni avanzate, poi crea
+      un'app con questo indirizzo e l'autenticazione OAuth;
+    - **altri assistenti** (es. Gemini, Claude Code, Cursor, VS Code): aggiungi un server MCP remoto (HTTP) con questo
+      indirizzo.
+3. L'assistente apre questa applicazione: accedi, controlla il nome dell'assistente e il sito su cui tornerai, poi
+   clicca **Approva**.
+
+L'assistente può leggere e fare solo ciò che puoi fare tu nell'applicazione, e ti chiede conferma prima di modificare
+qualcosa. **Assistenti collegati** elenca quelli che hai approvato: clicca **Scollega** per togliere l'accesso a uno di
+loro, che dovrà poi essere approvato di nuovo.
+
+> ⚠️ **Attenzione:** ciò che l'assistente legge (es. i nomi dei proclamatori) viene inviato all'azienda che lo fornisce.
+> Chiedigli solo ciò che ti serve.
+
 ## Aggiorna password
 
 Inserisci la **Password attuale**, poi due volte la **Nuova password** e clicca **Salva**. Usa una password lunga e

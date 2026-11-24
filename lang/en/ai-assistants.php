@@ -32,7 +32,7 @@ return [
         'how_to' => 'How to connect it',
         'how_to_claude' => '<strong>Claude</strong>: in Settings, Connectors, add a custom connector with this address.',
         'how_to_chatgpt' => '<strong>ChatGPT</strong>: in Settings, Apps, turn on the developer mode in the advanced settings, then create an app with this address and the OAuth authentication.',
-        'how_to_other' => '<strong>Other assistants</strong> (e.g. Claude Code, Cursor, VS Code): add a remote MCP server (HTTP) with this address.',
+        'how_to_other' => '<strong>Other assistants</strong> (e.g. Gemini, Claude Code, Cursor, VS Code): add a remote MCP server (HTTP) with this address.',
         'permissions' => 'The assistant then opens this app to let you log in and approve it: it can do only what you can do.',
         'connected' => 'Connected assistants',
         'connected_at' => 'Connected on :date',

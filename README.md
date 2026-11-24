@@ -19,6 +19,7 @@ You choose where to host the webapp, you own the data.
 | **Dashboard** | Key statistics and a map of all the territories, colored by zone, availability, how often they were worked or campaign progress | <a href="docs/user-documentation/en/basics/assets/dashboard.webp"><img src="docs/readme-screenshots/dashboard.webp" alt="Dashboard" width="300"></a> |
 | **Notifications** | In the app and by email, when a territory is assigned or returned, a campaign starts, or a territory has been out for more than 60 days | <a href="docs/user-documentation/en/basics/assets/notifications.webp"><img src="docs/user-documentation/en/basics/assets/notifications.webp" alt="Notifications" width="300"></a> |
 | **Link sharing** | Send an assignment to a publisher as a link that opens without an account, and revoke it any time | <a href="docs/user-documentation/en/assignments/assets/shared-page.webp"><img src="docs/readme-screenshots/shared-page.webp" alt="Link sharing" width="300"></a> |
+| **AI assistants** | Optional and off by default: connect ChatGPT, Claude, Gemini and other assistants (MCP) to ask about the territories or have them assigned and returned, with the permissions of the user who connects them | <a href="docs/user-documentation/en/basics/assets/profile-ai-assistants.webp"><img src="docs/user-documentation/en/basics/assets/profile-ai-assistants.webp" alt="AI assistants" width="300"></a> |
 | **Users and roles** | Permissions by role, users without login who can still receive territories, and a log of who changed what | <a href="docs/user-documentation/en/administration/assets/users-list.webp"><img src="docs/readme-screenshots/users-list.webp" alt="Users and roles" width="300"></a> |
 | **Languages** | Interface in English, Italian and Spanish | <a href="docs/user-documentation/en/basics/assets/language-switch.webp"><img src="docs/user-documentation/en/basics/assets/language-switch.webp" alt="Languages" width="300"></a> |
 | **User guide** | Built into the app (English and Italian), with a **Help** button on each page | <a href="docs/user-documentation/en/basics/assets/help-slideover.webp"><img src="docs/readme-screenshots/help-slideover.webp" alt="User guide" width="300"></a> |
@@ -125,6 +126,10 @@ The preferred way of developing is by using **Docker Compose** to build the cont
     6. Create super user:
         ```shell
         sail artisan shield:super-admin --user=1 --panel=app
+        ```
+    7. Create the keys of the AI assistants (MCP server), only needed to try them:
+        ```shell
+        sail artisan app:ensure-passport-keys
         ```
 6. Install the frontend dependencies and run the Vite server:
     ```shell
