@@ -94,6 +94,12 @@ main () {
                 break;
             ;;
             -*)
+                # After the command, the options are its own (e.g. `och:post-deploy --no-interaction`)
+                if (( ${#POSITIONAL[@]} > 0 )); then
+                    while (( $# > 0 )); do POSITIONAL+=("$1"); shift; done
+                    break;
+                fi
+
                 printf "ERROR: Unknown option '%s'" "$1" >&2;
                 return 1;
             ;;

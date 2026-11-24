@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
+use Illuminate\Foundation\Console\ClosureCommand;
 use Illuminate\Support\Facades\File;
 
 beforeEach(function () {
@@ -101,6 +103,24 @@ test('artisan command endpoints cannot be reached without a token, even in the l
 
     $this->getJson($this->artisanUrl.'/list', ['X-Artisan-Token-Bypass' => 'true', 'X-Artisan-Token' => 'wrong'])
         ->assertUnauthorized();
+});
+
+test('the output of a command is returned even when the command replaces the application', function () {
+    File::put($this->tokenFile, 'artisan-secret');
+
+    // Like `config:cache` (run by `och:post-deploy`), which boots a fresh application to read the configuration
+    app(ConsoleKernel::class)->registerCommand(new ClosureCommand('test:fresh-application', function () {
+        /** @var ClosureCommand $this */
+        $this->info('Output written before the application was replaced');
+
+        $freshApplication = require base_path('bootstrap/app.php');
+        $freshApplication->make(ConsoleKernel::class)->bootstrap();
+    }));
+
+    $this->postJson($this->artisanUrl.'/execute/test:fresh-application', [], ['X-Artisan-Token' => 'artisan-secret'])
+        ->assertOk()
+        ->assertJson(['success' => true, 'returnCode' => 0])
+        ->assertJsonPath('output', fn (string $output) => str_contains($output, 'Output written before the application was replaced'));
 });
 
 test('artisan command parameters must be a string', function () {
