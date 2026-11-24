@@ -1,8 +1,15 @@
 name: Check Translations
 
 on:
+  # Every pull request (forks included), and what lands on main
   push:
+    branches:
+      - main
+  pull_request:
   workflow_dispatch: # Manually trigger a workflow run
+
+permissions:
+  contents: read
 
 env:
   php_extensions: >-

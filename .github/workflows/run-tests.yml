@@ -1,9 +1,16 @@
 name: Run tests
 
 on:
+  # Every pull request (forks included), and what lands on main
   push:
+    branches:
+      - main
+  pull_request:
   workflow_dispatch: # Manually trigger a workflow run
   workflow_call:
+
+permissions:
+  contents: read
 
 env:
   # Same major version installed in the Sail image (see docker-compose.yml)

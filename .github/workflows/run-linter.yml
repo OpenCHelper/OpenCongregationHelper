@@ -1,9 +1,16 @@
 name: Run linter
 
 on:
+  # Every pull request (forks included), and what lands on main
   push:
+    branches:
+      - main
+  pull_request:
   workflow_dispatch: # Manually trigger a workflow run
   workflow_call:
+
+permissions:
+  contents: read
 
 env:
   php_extensions: >-
@@ -13,10 +20,10 @@ env:
     ,Phar,random,Reflection,session,SimpleXML,SPL,sqlite3,standard
     ,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib
 
-# FilaCheck and Pint only analyse the source code: they need neither the
-# application environment nor the Sail containers.
+# FilaCheck, Pint and PHPStan only analyse the source code: they need neither
+# the application environment nor the Sail containers.
 jobs:
-  run-tests:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -49,3 +56,7 @@ jobs:
       - name: Run pint
         run: |
           ./vendor/bin/pint --test
+
+      - name: Run phpstan
+        run: |
+          ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G --error-format=github
