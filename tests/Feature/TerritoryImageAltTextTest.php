@@ -44,12 +44,14 @@ test('the image preview of a territory without a name yet has a generic descript
 });
 
 test('the separator between the image URL and the image file is hidden from screen readers', function () {
+    $separator = __('filament-resources.territory.image_separator');
+
     Livewire::test(CreateTerritory::class)
         ->assertSeeHtml('aria-hidden="true"')
-        ->assertSee('— or —');
+        ->assertSee($separator);
 
     expect(html_entity_decode(Livewire::test(CreateTerritory::class)->html()))
-        ->toMatch('/aria-hidden="true"[^>]*>(?:(?!<\/div>).)*— or —/s');
+        ->toMatch('/aria-hidden="true"[^>]*>(?:(?!<\/div>).)*'.preg_quote($separator, '/').'/s');
 });
 
 test('the territory image of an assignment is described by the territory name', function () {

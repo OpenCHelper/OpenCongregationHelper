@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Accessibility**: territory images have the territory name as alternative text, and the "— or —" separator of the
   image field is hidden from screen readers ([#78](https://github.com/OpenCHelper/OpenCongregationHelper/pull/78)).
+- Translated the texts still in English: the image fields of territories, the **API Tokens** menu item and the Italian
+  mail log; the contacts of a user have a singular label ("Crea Contatto", not "Crea Informazioni Di Contatto")
+  ([#85](https://github.com/OpenCHelper/OpenCongregationHelper/pull/85)).
 
 ### Security
 
