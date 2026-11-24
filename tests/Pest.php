@@ -69,7 +69,10 @@ function usePassportTestKeys(): void
     $keys = sys_get_temp_dir().'/passport-test-keys-'.getmypid();
 
     if (! file_exists($keys.'/oauth-private.key')) {
-        @mkdir($keys);
+        if (! is_dir($keys)) {
+            mkdir($keys);
+        }
+
         $key = RSA::createKey(2048);
         file_put_contents($keys.'/oauth-public.key', (string) $key->getPublicKey());
         file_put_contents($keys.'/oauth-private.key', (string) $key);

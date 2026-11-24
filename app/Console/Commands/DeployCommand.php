@@ -27,9 +27,10 @@ class DeployCommand extends Command
             return self::FAILURE;
         }
 
-        // Through the Artisan endpoint all the steps run in a single request, which must not time out halfway
+        // Through the Artisan endpoint all the steps run in a single request, which must not time out halfway (the
+        // function is not defined where the hosting disables it)
         if (function_exists('set_time_limit')) {
-            @set_time_limit(0);
+            set_time_limit(0);
         }
 
         foreach ($this->steps() as [$command, $arguments]) {
