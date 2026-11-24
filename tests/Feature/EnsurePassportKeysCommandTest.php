@@ -15,13 +15,13 @@ afterEach(function () {
 });
 
 test('the keys are created when missing, and kept when they exist', function () {
-    $this->artisan('app:ensure-passport-keys', ['--length' => 1024])->assertSuccessful();
+    $this->artisan('och:ensure-passport-keys', ['--length' => 1024])->assertSuccessful();
 
     $privateKey = file_get_contents($this->keys.'/oauth-private.key');
     expect($privateKey)->toContain('PRIVATE KEY')
         ->and(file_get_contents($this->keys.'/oauth-public.key'))->toContain('PUBLIC KEY');
 
-    $this->artisan('app:ensure-passport-keys', ['--length' => 1024])->assertSuccessful();
+    $this->artisan('och:ensure-passport-keys', ['--length' => 1024])->assertSuccessful();
 
     expect(file_get_contents($this->keys.'/oauth-private.key'))->toBe($privateKey);
 });

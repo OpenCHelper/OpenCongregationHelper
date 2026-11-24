@@ -4,6 +4,11 @@ use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Hash;
 
+beforeEach(function () {
+    // `och:install` creates the keys of the AI assistants when they are missing
+    usePassportTestKeys();
+});
+
 test('the root user is created from the configuration', function () {
     config(['app.initial_root_user' => [
         'name' => 'Mario Rossi',

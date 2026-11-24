@@ -465,39 +465,12 @@ jobs:
           token-file: ${{ inputs.environment-folder != '' && format('{0}/', inputs.environment-folder) || '' }}storage/framework/.artisan-token
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           commands: |
-            # ------------------------- Migrations / Seeder -------------------------
-            # `--force`: the commands are refused in production without it, as they cannot ask for a confirmation
-            artisan ${{ inputs.reset-database && 'migrate:fresh' || 'migrate' }} --force
-
-            # The root user (from the `INITIAL_ROOT_*` variables) with the super admin role, unless it already exists
-            artisan och:install --no-interaction
+            # ------------------------- Deployment -------------------------
+            # Migrations, `och:install` (permissions, keys of the AI assistants, root user), `public/storage` link and
+            # caches, stopping at the first failing step (see `app/Console/Commands/PostDeployCommand.php`)
+            artisan och:post-deploy ${{ inputs.reset-database && '--fresh' || '' }}
 
             ${{ inputs.seed-dummy-data && 'artisan db:seed --class=FakeDataSeeder' || '' }}
-
-            # The `public/storage` link is never deployed (the build's one would be uploaded as a plain folder)
-            artisan storage:link --force
-
-            # The keys signing the OAuth tokens of the AI assistants (MCP), kept between deployments (`storage/*.key`)
-            artisan app:ensure-passport-keys
-
-            # ------------------------- Optimizations -------------------------
-            # First clear all previous optimizations
-            artisan optimize:clear
-            artisan filament:clear-cached-components
-            artisan filament:optimize-clear
-
-            # Now cache individually the configuration, routes, and views (instead of `optimize`, which does all but does not show anything)
-            artisan config:cache
-            artisan event:cache
-            artisan route:cache
-            artisan view:cache
-
-            # Optimize Filament assets
-            artisan filament:cache-components
-            artisan filament:optimize
-
-            # Interrupt sub-minute tasks (if any) - https://laravel.com/docs/12.x/scheduling#interrupting-sub-minute-tasks
-            artisan schedule:interrupt
 
       # Once the deployment runs with the new token (see the `cron-folder` input): the job of the folder is matched by
       # title, so that every deployment updates it (with the new token) instead of creating it again

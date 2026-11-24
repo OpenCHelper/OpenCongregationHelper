@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 class ArtisanCommandController extends Controller
 {
@@ -48,8 +49,12 @@ class ArtisanCommandController extends Controller
             ], status: 404);
         }
 
+        // A buffer of its own: commands such as `config:cache` (run by `och:post-deploy`) boot a fresh application, whose
+        // Artisan has none of the output of this call
+        $buffer = new BufferedOutput;
+
         try {
-            $exitCode = Artisan::call("$command $params");
+            $exitCode = Artisan::call("$command $params", [], $buffer);
         } catch (Exception $e) {
             Log::error('Error executing Artisan command: '.$command.' with params: '.json_encode($params).' - '.$e->getMessage());
 
@@ -60,7 +65,7 @@ class ArtisanCommandController extends Controller
             ], status: 400);
         }
 
-        $output = Artisan::output();
+        $output = $buffer->fetch();
 
         Log::info('Artisan command output: '.PHP_EOL.implode("\n", array_map(function ($line) {
             return '    | '.$line;

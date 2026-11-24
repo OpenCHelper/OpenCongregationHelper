@@ -8,14 +8,14 @@ use phpseclib4\Crypt\RSA;
 
 /**
  * Create the keys signing the OAuth tokens of the AI assistants only when they are missing, so that the deployments can
- * run it every time: replacing them would disconnect every assistant.
+ * run it every time (through `och:install`): replacing them would disconnect every assistant.
  *
  * The keys are created as `passport:keys` does, without calling it: the deployments run the Artisan commands from a
  * web request (`/api/artisan/execute`), where Passport does not register its commands.
  */
 class EnsurePassportKeysCommand extends Command
 {
-    protected $signature = 'app:ensure-passport-keys
+    protected $signature = 'och:ensure-passport-keys
                             {--length=4096 : The length of the private key}';
 
     protected $description = 'Create the Passport encryption keys, unless they already exist';

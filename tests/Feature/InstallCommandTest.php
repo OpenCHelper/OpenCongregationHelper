@@ -2,9 +2,12 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Passport\Passport;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
+    usePassportTestKeys();
+
     config(['app.initial_root_user' => [
         'name' => 'Mario Rossi',
         'email' => 'root@example.com',
@@ -25,6 +28,16 @@ test('the root user is created from the configuration as a super admin', functio
         ->and(Hash::check('secret-password', $root->password))->toBeTrue()
         ->and($root->hasRole('super_admin'))->toBeTrue()
         ->and(Permission::where('name', 'ViewAny:Territory')->exists())->toBeTrue();
+});
+
+test('the keys of the AI assistants are kept when they exist', function () {
+    $privateKey = file_get_contents(Passport::keyPath('oauth-private.key'));
+
+    $this->artisan('och:install', ['--no-interaction' => true])
+        ->expectsOutputToContain('The Passport encryption keys already exist.')
+        ->assertSuccessful();
+
+    expect(file_get_contents(Passport::keyPath('oauth-private.key')))->toBe($privateKey);
 });
 
 test('running it again changes nothing', function () {
