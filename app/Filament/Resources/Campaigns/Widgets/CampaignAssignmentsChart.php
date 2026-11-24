@@ -27,6 +27,17 @@ class CampaignAssignmentsChart extends ChartWidget
                         $this->record->assignments()->whereNull('ended_at')->count(),
                         $this->record->assignments()->whereNotNull('ended_at')->count(),
                     ],
+                    // The gray, warning (amber) and success (green) colors of the theme, readable in light and dark mode
+                    'backgroundColor' => [
+                        'rgba(156, 163, 175, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(34, 197, 94, 0.8)',
+                    ],
+                    'borderColor' => [
+                        'rgb(156, 163, 175)',
+                        'rgb(245, 158, 11)',
+                        'rgb(34, 197, 94)',
+                    ],
                 ],
             ],
             'labels' => [
