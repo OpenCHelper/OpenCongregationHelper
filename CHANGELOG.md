@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   asking for the missing credentials; it replaces `db:seed` and `shield:super-admin` in the setup guide
   ([#67](https://github.com/OpenCHelper/OpenCongregationHelper/pull/67)).
 - **Post-deploy command**: `php artisan och:post-deploy` runs the migrations, `och:install`, the storage link and the
-  caches after uploading a new version, stopping at the first step that fails
+  caches after uploading a new version, stopping at the first step that fails; `--no-cache` skips building the caches
   ([#68](https://github.com/OpenCHelper/OpenCongregationHelper/pull/68)).
 - **Health check**: `php artisan och:doctor` reports what is missing or wrong in the configuration of an installation
   ([#68](https://github.com/OpenCHelper/OpenCongregationHelper/pull/68)).

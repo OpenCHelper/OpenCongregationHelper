@@ -118,7 +118,8 @@ php artisan och:post-deploy
 ```
 
 Esegue le nuove migrazioni, crea ciò che ancora manca (`och:install`), ricrea il collegamento `public/storage` e
-ricostruisce le cache, fermandosi al primo passaggio che non riesce.
+ricostruisce le cache, fermandosi al primo passaggio che non riesce. Con `--no-cache` le cache vengono solo svuotate,
+senza ricostruirle (es. su una macchina di sviluppo, dove nasconderebbero le modifiche al codice).
 
 **Senza accesso alla shell**, i comandi vengono eseguiti tramite l'endpoint `/api/artisan/execute`, autorizzato da un
 token monouso caricato via FTP: `scripts/remote_artisan.sh` fa entrambe le cose. Per esempio:

@@ -64,6 +64,22 @@ test('the deployment stops at the first failing step', function () {
     expect(array_column($calls->getArrayCopy(), 0))->toBe(['migrate', 'och:install']);
 });
 
+test('--no-cache only clears the caches', function () {
+    $calls = fakeDeploymentSteps();
+
+    $this->artisan('och:post-deploy', ['--no-cache' => true, '--no-interaction' => true])->assertSuccessful();
+
+    expect(array_column($calls->getArrayCopy(), 0))->toBe([
+        'migrate',
+        'och:install',
+        'storage:link',
+        'optimize:clear',
+        'filament:clear-cached-components',
+        'filament:optimize-clear',
+        'schedule:interrupt',
+    ]);
+});
+
 test('--fresh drops the tables first', function () {
     $calls = fakeDeploymentSteps();
 

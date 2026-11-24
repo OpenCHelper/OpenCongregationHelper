@@ -6,7 +6,8 @@ use Illuminate\Console\Command;
 
 /**
  * Run everything a deployment needs once the files of a new version are in place: the migrations, `och:install`, the
- * `public/storage` link and the caches.
+ * `public/storage` link and the caches. The caches of the previous version are always cleared; the new ones are built
+ * unless `--no-cache` is given (e.g. on a development machine, where they would hide the changes to the code).
  *
  * It replaces the list of commands each deployment used to run, and it works through the Artisan endpoint too
  * (`/api/artisan/execute`), so that the installations without a shell can be updated in one call. It stops at the
@@ -15,9 +16,10 @@ use Illuminate\Console\Command;
 class PostDeployCommand extends Command
 {
     protected $signature = 'och:post-deploy
-                            {--fresh : Drop all the tables before migrating, deleting ALL the data (refused in production)}';
+                            {--fresh : Drop all the tables before migrating, deleting ALL the data (refused in production)}
+                            {--no-cache : Only clear the caches, without building them again}';
 
-    protected $description = 'Migrate the database, set up what is missing (och:install) and rebuild the caches after deploying a new version';
+    protected $description = 'Migrate the database, set up what is missing (och:install) and rebuild the caches (unless --no-cache) after deploying a new version';
 
     public function handle(): int
     {
@@ -67,12 +69,14 @@ class PostDeployCommand extends Command
             ['optimize:clear', []],
             ['filament:clear-cached-components', []],
             ['filament:optimize-clear', []],
-            ['config:cache', []],
-            ['event:cache', []],
-            ['route:cache', []],
-            ['view:cache', []],
-            ['filament:cache-components', []],
-            ['filament:optimize', []],
+            ...($this->option('no-cache') ? [] : [
+                ['config:cache', []],
+                ['event:cache', []],
+                ['route:cache', []],
+                ['view:cache', []],
+                ['filament:cache-components', []],
+                ['filament:optimize', []],
+            ]),
 
             // The sub-minute tasks still running the previous version - https://laravel.com/docs/12.x/scheduling#interrupting-sub-minute-tasks
             ['schedule:interrupt', []],
