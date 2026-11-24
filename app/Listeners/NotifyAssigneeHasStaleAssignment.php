@@ -22,7 +22,11 @@ class NotifyAssigneeHasStaleAssignment
     {
         $assignment = $event->assignment;
 
-        // Notify the assignee about the stale assignment
+        // Virtual users (who cannot log in) are not notified: the notification links into a panel they cannot open
+        if ($assignment->assignee === null || $assignment->assignee->isVirtual()) {
+            return;
+        }
+
         $assignment->assignee->notify(new StaleAssignmentNotification($assignment));
     }
 }
