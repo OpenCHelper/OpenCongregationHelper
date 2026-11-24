@@ -149,6 +149,7 @@ return [
         'action_end_assignments' => 'Terminar Asignaciones',
         'missing_image' => 'No se ha establecido ninguna imagen',
         'tab_image' => 'Imagen',
+        'image_alt' => 'Imagen del territorio',
         'tab_map' => 'Mapa',
         'status_all' => 'Todos',
         'status_assigned' => 'Asignados',
