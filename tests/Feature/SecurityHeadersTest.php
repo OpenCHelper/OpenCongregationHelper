@@ -24,7 +24,7 @@ it('sends the security headers on the web pages', function () {
 });
 
 it('sends the security headers on the API and on redirects', function () {
-    assertSecurityHeaders($this->getJson('/api/user')->assertUnauthorized());
+    assertSecurityHeaders($this->getJson('/api/artisan/list')->assertUnauthorized());
     assertSecurityHeaders($this->get('/dashboard')->assertRedirect());
 });
 
