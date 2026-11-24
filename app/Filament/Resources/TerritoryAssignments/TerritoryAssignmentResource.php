@@ -135,6 +135,14 @@ class TerritoryAssignmentResource extends Resource
     }
 
     /**
+     * Timezone of the dates shown: the one of the user, or the one of the application for the guests of a shared page.
+     */
+    public static function getDisplayTimezone(): string
+    {
+        return Auth::user()?->timezone ?? config('app.timezone');
+    }
+
+    /**
      * Personal data (assignee name, notes) is hidden on publicly shared pages
      * unless enabled from the Settings pages (or with `ENABLE_SHARED_PII`).
      */
@@ -380,10 +388,14 @@ class TerritoryAssignmentResource extends Resource
                             ->placeholder(__('filament-resources.territory_assignment.info_campaign_placeholder')),
                         TextEntry::make('started_at')
                             ->icon(Heroicon::OutlinedCalendar)
+                            ->isoDateTime()
+                            ->timezone(fn (): string => static::getDisplayTimezone())
                             ->sinceTooltip()
                             ->label(__('filament-resources.territory_assignment.info_start_assignment')),
                         TextEntry::make('ended_at')
                             ->icon(Heroicon::OutlinedCalendar)
+                            ->isoDateTime()
+                            ->timezone(fn (): string => static::getDisplayTimezone())
                             ->sinceTooltip()
                             ->visible(fn (Model $record) => $record->ended_at != null)
                             ->label(__('filament-resources.territory_assignment.info_end_assignment'))
