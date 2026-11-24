@@ -2,7 +2,12 @@ name: Check Translations
 
 on:
   push:
+  # Pull requests from forks only: those of this repository are already checked on push
+  pull_request:
   workflow_dispatch: # Manually trigger a workflow run
+
+permissions:
+  contents: read
 
 env:
   php_extensions: >-
@@ -14,6 +19,7 @@ env:
 
 jobs:
   check-translations:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
 
     steps:

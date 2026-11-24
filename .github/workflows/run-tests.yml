@@ -2,8 +2,13 @@ name: Run tests
 
 on:
   push:
+  # Pull requests from forks only: those of this repository are already tested on push
+  pull_request:
   workflow_dispatch: # Manually trigger a workflow run
   workflow_call:
+
+permissions:
+  contents: read
 
 env:
   # Same major version installed in the Sail image (see docker-compose.yml)
@@ -21,6 +26,7 @@ env:
 jobs:
   run-tests:
     name: Run tests (prefixed=${{ matrix.db-prefix != '' && 'yes' || 'no' }})
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
 
     # The PR previews share one database, prefixing their tables with `p<N>_` (`DB_PREFIX`): the suite also runs with
