@@ -69,6 +69,12 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
      *
      * @var array<int, string>
      */
+    /**
+     * The guard of the roles and permissions (Spatie), whatever guard authenticated the user: the AI assistants use the
+     * `api` guard (OAuth tokens of the MCP server), but the roles and permissions are all defined for `web`.
+     */
+    protected string $guard_name = 'web';
+
     protected $fillable = [
         'first_name',
         'last_name',

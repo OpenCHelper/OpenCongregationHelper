@@ -24,7 +24,8 @@ class EnsureAiAssistantsAreEnabled
     {
         abort_unless(AiAssistantConnections::enabled(), 404);
 
-        $user = $request->user();
+        // It runs before `auth:api` (on the MCP server) and on the OAuth routes: the user of the access token, if any
+        $user = $request->user('api') ?? $request->user();
 
         abort_if($user instanceof User && ! $user->can_login, 403, 'This account cannot log in.');
 

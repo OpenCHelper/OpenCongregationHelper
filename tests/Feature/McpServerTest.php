@@ -14,6 +14,7 @@ use Laravel\Passport\Passport;
 use Laravel\Passport\Token;
 use Livewire\Livewire;
 use phpseclib4\Crypt\RSA;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use STS\FilamentImpersonate\ImpersonateManager;
 
@@ -85,6 +86,72 @@ function connectAssistant(User $user, string $name = 'Claude'): Client
     ])->save();
 
     return $client;
+}
+
+/**
+ * Connect an assistant for the user through the whole OAuth flow, as ChatGPT or Claude do: it registers itself, the user
+ * approves it, and it exchanges the code for its tokens. The session of the user is then forgotten, as the next
+ * requests of the assistant only carry its access token.
+ *
+ * @return array{client_id: string, access_token: string, refresh_token: string}
+ */
+function connectAssistantThroughOAuth(User $user, string $redirectUri = 'https://claude.ai/api/mcp/auth_callback'): array
+{
+    $clientId = test()->postJson('/oauth/register', ['client_name' => 'Claude', 'redirect_uris' => [$redirectUri]])
+        ->assertCreated()
+        ->json('client_id');
+
+    $verifier = Str::random(64);
+    $query = http_build_query([
+        'client_id' => $clientId,
+        'redirect_uri' => $redirectUri,
+        'response_type' => 'code',
+        'scope' => 'mcp:use',
+        'state' => 'xyz',
+        'code_challenge' => strtr(rtrim(base64_encode(hash('sha256', $verifier, true)), '='), '+/', '-_'),
+        'code_challenge_method' => 'S256',
+    ]);
+
+    // A previous request with an access token left `api` as the default guard of this test (each real request starts anew)
+    app('auth')->shouldUse('web');
+
+    $consent = test()->actingAs($user, 'web')->get('/oauth/authorize?'.$query)->assertOk();
+    preg_match('/name="auth_token" value="([^"]+)"/', $consent->getContent(), $matches);
+
+    $location = test()->post(route('passport.authorizations.approve'), ['state' => '', 'client_id' => $clientId, 'auth_token' => $matches[1]])
+        ->assertRedirect()
+        ->headers->get('Location');
+    parse_str((string) parse_url((string) $location, PHP_URL_QUERY), $callback);
+
+    $tokens = test()->postJson('/oauth/token', [
+        'grant_type' => 'authorization_code',
+        'client_id' => $clientId,
+        'redirect_uri' => $redirectUri,
+        'code_verifier' => $verifier,
+        'code' => $callback['code'],
+    ])->assertOk()->json();
+
+    app('auth')->forgetGuards();
+    test()->flushSession();
+    app('auth')->guard('web')->logout();
+
+    return ['client_id' => (string) $clientId, 'access_token' => $tokens['access_token'], 'refresh_token' => $tokens['refresh_token']];
+}
+
+/**
+ * The names of the tools listed to an assistant with the given access token.
+ *
+ * @return list<string>
+ */
+function mcpToolNamesWithToken(string $accessToken): array
+{
+    app('auth')->forgetGuards();
+
+    return collect(mcpRequest('tools/list', [], ['Authorization' => 'Bearer '.$accessToken])->assertOk()->json('result.tools'))
+        ->pluck('name')
+        ->sort()
+        ->values()
+        ->all();
 }
 
 test('the AI assistants are not allowed by default', function () {
@@ -312,4 +379,57 @@ test('turning the assistants off disconnects all of them', function () {
 
     expect(app(SecuritySettings::class)->ai_assistants_enabled)->toBeFalse()
         ->and(Token::query()->where('revoked', false)->exists())->toBeFalse();
+});
+
+test('an assistant gets the permissions the user has through their roles', function () {
+    allowAiAssistants();
+
+    $role = Role::findOrCreate('territory_manager');
+    $role->givePermissionTo([Permission::findOrCreate('ViewAny:Territory'), Permission::findOrCreate('View:Territory')]);
+    $this->user->assignRole($role);
+
+    expect(mcpToolNamesWithToken(connectAssistantThroughOAuth($this->user)['access_token']))->toContain('list_territories', 'get_territory');
+});
+
+test('an assistant gets the permissions given to the user directly', function () {
+    allowAiAssistants();
+
+    $this->user->givePermissionTo(Permission::findOrCreate('ViewAny:TerritoryZone'));
+
+    expect(mcpToolNamesWithToken(connectAssistantThroughOAuth($this->user)['access_token']))->toContain('list_territory_zones');
+});
+
+test('the assistant of a user who can no longer log in stops working', function () {
+    allowAiAssistants();
+    $tokens = connectAssistantThroughOAuth($this->user);
+
+    $this->user->update(['can_login' => false]);
+
+    mcpRequest('tools/call', ['name' => 'get_my_account', 'arguments' => (object) []], ['Authorization' => 'Bearer '.$tokens['access_token']])
+        ->assertForbidden();
+});
+
+test('an administrator impersonating a user cannot get a code for an assistant the user already approved', function () {
+    allowAiAssistants();
+    $redirectUri = 'http://localhost:33418/callback';
+    $tokens = connectAssistantThroughOAuth($this->user, $redirectUri);
+
+    $admin = User::factory()->create(['can_login' => true]);
+    $admin->assignRole(Role::findOrCreate('super_admin'));
+
+    // As the impersonation of the panel: logged in as the user, with the administrator remembered in the session
+    $response = $this->actingAs($this->user)
+        ->withSession([ImpersonateManager::SESSION_KEY => $admin->id])
+        ->get('/oauth/authorize?'.http_build_query([
+            'client_id' => $tokens['client_id'],
+            'redirect_uri' => $redirectUri,
+            'response_type' => 'code',
+            'scope' => 'mcp:use',
+            'state' => 'xyz',
+            'code_challenge' => str_repeat('a', 43),
+            'code_challenge_method' => 'S256',
+        ]));
+
+    expect((string) $response->headers->get('Location'))->not->toContain('code=');
+    $response->assertForbidden();
 });
