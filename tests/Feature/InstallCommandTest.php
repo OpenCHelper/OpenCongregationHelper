@@ -38,7 +38,7 @@ test('running it again changes nothing', function () {
 });
 
 test('the existing root user is made a super admin without creating a user', function () {
-    $root = User::factory()->create();
+    $root = User::factory()->create(['id' => 1]);
 
     $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
 
@@ -70,4 +70,12 @@ test('it asks for the missing values when run interactively', function () {
         ->and($root->first_name)->toBe('Mario')
         ->and(Hash::check('another-password', $root->password))->toBeTrue()
         ->and($root->hasRole('super_admin'))->toBeTrue();
+});
+
+test('the root user gets ID 1 even when the next ID is higher', function () {
+    User::factory()->create(['id' => 5])->delete();
+
+    $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
+
+    expect(User::sole()->isRootUser())->toBeTrue();
 });

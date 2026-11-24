@@ -86,7 +86,9 @@ class InstallCommand extends Command
 
         [$firstName, $lastName] = array_pad(explode(' ', $root['name'], 2), 2, '');
 
+        // The ID is set: the root user is the one with ID 1, while the next ID may be higher (e.g. after deleted users)
         User::forceCreate([
+            'id' => 1,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => $root['email'],
