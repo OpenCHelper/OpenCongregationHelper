@@ -35,8 +35,11 @@ class ListPeopleTool extends CongregationTool
 
         $filters = $request->validate(['search' => ['nullable', 'string', 'max:255']]);
 
+        // How many territories each one has is shown only to who can see the assignments
+        $canSeeAssignments = $this->can('viewAny', TerritoryAssignment::class);
+
         $query = User::query()
-            ->withCount(['assignments as assignments_in_progress_count' => fn (Builder $query) => $query->whereNull('ended_at')])
+            ->when($canSeeAssignments, fn (Builder $query) => $query->withCount(['assignments as assignments_in_progress_count' => fn (Builder $query) => $query->whereNull('ended_at')]))
             // Every word must be in the first or last name (e.g. "Mario Rossi")
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
                 foreach (preg_split('/\s+/', trim($search)) ?: [] as $word) {
@@ -48,7 +51,7 @@ class ListPeopleTool extends CongregationTool
 
         return $this->respond($this->paginate($request, $query, fn (User $user): array => [
             ...McpPresenter::person($user),
-            'assignments_in_progress_count' => (int) $user->getAttribute('assignments_in_progress_count'),
+            ...($canSeeAssignments ? ['assignments_in_progress_count' => (int) $user->getAttribute('assignments_in_progress_count')] : []),
         ]));
     }
 

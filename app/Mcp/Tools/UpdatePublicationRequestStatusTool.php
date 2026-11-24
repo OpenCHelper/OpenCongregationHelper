@@ -33,6 +33,8 @@ class UpdatePublicationRequestStatusTool extends CongregationTool
 
     public function handle(Request $request): ResponseFactory
     {
+        abort_unless($this->isAllowed($this->user()), 403);
+
         $validated = $request->validate([
             'request_ids' => ['required', 'array', 'min:1', 'max:'.self::MAX_REQUESTS],
             'request_ids.*' => ['integer', 'distinct'],

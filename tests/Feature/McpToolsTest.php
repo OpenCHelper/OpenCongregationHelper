@@ -390,3 +390,24 @@ test('the search and fetch only show what the user can see', function () {
         ->tool(FetchTool::class, ['id' => 'nonsense'])
         ->assertHasErrors(['Unknown id']);
 });
+
+test('the zones and campaigns can be fetched, and the overview lists the active campaigns', function () {
+    $territory = mcpTerritory(['name' => 'Via Roma']);
+    $campaign = Campaign::factory()->create(['name' => 'Memorial', 'valid_from' => now()->subWeek(), 'valid_until' => now()->addMonth()]);
+    mcpAssignment($territory, $this->publisher, ['campaign_id' => $campaign->id]);
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(FetchTool::class, ['id' => "zone:{$this->zone->id}"])
+        ->assertOk()
+        ->assertSee(['North', 'Via Roma']);
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(FetchTool::class, ['id' => "campaign:{$campaign->id}"])
+        ->assertOk()
+        ->assertSee(['Memorial', 'Via Roma', 'assignments_in_progress_count']);
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(GetOverviewTool::class)
+        ->assertOk()
+        ->assertStructuredContentPath('active_campaigns.0.name', 'Memorial');
+});

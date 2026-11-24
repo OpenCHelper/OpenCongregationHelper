@@ -132,17 +132,21 @@ class FetchTool extends CongregationTool
 
         return match (true) {
             $record instanceof Territory => [$record->name, app(GetTerritoryTool::class)->details($record)],
-            $record instanceof TerritoryZone => [$record->name, [
-                ...McpPresenter::zone($record),
-                'territories' => $record->territories()
-                    ->with(['territoryZone', 'currentAssignment.campaign'])
-                    ->orderBy('name')
-                    ->get()
-                    ->map(McpPresenter::territory(...))
-                    ->all(),
-            ]],
+            $record instanceof TerritoryZone => [$record->name, array_filter([
+                ...McpPresenter::zone($record->loadCount('territories')),
+                'territories' => $this->can('viewAny', Territory::class)
+                    ? $record->territories()
+                        ->with(['territoryZone', 'currentAssignment.campaign'])
+                        ->orderBy('name')
+                        ->get()
+                        ->map(McpPresenter::territory(...))
+                        ->all()
+                    : null,
+            ], fn (mixed $value): bool => $value !== null)],
             $record instanceof Campaign => [$record->name, [
-                ...McpPresenter::campaign($record),
+                ...McpPresenter::campaign($canSeeAssignments
+                    ? $record->loadCount(['assignments', 'assignments as assignments_in_progress_count' => fn (Builder $query) => $query->whereNull('ended_at')])
+                    : $record),
                 'assignments' => $canSeeAssignments ? $this->assignments($record->assignments()->getQuery()) : null,
             ]],
             $record instanceof User => [$record->getFullName(), [

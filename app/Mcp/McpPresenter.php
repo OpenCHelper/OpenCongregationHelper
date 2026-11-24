@@ -13,6 +13,7 @@ use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 
@@ -41,8 +42,13 @@ final class McpPresenter
             'status' => $territory->relationLoaded('currentAssignment')
                 ? ($currentAssignment === null ? 'available' : 'assigned')
                 : null,
-            'current_assignment' => $currentAssignment !== null ? self::assignment($currentAssignment, withTerritory: false) : null,
-            'last_returned_at' => self::date($territory->getAttribute('last_returned_at')),
+            // As the territory list of the app: only who has it, unless the user can see the assignments
+            'current_assignment' => match (true) {
+                $currentAssignment === null => null,
+                Gate::allows('viewAny', TerritoryAssignment::class) => self::assignment($currentAssignment, withTerritory: false),
+                default => array_filter(['assignee' => $currentAssignment->assignee !== null ? self::person($currentAssignment->assignee) : null]),
+            },
+            'last_returned_at' => self::date(self::loaded($territory, 'last_returned_at')),
             'url' => self::url(fn (): string => TerritoryResource::getUrl('view', ['record' => $territory], panel: 'app'), 'view', $territory),
         ], fn (mixed $value): bool => $value !== null);
     }
@@ -102,8 +108,8 @@ final class McpPresenter
             'status' => $campaign->getStatus()->value,
             'valid_from' => self::date($campaign->valid_from),
             'valid_until' => self::date($campaign->valid_until),
-            'assignments_count' => $campaign->getAttribute('assignments_count'),
-            'assignments_in_progress_count' => $campaign->getAttribute('assignments_in_progress_count'),
+            'assignments_count' => self::loaded($campaign, 'assignments_count'),
+            'assignments_in_progress_count' => self::loaded($campaign, 'assignments_in_progress_count'),
             'url' => self::url(fn (): string => CampaignResource::getUrl('view', ['record' => $campaign], panel: 'app'), 'view', $campaign),
         ], fn (mixed $value): bool => $value !== null);
     }
@@ -116,7 +122,7 @@ final class McpPresenter
         return array_filter([
             'id' => $zone->id,
             'name' => $zone->name,
-            'territories_count' => $zone->getAttribute('territories_count'),
+            'territories_count' => self::loaded($zone, 'territories_count'),
         ], fn (mixed $value): bool => $value !== null);
     }
 
@@ -172,6 +178,15 @@ final class McpPresenter
     public static function kindLabel(string $kind): string
     {
         return __("ai-assistants.kinds.{$kind}");
+    }
+
+    /**
+     * An attribute only loaded by some queries (e.g. `withCount()`), when it was: reading a missing one throws outside
+     * of production (`Model::shouldBeStrict()`).
+     */
+    private static function loaded(Model $model, string $attribute): mixed
+    {
+        return array_key_exists($attribute, $model->getAttributes()) ? $model->getAttribute($attribute) : null;
     }
 
     public static function date(mixed $date): ?string

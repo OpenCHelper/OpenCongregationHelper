@@ -29,6 +29,8 @@ class ReturnTerritoryTool extends CongregationTool
 
     public function handle(Request $request): Response|ResponseFactory
     {
+        abort_unless($this->isAllowed($this->user()), 403);
+
         $validated = $request->validate([
             'territory_id' => ['required', 'integer'],
             'returned_at' => ['nullable', 'date', 'before_or_equal:today'],
