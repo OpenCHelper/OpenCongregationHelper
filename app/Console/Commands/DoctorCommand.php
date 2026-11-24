@@ -35,6 +35,9 @@ class DoctorCommand extends Command
 
     public function handle(Migrator $migrator): int
     {
+        // Artisan keeps the same instance: the results of a previous run in the same process must not be shown again
+        $this->results = [];
+
         $this->checkConfiguration();
         $databaseIsReachable = $this->checkDatabase($migrator);
         $this->checkFiles();
@@ -88,8 +91,9 @@ class DoctorCommand extends Command
         $this->check('Debug mode (APP_DEBUG)', ! ($isProduction && config('app.debug')), self::WARNING,
             'turn it off in production: errors would show internal details');
 
-        $this->check('Queue and scheduler endpoints (ARTISAN_CRON_TOKEN)', filled(config('app.artisan_cron_token')),
-            self::WARNING, 'disabled: without a shell, the queued emails and the scheduled tasks never run');
+        // Optional: only the installations without a shell run the queue and the scheduler through these endpoints
+        $this->report('Queue and scheduler endpoints (ARTISAN_CRON_TOKEN)', self::OK,
+            filled(config('app.artisan_cron_token')) ? 'enabled' : 'disabled (only needed without a shell)');
 
         $this->check('Email (MAIL_MAILER, MAIL_FROM_ADDRESS)', filled(config('mail.default')) && filled(config('mail.from.address')),
             self::WARNING, 'the notification emails cannot be sent', (string) config('mail.default'));

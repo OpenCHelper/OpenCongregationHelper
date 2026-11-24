@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function () {
     usePassportTestKeys();
@@ -38,13 +39,19 @@ test('a missing application key is an error', function () {
         ->assertFailed();
 });
 
-test('the disabled cron endpoints are only a warning', function () {
+test('the cron endpoints are optional', function () {
     $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
-    config(['app.artisan_cron_token' => null]);
 
-    $this->artisan('och:doctor')
-        ->expectsOutputToContain('the queued emails and the scheduled tasks never run')
-        ->assertSuccessful();
+    Artisan::call('och:doctor');
+    $warningsWithToken = substr_count(Artisan::output(), 'WARNING');
+
+    config(['app.artisan_cron_token' => null]);
+    $exitCode = Artisan::call('och:doctor');
+    $output = Artisan::output();
+
+    expect($exitCode)->toBe(0)
+        ->and($output)->toContain('disabled (only needed without a shell)')
+        ->and(substr_count($output, 'WARNING'))->toBe($warningsWithToken);
 });
 
 test('a root user that cannot log in is reported', function () {
