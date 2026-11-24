@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- **Campaign chart**: a territory assigned more than once in the same campaign is counted once, so "To be assigned"
+  no longer goes negative and the slices add up to the number of territories
+  ([#77](https://github.com/OpenCHelper/OpenCongregationHelper/pull/77)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
