@@ -77,6 +77,12 @@ proclamatore.
 
 Si possono impersonare anche gli utenti virtuali; l'utente root no.
 
+## Aggiungere utenti a un reparto
+
+Seleziona alcuni utenti e usa l'azione di massa **Aggiungi al reparto**: scegli il **Reparto** e il **Ruolo nel
+reparto**, e vi entrano tutti insieme. Chi serve già nel reparto mantiene il suo ruolo. Vedi
+[Reparti](departments) per cosa possono fare i membri.
+
 ## Eliminare utenti
 
 Usa **Elimina** nella pagina dell'utente, oppure seleziona alcuni utenti e usa l'azione di massa

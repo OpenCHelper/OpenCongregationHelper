@@ -38,6 +38,7 @@ return [
         'column_role' => 'Rol',
         'column_email' => 'Correo electrónico',
         'field_users' => 'Hermanos',
+        'field_users_helper' => 'Puedes elegir varios hermanos: búscalos por nombre y selecciónalos uno tras otro.',
         'field_role' => 'Rol en el departamento',
         'field_role_helper' => 'Los responsables también pueden eliminar en sus secciones, y añadir y quitar sus ayudantes.',
         'action_add' => 'Añadir miembros',
@@ -50,5 +51,12 @@ return [
         'notification_removed' => 'Miembro quitado',
         'empty_heading' => 'Todavía no hay miembros',
         'empty_description' => 'Añade los hermanos que sirven en este departamento: podrán gestionar sus secciones.',
+    ],
+    'bulk_add' => [
+        'action' => 'Añadir al departamento',
+        'heading' => 'Añadir a un departamento',
+        'field_department' => 'Departamento',
+        'notification_added' => '{0} Nadie añadido a :department|{1} 1 hermano añadido a :department|[2,*] :count hermanos añadidos a :department',
+        'notification_skipped' => '{1} 1 ya era miembro y mantiene su rol.|[2,*] :count ya eran miembros y mantienen su rol.',
     ],
 ];
