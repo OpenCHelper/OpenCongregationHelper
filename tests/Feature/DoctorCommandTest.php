@@ -8,7 +8,7 @@ beforeEach(function () {
 
     config([
         'app.key' => 'base64:'.base64_encode(str_repeat('a', 32)),
-        'app.url' => 'https://territories.example.com',
+        'app.url' => 'https://och-instance.example.com',
         'app.artisan_cron_token' => 'cron-secret',
         'app.initial_root_user' => ['name' => 'Root', 'email' => 'root@example.com', 'password' => 'secret-password'],
     ]);

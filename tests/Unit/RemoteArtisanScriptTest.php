@@ -43,7 +43,7 @@ afterEach(function () {
 function runRemoteArtisan(string $bin, array $arguments, array $response = ['output' => 'Done.', 'returnCode' => 0]): Process
 {
     $process = new Process(
-        ['bash', dirname(__DIR__, 2).'/scripts/remote_artisan.sh', '--base-url', 'https://territories.example.com',
+        ['bash', dirname(__DIR__, 2).'/scripts/remote_artisan.sh', '--base-url', 'https://och-instance.example.com',
             '--ftp-hostname', 'ftp.example.com', '--ftp-username', 'user', '--ftp-password', 'secret', ...$arguments],
         dirname(__DIR__, 2),
         [

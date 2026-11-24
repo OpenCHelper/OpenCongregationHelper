@@ -33,7 +33,7 @@ APP_NAME="My Application Name"
 APP_ENV=production
 APP_DEBUG=false
 APP_TIMEZONE=UTC
-APP_URL=https://territori.example.com
+APP_URL=https://och-instance.example.com
 
 # Imposta qui la tua locale
 APP_LOCALE=it
@@ -125,7 +125,7 @@ senza ricostruirle (es. su una macchina di sviluppo, dove nasconderebbero le mod
 token monouso caricato via FTP: `scripts/remote_artisan.sh` fa entrambe le cose. Per esempio:
 
 ```shell
-scripts/remote_artisan.sh --base-url https://territories.example.com \
+scripts/remote_artisan.sh --base-url https://och-instance.example.com \
     --ftp-hostname <host> --ftp-username <utente> --ftp-password <password> \
     och:post-deploy --no-interaction
 ```
@@ -156,10 +156,10 @@ tempo. Entrambe richiedono qualcosa che venga eseguito periodicamente:
 
     ```shell
     # Elabora la coda (es. ogni 5 minuti)
-    curl -X POST -H "X-Cron-Token: <il tuo token>" https://territori.example.com/api/artisan/queue/process
+    curl -X POST -H "X-Cron-Token: <il tuo token>" https://och-instance.example.com/api/artisan/queue/process
 
     # Esegue le attività pianificate (es. ogni ora)
-    curl -X POST -H "X-Cron-Token: <il tuo token>" https://territori.example.com/api/artisan/schedule/process
+    curl -X POST -H "X-Cron-Token: <il tuo token>" https://och-instance.example.com/api/artisan/schedule/process
     ```
 
   Gli endpoint hanno un limite di 10 richieste al minuto.

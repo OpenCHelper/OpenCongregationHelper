@@ -33,7 +33,7 @@ APP_NAME="My Application Name"
 APP_ENV=production
 APP_DEBUG=false
 APP_TIMEZONE=UTC
-APP_URL=https://territories.example.com
+APP_URL=https://och-instance.example.com
 
 # Choose here your default locale
 APP_LOCALE=en
@@ -124,7 +124,7 @@ again (e.g. on a development machine, where they would hide the changes to the c
 uploaded through FTP: `scripts/remote_artisan.sh` does both. For example:
 
 ```shell
-scripts/remote_artisan.sh --base-url https://territories.example.com \
+scripts/remote_artisan.sh --base-url https://och-instance.example.com \
     --ftp-hostname <host> --ftp-username <user> --ftp-password <password> \
     och:post-deploy --no-interaction
 ```
@@ -153,10 +153,10 @@ Both need something that runs periodically:
 
     ```shell
     # Process the queue (e.g. every 5 minutes)
-    curl -X POST -H "X-Cron-Token: <your token>" https://territories.example.com/api/artisan/queue/process
+    curl -X POST -H "X-Cron-Token: <your token>" https://och-instance.example.com/api/artisan/queue/process
 
     # Run the scheduled jobs (e.g. every hour)
-    curl -X POST -H "X-Cron-Token: <your token>" https://territories.example.com/api/artisan/schedule/process
+    curl -X POST -H "X-Cron-Token: <your token>" https://och-instance.example.com/api/artisan/schedule/process
     ```
 
   The endpoints are rate limited (10 requests per minute).
