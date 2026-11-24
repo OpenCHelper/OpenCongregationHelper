@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- **Zone territories**: creating or editing a territory with an uploaded image from a zone's **Territories** tab no
+  longer fails, and the image is saved ([#73](https://github.com/OpenCHelper/OpenCongregationHelper/pull/73)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
