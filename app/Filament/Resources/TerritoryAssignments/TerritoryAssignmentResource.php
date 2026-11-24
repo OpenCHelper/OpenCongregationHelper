@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TerritoryAssignments;
 
 use App\Enums\NavigationGroup;
+use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Models\TerritoryAssignment;
@@ -345,6 +346,7 @@ class TerritoryAssignmentResource extends Resource
                                     ->visible(fn (Model $record) => $record->territory?->image_path != null)
                                     ->schema([
                                         ImageEntry::make('territory.image_path')
+                                            ->alt(fn (Model $record): string => TerritoryResource::getImageAlt($record->territory?->name))
                                             ->visibility('private')
                                             ->imageHeight('auto')
                                             ->imageWidth('100%')

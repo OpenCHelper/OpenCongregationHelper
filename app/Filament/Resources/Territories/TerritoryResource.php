@@ -280,10 +280,11 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->state(function (Get $get) {
                                                 $file = $get('image_file');
                                                 $url = $get('image_path');
+                                                $alt = e(static::getImageAlt($get('name')));
 
                                                 if ($file instanceof TemporaryUploadedFile) {
                                                     return new HtmlString(
-                                                        '<img src="'.e($file->temporaryUrl()).'" class="rounded-lg">'
+                                                        '<img src="'.e($file->temporaryUrl()).'" alt="'.$alt.'" class="rounded-lg">'
                                                     );
                                                 }
 
@@ -300,13 +301,13 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                                 }
 
                                                 return new HtmlString(
-                                                    '<img src="'.e($url).'" class="rounded-lg">'
+                                                    '<img src="'.e($url).'" alt="'.$alt.'" class="rounded-lg">'
                                                 );
                                             })
                                             ->live(),
 
                                         TextInput::make('image_path')
-                                            ->label('Image from URL')
+                                            ->label(__('filament-resources.territory.field_image_url'))
                                             ->url()
                                             ->autocomplete(false)
                                             ->live()
@@ -320,13 +321,14 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             }),
                                         TextEntry::make('image_separator')
                                             ->hiddenLabel()
-                                            ->state('— or —')
+                                            ->state(__('filament-resources.territory.image_separator'))
                                             ->hiddenOn(['view'])
                                             ->extraAttributes([
                                                 'class' => 'flex items-center justify-center h-full',
+                                                'aria-hidden' => 'true',
                                             ]),
                                         FileUpload::make('image_file')
-                                            ->label('Image from file')
+                                            ->label(__('filament-resources.territory.field_image_file'))
                                             ->image()
                                             // Not SVG, which can carry scripts run when the image is opened
                                             ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
@@ -749,6 +751,14 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
         unset($data['image_file']);
 
         return $data;
+    }
+
+    /**
+     * The alternative text of a territory image: the territory name, or a generic one while it has none.
+     */
+    public static function getImageAlt(?string $territoryName): string
+    {
+        return filled($territoryName) ? $territoryName : __('filament-resources.territory.image_alt');
     }
 
     /**

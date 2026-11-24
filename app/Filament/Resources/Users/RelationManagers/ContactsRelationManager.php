@@ -29,8 +29,6 @@ class ContactsRelationManager extends RelationManager
 {
     protected static string $relationship = 'contacts';
 
-    protected static ?string $title = 'Contatti';
-
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('profile.contacts.section_title');
@@ -38,7 +36,12 @@ class ContactsRelationManager extends RelationManager
 
     public static function getModelLabel(): string
     {
-        return __('profile.contacts.section_title');
+        return __('profile.contacts.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('profile.contacts.plural_model_label');
     }
 
     public function infolist(Schema $schema): Schema
@@ -113,7 +116,7 @@ class ContactsRelationManager extends RelationManager
                     ->requiredWithout('phone_number'),
                 Textarea::make('notes')
                     ->label(__('profile.contacts.notes'))
-                    ->placeholder('Notes...')
+                    ->placeholder(__('profile.contacts.notes_placeholder'))
                     ->columnSpanFull(),
             ]);
     }
