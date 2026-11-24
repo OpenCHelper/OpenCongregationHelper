@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Install command**: `php artisan och:install` creates the permissions and the root user with the super admin role,
+  asking for the missing credentials; it replaces `db:seed` and `shield:super-admin` in the setup guide.
+
+### Fixed
+
+- Root user not created on installations in the production environment.
+
 ## [1.0.0-alpha14] - 2026-11-24
 
 ### Added

@@ -29,7 +29,6 @@ jobs:
       label: Nightly
       reset-database: true
       seed-dummy-data: true
-      setup-root-user: true
       install-dev-dependencies: false
       # The space may also host the PR previews: each environment has its own folder (see the README), and Nightly is
       # deployed as a single archive unpacked on the server

@@ -90,21 +90,17 @@ precedente.
     php artisan key:generate
     ```
 
-3. Crea le tabelle del database e l'utente root:
+3. Crea le tabelle del database, poi i permessi e l'utente root con il ruolo `super_admin`:
 
     ```shell
     php artisan migrate --force
-    php artisan db:seed --force
+    php artisan och:install
     ```
 
-4. Crea i permessi e assegna all'utente root il ruolo `super_admin`:
+    `och:install` legge l'utente root dalle variabili `INITIAL_ROOT_*` e chiede quelle mancanti. Crea solo ciò che
+    manca, quindi può essere eseguito di nuovo dopo ogni aggiornamento.
 
-    ```shell
-    php artisan db:seed --class=ShieldSeeder --force
-    php artisan shield:super-admin --user=1 --panel=app
-    ```
-
-5. Apri `/app/login` e accedi con le credenziali `INITIAL_ROOT_*`. Poi segui la guida
+4. Apri `/app/login` e accedi con le credenziali `INITIAL_ROOT_*`. Poi segui la guida
    [Configurare la congregazione](guides/first-setup).
 
 > 🔒 **L'utente root** è l'utente con ID 1. Non può mai essere eliminato né impersonato e, al di fuori dell'ambiente

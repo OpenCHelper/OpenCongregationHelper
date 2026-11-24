@@ -122,7 +122,7 @@ This application uses the following specific versions and technologies:
    ./vendor/bin/sail composer install
    ./vendor/bin/sail artisan key:generate
    ./vendor/bin/sail artisan migrate
-   ./vendor/bin/sail artisan db:seed
+   ./vendor/bin/sail artisan och:install
    ./vendor/bin/sail artisan db:seed --class=FakeDataSeeder
    ```
 
@@ -133,10 +133,8 @@ This application uses the following specific versions and technologies:
    ./vendor/bin/sail artisan vendor:publish --tag=jetstream-views
    ```
 
-9. **Create super admin user (Filament Shield)**:
-   ```bash
-   ./vendor/bin/sail artisan shield:super-admin --user=1 --panel=app
-   ```
+9. **Super admin user (Filament Shield)**: `och:install` (step 7) already creates the root user (ID 1) with the
+   `super_admin` role.
 
 10. **Install frontend dependencies with Vite 5** (15+ seconds, NEVER CANCEL):
    ```bash
@@ -182,7 +180,7 @@ This application uses the following specific versions and technologies:
    
    touch database/database.sqlite
    php artisan migrate
-   php artisan db:seed
+   php artisan och:install
    php artisan db:seed --class=FakeDataSeeder
    ```
 
@@ -192,10 +190,8 @@ This application uses the following specific versions and technologies:
    php artisan vendor:publish --tag=jetstream-views
    ```
 
-7. **Initialize root user as admin (Filament Shield)**:
-   ```bash
-   php artisan shield:super-admin --user=1 --panel=app
-   ```
+7. **Root user as admin (Filament Shield)**: `och:install` (step 5) already creates the root user (ID 1) with the
+   `super_admin` role.
 
 ## Development Commands
 
@@ -213,7 +209,7 @@ This application uses the following specific versions and technologies:
 
 ### Database Operations
 - **Laravel 11 migrate**: `php artisan migrate` or `./vendor/bin/sail artisan migrate`
-- **Fresh migration with seeding**: `php artisan migrate:fresh --seed`
+- **Fresh migration with seeding**: `php artisan migrate:fresh --seed` (the seeder runs `och:install`)
 - **Seed fake data**: `php artisan db:seed --class=FakeDataSeeder`
 - **Database factories**: Use `php artisan tinker` then `User::factory(10)->create()`
 
@@ -290,7 +286,7 @@ php artisan db:seed --class=FakeDataSeeder
 php artisan filament:install --panels
 php artisan filament:make-resource TerritoryResource
 php artisan filament:make-page CustomPage
-php artisan shield:super-admin --user=1 --panel=app
+php artisan och:install  # permissions, root user and its super admin role
 
 # Laravel Jetstream
 php artisan jetstream:install livewire

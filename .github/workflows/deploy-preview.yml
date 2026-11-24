@@ -514,9 +514,9 @@ jobs:
             # No `optimize:clear` first: the release is built from scratch, and it would fail on the missing cache table
 
             # The tables were already dropped by the deployer (which works even when the application cannot boot)
-            artisan migrate --seed
+            artisan migrate --force
+            artisan och:install --no-interaction
             artisan db:seed --class=FakeDataSeeder
-            artisan shield:super-admin --user=1 --panel=app
 
             # The `public/storage` link is never deployed (the build's one would be uploaded as a plain folder)
             artisan storage:link --force

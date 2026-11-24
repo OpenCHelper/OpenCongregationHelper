@@ -89,21 +89,17 @@ changing them in `.env`, or the settings not changed from those pages keep the p
     php artisan key:generate
     ```
 
-3. Create the database tables and the root user:
+3. Create the database tables, then the permissions and the root user with the `super_admin` role:
 
     ```shell
     php artisan migrate --force
-    php artisan db:seed --force
+    php artisan och:install
     ```
 
-4. Create the permissions and give the root user the `super_admin` role:
+    `och:install` reads the root user from the `INITIAL_ROOT_*` variables and asks for the missing ones. It only
+    creates what is missing, so it can be run again after every update.
 
-    ```shell
-    php artisan db:seed --class=ShieldSeeder --force
-    php artisan shield:super-admin --user=1 --panel=app
-    ```
-
-5. Open `/app/login` and log in with the `INITIAL_ROOT_*` credentials. Then follow the
+4. Open `/app/login` and log in with the `INITIAL_ROOT_*` credentials. Then follow the
    [Setting up the congregation](guides/first-setup) guide.
 
 > 🔒 **The root user** is the user with ID 1. It can never be deleted nor impersonated and, outside of the `production`

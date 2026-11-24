@@ -115,19 +115,15 @@ The preferred way of developing is by using **Docker Compose** to build the cont
         ```shell
         sail artisan migrate
         ```
-    4. Seed initial data:
+    4. Create the permissions and the root user (from the `INITIAL_ROOT_*` variables) with the super admin role:
         ```shell
-        sail artisan db:seed
+        sail artisan och:install
         ```
     5. Seed dummy data for development:
         ```shell
         sail artisan db:seed --class=FakeDataSeeder
         ```
-    6. Create super user:
-        ```shell
-        sail artisan shield:super-admin --user=1 --panel=app
-        ```
-    7. Create the keys of the AI assistants (MCP server), only needed to try them:
+    6. Create the keys of the AI assistants (MCP server), only needed to try them:
         ```shell
         sail artisan app:ensure-passport-keys
         ```
