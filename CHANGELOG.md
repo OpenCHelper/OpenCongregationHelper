@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
   button. Returned or deleted assignments can no longer be shared, and their leftover links stop working
   ([#72](https://github.com/OpenCHelper/OpenCongregationHelper/pull/72)).
+- The unused `/api` endpoints (`/api/user`, `/api/assignees`, `/api/assignments`, `/api/territories`, `/api/zones`)
+  are removed: they returned whole user and assignment records
+  ([#81](https://github.com/OpenCHelper/OpenCongregationHelper/pull/81)).
 
 ## [1.0.0-alpha15] - 2026-11-24
 
