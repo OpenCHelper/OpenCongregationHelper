@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- **Territories**: the counts in the zone and campaign group headers now match the rows below them: they follow the
+  filters and the search, no longer count returned assignments, and include under "No campaign" the territories
+  assigned outside a campaign ([#87](https://github.com/OpenCHelper/OpenCongregationHelper/pull/87)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
