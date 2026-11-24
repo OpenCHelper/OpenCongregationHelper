@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- **Contacts**: setting a contact as primary from the user's page in the admin panel now replaces the previous primary
+  contact, as in the profile, instead of leaving the user with several
+  ([#76](https://github.com/OpenCHelper/OpenCongregationHelper/pull/76)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
