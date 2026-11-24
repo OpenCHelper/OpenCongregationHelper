@@ -43,7 +43,7 @@ Each member has a **role in the department**:
 ![Adding members](/docs/user-documentation/en/administration/assets/department-add-members.webp)
 
 To add **many users at once**, e.g. when setting up a department, you can also start from the [users list](users):
-select them, open the bulk actions and click **Add to department**, then choose the **Department** and the **Role in
+select them, open **Bulk actions** and click **Add to department**, then choose the **Department** and the **Role in
 the department**. Those who already serve in the department keep their role.
 
 The administrators can manage the members of every department; the overseers only those of their own departments.

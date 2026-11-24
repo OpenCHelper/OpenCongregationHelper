@@ -44,7 +44,7 @@ Ogni membro ha un **ruolo nel reparto**:
 ![Aggiungere membri](/docs/user-documentation/it/administration/assets/department-add-members.webp)
 
 Per aggiungere **molti utenti insieme**, ad esempio quando si organizza un reparto, puoi anche partire
-dall'[elenco degli utenti](users): selezionali, apri le azioni di gruppo e clicca **Aggiungi al reparto**, poi scegli il
+dall'[elenco degli utenti](users): selezionali, apri il menu **Azioni** e clicca **Aggiungi al reparto**, poi scegli il
 **Reparto** e il **Ruolo nel reparto**. Chi serve già nel reparto mantiene il suo ruolo.
 
 Gli amministratori possono gestire i membri di ogni reparto; i responsabili solo quelli dei propri reparti.

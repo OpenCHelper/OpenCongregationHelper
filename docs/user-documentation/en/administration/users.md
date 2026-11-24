@@ -73,6 +73,12 @@ Super administrators can use the application **as another user**, for example to
 
 Virtual users can be impersonated too; the root user cannot.
 
+## Adding users to a department
+
+Select some users and use the **Add to department** bulk action: choose the **Department** and the **Role in the
+department**, and they all join it at once. Those who already serve in the department keep their role. See
+[Departments](departments) for what the members can do.
+
 ## Deleting users
 
 Use **Delete** in the user page, or select some users and use the **Delete selected** bulk action.
