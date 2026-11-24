@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- **Notifications**: recording an assignment that is already returned no longer notifies it as assigned, correcting the
+  date of a return no longer notifies it again, and virtual users no longer receive assignment notifications
+  ([#74](https://github.com/OpenCHelper/OpenCongregationHelper/pull/74)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
