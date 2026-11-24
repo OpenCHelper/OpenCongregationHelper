@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('mail_logs', function (Blueprint $table) {
             $table->increments('id');
@@ -31,5 +31,10 @@ return new class extends Migration
             $table->index('message_id');
             $table->index('status');
         });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('mail_logs');
     }
 };

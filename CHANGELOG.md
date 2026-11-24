@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- **Migrations**: splitting the full name of the users keeps it in the first and last name, rolling it back joins
+  them again, a failed creation of the app tables no longer drops them, the two-factor column is added only when
+  missing and the mail log table can be rolled back
+  ([#84](https://github.com/OpenCHelper/OpenCongregationHelper/pull/84)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
