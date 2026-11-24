@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- **Assignments**: the start time of a new assignment uses the app's timezone instead of the database clock, so a
+  territory returned soon after being assigned no longer ends before it started; from the AI assistant, a territory
+  assigned today starts now instead of at midnight
+  ([#75](https://github.com/OpenCHelper/OpenCongregationHelper/pull/75)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
