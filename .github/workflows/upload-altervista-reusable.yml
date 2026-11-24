@@ -31,11 +31,6 @@ on:
         required: false
         default: false
         type: boolean
-      setup-root-user:
-        description: "Run `shield:super-admin` for user with ID=1 on the `app` panel."
-        required: false
-        default: false
-        type: boolean
       delete-remote-contents:
         description: "Delete the contents of the remote folder before starting the upload via FTP"
         required: false
@@ -471,10 +466,13 @@ jobs:
           log-file: ${{ steps.artisan-required-data.outputs.artisan-log-file }}
           commands: |
             # ------------------------- Migrations / Seeder -------------------------
-            artisan ${{ inputs.reset-database && 'migrate:fresh' || 'migrate' }} --seed
+            # `--force`: the commands are refused in production without it, as they cannot ask for a confirmation
+            artisan ${{ inputs.reset-database && 'migrate:fresh' || 'migrate' }} --force
+
+            # The root user (from the `INITIAL_ROOT_*` variables) with the super admin role, unless it already exists
+            artisan och:install --no-interaction
 
             ${{ inputs.seed-dummy-data && 'artisan db:seed --class=FakeDataSeeder' || '' }}
-            ${{ inputs.setup-root-user && 'artisan shield:super-admin --user=1 --panel=app' || '' }}
 
             # The `public/storage` link is never deployed (the build's one would be uploaded as a plain folder)
             artisan storage:link --force
