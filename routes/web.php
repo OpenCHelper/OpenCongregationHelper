@@ -40,6 +40,9 @@ Route::get('/storage/{path}', PublicStorageController::class)->where('path', '.*
 
 Route::redirect('/dashboard', '/app')->name('dashboard');
 
+// The guest panel only serves the shared pages: its root has nothing to show (SEC-09)
+Route::redirect('/guest', '/');
+
 // Jetstream sends the user here after uploading a new profile photo, but the profile page is in the Filament panel.
 Route::redirect('/user/profile', '/app/edit-profile')->name('profile.show');
 
