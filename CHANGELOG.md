@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Add to department** bulk action in the users list, to add the selected users to a department at once
   ([#66](https://github.com/OpenCHelper/OpenCongregationHelper/pull/66)).
 
+### Changed
+
+- The **Brothers** field of **Add members**, in a department, now says that several brothers can be chosen
+  ([#66](https://github.com/OpenCHelper/OpenCongregationHelper/pull/66)).
+
 ## [1.0.0-alpha13] - 2026-11-23
 
 ### Added

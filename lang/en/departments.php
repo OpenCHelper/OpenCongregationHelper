@@ -38,6 +38,7 @@ return [
         'column_role' => 'Role',
         'column_email' => 'Email',
         'field_users' => 'Brothers',
+        'field_users_helper' => 'You can choose several brothers: search them by name and pick them one after the other.',
         'field_role' => 'Role in the department',
         'field_role_helper' => 'The overseers can also delete in its sections, and add and remove its assistants.',
         'action_add' => 'Add members',

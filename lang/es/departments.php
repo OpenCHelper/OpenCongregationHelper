@@ -38,6 +38,7 @@ return [
         'column_role' => 'Rol',
         'column_email' => 'Correo electrónico',
         'field_users' => 'Hermanos',
+        'field_users_helper' => 'Puedes elegir varios hermanos: búscalos por nombre y selecciónalos uno tras otro.',
         'field_role' => 'Rol en el departamento',
         'field_role_helper' => 'Los responsables también pueden eliminar en sus secciones, y añadir y quitar sus ayudantes.',
         'action_add' => 'Añadir miembros',

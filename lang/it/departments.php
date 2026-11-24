@@ -38,6 +38,7 @@ return [
         'column_role' => 'Ruolo',
         'column_email' => 'Email',
         'field_users' => 'Fratelli',
+        'field_users_helper' => 'Puoi scegliere più fratelli: cercali per nome e selezionali uno dopo l\'altro.',
         'field_role' => 'Ruolo nel reparto',
         'field_role_helper' => 'I responsabili possono anche eliminare nelle sue sezioni, e aggiungerne e rimuoverne gli assistenti.',
         'action_add' => 'Aggiungi membri',

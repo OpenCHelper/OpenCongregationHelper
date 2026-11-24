@@ -16,6 +16,7 @@ use App\Models\User;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
@@ -244,6 +245,9 @@ test('the users to add are searched by name, not by email', function () {
 
     $select = Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class])
         ->mountAction(TestAction::make('attach')->table())
+        // The field says that several brothers can be chosen
+        ->assertFormFieldExists('recordId', fn (Select $field): bool => $field->isMultiple()
+            && $field->getChildSchema($field::BELOW_CONTENT_SCHEMA_KEY)?->getComponents()[0]?->getContent() === __('departments.members.field_users_helper'))
         ->instance()
         ->getMountedAction()
         ->getRecordSelect();
