@@ -7,6 +7,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Notifications\TerritoryAssignedNotification;
 use App\Notifications\TerritoryReturnedNotification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class TerritoryAssignmentObserver
@@ -26,6 +27,10 @@ class TerritoryAssignmentObserver
      */
     public function creating(TerritoryAssignment $territoryAssignment): void
     {
+        if (! $territoryAssignment->created_by && Auth::check()) {
+            $territoryAssignment->created_by = Auth::id();
+        }
+
         $this->ensureCampaignIsNotTerminated($territoryAssignment);
         $this->ensureTerritoryIsNotAlreadyAssigned($territoryAssignment);
     }
