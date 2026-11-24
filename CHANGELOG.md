@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The territories of a zone, the assignment history of a territory and the assignments of a user have translated
   titles, breadcrumbs and columns, and users' pages show their name in the breadcrumbs
   ([#83](https://github.com/OpenCHelper/OpenCongregationHelper/pull/83)).
+- **Assignments**: the start time of a new assignment uses the app's timezone instead of the database clock, so a
+  territory returned soon after being assigned no longer ends before it started; from the AI assistant, a territory
+  assigned today starts now instead of at midnight
+  ([#75](https://github.com/OpenCHelper/OpenCongregationHelper/pull/75)).
 
 ### Security
 
