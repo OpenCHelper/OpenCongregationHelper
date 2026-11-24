@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users;
 
 use App\Enums\DepartmentKey;
 use App\Enums\NavigationGroup;
+use App\Filament\Resources\Users\Actions\AddToDepartmentBulkAction;
 use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
@@ -260,6 +261,7 @@ class UserResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    AddToDepartmentBulkAction::make(),
                     DeleteBulkAction::make()
                         ->deselectRecordsAfterCompletion()
                         ->action(function ($records) {

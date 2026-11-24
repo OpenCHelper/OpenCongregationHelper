@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Add to department** bulk action in the users list, to add the selected users to a department at once
+  ([#66](https://github.com/OpenCHelper/OpenCongregationHelper/pull/66)).
+
 ## [1.0.0-alpha13] - 2026-11-23
 
 ### Added

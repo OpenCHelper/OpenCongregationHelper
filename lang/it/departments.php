@@ -51,4 +51,11 @@ return [
         'empty_heading' => 'Ancora nessun membro',
         'empty_description' => 'Aggiungi i fratelli che servono in questo reparto: potranno gestirne le sezioni.',
     ],
+    'bulk_add' => [
+        'action' => 'Aggiungi al reparto',
+        'heading' => 'Aggiungi a un reparto',
+        'field_department' => 'Reparto',
+        'notification_added' => '{0} Nessuno aggiunto a :department|{1} 1 fratello aggiunto a :department|[2,*] :count fratelli aggiunti a :department',
+        'notification_skipped' => '{1} 1 era già membro e mantiene il suo ruolo.|[2,*] :count erano già membri e mantengono il loro ruolo.',
+    ],
 ];

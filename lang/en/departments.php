@@ -51,4 +51,11 @@ return [
         'empty_heading' => 'No members yet',
         'empty_description' => 'Add the brothers serving in this department: they will be able to manage its sections.',
     ],
+    'bulk_add' => [
+        'action' => 'Add to department',
+        'heading' => 'Add to a department',
+        'field_department' => 'Department',
+        'notification_added' => '{0} No one added to :department|{1} 1 brother added to :department|[2,*] :count brothers added to :department',
+        'notification_skipped' => '{1} 1 was already a member and keeps their role.|[2,*] :count were already members and keep their role.',
+    ],
 ];

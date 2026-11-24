@@ -51,4 +51,11 @@ return [
         'empty_heading' => 'Todavía no hay miembros',
         'empty_description' => 'Añade los hermanos que sirven en este departamento: podrán gestionar sus secciones.',
     ],
+    'bulk_add' => [
+        'action' => 'Añadir al departamento',
+        'heading' => 'Añadir a un departamento',
+        'field_department' => 'Departamento',
+        'notification_added' => '{0} Nadie añadido a :department|{1} 1 hermano añadido a :department|[2,*] :count hermanos añadidos a :department',
+        'notification_skipped' => '{1} 1 ya era miembro y mantiene su rol.|[2,*] :count ya eran miembros y mantienen su rol.',
+    ],
 ];
