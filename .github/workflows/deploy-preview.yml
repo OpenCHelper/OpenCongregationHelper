@@ -511,25 +511,11 @@ jobs:
           token-file: previews/${{ steps.resolve.outputs.slug }}/storage/framework/.artisan-token
           log-file: ${{ runner.temp }}/artisan-commands-output.txt
           commands: |
-            # No `optimize:clear` first: the release is built from scratch, and it would fail on the missing cache table
-
-            # The tables were already dropped by the deployer (which works even when the application cannot boot)
-            artisan migrate --force
-            artisan och:install --no-interaction
+            # The tables were already dropped by the deployer (which works even when the application cannot boot).
+            # Migrations, `och:install` (permissions, keys of the AI assistants, root user), `public/storage` link and
+            # caches (see `app/Console/Commands/DeployCommand.php`)
+            artisan och:deploy
             artisan db:seed --class=FakeDataSeeder
-
-            # The `public/storage` link is never deployed (the build's one would be uploaded as a plain folder)
-            artisan storage:link --force
-
-            # The keys signing the OAuth tokens of the AI assistants (MCP), kept between deployments (`storage/*.key`)
-            artisan app:ensure-passport-keys
-
-            artisan config:cache
-            artisan event:cache
-            artisan route:cache
-            artisan view:cache
-            artisan filament:cache-components
-            artisan filament:optimize
 
       # Once the preview runs with the new token: the jobs of its folder are matched by title, so that every push
       # updates them (with the new token) instead of creating them again.

@@ -90,21 +90,56 @@ precedente.
     php artisan key:generate
     ```
 
-3. Crea le tabelle del database, poi i permessi e l'utente root con il ruolo `super_admin`:
+3. Crea le tabelle del database, i permessi, le chiavi degli [assistenti IA](#assistenti-ia) e l'utente root con il
+   ruolo `super_admin`, poi il collegamento `public/storage` e le cache:
 
     ```shell
-    php artisan migrate --force
-    php artisan och:install
+    php artisan och:deploy
     ```
 
-    `och:install` legge l'utente root dalle variabili `INITIAL_ROOT_*` e chiede quelle mancanti. Crea solo ciò che
-    manca, quindi può essere eseguito di nuovo dopo ogni aggiornamento.
+    L'utente root viene letto dalle variabili `INITIAL_ROOT_*`, e quelle mancanti vengono chieste.
 
-4. Apri `/app/login` e accedi con le credenziali `INITIAL_ROOT_*`. Poi segui la guida
-   [Configurare la congregazione](guides/first-setup).
+4. Controlla che non manchi nulla, poi apri `/app/login` e accedi con le credenziali `INITIAL_ROOT_*`. Poi segui la
+   guida [Configurare la congregazione](guides/first-setup).
+
+    ```shell
+    php artisan och:doctor
+    ```
 
 > 🔒 **L'utente root** è l'utente con ID 1. Non può mai essere eliminato né impersonato e, al di fuori dell'ambiente
 > `production`, nessuno può modificarne email, password, accesso e ruoli.
+
+## Aggiornamento
+
+Sostituisci i file con quelli della nuova versione (mantenendo `.env` e `storage/`), poi esegui:
+
+```shell
+php artisan och:deploy
+```
+
+Esegue le nuove migrazioni, crea ciò che ancora manca (`och:install`), ricrea il collegamento `public/storage` e
+ricostruisce le cache, fermandosi al primo passaggio che non riesce.
+
+**Senza accesso alla shell**, i comandi vengono eseguiti tramite l'endpoint `/api/artisan/execute`, autorizzato da un
+token monouso caricato via FTP: `scripts/remote_artisan.sh` fa entrambe le cose. Per esempio:
+
+```shell
+scripts/remote_artisan.sh --base-url https://territories.example.com \
+    --ftp-hostname <host> --ftp-username <utente> --ftp-password <password> \
+    och:deploy --no-interaction
+```
+
+## Risoluzione dei problemi
+
+- **`php artisan och:doctor`** controlla la configurazione (chiave e URL dell'applicazione, database e migrazioni,
+  collegamento dello storage, chiavi degli assistenti IA, utente root e super amministratori, email, attività
+  pianificate) e indica cosa fare per ogni problema. Non modifica nulla, quindi può essere eseguito in qualsiasi momento.
+- **`php artisan och:recover-root`** restituisce l'accesso all'utente root quando nessuno può più gestire
+  l'applicazione (es. password persa, oppure accesso o ruoli rimossi in produzione): imposta la sua password da
+  `INITIAL_ROOT_PASSWORD` (o la chiede), gli permette di nuovo di accedere, segna la sua email come verificata,
+  disattiva la sua autenticazione a due fattori e lo rende super amministratore. Chiede una conferma, oppure richiede
+  `--force` quando viene eseguito senza terminale (es. tramite `scripts/remote_artisan.sh`), e viene sempre registrato
+  nel log.
 
 ## Attività pianificate ed email
 
@@ -156,10 +191,10 @@ l'accesso viene revocato.
 Gli utenti possono collegare all'applicazione degli assistenti IA (es. ChatGPT, Claude, Gemini) tramite il suo server
 MCP (`/mcp`), una volta che un super amministratore li consente nelle
 [impostazioni di sicurezza](administration/settings#sicurezza). Gli assistenti si autorizzano con OAuth, i cui token
-sono firmati da due chiavi create una volta:
+sono firmati da due chiavi create una volta da `och:install` (eseguito anche da `och:deploy`), oppure da sole con:
 
 ```shell
-php artisan app:ensure-passport-keys
+php artisan och:ensure-passport-keys
 ```
 
 Il comando crea `storage/oauth-private.key` e `storage/oauth-public.key` solo se mancano, quindi può essere eseguito a

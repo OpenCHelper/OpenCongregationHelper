@@ -13,7 +13,6 @@ use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Laravel\Passport\Token;
 use Livewire\Livewire;
-use phpseclib4\Crypt\RSA;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use STS\FilamentImpersonate\ImpersonateManager;
@@ -25,25 +24,6 @@ beforeEach(function () {
 
     $this->user = User::factory()->create(['can_login' => true, 'first_name' => 'Mario', 'last_name' => 'Rossi']);
 });
-
-/**
- * Sign the OAuth tokens with keys of a test size, outside of the storage of the app, created once per test run.
- */
-function usePassportTestKeys(): void
-{
-    $keys = sys_get_temp_dir().'/mcp-test-keys-'.getmypid();
-
-    if (! file_exists($keys.'/oauth-private.key')) {
-        @mkdir($keys);
-        $key = RSA::createKey(2048);
-        file_put_contents($keys.'/oauth-public.key', (string) $key->getPublicKey());
-        file_put_contents($keys.'/oauth-private.key', (string) $key);
-        chmod($keys.'/oauth-public.key', 0600);
-        chmod($keys.'/oauth-private.key', 0600);
-    }
-
-    Passport::loadKeysFrom($keys);
-}
 
 /**
  * Allow (or not) the AI assistants in the Security settings.

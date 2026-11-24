@@ -115,17 +115,14 @@ The preferred way of developing is by using **Docker Compose** to build the cont
         ```shell
         sail artisan migrate
         ```
-    4. Create the permissions and the root user (from the `INITIAL_ROOT_*` variables) with the super admin role:
+    4. Create the permissions, the keys of the AI assistants (MCP server) and the root user (from the
+       `INITIAL_ROOT_*` variables) with the super admin role:
         ```shell
         sail artisan och:install
         ```
     5. Seed dummy data for development:
         ```shell
         sail artisan db:seed --class=FakeDataSeeder
-        ```
-    6. Create the keys of the AI assistants (MCP server), only needed to try them:
-        ```shell
-        sail artisan app:ensure-passport-keys
         ```
 6. Install the frontend dependencies and run the Vite server:
     ```shell

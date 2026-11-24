@@ -11,9 +11,9 @@ use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
 
 /**
- * Set up the data a new installation needs: the permissions of the roles (`ShieldSeeder`) and the root user, from the
- * `INITIAL_ROOT_*` environment variables (or asked for, when run from a terminal), with the `super_admin` role while no
- * user has it yet.
+ * Set up what a new installation needs: the permissions of the roles (`ShieldSeeder`), the keys signing the OAuth tokens
+ * of the AI assistants, and the root user, from the `INITIAL_ROOT_*` environment variables (or asked for, when run from
+ * a terminal), with the `super_admin` role while no user has it yet.
  *
  * It only creates what is missing, so that the deployments can run it every time, and it needs no `--force` in
  * production. The migrations must have run first.
@@ -22,37 +22,49 @@ class InstallCommand extends Command
 {
     protected $signature = 'och:install';
 
-    protected $description = 'Create the permissions and the root user with the super admin role, unless they already exist';
+    protected $description = 'Create the permissions, the keys of the AI assistants and the root user with the super admin role, unless they already exist';
 
     public function handle(): int
     {
         $this->call('db:seed', ['--class' => ShieldSeeder::class, '--force' => true]);
 
+        if ($this->call('och:ensure-passport-keys') !== self::SUCCESS) {
+            return self::FAILURE;
+        }
+
         if (User::query()->doesntExist() && ! $this->createRootUser()) {
             return self::FAILURE;
         }
 
+        $this->grantSuperAdminRoleToRootUser();
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * Give the root user the `super_admin` role, only while nobody has it (a new installation): later, the roles of the
+     * root user are the admins' call.
+     */
+    private function grantSuperAdminRoleToRootUser(): void
+    {
         $root = User::rootUser();
 
         if ($root === null) {
             $this->components->warn('There is no root user (ID 1): no user was given the super admin role.');
 
-            return self::SUCCESS;
+            return;
         }
 
         $role = Utils::createRole();
 
-        // Only while nobody is a super admin (a new installation): later, the roles of the root user are the admins' call
         if ($role->users()->exists()) {
             $this->components->info('There is already a super admin: the roles of the root user were left as they are.');
 
-            return self::SUCCESS;
+            return;
         }
 
         $root->assignRole($role);
         $this->components->info("The root user ({$root->email}) is now a super admin.");
-
-        return self::SUCCESS;
     }
 
     /**

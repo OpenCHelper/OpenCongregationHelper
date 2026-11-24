@@ -171,6 +171,14 @@ main () {
 
     jq -r '.output' <<< "$response"
 
+    # The command itself failed (e.g. `och:deploy` stopped at a step): the HTTP request did not
+    local return_code
+    return_code="$(jq -r '.returnCode // 0' <<< "$response")"
+    if [[ "$return_code" != "0" ]]; then
+      printf "Command '%s' failed with exit code %s\n" "$command" "$return_code" >&2
+      return 1
+    fi
+
     return 0;
 }
 
