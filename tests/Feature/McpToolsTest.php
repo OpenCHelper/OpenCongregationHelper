@@ -32,7 +32,7 @@ use Spatie\Permission\Models\Permission;
 beforeEach(function () {
     Notification::fake();
 
-    // Fixed names: random ones (e.g. "Romaguera") could match the searches
+    // Fixed names, so that random ones (e.g. "Stroman") are never found by the searches of the tests
     User::factory()->create(['id' => 1, 'first_name' => 'Root', 'last_name' => 'User']);
 
     // The members of the territory department can do everything on the territories and their assignments

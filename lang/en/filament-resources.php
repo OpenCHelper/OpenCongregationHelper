@@ -149,6 +149,7 @@ return [
         'action_end_assignments' => 'End Assignments',
         'missing_image' => 'No image has been set',
         'tab_image' => 'Image',
+        'image_alt' => 'Image of the territory',
         'tab_map' => 'Map',
         'status_all' => 'All',
         'status_assigned' => 'Assigned',
