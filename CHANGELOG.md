@@ -10,21 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Install command**: `php artisan och:install` creates the permissions and the root user with the super admin role,
-  asking for the missing credentials; it replaces `db:seed` and `shield:super-admin` in the setup guide.
+  asking for the missing credentials; it replaces `db:seed` and `shield:super-admin` in the setup guide
+  ([#67](https://github.com/OpenCHelper/OpenCongregationHelper/pull/67)).
 - **Deploy command**: `php artisan och:deploy` runs the migrations, `och:install`, the storage link and the caches
-  after uploading a new version, stopping at the first step that fails.
-- **Health check**: `php artisan och:doctor` reports what is missing or wrong in the configuration of an installation.
-- `php artisan och:recover-root` gives the root user its access back when nobody can manage the application anymore.
+  after uploading a new version, stopping at the first step that fails
+  ([#68](https://github.com/OpenCHelper/OpenCongregationHelper/pull/68)).
+- **Health check**: `php artisan och:doctor` reports what is missing or wrong in the configuration of an installation
+  ([#68](https://github.com/OpenCHelper/OpenCongregationHelper/pull/68)).
+- `php artisan och:recover-root` gives the root user its access back when nobody can manage the application anymore
+  ([#68](https://github.com/OpenCHelper/OpenCongregationHelper/pull/68)).
 
 ### Changed
 
 - `och:install` also creates the keys of the AI assistants; `app:ensure-passport-keys` is now
-  `och:ensure-passport-keys` (the old name still works).
+  `och:ensure-passport-keys` (the old name still works)
+  ([#68](https://github.com/OpenCHelper/OpenCongregationHelper/pull/68)).
 
 ### Fixed
 
-- Root user not created on installations in the production environment.
-- Deployments without a shell reporting success when an Artisan command failed.
+- Root user not created on installations in the production environment
+  ([#67](https://github.com/OpenCHelper/OpenCongregationHelper/pull/67)).
+- Deployments without a shell reporting success when an Artisan command failed
+  ([#68](https://github.com/OpenCHelper/OpenCongregationHelper/pull/68)).
 
 ## [1.0.0-alpha14] - 2026-11-24
 
