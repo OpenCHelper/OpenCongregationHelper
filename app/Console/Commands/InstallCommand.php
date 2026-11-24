@@ -12,7 +12,8 @@ use function Laravel\Prompts\text;
 
 /**
  * Set up the data a new installation needs: the permissions of the roles (`ShieldSeeder`) and the root user, from the
- * `INITIAL_ROOT_*` environment variables (or asked for, when run from a terminal), with the `super_admin` role.
+ * `INITIAL_ROOT_*` environment variables (or asked for, when run from a terminal), with the `super_admin` role while no
+ * user has it yet.
  *
  * It only creates what is missing, so that the deployments can run it every time, and it needs no `--force` in
  * production. The migrations must have run first.
@@ -41,12 +42,15 @@ class InstallCommand extends Command
 
         $role = Utils::createRole();
 
-        if ($root->hasRole($role)) {
-            $this->components->info("The root user ({$root->email}) is already a super admin.");
-        } else {
-            $root->assignRole($role);
-            $this->components->info("The root user ({$root->email}) is now a super admin.");
+        // Only while nobody is a super admin (a new installation): later, the roles of the root user are the admins' call
+        if ($role->users()->exists()) {
+            $this->components->info('There is already a super admin: the roles of the root user were left as they are.');
+
+            return self::SUCCESS;
         }
+
+        $root->assignRole($role);
+        $this->components->info("The root user ({$root->email}) is now a super admin.");
 
         return self::SUCCESS;
     }

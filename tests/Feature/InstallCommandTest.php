@@ -37,13 +37,28 @@ test('running it again changes nothing', function () {
         ->and(User::rootUser()->roles)->toHaveCount(1);
 });
 
-test('the existing root user is made a super admin without creating a user', function () {
+test('the existing root user is made a super admin when nobody is one', function () {
     $root = User::factory()->create(['id' => 1]);
 
     $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
 
     expect(User::count())->toBe(1)
         ->and($root->fresh()->hasRole('super_admin'))->toBeTrue();
+});
+
+test('the root user is not made a super admin again when another user is one', function () {
+    $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
+
+    // E.g. in production, where the admins can change the roles of the root user
+    $admin = User::factory()->create();
+    $admin->assignRole('super_admin');
+    User::rootUser()->removeRole('super_admin');
+
+    $this->artisan('och:install', ['--no-interaction' => true])
+        ->expectsOutputToContain('already a super admin')
+        ->assertSuccessful();
+
+    expect(User::rootUser()->fresh()->hasRole('super_admin'))->toBeFalse();
 });
 
 test('it fails without prompting when the root user is not configured', function () {
