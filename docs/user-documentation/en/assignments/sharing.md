@@ -12,11 +12,15 @@ have an account. Whoever has the link can see the territory without logging in.
 
 1. Open the assignment (from **Assignments**, or from the history of the territory).
 2. Click **Actions → Share**.
-3. Click the copy button next to **Sharing URL** and send the link (by message, email, …).
+3. Click **Create link**: until you do, the assignment is not shared.
+4. Click the copy button next to **Sharing URL** and send the link (by message, email, …).
 
 ![Share window](/docs/user-documentation/en/assignments/assets/share-modal.webp)
 
 The link stays the same every time you open **Share** for that assignment.
+
+Only assignments in progress can be shared: once the territory is returned (or the assignment deleted) **Share** is no
+longer offered and the link stops working.
 
 Publishers can also share the assignments given to them (and stop sharing them), from the link in the notification
 of the assignment, even if they cannot see the other assignments.
