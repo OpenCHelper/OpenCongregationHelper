@@ -257,6 +257,40 @@ test('the territories page of a zone rejects the name of another territory of th
     expect(Territory::query()->where('name', 'Via Roma')->count())->toBe(1);
 });
 
+test('an image uploaded from the territories page of a zone becomes the territory image', function (bool $isEditing) {
+    Storage::fake('local');
+
+    foreach (['ViewAny:TerritoryZone', 'View:TerritoryZone', 'Update:TerritoryZone'] as $permission) {
+        auth()->user()->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+
+    $page = Livewire::test(ManageZoneTerritories::class, ['record' => $this->zone->getKey()]);
+
+    if ($isEditing) {
+        $territory = Territory::factory()->for($this->zone, 'territoryZone')->create(['name' => 'Via Roma', 'image_path' => null]);
+
+        $page->callAction(TestAction::make('edit')->table($territory), [
+            'image_file' => UploadedFile::fake()->image('via-roma.png'),
+        ]);
+    } else {
+        $page->callAction(TestAction::make('create')->table(), [
+            'name' => 'Via Roma',
+            'territory_zone_id' => $this->zone->getKey(),
+            'image_file' => UploadedFile::fake()->image('via-roma.png'),
+        ]);
+    }
+
+    $page->assertHasNoFormErrors();
+
+    $territory = Territory::query()->where('name', 'Via Roma')->firstOrFail();
+
+    expect($territory->image_path)->toStartWith('territories/');
+    Storage::disk('local')->assertExists($territory->image_path);
+})->with([
+    'create' => false,
+    'edit' => true,
+]);
+
 test('the map of a new territory opens on the configured default centre', function () {
     config(['filament-leaflet.default_map_center' => [39.8017, -89.6436]]);
 
