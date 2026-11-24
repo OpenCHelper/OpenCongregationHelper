@@ -158,9 +158,9 @@ l'accesso viene revocato.
 ## Assistenti IA
 
 Gli utenti possono collegare all'applicazione degli assistenti IA (es. ChatGPT, Claude, Gemini) tramite il suo server
-MCP (`/mcp`), una volta che un super amministratore li consente nelle
-[impostazioni di sicurezza](administration/settings#sicurezza). Gli assistenti si autorizzano con OAuth, i cui token
-sono firmati da due chiavi create una volta:
+MCP, all'indirizzo `APP_URL` seguito da `/mcp` (es. `https://congregazione.example.org/mcp`), una volta che un super
+amministratore li consente nelle [impostazioni di sicurezza](administration/settings#sicurezza). Gli assistenti si
+autorizzano con OAuth, i cui token sono firmati da due chiavi create una volta:
 
 ```shell
 php artisan app:ensure-passport-keys

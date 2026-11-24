@@ -153,9 +153,10 @@ Users who cannot log in receive no push notifications, and their devices are for
 
 ## AI assistants
 
-The users can connect AI assistants (e.g. ChatGPT, Claude, Gemini) to the application through its MCP server
-(`/mcp`), once a super administrator allows them in the [Security settings](administration/settings#security). The
-assistants authorize themselves with OAuth, whose tokens are signed by two keys created once:
+The users can connect AI assistants (e.g. ChatGPT, Claude, Gemini) to the application through its MCP server, at
+`APP_URL` followed by `/mcp` (e.g. `https://congregation.example.org/mcp`), once a super administrator allows them in
+the [Security settings](administration/settings#security). The assistants authorize themselves with OAuth, whose
+tokens are signed by two keys created once:
 
 ```shell
 php artisan app:ensure-passport-keys

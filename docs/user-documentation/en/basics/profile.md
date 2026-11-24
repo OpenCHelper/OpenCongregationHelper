@@ -54,7 +54,8 @@ administrators allow the AI assistants (see [Settings](../administration/setting
 
 ![AI assistants](/docs/user-documentation/en/basics/assets/profile-ai-assistants.webp)
 
-1. Copy the **Address of the server (MCP)** with the button next to it.
+1. Copy the **Address of the server (MCP)** with the button next to it: it is the address of the application followed
+   by `/mcp` (e.g. `https://congregation.example.org/mcp`).
 2. Add it to your assistant:
     - **Claude**: in *Settings*, *Connectors*, add a custom connector with this address;
     - **ChatGPT**: in *Settings*, *Apps*, turn on the developer mode in the advanced settings, then create an app with

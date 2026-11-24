@@ -54,7 +54,8 @@ gli amministratori consentono gli assistenti IA (vedi [Impostazioni](../administ
 
 ![Assistenti IA](/docs/user-documentation/it/basics/assets/profile-ai-assistants.webp)
 
-1. Copia l'**Indirizzo del server (MCP)** con il pulsante accanto.
+1. Copia l'**Indirizzo del server (MCP)** con il pulsante accanto: è l'indirizzo dell'applicazione seguito da `/mcp`
+   (es. `https://congregazione.example.org/mcp`).
 2. Aggiungilo al tuo assistente:
     - **Claude**: in *Impostazioni*, *Connettori*, aggiungi un connettore personalizzato con questo indirizzo;
     - **ChatGPT**: in *Impostazioni*, *App*, attiva la modalità sviluppatore nelle impostazioni avanzate, poi crea
