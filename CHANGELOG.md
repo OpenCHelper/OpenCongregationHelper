@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Translated the texts still in English: the image fields of territories, the **API Tokens** menu item and the Italian
   mail log; the contacts of a user have a singular label ("Crea Contatto", not "Crea Informazioni Di Contatto")
   ([#85](https://github.com/OpenCHelper/OpenCongregationHelper/pull/85)).
+- The territories of a zone, the assignment history of a territory and the assignments of a user have translated
+  titles, breadcrumbs and columns, and users' pages show their name in the breadcrumbs
+  ([#83](https://github.com/OpenCHelper/OpenCongregationHelper/pull/83)).
 
 ### Security
 
