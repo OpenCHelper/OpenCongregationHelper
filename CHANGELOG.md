@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   territory returned soon after being assigned no longer ends before it started; from the AI assistant, a territory
   assigned today starts now instead of at midnight
   ([#75](https://github.com/OpenCHelper/OpenCongregationHelper/pull/75)).
+- New assignments, territories and zones remember the user who created them: the Create forms left their creator
+  empty ([#82](https://github.com/OpenCHelper/OpenCongregationHelper/pull/82)).
 
 ### Security
 
