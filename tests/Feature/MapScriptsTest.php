@@ -94,6 +94,7 @@ test('the shared page of an assignment loads only the script of its map', functi
     $assignment = TerritoryAssignment::factory()->create([
         'territory_id' => Territory::factory()->withMap()->for(TerritoryZone::factory(), 'territoryZone')->create()->getKey(),
         'assignee_id' => User::factory()->create()->getKey(),
+        'ended_at' => null,
     ]);
     $sharedUrl = $assignment->share();
 

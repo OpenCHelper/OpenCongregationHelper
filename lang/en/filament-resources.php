@@ -280,6 +280,8 @@ return [
         'share_modal' => [
             'title' => 'Share Assignment',
             'description' => 'Share this assignment with others through a public link.',
+            'not_shared' => 'This assignment is not shared yet: create a public link to share it.',
+            'create_link' => 'Create link',
             'url_label' => 'Sharing URL',
             'copy_button' => 'Copy URL',
             'stop_sharing' => 'Stop Sharing',

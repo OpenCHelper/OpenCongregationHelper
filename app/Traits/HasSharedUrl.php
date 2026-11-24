@@ -29,12 +29,20 @@ trait HasSharedUrl
     }
 
     /**
+     * Whether the model can be shared (and its link opened): not once it is in the trash.
+     */
+    public function isShareable(): bool
+    {
+        return ! (method_exists($this, 'trashed') && $this->trashed());
+    }
+
+    /**
      * Share the model and return the shared URL.
      *
      * If a shared URL already exists, it will return that.
      * Otherwise, it will create a new shared URL.
      *
-     * @throws AuthorizationException While sharing is disabled from the territory settings.
+     * @throws AuthorizationException While sharing is disabled from the territory settings, or the model cannot be shared.
      */
     public function share(): SharedUrl
     {
@@ -42,15 +50,22 @@ trait HasSharedUrl
             throw new AuthorizationException('Sharing is disabled.');
         }
 
+        if (! $this->isShareable()) {
+            throw new AuthorizationException('This resource cannot be shared.');
+        }
+
         $this->load('shared');
 
-        if ($this->shared?->exists()) {
+        if ($this->shared !== null) {
             return $this->shared;
         }
 
-        $sharedUrl = $this->shared()->firstOrCreate([
+        // A model has one link at most (unique index): when two shares race, the one that loses gets the other's link
+        $sharedUrl = $this->shared()->createOrFirst([], [
             'uid' => Str::uuid()->toString(),
         ]);
+
+        $this->setRelation('shared', $sharedUrl);
 
         return $sharedUrl;
     }

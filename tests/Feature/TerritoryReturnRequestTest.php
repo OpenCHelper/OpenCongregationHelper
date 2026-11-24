@@ -203,7 +203,8 @@ test('a publisher without permissions can share their own assignment, and stop s
     Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
         ->assertActionVisible('share')
         ->mountAction('share')
-        ->assertActionMounted('share');
+        ->assertActionMounted('share')
+        ->callAction(TestAction::make('create_share_link')->schemaComponent('shareLinkActions', 'mountedActionSchema0'));
 
     expect($this->assignment->fresh()->shared)->not->toBeNull();
 
@@ -241,7 +242,8 @@ test('the users allowed to view the assignments can still share them', function 
     Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
         ->assertActionVisible('share')
         ->mountAction('share')
-        ->assertActionMounted('share');
+        ->assertActionMounted('share')
+        ->callAction(TestAction::make('create_share_link')->schemaComponent('shareLinkActions', 'mountedActionSchema0'));
 
     expect($this->assignment->fresh()->shared)->not->toBeNull();
 });

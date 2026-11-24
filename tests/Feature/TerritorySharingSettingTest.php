@@ -9,6 +9,7 @@ use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
 use App\Settings\TerritorySettings;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
@@ -65,7 +66,9 @@ test('the assignee can share an assignment while sharing is enabled', function (
     Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
         ->assertActionVisible('share')
         ->mountAction('share')
-        ->assertActionMounted('share');
+        ->assertActionMounted('share')
+        ->callAction(TestAction::make('create_share_link')->schemaComponent('shareLinkActions', 'mountedActionSchema0'))
+        ->assertSchemaStateSet(['share_url' => route('share.redirect', $this->assignment->fresh()->shared->uid)], 'mountedActionSchema0');
 
     expect($this->assignment->fresh()->shared)->not->toBeNull()
         ->and(Gate::forUser($this->assignee)->allows('create', SharedUrl::class))->toBeTrue();

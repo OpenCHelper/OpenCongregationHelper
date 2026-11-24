@@ -12,11 +12,15 @@ proclamatore che non ha un account. Chi ha il link può vedere il territorio sen
 
 1. Apri l'assegnazione (da **Assegnazioni**, o dallo storico del territorio).
 2. Clicca **Azioni → Condividi**.
-3. Clicca il pulsante di copia accanto a **URL di condivisione** e invia il link (via messaggio, email, …).
+3. Clicca **Crea link**: finché non lo fai, l'assegnazione non è condivisa.
+4. Clicca il pulsante di copia accanto a **URL di condivisione** e invia il link (via messaggio, email, …).
 
 ![Finestra di condivisione](/docs/user-documentation/it/assignments/assets/share-modal.webp)
 
 Il link resta lo stesso ogni volta che apri **Condividi** per quell'assegnazione.
+
+Si possono condividere solo le assegnazioni in corso: quando il territorio viene riconsegnato (o l'assegnazione
+eliminata) **Condividi** non viene più offerto e il link smette di funzionare.
 
 Anche i proclamatori possono condividere le assegnazioni affidate a loro (e smettere di condividerle), dal link nella
 notifica dell'assegnazione, anche se non possono vedere le altre assegnazioni.

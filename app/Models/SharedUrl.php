@@ -20,6 +20,27 @@ class SharedUrl extends Model
     }
 
     /**
+     * Find the link that can be opened with the given identifier, or abort with a 404: while sharing is disabled, and
+     * when the shared model is missing or can no longer be shared (e.g. a returned assignment), whose link is deleted.
+     */
+    public static function findOpenableOrFail(string $uid): self
+    {
+        // The links are deleted when sharing is disabled: this also covers the pages opened meanwhile
+        abort_unless(static::isSharingEnabled(), 404);
+
+        $sharedUrl = static::where('uid', $uid)->firstOrFail();
+        $shareable = $sharedUrl->shareable;
+
+        if ($shareable === null || (method_exists($shareable, 'isShareable') && ! $shareable->isShareable())) {
+            $sharedUrl->delete();
+
+            abort(404, 'Shared resource not found.');
+        }
+
+        return $sharedUrl;
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

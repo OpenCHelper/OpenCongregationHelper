@@ -30,10 +30,7 @@ class ViewSharedAssignment extends Page implements HasInfolists
 
     public function mount(string $record): void
     {
-        // The links are deleted when sharing is disabled: this also covers the pages opened meanwhile
-        abort_unless(SharedUrl::isSharingEnabled(), 404);
-
-        $this->sharedUrl = SharedUrl::where('uid', $record)->firstOrFail();
+        $this->sharedUrl = SharedUrl::findOpenableOrFail($record);
 
         if (! $this->sharedUrl->shareable instanceof TerritoryAssignment) {
             abort(404, 'Invalid shareable resource type.');
