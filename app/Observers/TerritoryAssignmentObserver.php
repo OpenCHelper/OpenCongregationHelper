@@ -17,6 +17,11 @@ class TerritoryAssignmentObserver
      */
     public function saving(TerritoryAssignment $territoryAssignment): void
     {
+        // Set here rather than left to the database default, which uses the database clock and timezone
+        if (! $territoryAssignment->exists) {
+            $territoryAssignment->started_at ??= now();
+        }
+
         if ($territoryAssignment->isDirty(['started_at', 'ended_at'])) {
             $this->ensureAssignmentDoesNotEndBeforeItStarts($territoryAssignment);
         }
@@ -77,8 +82,6 @@ class TerritoryAssignmentObserver
 
     /**
      * An assignment cannot be returned before it is assigned.
-     *
-     * A new assignment saved without a start date is skipped: the database sets its start date when inserting it.
      *
      * @throws ValidationException
      */

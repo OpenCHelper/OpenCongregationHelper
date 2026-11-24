@@ -26,16 +26,18 @@ use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
 use App\Notifications\TerritoryReturnRequestedNotification;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
     Notification::fake();
 
-    User::factory()->create(['id' => 1]);
+    // Fixed names, so that random ones (e.g. "Stroman") are never found by the searches of the tests
+    User::factory()->create(['id' => 1, 'first_name' => 'Root', 'last_name' => 'User']);
 
     // The members of the territory department can do everything on the territories and their assignments
-    $this->overseer = User::factory()->create(['can_login' => true]);
+    $this->overseer = User::factory()->create(['can_login' => true, 'first_name' => 'Anna', 'last_name' => 'Bianchi']);
     Department::for(DepartmentKey::Territories)->members()->attach($this->overseer, ['role' => DepartmentRole::Overseer]);
 
     $this->publisher = User::factory()->create(['can_login' => true, 'first_name' => 'Mario', 'last_name' => 'Rossi']);
@@ -184,6 +186,23 @@ test('a territory can be assigned, but not twice', function () {
         ->assertHasErrors([__('validation.territory_assignment.already_assigned')]);
 
     expect($territory->assignments()->count())->toBe(1);
+});
+
+test('a territory assigned today starts now, one assigned on an earlier day starts at midnight', function () {
+    $this->travelTo(Carbon::parse('2026-03-29 10:15:00'));
+    $today = mcpTerritory();
+    $earlier = mcpTerritory();
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(AssignTerritoryTool::class, ['territory_id' => $today->id, 'assignee_id' => $this->publisher->id, 'started_at' => '2026-03-29'])
+        ->assertOk();
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(AssignTerritoryTool::class, ['territory_id' => $earlier->id, 'assignee_id' => $this->publisher->id, 'started_at' => '2026-03-20'])
+        ->assertOk();
+
+    expect($today->assignments()->sole()->started_at)->toEqual(now())
+        ->and($earlier->assignments()->sole()->started_at)->toEqual(Carbon::parse('2026-03-20 00:00:00'));
 });
 
 test('a territory cannot be assigned for a campaign already ended', function () {

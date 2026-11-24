@@ -81,6 +81,8 @@ return [
     ],
     'contacts' => [
         'section_title' => 'Contact information',
+        'model_label' => 'Contact',
+        'plural_model_label' => 'Contacts',
         'select_type' => 'Select type',
         'section_description' => 'Manage your emergency contacts.',
         'add_contact' => 'Add contact',
@@ -94,6 +96,7 @@ return [
         'phone_number' => 'Phone number',
         'address' => 'Address',
         'notes' => 'Notes',
+        'notes_placeholder' => 'Notes...',
         'is_primary' => 'Primary contact',
         'is_primary_help' => 'Mark this as your primary contact for this type.',
         'primary' => 'Primary',
