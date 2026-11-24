@@ -6,6 +6,8 @@ use App\Models\User;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\password;
@@ -103,7 +105,7 @@ class RecoverRootCommand extends Command
         return password(
             label: 'New password of the root user',
             required: true,
-            validate: fn (string $value): ?string => strlen($value) < 8 ? 'The password must be at least 8 characters.' : null,
+            validate: fn (string $value): ?string => Validator::make(['password' => $value], ['password' => Password::default()])->errors()->first('password') ?: null,
         );
     }
 }

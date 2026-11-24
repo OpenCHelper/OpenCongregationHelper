@@ -72,6 +72,17 @@ test('the password is asked for when it is not configured', function () {
     expect(Hash::check('typed-password', User::rootUser()->password))->toBeTrue();
 });
 
+test('the typed password follows the password policy', function () {
+    config(['app.initial_root_user.password' => null]);
+
+    $this->artisan('och:recover-root', ['--force' => true])
+        ->expectsQuestion('New password of the root user', 'short')
+        ->expectsOutputToContain(__('validation.min.string', ['attribute' => 'password', 'min' => 8]))
+        ->assertFailed();
+
+    expect(Hash::check('short', User::rootUser()->password))->toBeFalse();
+});
+
 test('it fails without a password when it cannot ask for one', function () {
     config(['app.initial_root_user.password' => null]);
 

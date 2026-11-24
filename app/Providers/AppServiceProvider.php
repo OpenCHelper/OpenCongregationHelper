@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
@@ -166,10 +167,27 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureAiAssistants();
 
+        $this->configurePasswordPolicy();
+
         // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
         ExportColumn::configureUsing(function (ExportColumn $column): void {
             $column->preventFormulaInjection();
         });
+    }
+
+    /**
+     * The rules of the passwords chosen by the users (Fortify, the Filament password reset and invitation page, the
+     * profile and the Artisan commands all use `Password::default()`).
+     *
+     * In production a password needs at least 12 characters and must not appear in a known data leak (checked with
+     * the k-anonymity API of Have I Been Pwned, which only receives the first characters of its SHA-1 hash). Elsewhere
+     * the 8 characters of Laravel are enough, so that local and test environments do not call the external API.
+     */
+    private function configurePasswordPolicy(): void
+    {
+        Password::defaults(fn (): Password => app()->isProduction()
+            ? Password::min(12)->max(255)->uncompromised()
+            : Password::min(8)->max(255));
     }
 
     /**

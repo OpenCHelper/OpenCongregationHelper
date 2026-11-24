@@ -74,7 +74,8 @@ loro, che dovrà poi essere approvato di nuovo.
 ## Aggiorna password
 
 Inserisci la **Password attuale**, poi due volte la **Nuova password** e clicca **Salva**. Usa una password lunga e
-casuale.
+casuale: deve avere almeno 12 caratteri e non deve comparire in fughe di dati note. Le stesse regole valgono quando
+scegli la password dall'invito o con **Hai smarrito la password?**.
 
 ## Autenticazione a due fattori
 

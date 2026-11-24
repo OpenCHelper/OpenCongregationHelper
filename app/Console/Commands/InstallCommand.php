@@ -6,6 +6,8 @@ use App\Models\User;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Database\Seeders\ShieldSeeder;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\text;
@@ -95,7 +97,7 @@ class InstallCommand extends Command
                 'password' => filled($root['password'] ?? null) ? $root['password'] : password(
                     label: 'Password of the root user',
                     required: true,
-                    validate: fn (string $password): ?string => strlen($password) < 8 ? 'The password must be at least 8 characters.' : null,
+                    validate: fn (string $password): ?string => Validator::make(['password' => $password], ['password' => Password::default()])->errors()->first('password') ?: null,
                 ),
             ];
         }
