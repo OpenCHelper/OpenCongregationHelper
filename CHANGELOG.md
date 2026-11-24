@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- **Assignments**: the dates in the table, on the assignment page and in its banners follow the user's language
+  instead of a fixed `dd/mm/yyyy` format, and the start and end dates are no longer shown raw
+  ([#90](https://github.com/OpenCHelper/OpenCongregationHelper/pull/90)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
