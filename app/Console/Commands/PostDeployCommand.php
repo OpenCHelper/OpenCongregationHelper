@@ -12,9 +12,9 @@ use Illuminate\Console\Command;
  * (`/api/artisan/execute`), so that the installations without a shell can be updated in one call. It stops at the
  * first failing step, with a failure exit code.
  */
-class DeployCommand extends Command
+class PostDeployCommand extends Command
 {
-    protected $signature = 'och:deploy
+    protected $signature = 'och:post-deploy
                             {--fresh : Drop all the tables before migrating, deleting ALL the data (refused in production)}';
 
     protected $description = 'Migrate the database, set up what is missing (och:install) and rebuild the caches after deploying a new version';

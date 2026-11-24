@@ -20,7 +20,7 @@ const DEPLOYMENT_STEPS = [
 ];
 
 /**
- * Replace the commands run by `och:deploy` with fakes that record their calls, so that the caches of the application
+ * Replace the commands run by `och:post-deploy` with fakes that record their calls, so that the caches of the application
  * running the tests are left alone. The fake named `$failing` fails.
  *
  * @return ArrayObject<int, array{0: string, 1: array<string, mixed>}>
@@ -45,7 +45,7 @@ function fakeDeploymentSteps(?string $failing = null): ArrayObject
 test('the deployment runs every step in order', function () {
     $calls = fakeDeploymentSteps();
 
-    $this->artisan('och:deploy', ['--no-interaction' => true])
+    $this->artisan('och:post-deploy', ['--no-interaction' => true])
         ->expectsOutputToContain('Deployment completed.')
         ->assertSuccessful();
 
@@ -57,7 +57,7 @@ test('the deployment runs every step in order', function () {
 test('the deployment stops at the first failing step', function () {
     $calls = fakeDeploymentSteps(failing: 'och:install');
 
-    $this->artisan('och:deploy', ['--no-interaction' => true])
+    $this->artisan('och:post-deploy', ['--no-interaction' => true])
         ->expectsOutputToContain('`och:install` failed: the deployment was stopped.')
         ->assertFailed();
 
@@ -67,7 +67,7 @@ test('the deployment stops at the first failing step', function () {
 test('--fresh drops the tables first', function () {
     $calls = fakeDeploymentSteps();
 
-    $this->artisan('och:deploy', ['--fresh' => true, '--no-interaction' => true])->assertSuccessful();
+    $this->artisan('och:post-deploy', ['--fresh' => true, '--no-interaction' => true])->assertSuccessful();
 
     expect($calls[0][0])->toBe('migrate:fresh');
 });
@@ -76,7 +76,7 @@ test('--fresh is refused in production', function () {
     $calls = fakeDeploymentSteps();
     app()->detectEnvironment(fn () => 'production');
 
-    $this->artisan('och:deploy', ['--fresh' => true, '--no-interaction' => true])
+    $this->artisan('och:post-deploy', ['--fresh' => true, '--no-interaction' => true])
         ->expectsOutputToContain('refused in production')
         ->assertFailed();
 

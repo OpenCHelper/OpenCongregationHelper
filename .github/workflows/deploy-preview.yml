@@ -513,8 +513,8 @@ jobs:
           commands: |
             # The tables were already dropped by the deployer (which works even when the application cannot boot).
             # Migrations, `och:install` (permissions, keys of the AI assistants, root user), `public/storage` link and
-            # caches (see `app/Console/Commands/DeployCommand.php`)
-            artisan och:deploy
+            # caches (see `app/Console/Commands/PostDeployCommand.php`)
+            artisan och:post-deploy
             artisan db:seed --class=FakeDataSeeder
 
       # Once the preview runs with the new token: the jobs of its folder are matched by title, so that every push

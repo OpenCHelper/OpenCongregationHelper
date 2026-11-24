@@ -115,7 +115,7 @@ class DoctorCommand extends Command
         $this->report('Database connection', self::OK, (string) DB::connection()->getDatabaseName());
 
         if (! $migrator->repositoryExists()) {
-            $this->report('Migrations', self::ERROR, 'the database is empty: run `php artisan och:deploy`');
+            $this->report('Migrations', self::ERROR, 'the database is empty: run `php artisan och:post-deploy`');
 
             return false;
         }
@@ -126,7 +126,7 @@ class DoctorCommand extends Command
             ->diff($ran)
             ->count();
 
-        $this->check('Migrations', $pending === 0, self::ERROR, "{$pending} pending: run `php artisan och:deploy`");
+        $this->check('Migrations', $pending === 0, self::ERROR, "{$pending} pending: run `php artisan och:post-deploy`");
 
         return $pending === 0;
     }

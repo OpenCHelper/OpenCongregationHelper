@@ -287,7 +287,7 @@ php artisan filament:install --panels
 php artisan filament:make-resource TerritoryResource
 php artisan filament:make-page CustomPage
 php artisan och:install  # permissions, keys of the AI assistants, root user and its super admin role
-php artisan och:deploy   # after deploying: migrations, och:install, storage link and caches
+php artisan och:post-deploy   # after deploying: migrations, och:install, storage link and caches
 php artisan och:doctor   # checks the configuration, changes nothing
 php artisan och:recover-root  # gives the access to the root user back (password, login, 2FA, super admin)
 

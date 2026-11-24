@@ -18,13 +18,6 @@ class EnsurePassportKeysCommand extends Command
     protected $signature = 'och:ensure-passport-keys
                             {--length=4096 : The length of the private key}';
 
-    /**
-     * The name used before the `och:` commands, kept for the scripts and guides that still call it.
-     *
-     * @var list<string>
-     */
-    protected $aliases = ['app:ensure-passport-keys'];
-
     protected $description = 'Create the Passport encryption keys, unless they already exist';
 
     public function handle(): int

@@ -467,8 +467,8 @@ jobs:
           commands: |
             # ------------------------- Deployment -------------------------
             # Migrations, `och:install` (permissions, keys of the AI assistants, root user), `public/storage` link and
-            # caches, stopping at the first failing step (see `app/Console/Commands/DeployCommand.php`)
-            artisan och:deploy ${{ inputs.reset-database && '--fresh' || '' }}
+            # caches, stopping at the first failing step (see `app/Console/Commands/PostDeployCommand.php`)
+            artisan och:post-deploy ${{ inputs.reset-database && '--fresh' || '' }}
 
             ${{ inputs.seed-dummy-data && 'artisan db:seed --class=FakeDataSeeder' || '' }}
 

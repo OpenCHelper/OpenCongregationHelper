@@ -25,9 +25,3 @@ test('the keys are created when missing, and kept when they exist', function () 
 
     expect(file_get_contents($this->keys.'/oauth-private.key'))->toBe($privateKey);
 });
-
-test('the previous name of the command still works', function () {
-    $this->artisan('app:ensure-passport-keys', ['--length' => 1024])->assertSuccessful();
-
-    expect(file_exists($this->keys.'/oauth-private.key'))->toBeTrue();
-});

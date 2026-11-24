@@ -94,7 +94,7 @@ precedente.
    ruolo `super_admin`, poi il collegamento `public/storage` e le cache:
 
     ```shell
-    php artisan och:deploy
+    php artisan och:post-deploy
     ```
 
     L'utente root viene letto dalle variabili `INITIAL_ROOT_*`, e quelle mancanti vengono chieste.
@@ -114,7 +114,7 @@ precedente.
 Sostituisci i file con quelli della nuova versione (mantenendo `.env` e `storage/`), poi esegui:
 
 ```shell
-php artisan och:deploy
+php artisan och:post-deploy
 ```
 
 Esegue le nuove migrazioni, crea ciò che ancora manca (`och:install`), ricrea il collegamento `public/storage` e
@@ -126,14 +126,14 @@ token monouso caricato via FTP: `scripts/remote_artisan.sh` fa entrambe le cose.
 ```shell
 scripts/remote_artisan.sh --base-url https://territories.example.com \
     --ftp-hostname <host> --ftp-username <utente> --ftp-password <password> \
-    och:deploy --no-interaction
+    och:post-deploy --no-interaction
 ```
 
 ## Risoluzione dei problemi
 
 - **`php artisan och:doctor`** controlla la configurazione (chiave e URL dell'applicazione, database e migrazioni,
-  collegamento dello storage, chiavi degli assistenti IA, utente root e super amministratori, email, endpoint
-  per il cron) e indica cosa fare per ogni problema. Non modifica nulla, quindi può essere eseguito in qualsiasi momento.
+  collegamento dello storage, chiavi degli assistenti IA, utente root e super amministratori, email, endpoint per il
+  cron) e indica cosa fare per ogni problema. Non modifica nulla, quindi può essere eseguito in qualsiasi momento.
 - **`php artisan och:recover-root`** restituisce l'accesso all'utente root quando nessuno può più gestire
   l'applicazione (es. password persa, oppure accesso o ruoli rimossi in produzione): imposta la sua password da
   `INITIAL_ROOT_PASSWORD` (o la chiede), gli permette di nuovo di accedere, segna la sua email come verificata,
@@ -191,7 +191,7 @@ l'accesso viene revocato.
 Gli utenti possono collegare all'applicazione degli assistenti IA (es. ChatGPT, Claude, Gemini) tramite il suo server
 MCP (`/mcp`), una volta che un super amministratore li consente nelle
 [impostazioni di sicurezza](administration/settings#sicurezza). Gli assistenti si autorizzano con OAuth, i cui token
-sono firmati da due chiavi create una volta da `och:install` (eseguito anche da `och:deploy`), oppure da sole con:
+sono firmati da due chiavi create una volta da `och:install` (eseguito anche da `och:post-deploy`), oppure da sole con:
 
 ```shell
 php artisan och:ensure-passport-keys

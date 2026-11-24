@@ -93,7 +93,7 @@ changing them in `.env`, or the settings not changed from those pages keep the p
    with the `super_admin` role, then the `public/storage` link and the caches:
 
     ```shell
-    php artisan och:deploy
+    php artisan och:post-deploy
     ```
 
     It reads the root user from the `INITIAL_ROOT_*` variables and asks for the missing ones.
@@ -113,7 +113,7 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 Replace the files with the ones of the new version (keeping `.env` and `storage/`), then run:
 
 ```shell
-php artisan och:deploy
+php artisan och:post-deploy
 ```
 
 It runs the new migrations, creates what is still missing (`och:install`), recreates the `public/storage` link and
@@ -125,7 +125,7 @@ uploaded through FTP: `scripts/remote_artisan.sh` does both. For example:
 ```shell
 scripts/remote_artisan.sh --base-url https://territories.example.com \
     --ftp-hostname <host> --ftp-username <user> --ftp-password <password> \
-    och:deploy --no-interaction
+    och:post-deploy --no-interaction
 ```
 
 ## Troubleshooting
@@ -186,7 +186,7 @@ Users who cannot log in receive no push notifications, and their devices are for
 The users can connect AI assistants (e.g. ChatGPT, Claude, Gemini) to the application through its MCP server
 (`/mcp`), once a super administrator allows them in the [Security settings](administration/settings#security). The
 assistants authorize themselves with OAuth, whose tokens are signed by two keys created once by `och:install` (also run
-by `och:deploy`), or on their own with:
+by `och:post-deploy`), or on their own with:
 
 ```shell
 php artisan och:ensure-passport-keys
