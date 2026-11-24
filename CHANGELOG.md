@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The unused `/api` endpoints (`/api/user`, `/api/assignees`, `/api/assignments`, `/api/territories`, `/api/zones`)
   are removed: they returned whole user and assignment records
   ([#81](https://github.com/OpenCHelper/OpenCongregationHelper/pull/81)).
+- Every response now sends the `X-Frame-Options`, `X-Content-Type-Options` and `Referrer-Policy` headers, so other
+  sites can no longer frame the app, and no longer reveals the PHP version in `X-Powered-By`
+  ([#88](https://github.com/OpenCHelper/OpenCongregationHelper/pull/88)).
 
 ## [1.0.0-alpha15] - 2026-11-24
 
