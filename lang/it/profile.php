@@ -81,6 +81,8 @@ return [
     ],
     'contacts' => [
         'section_title' => 'Informazioni di contatto',
+        'model_label' => 'Contatto',
+        'plural_model_label' => 'Contatti',
         'select_type' => 'Seleziona tipo',
         'section_description' => 'Gestisci i tuoi contatti di emergenza.',
         'add_contact' => 'Aggiungi contatto',
@@ -94,6 +96,7 @@ return [
         'phone_number' => 'Numero di telefono',
         'address' => 'Indirizzo',
         'notes' => 'Note',
+        'notes_placeholder' => 'Note...',
         'is_primary' => 'Contatto principale',
         'is_primary_help' => 'Contrassegna questo come contatto principale per questo tipo.',
         'primary' => 'Principale',

@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Accessibility**: territory images have the territory name as alternative text, and the "— or —" separator of the
   image field is hidden from screen readers ([#78](https://github.com/OpenCHelper/OpenCongregationHelper/pull/78)).
+- Translated the texts still in English: the image fields of territories, the **API Tokens** menu item and the Italian
+  mail log; the contacts of a user have a singular label ("Crea Contatto", not "Crea Informazioni Di Contatto")
+  ([#85](https://github.com/OpenCHelper/OpenCongregationHelper/pull/85)).
+- The territories of a zone, the assignment history of a territory and the assignments of a user have translated
+  titles, breadcrumbs and columns, and users' pages show their name in the breadcrumbs
+  ([#83](https://github.com/OpenCHelper/OpenCongregationHelper/pull/83)).
+- **Assignments**: the start time of a new assignment uses the app's timezone instead of the database clock, so a
+  territory returned soon after being assigned no longer ends before it started; from the AI assistant, a territory
+  assigned today starts now instead of at midnight
+  ([#75](https://github.com/OpenCHelper/OpenCongregationHelper/pull/75)).
+- New assignments, territories and zones remember the user who created them: the Create forms left their creator
+  empty ([#82](https://github.com/OpenCHelper/OpenCongregationHelper/pull/82)).
 
 ### Security
 
@@ -25,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The unused `/api` endpoints (`/api/user`, `/api/assignees`, `/api/assignments`, `/api/territories`, `/api/zones`)
   are removed: they returned whole user and assignment records
   ([#81](https://github.com/OpenCHelper/OpenCongregationHelper/pull/81)).
+- Every response now sends the `X-Frame-Options`, `X-Content-Type-Options` and `Referrer-Policy` headers, so other
+  sites can no longer frame the app, and no longer reveals the PHP version in `X-Powered-By`
+  ([#88](https://github.com/OpenCHelper/OpenCongregationHelper/pull/88)).
 
 ## [1.0.0-alpha15] - 2026-11-24
 
