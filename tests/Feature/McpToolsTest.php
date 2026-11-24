@@ -33,10 +33,11 @@ use Spatie\Permission\Models\Permission;
 beforeEach(function () {
     Notification::fake();
 
-    User::factory()->create(['id' => 1]);
+    // Fixed names, so that random ones (e.g. "Stroman") are never found by the searches of the tests
+    User::factory()->create(['id' => 1, 'first_name' => 'Root', 'last_name' => 'User']);
 
     // The members of the territory department can do everything on the territories and their assignments
-    $this->overseer = User::factory()->create(['can_login' => true]);
+    $this->overseer = User::factory()->create(['can_login' => true, 'first_name' => 'Anna', 'last_name' => 'Bianchi']);
     Department::for(DepartmentKey::Territories)->members()->attach($this->overseer, ['role' => DepartmentRole::Overseer]);
 
     $this->publisher = User::factory()->create(['can_login' => true, 'first_name' => 'Mario', 'last_name' => 'Rossi']);
