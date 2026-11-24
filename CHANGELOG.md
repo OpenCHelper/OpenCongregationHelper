@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-alpha15] - 2026-11-24
+
 ### Added
 
 - **Install command**: `php artisan och:install` creates the permissions and the root user with the super admin role,
