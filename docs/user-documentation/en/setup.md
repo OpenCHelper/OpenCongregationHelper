@@ -151,6 +151,23 @@ Push notifications need HTTPS and, like the emails, are sent by the queue (see a
 
 Users who cannot log in receive no push notifications, and their devices are forgotten when their access is revoked.
 
+## AI assistants
+
+The users can connect AI assistants (e.g. ChatGPT, Claude, Gemini) to the application through its MCP server
+(`/mcp`), once a super administrator allows them in the [Security settings](administration/settings#security). The
+assistants authorize themselves with OAuth, whose tokens are signed by two keys created once:
+
+```shell
+php artisan app:ensure-passport-keys
+```
+
+The command creates `storage/oauth-private.key` and `storage/oauth-public.key` only when they are missing, so it can run
+on every deployment: keep them between deployments, as new keys disconnect every assistant. Like the `.env` file, they
+must never be reachable from the web (the `.htaccess` of the project serves only the `public/` folder).
+
+The assistants of ChatGPT, Claude and Gemini connect from their own servers: the application must be reachable from the
+internet over HTTPS, with a valid certificate.
+
 ## Environments
 
 On environments other than `production` (e.g. `local`, `nightly`, `staging`), super administrators see a colored

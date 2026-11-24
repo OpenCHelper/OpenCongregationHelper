@@ -29,6 +29,8 @@
 
     @livewire('profile-push-notifications')
 
+    @livewire('profile-ai-assistants')
+
     @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
         @livewire(Laravel\Jetstream\Http\Livewire\UpdatePasswordForm::class)
     @endif

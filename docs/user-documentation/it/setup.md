@@ -155,6 +155,25 @@ Le notifiche push richiedono HTTPS e, come le email, vengono inviate dalla coda 
 Gli utenti che non possono accedere non ricevono notifiche push, e i loro dispositivi vengono dimenticati quando
 l'accesso viene revocato.
 
+## Assistenti IA
+
+Gli utenti possono collegare all'applicazione degli assistenti IA (es. ChatGPT, Claude, Gemini) tramite il suo server
+MCP (`/mcp`), una volta che un super amministratore li consente nelle
+[impostazioni di sicurezza](administration/settings#sicurezza). Gli assistenti si autorizzano con OAuth, i cui token
+sono firmati da due chiavi create una volta:
+
+```shell
+php artisan app:ensure-passport-keys
+```
+
+Il comando crea `storage/oauth-private.key` e `storage/oauth-public.key` solo se mancano, quindi può essere eseguito a
+ogni installazione: conservale tra un'installazione e l'altra, perché delle nuove chiavi scollegano tutti gli
+assistenti. Come il file `.env`, non devono mai essere raggiungibili dal web (il file `.htaccess` del progetto espone
+solo la cartella `public/`).
+
+Gli assistenti di ChatGPT, Claude e Gemini si collegano dai propri server: l'applicazione deve essere raggiungibile da
+internet in HTTPS, con un certificato valido.
+
 ## Ambienti
 
 Negli ambienti diversi da `production` (es. `local`, `nightly`, `staging`) i super amministratori vedono un bordo

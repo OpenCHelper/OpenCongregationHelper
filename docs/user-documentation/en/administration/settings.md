@@ -96,6 +96,13 @@ up two-factor authentication.
 > address of the root user first. Disabling a requirement is always possible. The root user is also never asked to
 > confirm its email, even if it changes it later, so that it can always reach these settings.
 
+Under **AI assistants**, **Allow AI assistants** lets the users connect an AI assistant (e.g. ChatGPT, Claude or
+Gemini) to the application, from their [profile](../basics/profile#ai-assistants). It is disabled by default:
+
+- each assistant works on behalf of the user who connected it, and can read and change only what that user can (it has
+  the same roles and permissions), so what it reads is sent to the company that provides the assistant;
+- disabling it disconnects every assistant at once: the users must approve them again once it is enabled.
+
 Click **Save changes** to apply them: they take effect immediately, for every user.
 
 ## Default values

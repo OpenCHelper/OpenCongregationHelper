@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureNotImpersonatingForOAuth;
 use App\Jobs\DetectStaleAssignments;
 use App\Jobs\RenewPublicationSubscriptions;
 use App\Settings\TerritorySettings;
@@ -43,6 +44,9 @@ return Application::configure(basePath: dirname(__DIR__))
               they would let a client choose the host of every generated
               URL, including the password reset links sent by email.
         */
+        // The OAuth authorization of the AI assistants (Passport, `web` group) cannot be approved while impersonating
+        $middleware->web(append: [EnsureNotImpersonatingForOAuth::class]);
+
         $middleware->trustProxies(
             at: '*',
             headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO,

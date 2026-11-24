@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Settings\Pages;
 use App\Filament\Clusters\Settings\AppSettingsPage;
 use App\Models\User;
 use App\Settings\SecuritySettings;
+use App\Support\AiAssistantConnections;
 use BackedEnum;
 use Closure;
 use Filament\Forms\Components\Toggle;
@@ -55,7 +56,25 @@ class ManageSecuritySettings extends AppSettingsPage
                                 __('settings.fields.require_email_verification.root_required'),
                             )),
                     ]),
+                Section::make(__('settings.sections.ai_assistants'))
+                    ->description(__('settings.sections.ai_assistants_description'))
+                    ->columnSpanFull()
+                    ->schema([
+                        Toggle::make('ai_assistants_enabled')
+                            ->label(__('settings.fields.ai_assistants_enabled.label'))
+                            ->helperText(__('settings.fields.ai_assistants_enabled.helper')),
+                    ]),
             ]);
+    }
+
+    /**
+     * Turning the AI assistants off disconnects them all: they must be authorized again once turned back on.
+     */
+    protected function afterSave(): void
+    {
+        if (! app(SecuritySettings::class)->ai_assistants_enabled) {
+            AiAssistantConnections::revokeAll();
+        }
     }
 
     /**

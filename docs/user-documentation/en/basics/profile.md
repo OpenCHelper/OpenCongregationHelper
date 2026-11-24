@@ -46,6 +46,31 @@ so when the application is already installed.
 Receive the notifications on this device too, even when the application is closed: click **Enable on this device**.
 See [Notifications](notifications#push-notifications).
 
+## AI assistants
+
+Connect an AI assistant, such as ChatGPT, Claude or Gemini, to ask it about the territories (e.g. *"Which territories
+have not been worked for six months?"*) or to have it assign and return them for you. The section appears only when the
+administrators allow the AI assistants (see [Settings](../administration/settings#security)).
+
+![AI assistants](/docs/user-documentation/en/basics/assets/profile-ai-assistants.webp)
+
+1. Copy the **Address of the server (MCP)** with the button next to it.
+2. Add it to your assistant:
+    - **Claude**: in *Settings*, *Connectors*, add a custom connector with this address;
+    - **ChatGPT**: in *Settings*, *Apps*, turn on the developer mode in the advanced settings, then create an app with
+      this address and the OAuth authentication;
+    - **other assistants** (e.g. Gemini, Claude Code, Cursor, VS Code): add a remote MCP server (HTTP) with this
+      address.
+3. The assistant opens this application: log in, check the name of the assistant and the site you will go back to,
+   then click **Approve**.
+
+The assistant can read and do only what you can do in the application, and asks you to confirm before changing
+anything. **Connected assistants** lists the ones you approved: click **Disconnect** to remove the access of one of
+them, which must then be approved again.
+
+> ⚠️ **Warning:** what the assistant reads (e.g. the names of the publishers) is sent to the company that provides it.
+> Ask it only what you need.
+
 ## Update password
 
 Enter your **Current password**, then the **New password** twice and click **Save**. Use a long, random password.
