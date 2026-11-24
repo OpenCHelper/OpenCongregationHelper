@@ -1,8 +1,10 @@
 name: Run linter
 
 on:
+  # Every pull request (forks included), and what lands on main
   push:
-  # Pull requests from forks only: those of this repository are already checked on push
+    branches:
+      - main
   pull_request:
   workflow_dispatch: # Manually trigger a workflow run
   workflow_call:
@@ -22,7 +24,6 @@ env:
 # the application environment nor the Sail containers.
 jobs:
   lint:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
 
     steps:
