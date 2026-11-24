@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#75](https://github.com/OpenCHelper/OpenCongregationHelper/pull/75)).
 - New assignments, territories and zones remember the user who created them: the Create forms left their creator
   empty ([#82](https://github.com/OpenCHelper/OpenCongregationHelper/pull/82)).
+- **Assignments**: the dates in the table, on the assignment page and in its banners follow the user's language
+  instead of a fixed `dd/mm/yyyy` format, and the start and end dates are no longer shown raw
+  ([#90](https://github.com/OpenCHelper/OpenCongregationHelper/pull/90)).
 
 ### Security
 
