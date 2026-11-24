@@ -280,6 +280,8 @@ return [
         'share_modal' => [
             'title' => 'Condividi Assegnazione',
             'description' => 'Condividi questa assegnazione con altri tramite un link pubblico.',
+            'not_shared' => 'Questa assegnazione non è ancora condivisa: crea un link pubblico per condividerla.',
+            'create_link' => 'Crea link',
             'url_label' => 'URL di condivisione',
             'copy_button' => 'Copia URL',
             'stop_sharing' => 'Interrompi condivisione',

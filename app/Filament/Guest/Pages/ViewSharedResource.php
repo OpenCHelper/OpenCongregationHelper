@@ -44,15 +44,7 @@ class ViewSharedResource extends Page implements HasInfolists
 
     public function mount(string $record): void
     {
-        // The links are deleted when sharing is disabled: this also covers the pages opened meanwhile
-        abort_unless(SharedUrl::isSharingEnabled(), 404);
-
-        $this->sharedUrl = SharedUrl::where('uid', $record)->firstOrFail();
-
-        if (! $this->sharedUrl->shareable) {
-            abort(404, 'Shareable resource not found.');
-        }
-
+        $this->sharedUrl = SharedUrl::findOpenableOrFail($record);
         $this->shareableResource = $this->sharedUrl->shareable;
         $this->resourceType = $this->getResourceModelLabel();
     }

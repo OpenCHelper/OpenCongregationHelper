@@ -32,27 +32,27 @@ class SharedUrlPolicy
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determine whether the user can update the model: a link is never changed, only created or deleted.
      */
     public function update(User $user, SharedUrl $sharedUrl): bool
     {
-        return true;
+        return false;
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determine whether the user can delete the model (stop sharing): those who can view what it shares.
      */
     public function delete(User $user, SharedUrl $sharedUrl): bool
     {
-        return true;
+        return $sharedUrl->shareable !== null && $user->can('view', $sharedUrl->shareable);
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Determine whether the user can restore the model: the links are not soft deleted.
      */
     public function restore(User $user, SharedUrl $sharedUrl): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -60,6 +60,6 @@ class SharedUrlPolicy
      */
     public function forceDelete(User $user, SharedUrl $sharedUrl): bool
     {
-        return true;
+        return $this->delete($user, $sharedUrl);
     }
 }

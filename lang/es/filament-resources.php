@@ -280,6 +280,8 @@ return [
         'share_modal' => [
             'title' => 'Compartir Asignación',
             'description' => 'Comparte esta asignación con otros a través de un enlace público.',
+            'not_shared' => 'Esta asignación aún no se comparte: crea un enlace público para compartirla.',
+            'create_link' => 'Crear enlace',
             'url_label' => 'URL para compartir',
             'copy_button' => 'Copiar URL',
             'stop_sharing' => 'Detener Compartir',

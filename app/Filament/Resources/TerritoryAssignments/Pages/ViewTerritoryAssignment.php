@@ -11,7 +11,11 @@ use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
@@ -45,7 +49,8 @@ class ViewTerritoryAssignment extends ViewRecord
 
     /**
      * Whether the user can share the assignment, or stop sharing it: those allowed to view the assignments, and its
-     * assignee (e.g. to pass the territory on to someone without an account), while sharing is enabled.
+     * assignee (e.g. to pass the territory on to someone without an account), while sharing is enabled and the
+     * assignment is in progress (a returned or deleted territory is not published again).
      */
     public static function canManageSharing(TerritoryAssignment $assignment): bool
     {
@@ -53,6 +58,7 @@ class ViewTerritoryAssignment extends ViewRecord
 
         return $user !== null
             && SharedUrl::isSharingEnabled()
+            && $assignment->isShareable()
             && ($user->can('View:TerritoryAssignment') || $assignment->assignee_id === $user->getKey());
     }
 
@@ -66,18 +72,33 @@ class ViewTerritoryAssignment extends ViewRecord
                     ->label(__('filament-resources.territory_assignment.action_copy.label'))
                     ->tooltip(__('filament-resources.territory_assignment.action_copy.tooltip'))
                     ->icon(Heroicon::OutlinedShare)
-                    ->visible(fn (): bool => SharedUrl::isSharingEnabled())
+                    ->visible(fn (): bool => SharedUrl::isSharingEnabled() && $this->getRecord()->isShareable())
                     ->authorize(fn (): bool => static::canManageSharing($this->getRecord()))
                     ->modalHeading(__('filament-resources.territory_assignment.share_modal.title'))
                     ->modalDescription(__('filament-resources.territory_assignment.share_modal.description'))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel(__('filament-resources.territory_assignment.share_modal.close'))
-                    ->fillForm(fn () => [
-                        'share_url' => $this->record->share()->getShareableUrl(),
+                    // Opening the modal only shows the existing link: a new one is created from its button
+                    ->fillForm(fn (): array => [
+                        'share_url' => $this->getRecord()->shared?->getShareableUrl(),
                     ])
                     ->schema([
                         Section::make()
                             ->schema([
+                                Text::make(__('filament-resources.territory_assignment.share_modal.not_shared'))
+                                    ->visible(fn (Get $get): bool => blank($get('share_url'))),
+                                Actions::make([
+                                    Action::make('create_share_link')
+                                        ->label(__('filament-resources.territory_assignment.share_modal.create_link'))
+                                        ->icon(Heroicon::OutlinedLink)
+                                        ->authorize(fn (): bool => static::canManageSharing($this->getRecord()))
+                                        ->action(function (Set $set): void {
+                                            $set('share_url', $this->getRecord()->share()->getShareableUrl());
+                                            $this->getRecord()->load('shared');
+                                        }),
+                                ])
+                                    ->key('shareLinkActions')
+                                    ->visible(fn (Get $get): bool => blank($get('share_url'))),
                                 TextInput::make('share_url')
                                     ->label(__('filament-resources.territory_assignment.share_modal.url_label'))
                                     ->visible(fn ($get) => ! empty($get('share_url')))
@@ -134,6 +155,7 @@ class ViewTerritoryAssignment extends ViewRecord
                     ])
                     ->extraModalFooterActions([
                         Action::make('stop_sharing')
+                            ->visible(fn (): bool => $this->getRecord()->shared !== null)
                             ->authorize(fn (): bool => static::canManageSharing($this->getRecord()))
                             ->requiresConfirmation()
                             ->cancelParentActions()

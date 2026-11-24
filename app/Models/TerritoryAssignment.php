@@ -140,6 +140,15 @@ class TerritoryAssignment extends Model
     }
 
     /**
+     * Whether the assignment can be shared (and its link opened): only while it is in progress, so that a returned
+     * territory is not published again.
+     */
+    public function isShareable(): bool
+    {
+        return $this->ended_at === null && ! $this->trashed();
+    }
+
+    /**
      * Whether the return of the assignment can be asked: it is still in progress and it was not asked already.
      */
     public function canRequestReturn(): bool
