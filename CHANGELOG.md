@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- The territories of a zone, the assignment history of a territory and the assignments of a user have translated
+  titles, breadcrumbs and columns, and users' pages show their name in the breadcrumbs
+  ([#83](https://github.com/OpenCHelper/OpenCongregationHelper/pull/83)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
