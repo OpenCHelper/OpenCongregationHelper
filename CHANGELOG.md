@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 
+### Fixed
+
+- Translated the texts still in English: the image fields of territories, the **API Tokens** menu item and the Italian
+  mail log; the contacts of a user have a singular label ("Crea Contatto", not "Crea Informazioni Di Contatto")
+  ([#85](https://github.com/OpenCHelper/OpenCongregationHelper/pull/85)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**

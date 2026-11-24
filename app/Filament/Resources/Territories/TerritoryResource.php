@@ -306,7 +306,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->live(),
 
                                         TextInput::make('image_path')
-                                            ->label('Image from URL')
+                                            ->label(__('filament-resources.territory.field_image_url'))
                                             ->url()
                                             ->autocomplete(false)
                                             ->live()
@@ -320,13 +320,13 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             }),
                                         TextEntry::make('image_separator')
                                             ->hiddenLabel()
-                                            ->state('— or —')
+                                            ->state(__('filament-resources.territory.image_separator'))
                                             ->hiddenOn(['view'])
                                             ->extraAttributes([
                                                 'class' => 'flex items-center justify-center h-full',
                                             ]),
                                         FileUpload::make('image_file')
-                                            ->label('Image from file')
+                                            ->label(__('filament-resources.territory.field_image_file'))
                                             ->image()
                                             // Not SVG, which can carry scripts run when the image is opened
                                             ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
