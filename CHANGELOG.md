@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **AI assistants**: connect ChatGPT, Claude and other assistants from the profile, to ask about the territories or
   have them assigned and returned, with the same permissions as the user; off until a super administrator allows them
   in the Security settings ([#64](https://github.com/OpenCHelper/OpenCongregationHelper/pull/64)).
+- **Add to department** bulk action in the users list, to add the selected users to a department at once
+  ([#66](https://github.com/OpenCHelper/OpenCongregationHelper/pull/66)).
+
+### Changed
+
+- The **Brothers** field of **Add members**, in a department, now says that several brothers can be chosen
+  ([#66](https://github.com/OpenCHelper/OpenCongregationHelper/pull/66)).
 
 ## [1.0.0-alpha13] - 2026-11-23
 

@@ -16,6 +16,7 @@ use App\Models\User;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
@@ -244,6 +245,9 @@ test('the users to add are searched by name, not by email', function () {
 
     $select = Livewire::test(MembersRelationManager::class, ['ownerRecord' => $department, 'pageClass' => ViewDepartment::class])
         ->mountAction(TestAction::make('attach')->table())
+        // The field says that several brothers can be chosen
+        ->assertFormFieldExists('recordId', fn (Select $field): bool => $field->isMultiple()
+            && $field->getChildSchema($field::BELOW_CONTENT_SCHEMA_KEY)?->getComponents()[0]?->getContent() === __('departments.members.field_users_helper'))
         ->instance()
         ->getMountedAction()
         ->getRecordSelect();
@@ -342,4 +346,56 @@ test('adding, changing and removing the members of a department is logged', func
         ->and($activities[0]->properties['attributes'])->toMatchArray(['department_id' => $department->id, 'user_id' => $member->id, 'role' => 'assistant'])
         ->and($activities[1]->properties['attributes'])->toBe(['role' => 'overseer'])
         ->and($activities[2]->properties['old'])->toMatchArray(['user_id' => $member->id, 'role' => 'overseer']);
+});
+
+test('administrators add the users selected in the list to a department in bulk, keeping the role of the members', function () {
+    $this->actingAs($this->admin);
+
+    $department = Department::for(DepartmentKey::Publications);
+    $overseer = User::factory()->create();
+    joinDepartment($overseer, DepartmentKey::Publications, DepartmentRole::Overseer);
+    $newMembers = User::factory()->count(2)->create();
+
+    Livewire::test(ListUsers::class)
+        ->selectTableRecords([$overseer, ...$newMembers])
+        ->callAction(TestAction::make('addToDepartment')->table()->bulk(), ['department' => $department->id, 'role' => DepartmentRole::Assistant->value])
+        ->assertHasNoFormErrors()
+        ->assertNotified(trans_choice('departments.bulk_add.notification_added', 2, ['count' => 2, 'department' => $department->getLabel()]));
+
+    expect($department->members()->pluck('users.id')->sort()->values()->all())->toBe(collect([$overseer, ...$newMembers])->pluck('id')->sort()->values()->all())
+        ->and($department->isOverseer($overseer))->toBeTrue()
+        ->and($department->overseers()->count())->toBe(1)
+        ->and(Activity::query()->where('subject_type', (new DepartmentMember)->getMorphClass())->where('event', 'created')->count())->toBe(3);
+});
+
+test('the overseers add users in bulk only to their own departments, and only as assistants', function () {
+    $overseer = User::factory()->create();
+    $overseer->givePermissionTo(Permission::findOrCreate('ViewAny:User', 'web'));
+    $department = joinDepartment($overseer, DepartmentKey::PublicWitnessing, DepartmentRole::Overseer);
+    $other = Department::for(DepartmentKey::Publications);
+    $user = User::factory()->create();
+
+    $this->actingAs($overseer);
+    $component = fn () => Livewire::test(ListUsers::class)->selectTableRecords([$user]);
+    $action = TestAction::make('addToDepartment')->table()->bulk();
+
+    $component()->callAction($action, ['department' => $other->id, 'role' => DepartmentRole::Assistant->value])
+        ->assertHasFormErrors(['department']);
+    $component()->callAction($action, ['department' => $department->id, 'role' => DepartmentRole::Overseer->value])
+        ->assertHasFormErrors(['role']);
+    $component()->callAction($action, ['department' => $department->id, 'role' => DepartmentRole::Assistant->value])
+        ->assertHasNoFormErrors();
+
+    expect($user->fresh()->isMemberOf(DepartmentKey::PublicWitnessing))->toBeTrue()
+        ->and($user->fresh()->isMemberOf(DepartmentKey::Publications))->toBeFalse();
+});
+
+test('the users who manage no department cannot add users to one in bulk', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(Permission::findOrCreate('ViewAny:User', 'web'));
+
+    $this->actingAs($user);
+
+    Livewire::test(ListUsers::class)
+        ->assertActionHidden(TestAction::make('addToDepartment')->table()->bulk());
 });

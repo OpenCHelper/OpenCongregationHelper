@@ -38,6 +38,7 @@ return [
         'column_role' => 'Role',
         'column_email' => 'Email',
         'field_users' => 'Brothers',
+        'field_users_helper' => 'You can choose several brothers: search them by name and pick them one after the other.',
         'field_role' => 'Role in the department',
         'field_role_helper' => 'The overseers can also delete in its sections, and add and remove its assistants.',
         'action_add' => 'Add members',
@@ -50,5 +51,12 @@ return [
         'notification_removed' => 'Member removed',
         'empty_heading' => 'No members yet',
         'empty_description' => 'Add the brothers serving in this department: they will be able to manage its sections.',
+    ],
+    'bulk_add' => [
+        'action' => 'Add to department',
+        'heading' => 'Add to a department',
+        'field_department' => 'Department',
+        'notification_added' => '{0} No one added to :department|{1} 1 brother added to :department|[2,*] :count brothers added to :department',
+        'notification_skipped' => '{1} 1 was already a member and keeps their role.|[2,*] :count were already members and keep their role.',
     ],
 ];

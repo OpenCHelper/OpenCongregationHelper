@@ -162,7 +162,8 @@ class MembersRelationManager extends RelationManager
                     ->schema(fn (AttachAction $action): array => [
                         $action->getRecordSelect()
                             ->label(__('departments.members.field_users'))
-                            ->hiddenLabel(false),
+                            ->hiddenLabel(false)
+                            ->helperText(__('departments.members.field_users_helper')),
                         static::getRoleField(),
                     ]),
             ])
