@@ -11,14 +11,14 @@ return [
     'hero' => [
         'eyebrow' => 'Progetto open source',
         'title' => 'Il registro dei territori, ordinato e sempre a portata di mano.',
-        'description' => ':app è un sistema open source per la gestione dei territori delle congregazioni dei Testimoni di Geova. Aiuta chi si occupa dei territori a sapere quali sono stati percorsi, chi li sta lavorando e cosa resta da fare, sostituendo il registro cartaceo con uno strumento semplice, utilizzabile anche da smartphone.',
+        'description' => ':app è un sistema open source per la gestione dei territori delle congregazioni dei Testimoni di Geova. Aiuta chi si occupa dei territori a sapere quali sono stati percorsi, chi li sta lavorando e cosa resta da fare, sostituendo il registro cartaceo con uno strumento semplice, utilizzabile anche da smartphone. Tiene anche le pubblicazioni richieste dai proclamatori e i poster per la testimonianza pubblica.',
         'primary_action_guest' => 'Accedi',
         'primary_action_auth' => 'Apri l\'applicazione',
         'secondary_action' => 'Leggi la guida',
     ],
     'features' => [
         'heading' => 'Funzionalità attuali',
-        'description' => 'Tutto il necessario per seguire il lavoro nel territorio, dall\'assegnazione alla riconsegna.',
+        'description' => 'Tutto il necessario per seguire il lavoro nel territorio, dall\'assegnazione alla riconsegna, e non solo.',
         'territories' => [
             'title' => 'Territori e zone',
             'description' => 'Crea i territori uno alla volta o importali in blocco da file CSV. Raggruppali per zona e descrivili con immagine, mappa, note e tag.',
@@ -33,15 +33,27 @@ return [
         ],
         'overview' => [
             'title' => 'Panoramica e mappa',
-            'description' => 'Una dashboard con le statistiche principali e una mappa d\'insieme di tutti i territori.',
+            'description' => 'Una dashboard con le statistiche principali, la copertura dei territori e una mappa d\'insieme di tutti i territori.',
         ],
         'sharing' => [
             'title' => 'Condivisione tramite link',
             'description' => 'Condividi un\'assegnazione con un link consultabile senza account, e interrompi la condivisione in qualsiasi momento.',
         ],
+        'notifications' => [
+            'title' => 'Notifiche',
+            'description' => 'Nell\'app, via email e come notifiche push, quando un territorio viene assegnato o riconsegnato, inizia una campagna o un territorio è fuori da troppo tempo.',
+        ],
+        'publications' => [
+            'title' => 'Pubblicazioni',
+            'description' => 'Raccogli le pubblicazioni richieste dai proclamatori, dalla richiesta alla consegna, e rinnova automaticamente quelle periodiche.',
+        ],
+        'public_witnessing' => [
+            'title' => 'Testimonianza pubblica',
+            'description' => 'Tieni l\'inventario dei poster per carrelli ed espositori, con le copie conservate in ogni luogo.',
+        ],
         'access' => [
             'title' => 'Utenti, ruoli e registro attività',
-            'description' => 'Permessi basati sui ruoli, team e un registro delle modifiche per sapere sempre chi ha fatto cosa.',
+            'description' => 'Reparti, permessi basati sui ruoli, autenticazione a due fattori e un registro delle modifiche per sapere sempre chi ha fatto cosa.',
         ],
     ],
     'open_source' => [

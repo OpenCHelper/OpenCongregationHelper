@@ -10,6 +10,9 @@
         'campaigns' => 'heroicon-o-calendar-days',
         'overview' => 'heroicon-o-chart-bar',
         'sharing' => 'heroicon-o-share',
+        'notifications' => 'heroicon-o-bell',
+        'publications' => 'heroicon-o-newspaper',
+        'public_witnessing' => 'heroicon-o-photo',
         'access' => 'heroicon-o-shield-check',
     ];
 

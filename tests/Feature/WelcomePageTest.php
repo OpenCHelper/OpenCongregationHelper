@@ -22,7 +22,7 @@ test('welcome page lists the current features', function () {
 
     $response->assertSeeText(__('welcome.features.heading'));
 
-    foreach (['territories', 'assignments', 'campaigns', 'overview', 'sharing', 'access'] as $feature) {
+    foreach (['territories', 'assignments', 'campaigns', 'overview', 'sharing', 'notifications', 'publications', 'public_witnessing', 'access'] as $feature) {
         $response
             ->assertSeeText(__("welcome.features.{$feature}.title"))
             ->assertSeeText(__("welcome.features.{$feature}.description"));
