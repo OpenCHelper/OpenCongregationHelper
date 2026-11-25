@@ -10,7 +10,8 @@ Apri **Amministrazione → Utenti** per gestire le persone registrate nell'appli
 ![Elenco degli utenti](/docs/user-documentation/it/administration/assets/users-list.webp)
 
 La tabella mostra nome, email, **Ruolo**, se l'email è stata verificata e se l'utente può accedere
-(**Accesso abilitato?**). Il filtro **Accesso abilitato?** mostra solo gli utenti che possono, o non possono, accedere.
+(**Accesso abilitato?**). Il filtro **Accesso** mostra solo gli utenti con accesso o solo gli utenti virtuali, e quanti
+sono gli uni e gli altri.
 
 ## Utenti e utenti virtuali
 

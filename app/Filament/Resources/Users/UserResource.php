@@ -30,6 +30,7 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -249,10 +250,21 @@ class UserResource extends Resource
                     ->getOptionLabelFromRecordUsing(fn (Department $record): string => $record->getLabel())
                     ->multiple(),
                 TernaryFilter::make('can_login')
-                    ->label(__('filament-resources.user.filter_access_enabled'))
-                    ->placeholder(__('filament-resources.user.filter_access_enabled_all'))
-                    ->trueLabel(__('filament-resources.user.filter_access_enabled_enabled'))
-                    ->falseLabel(__('filament-resources.user.filter_access_enabled_disabled')),
+                    ->label(__('filament-resources.user.filter_access'))
+                    ->placeholder(fn (): string => __('filament-resources.user.filter_access_all', [
+                        'count' => static::countUsers(),
+                    ]))
+                    ->trueLabel(fn (): string => __('filament-resources.user.filter_access_with_access', [
+                        'count' => static::countUsers(canLogin: true),
+                    ]))
+                    ->falseLabel(fn (): string => __('filament-resources.user.filter_access_virtual', [
+                        'count' => static::countUsers(canLogin: false),
+                    ]))
+                    ->indicateUsing(fn (array $state): array => match (blank($state['value'] ?? null) ? null : (bool) $state['value']) {
+                        true => [Indicator::make(__('filament-resources.user.filter_access_indicator_with_access'))],
+                        false => [Indicator::make(__('filament-resources.user.filter_access_indicator_virtual'))],
+                        null => [],
+                    }),
             ])
             ->recordActions([
                 ResendInvitationAction::make(),
@@ -297,6 +309,16 @@ class UserResource extends Resource
             ManageUserAssignments::class,
             ManageUserPublicationRequests::class,
         ]);
+    }
+
+    /**
+     * Count the users listed in the table, optionally only those who can (or cannot) log in.
+     */
+    public static function countUsers(?bool $canLogin = null): int
+    {
+        return static::getEloquentQuery()
+            ->when($canLogin !== null, fn (Builder $query): Builder => $query->where('can_login', $canLogin))
+            ->count();
     }
 
     public static function getPages(): array

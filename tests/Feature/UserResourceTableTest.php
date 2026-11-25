@@ -39,23 +39,24 @@ test('users can be sorted by role', function () {
         ->assertCanSeeTableRecords([$viewer, $editorAndViewer, $admin], inOrder: true);
 });
 
-test('users can be grouped by access with a badge count on each tab', function () {
+test('users can be filtered by access, with the number of users of each option', function () {
     $userWithAccess = User::factory()->create();
     $virtualUsers = User::factory()->virtual()->count(2)->create();
 
     $component = Livewire::test(ListUsers::class);
 
-    $tabs = $component->instance()->getTabs();
-    expect($tabs['all']->getBadge())->toBe('5')
-        ->and($tabs['with_access']->getBadge())->toBe('3')
-        ->and($tabs['virtual']->getBadge())->toBe('2');
+    $filter = $component->instance()->getTable()->getFilter('can_login');
+    expect($filter->getPlaceholder())->toBe(__('filament-resources.user.filter_access_all', ['count' => 5]))
+        ->and($filter->getTrueLabel())->toBe(__('filament-resources.user.filter_access_with_access', ['count' => 3]))
+        ->and($filter->getFalseLabel())->toBe(__('filament-resources.user.filter_access_virtual', ['count' => 2]));
 
     $component
-        ->assertCanSeeTableRecords([$userWithAccess, ...$virtualUsers])
-        ->set('activeTab', 'with_access')
+        ->filterTable('can_login', true)
         ->assertCanSeeTableRecords([$this->manager, $userWithAccess])
         ->assertCanNotSeeTableRecords($virtualUsers)
-        ->set('activeTab', 'virtual')
+        ->assertSee(__('filament-resources.user.filter_access_indicator_with_access'))
+        ->filterTable('can_login', false)
         ->assertCanSeeTableRecords($virtualUsers)
-        ->assertCanNotSeeTableRecords([$this->manager, $userWithAccess]);
+        ->assertCanNotSeeTableRecords([$this->manager, $userWithAccess])
+        ->assertSee(__('filament-resources.user.filter_access_indicator_virtual'));
 });
