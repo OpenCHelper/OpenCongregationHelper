@@ -74,12 +74,15 @@ class ManageZoneTerritories extends ManageRelatedRecords
             ->headerActions([
                 // A territory created in a deleted zone would be hidden together with the zone
                 CreateAction::make()
-                    ->hidden(fn (): bool => $this->getOwnerRecord()->trashed()),
+                    ->hidden(fn (): bool => $this->getOwnerRecord()->trashed())
+                    ->mutateDataUsing(fn (array $data): array => TerritoryResource::mergeUploadedImageIntoFormData($data)),
                 // Tables\Actions\AssociateAction::make(),
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->mutateRecordDataUsing(fn (array $data): array => TerritoryResource::splitStoredImageFromFormData($data))
+                    ->mutateDataUsing(fn (array $data): array => TerritoryResource::mergeUploadedImageIntoFormData($data)),
                 // Tables\Actions\DissociateAction::make(),
                 TerritoryResource::explainRefusedDeletion(DeleteAction::make()),
                 TerritoryResource::explainRefusedDeletion(ForceDeleteAction::make()),
