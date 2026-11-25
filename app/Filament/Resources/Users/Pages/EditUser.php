@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\Actions\DeleteUserAction;
 use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\Pages\Concerns\SendsUserInvitation;
 use App\Filament\Resources\Users\UserResource;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord
@@ -32,12 +32,7 @@ class EditUser extends EditRecord
     {
         return [
             ResendInvitationAction::make(),
-            DeleteAction::make()
-                ->visible(function () {
-                    $record = $this->record;
-
-                    return ! $record->isRootUser();
-                }),
+            DeleteUserAction::make(),
         ];
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\Actions\DeleteUserAction;
 use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\Users\Widgets\PublisherStatistics;
 use App\Models\User;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
@@ -52,12 +52,7 @@ class ViewUser extends ViewRecord
                         ? __('profile.root_user_protection.edit_action_disabled')
                         : null;
                 }),
-            DeleteAction::make()
-                ->visible(function () {
-                    $record = $this->getRecord();
-
-                    return ! $record->isRootUser();
-                }),
+            DeleteUserAction::make(),
         ];
     }
 }
