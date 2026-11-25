@@ -343,19 +343,60 @@ test('a territory with a stored image can be edited', function (bool $isFromZone
     'zone page' => true,
 ])->with(['keep', 'replace', 'clear']);
 
-test('a territory with an image URL keeps it in the URL field when edited', function () {
+test('a territory with an image URL keeps it in the URL field when edited', function (string $imageUrl) {
+    Storage::fake('local');
+
     $territory = Territory::factory()->for($this->zone, 'territoryZone')->create([
         'name' => 'Via Roma',
-        'image_path' => 'https://example.com/territory.png',
+        'image_path' => $imageUrl,
     ]);
 
     Livewire::test(EditTerritory::class, ['record' => $territory->getKey()])
-        ->assertSchemaStateSet(['image_path' => 'https://example.com/territory.png'])
+        ->assertSchemaStateSet(['image_path' => $imageUrl])
         ->fillForm(['notes' => 'Only the notes changed'])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($territory->refresh()->image_path)->toBe('https://example.com/territory.png');
+    expect($territory->refresh()->image_path)->toBe($imageUrl);
+})->with([
+    'https' => 'https://example.com/territory.png',
+    'uppercase scheme' => 'HTTPS://example.com/territory.png',
+]);
+
+test('an image path that is not a stored file stays in the URL field of the edit form', function (string $imagePath) {
+    Storage::fake('local');
+
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create([
+        'name' => 'Via Roma',
+        'image_path' => $imagePath,
+    ]);
+
+    // Not moved to the upload field, which would drop it and clear the image on save
+    Livewire::test(EditTerritory::class, ['record' => $territory->getKey()])
+        ->assertSchemaStateSet(['image_path' => $imagePath, 'image_file' => null]);
+})->with([
+    'protocol-relative URL' => '//example.com/territory.png',
+    'other scheme' => 'ftp://example.com/territory.png',
+    'missing stored file' => 'territories/deleted.png',
+]);
+
+test('the image preview of the edit form shows the stored image', function () {
+    Storage::fake('local');
+    Storage::disk('local')->put('territories/stored.png', UploadedFile::fake()->image('stored.png')->getContent());
+
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create([
+        'name' => 'Via Roma',
+        'image_path' => 'territories/stored.png',
+    ]);
+
+    $preview = (string) Livewire::test(EditTerritory::class, ['record' => $territory->getKey()])
+        ->instance()
+        ->form
+        ->getComponent('image_preview')
+        ->getState();
+
+    expect($preview)->toContain('<img src="')
+        ->toContain('/territories/stored.png?expiration=');
 });
 
 test('the map of a new territory opens on the configured default centre', function () {

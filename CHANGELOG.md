@@ -48,9 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Contacts**: setting a contact as primary from the user's page in the admin panel now replaces the previous primary
   contact, as in the profile, instead of leaving the user with several
   ([#76](https://github.com/OpenCHelper/OpenCongregationHelper/pull/76)).
-
-### Fixed
-
 - **Zone territories**: creating or editing a territory with an uploaded image from a zone's **Territories** tab no
   longer fails, and the image is saved. A territory with an uploaded image can be edited again without the image being
   rejected as an invalid URL ([#73](https://github.com/OpenCHelper/OpenCongregationHelper/pull/73)).

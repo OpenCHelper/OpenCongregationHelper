@@ -69,6 +69,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -290,8 +291,12 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ))
                                             ->state(function (Get $get) {
                                                 $file = $get('image_file');
-                                                $url = $get('image_path');
                                                 $alt = e(static::getImageAlt($get('name')));
+
+                                                // The upload field holds its files keyed by an id
+                                                if (is_array($file)) {
+                                                    $file = Arr::first($file);
+                                                }
 
                                                 if ($file instanceof TemporaryUploadedFile) {
                                                     return new HtmlString(
@@ -299,12 +304,14 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                                     );
                                                 }
 
+                                                // A stored image, moved to the upload field when the form is filled
+                                                $url = filled($file) ? $file : $get('image_path');
+
                                                 if (! filled($url)) {
                                                     return null;
                                                 }
 
-                                                // Local path
-                                                if (! Str::of($url)->isMatch('/^https?:\/\//')) {
+                                                if (static::isLocalImagePath($url)) {
                                                     $url = Storage::disk('local')->temporaryUrl(
                                                         $url,
                                                         now()->plus(minutes: 5)
@@ -776,8 +783,19 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
     }
 
     /**
-     * Move a stored image (`image_path` without a scheme) to the upload field (`image_file`), so that the
-     * `image_path` field, which only accepts URLs, keeps only external images.
+     * Whether a territory image is a path on the local disk rather than a URL: it has no scheme (`https:`, `ftp:`...)
+     * and is not protocol-relative (`//cdn...`).
+     */
+    public static function isLocalImagePath(?string $imagePath): bool
+    {
+        return filled($imagePath)
+            && ! Str::of($imagePath)->isMatch('/^([a-z][a-z0-9+.\-]*:|\/\/)/i');
+    }
+
+    /**
+     * Move an image stored on the local disk (`image_path`) to the upload field (`image_file`), so that the
+     * `image_path` field, which only accepts URLs, keeps only external images. Anything else (URLs, missing files)
+     * stays in `image_path`, so that it is not lost when the territory is saved.
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -786,7 +804,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
     {
         $imagePath = $data['image_path'] ?? null;
 
-        if (filled($imagePath) && ! Str::of($imagePath)->isMatch('/^https?:\/\//')) {
+        if (static::isLocalImagePath($imagePath) && Storage::disk('local')->exists($imagePath)) {
             $data['image_file'] = $imagePath;
             $data['image_path'] = null;
         }
