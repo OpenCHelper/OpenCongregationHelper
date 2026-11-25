@@ -53,9 +53,11 @@ search only in that column.
 
 Choose a value in **Group by** to split the table:
 
-- **Zone**: one group per zone, with the number of territories in it;
-- **Campaign**: groups the territories by the campaign of their current assignment. Available territories are listed
-  under *No Campaign*.
+- **Zone**: one group per zone;
+- **Campaign**: groups the territories by the campaign of their current assignment. Available territories, and those
+  assigned outside a campaign, are listed under *No Campaign*.
+
+Each group title shows how many territories it contains among those matching the current tab, filters and search.
 
 Click a group title to collapse or expand it.
 

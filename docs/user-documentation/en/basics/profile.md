@@ -26,7 +26,8 @@ To add a contact:
 
 1. Click **Add contact**.
 2. Choose the **Type**: *Personal*, *Emergency*, *Business* or *Other*.
-3. Enable **Primary contact** if this is the main contact for that type.
+3. Enable **Primary contact** if this is your main contact. You can have only one: enabling it on a contact turns it
+   off on the previous one, whatever its type.
 4. Fill in the **Name** and at least a **Phone number** or an **Address**, plus optional **Notes**.
 5. Click **Submit**.
 

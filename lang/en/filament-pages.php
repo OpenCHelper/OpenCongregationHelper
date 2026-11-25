@@ -4,10 +4,13 @@ return [
     // Page navigation labels
     'view_territory' => 'Territory',
     'manage_territory_assignments' => 'Assignment History',
+    'manage_territory_assignments_title' => 'Assignment history of :name',
     'manage_zone_territories' => 'Territories',
+    'manage_zone_territories_title' => 'Territories of zone :name',
     'view_territory_zone' => 'Zone',
     'view_user' => 'User',
     'manage_user_assignments' => 'Assignments',
+    'manage_user_assignments_title' => 'Assignments of :name',
     'manage_user_publication_requests' => 'Publication requests',
     'manage_user_publication_requests_title' => 'Publication requests of :name',
 

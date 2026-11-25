@@ -165,7 +165,7 @@ test('the territory department sees the request and closes the assignment in one
 
     Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
         ->assertSee(__('filament-resources.territory_assignment.return_requested_heading', [
-            'date' => $this->assignment->return_requested_at->format('d/m/Y H:i'),
+            'date' => $this->assignment->return_requested_at->isoFormat('LLL'),
         ]))
         ->callAction(TestAction::make('returnRequestedAssignment')->schemaComponent('returnRequestedCallout', 'infolist'))
         ->assertNotified(__('filament-resources.territory_assignment.return_success'));
@@ -179,7 +179,7 @@ test('the assignee sees that the return has been asked, but cannot close the ass
 
     Livewire::test(ViewTerritoryAssignment::class, ['record' => $this->assignment->getKey()])
         ->assertSee(__('filament-resources.territory_assignment.return_requested_heading', [
-            'date' => $this->assignment->return_requested_at->format('d/m/Y H:i'),
+            'date' => $this->assignment->return_requested_at->isoFormat('LLL'),
         ]))
         ->assertActionHidden(TestAction::make('returnRequestedAssignment')->schemaComponent('returnRequestedCallout', 'infolist'));
 });
@@ -308,7 +308,7 @@ describe('from the shared link', function () {
             ->assertNotified(__('filament-resources.territory_assignment.request_return_success_title'))
             ->assertActionHidden('requestReturn')
             ->assertSee(__('filament-resources.territory_assignment.return_requested_heading', [
-                'date' => $this->assignment->fresh()->return_requested_at->format('d/m/Y H:i'),
+                'date' => $this->assignment->fresh()->return_requested_at->isoFormat('LLL'),
             ]));
 
         expect($this->assignment->fresh()->return_requested_at)->not->toBeNull();

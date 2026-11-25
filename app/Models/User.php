@@ -281,9 +281,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(Contact::class);
     }
 
-    public function primaryContact(): HasMany
+    public function primaryContact(): HasOne
     {
-        return $this->hasMany(Contact::class)->where('is_primary', true);
+        return $this->hasOne(Contact::class)->where('is_primary', true);
     }
 
     public function emergencyContacts(): HasMany

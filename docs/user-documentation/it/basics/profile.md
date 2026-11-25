@@ -26,7 +26,8 @@ Per aggiungere un contatto:
 
 1. Clicca **Aggiungi contatto**.
 2. Scegli il **Tipo**: *Personale*, *Emergenza*, *Aziendale* o *Altro*.
-3. Attiva **Contatto principale** se è il contatto principale per quel tipo.
+3. Attiva **Contatto principale** se è il tuo contatto principale. Puoi averne uno solo: attivandolo su un contatto,
+   viene disattivato su quello precedente, di qualunque tipo sia.
 4. Compila il **Nome** e almeno un **Numero di telefono** o un **Indirizzo**, più eventuali **Note**.
 5. Clicca **Invia**.
 

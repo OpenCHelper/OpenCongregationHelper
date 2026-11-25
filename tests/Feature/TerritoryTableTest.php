@@ -82,6 +82,52 @@ test('zone groups show the number of territories of each zone', function () {
         ->assertSee('South (1)');
 });
 
+test('zone group counts follow the table search and filters', function () {
+    $south = TerritoryZone::factory()->create(['name' => 'South']);
+
+    territoryAssignedSince($this->zone, $this->assignee)->update(['name' => 'Via Roma 1']);
+    territoryAssignedSince($this->zone, $this->assignee, days: 5)->update(['name' => 'Via Roma 2']);
+    territoryAssignedSince($this->zone, $this->assignee)->update(['name' => 'Via Milano']);
+    territoryAssignedSince($south, $this->assignee, days: 5)->update(['name' => 'Via Roma 3']);
+
+    Livewire::test(ListTerritories::class)
+        ->set('tableGrouping', 'territoryZone.name')
+        ->assertSee('North (3)')
+        ->assertSee('South (1)')
+        ->searchTable('Roma')
+        ->assertSee('North (2)')
+        ->assertSee('South (1)')
+        ->filterTable('assignment_status', true)
+        ->assertSee('North (1)')
+        ->assertSee('South (1)');
+});
+
+test('campaign groups count the territories shown below them', function () {
+    $alpha = Campaign::factory()->create(['name' => 'Alpha']);
+
+    // Returned assignments of the campaign must not be counted
+    $returned = territoryAssignedSince($this->zone, $this->assignee, days: 40, returnedDaysAgo: 3);
+    $returned->assignments()->update(['campaign_id' => $alpha->id]);
+
+    $inAlpha = territoryAssignedSince($this->zone, $this->assignee, days: 5);
+    $inAlpha->currentAssignment->update(['campaign_id' => $alpha->id]);
+
+    // Territories assigned outside of any campaign are listed under "no campaign" too
+    territoryAssignedSince($this->zone, $this->assignee, days: 5);
+    $unassigned = territoryAssignedSince($this->zone, $this->assignee);
+    $unassigned->update(['name' => 'Via Roma']);
+
+    $noCampaign = __('filament-resources.territory.filter_no_campaign');
+
+    Livewire::test(ListTerritories::class)
+        ->set('tableGrouping', 'currentAssignment.campaign.name')
+        ->assertSee('Alpha (1)')
+        ->assertSee("{$noCampaign} (3)")
+        ->searchTable('Roma')
+        ->assertDontSee('Alpha (')
+        ->assertSee("{$noCampaign} (1)");
+});
+
 test('campaign groups are sorted by campaign name, with unassigned territories last', function () {
     $beta = Campaign::factory()->create(['name' => 'Beta']);
     $alpha = Campaign::factory()->create(['name' => 'Alpha']);
@@ -158,6 +204,34 @@ test('the number of queries does not grow with the number of territories', funct
 
     expect($queriesWithManyTerritories)->toBe($queriesWithFewTerritories);
 });
+
+test('the group counts take one query whatever the number of groups', function (string $grouping) {
+    $countQueries = function () use ($grouping): int {
+        $table = Livewire::test(ListTerritories::class);
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $table->set('tableGrouping', $grouping);
+
+        return count(DB::getQueryLog());
+    };
+
+    $addGroup = function (): void {
+        $territory = territoryAssignedSince(TerritoryZone::factory()->create(), $this->assignee, days: 5);
+        $territory->currentAssignment->update(['campaign_id' => Campaign::factory()->create()->id]);
+    };
+
+    $addGroup();
+    $countQueries();
+    $queriesWithFewGroups = $countQueries();
+
+    foreach (range(1, 4) as $i) {
+        $addGroup();
+    }
+
+    expect($countQueries())->toBe($queriesWithFewGroups);
+})->with(['territoryZone.name', 'currentAssignment.campaign.name']);
 
 test('territories of soft-deleted zones are hidden', function () {
     $south = TerritoryZone::factory()->create(['name' => 'South']);

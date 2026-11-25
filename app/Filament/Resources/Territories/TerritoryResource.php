@@ -20,6 +20,7 @@ use App\Models\User;
 use App\Observers\TerritoryObserver;
 use App\Support\MapCenter;
 use Carbon\Carbon;
+use Closure;
 use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 use Dotswan\MapPicker\Fields\Map;
 use Exception;
@@ -55,6 +56,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -66,6 +68,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -78,6 +81,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Override;
 use UnitEnum;
+use WeakMap;
 
 class TerritoryResource extends Resource implements HasKnowledgeBase
 {
@@ -108,6 +112,13 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
     }
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    /**
+     * Counts of the territories of each table group, by Livewire component and count query.
+     *
+     * @var WeakMap<HasTable, array<string, array<array-key, int>>>|null
+     */
+    protected static ?WeakMap $tableTerritoriesCountsByGroup = null;
 
     public static function getGlobalSearchEloquentQuery(): Builder
     {
@@ -280,10 +291,11 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->state(function (Get $get) {
                                                 $file = $get('image_file');
                                                 $url = $get('image_path');
+                                                $alt = e(static::getImageAlt($get('name')));
 
                                                 if ($file instanceof TemporaryUploadedFile) {
                                                     return new HtmlString(
-                                                        '<img src="'.e($file->temporaryUrl()).'" class="rounded-lg">'
+                                                        '<img src="'.e($file->temporaryUrl()).'" alt="'.$alt.'" class="rounded-lg">'
                                                     );
                                                 }
 
@@ -300,13 +312,13 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                                 }
 
                                                 return new HtmlString(
-                                                    '<img src="'.e($url).'" class="rounded-lg">'
+                                                    '<img src="'.e($url).'" alt="'.$alt.'" class="rounded-lg">'
                                                 );
                                             })
                                             ->live(),
 
                                         TextInput::make('image_path')
-                                            ->label('Image from URL')
+                                            ->label(__('filament-resources.territory.field_image_url'))
                                             ->url()
                                             ->autocomplete(false)
                                             ->live()
@@ -320,13 +332,14 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             }),
                                         TextEntry::make('image_separator')
                                             ->hiddenLabel()
-                                            ->state('— or —')
+                                            ->state(__('filament-resources.territory.image_separator'))
                                             ->hiddenOn(['view'])
                                             ->extraAttributes([
                                                 'class' => 'flex items-center justify-center h-full',
+                                                'aria-hidden' => 'true',
                                             ]),
                                         FileUpload::make('image_file')
-                                            ->label('Image from file')
+                                            ->label(__('filament-resources.territory.field_image_file'))
                                             ->image()
                                             // Not SVG, which can carry scripts run when the image is opened
                                             ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
@@ -401,18 +414,64 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
         return trans_choice('filament-resources.territory.assignment_duration_day', $roundedDays, ['count' => $roundedDays]);
     }
 
+    /**
+     * Number of territories of each group of the table, as filtered and searched, so that the counts in the group
+     * headers match the rows below them. They are counted with a single query per request and grouping.
+     *
+     * @param  Closure(QueryBuilder): QueryBuilder  $selectGroupKey  selects the key of the group as `group_key`
+     * @return array<array-key, int> the counts by group key, with the empty string for the territories with no key
+     */
+    protected static function countTableTerritoriesByGroup(HasTable $livewire, Closure $selectGroupKey): array
+    {
+        static::$tableTerritoriesCountsByGroup ??= new WeakMap;
+
+        $query = $selectGroupKey($livewire->getFilteredTableQuery()->toBase()->reorder())
+            ->selectRaw('count(*) as aggregate')
+            ->groupBy('group_key');
+
+        // Keyed by the query too, so that the counts follow the filters and the search if they change
+        $cacheKey = md5($query->toSql().'|'.serialize($query->getBindings()));
+        $countsByQuery = static::$tableTerritoriesCountsByGroup[$livewire] ?? [];
+
+        if (! array_key_exists($cacheKey, $countsByQuery)) {
+            $countsByQuery[$cacheKey] = $query
+                ->get()
+                ->mapWithKeys(fn (object $row): array => [(string) $row->group_key => (int) $row->aggregate])
+                ->all();
+
+            static::$tableTerritoriesCountsByGroup[$livewire] = $countsByQuery;
+        }
+
+        return $countsByQuery[$cacheKey];
+    }
+
+    /**
+     * Name of the campaign of the open assignment of the territories of the given table, as a subquery. A subquery
+     * rather than a join: the query keeps reading the territories table only, so the columns of the table searches
+     * (e.g. `name`) are not ambiguous.
+     */
+    protected static function currentCampaignNameQuery(string $territoriesTable): QueryBuilder
+    {
+        return Campaign::query()
+            ->select((new Campaign)->qualifyColumn('name'))
+            ->whereHas('assignments', fn (Builder $assignments): Builder => $assignments
+                ->whereColumn($assignments->qualifyColumn('territory_id'), "{$territoriesTable}.id")
+                ->whereNull($assignments->qualifyColumn('ended_at')))
+            ->limit(1)
+            ->toBase();
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->groups([
                 Group::make('territoryZone.name')
                     ->label(ucfirst(__('filament-resources.territory_zone.model_label')))
-                    ->getTitleFromRecordUsing(function (Territory $record): string {
-                        // Count the territories of every zone with a single query per request
-                        $territoriesCountByZone = once(fn () => Territory::query()
-                            ->selectRaw('territory_zone_id, count(*) as aggregate')
-                            ->groupBy('territory_zone_id')
-                            ->pluck('aggregate', 'territory_zone_id'));
+                    ->getTitleFromRecordUsing(function (Territory $record, HasTable $livewire): string {
+                        $territoriesCountByZone = static::countTableTerritoriesByGroup(
+                            $livewire,
+                            fn (QueryBuilder $query): QueryBuilder => $query->select($query->from.'.territory_zone_id as group_key'),
+                        );
 
                         return $record->territoryZone->name.' ('.($territoriesCountByZone[$record->territory_zone_id] ?? 0).')';
                     })
@@ -420,34 +479,22 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                     ->collapsible(),
                 Group::make('currentAssignment.campaign.name')
                     ->label(ucfirst(__('filament-resources.campaign.model_label')))
-                    ->getTitleFromRecordUsing(function (Territory $record): string {
-                        /** @var Campaign $campaign */
+                    ->getTitleFromRecordUsing(function (Territory $record, HasTable $livewire): string {
+                        $territoriesCountByCampaign = static::countTableTerritoriesByGroup(
+                            $livewire,
+                            fn (QueryBuilder $query): QueryBuilder => $query
+                                ->select([])
+                                ->selectSub(static::currentCampaignNameQuery($query->from), 'group_key'),
+                        );
+
+                        /** @var Campaign|null $campaign */
                         $campaign = $record->currentAssignment?->campaign;
-                        if ($campaign) {
-                            // Count the assignments of every campaign with a single query per request
-                            $assignmentsCountByCampaign = once(fn () => TerritoryAssignment::query()
-                                ->whereNotNull('campaign_id')
-                                ->selectRaw('campaign_id, count(*) as aggregate')
-                                ->groupBy('campaign_id')
-                                ->pluck('aggregate', 'campaign_id'));
+                        $title = $campaign?->name ?? __('filament-resources.territory.filter_no_campaign');
 
-                            return $campaign->name.' ('.($assignmentsCountByCampaign[$campaign->id] ?? 0).')';
-                        }
-
-                        $territoriesCount = once(fn (): int => Territory::unassigned()->count());
-
-                        return __('filament-resources.territory.filter_no_campaign')." ({$territoriesCount})";
+                        return $title.' ('.($territoriesCountByCampaign[$campaign?->name ?? ''] ?? 0).')';
                     })
                     ->orderQueryUsing(function (Builder $query, string $direction): Builder {
-                        // A subquery rather than a join: the query keeps reading the territories table only,
-                        // so the columns of the table searches (e.g. `name`) are not ambiguous
-                        $currentCampaignName = Campaign::query()
-                            ->select((new Campaign)->qualifyColumn('name'))
-                            ->whereHas('assignments', fn (Builder $assignments): Builder => $assignments
-                                ->whereColumn($assignments->qualifyColumn('territory_id'), $query->qualifyColumn('id'))
-                                ->whereNull($assignments->qualifyColumn('ended_at')))
-                            ->limit(1)
-                            ->toBase();
+                        $currentCampaignName = static::currentCampaignNameQuery($query->getModel()->getTable());
 
                         return $query->orderByRaw(
                             "COALESCE(({$currentCampaignName->toSql()}), 'zzz_no_campaign') ".($direction === 'desc' ? 'desc' : 'asc'),
@@ -749,6 +796,14 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
         unset($data['image_file']);
 
         return $data;
+    }
+
+    /**
+     * The alternative text of a territory image: the territory name, or a generic one while it has none.
+     */
+    public static function getImageAlt(?string $territoryName): string
+    {
+        return filled($territoryName) ? $territoryName : __('filament-resources.territory.image_alt');
     }
 
     /**
