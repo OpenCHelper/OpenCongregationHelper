@@ -23,6 +23,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Override;
@@ -170,13 +171,36 @@ class TagResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->modalDescription(fn (Tag $record): string => static::getDeleteModalDescription([$record->getKey()])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->modalDescription(fn (Collection $records): string => static::getDeleteModalDescription($records->modelKeys())),
                 ]),
             ]);
+    }
+
+    /**
+     * Description of the confirmation modal of the deletion of the given tags: how many territories and zones would lose
+     * them, since deleting a tag also removes it from every record that uses it.
+     *
+     * @param  array<int, int|string>  $tagIds
+     */
+    public static function getDeleteModalDescription(array $tagIds): string
+    {
+        $usages = Tag::countUsages($tagIds);
+        $isBulk = count($tagIds) > 1;
+
+        if (($usages['territories'] === 0) && ($usages['zones'] === 0)) {
+            return __($isBulk ? 'filament-resources.tag.bulk_delete_description_unused' : 'filament-resources.tag.delete_description_unused');
+        }
+
+        return __($isBulk ? 'filament-resources.tag.bulk_delete_description' : 'filament-resources.tag.delete_description', [
+            'territories' => trans_choice('filament-resources.tag.delete_usage_territories', $usages['territories']),
+            'zones' => trans_choice('filament-resources.tag.delete_usage_zones', $usages['zones']),
+        ]);
     }
 
     public static function getPages(): array

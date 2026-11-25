@@ -32,4 +32,5 @@ Tags are created automatically when you type a new one in a territory or zone fo
 
 ## Deleting tags
 
-A tag can be deleted only if no territory or zone uses it: remove it from them first.
+Deleting a tag also removes it from every territory and zone that uses it (they are kept). Before deleting, the
+confirmation says how many territories and zones use it (the selected tags, when deleting more than one).
