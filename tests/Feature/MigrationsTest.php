@@ -22,6 +22,11 @@ it('rolls back every migration and runs them again', function () {
         ->and(Schema::hasColumn('users', 'two_factor_confirmed_at'))->toBeTrue();
 });
 
+afterEach(function () {
+    // On MySQL the schema changes of the migrations commit the test transaction, so the user would outlive the test
+    DB::table('users')->where('email', 'maria@example.com')->delete();
+});
+
 it('keeps the names of the users when splitting and joining them', function () {
     $splitFullName = loadMigration('2025_04_13_075827_split_user_fullname');
     $userId = DB::table('users')->insertGetId([
