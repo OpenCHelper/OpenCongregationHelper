@@ -89,7 +89,7 @@ class FakePublicationSubscriberSeeder extends Seeder
      * Renew the subscription as the daily job did every month since its start, until the given day: the renewal
      * requests only the current period, so the history of the past months is made one month at a time.
      */
-    private static function renewEveryMonth(PublicationSubscription $subscription, CarbonInterface $until): void
+    public static function renewEveryMonth(PublicationSubscription $subscription, CarbonInterface $until): void
     {
         for ($day = $subscription->started_at->copy(); $day->lessThanOrEqualTo($until); $day = $day->copy()->startOfMonth()->addMonthNoOverflow()) {
             $subscription->renew($day);

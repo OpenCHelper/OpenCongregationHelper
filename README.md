@@ -125,6 +125,17 @@ The preferred way of developing is by using **Docker Compose** to build the cont
         ```shell
         sail artisan db:seed --class=FakeDataSeeder
         ```
+        To take or update the screenshots of the user documentation (`docs/user-documentation/*/**/assets`), seed
+        the curated demo data instead, always the same (no random values, dates relative to the day of seeding), on
+        a fresh database. Set `APP_NAME=OpenCongregationTools`, `APP_LOCALE=en`,
+        `INITIAL_ROOT_USERNAME="Daniel Hughes"` and `INITIAL_ROOT_USERMAIL=admin@example.com` in the `.env` file,
+        then run:
+        ```shell
+        sail artisan migrate:fresh --seed
+        sail artisan db:seed --class=DocsDemoSeeder
+        ```
+        Log in as `admin@example.com` (the other users who can log in, e.g. `emily.parker@example.com`, use the
+        password `password`).
 6. Install the frontend dependencies and run the Vite server:
     ```shell
     sail npm install && sail npm run dev
