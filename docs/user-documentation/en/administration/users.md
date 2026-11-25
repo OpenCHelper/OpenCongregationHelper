@@ -48,7 +48,8 @@ Administrators cannot set or change the password of a user: people choose their 
 Click a user to open their page:
 
 - the **User** tab shows their data and their **Contact Information** (e.g. emergency contacts), which you can add,
-  edit or delete here too. **Call** and **Open in Maps** start a phone call or open the address;
+  edit or delete here too (a user has only one **Primary contact**). **Call** and **Open in Maps** start a phone call
+  or open the address;
 - the **Assignments** tab lists the territories assigned to them.
 
 At the bottom of the **User** tab, **Statistics** shows the **Preferred zones** (every zone the publisher took
