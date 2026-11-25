@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Assignments**: the dates in the table, on the assignment page and in its banners follow the user's language
   instead of a fixed `dd/mm/yyyy` format, and the start and end dates are no longer shown raw
   ([#90](https://github.com/OpenCHelper/OpenCongregationHelper/pull/90)).
+- **Territories**: the counts in the zone and campaign group headers now match the rows below them: they follow the
+  filters and the search, no longer count returned assignments, and include under "No campaign" the territories
+  assigned outside a campaign ([#87](https://github.com/OpenCHelper/OpenCongregationHelper/pull/87)).
 
 ### Security
 
