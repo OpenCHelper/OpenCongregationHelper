@@ -55,6 +55,15 @@ test('the leak check can be turned off', function () {
     Http::assertNothingSent();
 });
 
+test('the leak check can be turned on outside of production', function () {
+    config(['auth.password_leak_check.enabled' => true]);
+    fakeLeakedPassword('leaked-password-123');
+
+    expect(passwordErrors('leaked-password-123'))->toBe([__('validation.password.uncompromised', ['attribute' => 'password'])])
+        ->and(passwordErrors('a-long-and-unique-passphrase'))->toBeEmpty()
+        ->and(passwordErrors('12345678'))->toBeEmpty();
+});
+
 test('the leak check gives up quickly when the service does not answer', function () {
     $verifier = app(UncompromisedVerifier::class);
 

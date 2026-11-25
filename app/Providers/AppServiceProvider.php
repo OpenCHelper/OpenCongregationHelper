@@ -190,21 +190,18 @@ class AppServiceProvider extends ServiceProvider
      * The rules of the passwords chosen by the users (Fortify, the Filament password reset and invitation page, the
      * profile and the Artisan commands all use `Password::default()`).
      *
-     * In production a password needs at least 12 characters and must not appear in a known data leak (checked with
-     * the k-anonymity API of Have I Been Pwned, which only receives the first characters of its SHA-1 hash), unless
-     * `PASSWORD_LEAK_CHECK` turns the check off. Elsewhere the 8 characters of Laravel are enough, so that local and
-     * test environments do not call the external API.
+     * In production a password needs at least 12 characters, elsewhere the 8 characters of Laravel are enough. It must
+     * not appear in a known data leak either (checked with the k-anonymity API of Have I Been Pwned, which only
+     * receives the first characters of its SHA-1 hash): `PASSWORD_LEAK_CHECK` turns the check on or off, and when it is
+     * not set the check runs only in production, so that local and test environments do not call the external API.
      */
     private function configurePasswordPolicy(): void
     {
         Password::defaults(function (): Password {
-            if (! app()->isProduction()) {
-                return Password::min(8)->max(255);
-            }
+            $rule = Password::min(app()->isProduction() ? 12 : 8)->max(255);
+            $checksLeaks = config('auth.password_leak_check.enabled') ?? app()->isProduction();
 
-            $rule = Password::min(12)->max(255);
-
-            return config('auth.password_leak_check.enabled') ? $rule->uncompromised() : $rule;
+            return filter_var($checksLeaks, FILTER_VALIDATE_BOOLEAN) ? $rule->uncompromised() : $rule;
         });
     }
 
