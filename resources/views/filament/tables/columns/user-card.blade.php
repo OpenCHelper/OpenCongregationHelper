@@ -16,10 +16,10 @@
     $detailColumns = $getEnabledColumns(['email_verified_at', 'two_factor_authentication', 'created_at', 'updated_at']);
 @endphp
 
-<div class="flex w-full flex-col gap-2">
+<div class="flex w-full flex-col gap-2 pt-1.5">
     <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-            <p class="font-semibold text-gray-950 dark:text-white">{{ $record->getFullName() }}</p>
+            <p class="leading-6 font-semibold text-gray-950 dark:text-white">{{ $record->getFullName() }}</p>
             <p class="truncate text-sm text-gray-500 dark:text-gray-400">{{ $record->email }}</p>
         </div>
 
