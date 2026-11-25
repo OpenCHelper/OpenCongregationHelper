@@ -192,13 +192,14 @@ class TerritoryAssignment extends Model
     }
 
     /**
-     * The users notified when the return of an assignment is asked: the members of the territory department.
+     * The users notified when the return of an assignment is asked: the members of the territory department who can
+     * log in (virtual users cannot open the assignment the notification links to).
      *
      * @return Collection<int, User>
      */
     public static function getReturnRequestRecipients(): Collection
     {
-        return Department::for(DepartmentKey::Territories)->members()->get();
+        return Department::for(DepartmentKey::Territories)->members()->where('can_login', true)->get();
     }
 
     /**

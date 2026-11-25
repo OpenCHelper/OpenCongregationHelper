@@ -122,6 +122,16 @@ test('only the members of the territory department are notified, not the one ask
     Notification::assertNotSentTo([$publicationsMember, $this->assignee], TerritoryReturnRequestedNotification::class);
 });
 
+test('virtual members of the territory department are not notified', function () {
+    $virtualMember = User::factory()->virtual()->create();
+    Department::for(DepartmentKey::Territories)->members()->attach($virtualMember, ['role' => DepartmentRole::Assistant]);
+
+    $this->assignment->requestReturn($this->assignee);
+
+    Notification::assertSentTo([$this->overseer, $this->assistant], TerritoryReturnRequestedNotification::class);
+    Notification::assertNotSentTo($virtualMember, TerritoryReturnRequestedNotification::class);
+});
+
 test('the return is asked only once', function () {
     expect($this->assignment->requestReturn($this->assignee))->toBeTrue()
         ->and(TerritoryAssignment::find($this->assignment->id)->requestReturn($this->assignee))->toBeFalse();
