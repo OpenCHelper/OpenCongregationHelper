@@ -6,6 +6,7 @@ use App\Models\Team;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Laravel\Jetstream\Contracts\DeletesTeams;
 use Laravel\Jetstream\Contracts\DeletesUsers;
 
@@ -24,6 +25,14 @@ class DeleteUser implements DeletesUsers
         // Prevent deletion of root user under any circumstances
         if ($user->isRootUser()) {
             throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
+        }
+
+        // The history of the territories would be lost with the user (see `UserObserver::deleting()`): the error is
+        // shown in the confirmation modal, before the user is logged out
+        if ($user->hasAssignments()) {
+            throw ValidationException::withMessages([
+                'password' => [__('profile.delete_account.has_assignments')],
+            ]);
         }
 
         DB::transaction(function () use ($user) {

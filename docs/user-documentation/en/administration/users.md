@@ -84,6 +84,17 @@ department**, and they all join it at once. Those who already serve in the depar
 
 Use **Delete** in the user page, or select some users and use the **Delete selected** bulk action.
 
+A user who has ever been assigned a territory (even one already returned) cannot be deleted: the history of those
+territories (when they were worked, the coverage, the campaigns) would be lost with them. For example, when a publisher
+moves away:
+
+1. Click **Delete** in their page: the window explains why they cannot be deleted.
+2. Click **Disable access**: they become a [virtual user](#users-and-virtual-users), cannot log in any more, and their
+   assignments are kept. Return their territories in progress, if any, when you get them back.
+
+The bulk action deletes the other selected users and says how many were skipped and why. Users cannot delete their own
+account either if they have assignments.
+
 ## The root user
 
 The root user is the first user, created during the installation. To avoid losing access to the application:

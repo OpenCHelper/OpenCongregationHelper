@@ -76,6 +76,7 @@ return [
         'warning' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',
         'delete_button' => 'Delete account',
         'confirm_deletion' => 'Are you sure you want to delete your account? Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
+        'has_assignments' => 'Territories have been assigned to you: deleting your account would permanently delete the history of those territories, so it cannot be deleted. Ask an administrator to disable your access instead.',
         'password_placeholder' => 'Password',
         'cancel' => 'Cancel',
     ],

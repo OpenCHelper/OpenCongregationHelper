@@ -72,15 +72,25 @@ class UserObserver
     /**
      * Handle the User "deleting" event.
      * This is called BEFORE the model is deleted.
+     *
+     * A user who has assignments cannot be deleted: the history of the territories (the dates they were last worked,
+     * the coverage, the campaigns...) would be lost with them, and their assignment in progress would disappear. The
+     * database refuses it too. Their access can be disabled instead (`can_login`), making them a virtual user.
+     *
+     * @return false|null false cancels the deletion; null lets it (and the other "deleting" listeners) go on
      */
-    public function deleting(User $user): bool
+    public function deleting(User $user): ?bool
     {
         // Prevent deletion of root user under any circumstances
         if ($user->isRootUser()) {
             throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
         }
 
-        return true;
+        if ($user->hasAssignments()) {
+            return false;
+        }
+
+        return null;
     }
 
     /**

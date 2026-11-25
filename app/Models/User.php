@@ -276,6 +276,15 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(TerritoryAssignment::class, 'assignee_id');
     }
 
+    /**
+     * Whether any territory has ever been assigned to the user, deleted assignments included: such a user cannot be
+     * deleted, or the history of the territories would be lost with them (see `UserObserver::deleting()`).
+     */
+    public function hasAssignments(): bool
+    {
+        return $this->assignments()->withTrashed()->exists();
+    }
+
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class);

@@ -404,6 +404,12 @@ return [
         'filter_access_enabled_all' => 'All',
         'filter_access_enabled_enabled' => 'Enabled',
         'filter_access_enabled_disabled' => 'Disabled',
+        'delete_refused_title' => 'User not deleted',
+        'delete_refused_body' => 'Territories have been assigned to this user: deleting them would permanently delete the history of those territories (when they were worked, the coverage, the campaigns).',
+        'delete_refused_disable_access' => 'Disable their access instead: they will become a virtual user and their assignments will be kept.',
+        'delete_refused_bulk' => '{1} :count user was not deleted because territories have been assigned to them: disable their access instead.|[2,*] :count users were not deleted because territories have been assigned to them: disable their access instead.',
+        'action_disable_access' => 'Disable access',
+        'access_disabled' => 'Access disabled: :name is now a virtual user.',
     ],
     'shared_resource' => [
         'details_title' => ':ResourceType details',

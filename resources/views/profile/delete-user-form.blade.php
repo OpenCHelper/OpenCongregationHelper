@@ -1,5 +1,8 @@
 @php
     use Filament\Support\Icons\Heroicon;
+
+    // A user who has assignments cannot be deleted (see `UserObserver::deleting()`): the form only explains it
+    $canBeDeleted = ! auth()->user()->isRootUserProtected() && ! auth()->user()->hasAssignments();
 @endphp
 
 <div>
@@ -13,6 +16,12 @@
                 color="danger"
                 :icon="Heroicon::OutlinedNoSymbol"
                 :description="__('profile.root_user_protection.account_deletion_not_allowed')"
+            />
+        @elseif (auth()->user()->hasAssignments())
+            <x-filament::callout
+                color="warning"
+                :icon="Heroicon::OutlinedNoSymbol"
+                :description="__('profile.delete_account.has_assignments')"
             />
         @else
             <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -31,7 +40,7 @@
         @endif
     </x-filament::section>
 
-    @if (! auth()->user()->isRootUserProtected())
+    @if ($canBeDeleted)
         {{-- The modal follows `$confirmingUserDeletion`, which Jetstream toggles on the server. --}}
         <x-filament::modal
             id="confirm-user-deletion"
