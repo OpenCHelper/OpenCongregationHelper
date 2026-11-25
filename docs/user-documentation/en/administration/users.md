@@ -9,8 +9,17 @@ Open **Administration → Users** to manage the people registered in the applica
 
 ![Users list](/docs/user-documentation/en/administration/assets/users-list.webp)
 
-The table shows name, email, **Role**, whether the email has been verified and whether the user can log in
-(**Access enabled?**). The **Access enabled?** filter shows only the users who can, or cannot, log in.
+The table shows name, email, **Departments** and whether the user can log in (**Access enabled**: a green key for the
+users with access, a grey one for the virtual users). From the columns button next to the filters you can also show the
+**Role**, whether the email has been verified and whether the user has set up two-factor authentication, or hide the
+access column.
+
+On a phone, each user is shown as a card with picture, name, email and access, plus the columns chosen with the columns
+button; the list can be sorted from the **Sort by** menu.
+
+The **Access** filter shows only the users with access or only the virtual users, and tells how many there are of each.
+The **Email verified** and **Two-factor authentication** filters show only the users who have (or have not) verified
+their email or set up two-factor authentication.
 
 ## Users and virtual users
 

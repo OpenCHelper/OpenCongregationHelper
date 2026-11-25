@@ -16,6 +16,7 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
 use App\Models\Department;
 use App\Models\User;
+use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
@@ -30,6 +31,8 @@ use Filament\Support\Enums\FontFamily;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -179,21 +182,32 @@ class UserResource extends Resource
     {
         return $table
             ->recordUrl(fn (Model $record): string => UserResource::getUrl('view', ['record' => $record]))
+            ->stackedOnMobile()
             ->columns([
+                // On phones, each user is a card (see `user-card.blade.php`) that shows the columns hidden below
+                ViewColumn::make('card')
+                    ->label(__('filament-resources.user.column_user'))
+                    ->view('filament.tables.columns.user-card')
+                    ->sortable(['last_name', 'first_name'])
+                    ->extraCellAttributes(['class' => 'fi-ta-cell-without-stacked-label'])
+                    ->hiddenFrom('sm'),
                 TextColumn::make('first_name')
                     ->label(__('filament-resources.user.column_first_name'))
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('sm'),
                 TextColumn::make('last_name')
                     ->label(__('filament-resources.user.column_last_name'))
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('sm'),
                 TextColumn::make('email')
                     ->label(__('filament-resources.user.column_email'))
                     ->copyable()
                     ->icon(Heroicon::Envelope)
                     ->fontFamily(FontFamily::Mono)
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('sm'),
                 TextColumn::make('roles.name')
                     ->label(__('filament-resources.user.column_role'))
                     ->badge()
@@ -212,7 +226,8 @@ class UserResource extends Resource
                         return $query->orderBy($firstRoleName->toBase(), $direction);
                     })
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
                 TextColumn::make('departments')
                     ->label(__('filament-resources.user.column_departments'))
                     ->state(fn (User $record): array => $record->departments->map(fn (Department $department): DepartmentKey => $department->key)->all())
@@ -220,28 +235,45 @@ class UserResource extends Resource
                     ->color(fn (DepartmentKey $state): string => $state->getColor())
                     ->badge()
                     ->listWithLineBreaks()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('sm'),
                 IconColumn::make('email_verified_at')
                     ->label(__('filament-resources.user.column_email_verified'))
                     ->default(false)
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
+                IconColumn::make('two_factor_authentication')
+                    ->label(__('filament-resources.user.column_two_factor_authentication'))
+                    ->state(fn (User $record): bool => $record->hasTwoFactorAuthentication())
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
                 IconColumn::make('can_login')
                     ->label(__('filament-resources.user.column_access_enabled'))
-                    ->boolean()
-                    ->sortable(),
+                    ->icon(Heroicon::OutlinedKey)
+                    ->color(fn (bool $state): string => $state ? 'success' : 'gray')
+                    ->tooltip(fn (bool $state): string => $state
+                        ? __('filament-resources.user.access_enabled_tooltip')
+                        : __('filament-resources.user.access_disabled_tooltip'))
+                    ->toggleable()
+                    ->sortable()
+                    ->visibleFrom('sm'),
                 TextColumn::make('created_at')
                     ->label(__('filament-resources.user.column_created_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
                 TextColumn::make('updated_at')
                     ->label(__('filament-resources.user.column_updated_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
             ])
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('departments'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['departments', 'roles']))
             ->filters([
                 SelectFilter::make('departments')
                     ->label(__('filament-resources.user.filter_department'))
@@ -249,10 +281,58 @@ class UserResource extends Resource
                     ->getOptionLabelFromRecordUsing(fn (Department $record): string => $record->getLabel())
                     ->multiple(),
                 TernaryFilter::make('can_login')
-                    ->label(__('filament-resources.user.filter_access_enabled'))
-                    ->placeholder(__('filament-resources.user.filter_access_enabled_all'))
-                    ->trueLabel(__('filament-resources.user.filter_access_enabled_enabled'))
-                    ->falseLabel(__('filament-resources.user.filter_access_enabled_disabled')),
+                    ->label(__('filament-resources.user.filter_access'))
+                    ->placeholder(fn (): string => __('filament-resources.user.filter_access_all', [
+                        'count' => static::countUsers(),
+                    ]))
+                    ->trueLabel(fn (): string => __('filament-resources.user.filter_access_with_access', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->where('can_login', true)),
+                    ]))
+                    ->falseLabel(fn (): string => __('filament-resources.user.filter_access_virtual', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->where('can_login', false)),
+                    ]))
+                    ->indicateUsing(fn (array $state): array => match (blank($state['value'] ?? null) ? null : (bool) $state['value']) {
+                        true => [Indicator::make(__('filament-resources.user.filter_access_indicator_with_access'))],
+                        false => [Indicator::make(__('filament-resources.user.filter_access_indicator_virtual'))],
+                        null => [],
+                    }),
+                TernaryFilter::make('email_verified_at')
+                    ->label(__('filament-resources.user.filter_email_verified'))
+                    ->placeholder(fn (): string => __('filament-resources.user.filter_all', [
+                        'count' => static::countUsers(),
+                    ]))
+                    ->trueLabel(fn (): string => __('filament-resources.user.filter_email_verified_yes', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->whereNotNull('email_verified_at')),
+                    ]))
+                    ->falseLabel(fn (): string => __('filament-resources.user.filter_email_verified_no', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->whereNull('email_verified_at')),
+                    ]))
+                    ->nullable()
+                    ->indicateUsing(fn (array $state): array => match (blank($state['value'] ?? null) ? null : (bool) $state['value']) {
+                        true => [Indicator::make(__('filament-resources.user.filter_email_verified_indicator_yes'))],
+                        false => [Indicator::make(__('filament-resources.user.filter_email_verified_indicator_no'))],
+                        null => [],
+                    }),
+                TernaryFilter::make('two_factor_authentication')
+                    ->label(__('filament-resources.user.filter_two_factor_authentication'))
+                    ->placeholder(fn (): string => __('filament-resources.user.filter_all', [
+                        'count' => static::countUsers(),
+                    ]))
+                    ->trueLabel(fn (): string => __('filament-resources.user.filter_two_factor_authentication_yes', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->whereNotNull('app_authentication_secret')),
+                    ]))
+                    ->falseLabel(fn (): string => __('filament-resources.user.filter_two_factor_authentication_no', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->whereNull('app_authentication_secret')),
+                    ]))
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNotNull('app_authentication_secret'),
+                        false: fn (Builder $query): Builder => $query->whereNull('app_authentication_secret'),
+                    )
+                    ->indicateUsing(fn (array $state): array => match (blank($state['value'] ?? null) ? null : (bool) $state['value']) {
+                        true => [Indicator::make(__('filament-resources.user.filter_two_factor_authentication_indicator_yes'))],
+                        false => [Indicator::make(__('filament-resources.user.filter_two_factor_authentication_indicator_no'))],
+                        null => [],
+                    }),
             ])
             ->recordActions([
                 ResendInvitationAction::make(),
@@ -297,6 +377,18 @@ class UserResource extends Resource
             ManageUserAssignments::class,
             ManageUserPublicationRequests::class,
         ]);
+    }
+
+    /**
+     * Count the users listed in the table, optionally only those matching the given constraint.
+     *
+     * @param  (Closure(Builder): Builder)|null  $constraint
+     */
+    public static function countUsers(?Closure $constraint = null): int
+    {
+        return static::getEloquentQuery()
+            ->when($constraint, $constraint)
+            ->count();
     }
 
     public static function getPages(): array

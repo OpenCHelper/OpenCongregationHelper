@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Users**: the **Access enabled?** filter of the list is now **Access**, with the options **With access** and
+  **Virtual**, and the new **Email verified** and **Two-factor authentication** filters show the users who have (or
+  have not) verified their email or set up two-factor authentication; each option shows how many users it matches
+  ([#94](https://github.com/OpenCHelper/OpenCongregationHelper/pull/94)).
+- **Users**: on phones the list shows each user as a card, with picture, name, email and access plus the enabled
+  columns; the role and whether the email has been verified are hidden by default, like the new two-factor
+  authentication column, and access (now a key icon) can be hidden too, all from the columns button
+  ([#94](https://github.com/OpenCHelper/OpenCongregationHelper/pull/94)).
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 - **Shared assignment page**: no sidebar any more, the assignment dates are shown in the language of the page and in
