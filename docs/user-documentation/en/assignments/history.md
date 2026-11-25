@@ -32,7 +32,9 @@ The number of territories still out for an ended campaign also appears in red ne
 
 ## Filters
 
-By default only the assignments **in progress** are shown. Open the filters to change it:
+By default only the assignments **in progress** are shown, also in the tabs of a territory, a user and a campaign: to
+see the returned ones too, open the filters and choose *All statuses*. The number next to these tabs counts all the
+assignments, returned ones included. The filters are:
 
 - **Assignment Status**: *All statuses*, *Returned* or *In progress*;
 - **My assignments only**: only the territories assigned to you;
@@ -52,12 +54,16 @@ Click a row to open the assignment. The page shows:
 If the campaign of the assignment has ended, or ends within 7 days, a banner at the top of the page says so and
 reminds to return the territory. If your role allows it, **End Assignment** in the banner returns it right away.
 
+If the assignee has asked to return the territory (see [Assigning and returning](assigning#return-requests)), a banner
+says when: **End Assignment** in the banner returns it, if your role allows it. The assignee asks it with
+**Ask to return** at the top of the page, offered until they have asked.
+
 From the **Actions** menu you can share the assignment with a public link (see [Sharing an assignment](sharing)).
 
 ## Correcting an assignment
 
-Click **Edit** on a row to change the territory, the assignee, the campaign, the start and end dates, the notes or who
-created it. Setting the **End Date** returns the territory.
+Click **Edit** on a row to change the **Start Date**, the **End Date** or the notes: the territory, the assignee, the
+campaign and who created the assignment are shown but cannot be changed. Setting the **End Date** returns the territory.
 
 ![Editing an assignment](/docs/user-documentation/en/assignments/assets/assignment-edit.webp)
 

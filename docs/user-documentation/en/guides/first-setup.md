@@ -28,18 +28,19 @@ Then [draw the map](../territories/maps) of each territory, or attach a scan of 
 
 > 💡 **Tip:** check the **Map State** filter of the territories list to find the territories that still lack a map.
 
-## 4. Copy the current situation
-
-For each territory that is currently out, [assign it](../assignments/assigning) to the right person. Use
-**Assignments → New assignment** if you also want to record the real start date or past assignments from the paper
-register.
-
-## 5. Create the roles and the users
+## 4. Create the roles and the users
 
 1. Create the [roles](../administration/roles) you need, e.g. *publisher* and *territory servant*.
 2. Create the [users](../administration/users): give **Allow access** and a role to those who will use the application,
    create everybody else as virtual users.
 3. [Impersonate](../administration/users) a user of each role to check what they see.
+
+## 5. Copy the current situation
+
+For each territory that is currently out, [assign it](../assignments/assigning) to the right person. Use
+**Assignments → New assignment** if you also want to record the real start date or past assignments from the paper
+register. The people who can log in are notified of each assignment in progress, not of the ones recorded as
+already returned.
 
 ## 6. Organize with tags
 

@@ -23,8 +23,9 @@ the street names, and use the **full screen** button to see it better on a smart
 
 ## Returning a territory
 
-When you have finished, tell the person who manages the territories, or click **End Assignment** in the territory page
-if your role allows it.
+When you have finished, open the page of the assignment (e.g. from its notification), click **Ask to return** and
+confirm: the territory department is notified and closes the assignment. If your role allows it, you can instead click
+**End Assignment** in the territory page.
 
 If the territory was assigned to you for a campaign that has ended, or ends within 7 days, the page of the assignment
 shows a reminder to return it.
@@ -36,5 +37,6 @@ emergency contact.
 
 ## Using it on the smartphone
 
-The application works in the browser of your phone: open its address, log in and use the bottom bar to move between
-the pages. You can add it to the home screen from the browser menu to open it like an app.
+The application works in the browser of your phone: open its address, log in and use the bottom bar to move between the
+pages. The lists show each record as a card. You can add it to the home screen from the browser menu to open it like an
+app.
