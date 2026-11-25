@@ -38,3 +38,24 @@ test('users can be sorted by role', function () {
         ->sortTable('roles.name', 'desc')
         ->assertCanSeeTableRecords([$viewer, $editorAndViewer, $admin], inOrder: true);
 });
+
+test('users can be grouped by access with a badge count on each tab', function () {
+    $userWithAccess = User::factory()->create();
+    $virtualUsers = User::factory()->virtual()->count(2)->create();
+
+    $component = Livewire::test(ListUsers::class);
+
+    $tabs = $component->instance()->getTabs();
+    expect($tabs['all']->getBadge())->toBe(5)
+        ->and($tabs['with_access']->getBadge())->toBe(3)
+        ->and($tabs['virtual']->getBadge())->toBe(2);
+
+    $component
+        ->assertCanSeeTableRecords([$userWithAccess, ...$virtualUsers])
+        ->set('activeTab', 'with_access')
+        ->assertCanSeeTableRecords([$this->manager, $userWithAccess])
+        ->assertCanNotSeeTableRecords($virtualUsers)
+        ->set('activeTab', 'virtual')
+        ->assertCanSeeTableRecords($virtualUsers)
+        ->assertCanNotSeeTableRecords([$this->manager, $userWithAccess]);
+});

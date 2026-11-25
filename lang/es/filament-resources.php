@@ -405,6 +405,9 @@ return [
         'filter_access_enabled_all' => 'Todos',
         'filter_access_enabled_enabled' => 'Habilitado',
         'filter_access_enabled_disabled' => 'Deshabilitado',
+        'tab_all' => 'Todos',
+        'tab_with_access' => 'Con acceso',
+        'tab_virtual' => 'Virtuales',
     ],
     'shared_resource' => [
         'details_title' => 'Detalles de :resourceType',
