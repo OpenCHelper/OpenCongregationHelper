@@ -5,9 +5,20 @@ namespace App\Observers;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Support\MapCenter;
+use Illuminate\Support\Facades\Auth;
 
 class TerritoryObserver
 {
+    /**
+     * Handle the Territory "creating" event.
+     */
+    public function creating(Territory $territory): void
+    {
+        if (! $territory->created_by && Auth::check()) {
+            $territory->created_by = Auth::id();
+        }
+    }
+
     /**
      * Handle the Territory "created" event.
      */

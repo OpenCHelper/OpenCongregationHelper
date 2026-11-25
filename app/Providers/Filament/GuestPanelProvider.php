@@ -31,7 +31,7 @@ class GuestPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->themeSwitcher(false)
-            // The panel only serves the shared pages: no dashboard nor navigation that would expose it to anyone
+            // The panel only hosts the pages opened from share links: a sidebar would have nothing useful to offer
             ->navigation(false)
             ->homeUrl('/')
             // ->resources([
