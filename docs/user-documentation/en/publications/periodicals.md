@@ -44,12 +44,12 @@ again).
 
 ![Publication list](/docs/user-documentation/en/publications/assets/publications.webp)
 
-1. Click **New** and enter the **Name** in your language (e.g. *Enjoy Life Forever!*): you can also enter it in the
+1. Click **New Publication** and enter the **Name** in your language (e.g. *Enjoy Life Forever!*): you can also enter it in the
    other languages, otherwise they show it as you wrote it.
 2. Choose the **Category**, as in the Watchtower Online Library: *Bibles*, *Watchtower*, *Awake!*, *Meeting Workbooks*,
    *Books*, *Brochures and Booklets*, *Tracts*, *Indexes*, *Programs*, *Manuals and Guidelines*, *DVD* or *Other*.
 3. Enter its **Code** (e.g. `lff`): it is required, the same in every language and shown in the header of its column.
-4. For the publications received regularly, turn on **Received regularly** and enter every how many months it **Renews**
+4. For the publications received regularly, turn on **Received regularly** and enter in **Renews every** how many months
    (e.g. 1 for *The Watchtower*, 2 for the *Meeting Workbook*); leave it off for the ones requested once (e.g. a book).
 5. Click **Create**: a publication that renews gets its own column in the regular publications; all of them can be
    [requested](requests).

@@ -22,7 +22,7 @@ oppure solo quelli **Disponibili** o **Esauriti**.
 3. In **Quantità**, scegli un **Deposito** e inserisci il numero di **Copie**. Clicca **Aggiungi deposito** per aggiungere le
    copie conservate in un altro posto. Per creare al volo un nuovo deposito, clicca **+** accanto al campo.
 4. Se vuoi, carica un'**Immagine** del poster per riconoscerlo a colpo d'occhio.
-5. Clicca **Crea** (o **Salva**).
+5. Clicca **Salva**.
 
 ![Modifica di un poster](/docs/user-documentation/it/public-witnessing/assets/poster-form.webp)
 

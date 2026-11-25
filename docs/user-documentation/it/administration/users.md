@@ -17,9 +17,10 @@ colonna dell'accesso.
 Sul telefono, ogni utente è mostrato come una scheda con immagine, nome, email e accesso, più le colonne scelte con il
 pulsante delle colonne; l'elenco si può ordinare dal menu **Ordina per**.
 
-Il filtro **Accesso** mostra solo gli utenti con accesso o solo gli utenti virtuali, e quanti sono gli uni e gli altri.
-I filtri **Email verificata** e **Autenticazione a due fattori** mostrano solo gli utenti che hanno (o non hanno)
-verificato l'email o attivato l'autenticazione a due fattori.
+Il filtro **Reparto** mostra solo i membri dei [reparti](departments) scelti. Il filtro **Accesso** mostra solo gli
+utenti con accesso o solo gli utenti virtuali, e quanti sono gli uni e gli altri. I filtri **Email verificata** e
+**Autenticazione a due fattori** mostrano solo gli utenti che hanno (o non hanno) verificato l'email o attivato
+l'autenticazione a due fattori.
 
 ## Utenti e utenti virtuali
 
@@ -34,7 +35,7 @@ Non tutti quelli che lavorano i territori devono usare l'applicazione:
 1. Clicca **Nuovo**.
 2. Compila **Nome**, **Cognome** ed **Email**.
 3. Per permettere alla persona di accedere, spunta **Permetti accesso** e scegli i **Ruoli**.
-4. Clicca **Crea**: se hai permesso l'accesso, la persona riceve un'email con un link per scegliere la sua password.
+4. Clicca **Salva**: se hai permesso l'accesso, la persona riceve un'email con un link per scegliere la sua password.
 
 ![Nuovo utente](/docs/user-documentation/it/administration/assets/user-create.webp)
 
@@ -61,7 +62,9 @@ Clicca un utente per aprirne la pagina:
 - la scheda **Utente** mostra i suoi dati e le sue **Informazioni di contatto** (es. i contatti di emergenza), che puoi
   aggiungere, modificare o eliminare anche da qui (un utente ha un solo **Contatto principale**). **Chiama** e
   **Apri in Maps** avviano una telefonata o aprono l'indirizzo;
-- la scheda **Assegnazioni** elenca i territori assegnati all'utente.
+- la scheda **Assegnazioni** elenca i territori assegnati all'utente;
+- la scheda **Richieste pubblicazioni** elenca le [pubblicazioni che ha richiesto](../publications/requests), con il
+  numero di quelle in attesa accanto. È mostrata solo a chi può vedere le richieste.
 
 In fondo alla scheda **Utente**, **Statistiche** mostra le **Zone preferite** (ogni zona in cui il proclamatore ha
 preso territori, con il numero di assegnazioni e la loro percentuale) e i **Territori preferiti** (i 5 che prende più
@@ -114,4 +117,4 @@ L'utente root è il primo utente, creato durante l'installazione. Per evitare di
 
 - non può mai essere eliminato (viene escluso dall'eliminazione di massa) né impersonato;
 - al di fuori dell'ambiente di produzione, non se ne possono modificare email, password, accesso e ruoli, e il suo
-  pulsante **Modifica** è disabilitato.
+  pulsante **Modifica** è disabilitato (tranne che per l'utente root stesso).

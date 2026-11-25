@@ -15,21 +15,25 @@ Apri **Amministrazione → Ruoli** per gestirli.
 Il ruolo **super_admin** (*Super Admin*) può fare tutto, comprese le azioni riservate a lui:
 
 - assegnare i ruoli agli utenti;
-- impersonare gli utenti.
+- impersonare gli utenti;
+- modificare le [impostazioni](settings);
+- leggere i log.
 
 ## Creare o modificare un ruolo
 
 1. Clicca **Nuovo** (o **Modifica** su un ruolo esistente).
-2. Inserisci il **Nome** (es. `publisher`). Lascia **Guard Name** impostato su `web`.
-3. Spunta i permessi nelle schede **Risorse** e **Pagine**. **Seleziona tutto** in ogni riquadro spunta tutti i
+2. Inserisci il **Nome** (es. `publisher`). Lascia **Nome Guard** impostato su `web`.
+3. Spunta i permessi nelle schede **Resources** e **Pages**. **Seleziona tutto** in ogni riquadro spunta tutti i
    permessi di quella risorsa; l'interruttore in alto li seleziona tutti.
-4. Clicca **Salva modifiche**.
+4. Clicca **Salva**.
 
 ![Modifica di un ruolo](/docs/user-documentation/it/administration/assets/role-edit.webp)
 
 ## Significato dei permessi
 
-Per ogni risorsa (Territorio, Zona, Assegnazione, Campagna, Utente, Ruolo, …) esistono gli stessi permessi:
+Per la maggior parte delle risorse (Territorio, Zona, Assegnazione, Campagna, Utente, …) esistono gli stessi permessi
+(*Reparto* ha solo **View Any**, **View** e **Update**, *Ruolo* solo **View Any**, **View**, **Create**, **Update** e
+**Delete**):
 
 | Permesso | Permette di |
 |----------|-------------|
@@ -45,7 +49,7 @@ Alcuni permessi hanno un significato particolare:
 - senza **View Any** su *Territory Assignment*, l'utente vede solo **le proprie** assegnazioni;
 - **View Any** su *Territory* mostra le statistiche, la copertura del territorio e la mappa nella
   [dashboard](../basics/dashboard);
-- la scheda *Pagine* controlla, ad esempio, l'accesso alla pagina del profilo.
+- la scheda *Pages* controlla, ad esempio, l'accesso alla pagina del profilo.
 
 ## Ruoli consigliati
 
