@@ -14,7 +14,6 @@ use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
-use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -31,7 +30,6 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Activitylog\LogOptions;
@@ -40,7 +38,7 @@ use Spatie\Permission\Traits\HasRoles;
 use STS\FilamentImpersonate\Facades\Impersonation;
 
 #[ObservedBy([UserObserver::class])]
-class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasLocalePreference, HasName, HasTenants, MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasLocalePreference, HasName, MustVerifyEmail
 {
     use HasApiTokens;
 
@@ -50,7 +48,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     use HasProfilePhoto;
     use HasPushSubscriptions;
     use HasRoles;
-    use HasTeams;
     use InteractsWithAppAuthentication;
     use InteractsWithAppAuthenticationRecovery;
     use LogsActivity;
@@ -254,16 +251,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function canBeImpersonated(): bool
     {
         return ! $this->isRootUser();
-    }
-
-    public function getTenants(Panel $panel): Collection
-    {
-        return $this->allTeams();
-    }
-
-    public function canAccessTenant(Model $tenant): bool
-    {
-        return $this->belongsToTeam($tenant);
     }
 
     public function isVirtual(): bool

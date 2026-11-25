@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\URL;
 use Laravel\Fortify\Features;
 use Laravel\Jetstream\Http\Livewire\UpdateProfileInformationForm;
 use Livewire\Livewire;
@@ -174,10 +173,4 @@ test('changing the email from the profile sends a verification link of the panel
 
         return true;
     });
-});
-
-test('a user with an unverified email following a team invitation is sent to the verification of the panel', function () {
-    $this->actingAs(User::factory()->create())
-        ->get(URL::signedRoute('team-invitations.accept', ['invitation' => 1]))
-        ->assertRedirect(Filament::getPanel('app')->getEmailVerificationPromptUrl());
 });
