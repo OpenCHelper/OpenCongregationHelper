@@ -4,6 +4,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use Composer\InstalledVersions;
 use Filament\Facades\Filament;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\FilamentInfoWidget;
@@ -21,7 +22,7 @@ test('the guest panel has no dashboard nor widgets', function () {
         ->and($panel->hasNavigation())->toBeFalse();
 });
 
-test('the shared pages of the guest panel do not show the Filament version', function () {
+test('the public pages of the guest panel do not show the Filament version', function () {
     $this->withoutVite();
     Notification::fake();
 
@@ -33,8 +34,14 @@ test('the shared pages of the guest panel do not show the Filament version', fun
         'ended_at' => null,
     ]);
 
-    $this->get('/guest/shared-assignment/'.$assignment->share()->uid)
-        ->assertOk()
-        ->assertDontSee('filament.io')
-        ->assertDontSee('fi-wi-filament-info');
+    $filamentVersion = InstalledVersions::getPrettyVersion('filament/filament');
+
+    foreach (['/guest', '/guest/shared-assignment/'.$assignment->share()->uid] as $url) {
+        $this->followingRedirects()
+            ->get($url)
+            ->assertOk()
+            ->assertDontSee('fi-filament-info-widget')
+            ->assertDontSee('filamentphp.com')
+            ->assertDontSee($filamentVersion);
+    }
 });
