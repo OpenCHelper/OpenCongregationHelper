@@ -63,7 +63,7 @@ return [
             'root_required' => 'Conferma prima l\'indirizzo email dell\'utente root, così che non possa restare bloccato fuori.',
         ],
         'password_leak_check' => [
-            'label' => 'Rifiuta le password trapelate',
+            'label' => 'Rifiuta le password compromesse',
             'helper' => 'Le password scelte dagli utenti vengono verificate nelle fughe di dati note di Have I Been Pwned, che riceve solo i primi caratteri del loro hash: una password trovata lì viene rifiutata. Se il servizio non è raggiungibile, la password viene accettata.',
             'enabled' => 'Attivo',
             'disabled' => 'Disattivo',
