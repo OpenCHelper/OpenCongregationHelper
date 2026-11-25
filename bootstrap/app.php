@@ -29,9 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
             Laravel to trust the proxy and allow URLs to be generated with
             the HTTPS scheme.
 
-            The address of the proxy is not known, so every peer is trusted
-            and any client can send these headers: only the ones the
-            application needs are honoured.
+            The address of the proxy is not known there, so by default every
+            peer is trusted and any client can send these headers: only the
+            ones the application needs are honoured. Installations that know
+            the address of their proxy, or have none, restrict it with
+            `TRUSTED_PROXIES` (see `config/trustedproxy.php`).
             - `X-Forwarded-Proto` keeps the HTTPS scheme (GH36); the host
               and port still come from the `Host` header, so no `:80` is
               added to the URLs.
@@ -40,7 +42,9 @@ return Application::configure(basePath: dirname(__DIR__))
               user in the same login throttling bucket. The right-most
               address is used, so an address prepended by the client is
               ignored as long as the proxy appends the one it received the
-              request from.
+              request from. When every peer is trusted a client can still
+              pick any address: the login is also throttled per email (see
+              `App\Filament\Pages\Auth\Login`).
             - `X-Forwarded-Host`, `-Port` and `-Prefix` are NOT trusted:
               they would let a client choose the host of every generated
               URL, including the password reset links sent by email.
@@ -52,7 +56,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(SetSecurityHeaders::class);
 
         $middleware->trustProxies(
-            at: '*',
             headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO,
         );
     })

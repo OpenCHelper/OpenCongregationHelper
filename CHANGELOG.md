@@ -99,6 +99,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#80](https://github.com/OpenCHelper/OpenCongregationHelper/pull/80)).
 - Updated the libraries used for passkeys and for CSV imports and exports, which had known vulnerabilities (forged
   passkey attestations, and memory exhaustion while reading a crafted CSV file).
+- **Login**: after 10 failed attempts for the same email (wrong password or two-factor code) the login with that email
+  is blocked for 15 minutes, whatever the device or network it comes from: changing the IP address on each attempt no
+  longer allows guessing a password indefinitely. The new `TRUSTED_PROXIES` setting lists the addresses of the proxies
+  in front of the app (by default `*`, any address, as Altervista needs): set it to the address of your proxy, or leave
+  it empty if there is none, so that visitors can no longer pass themselves off as another IP address.
 
 ## [1.0.0-alpha15] - 2026-11-24
 
