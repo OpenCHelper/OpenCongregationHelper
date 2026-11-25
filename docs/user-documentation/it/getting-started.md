@@ -32,7 +32,9 @@ sta lavorando, da quando e quali sono stati percorsi. Funziona nel browser, anch
 - **Nozioni di base**: accesso, interfaccia, dashboard, profilo e notifiche.
 - **Territori**: consultare, creare, mappare e importare i territori, e organizzarli in zone.
 - **Assegnazioni**: assegnare e riconsegnare i territori, lo storico, la condivisione delle assegnazioni e le campagne.
-- **Amministrazione**: utenti, ruoli e permessi, e tag.
+- **Testimonianza pubblica**: i poster e i depositi in cui sono conservati.
+- **Pubblicazioni**: le pubblicazioni periodiche e le richieste di pubblicazioni dei proclamatori.
+- **Amministrazione**: utenti, ruoli e permessi, reparti, tag e impostazioni.
 - **Guide**: procedure passo passo per le attività più comuni.
 
 > 💡 **Suggerimento:** mentre usi l'applicazione, il pulsante **Aiuto** nella barra in alto (dove disponibile) apre la

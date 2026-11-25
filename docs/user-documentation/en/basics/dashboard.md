@@ -17,7 +17,7 @@ only shows a welcome message: ask an administrator if you need access.
 
 - **Territories**: the total number of territories.
 - **Average monthly assignment duration**: how many days, on average, a territory stayed out before being returned,
-  calculated on the assignments started in the last 365 days. The small chart shows how the average changed month by
+  calculated on the assignments returned in the last 365 days. The small chart shows how the average changed month by
   month.
 
 The statistics refresh automatically every few seconds.
@@ -29,7 +29,7 @@ months**, 12 by default: the super administrators can change them in the
 [Settings](../administration/settings#territories)). The selection is remembered while you stay logged in.
 
 - **Territories worked at least once**: the percentage and the number of territories with at least one assignment in
-  the period, e.g. *97% (240 of 243)*: an assignment **returned** in the period, or still **in progress**. The
+  the period, e.g. *98.7% (240 of 243)*: an assignment **returned** in the period, or still **in progress**. The
   percentage is rounded down, so 100% means that every territory was worked.
 - **Excluding campaigns**: the same figure, counting only the assignments that are not part of a campaign.
 - **Never worked or not worked for the longest time**: the 5 territories never assigned, then those returned the
@@ -60,8 +60,8 @@ be chosen.
 Under the map, the **legend** lists the colors with the number of territories of each one.
 
 - Use **+** and **−** (or the mouse wheel) to zoom, and drag to move around.
-- Hover a territory to see its name, and click it to see its zone, its status and a link to its page (if you can
-  view the territories).
+- Hover a territory to see its name, and click it to see its zone, what its color means (with **Assignment
+  frequency**, also how many times it was assigned) and a **Go to territory** link to its page.
 - The **full screen** button enlarges the map to the whole screen.
 - The **layers** button (top right) lets you:
   - choose the **base map**: *Street Map* (OpenStreetMap), *Google Streets*, *Google Satellite* or *Google Hybrid*;

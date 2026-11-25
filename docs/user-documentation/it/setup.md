@@ -66,7 +66,7 @@ precedente.
 | `APP_LOCALE` | Lingua predefinita (`en`, `it` o `es`). Ogni utente può poi scegliere la propria lingua. |
 | `APP_TIMEZONE` | Fuso orario usato per mostrare le date, e in cui si contano il giorno e l'ora dei promemoria settimanali (vedi le pagine [Impostazioni](administration/settings)) e l'ora del rinnovo giornaliero delle pubblicazioni (alle 9:00). |
 | `DB_PREFIX` / `DB_ENGINE` | Prefisso delle tabelle e motore di archiviazione, facoltativi, utili sui database condivisi: `db:wipe` e `migrate:fresh` eliminano allora solo le tabelle con questo prefisso. |
-| `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Nome (nome e cognome separati da uno spazio), email e password dell'utente **root**, creato la prima volta che il database viene popolato. La password segue le stesse regole delle password scelte dagli utenti (vedi `PASSWORD_LEAK_CHECK`): `och:install` e `och:recover-root` rifiutano una password che non le rispetta, oppure ne chiedono un'altra se eseguiti da terminale. |
+| `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Nome (nome e cognome separati da uno spazio), email e password dell'utente **root**, creato da `och:install` quando il database non ha ancora utenti. La password segue le stesse regole delle password scelte dagli utenti (vedi `PASSWORD_LEAK_CHECK`): `och:install` e `och:recover-root` rifiutano una password che non le rispetta, oppure ne chiedono un'altra se eseguiti da terminale. |
 | `PASSWORD_LEAK_CHECK` | Quando `APP_ENV` è `production`, le password devono avere almeno 12 caratteri (8 altrove). Se è `true`, non devono nemmeno comparire in fughe di dati note: vengono verificate con [Have I Been Pwned](https://haveibeenpwned.com/Passwords), inviando ad `api.pwnedpasswords.com` solo i primi 5 caratteri del loro hash SHA-1. Se il servizio non risponde entro 5 secondi la password viene accettata. Predefinito: `true` in produzione (impostala a `false` sui server che non possono raggiungere il servizio) e `false` altrove. I super amministratori possono cambiarla dalle [impostazioni di sicurezza](administration/settings#sicurezza). |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Come vengono inviate le email. `failover` prova prima la funzione nativa `mail()` di PHP e in caso di errore scrive l'email nel log. |
 | `QUEUE_CONNECTION` | `database` (consigliato in produzione) o `sync` (le email vengono inviate subito, durante la richiesta). |
@@ -74,7 +74,8 @@ precedente.
 | `ENABLE_SHARED_PII` | Se `true`, la pagina pubblica di un'assegnazione condivisa mostra anche il nome dell'assegnatario e le note del territorio. Predefinito: `false`. |
 | `GUEST_ALLOW_RETURNING_ASSIGNMENT` | Se `true`, chi apre la pagina pubblica di un'assegnazione condivisa può chiedere al reparto territori di chiuderla (come può fare l'assegnatario dall'applicazione). Predefinito: `false`. |
 | `DEMO_PREFILL_LOGIN_CREDENTIALS` | **Solo per installazioni dimostrative**, con dati fittizi: se `true`, la pagina di accesso è precompilata con le credenziali dell'utente **root**, quindi chiunque può accedere come root. Non attivarla mai su un'installazione con dati reali. Sempre ignorata quando `APP_ENV` è `production`. Predefinito: `false`. |
-| `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | File usati per mostrare il branch e il commit Git nella barra laterale sui server senza `git`. |
+| `TRUSTED_PROXIES` | Indirizzi (o intervalli CIDR, separati da virgole) dei reverse proxy davanti all'applicazione, di cui ci si fida per le intestazioni `X-Forwarded-For` e `X-Forwarded-Proto`. Predefinito: `*` (qualsiasi peer, necessario quando l'indirizzo del proxy non è noto, es. su Altervista); lasciala vuota quando l'applicazione è raggiunta direttamente, senza proxy. |
+| `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | File da cui vengono letti il branch e il commit Git (di default `.git/HEAD` e `.git/refs/heads/<branch>`), mostrati in **Informazioni** nel menu utente fuori da `production`. Utili sui server senza la cartella `.git`. |
 
 ## Installazione
 
@@ -145,8 +146,8 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 
 ## Attività pianificate ed email
 
-Le email di notifica vengono messe in coda e un'attività settimanale invia i promemoria per i territori fuori da molto
-tempo. Entrambe richiedono qualcosa che venga eseguito periodicamente:
+Le email di notifica vengono messe in coda, un'attività settimanale invia i promemoria per i territori fuori da molto
+tempo e una giornaliera rinnova le pubblicazioni periodiche. Richiedono qualcosa che venga eseguito periodicamente:
 
 - **Con accesso alla shell**, avvia il worker della coda (`php artisan queue:work`) e lo scheduler di Laravel, dal
   crontab (`* * * * * php /percorso/di/artisan schedule:run`) o come processo sempre attivo
@@ -209,5 +210,6 @@ internet in HTTPS, con un certificato valido.
 
 ## Ambienti
 
-Negli ambienti diversi da `production` (es. `local`, `nightly`, `staging`) i super amministratori vedono un bordo
-colorato e un'etichetta con il nome dell'ambiente, così da non confondere un'installazione di prova con quella reale.
+I super amministratori vedono un bordo colorato e un'etichetta con il nome dell'ambiente (`APP_ENV`): rossi in
+`production`, di altri colori altrove (es. `local`, `nightly`, `staging`), così da non confondere un'installazione di
+prova con quella reale.
