@@ -61,6 +61,17 @@
 }
 
 /*
+   ------------ Columns without a label in stacked tables ------------
+
+   On phones, tables stacked with `stackedOnMobile()` show the label of each column above its value: columns whose
+   values speak for themselves (e.g. badges) hide it with this class, added with `extraCellAttributes()` (see
+   `UserResource::table()`).
+*/
+.fi-ta-table-stacked-on-mobile > tbody > tr > td.fi-ta-cell-without-stacked-label > .fi-ta-cell-label {
+    display: none;
+}
+
+/*
    ------------ Assignments of an ended (or ending) campaign ------------
 
    Accent border on the left of the assignments still in progress whose campaign has ended (or is about to end).

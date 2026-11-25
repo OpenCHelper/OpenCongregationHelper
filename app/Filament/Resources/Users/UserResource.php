@@ -234,6 +234,8 @@ class UserResource extends Resource
                     ->color(fn (DepartmentKey $state): string => $state->getColor())
                     ->badge()
                     ->listWithLineBreaks()
+                    // The badges speak for themselves: no label above them in the cards shown on phones
+                    ->extraCellAttributes(['class' => 'fi-ta-cell-without-stacked-label'])
                     ->toggleable(),
                 IconColumn::make('email_verified_at')
                     ->label(__('filament-resources.user.column_email_verified'))
