@@ -398,7 +398,7 @@ return [
         'column_role' => 'Rol',
         'column_email_verified' => 'Correo verificado',
         'column_two_factor_authentication' => 'Autenticación de dos factores',
-        'column_two_factor_authentication_short' => '2FA',
+        'column_two_factor_authentication_short' => '2FA activada',
         'column_access_enabled' => 'Acceso habilitado',
         'access_enabled_tooltip' => 'Puede acceder',
         'access_disabled_tooltip' => 'Usuario virtual: no puede acceder',

@@ -397,7 +397,7 @@ return [
         'column_role' => 'Role',
         'column_email_verified' => 'Email verified',
         'column_two_factor_authentication' => 'Two-factor authentication',
-        'column_two_factor_authentication_short' => '2FA',
+        'column_two_factor_authentication_short' => '2FA enabled',
         'column_access_enabled' => 'Access enabled',
         'access_enabled_tooltip' => 'Can log in',
         'access_disabled_tooltip' => 'Virtual user: cannot log in',
