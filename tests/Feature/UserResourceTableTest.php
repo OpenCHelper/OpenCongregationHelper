@@ -66,6 +66,7 @@ test('secondary columns are hidden by default', function () {
     Livewire::test(ListUsers::class)
         ->assertCanRenderTableColumn('departments')
         ->assertCanRenderTableColumn('can_login')
+        ->tap(fn ($component) => expect($component->instance()->getTable()->getColumn('can_login')->isToggleable())->toBeTrue())
         ->assertCanNotRenderTableColumn('roles.name')
         ->assertCanNotRenderTableColumn('email_verified_at')
         ->assertCanNotRenderTableColumn('two_factor_authentication')

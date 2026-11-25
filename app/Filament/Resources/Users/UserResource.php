@@ -256,6 +256,7 @@ class UserResource extends Resource
                     ->tooltip(fn (bool $state): string => $state
                         ? __('filament-resources.user.access_enabled_tooltip')
                         : __('filament-resources.user.access_disabled_tooltip'))
+                    ->toggleable()
                     ->sortable()
                     ->visibleFrom('sm'),
                 TextColumn::make('created_at')

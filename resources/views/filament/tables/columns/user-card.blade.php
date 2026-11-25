@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        @if ($accessColumn = $table->getColumn('can_login'))
+        @if (($accessColumn = $table->getColumn('can_login')) && ! $livewire->isTableColumnToggledHidden('can_login'))
             <div class="shrink-0">{{ $accessColumn->record($record) }}</div>
         @endif
     </div>
