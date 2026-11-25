@@ -67,3 +67,20 @@ test('each slice of the assignment status chart has its own color', function () 
         ->and(array_unique($dataset['backgroundColor']))->toHaveCount(3)
         ->and($dataset['backgroundColor'])->toHaveCount(count($dataset['data']));
 });
+
+test('soft-deleted territories are left out of every slice', function () {
+    $campaign = Campaign::factory()->create(['valid_until' => null]);
+    [$deleted, $worked] = Territory::factory()->count(2)->for(TerritoryZone::factory(), 'territoryZone')->create();
+
+    foreach ([$deleted, $worked] as $territory) {
+        TerritoryAssignment::factory()->create([
+            'territory_id' => $territory->id,
+            'assignee_id' => 1,
+            'campaign_id' => $campaign->id,
+            'ended_at' => now(),
+        ]);
+    }
+    $deleted->delete();
+
+    expect(campaignChartData($campaign))->toBe([0, 0, 1]);
+});
