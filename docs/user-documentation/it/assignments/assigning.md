@@ -19,7 +19,8 @@ l'assegnazione, che resta nello storico del territorio.
 
 ![Assegnare un territorio](/docs/user-documentation/it/assignments/assets/assign-modal.webp)
 
-L'assegnatario riceve una notifica e un'email, e il territorio risulta fuori nell'elenco dei territori.
+L'assegnatario riceve una notifica e un'email (tranne se è un utente virtuale), e il territorio risulta fuori
+nell'elenco dei territori.
 
 > ℹ️ **Nota:** un territorio può avere una sola assegnazione in corso. **Assegna territorio** compare solo per i
 > territori disponibili: per affidare a qualcun altro un territorio già assegnato, prima riconsegnalo.
@@ -31,7 +32,7 @@ L'assegnatario riceve una notifica e un'email, e il territorio risulta fuori nel
 
 ![Riconsegnare un territorio](/docs/user-documentation/it/assignments/assets/return-modal.webp)
 
-L'assegnazione viene chiusa con la data di oggi e l'assegnatario riceve una notifica.
+L'assegnazione viene chiusa con la data di oggi e l'assegnatario riceve una notifica (tranne se è un utente virtuale).
 
 ## Assegnare o riconsegnare più territori insieme
 
