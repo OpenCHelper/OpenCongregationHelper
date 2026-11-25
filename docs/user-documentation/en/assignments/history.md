@@ -15,7 +15,7 @@ Every assignment, in progress or returned, is kept. You can find them:
 ![Assignments list](/docs/user-documentation/en/assignments/assets/assignments-list.webp)
 
 The table shows the **Territory**, the **Assignee**, the **Started At** and **Ended At** dates (*(in progress)* if not
-returned yet) and the **Campaign**.
+returned yet) and the **Campaign**, which can be hidden with the columns button.
 
 ## Assignments of ended or ending campaigns
 

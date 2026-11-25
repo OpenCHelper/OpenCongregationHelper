@@ -10,9 +10,10 @@ la **Sigla**, il **Titolo** e quante copie sono conservate in ogni deposito (ad 
 
 ![Elenco dei poster](/docs/user-documentation/it/public-witnessing/assets/posters.webp)
 
-La tabella ha una colonna per ogni deposito e una colonna **Totale**, in rosso quando non resta nessuna copia. La riga
-**Riepilogo** in fondo somma le copie dei poster mostrati. Usa i filtri per vedere i poster **Conservato in** un deposito,
-oppure solo quelli **Disponibili** o **Esauriti**.
+La tabella ha una colonna per ogni deposito e una colonna **Totale**, in rosso quando non resta nessuna copia; il
+pulsante delle colonne nasconde i depositi e la **Sigla**. La riga **Riepilogo** in fondo somma le copie dei poster
+mostrati. Usa i filtri per vedere i poster **Conservato in** un deposito, oppure solo quelli **Disponibili** o
+**Esauriti**.
 
 ## Aggiungere o modificare un poster
 

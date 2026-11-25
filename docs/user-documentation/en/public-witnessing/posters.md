@@ -10,9 +10,10 @@ Open **Public Witnessing → Posters** to see the inventory of the magnetic post
 
 ![Posters list](/docs/user-documentation/en/public-witnessing/assets/posters.webp)
 
-The table has a column for each storage place and a **Total** column, red when no copy is left. The **Summary** row at the
-bottom adds up the copies of the posters shown. Use the filters to see the posters **Kept in** a storage place, or only
-the ones that are **Available** or **Out of stock**.
+The table has a column for each storage place and a **Total** column, red when no copy is left; the columns button
+hides the storage places and the **Code**. The **Summary** row at the bottom adds up the copies of the posters shown.
+Use the filters to see the posters **Kept in** a storage place, or only the ones that are **Available** or **Out of
+stock**.
 
 ## Adding or editing a poster
 

@@ -555,7 +555,8 @@ class TerritoryAssignmentResource extends Resource
                     ->iconColor(fn (TerritoryAssignment $record): ?string => static::getCampaignDeadlineColor($record))
                     ->description(fn (TerritoryAssignment $record): ?string => static::getCampaignDeadlineDescription($record))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('creator.full_name')
                     ->label(__('filament-resources.territory_assignment.column_creator'))
                     ->sortable(['first_name', 'last_name'])

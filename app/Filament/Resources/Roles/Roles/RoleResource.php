@@ -114,7 +114,8 @@ class RoleResource extends Resource
                 TextColumn::make('guard_name')
                     ->badge()
                     ->color('warning')
-                    ->label(__('filament-shield::filament-shield.column.guard_name')),
+                    ->label(__('filament-shield::filament-shield.column.guard_name'))
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('team.name')
                     ->default('Global')
                     ->badge()
@@ -129,7 +130,8 @@ class RoleResource extends Resource
                     ->color('primary'),
                 TextColumn::make('updated_at')
                     ->label(__('filament-shield::filament-shield.column.updated_at'))
-                    ->dateTime(),
+                    ->dateTime()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->addTo($table))
             ->filters([

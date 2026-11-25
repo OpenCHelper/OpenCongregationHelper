@@ -11,7 +11,8 @@ or the *Meeting Workbook*), and how many copies. Each one is [requested](request
 
 ![Regular publications](/docs/user-documentation/en/publications/assets/periodicals.webp)
 
-There is a row for each publisher and a column for each publication (**—** when not received), grouped by category.
+There is a row for each publisher and a column for each publication (**—** when not received), grouped by category;
+hide the ones you don't need with the columns button.
 The cards at the top, and the **Summary** row at the bottom, show the **total copies to order** of each publication and
 how many publishers receive it. Use the **Receives** filter to see only who receives a publication: the totals follow
 the filters and the search.

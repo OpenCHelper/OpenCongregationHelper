@@ -27,6 +27,7 @@ test('campaigns can be sorted by creator', function () {
     $createdByAnna = Campaign::factory()->create(['created_by' => $anna->id]);
 
     Livewire::test(ListCampaigns::class)
+        ->toggleAllTableColumns()
         ->sortTable('creator.full_name')
         ->assertCanSeeTableRecords([$createdByAnna, $createdByZoe], inOrder: true)
         ->sortTable('creator.full_name', 'desc')

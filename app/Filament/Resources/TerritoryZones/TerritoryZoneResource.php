@@ -136,7 +136,8 @@ class TerritoryZoneResource extends Resource
                     ->sortable(),
                 SpatieTagsColumn::make('tags')
                     ->label(__('filament-resources.territory_zone.column_tags'))
-                    ->type(TagType::ZONES->value),
+                    ->type(TagType::ZONES->value)
+                    ->toggleable(),
             ])
             ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->fullWidth('tags')->addTo($table))
             ->filters([
