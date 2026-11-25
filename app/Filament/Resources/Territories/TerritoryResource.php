@@ -12,6 +12,7 @@ use App\Filament\Resources\Territories\Pages\ViewTerritory;
 use App\Filament\Resources\TerritoryAssignments\Actions as AssignmentActions;
 use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Campaign;
 use App\Models\Tag;
 use App\Models\Territory;
@@ -617,6 +618,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->fullWidth('tags')->addTo($table))
             ->filters([
                 TrashedFilter::make(),
                 TernaryFilter::make('geojson')

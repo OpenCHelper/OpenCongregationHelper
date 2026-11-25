@@ -7,6 +7,7 @@ use App\Enums\NavigationGroup;
 use App\Filament\Resources\Departments\Pages\ListDepartments;
 use App\Filament\Resources\Departments\Pages\ViewDepartment;
 use App\Filament\Resources\Departments\RelationManagers\MembersRelationManager;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Department;
 use App\Models\User;
 use Filament\Infolists\Components\TextEntry;
@@ -159,7 +160,8 @@ class DepartmentResource extends Resource implements HasKnowledgeBase
                     ->label(__('departments.resource.column_members'))
                     ->icon(Heroicon::OutlinedUsers)
                     ->alignCenter(),
-            ]);
+            ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('key')->except('sections')->addTo($table));
     }
 
     public static function getRelations(): array

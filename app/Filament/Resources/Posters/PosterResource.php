@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Posters;
 use App\Enums\NavigationGroup;
 use App\Filament\Resources\Posters\Pages\ManagePosters;
 use App\Filament\Resources\StorageLocations\StorageLocationResource;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Poster;
 use App\Models\PosterStock;
 use App\Models\StorageLocation;
@@ -197,6 +198,7 @@ class PosterResource extends Resource implements HasKnowledgeBase
                     ))
                     ->summarize(static::sumOfStocks()),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('code', 'title')->aside('image_path')->addTo($table))
             ->filters([
                 SelectFilter::make('location')
                     ->label(__('filament-resources.poster.filter_location'))

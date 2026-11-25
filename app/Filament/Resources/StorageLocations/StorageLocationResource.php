@@ -4,6 +4,7 @@ namespace App\Filament\Resources\StorageLocations;
 
 use App\Enums\NavigationGroup;
 use App\Filament\Resources\StorageLocations\Pages\ManageStorageLocations;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\StorageLocation;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -101,6 +102,7 @@ class StorageLocationResource extends Resource implements HasKnowledgeBase
                     ->alignCenter()
                     ->sortable(),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->addTo($table))
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()

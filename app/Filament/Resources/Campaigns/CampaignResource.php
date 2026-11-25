@@ -7,6 +7,7 @@ use App\Enums\NavigationGroup;
 use App\Filament\Resources\Campaigns\Pages\ListCampaigns;
 use App\Filament\Resources\Campaigns\Pages\ManageCampaignAssignments;
 use App\Filament\Resources\Campaigns\Pages\ViewCampaign;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Campaign;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -208,6 +209,7 @@ class CampaignResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->aside('campaign_status')->addTo($table))
             ->filters([
                 TrashedFilter::make()
                     ->label(__('filament-resources.campaign.filter_trashed')),

@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   columns; the role and whether the email has been verified are hidden by default, like the new two-factor
   authentication column, and access (now a key icon) can be hidden too, all from the columns button
   ([#94](https://github.com/OpenCHelper/OpenCongregationHelper/pull/94)).
+- **Tables**: on phones the other lists (territories, zones, assignments, campaigns, publications, requests, posters,
+  storage locations, departments and their members, tags, roles and contacts) show each row as a card too, with its
+  name and status at the top and the enabled columns below, instead of a table to scroll sideways
+  ([#95](https://github.com/OpenCHelper/OpenCongregationHelper/pull/95)).
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 - **Shared assignment page**: no sidebar any more, the assignment dates are shown in the language of the page and in

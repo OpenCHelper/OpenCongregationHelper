@@ -82,6 +82,8 @@ Se provi a lasciare una pagina con modifiche non salvate, l'applicazione chiede 
 
 Sugli schermi piccoli la barra laterale è sostituita da una **barra di navigazione in basso**. Tocca **Altro** per
 raggiungere le altre voci del menu. Moduli e finestre si aprono come pannelli laterali, più comodi da usare con il dito.
+Le tabelle mostrano ogni riga come una scheda, con le informazioni principali in alto e sotto le altre colonne, scelte
+con il pulsante **Colonne**; per ordinarle usa il menu **Ordina per**.
 
 ![L'applicazione su uno smartphone](/docs/user-documentation/it/basics/assets/mobile-territories.webp)
 
