@@ -33,7 +33,7 @@
         </div>
 
         @if ($accessColumn = $table->getColumn('can_login'))
-            <div class="shrink-0" title="{{ $accessColumn->getLabel() }}">{{ $accessColumn->record($record) }}</div>
+            <div class="shrink-0">{{ $accessColumn->record($record) }}</div>
         @endif
     </div>
 

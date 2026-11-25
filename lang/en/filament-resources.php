@@ -399,6 +399,8 @@ return [
         'column_two_factor_authentication' => 'Two-factor authentication',
         'column_two_factor_authentication_short' => '2FA',
         'column_access_enabled' => 'Access enabled',
+        'access_enabled_tooltip' => 'Can log in',
+        'access_disabled_tooltip' => 'Virtual user: cannot log in',
         'column_created_at' => 'Created At',
         'column_updated_at' => 'Updated At',
         'column_departments' => 'Departments',

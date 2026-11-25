@@ -251,7 +251,11 @@ class UserResource extends Resource
                     ->visibleFrom('sm'),
                 IconColumn::make('can_login')
                     ->label(__('filament-resources.user.column_access_enabled'))
-                    ->boolean()
+                    ->icon(Heroicon::OutlinedKey)
+                    ->color(fn (bool $state): string => $state ? 'success' : 'gray')
+                    ->tooltip(fn (bool $state): string => $state
+                        ? __('filament-resources.user.access_enabled_tooltip')
+                        : __('filament-resources.user.access_disabled_tooltip'))
                     ->sortable()
                     ->visibleFrom('sm'),
                 TextColumn::make('created_at')

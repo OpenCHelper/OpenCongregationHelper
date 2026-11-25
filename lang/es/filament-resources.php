@@ -400,6 +400,8 @@ return [
         'column_two_factor_authentication' => 'Autenticación de dos factores',
         'column_two_factor_authentication_short' => '2FA',
         'column_access_enabled' => 'Acceso habilitado',
+        'access_enabled_tooltip' => 'Puede acceder',
+        'access_disabled_tooltip' => 'Usuario virtual: no puede acceder',
         'column_created_at' => 'Creado En',
         'column_updated_at' => 'Actualizado En',
         'column_departments' => 'Departamentos',
