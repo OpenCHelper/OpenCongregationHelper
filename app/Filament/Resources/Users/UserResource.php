@@ -34,6 +34,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -61,6 +62,22 @@ class UserResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('filament-resources.user.plural_model_label');
+    }
+
+    /**
+     * Users are titled by their full name (e.g. in the title and breadcrumbs of their pages), which is not a column: it
+     * is not the `$recordTitleAttribute`, that the global search would look for in the database.
+     */
+    #[Override]
+    public static function hasRecordTitle(): bool
+    {
+        return true;
+    }
+
+    #[Override]
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        return $record instanceof User ? $record->getFullName() : static::getModelLabel();
     }
 
     #[Override]

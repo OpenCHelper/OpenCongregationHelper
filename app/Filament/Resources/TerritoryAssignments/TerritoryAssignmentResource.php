@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TerritoryAssignments;
 
 use App\Enums\NavigationGroup;
+use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Models\TerritoryAssignment;
@@ -135,6 +136,14 @@ class TerritoryAssignmentResource extends Resource
     }
 
     /**
+     * Timezone of the dates shown: the one of the user, or the one of the application for the guests of a shared page.
+     */
+    public static function getDisplayTimezone(): string
+    {
+        return Auth::user()?->timezone ?? config('app.timezone');
+    }
+
+    /**
      * Personal data (assignee name, notes) is hidden on publicly shared pages
      * unless enabled from the Settings pages (or with `ENABLE_SHARED_PII`).
      */
@@ -195,12 +204,12 @@ class TerritoryAssignmentResource extends Resource
             $record->isOverdue() => __('filament-resources.territory_assignment.overdue_assignment_heading', [
                 'campaign' => $record->campaign->name,
                 'when' => static::getCampaignDeadlineDistance($record),
-                'date' => $record->campaign->valid_until->format('d/m/Y'),
+                'date' => $record->campaign->valid_until->isoFormat('LL'),
             ]),
             $record->isDueSoon() => __('filament-resources.territory_assignment.due_soon_assignment_heading', [
                 'campaign' => $record->campaign->name,
                 'when' => static::getCampaignDeadlineDistance($record),
-                'date' => $record->campaign->valid_until->format('d/m/Y'),
+                'date' => $record->campaign->valid_until->isoFormat('LL'),
             ]),
             default => null,
         })
@@ -239,7 +248,7 @@ class TerritoryAssignmentResource extends Resource
     {
         return Callout::make(fn (TerritoryAssignment $record): ?string => $record->isReturnRequested()
             ? __('filament-resources.territory_assignment.return_requested_heading', [
-                'date' => $record->return_requested_at->format('d/m/Y H:i'),
+                'date' => $record->return_requested_at->isoFormat('LLL'),
             ])
             : null)
             ->key('returnRequestedCallout')
@@ -345,6 +354,7 @@ class TerritoryAssignmentResource extends Resource
                                     ->visible(fn (Model $record) => $record->territory?->image_path != null)
                                     ->schema([
                                         ImageEntry::make('territory.image_path')
+                                            ->alt(fn (Model $record): string => TerritoryResource::getImageAlt($record->territory?->name))
                                             ->visibility('private')
                                             ->imageHeight('auto')
                                             ->imageWidth('100%')
@@ -380,10 +390,14 @@ class TerritoryAssignmentResource extends Resource
                             ->placeholder(__('filament-resources.territory_assignment.info_campaign_placeholder')),
                         TextEntry::make('started_at')
                             ->icon(Heroicon::OutlinedCalendar)
+                            ->isoDateTime()
+                            ->timezone(fn (): string => static::getDisplayTimezone())
                             ->sinceTooltip()
                             ->label(__('filament-resources.territory_assignment.info_start_assignment')),
                         TextEntry::make('ended_at')
                             ->icon(Heroicon::OutlinedCalendar)
+                            ->isoDateTime()
+                            ->timezone(fn (): string => static::getDisplayTimezone())
                             ->sinceTooltip()
                             ->visible(fn (Model $record) => $record->ended_at != null)
                             ->label(__('filament-resources.territory_assignment.info_end_assignment'))
@@ -520,11 +534,11 @@ class TerritoryAssignmentResource extends Resource
                     ->sortable(['first_name', 'last_name']),
                 TextColumn::make('started_at')
                     ->label(__('filament-resources.territory_assignment.column_started_at'))
-                    ->dateTime('d/m/Y H:i')
+                    ->isoDateTime()
                     ->sortable(),
                 TextColumn::make('ended_at')
                     ->label(__('filament-resources.territory_assignment.column_ended_at'))
-                    ->dateTime('d/m/Y H:i')
+                    ->isoDateTime()
                     ->placeholder(__('filament-resources.territory_assignment.column_ended_at_placeholder'))
                     ->sortable(),
                 TextColumn::make('campaign.name')

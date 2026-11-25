@@ -11,6 +11,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
+- **Shared assignment page**: no sidebar any more, the assignment dates are shown in the language of the page and in
+  the timezone of the congregation, and each section has its own description. The page of an assignment in the app
+  shows the start and end dates the same way, and the same section descriptions
+  ([#86](https://github.com/OpenCHelper/OpenCongregationHelper/pull/86)).
+
+### Fixed
+
+- **Accessibility**: territory images have the territory name as alternative text, and the "— or —" separator of the
+  image field is hidden from screen readers ([#78](https://github.com/OpenCHelper/OpenCongregationHelper/pull/78)).
+- Translated the texts still in English: the image fields of territories, the **API Tokens** menu item and the Italian
+  mail log; the contacts of a user have a singular label ("Crea Contatto", not "Crea Informazioni Di Contatto")
+  ([#85](https://github.com/OpenCHelper/OpenCongregationHelper/pull/85)).
+- The territories of a zone, the assignment history of a territory and the assignments of a user have translated
+  titles, breadcrumbs and columns, and users' pages show their name in the breadcrumbs
+  ([#83](https://github.com/OpenCHelper/OpenCongregationHelper/pull/83)).
+- **Assignments**: the start time of a new assignment uses the app's timezone instead of the database clock, so a
+  territory returned soon after being assigned no longer ends before it started; from the AI assistant, a territory
+  assigned today starts now instead of at midnight
+  ([#75](https://github.com/OpenCHelper/OpenCongregationHelper/pull/75)).
+- New assignments, territories and zones remember the user who created them: the Create forms left their creator
+  empty ([#82](https://github.com/OpenCHelper/OpenCongregationHelper/pull/82)).
+- **Assignments**: the dates in the table, on the assignment page and in its banners follow the user's language
+  instead of a fixed `dd/mm/yyyy` format, and the start and end dates are no longer shown raw
+  ([#90](https://github.com/OpenCHelper/OpenCongregationHelper/pull/90)).
+- **Territories**: the counts in the zone and campaign group headers now match the rows below them: they follow the
+  filters and the search, no longer count returned assignments, and include under "No campaign" the territories
+  assigned outside a campaign ([#87](https://github.com/OpenCHelper/OpenCongregationHelper/pull/87)).
+- **Campaigns**: the slices of the assignment status chart have different colours (gray, amber and green), so "To be
+  assigned", "In progress" and "Completed" can be told apart
+  ([#89](https://github.com/OpenCHelper/OpenCongregationHelper/pull/89)).
+- **Migrations**: splitting the full name of the users keeps it in the first and last name, rolling it back joins
+  them again, a failed creation of the app tables no longer drops them, the two-factor column is added only when
+  missing and the mail log table can be rolled back
+  ([#84](https://github.com/OpenCHelper/OpenCongregationHelper/pull/84)).
+- **Contacts**: setting a contact as primary from the user's page in the admin panel now replaces the previous primary
+  contact, as in the profile, instead of leaving the user with several
+  ([#76](https://github.com/OpenCHelper/OpenCongregationHelper/pull/76)).
 
 ### Fixed
 
@@ -22,6 +59,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
   button. Returned or deleted assignments can no longer be shared, and their leftover links stop working
   ([#72](https://github.com/OpenCHelper/OpenCongregationHelper/pull/72)).
+- The unused `/api` endpoints (`/api/user`, `/api/assignees`, `/api/assignments`, `/api/territories`, `/api/zones`)
+  are removed: they returned whole user and assignment records
+  ([#81](https://github.com/OpenCHelper/OpenCongregationHelper/pull/81)).
+- Every response now sends the `X-Frame-Options`, `X-Content-Type-Options` and `Referrer-Policy` headers, so other
+  sites can no longer frame the app, and no longer reveals the PHP version in `X-Powered-By`
+  ([#88](https://github.com/OpenCHelper/OpenCongregationHelper/pull/88)).
 
 ## [1.0.0-alpha15] - 2026-11-24
 
