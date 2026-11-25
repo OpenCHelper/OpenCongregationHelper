@@ -3,9 +3,20 @@
 namespace App\Observers;
 
 use App\Models\TerritoryZone;
+use Illuminate\Support\Facades\Auth;
 
 class TerritoryZoneObserver
 {
+    /**
+     * Handle the TerritoryZone "creating" event.
+     */
+    public function creating(TerritoryZone $territoryZone): void
+    {
+        if (! $territoryZone->created_by && Auth::check()) {
+            $territoryZone->created_by = Auth::id();
+        }
+    }
+
     /**
      * Handle the TerritoryZone "deleting" event, fired by both soft and force deletes.
      *
