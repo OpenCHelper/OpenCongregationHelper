@@ -9,7 +9,7 @@ Apri **Amministrazione → Utenti** per gestire le persone registrate nell'appli
 
 ![Elenco degli utenti](/docs/user-documentation/it/administration/assets/users-list.webp)
 
-La tabella mostra nome, email, **Reparti** e se l'utente può accedere (**Accesso abilitato?**). Dal pulsante delle
+La tabella mostra nome, email, **Reparti** e se l'utente può accedere (**Accesso abilitato**). Dal pulsante delle
 colonne accanto ai filtri puoi mostrare anche il **Ruolo**, se l'email è stata verificata e se l'utente ha attivato
 l'autenticazione a due fattori. Sul telefono, ogni utente è mostrato come una scheda con nome, email e accesso, più le colonne scelte con il pulsante
 delle colonne; l'elenco si può ordinare dal menu **Ordina per**. Il filtro **Accesso** mostra solo gli utenti con accesso o solo gli utenti virtuali, e quanti
