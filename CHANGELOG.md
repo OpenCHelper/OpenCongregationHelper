@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Users**: the list has **All**, **With access** and **Virtual** tabs, each with the number of its users
+  ([#94](https://github.com/OpenCHelper/OpenCongregationHelper/pull/94)).
+
 ### Changed
 
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
