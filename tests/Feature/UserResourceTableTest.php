@@ -46,9 +46,9 @@ test('users can be grouped by access with a badge count on each tab', function (
     $component = Livewire::test(ListUsers::class);
 
     $tabs = $component->instance()->getTabs();
-    expect($tabs['all']->getBadge())->toBe(5)
-        ->and($tabs['with_access']->getBadge())->toBe(3)
-        ->and($tabs['virtual']->getBadge())->toBe(2);
+    expect($tabs['all']->getBadge())->toBe('5')
+        ->and($tabs['with_access']->getBadge())->toBe('3')
+        ->and($tabs['virtual']->getBadge())->toBe('2');
 
     $component
         ->assertCanSeeTableRecords([$userWithAccess, ...$virtualUsers])
