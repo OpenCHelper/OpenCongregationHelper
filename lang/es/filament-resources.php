@@ -393,7 +393,7 @@ return [
         'field_roles' => 'Roles',
         'column_first_name' => 'Nombre',
         'column_last_name' => 'Apellido',
-        'column_full_name' => 'Nombre completo',
+        'column_user' => 'Usuario',
         'column_email' => 'Correo Electrónico',
         'column_role' => 'Rol',
         'column_email_verified' => '¿Correo verificado?',

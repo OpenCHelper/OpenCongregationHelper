@@ -392,7 +392,7 @@ return [
         'field_roles' => 'Roles',
         'column_first_name' => 'First Name',
         'column_last_name' => 'Last Name',
-        'column_full_name' => 'Full name',
+        'column_user' => 'User',
         'column_email' => 'Email',
         'column_role' => 'Role',
         'column_email_verified' => 'Email verified?',

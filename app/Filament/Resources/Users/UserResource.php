@@ -27,10 +27,10 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
-use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -183,13 +183,12 @@ class UserResource extends Resource
             ->recordUrl(fn (Model $record): string => UserResource::getUrl('view', ['record' => $record]))
             ->stackedOnMobile()
             ->columns([
-                // On phones, where each user is a card, the name and the email replace the columns hidden below
-                TextColumn::make('full_name')
-                    ->label(__('filament-resources.user.column_full_name'))
-                    ->state(fn (User $record): string => $record->getFullName())
-                    ->description(fn (User $record): ?string => $record->email)
-                    ->weight(FontWeight::SemiBold)
+                // On phones, each user is a card (see `user-card.blade.php`) that shows the columns hidden below
+                ViewColumn::make('card')
+                    ->label(__('filament-resources.user.column_user'))
+                    ->view('filament.tables.columns.user-card')
                     ->sortable(['last_name', 'first_name'])
+                    ->extraCellAttributes(['class' => 'fi-ta-cell-without-stacked-label'])
                     ->hiddenFrom('sm'),
                 TextColumn::make('first_name')
                     ->label(__('filament-resources.user.column_first_name'))
@@ -226,7 +225,8 @@ class UserResource extends Resource
                         return $query->orderBy($firstRoleName->toBase(), $direction);
                     })
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
                 TextColumn::make('departments')
                     ->label(__('filament-resources.user.column_departments'))
                     ->state(fn (User $record): array => $record->departments->map(fn (Department $department): DepartmentKey => $department->key)->all())
@@ -234,36 +234,40 @@ class UserResource extends Resource
                     ->color(fn (DepartmentKey $state): string => $state->getColor())
                     ->badge()
                     ->listWithLineBreaks()
-                    // The badges speak for themselves: no label above them in the cards shown on phones
-                    ->extraCellAttributes(['class' => 'fi-ta-cell-without-stacked-label'])
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('sm'),
                 IconColumn::make('email_verified_at')
                     ->label(__('filament-resources.user.column_email_verified'))
                     ->default(false)
                     ->boolean()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
                 IconColumn::make('two_factor_authentication')
                     ->label(__('filament-resources.user.column_two_factor_authentication'))
                     ->state(fn (User $record): bool => $record->hasTwoFactorAuthentication())
                     ->boolean()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
                 IconColumn::make('can_login')
                     ->label(__('filament-resources.user.column_access_enabled'))
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('sm'),
                 TextColumn::make('created_at')
                     ->label(__('filament-resources.user.column_created_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
                 TextColumn::make('updated_at')
                     ->label(__('filament-resources.user.column_updated_at'))
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('sm'),
             ])
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('departments'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['departments', 'roles']))
             ->filters([
                 SelectFilter::make('departments')
                     ->label(__('filament-resources.user.filter_department'))

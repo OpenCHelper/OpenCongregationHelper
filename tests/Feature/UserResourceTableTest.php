@@ -75,12 +75,34 @@ test('secondary columns are hidden by default', function () {
         ->assertCanRenderTableColumn('two_factor_authentication');
 });
 
-test('the full name column shows the name of the user', function () {
-    $user = User::factory()->create(['first_name' => 'Mario', 'last_name' => 'Rossi']);
+test('the card shown on phones has the name, the email and the enabled columns of the user', function () {
+    $role = Role::create(['name' => 'card-role', 'guard_name' => 'web']);
+    $user = User::factory()->create(['first_name' => 'Mario', 'last_name' => 'Rossi', 'email' => 'mario.rossi@example.com']);
+    $user->assignRole($role);
+
+    $component = Livewire::test(ListUsers::class);
+    $renderCard = fn (): string => $component->instance()->getTable()->getColumn('card')->record($user)->toHtml();
+
+    expect($renderCard())
+        ->toContain('Mario Rossi')
+        ->toContain('mario.rossi@example.com')
+        ->not->toContain('card-role')
+        ->not->toContain(__('filament-resources.user.column_two_factor_authentication'));
+
+    $component->toggleAllTableColumns();
+
+    expect($renderCard())
+        ->toContain('card-role')
+        ->toContain(__('filament-resources.user.column_two_factor_authentication'));
+});
+
+test('users can be sorted by the card shown on phones, by last and first name', function () {
+    User::factory()->create(['first_name' => 'Mario', 'last_name' => 'Rossi']);
+    User::factory()->create(['first_name' => 'Anna', 'last_name' => 'Rossi']);
+    User::factory()->create(['first_name' => 'Zeno', 'last_name' => 'Bianchi']);
 
     Livewire::test(ListUsers::class)
-        ->assertTableColumnStateSet('full_name', 'Mario Rossi', $user)
-        ->sortTable('full_name')
+        ->sortTable('card')
         ->assertCanSeeTableRecords(
             User::query()->orderBy('last_name')->orderBy('first_name')->get(),
             inOrder: true,
