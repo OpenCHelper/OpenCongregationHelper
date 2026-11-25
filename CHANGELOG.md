@@ -48,12 +48,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Contacts**: setting a contact as primary from the user's page in the admin panel now replaces the previous primary
   contact, as in the profile, instead of leaving the user with several
   ([#76](https://github.com/OpenCHelper/OpenCongregationHelper/pull/76)).
-
-### Fixed
-
 - **Notifications**: recording an assignment that is already returned no longer notifies it as assigned, correcting the
-  date of a return no longer notifies it again, and virtual users no longer receive assignment notifications
-  ([#74](https://github.com/OpenCHelper/OpenCongregationHelper/pull/74)).
+  date of a return no longer notifies it again, and virtual users no longer receive assignment or return request
+  notifications ([#74](https://github.com/OpenCHelper/OpenCongregationHelper/pull/74)).
 
 ### Security
 
