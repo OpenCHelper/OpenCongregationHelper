@@ -8,6 +8,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -48,12 +49,19 @@ class AssignTerritoryTool extends CongregationTool
             return $this->notFound('territory');
         }
 
+        // Only the date is given: a territory given today starts now (the observer's default), not at midnight
+        $startedAt = isset($validated['started_at']) ? Carbon::parse($validated['started_at']) : null;
+
+        if ($startedAt?->isToday()) {
+            $startedAt = null;
+        }
+
         // The observer refuses a territory already assigned or a campaign already ended (as a validation error); the
         // transaction makes the check atomic, as from the app (`CreateAssignmentAction`)
         $assignment = DB::transaction(fn (): TerritoryAssignment => $territory->assignments()->create(array_filter([
             'assignee_id' => $validated['assignee_id'],
             'campaign_id' => $validated['campaign_id'] ?? null,
-            'started_at' => $validated['started_at'] ?? null,
+            'started_at' => $startedAt,
             'notes' => $validated['notes'] ?? null,
             'created_by' => $this->user()?->id,
         ], fn (mixed $value): bool => $value !== null)));

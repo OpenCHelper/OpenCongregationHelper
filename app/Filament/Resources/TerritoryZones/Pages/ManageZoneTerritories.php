@@ -21,6 +21,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Livewire\Livewire;
@@ -36,6 +37,16 @@ class ManageZoneTerritories extends ManageRelatedRecords
     public static function getNavigationLabel(): string
     {
         return __('filament-pages.manage_zone_territories');
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('filament-pages.manage_zone_territories_title', ['name' => $this->getRecordTitle()]);
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return static::getNavigationLabel();
     }
 
     // Source: https://github.com/filamentphp/filament/discussions/10168#discussioncomment-10923902
@@ -54,7 +65,8 @@ class ManageZoneTerritories extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->label(__('filament-resources.territory.column_name')),
             ])
             ->filters([
                 TrashedFilter::make(),
