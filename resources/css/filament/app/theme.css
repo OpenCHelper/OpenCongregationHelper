@@ -96,6 +96,40 @@
     }
 }
 
+/*
+   On phones the summaries (e.g. the totals of the posters) stay visible, although their columns are shown only in the
+   cards: the cells with a summary (and a label) are laid out two per row like the details of the cards, the empty ones
+   (including the one of the card) are hidden.
+*/
+@media (width < 40rem) {
+    .fi-ta-table-stacked-on-mobile:has(> tbody td.fi-ta-cell-card) > tbody > tr.fi-ta-summary-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 1rem;
+        padding-block-end: 0.5rem;
+
+        & > .fi-ta-summary-row-heading-cell {
+            grid-column: 1 / -1;
+        }
+
+        & > td.sm\:fi-visible:has(.fi-ta-cell-label) {
+            display: block;
+
+            &,
+            & * {
+                text-align: start;
+                justify-content: flex-start;
+            }
+        }
+
+        & > td.sm\:fi-visible:not(:has(.fi-ta-cell-label)),
+        & > td.sm\:fi-hidden,
+        & > td:not([class]) {
+            display: none;
+        }
+    }
+}
+
 /* Columns centred in the table (e.g. counts) are aligned to their label in the card */
 .fi-ta-record-card dd .fi-align-center,
 .fi-ta-record-card dd .fi-align-center ul {

@@ -76,3 +76,11 @@ test('the card leaves out the details without a value', function () {
         ->toContain(__('filament-resources.campaign.column_short_name'))
         ->not->toContain(__('filament-resources.campaign.column_creator'));
 });
+
+test('the card is not listed in the columns menu', function () {
+    $card = Livewire::test(ListCampaigns::class)->instance()->getTable()->getColumn('card');
+
+    // The columns menu leaves out the columns without a label
+    expect($card->getLabel())->toBeEmpty()
+        ->and($card->isToggleable())->toBeFalse();
+});

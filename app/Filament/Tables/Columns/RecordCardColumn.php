@@ -42,6 +42,8 @@ class RecordCardColumn extends ViewColumn
         parent::setUp();
 
         $this
+            // Without a label, so that it's not listed in the columns menu: it can't be hidden anyway
+            ->label('')
             ->extraCellAttributes(['class' => 'fi-ta-cell-without-stacked-label'])
             ->hiddenFrom('sm');
     }
@@ -60,9 +62,10 @@ class RecordCardColumn extends ViewColumn
         }
 
         // In its own group when the table has groups: the cell above an ungrouped column in the row of the groups is
-        // shown at any width, and would shift the groups on larger screens
+        // shown at any width, and would shift the groups on larger screens. The group, without a label, keeps the card
+        // out of the columns menu, so the card needs one: in a group, a column without a label can be toggled
         $card = $table->hasColumnGroups()
-            ? ColumnGroup::make('', [$this])->hiddenFrom('sm')
+            ? ColumnGroup::make('', [$this->label($table->getModelLabel())])->hiddenFrom('sm')
             : $this;
 
         // Last, so that on larger screens the first visible column keeps the padding and the summary label of the table

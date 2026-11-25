@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#94](https://github.com/OpenCHelper/OpenCongregationHelper/pull/94)).
 - **Tables**: on phones the other lists (territories, zones, assignments, campaigns, publications, requests, posters,
   storage locations, departments and their members, tags, roles and contacts) show each row as a card too, with its
-  name and status at the top and the enabled columns below, instead of a table to scroll sideways
+  name and status at the top and the enabled columns below, instead of a table to scroll sideways; the totals stay
+  below the list
   ([#95](https://github.com/OpenCHelper/OpenCongregationHelper/pull/95)).
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
