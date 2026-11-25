@@ -38,6 +38,12 @@ class CampaignAssignmentsChart extends ChartWidget
                             ->whereDoesntHave('assignments', $inProgressInCampaign)
                             ->count(),
                     ],
+                    // The gray, warning (amber) and success (green) colors of the theme, readable in light and dark mode
+                    'backgroundColor' => [
+                        'rgba(156, 163, 175, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(34, 197, 94, 0.8)',
+                    ],
                 ],
             ],
             'labels' => [

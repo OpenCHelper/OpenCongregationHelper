@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Livewire;
 
@@ -22,6 +23,16 @@ class ManageUserAssignments extends ManageRelatedRecords
     public static function getNavigationLabel(): string
     {
         return __('filament-pages.manage_user_assignments');
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('filament-pages.manage_user_assignments_title', ['name' => $this->getRecordTitle()]);
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return static::getNavigationLabel();
     }
 
     // Source: https://github.com/filamentphp/filament/discussions/10168#discussioncomment-10923902

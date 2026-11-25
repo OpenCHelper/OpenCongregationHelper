@@ -12,7 +12,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function _up(): void
+    public function up(): void
     {
         // Previous table: `zone`
         Schema::create('territory_zones', function (Blueprint $table) {
@@ -86,16 +86,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-    }
-
-    public function up(): void
-    {
-        try {
-            $this->_up();
-        } catch (Exception $e) {
-            $this->down();
-            throw $e;
-        }
     }
 
     /**
