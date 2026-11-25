@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Http\Middleware\PreventSearchIndexing;
+use App\Http\Middleware\RedirectGuestPanelRoot;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -55,6 +56,7 @@ class GuestPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 PreventSearchIndexing::class,
+                RedirectGuestPanelRoot::class,
             ])
             // Also for the crawlers that read only the page, besides the header of `PreventSearchIndexing`
             ->renderHook(

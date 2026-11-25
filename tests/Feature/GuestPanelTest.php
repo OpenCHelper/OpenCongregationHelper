@@ -14,6 +14,14 @@ test('the root of the guest panel redirects to the welcome page', function () {
     $this->get('/guest')->assertRedirect('/');
 });
 
+test('the root of the guest panel redirects to the welcome page with the routes cached', function () {
+    // As after `route:cache`: the compiled routes match the first route of a URI, here the panel's home route
+    $router = app('router');
+    $router->setCompiledRoutes($router->getRoutes()->compile());
+
+    $this->get('/guest')->assertRedirect('/');
+});
+
 test('the guest panel has no dashboard nor widgets', function () {
     $panel = Filament::getPanel('guest');
 
