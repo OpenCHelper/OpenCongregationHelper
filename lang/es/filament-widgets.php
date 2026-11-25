@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'no_dashboard_access' => [
+        'heading' => 'Hola, :name',
+        'description' => 'Tu cuenta todavía no puede ver los territorios, así que aquí no hay nada que mostrar. Si necesitas acceso, pide a un administrador que te asigne un rol.',
+    ],
     'publisher_statistics' => [
         'heading' => 'Estadísticas',
         'assignments_count' => '{0} Ninguna asignación|{1} :count asignación|[2,*] :count asignaciones',

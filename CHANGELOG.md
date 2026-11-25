@@ -61,6 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Dashboard**: the statistics, the territory coverage and the territory map are shown only to who can view the
+  territories (**View Any** on *Territory*). A user without it, e.g. with no role yet, sees a welcome message instead
+  of every territory, zone and count. The roles no longer have a *Widgets* tab, whose permissions did nothing.
 - The public `/guest` address no longer shows a dashboard with the Filament version: it redirects to the welcome page
   ([#79](https://github.com/OpenCHelper/OpenCongregationHelper/pull/79)).
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**

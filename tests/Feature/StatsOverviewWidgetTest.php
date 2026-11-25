@@ -9,12 +9,13 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
     Notification::fake();
     $this->travelTo(Carbon::parse('2026-06-15 12:00:00'));
 
-    $this->actingAs(User::factory()->create(['id' => 1]));
+    $this->actingAs(User::factory()->create(['id' => 1])->givePermissionTo(Permission::findOrCreate('ViewAny:Territory', 'web')));
 
     $this->assignee = User::factory()->create();
     $this->territory = Territory::factory()->for(TerritoryZone::factory(), 'territoryZone')->create();

@@ -29,6 +29,14 @@ class TerritoryCoverage extends Widget
     protected int|string|array $columnSpan = 'full';
 
     /**
+     * Only who can view the territories sees how much of them was worked (the widget lists their names).
+     */
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('viewAny', Territory::class) ?? false;
+    }
+
+    /**
      * The period, in months, remembered for the whole session (the default one of the settings until chosen).
      */
     #[Session]
