@@ -131,7 +131,7 @@ return [
     */
 
     'password_leak_check' => [
-        'enabled' => (bool) env('PASSWORD_LEAK_CHECK', env('APP_ENV') === 'production'),
+        'enabled' => (bool) env('PASSWORD_LEAK_CHECK', env('APP_ENV', 'production') === 'production'),
         'timeout' => 5,
     ],
 
