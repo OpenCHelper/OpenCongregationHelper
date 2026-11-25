@@ -133,7 +133,7 @@ test('another password is asked for when the configured one breaks the password 
 });
 
 test('in production the configured password needs 12 characters and must not have leaked', function (string $password, string $errorKey) {
-    $this->app->detectEnvironment(fn () => 'production');
+    useProductionPasswordPolicy();
     fakeLeakedPassword('leaked-password-123');
     config(['app.initial_root_user.password' => $password]);
 

@@ -32,6 +32,8 @@ return [
     'sections' => [
         'account_requirements' => 'Requisiti degli account',
         'account_requirements_description' => 'Cosa devono fare gli utenti prima di poter usare l\'app.',
+        'passwords' => 'Password',
+        'passwords_description' => 'Le regole delle password scelte dagli utenti.',
         'ai_assistants' => 'Assistenti IA',
         'ai_assistants_description' => 'Se gli utenti possono collegare all\'app degli assistenti IA (es. ChatGPT, Claude).',
         'campaign_expiry' => 'Scadenza delle campagne',
@@ -59,6 +61,12 @@ return [
             'label' => 'Richiedi la conferma dell\'indirizzo email',
             'helper' => 'Gli utenti devono confermare il proprio indirizzo email, dal link che ricevono, prima di usare l\'app.',
             'root_required' => 'Conferma prima l\'indirizzo email dell\'utente root, così che non possa restare bloccato fuori.',
+        ],
+        'password_leak_check' => [
+            'label' => 'Rifiuta le password trapelate',
+            'helper' => 'Le password scelte dagli utenti vengono verificate nelle fughe di dati note di Have I Been Pwned, che riceve solo i primi caratteri del loro hash: una password trovata lì viene rifiutata. Se il servizio non è raggiungibile, la password viene accettata.',
+            'enabled' => 'Attivo',
+            'disabled' => 'Disattivo',
         ],
         'ai_assistants_enabled' => [
             'label' => 'Consenti gli assistenti IA',

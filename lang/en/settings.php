@@ -32,6 +32,8 @@ return [
     'sections' => [
         'account_requirements' => 'Account requirements',
         'account_requirements_description' => 'What the users must do before they can use the app.',
+        'passwords' => 'Passwords',
+        'passwords_description' => 'The rules of the passwords chosen by the users.',
         'ai_assistants' => 'AI assistants',
         'ai_assistants_description' => 'Whether the users can connect AI assistants (e.g. ChatGPT, Claude) to the app.',
         'campaign_expiry' => 'Campaign expiry',
@@ -59,6 +61,12 @@ return [
             'label' => 'Require email confirmation',
             'helper' => 'Users must confirm their email address, from the link sent to them, before using the app.',
             'root_required' => 'Confirm the email address of the root user first, so that it cannot be locked out.',
+        ],
+        'password_leak_check' => [
+            'label' => 'Refuse leaked passwords',
+            'helper' => 'The passwords chosen by the users are checked against the known data leaks of Have I Been Pwned, which receives only the first characters of their hash: a password found there is refused. If the service cannot be reached, the password is accepted.',
+            'enabled' => 'Enabled',
+            'disabled' => 'Disabled',
         ],
         'ai_assistants_enabled' => [
             'label' => 'Allow AI assistants',

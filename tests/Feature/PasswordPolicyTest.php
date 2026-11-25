@@ -1,7 +1,9 @@
 <?php
 
+use App\Filament\Clusters\Settings\Pages\ManageSecuritySettings;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Models\User;
+use App\Settings\SecuritySettings;
 use Filament\Facades\Filament;
 use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +14,7 @@ use Illuminate\Validation\NotPwnedVerifier;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Jetstream\Http\Livewire\UpdatePasswordForm;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 /**
  * @return array<string, string>
@@ -19,6 +22,16 @@ use Livewire\Livewire;
 function passwordErrors(string $password): array
 {
     return Validator::make(['password' => $password], ['password' => Password::default()])->errors()->get('password');
+}
+
+/**
+ * Turn the leak check on or off from the Security settings.
+ */
+function setPasswordLeakCheck(bool $isEnabled): void
+{
+    $settings = app(SecuritySettings::class);
+    $settings->password_leak_check = $isEnabled;
+    $settings->save();
 }
 
 beforeEach(function () {
@@ -36,7 +49,7 @@ test('outside of production the passwords need 8 characters and are not checked 
 });
 
 test('in production the passwords need 12 characters and must not have leaked', function () {
-    $this->app->detectEnvironment(fn () => 'production');
+    useProductionPasswordPolicy();
     fakeLeakedPassword('leaked-password-123');
 
     expect(passwordErrors('elevenchars'))->toBe([__('validation.min.string', ['attribute' => 'password', 'min' => 12])])
@@ -44,10 +57,10 @@ test('in production the passwords need 12 characters and must not have leaked', 
         ->and(passwordErrors('a-long-and-unique-passphrase'))->toBeEmpty();
 });
 
-test('the leak check can be turned off', function () {
-    $this->app->detectEnvironment(fn () => 'production');
-    config(['auth.password_leak_check.enabled' => false]);
+test('the leak check can be turned off from the Security settings', function () {
+    useProductionPasswordPolicy();
     Http::fake();
+    setPasswordLeakCheck(false);
 
     expect(passwordErrors('leaked-password-123'))->toBeEmpty()
         ->and(passwordErrors('elevenchars'))->not->toBeEmpty();
@@ -55,13 +68,47 @@ test('the leak check can be turned off', function () {
     Http::assertNothingSent();
 });
 
-test('the leak check can be turned on outside of production', function () {
-    config(['auth.password_leak_check.enabled' => true]);
+test('the leak check can be turned on outside of production', function (bool $fromSettings) {
     fakeLeakedPassword('leaked-password-123');
+
+    if ($fromSettings) {
+        setPasswordLeakCheck(true);
+    } else {
+        config(['auth.password_leak_check.enabled' => true]);
+    }
 
     expect(passwordErrors('leaked-password-123'))->toBe([__('validation.password.uncompromised', ['attribute' => 'password'])])
         ->and(passwordErrors('a-long-and-unique-passphrase'))->toBeEmpty()
         ->and(passwordErrors('12345678'))->toBeEmpty();
+})->with(['from the Security settings' => true, 'from .env' => false]);
+
+test('the leak check follows .env until changed from the Security settings', function () {
+    config(['auth.password_leak_check.enabled' => true]);
+
+    expect(app(SecuritySettings::class)->password_leak_check)->toBeTrue();
+
+    config(['auth.password_leak_check.enabled' => false]);
+    app()->forgetInstance(SecuritySettings::class);
+
+    expect(app(SecuritySettings::class)->password_leak_check)->toBeFalse();
+});
+
+test('the leak check is shown in the Security settings', function () {
+    Filament::setCurrentPanel('app');
+    $superAdmin = User::factory()->create(['can_login' => true]);
+    $superAdmin->assignRole(Role::findOrCreate('super_admin'));
+    $this->actingAs($superAdmin);
+
+    Livewire::test(ManageSecuritySettings::class)
+        ->assertFormFieldExists('password_leak_check')
+        ->assertSee(__('settings.default', ['value' => __('settings.fields.password_leak_check.disabled')]))
+        ->fillForm(['password_leak_check' => true])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    app()->forgetInstance(SecuritySettings::class);
+
+    expect(app(SecuritySettings::class)->password_leak_check)->toBeTrue();
 });
 
 test('the leak check gives up quickly when the service does not answer', function () {
@@ -73,7 +120,7 @@ test('the leak check gives up quickly when the service does not answer', functio
 });
 
 test('the profile applies the password policy', function () {
-    $this->app->detectEnvironment(fn () => 'production');
+    useProductionPasswordPolicy();
     fakeLeakedPassword('leaked-password-123');
     $this->actingAs($user = User::factory()->create());
 
@@ -92,7 +139,7 @@ test('the profile applies the password policy', function () {
 });
 
 test('the invitation and password reset page applies the password policy', function (bool $isInvitation) {
-    $this->app->detectEnvironment(fn () => 'production');
+    useProductionPasswordPolicy();
     fakeLeakedPassword('leaked-password-123');
     Filament::setCurrentPanel('app');
 

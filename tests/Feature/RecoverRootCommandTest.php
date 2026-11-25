@@ -85,7 +85,7 @@ test('the typed password follows the password policy', function () {
 });
 
 test('a configured password that breaks the password policy is refused', function () {
-    $this->app->detectEnvironment(fn () => 'production');
+    useProductionPasswordPolicy();
     fakeLeakedPassword('leaked-password-123');
     config(['app.initial_root_user.password' => 'leaked-password-123']);
 
@@ -98,7 +98,7 @@ test('a configured password that breaks the password policy is refused', functio
 });
 
 test('another password is asked for when the configured one breaks the password policy', function () {
-    $this->app->detectEnvironment(fn () => 'production');
+    useProductionPasswordPolicy();
     config(['app.initial_root_user.password' => 'elevenchars']);
     Http::fake(['api.pwnedpasswords.com/*' => Http::response('')]);
 

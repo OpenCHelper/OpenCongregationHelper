@@ -99,6 +99,13 @@ confermano l'email, poi configurano l'autenticazione a due fattori.
 > viene mai chiesto di confermare l'email, anche se la cambia in seguito, così che possa sempre raggiungere queste
 > impostazioni.
 
+In **Password**, **Rifiuta le password trapelate** verifica le password scelte dagli utenti (da un invito, da **Hai
+smarrito la password?** o dal proprio profilo) nelle fughe di dati note di [Have I Been
+Pwned](https://haveibeenpwned.com/Passwords), e rifiuta una password trovata lì. L'applicazione invia solo i primi 5
+caratteri dell'hash SHA-1 della password, mai la password stessa. Se il servizio non risponde entro 5 secondi, la
+password viene accettata. È attivo in modo predefinito in produzione e disattivato altrove (vedi `PASSWORD_LEAK_CHECK`
+nella [Guida al setup](../setup)): disattivalo se il server non può raggiungere il servizio.
+
 In **Assistenti IA**, **Consenti gli assistenti IA** permette agli utenti di collegare all'applicazione un assistente
 IA (es. ChatGPT, Claude o Gemini), dal proprio [profilo](../basics/profile#assistenti-ia). È disattivato in modo
 predefinito:
@@ -114,7 +121,8 @@ Clicca **Salva** per applicarle: hanno effetto subito, per tutti gli utenti.
 ## Valori predefiniti
 
 Sotto ogni opzione, **Predefinito** mostra il suo valore prima che venga cambiato qui: per il centro delle mappe, i
-dati personali e le richieste di riconsegna dalla pagina pubblica, il valore impostato nel file `.env` da chi ha
-installato l'applicazione (vedi la [Guida al setup](../setup)). Queste tre opzioni continuano a seguire il file `.env`
+dati personali, le richieste di riconsegna dalla pagina pubblica e la verifica delle password trapelate, il valore
+impostato nel file `.env` da chi ha installato l'applicazione (vedi la [Guida al setup](../setup)). Queste quattro
+opzioni continuano a seguire il file `.env`
 finché non vengono cambiate qui; per farne seguire di nuovo il file `.env` a una, reimpostala al suo valore
 predefinito e salva. Il nome, la lingua e il fuso orario dell'applicazione si impostano solo nel file `.env`.

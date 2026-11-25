@@ -124,13 +124,14 @@ return [
     | The passwords chosen by the users can be checked against the known data
     | leaks of Have I Been Pwned (api.pwnedpasswords.com, which only receives
     | the first 5 characters of their SHA-1 hash). When not set, the check is
-    | on in production and off elsewhere. The check is skipped (the password is
+    | on in production and off elsewhere. The super administrators can change
+    | it from the Security settings. The check is skipped (the password is
     | accepted) when the service does not answer within the timeout, in seconds.
     |
     */
 
     'password_leak_check' => [
-        'enabled' => env('PASSWORD_LEAK_CHECK'),
+        'enabled' => (bool) env('PASSWORD_LEAK_CHECK', env('APP_ENV') === 'production'),
         'timeout' => 5,
     ],
 

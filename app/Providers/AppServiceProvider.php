@@ -9,6 +9,7 @@ use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
 use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
+use App\Settings\SecuritySettings;
 use App\Support\AiAssistantConnections;
 use App\Support\UserLocale;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
@@ -192,16 +193,15 @@ class AppServiceProvider extends ServiceProvider
      *
      * In production a password needs at least 12 characters, elsewhere the 8 characters of Laravel are enough. It must
      * not appear in a known data leak either (checked with the k-anonymity API of Have I Been Pwned, which only
-     * receives the first characters of its SHA-1 hash): `PASSWORD_LEAK_CHECK` turns the check on or off, and when it is
-     * not set the check runs only in production, so that local and test environments do not call the external API.
+     * receives the first characters of its SHA-1 hash), when the Security settings say so: by default
+     * `PASSWORD_LEAK_CHECK`, itself on only in production, so that local and test environments do not call the API.
      */
     private function configurePasswordPolicy(): void
     {
         Password::defaults(function (): Password {
             $rule = Password::min(app()->isProduction() ? 12 : 8)->max(255);
-            $checksLeaks = config('auth.password_leak_check.enabled') ?? app()->isProduction();
 
-            return filter_var($checksLeaks, FILTER_VALIDATE_BOOLEAN) ? $rule->uncompromised() : $rule;
+            return app(SecuritySettings::class)->password_leak_check ? $rule->uncompromised() : $rule;
         });
     }
 

@@ -54,8 +54,8 @@ INITIAL_ROOT_PASSWORD="a-long-and-unique-passphrase"
 
 ### Main settings
 
-`MAP_DEFAULT_CENTER`, `ENABLE_SHARED_PII` and `GUEST_ALLOW_RETURNING_ASSIGNMENT` are only the defaults: the super
-administrators can change them from the [Settings](administration/settings) pages, without editing `.env`.
+`MAP_DEFAULT_CENTER`, `ENABLE_SHARED_PII`, `GUEST_ALLOW_RETURNING_ASSIGNMENT` and `PASSWORD_LEAK_CHECK` are only the
+defaults: the super administrators can change them from the [Settings](administration/settings) pages, without editing `.env`.
 If the settings cache is enabled (`SETTINGS_CACHE_ENABLED=true`), run `php artisan settings:clear-cache` after
 changing them in `.env`, or the settings not changed from those pages keep the previous value.
 
@@ -66,7 +66,7 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 | `APP_TIMEZONE` | Timezone used to display dates, and in which the day and time of the weekly reminders (see the [Settings](administration/settings) pages) and the daily renewal of the publications (at 9:00) are counted. |
 | `DB_PREFIX` / `DB_ENGINE` | Optional table prefix and storage engine, useful on shared databases: `db:wipe` and `migrate:fresh` then drop only the tables with this prefix. |
 | `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Name (first and last name separated by a space), email and password of the **root** user, created the first time the database is seeded. The password follows the same rules as the passwords chosen by the users (see `PASSWORD_LEAK_CHECK`): `och:install` and `och:recover-root` refuse one that breaks them, or ask for another one when run from a terminal. |
-| `PASSWORD_LEAK_CHECK` | When `APP_ENV` is `production`, the passwords need at least 12 characters (8 elsewhere). When this is `true`, they must not appear in a known data leak either: they are checked with [Have I Been Pwned](https://haveibeenpwned.com/Passwords), by sending only the first 5 characters of their SHA-1 hash to `api.pwnedpasswords.com`. If the service does not answer within 5 seconds the password is accepted. Defaults to `true` in production (set it to `false` on servers that cannot reach the service) and to `false` elsewhere. |
+| `PASSWORD_LEAK_CHECK` | When `APP_ENV` is `production`, the passwords need at least 12 characters (8 elsewhere). When this is `true`, they must not appear in a known data leak either: they are checked with [Have I Been Pwned](https://haveibeenpwned.com/Passwords), by sending only the first 5 characters of their SHA-1 hash to `api.pwnedpasswords.com`. If the service does not answer within 5 seconds the password is accepted. Defaults to `true` in production (set it to `false` on servers that cannot reach the service) and to `false` elsewhere. The super administrators can change it from the [Security settings](administration/settings#security). |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | How emails are sent. `failover` tries the native PHP `mail()` function first and falls back to the log. |
 | `QUEUE_CONNECTION` | `database` (recommended in production) or `sync` (emails are sent immediately, during the request). |
 | `ARTISAN_CRON_TOKEN` | Secret required by the endpoints that process the queue and the scheduled jobs. If empty, those endpoints are disabled. |

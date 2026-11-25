@@ -1,5 +1,6 @@
 <?php
 
+use App\Settings\SecuritySettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Vite;
@@ -92,4 +93,17 @@ function fakeLeakedPassword(string $password): void
     Http::fake([
         'api.pwnedpasswords.com/*' => Http::response(strtoupper(substr(sha1($password), 5)).':42'),
     ]);
+}
+
+/**
+ * Run in production, where `PASSWORD_LEAK_CHECK` (the default of the leak check in the Security settings) is on unless
+ * set otherwise in `.env`: the configuration was read for the testing environment.
+ */
+function useProductionPasswordPolicy(): void
+{
+    app()->detectEnvironment(fn (): string => 'production');
+    config(['auth.password_leak_check.enabled' => true]);
+
+    // Read the settings again, as they follow the configuration until changed
+    app()->forgetInstance(SecuritySettings::class);
 }
