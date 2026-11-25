@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   name and status at the top and the enabled columns below, instead of a table to scroll sideways; the totals stay
   below the list
   ([#95](https://github.com/OpenCHelper/OpenCongregationHelper/pull/95)).
+- **User guide**: every page now matches what the app does, e.g. the import columns, the deletion rules of territories
+  and zones, the map drawings that publishers don't see, return requests, the sidebar, notifications, two-factor setup
+  and the settings reserved to super administrators.
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 - **Shared assignment page**: no sidebar any more, the assignment dates are shown in the language of the page and in
