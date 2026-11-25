@@ -149,7 +149,11 @@ class TerritoryAssignmentObserver
      */
     public function created(TerritoryAssignment $territoryAssignment): void
     {
-        // Carica la relazione territory prima di inviare la notifica
+        // An assignment recorded as already returned (e.g. back-filled by an admin) is not news to the assignee
+        if ($territoryAssignment->ended_at !== null || ! $this->assigneeCanBeNotified($territoryAssignment)) {
+            return;
+        }
+
         $territoryAssignment->load('territory');
         $territoryAssignment->assignee->notify(new TerritoryAssignedNotification($territoryAssignment));
     }
@@ -160,15 +164,26 @@ class TerritoryAssignmentObserver
     public function updated(TerritoryAssignment $territoryAssignment): void
     {
         if ($territoryAssignment->wasChanged('ended_at') && $territoryAssignment->ended_at !== null) {
-            // Carica la relazione territory prima di inviare la notifica
             $territoryAssignment->load(['territory', 'shared']);
-            $territoryAssignment->assignee->notify(new TerritoryReturnedNotification($territoryAssignment));
+
+            // Only the return itself is notified, not a later correction of its date
+            if ($territoryAssignment->getOriginal('ended_at') === null && $this->assigneeCanBeNotified($territoryAssignment)) {
+                $territoryAssignment->assignee->notify(new TerritoryReturnedNotification($territoryAssignment));
+            }
 
             // Remove shared URL when assignment ends
             if ($territoryAssignment->shared) {
                 $territoryAssignment->shared->delete();
             }
         }
+    }
+
+    /**
+     * Virtual users (who cannot log in) are not notified: the notifications link into a panel they cannot open.
+     */
+    private function assigneeCanBeNotified(TerritoryAssignment $territoryAssignment): bool
+    {
+        return $territoryAssignment->assignee?->isVirtual() === false;
     }
 
     /**

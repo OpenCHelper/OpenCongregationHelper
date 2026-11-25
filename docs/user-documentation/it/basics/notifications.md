@@ -17,8 +17,12 @@ tuo [profilo](profile).
 |--------|--------------------|
 | **Territorio assegnato** | la persona che ha ricevuto il territorio |
 | **Territorio riconsegnato** | la persona che aveva il territorio |
+| **Riconsegna richiesta** | i membri del reparto territori, tranne chi l'ha chiesta |
 | **Nuova campagna** | tutti gli utenti che possono accedere |
 | **Territorio fuori da *N* giorni** | chi ha un territorio da più dei giorni impostati nelle [Impostazioni](../administration/settings) (60 di default). Il promemoria viene inviato una volta a settimana, nel giorno e all'ora impostati lì (lunedì alle 9:00 di default), finché il territorio non viene riconsegnato. |
+
+Gli utenti virtuali, che non possono accedere, non ricevono notifiche. Registrare un'assegnazione già riconsegnata
+non avvisa nessuno, e lo stesso vale per correggere la data di una riconsegna.
 
 ## Notifiche push
 
