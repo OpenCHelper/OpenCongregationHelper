@@ -225,8 +225,7 @@ class UserResource extends Resource
                         return $query->orderBy($firstRoleName->toBase(), $direction);
                     })
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->visibleFrom('md'),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('departments')
                     ->label(__('filament-resources.user.column_departments'))
                     ->state(fn (User $record): array => $record->departments->map(fn (Department $department): DepartmentKey => $department->key)->all())
@@ -234,21 +233,18 @@ class UserResource extends Resource
                     ->color(fn (DepartmentKey $state): string => $state->getColor())
                     ->badge()
                     ->listWithLineBreaks()
-                    ->toggleable()
-                    ->visibleFrom('md'),
+                    ->toggleable(),
                 IconColumn::make('email_verified_at')
                     ->label(__('filament-resources.user.column_email_verified'))
                     ->default(false)
                     ->boolean()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->visibleFrom('md'),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('two_factor_authentication')
                     ->label(__('filament-resources.user.column_two_factor_authentication'))
                     ->state(fn (User $record): bool => $record->hasTwoFactorAuthentication())
                     ->boolean()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->visibleFrom('md'),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('can_login')
                     ->label(__('filament-resources.user.column_access_enabled'))
                     ->boolean()
