@@ -14,6 +14,11 @@
 
     $badgeColumns = $getEnabledColumns(['departments', 'roles.name']);
     $detailColumns = $getEnabledColumns(['email_verified_at', 'two_factor_authentication', 'created_at', 'updated_at']);
+
+    // Shorter labels for the details, where the card has less room than the table
+    $shortLabels = [
+        'two_factor_authentication' => __('filament-resources.user.column_two_factor_authentication_short'),
+    ];
 @endphp
 
 <div class="flex w-full flex-col gap-2 pt-1.5">
@@ -39,7 +44,7 @@
     @if (filled($detailColumns))
         <dl class="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 text-sm">
             @foreach ($detailColumns as $column)
-                <dt class="text-gray-500 dark:text-gray-400">{{ $column->getLabel() }}</dt>
+                <dt class="text-gray-500 dark:text-gray-400">{{ $shortLabels[$column->getName()] ?? $column->getLabel() }}</dt>
                 <dd>{{ $column->record($record) }}</dd>
             @endforeach
         </dl>

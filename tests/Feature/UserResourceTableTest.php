@@ -88,13 +88,13 @@ test('the card shown on phones has the name, the email and the enabled columns o
         ->toContain('mario.rossi@example.com')
         ->toContain('fi-user-avatar')
         ->not->toContain('card-role')
-        ->not->toContain(__('filament-resources.user.column_two_factor_authentication'));
+        ->not->toContain(__('filament-resources.user.column_two_factor_authentication_short'));
 
     $component->toggleAllTableColumns();
 
     expect($renderCard())
         ->toContain('card-role')
-        ->toContain(__('filament-resources.user.column_two_factor_authentication'));
+        ->toContain(__('filament-resources.user.column_two_factor_authentication_short'));
 });
 
 test('users can be sorted by the card shown on phones, by last and first name', function () {
