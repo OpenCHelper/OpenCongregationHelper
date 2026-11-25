@@ -65,20 +65,6 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
                     ->schema($this->getContactInfolist()),
                 EditAction::make()
                     ->schema($this->getFormSchema())
-                    ->using(function (array $data, Contact $record): Contact {
-                        // If this contact is set as primary, unset any other primary contacts
-                        if ($data['is_primary']) {
-                            /** @var User $user */
-                            $user = Auth::user();
-                            $user->contacts()
-                                ->where('id', '!=', $record->id)
-                                ->update(['is_primary' => false]);
-                        }
-
-                        $record->update($data);
-
-                        return $record;
-                    })
                     ->successNotification(
                         Notification::make()
                             ->success()
@@ -114,11 +100,6 @@ class ProfileContacts extends Component implements HasActions, HasForms, HasInfo
             ->action(function (array $data, Schema $schema): void {
                 /** @var User $user */
                 $user = Auth::user();
-
-                // A new primary contact replaces the previous one, as when editing a contact.
-                if ($data['is_primary'] ?? false) {
-                    $user->contacts()->update(['is_primary' => false]);
-                }
 
                 $contact = $user->contacts()->create($data);
 
