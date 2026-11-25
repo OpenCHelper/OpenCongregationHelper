@@ -54,8 +54,6 @@ class UserResource extends Resource
 
     protected static string|\BackedEnum|null $activeNavigationIcon = Heroicon::Users;
 
-    protected static ?string $tenantOwnershipRelationshipName = 'teams';
-
     public static function getModelLabel(): string
     {
         return __('filament-resources.user.model_label');
