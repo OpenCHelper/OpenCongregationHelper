@@ -35,7 +35,9 @@ barra laterale.
 
 ## Filtri
 
-Di default vengono mostrate solo le assegnazioni **in lavorazione**. Apri i filtri per cambiarlo:
+Di default vengono mostrate solo le assegnazioni **in lavorazione**, anche nelle schede di un territorio, di un utente e
+di una campagna: per vedere anche quelle riconsegnate, apri i filtri e scegli *Tutti gli stati*. Il numero accanto a
+queste schede conta tutte le assegnazioni, comprese quelle riconsegnate. I filtri sono:
 
 - **Stato assegnazione**: *Tutti gli stati*, *Restituito* o *In lavorazione*;
 - **Solo le mie assegnazioni**: solo i territori assegnati a te;
@@ -56,13 +58,19 @@ Se la campagna dell'assegnazione è terminata, o termina entro 7 giorni, un avvi
 ricorda di riconsegnare il territorio. Se il tuo ruolo lo permette, **Termina assegnazione** nell'avviso lo riconsegna
 subito.
 
+Se l'assegnatario ha chiesto di riconsegnare il territorio (vedi
+[Assegnare e riconsegnare](assigning#richieste-di-riconsegna)), un avviso indica quando: **Termina assegnazione**
+nell'avviso lo riconsegna, se il tuo ruolo lo permette. L'assegnatario lo chiede con **Chiedi di riconsegnare** in cima alla pagina,
+offerto finché non l'ha chiesto.
+
 Dal menu **Azioni** puoi condividere l'assegnazione con un link pubblico (vedi
 [Condividere un'assegnazione](sharing)).
 
 ## Correggere un'assegnazione
 
-Clicca **Modifica** su una riga per cambiare il territorio, l'assegnatario, la campagna, le date di inizio e fine, le
-note o chi l'ha creata. Impostando la **Data fine** il territorio viene riconsegnato.
+Clicca **Modifica** su una riga per cambiare la **Data inizio**, la **Data fine** o le note: il territorio,
+l'assegnatario, la campagna e chi ha creato l'assegnazione sono mostrati ma non si possono cambiare. Impostando la
+**Data fine** il territorio viene riconsegnato.
 
 ![Modifica di un'assegnazione](/docs/user-documentation/it/assignments/assets/assignment-edit.webp)
 

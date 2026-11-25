@@ -29,18 +29,19 @@ Poi [disegna la mappa](../territories/maps) di ogni territorio, oppure allega la
 > 💡 **Suggerimento:** usa il filtro **Stato mappa interattiva** dell'elenco dei territori per trovare quelli ancora
 > senza mappa.
 
-## 4. Ricopia la situazione attuale
-
-Per ogni territorio attualmente fuori, [assegnalo](../assignments/assigning) alla persona giusta. Usa
-**Assegnazioni → Nuovo** se vuoi registrare anche la data di inizio reale o le assegnazioni passate dal registro
-cartaceo.
-
-## 5. Crea i ruoli e gli utenti
+## 4. Crea i ruoli e gli utenti
 
 1. Crea i [ruoli](../administration/roles) che ti servono, es. *proclamatore* e *servitore di territorio*.
 2. Crea gli [utenti](../administration/users): dai **Permetti accesso** e un ruolo a chi userà l'applicazione, e crea
    tutti gli altri come utenti virtuali.
 3. [Impersona](../administration/users) un utente per ogni ruolo per verificare cosa vede.
+
+## 5. Ricopia la situazione attuale
+
+Per ogni territorio attualmente fuori, [assegnalo](../assignments/assigning) alla persona giusta. Usa
+**Assegnazioni → Nuovo** se vuoi registrare anche la data di inizio reale o le assegnazioni passate dal registro
+cartaceo. Le persone che possono accedere ricevono una notifica per ogni assegnazione in corso, non per quelle
+registrate come già riconsegnate.
 
 ## 6. Organizza con i tag
 
