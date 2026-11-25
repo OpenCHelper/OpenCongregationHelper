@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Tags**: deleting a tag asks for a confirmation that says how many territories and zones use it, since it is
+  removed from all of them; it was removed silently, while the guide said that a tag in use could not be deleted.
 - **Users**: a user who has assignments can no longer be deleted, from their page, the bulk action or their profile:
   it permanently deleted the history of every territory they had (dates, coverage, campaigns) and freed their
   territories in progress. The delete modal explains why and offers to disable their access instead, making them a
