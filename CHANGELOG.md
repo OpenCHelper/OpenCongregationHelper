@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 - **Shared assignment page**: no sidebar any more, the assignment dates are shown in the language of the page and in
-  the timezone of the congregation, and each section has its own description
+  the timezone of the congregation, and each section has its own description. The page of an assignment in the app
+  shows the start and end dates the same way, and the same section descriptions
   ([#86](https://github.com/OpenCHelper/OpenCongregationHelper/pull/86)).
 
 ### Security
