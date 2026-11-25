@@ -96,7 +96,7 @@ up two-factor authentication.
 > address of the root user first. Disabling a requirement is always possible. The root user is also never asked to
 > confirm its email, even if it changes it later, so that it can always reach these settings.
 
-Under **Passwords**, **Refuse leaked passwords** checks the passwords that the users choose (from an invitation,
+Under **Passwords**, **Refuse compromised passwords** checks the passwords that the users choose (from an invitation,
 **Forgot password?** or their profile) against the known data leaks of [Have I Been
 Pwned](https://haveibeenpwned.com/Passwords), and refuses one found there. The application sends only the first 5
 characters of the SHA-1 hash of the password, never the password itself. If the service does not answer within 5
@@ -115,7 +115,7 @@ Click **Save changes** to apply them: they take effect immediately, for every us
 ## Default values
 
 Under each option, **Default** shows its value before it is changed here: for the map centre, the personal data, the
-return requests from the public page and the check of leaked passwords, the value set in `.env` by whoever installed the
-application (see the [Setup guide](../setup)). These four options keep following `.env` until they are changed here; to make one follow `.env`
-again, set it back to its default value and save. The name, language and timezone of the application are set only in
-`.env`.
+return requests from the public page and the check of compromised passwords, the value set in `.env` by whoever
+installed the application (see the [Setup guide](../setup)). These four options keep following `.env` until they are
+changed here; to make one follow `.env` again, set it back to its default value and save. The name, language and
+timezone of the application are set only in `.env`.

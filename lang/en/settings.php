@@ -63,7 +63,7 @@ return [
             'root_required' => 'Confirm the email address of the root user first, so that it cannot be locked out.',
         ],
         'password_leak_check' => [
-            'label' => 'Refuse leaked passwords',
+            'label' => 'Refuse compromised passwords',
             'helper' => 'The passwords chosen by the users are checked against the known data leaks of Have I Been Pwned, which receives only the first characters of their hash: a password found there is refused. If the service cannot be reached, the password is accepted.',
             'enabled' => 'Enabled',
             'disabled' => 'Disabled',

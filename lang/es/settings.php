@@ -63,7 +63,7 @@ return [
             'root_required' => 'Confirma primero la dirección de correo electrónico del usuario root, para que no pueda quedarse bloqueado.',
         ],
         'password_leak_check' => [
-            'label' => 'Rechazar las contraseñas filtradas',
+            'label' => 'Rechazar las contraseñas comprometidas',
             'helper' => 'Las contraseñas elegidas por los usuarios se comprueban en las filtraciones de datos conocidas de Have I Been Pwned, que solo recibe los primeros caracteres de su hash: una contraseña encontrada allí se rechaza. Si no se puede acceder al servicio, la contraseña se acepta.',
             'enabled' => 'Activado',
             'disabled' => 'Desactivado',
