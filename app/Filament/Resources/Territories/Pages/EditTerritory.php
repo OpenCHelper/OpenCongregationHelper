@@ -14,6 +14,15 @@ class EditTerritory extends EditRecord
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        return TerritoryResource::splitStoredImageFromFormData($data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return TerritoryResource::mergeUploadedImageIntoFormData($data);
