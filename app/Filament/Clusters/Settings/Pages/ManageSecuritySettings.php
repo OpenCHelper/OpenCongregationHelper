@@ -56,6 +56,16 @@ class ManageSecuritySettings extends AppSettingsPage
                                 __('settings.fields.require_email_verification.root_required'),
                             )),
                     ]),
+                Section::make(__('settings.sections.passwords'))
+                    ->description(__('settings.sections.passwords_description'))
+                    ->columnSpanFull()
+                    ->schema([
+                        Toggle::make('password_leak_check')
+                            ->label(__('settings.fields.password_leak_check.label'))
+                            ->helperText(__('settings.fields.password_leak_check.helper').' '.$this->defaultHint(
+                                $this->defaultValue('password_leak_check') ? __('settings.fields.password_leak_check.enabled') : __('settings.fields.password_leak_check.disabled'),
+                            )),
+                    ]),
                 Section::make(__('settings.sections.ai_assistants'))
                     ->description(__('settings.sections.ai_assistants_description'))
                     ->columnSpanFull()

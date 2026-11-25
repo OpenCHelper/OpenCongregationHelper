@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Support\PasswordPolicy;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -52,8 +53,6 @@ class RecoverRootCommand extends Command
         $password = $this->newPassword();
 
         if ($password === null) {
-            $this->components->error('Please set the INITIAL_ROOT_PASSWORD environment variable, or run the command from a terminal to type the password.');
-
             return self::FAILURE;
         }
 
@@ -86,24 +85,35 @@ class RecoverRootCommand extends Command
     }
 
     /**
-     * The password from the configuration, or typed in when run from a terminal.
+     * The password from the configuration, or typed in when run from a terminal (also when the one from the
+     * configuration does not follow the password policy). `null`, with the error shown, when there is none.
      */
     private function newPassword(): ?string
     {
         $password = config('app.initial_root_user.password');
 
         if (filled($password)) {
-            return $password;
+            $passwordError = PasswordPolicy::errorFor($password);
+
+            if ($passwordError === null) {
+                return $password;
+            }
+
+            $this->components->error("The INITIAL_ROOT_PASSWORD environment variable does not follow the password policy: {$passwordError}");
         }
 
         if (! $this->input->isInteractive()) {
+            if (blank($password)) {
+                $this->components->error('Please set the INITIAL_ROOT_PASSWORD environment variable, or run the command from a terminal to type the password.');
+            }
+
             return null;
         }
 
         return password(
             label: 'New password of the root user',
             required: true,
-            validate: fn (string $value): ?string => strlen($value) < 8 ? 'The password must be at least 8 characters.' : null,
+            validate: fn (string $value): ?string => PasswordPolicy::errorFor($value),
         );
     }
 }

@@ -96,6 +96,13 @@ up two-factor authentication.
 > address of the root user first. Disabling a requirement is always possible. The root user is also never asked to
 > confirm its email, even if it changes it later, so that it can always reach these settings.
 
+Under **Passwords**, **Refuse compromised passwords** checks the passwords that the users choose (from an invitation,
+**Forgot password?** or their profile) against the known data leaks of [Have I Been
+Pwned](https://haveibeenpwned.com/Passwords), and refuses one found there. The application sends only the first 5
+characters of the SHA-1 hash of the password, never the password itself. If the service does not answer within 5
+seconds, the password is accepted. It is enabled by default in production and disabled elsewhere (see
+`PASSWORD_LEAK_CHECK` in the [Setup guide](../setup)): disable it if the server cannot reach the service.
+
 Under **AI assistants**, **Allow AI assistants** lets the users connect an AI assistant (e.g. ChatGPT, Claude or
 Gemini) to the application, from their [profile](../basics/profile#ai-assistants). It is disabled by default:
 
@@ -107,8 +114,8 @@ Click **Save changes** to apply them: they take effect immediately, for every us
 
 ## Default values
 
-Under each option, **Default** shows its value before it is changed here: for the map centre, the personal data and the
-return requests from the public page, the value set in `.env` by whoever installed the application (see the [Setup
-guide](../setup)). These three options keep following `.env` until they are changed here; to make one follow `.env`
-again, set it back to its default value and save. The name, language and timezone of the application are set only in
-`.env`.
+Under each option, **Default** shows its value before it is changed here: for the map centre, the personal data, the
+return requests from the public page and the check of compromised passwords, the value set in `.env` by whoever
+installed the application (see the [Setup guide](../setup)). These four options keep following `.env` until they are
+changed here; to make one follow `.env` again, set it back to its default value and save. The name, language and
+timezone of the application are set only in `.env`.
