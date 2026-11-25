@@ -42,10 +42,12 @@
     @endforeach
 
     @if (filled($detailColumns))
-        <dl class="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 text-sm">
+        <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             @foreach ($detailColumns as $column)
-                <dt class="text-gray-500 dark:text-gray-400">{{ $shortLabels[$column->getName()] ?? $column->getLabel() }}</dt>
-                <dd>{{ $column->record($record) }}</dd>
+                <div class="min-w-0">
+                    <dt class="text-gray-500 dark:text-gray-400">{{ $shortLabels[$column->getName()] ?? $column->getLabel() }}</dt>
+                    <dd>{{ $column->record($record) }}</dd>
+                </div>
             @endforeach
         </dl>
     @endif
