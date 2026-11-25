@@ -17,7 +17,7 @@ dashboard mostra solo un messaggio di benvenuto: chiedi a un amministratore se t
 
 - **Territori**: il numero totale di territori.
 - **Durata media assegnazioni mensili**: quanti giorni, in media, un territorio è rimasto fuori prima di essere
-  riconsegnato, calcolato sulle assegnazioni iniziate negli ultimi 365 giorni. Il piccolo grafico mostra l'andamento
+  riconsegnato, calcolato sulle assegnazioni riconsegnate negli ultimi 365 giorni. Il piccolo grafico mostra l'andamento
   della media mese per mese.
 
 Le statistiche si aggiornano automaticamente ogni pochi secondi.
@@ -29,7 +29,7 @@ mesi**, 12 di default: i super amministratori possono cambiarli nelle
 [Impostazioni](../administration/settings#territori)). La scelta viene ricordata finché resti connesso.
 
 - **Territori lavorati almeno una volta**: la percentuale e il numero di territori con almeno un'assegnazione nel
-  periodo, ad es. *97% (240 su 243)*: un'assegnazione **riconsegnata** nel periodo, o ancora **in corso**. La
+  periodo, ad es. *98,7% (240 su 243)*: un'assegnazione **riconsegnata** nel periodo, o ancora **in corso**. La
   percentuale è arrotondata per difetto, quindi 100% significa che ogni territorio è stato lavorato.
 - **Escluse le campagne**: lo stesso dato, contando solo le assegnazioni che non fanno parte di una campagna.
 - **Mai lavorati o non lavorati da più tempo**: i 5 territori mai assegnati, poi quelli riconsegnati da più tempo,
@@ -59,8 +59,8 @@ ultima (o, se nessuna è attiva, la prossima che inizierà), e si può scegliere
 Sotto la mappa, la **legenda** elenca i colori con il numero di territori di ciascuno.
 
 - Usa **+** e **−** (o la rotellina del mouse) per lo zoom, e trascina per spostarti.
-- Passa sopra un territorio per vederne il nome, e cliccalo per vederne la zona, lo stato e un link alla sua pagina
-  (se puoi visualizzare i territori).
+- Passa sopra un territorio per vederne il nome, e cliccalo per vederne la zona, il significato del suo colore (con
+  **Frequenza di assegnazione**, anche quante volte è stato assegnato) e il link **Vai al territorio** alla sua pagina.
 - Il pulsante **schermo intero** ingrandisce la mappa a tutto lo schermo.
 - Il pulsante dei **livelli** (in alto a destra) permette di:
   - scegliere la **mappa di base**: *Street Map* (OpenStreetMap), *Google Streets*, *Google Satellite* o

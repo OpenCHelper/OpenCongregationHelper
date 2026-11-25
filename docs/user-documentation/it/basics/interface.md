@@ -11,18 +11,22 @@ Tutte le pagine dell'applicazione condividono la stessa struttura.
 
 1. **Barra laterale**: il menu, diviso in gruppi. Vedi solo le voci che il tuo ruolo ti permette di usare.
    - **Reparto territori**: Territori, Zone, Campagne e Assegnazioni;
-   - **Amministrazione**: Utenti, Ruoli e Tag.
+   - **Testimonianza pubblica**: Poster e Depositi;
+   - **Pubblicazioni**: Pubblicazioni periodiche, Richieste ed Elenco pubblicazioni;
+   - **Amministrazione**: Utenti, Ruoli, Reparti, Tag e Impostazioni;
+   - **Sviluppatore**: i log dell'applicazione, delle email inviate e delle modifiche effettuate.
 
    Un numero accanto a una voce segnala qualcosa da controllare: accanto a **Campagne** (arancione) le campagne che
-   terminano entro 7 giorni, accanto ad **Assegnazioni** (rosso) i territori ancora fuori per una campagna terminata.
+   terminano entro 7 giorni, accanto ad **Assegnazioni** (rosso) i territori ancora fuori per una campagna terminata,
+   accanto a **Richieste** (arancione) le richieste di pubblicazioni ancora da ordinare o prendere.
 2. **Aiuto**: apre in un pannello laterale la pagina di questa guida che spiega la schermata corrente.
-3. **Ricerca globale**: cerca contemporaneamente tra territori, zone e campagne (vedi sotto).
+3. **Ricerca globale**: cerca contemporaneamente tra territori, zone, campagne e altro (vedi sotto).
 4. **Lingua**: cambia la lingua dell'interfaccia (inglese, italiano o spagnolo).
 5. **Notifiche**: la campanella mostra il numero di notifiche non lette (vedi [Notifiche](notifications)).
 6. **Menu utente**: il tuo [profilo](profile), l'aspetto dell'interfaccia (vedi sotto), **Installa app** (vedi
-   [Installare l'app](#installare-lapp)), **Informazioni** (la versione dell'applicazione e il pulsante **Segnala un
-   bug**) e il pulsante **Disconnetti**.
-7. **Documentazione**: apre questa guida. Sopra il pulsante è indicata la versione dell'applicazione.
+   [Installare l'app](#installare-lapp)), **Informazioni** (la versione dell'applicazione, più quelle di
+   Laravel, Filament e PHP fuori dalla produzione, e il pulsante **Segnala un bug**) e il pulsante **Disconnetti**.
+7. **Documentazione**: apre questa guida.
 8. **Azioni della pagina**: i pulsanti principali della pagina corrente (es. **Nuovo**).
 
 ## Ricerca globale
@@ -31,7 +35,10 @@ Clicca il campo di ricerca (oppure premi <kbd>Ctrl</kbd>+<kbd>K</kbd>, <kbd>⌘<
 scrivere. La ricerca guarda in:
 
 - **territori**: nome, descrizione, zona, note e tag;
-- **zone**, **campagne** e **tag**: nome.
+- **zone**, **campagne**, **tag**, **ruoli**, **pubblicazioni** e **depositi**: nome;
+- **poster**: titolo e codice.
+
+Trovi solo ciò che il tuo ruolo ti permette di vedere.
 
 Clicca un risultato per aprirlo.
 

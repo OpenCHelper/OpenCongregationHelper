@@ -11,18 +11,22 @@ Every page of the application shares the same layout.
 
 1. **Sidebar**: the menu, divided into groups. You only see the items your role allows you to use.
    - **Territory Department**: Territories, Zones, Campaigns and Assignments;
-   - **Administration**: Users, Roles and Tags.
+   - **Public Witnessing**: Posters and Storage;
+   - **Publications**: Regular publications, Requests and Publication list;
+   - **Administration**: Users, Roles, Departments, Tags and Settings;
+   - **Developer**: the logs of the application, of the emails sent and of the changes made.
 
    A number next to an item points out something to check: next to **Campaigns** (amber) the campaigns ending within
-   7 days, next to **Assignments** (red) the territories still out for a campaign that has ended.
+   7 days, next to **Assignments** (red) the territories still out for a campaign that has ended, next to **Requests**
+   (amber) the publication requests still to order or retrieve.
 2. **Help**: opens the page of this guide that explains the current screen, in a side panel.
-3. **Global search**: searches territories, zones and campaigns at once (see below).
+3. **Global search**: searches territories, zones, campaigns and more at once (see below).
 4. **Language**: switches the language of the interface (English, Italian or Spanish).
 5. **Notifications**: the bell shows the number of unread notifications (see [Notifications](notifications)).
 6. **User menu**: your [profile](profile), the look of the interface (see below), **Install app** (see
-   [Installing the app](#installing-the-app)), **About** (the version of the application, and the **Report a bug**
-   button) and the **Sign out** button.
-7. **Documentation**: opens this guide. Above it you can read the version of the application.
+   [Installing the app](#installing-the-app)), **About** (the version of the application, plus those of Laravel,
+   Filament and PHP outside of production, and the **Report a bug** button) and the **Sign out** button.
+7. **Documentation**: opens this guide.
 8. **Page actions**: the main buttons of the current page (e.g. **New territory**).
 
 ## Global search
@@ -31,7 +35,10 @@ Click the search field (or press <kbd>Ctrl</kbd>+<kbd>K</kbd>, <kbd>⌘</kbd>+<k
 search looks into:
 
 - **territories**: name, description, zone, notes and tags;
-- **zones**, **campaigns** and **tags**: name.
+- **zones**, **campaigns**, **tags**, **roles**, **publications** and **storage places**: name;
+- **posters**: title and code.
+
+You only find what your role allows you to see.
 
 Click a result to open it.
 
