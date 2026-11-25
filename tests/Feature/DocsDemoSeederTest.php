@@ -97,10 +97,19 @@ test('the assignments of the documentation are seeded', function () {
 });
 
 test('the departments, publications and posters of the documentation are seeded', function () {
-    $territories = Department::for(DepartmentKey::Territories);
+    $members = Department::ordered()->with('members')->get()->mapWithKeys(fn (Department $department): array => [
+        $department->key->value => $department->members
+            ->sortBy(fn (User $member): string => $member->pivot->role->value === DepartmentRole::Overseer->value ? '0' : '1'.$member->full_name)
+            ->map(fn (User $member): string => $member->full_name)
+            ->values()
+            ->all(),
+    ]);
 
-    expect($territories->members()->sole()->full_name)->toBe('Emily Parker')
-        ->and($territories->members()->sole()->pivot->role)->toBe(DepartmentRole::Overseer)
+    expect($members->all())->toBe([
+        DepartmentKey::Territories->value => ['Daniel Hughes', 'Samuel Price'],
+        DepartmentKey::PublicWitnessing->value => ['Thomas Reed', 'Oliver Hayes'],
+        DepartmentKey::Publications->value => ['Samuel Price', 'Thomas Reed'],
+    ])
         ->and(PublicationSubscriber::count())->toBe(count(DocsDemoSeeder::SUBSCRIPTIONS))
         ->and(PublicationRequest::whereNull('subscription_id')->count())->toBe(count(DocsDemoSeeder::REQUESTS))
         ->and(Poster::count())->toBe(8);

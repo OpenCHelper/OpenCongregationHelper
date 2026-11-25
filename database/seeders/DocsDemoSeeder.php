@@ -86,14 +86,16 @@ class DocsDemoSeeder extends Seeder
     ];
 
     /**
-     * The members of the departments, by full name: the first one is the overseer, the others are assistants.
+     * The members of the departments, by full name: the first one is the overseer, the others are assistants. Only
+     * brothers serve in the departments; James Collins is left out, so that his menu (shown while impersonating him)
+     * only has the territories and zones of a publisher.
      *
      * @var array<string, list<string>>
      */
     public const DEPARTMENTS = [
-        DepartmentKey::Territories->value => ['Emily Parker'],
-        DepartmentKey::PublicWitnessing->value => ['Olivia Bennett', 'Grace Mitchell'],
-        DepartmentKey::Publications->value => ['Grace Mitchell', 'Olivia Bennett'],
+        DepartmentKey::Territories->value => ['Daniel Hughes', 'Samuel Price'],
+        DepartmentKey::PublicWitnessing->value => ['Thomas Reed', 'Oliver Hayes'],
+        DepartmentKey::Publications->value => ['Samuel Price', 'Thomas Reed'],
     ];
 
     /**
