@@ -46,6 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   missing and the mail log table can be rolled back
   ([#84](https://github.com/OpenCHelper/OpenCongregationHelper/pull/84)).
 
+### Fixed
+
+- **Contacts**: setting a contact as primary from the user's page in the admin panel now replaces the previous primary
+  contact, as in the profile, instead of leaving the user with several
+  ([#76](https://github.com/OpenCHelper/OpenCongregationHelper/pull/76)).
+
 ### Security
 
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**

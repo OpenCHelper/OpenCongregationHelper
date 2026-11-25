@@ -50,8 +50,8 @@ Gli amministratori non possono impostare o modificare la password di un utente: 
 Clicca un utente per aprirne la pagina:
 
 - la scheda **Utente** mostra i suoi dati e le sue **Informazioni di contatto** (es. i contatti di emergenza), che puoi
-  aggiungere, modificare o eliminare anche da qui. **Chiama** e **Apri in Maps** avviano una telefonata o aprono
-  l'indirizzo;
+  aggiungere, modificare o eliminare anche da qui (un utente ha un solo **Contatto principale**). **Chiama** e
+  **Apri in Maps** avviano una telefonata o aprono l'indirizzo;
 - la scheda **Assegnazioni** elenca i territori assegnati all'utente.
 
 In fondo alla scheda **Utente**, **Statistiche** mostra le **Zone preferite** (ogni zona in cui il proclamatore ha
