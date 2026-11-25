@@ -397,7 +397,7 @@ return [
         'column_email' => 'Correo Electrónico',
         'column_role' => 'Rol',
         'column_email_verified' => '¿Correo verificado?',
-        'column_two_factor_authentication' => '¿Autenticación de dos factores?',
+        'column_two_factor_authentication' => '¿2FA?',
         'column_access_enabled' => '¿Acceso habilitado?',
         'column_created_at' => 'Creado En',
         'column_updated_at' => 'Actualizado En',

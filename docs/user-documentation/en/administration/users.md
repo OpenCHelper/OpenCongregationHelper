@@ -11,7 +11,7 @@ Open **Administration → Users** to manage the people registered in the applica
 
 The table shows name, email, **Departments** and whether the user can log in (**Access enabled?**). From the columns
 button next to the filters you can also show the **Role**, whether the email has been verified and whether the user
-has set up two-factor authentication. On a phone, each user is shown as a card with name, email and access, plus the columns chosen with the columns
+has set up two-factor authentication (**2FA?**). On a phone, each user is shown as a card with name, email and access, plus the columns chosen with the columns
 button; the list can be sorted from the **Sort by** menu. The **Access** filter shows only the users with access or only the virtual users, and tells
 how many there are of each.
 

@@ -396,7 +396,7 @@ return [
         'column_email' => 'Email',
         'column_role' => 'Role',
         'column_email_verified' => 'Email verified?',
-        'column_two_factor_authentication' => 'Two-factor authentication?',
+        'column_two_factor_authentication' => '2FA?',
         'column_access_enabled' => 'Access enabled?',
         'column_created_at' => 'Created At',
         'column_updated_at' => 'Updated At',
