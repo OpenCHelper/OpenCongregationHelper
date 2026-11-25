@@ -299,6 +299,11 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                                 }
 
                                                 if ($file instanceof TemporaryUploadedFile) {
+                                                    // Livewire throws for the files it cannot preview (e.g. HEIC saved as .jpg)
+                                                    if (! $file->isPreviewable()) {
+                                                        return null;
+                                                    }
+
                                                     return new HtmlString(
                                                         '<img src="'.e($file->temporaryUrl()).'" alt="'.$alt.'" class="rounded-lg">'
                                                     );

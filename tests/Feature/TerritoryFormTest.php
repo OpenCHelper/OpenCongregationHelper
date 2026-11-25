@@ -399,6 +399,30 @@ test('the image preview of the edit form shows the stored image', function () {
         ->toContain('/territories/stored.png?expiration=');
 });
 
+test('the image preview of the form shows a newly uploaded image only when it can be previewed', function (bool $isPreviewable) {
+    Storage::fake('local');
+
+    $upload = $isPreviewable
+        ? UploadedFile::fake()->image('new.png')
+        // Content Livewire cannot preview, under an image name
+        : UploadedFile::fake()->create('new.jpg', 10, 'image/heic');
+
+    $page = Livewire::test(CreateTerritory::class)
+        ->fillForm(['name' => 'Via Roma', 'image_file' => [$upload]]);
+
+    $preview = $page->instance()->form->getComponent('image_preview')->getState();
+
+    if ($isPreviewable) {
+        expect((string) $preview)->toContain('<img src="');
+    } else {
+        expect((string) $preview)->not->toContain('<img')
+            ->toContain(__('filament-resources.territory.missing_image'));
+    }
+})->with([
+    'previewable' => true,
+    'not previewable' => false,
+]);
+
 test('the map of a new territory opens on the configured default centre', function () {
     config(['filament-leaflet.default_map_center' => [39.8017, -89.6436]]);
 
