@@ -18,9 +18,13 @@
 
 <div class="flex w-full flex-col gap-2 pt-1.5">
     <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0">
-            <p class="leading-6 font-semibold text-gray-950 dark:text-white">{{ $record->getFullName() }}</p>
-            <p class="truncate text-sm text-gray-500 dark:text-gray-400">{{ $record->email }}</p>
+        <div class="flex min-w-0 items-center gap-3">
+            <x-filament-panels::avatar.user :user="$record" size="lg" class="shrink-0" />
+
+            <div class="min-w-0">
+                <p class="leading-6 font-semibold text-gray-950 dark:text-white">{{ $record->getFullName() }}</p>
+                <p class="truncate text-sm text-gray-500 dark:text-gray-400">{{ $record->email }}</p>
+            </div>
         </div>
 
         @if ($accessColumn = $table->getColumn('can_login'))

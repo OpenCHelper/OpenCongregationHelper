@@ -86,6 +86,7 @@ test('the card shown on phones has the name, the email and the enabled columns o
     expect($renderCard())
         ->toContain('Mario Rossi')
         ->toContain('mario.rossi@example.com')
+        ->toContain('fi-user-avatar')
         ->not->toContain('card-role')
         ->not->toContain(__('filament-resources.user.column_two_factor_authentication'));
 
