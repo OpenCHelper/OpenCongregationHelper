@@ -88,6 +88,17 @@ reparto**, e vi entrano tutti insieme. Chi serve già nel reparto mantiene il su
 Usa **Elimina** nella pagina dell'utente, oppure seleziona alcuni utenti e usa l'azione di massa
 **Elimina selezionati**.
 
+Un utente a cui è stato assegnato almeno un territorio (anche se già restituito) non può essere eliminato: con lui
+andrebbe persa la storia di quei territori (quando sono stati percorsi, la copertura, le campagne). Ad esempio, quando
+un proclamatore si trasferisce:
+
+1. Clicca **Elimina** nella sua pagina: la finestra spiega perché non può essere eliminato.
+2. Clicca **Disabilita accesso**: diventa un [utente virtuale](#utenti-e-utenti-virtuali), non può più accedere e le
+   sue assegnazioni vengono conservate. Restituisci i suoi territori in corso, se ce ne sono, quando li riavrai.
+
+L'azione di massa elimina gli altri utenti selezionati e indica quanti sono stati esclusi e perché. Nemmeno gli utenti
+con delle assegnazioni possono eliminare il proprio account.
+
 ## L'utente root
 
 L'utente root è il primo utente, creato durante l'installazione. Per evitare di perdere l'accesso all'applicazione:

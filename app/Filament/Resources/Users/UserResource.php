@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Users;
 use App\Enums\DepartmentKey;
 use App\Enums\NavigationGroup;
 use App\Filament\Resources\Users\Actions\AddToDepartmentBulkAction;
+use App\Filament\Resources\Users\Actions\DeleteUsersBulkAction;
 use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
@@ -16,12 +17,10 @@ use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
 use App\Models\Department;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -279,37 +278,7 @@ class UserResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     AddToDepartmentBulkAction::make(),
-                    DeleteBulkAction::make()
-                        ->deselectRecordsAfterCompletion()
-                        ->action(function ($records) {
-                            // Check if root user is in the selection
-                            $hasRootUser = $records->contains(fn (User $record) => $record->isRootUser());
-
-                            // Filter out root user before deletion (root user can never be deleted)
-                            $recordsToDelete = $records->filter(fn (User $record) => ! $record->isRootUser());
-                            $deletedCount = 0;
-
-                            if ($recordsToDelete->isNotEmpty()) {
-                                $recordsToDelete->each->delete();
-                                $deletedCount = $recordsToDelete->count();
-                            }
-
-                            // Provide appropriate feedback based on the situation
-                            if ($hasRootUser && $deletedCount > 0) {
-                                // Some users deleted, but root user was excluded
-                                Notification::make()
-                                    ->warning()
-                                    ->title(__('profile.root_user_protection.bulk_delete_partial_success', ['deleted' => $deletedCount]))
-                                    ->send();
-                            } elseif ($hasRootUser && $deletedCount === 0) {
-                                // Only root user was selected
-                                Notification::make()
-                                    ->danger()
-                                    ->title(__('profile.root_user_protection.bulk_delete_only_root_selected'))
-                                    ->send();
-                            }
-                            // If no root user was involved, let Filament show the default success message
-                        }),
+                    DeleteUsersBulkAction::make(),
                 ]),
             ]);
     }

@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Users**: a user who has assignments can no longer be deleted, from their page, the bulk action or their profile:
+  it permanently deleted the history of every territory they had (dates, coverage, campaigns) and freed their
+  territories in progress. The delete modal explains why and offers to disable their access instead, making them a
+  virtual user ([#93](https://github.com/OpenCHelper/OpenCongregationHelper/pull/93)).
 - **Accessibility**: territory images have the territory name as alternative text, and the "— or —" separator of the
   image field is hidden from screen readers ([#78](https://github.com/OpenCHelper/OpenCongregationHelper/pull/78)).
 - Translated the texts still in English: the image fields of territories, the **API Tokens** menu item and the Italian

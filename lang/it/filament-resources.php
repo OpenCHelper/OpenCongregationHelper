@@ -408,6 +408,12 @@ return [
         'tab_all' => 'Tutti',
         'tab_with_access' => 'Con accesso',
         'tab_virtual' => 'Virtuali',
+        'delete_refused_title' => 'Utente non eliminato',
+        'delete_refused_body' => 'A questo utente sono stati assegnati dei territori: eliminarlo cancellerebbe definitivamente la storia di quei territori (quando sono stati percorsi, la copertura, le campagne).',
+        'delete_refused_disable_access' => 'Disabilita invece il suo accesso: diventerà un utente virtuale e le sue assegnazioni saranno conservate.',
+        'delete_refused_bulk' => '{1} :count utente non è stato eliminato perché gli sono stati assegnati dei territori: disabilita invece il suo accesso.|[2,*] :count utenti non sono stati eliminati perché sono stati loro assegnati dei territori: disabilita invece il loro accesso.',
+        'action_disable_access' => 'Disabilita accesso',
+        'access_disabled' => 'Accesso disabilitato: :name ora è un utente virtuale.',
     ],
     'shared_resource' => [
         'details_title' => 'Dettagli :resourceType',

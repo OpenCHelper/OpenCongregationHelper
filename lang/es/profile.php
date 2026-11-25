@@ -26,8 +26,6 @@ return [
         'password_change_not_allowed' => 'Los cambios de contraseña no están permitidos para el usuario root en entornos que no son de producción.',
         'account_deletion_not_allowed' => 'El usuario root no puede ser eliminado bajo ninguna circunstancia.',
         'edit_action_disabled' => 'La edición no está permitida para el usuario root en entornos que no son de producción.',
-        'bulk_delete_partial_success' => ':deleted usuario(s) eliminado(s) exitosamente. El usuario root fue excluido y no pudo ser eliminado.',
-        'bulk_delete_only_root_selected' => 'No se pueden eliminar los usuario(s) seleccionado(s). El usuario root no puede ser eliminado bajo ninguna circunstancia.',
     ],
     'update_password' => [
         'title' => 'Actualizar contraseña',
@@ -76,6 +74,7 @@ return [
         'warning' => 'Una vez que tu cuenta sea eliminada, todos sus recursos y datos serán eliminados permanentemente. Antes de eliminar tu cuenta, por favor descarga cualquier dato o información que desees conservar.',
         'delete_button' => 'Eliminar cuenta',
         'confirm_deletion' => '¿Estás seguro de que quieres eliminar tu cuenta? Una vez que tu cuenta sea eliminada, todos sus recursos y datos serán eliminados permanentemente. Por favor ingresa tu contraseña para confirmar que quieres eliminar permanentemente tu cuenta.',
+        'has_assignments' => 'Se te han asignado territorios: eliminar tu cuenta borraría definitivamente el historial de esos territorios, así que no se puede eliminar. En su lugar, pide a un administrador que deshabilite tu acceso.',
         'password_placeholder' => 'Contraseña',
         'cancel' => 'Cancelar',
     ],
