@@ -45,6 +45,25 @@ test('territories assigned more than once in a campaign are counted once', funct
         ->assertDontSee('150%');
 });
 
+test('soft-deleted territories are left out of the completion', function () {
+    $campaign = Campaign::factory()->create(['valid_until' => null]);
+    [$deleted, $worked] = Territory::factory()->count(2)->for(TerritoryZone::factory(), 'territoryZone')->create();
+
+    foreach ([$deleted, $worked] as $territory) {
+        TerritoryAssignment::factory()->create([
+            'territory_id' => $territory->id,
+            'assignee_id' => 1,
+            'campaign_id' => $campaign->id,
+            'ended_at' => now(),
+        ]);
+    }
+    $deleted->delete();
+
+    Livewire::test(CampaignOverview::class, ['record' => $campaign])
+        ->assertSee('100%')
+        ->assertDontSee('200%');
+});
+
 test('no warning is shown at the beginning of a campaign', function () {
     $campaign = Campaign::factory()->create([
         'valid_from' => now()->subDay(),
