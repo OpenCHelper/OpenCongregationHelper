@@ -35,7 +35,7 @@ It is possible to create new territories in two ways:
 | **Tags** | Tags of the territory. |
 
 The **Commercial?**, **Created At** and **Updated At** columns are hidden by default: show them with the columns
-button.
+button, which can also hide the **Tags**.
 
 > 💡 **Tip:** sort by **Assignment Duration** to quickly find the territories that have been out the longest, or the
 > ones that have not been worked for a long time.
