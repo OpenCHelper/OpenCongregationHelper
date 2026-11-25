@@ -23,8 +23,8 @@ Il ruolo **super_admin** (*Super Admin*) può fare tutto, comprese le azioni ris
 
 1. Clicca **Nuovo** (o **Modifica** su un ruolo esistente).
 2. Inserisci il **Nome** (es. `publisher`). Lascia **Nome Guard** impostato su `web`.
-3. Spunta i permessi nelle schede **Resources** e **Pages**. **Seleziona tutto** in ogni riquadro spunta tutti i
-   permessi di quella risorsa; l'interruttore in alto li seleziona tutti.
+3. Spunta i permessi nella scheda **Resources**. **Seleziona tutto** in ogni riquadro spunta tutti i permessi di
+   quella risorsa; l'interruttore in alto li seleziona tutti.
 4. Clicca **Salva**.
 
 ![Modifica di un ruolo](/docs/user-documentation/it/administration/assets/role-edit.webp)
@@ -48,14 +48,16 @@ Alcuni permessi hanno un significato particolare:
 - **Create** su *Territory Assignment* permette di **assegnare** i territori, **Update** permette di **riconsegnarli**;
 - senza **View Any** su *Territory Assignment*, l'utente vede solo **le proprie** assegnazioni;
 - **View Any** su *Territory* mostra le statistiche, la copertura del territorio e la mappa nella
-  [dashboard](../basics/dashboard);
-- la scheda *Pages* controlla, ad esempio, l'accesso alla pagina del profilo.
+  [dashboard](../basics/dashboard).
+
+Le pagine non hanno permessi propri: tutti possono aprire il proprio [profilo](../basics/profile), e solo i super
+amministratori le [impostazioni](settings) e i log.
 
 ## Ruoli consigliati
 
 | Ruolo | Permessi consigliati |
 |-------|----------------------|
-| **Proclamatore** | View / View Any su Territorio e Zona, View su Assegnazione, la pagina del profilo. I proclamatori vedono i territori e solo le proprie assegnazioni. |
+| **Proclamatore** | View / View Any su Territorio e Zona, View su Assegnazione. I proclamatori vedono i territori e solo le proprie assegnazioni. |
 | **Servitore di territorio** | Tutto su Territorio, Zona, Assegnazione e Campagna, più View / View Any su Utente. |
 | **Amministratore** | Il ruolo **super_admin**. |
 
