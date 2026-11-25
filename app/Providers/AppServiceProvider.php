@@ -9,6 +9,7 @@ use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
 use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
+use App\Settings\SecuritySettings;
 use App\Support\AiAssistantConnections;
 use App\Support\UserLocale;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
@@ -23,8 +24,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +39,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\NotPwnedVerifier;
+use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
@@ -52,6 +58,13 @@ class AppServiceProvider extends ServiceProvider
         // `db:wipe` (also run by `migrate:fresh`) drops only the tables of this installation when the database is
         // shared (see the command). Extended, not bound: the deferred Artisan provider registers the command later.
         $this->app->extend(WipeCommand::class, fn (): PrefixAwareWipeCommand => new PrefixAwareWipeCommand);
+
+        // The leaked-password check waits 30 seconds by default for Have I Been Pwned: on servers that cannot reach it,
+        // every password change would hang that long. Extended for the same reason (the validation provider is deferred)
+        $this->app->extend(UncompromisedVerifier::class, fn (UncompromisedVerifier $verifier, Application $app): UncompromisedVerifier => new NotPwnedVerifier(
+            $app->make(HttpFactory::class),
+            (int) config('auth.password_leak_check.timeout'),
+        ));
     }
 
     /**
@@ -166,9 +179,29 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureAiAssistants();
 
+        $this->configurePasswordPolicy();
+
         // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
         ExportColumn::configureUsing(function (ExportColumn $column): void {
             $column->preventFormulaInjection();
+        });
+    }
+
+    /**
+     * The rules of the passwords chosen by the users (Fortify, the Filament password reset and invitation page, the
+     * profile and the Artisan commands all use `Password::default()`).
+     *
+     * In production a password needs at least 12 characters, elsewhere the 8 characters of Laravel are enough. It must
+     * not appear in a known data leak either (checked with the k-anonymity API of Have I Been Pwned, which only
+     * receives the first characters of its SHA-1 hash), when the Security settings say so: by default
+     * `PASSWORD_LEAK_CHECK`, itself on only in production, so that local and test environments do not call the API.
+     */
+    private function configurePasswordPolicy(): void
+    {
+        Password::defaults(function (): Password {
+            $rule = Password::min(app()->isProduction() ? 12 : 8)->max(255);
+
+            return app(SecuritySettings::class)->password_leak_check ? $rule->uncompromised() : $rule;
         });
     }
 

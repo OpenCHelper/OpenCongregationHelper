@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Support\PasswordPolicy;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Database\Seeders\ShieldSeeder;
 use Illuminate\Console\Command;
@@ -92,12 +93,22 @@ class InstallCommand extends Command
                     required: true,
                     validate: fn (string $email): ?string => filter_var($email, FILTER_VALIDATE_EMAIL) ? null : 'The email address must be valid.',
                 ),
-                'password' => filled($root['password'] ?? null) ? $root['password'] : password(
-                    label: 'Password of the root user',
-                    required: true,
-                    validate: fn (string $password): ?string => strlen($password) < 8 ? 'The password must be at least 8 characters.' : null,
-                ),
+                'password' => filled($root['password'] ?? null) ? $root['password'] : $this->askPassword(),
             ];
+        }
+
+        // A password from `INITIAL_ROOT_PASSWORD` follows the password policy too: another one is asked for when
+        // running interactively
+        $passwordError = PasswordPolicy::errorFor($root['password']);
+
+        if ($passwordError !== null) {
+            $this->components->error("The INITIAL_ROOT_PASSWORD environment variable does not follow the password policy: {$passwordError}");
+
+            if (! $this->input->isInteractive()) {
+                return false;
+            }
+
+            $root['password'] = $this->askPassword();
         }
 
         [$firstName, $lastName] = array_pad(explode(' ', $root['name'], 2), 2, '');
@@ -115,5 +126,14 @@ class InstallCommand extends Command
         $this->components->info("The root user ({$root['email']}) was created.");
 
         return true;
+    }
+
+    private function askPassword(): string
+    {
+        return password(
+            label: 'Password of the root user',
+            required: true,
+            validate: fn (string $password): ?string => PasswordPolicy::errorFor($password),
+        );
     }
 }

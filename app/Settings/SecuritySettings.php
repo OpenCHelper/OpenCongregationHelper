@@ -2,7 +2,7 @@
 
 namespace App\Settings;
 
-class SecuritySettings extends AppSettings
+class SecuritySettings extends ConfigSettings
 {
     /**
      * Whether the users must set up two-factor authentication before using the app (otherwise they can still enable it
@@ -21,8 +21,20 @@ class SecuritySettings extends AppSettings
      */
     public bool $ai_assistants_enabled = false;
 
+    /**
+     * Whether the passwords chosen by the users are checked against the known data leaks of Have I Been Pwned.
+     */
+    public ?bool $password_leak_check = null;
+
     public static function group(): string
     {
         return 'security';
+    }
+
+    public static function configKeys(): array
+    {
+        return [
+            'password_leak_check' => 'auth.password_leak_check.enabled',
+        ];
     }
 }

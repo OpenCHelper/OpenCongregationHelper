@@ -74,7 +74,9 @@ them, which must then be approved again.
 
 ## Update password
 
-Enter your **Current password**, then the **New password** twice and click **Save**. Use a long, random password.
+Enter your **Current password**, then the **New password** twice and click **Save**. Use a long, random password: it
+must have at least 12 characters and, unless the administrators turned the check off, must not appear in a known data
+leak. The same rules apply when you choose your password from an invitation or with **Forgot password?**.
 
 ## Two-factor authentication
 
