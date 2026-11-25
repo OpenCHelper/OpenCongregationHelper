@@ -46,7 +46,8 @@ In the **Image** tab you can either:
   you crop and rotate the image before saving it.
 
 The two options are alternative: filling one disables the other. Uploaded images are stored privately and can only be
-seen by logged-in users.
+seen by logged-in users. When you edit a territory with an uploaded image, the image is in **Image from file**:
+remove it to upload another one or to use a link instead.
 
 ![Image tab](/docs/user-documentation/en/territories/assets/territory-edit-image.webp)
 

@@ -41,12 +41,13 @@ Il disegno della mappa è descritto in [Disegnare le mappe](maps).
 
 Nella scheda **Immagine** puoi:
 
-- incollare un link in **Image from URL**, oppure
-- trascinare un file su **Image from file** (o cliccare **Sfoglia**): un'immagine PNG, JPEG o WebP. L'editor
+- incollare un link in **Immagine da URL**, oppure
+- trascinare un file su **Immagine da file** (o cliccare **Sfoglia**): un'immagine PNG, JPEG o WebP. L'editor
   integrato permette di ritagliare e ruotare l'immagine prima di salvarla.
 
 Le due opzioni sono alternative: compilarne una disabilita l'altra. Le immagini caricate sono conservate in modo
-privato e possono vederle solo gli utenti che hanno effettuato l'accesso.
+privato e possono vederle solo gli utenti che hanno effettuato l'accesso. Quando modifichi un territorio con
+un'immagine caricata, l'immagine si trova in **Immagine da file**: rimuovila per caricarne un'altra o per usare un link.
 
 ![Scheda Immagine](/docs/user-documentation/it/territories/assets/territory-edit-image.webp)
 
