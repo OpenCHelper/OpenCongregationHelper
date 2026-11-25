@@ -109,8 +109,6 @@ test('the shared page of an assignment loads only the script of its map', functi
 });
 
 test('the dashboard map loads only the script of its map', function () {
-    auth()->user()->givePermissionTo(Permission::findOrCreate('View:TerritoryGlobalMap', 'web'));
-
     $component = Livewire::withoutLazyLoading()->test(TerritoryGlobalMap::class)->assertOk();
 
     expect($component->snapshot['memo']['assets'] ?? [])->toBe([mapAssetsKey('leaflet-map-assets')]);

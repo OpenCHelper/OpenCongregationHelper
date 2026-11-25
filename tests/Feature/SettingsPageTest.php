@@ -559,10 +559,7 @@ test('the address of the Kingdom Hall is optional', function () {
 });
 
 test('the global map opens on the default centre of the settings', function () {
-    $this->actingAs(User::factory()->create()->givePermissionTo(
-        Permission::findOrCreate('View:TerritoryGlobalMap', 'web'),
-        Permission::findOrCreate('ViewAny:Territory', 'web'),
-    ));
+    $this->actingAs(User::factory()->create()->givePermissionTo(Permission::findOrCreate('ViewAny:Territory', 'web')));
 
     expect(Livewire::test(TerritoryGlobalMap::class)->instance()->getMapData()['defaultCoord'])
         ->toBe(config('filament-leaflet.default_map_center'));

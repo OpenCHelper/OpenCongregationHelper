@@ -5,6 +5,7 @@ use App\Filament\Resources\Departments\DepartmentResource;
 use App\Filament\Widgets\NoDashboardAccess;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TerritoryCoverage;
+use App\Filament\Widgets\TerritoryGlobalMap;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -29,7 +30,8 @@ return [
         'cluster' => null,
         'tabs' => [
             'pages' => true,
-            'widgets' => true,
+            // Every widget is shown according to the permissions of the resources (see `widgets.exclude`)
+            'widgets' => false,
             'resources' => true,
             'custom_permissions' => false,
         ],
@@ -246,10 +248,11 @@ return [
         'exclude' => [
             AccountWidget::class,
             FilamentInfoWidget::class,
-            // Shown to who can view the territories (or, for the last one, to who cannot): no permission of their own
+            // Shown to who can view the territories (or, for the first one, to who cannot): no permission of their own
             NoDashboardAccess::class,
             StatsOverview::class,
             TerritoryCoverage::class,
+            TerritoryGlobalMap::class,
         ],
     ],
 

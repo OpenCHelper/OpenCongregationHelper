@@ -8,6 +8,7 @@ use App\Filament\Widgets\TerritoryGlobalMap;
 use App\Models\Territory;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Database\Seeders\FakeRoleSeeder;
 use Database\Seeders\ShieldSeeder;
 use Filament\Facades\Filament;
@@ -73,18 +74,24 @@ test('the seeded roles and the super admins see every dashboard widget', functio
         ->assertDontSee(__('filament-widgets.no_dashboard_access.description'));
 })->with(['super_admin', 'publisher', 'group_overseer', 'service_overseer', 'territory_servant']);
 
-test('the map also needs its own permission', function () {
+test('every widget follows the permission to view the territories', function () {
     $user = User::factory()->create()->givePermissionTo(Permission::findByName('ViewAny:Territory', 'web'));
 
-    expect(visibleDashboardWidgets($user))->toBe([StatsOverview::class, TerritoryCoverage::class]);
-
-    $user->givePermissionTo(Permission::findByName('View:TerritoryGlobalMap', 'web'));
-
-    expect(visibleDashboardWidgets($user->refresh()))->toBe(NoDashboardAccess::DASHBOARD_WIDGETS);
+    expect(visibleDashboardWidgets($user))->toBe(NoDashboardAccess::DASHBOARD_WIDGETS);
 });
 
-test('the permission of the map alone does not show the territories', function () {
+test('the former permission of the map alone does not show the territories', function () {
     $user = User::factory()->create()->givePermissionTo(Permission::findByName('View:TerritoryGlobalMap', 'web'));
 
     expect(visibleDashboardWidgets($user))->toBe([NoDashboardAccess::class]);
+});
+
+test('the roles offer no permission for the dashboard widgets', function () {
+    $this->actingAs(User::factory()->create()->assignRole('super_admin'));
+
+    $this->get(RoleResource::getUrl('create'))
+        ->assertOk()
+        ->assertDontSee('TerritoryGlobalMap')
+        ->assertDontSee('StatsOverview')
+        ->assertDontSee('TerritoryCoverage');
 });

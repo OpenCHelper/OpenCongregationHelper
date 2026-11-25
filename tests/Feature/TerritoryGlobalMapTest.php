@@ -23,11 +23,7 @@ beforeEach(function () {
 
     User::factory()->create(['id' => 1]);
 
-    $viewer = User::factory()->create();
-    foreach (['View:TerritoryGlobalMap', 'ViewAny:Territory'] as $permission) {
-        $viewer->givePermissionTo(Permission::findOrCreate($permission, 'web'));
-    }
-    $this->actingAs($viewer);
+    $this->actingAs(User::factory()->create()->givePermissionTo(Permission::findOrCreate('ViewAny:Territory', 'web')));
 
     $this->assignee = User::factory()->create();
     $this->zone = TerritoryZone::factory()->create(['name' => 'North', 'color' => '#ff0000']);

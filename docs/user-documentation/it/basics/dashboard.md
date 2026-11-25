@@ -8,9 +8,8 @@ order: 3
 La dashboard è la prima pagina che vedi dopo l'accesso. Offre una panoramica dell'intero registro dei territori.
 
 Cosa vedi dipende dal tuo [ruolo](../administration/roles): le statistiche, la copertura del territorio e la mappa
-compaiono solo se puoi vedere i territori (la mappa richiede anche un permesso a parte). Se non puoi vederne nessuna,
-ad esempio perché non ti è ancora stato assegnato un ruolo, la dashboard mostra solo un messaggio di benvenuto: chiedi
-a un amministratore se ti serve l'accesso.
+compaiono solo se puoi vedere i territori. Altrimenti, ad esempio perché non ti è ancora stato assegnato un ruolo, la
+dashboard mostra solo un messaggio di benvenuto: chiedi a un amministratore se ti serve l'accesso.
 
 ![Dashboard](/docs/user-documentation/it/basics/assets/dashboard.webp)
 
