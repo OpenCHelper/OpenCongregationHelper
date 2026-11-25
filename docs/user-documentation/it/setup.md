@@ -55,8 +55,8 @@ INITIAL_ROOT_PASSWORD="una-frase-lunga-e-unica"
 ### Impostazioni principali
 
 `MAP_DEFAULT_CENTER`, `ENABLE_SHARED_PII`, `GUEST_ALLOW_RETURNING_ASSIGNMENT` e `PASSWORD_LEAK_CHECK` sono solo i
-valori predefiniti: i super amministratori possono cambiarli dalle pagine [Impostazioni](administration/settings), senza modificare `.env`.
-Se la cache delle impostazioni è attiva (`SETTINGS_CACHE_ENABLED=true`), dopo averli cambiati in `.env` esegui
+valori predefiniti: i super amministratori possono cambiarli dalle pagine [Impostazioni](administration/settings),
+senza modificare `.env`. Se la cache delle impostazioni è attiva (`SETTINGS_CACHE_ENABLED=true`), dopo averli cambiati in `.env` esegui
 `php artisan settings:clear-cache`, altrimenti le impostazioni non cambiate da quelle pagine mantengono il valore
 precedente.
 
