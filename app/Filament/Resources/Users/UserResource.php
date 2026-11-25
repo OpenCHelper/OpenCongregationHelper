@@ -16,6 +16,7 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
 use App\Models\Department;
 use App\Models\User;
+use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
@@ -285,10 +286,10 @@ class UserResource extends Resource
                         'count' => static::countUsers(),
                     ]))
                     ->trueLabel(fn (): string => __('filament-resources.user.filter_access_with_access', [
-                        'count' => static::countUsers(canLogin: true),
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->where('can_login', true)),
                     ]))
                     ->falseLabel(fn (): string => __('filament-resources.user.filter_access_virtual', [
-                        'count' => static::countUsers(canLogin: false),
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->where('can_login', false)),
                     ]))
                     ->indicateUsing(fn (array $state): array => match (blank($state['value'] ?? null) ? null : (bool) $state['value']) {
                         true => [Indicator::make(__('filament-resources.user.filter_access_indicator_with_access'))],
@@ -297,19 +298,41 @@ class UserResource extends Resource
                     }),
                 TernaryFilter::make('email_verified_at')
                     ->label(__('filament-resources.user.filter_email_verified'))
-                    ->placeholder(__('filament-resources.user.filter_all'))
-                    ->trueLabel(__('filament-resources.user.filter_email_verified_yes'))
-                    ->falseLabel(__('filament-resources.user.filter_email_verified_no'))
-                    ->nullable(),
+                    ->placeholder(fn (): string => __('filament-resources.user.filter_all', [
+                        'count' => static::countUsers(),
+                    ]))
+                    ->trueLabel(fn (): string => __('filament-resources.user.filter_email_verified_yes', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->whereNotNull('email_verified_at')),
+                    ]))
+                    ->falseLabel(fn (): string => __('filament-resources.user.filter_email_verified_no', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->whereNull('email_verified_at')),
+                    ]))
+                    ->nullable()
+                    ->indicateUsing(fn (array $state): array => match (blank($state['value'] ?? null) ? null : (bool) $state['value']) {
+                        true => [Indicator::make(__('filament-resources.user.filter_email_verified_indicator_yes'))],
+                        false => [Indicator::make(__('filament-resources.user.filter_email_verified_indicator_no'))],
+                        null => [],
+                    }),
                 TernaryFilter::make('two_factor_authentication')
                     ->label(__('filament-resources.user.filter_two_factor_authentication'))
-                    ->placeholder(__('filament-resources.user.filter_all'))
-                    ->trueLabel(__('filament-resources.user.filter_two_factor_authentication_yes'))
-                    ->falseLabel(__('filament-resources.user.filter_two_factor_authentication_no'))
+                    ->placeholder(fn (): string => __('filament-resources.user.filter_all', [
+                        'count' => static::countUsers(),
+                    ]))
+                    ->trueLabel(fn (): string => __('filament-resources.user.filter_two_factor_authentication_yes', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->whereNotNull('app_authentication_secret')),
+                    ]))
+                    ->falseLabel(fn (): string => __('filament-resources.user.filter_two_factor_authentication_no', [
+                        'count' => static::countUsers(fn (Builder $query): Builder => $query->whereNull('app_authentication_secret')),
+                    ]))
                     ->queries(
                         true: fn (Builder $query): Builder => $query->whereNotNull('app_authentication_secret'),
                         false: fn (Builder $query): Builder => $query->whereNull('app_authentication_secret'),
-                    ),
+                    )
+                    ->indicateUsing(fn (array $state): array => match (blank($state['value'] ?? null) ? null : (bool) $state['value']) {
+                        true => [Indicator::make(__('filament-resources.user.filter_two_factor_authentication_indicator_yes'))],
+                        false => [Indicator::make(__('filament-resources.user.filter_two_factor_authentication_indicator_no'))],
+                        null => [],
+                    }),
             ])
             ->recordActions([
                 ResendInvitationAction::make(),
@@ -357,12 +380,14 @@ class UserResource extends Resource
     }
 
     /**
-     * Count the users listed in the table, optionally only those who can (or cannot) log in.
+     * Count the users listed in the table, optionally only those matching the given constraint.
+     *
+     * @param  (Closure(Builder): Builder)|null  $constraint
      */
-    public static function countUsers(?bool $canLogin = null): int
+    public static function countUsers(?Closure $constraint = null): int
     {
         return static::getEloquentQuery()
-            ->when($canLogin !== null, fn (Builder $query): Builder => $query->where('can_login', $canLogin))
+            ->when($constraint, $constraint)
             ->count();
     }
 

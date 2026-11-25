@@ -124,24 +124,41 @@ test('users can be filtered by email verification', function () {
     $verifiedUser = User::factory()->create(['email_verified_at' => now()]);
     $unverifiedUser = User::factory()->create(['email_verified_at' => null]);
 
-    Livewire::test(ListUsers::class)
+    $component = Livewire::test(ListUsers::class);
+
+    // The root user and the manager of `beforeEach()` are not verified (the default of the factory)
+    $filter = $component->instance()->getTable()->getFilter('email_verified_at');
+    expect($filter->getPlaceholder())->toBe(__('filament-resources.user.filter_all', ['count' => 4]))
+        ->and($filter->getTrueLabel())->toBe(__('filament-resources.user.filter_email_verified_yes', ['count' => 1]))
+        ->and($filter->getFalseLabel())->toBe(__('filament-resources.user.filter_email_verified_no', ['count' => 3]));
+
+    $component
         ->filterTable('email_verified_at', true)
         ->assertCanSeeTableRecords([$verifiedUser])
         ->assertCanNotSeeTableRecords([$unverifiedUser])
         ->filterTable('email_verified_at', false)
         ->assertCanSeeTableRecords([$unverifiedUser])
-        ->assertCanNotSeeTableRecords([$verifiedUser]);
+        ->assertCanNotSeeTableRecords([$verifiedUser])
+        ->assertSee(__('filament-resources.user.filter_email_verified_indicator_no'));
 });
 
 test('users can be filtered by two-factor authentication', function () {
     $userWithTwoFactorAuthentication = User::factory()->create(['app_authentication_secret' => 'secret']);
     $userWithoutTwoFactorAuthentication = User::factory()->create();
 
-    Livewire::test(ListUsers::class)
+    $component = Livewire::test(ListUsers::class);
+
+    $filter = $component->instance()->getTable()->getFilter('two_factor_authentication');
+    expect($filter->getPlaceholder())->toBe(__('filament-resources.user.filter_all', ['count' => 4]))
+        ->and($filter->getTrueLabel())->toBe(__('filament-resources.user.filter_two_factor_authentication_yes', ['count' => 1]))
+        ->and($filter->getFalseLabel())->toBe(__('filament-resources.user.filter_two_factor_authentication_no', ['count' => 3]));
+
+    $component
         ->filterTable('two_factor_authentication', true)
         ->assertCanSeeTableRecords([$userWithTwoFactorAuthentication])
         ->assertCanNotSeeTableRecords([$userWithoutTwoFactorAuthentication])
         ->filterTable('two_factor_authentication', false)
         ->assertCanSeeTableRecords([$userWithoutTwoFactorAuthentication])
-        ->assertCanNotSeeTableRecords([$userWithTwoFactorAuthentication]);
+        ->assertCanNotSeeTableRecords([$userWithTwoFactorAuthentication])
+        ->assertSee(__('filament-resources.user.filter_two_factor_authentication_indicator_no'));
 });
