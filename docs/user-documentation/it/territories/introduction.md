@@ -52,9 +52,12 @@ cercare solo in quella colonna.
 
 Scegli un valore in **Raggruppa per** per dividere la tabella:
 
-- **Zona**: un gruppo per zona, con il numero di territori che contiene;
-- **Campagna**: raggruppa i territori in base alla campagna della loro assegnazione attuale. I territori disponibili
-  sono elencati sotto *Nessuna campagna*.
+- **Zona**: un gruppo per zona;
+- **Campagna**: raggruppa i territori in base alla campagna della loro assegnazione attuale. I territori disponibili,
+  e quelli assegnati fuori da una campagna, sono elencati sotto *Nessuna campagna*.
+
+Il titolo di ogni gruppo mostra quanti territori contiene tra quelli che corrispondono alla scheda, ai filtri e alla
+ricerca attuali.
 
 Clicca il titolo di un gruppo per chiuderlo o aprirlo.
 
