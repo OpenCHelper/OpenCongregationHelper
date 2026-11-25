@@ -44,6 +44,8 @@ Some permissions have a special meaning:
 
 - **Create** on *Territory Assignment* allows to **assign** territories, **Update** allows to **return** them;
 - without **View Any** on *Territory Assignment*, the user only sees **their own** assignments;
+- **View Any** on *Territory* shows the statistics, the territory coverage and the map on the
+  [dashboard](../basics/dashboard); the map also needs *Territory Global Map* in the *Widgets* tab;
 - the *Pages* and *Widgets* tabs control, for example, the access to the profile page and the dashboard map.
 
 ## Suggested roles

@@ -7,6 +7,11 @@ order: 3
 
 The dashboard is the first page you see after logging in. It gives an overview of the whole territory register.
 
+What you see depends on your [role](../administration/roles): the statistics, the territory coverage and the map are
+shown only if you can view the territories (the map also needs its own permission). If you can see none of them, e.g.
+because you have not been given a role yet, the dashboard only shows a welcome message: ask an administrator if you
+need access.
+
 ![Dashboard](/docs/user-documentation/en/basics/assets/dashboard.webp)
 
 ## Statistics

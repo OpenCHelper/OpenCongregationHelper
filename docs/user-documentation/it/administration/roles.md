@@ -43,6 +43,8 @@ Alcuni permessi hanno un significato particolare:
 
 - **Create** su *Territory Assignment* permette di **assegnare** i territori, **Update** permette di **riconsegnarli**;
 - senza **View Any** su *Territory Assignment*, l'utente vede solo **le proprie** assegnazioni;
+- **View Any** su *Territory* mostra le statistiche, la copertura del territorio e la mappa nella
+  [dashboard](../basics/dashboard); la mappa richiede anche *Territory Global Map* nella scheda *Widget*;
 - le schede *Pagine* e *Widget* controllano, ad esempio, l'accesso alla pagina del profilo e alla mappa della dashboard.
 
 ## Ruoli consigliati

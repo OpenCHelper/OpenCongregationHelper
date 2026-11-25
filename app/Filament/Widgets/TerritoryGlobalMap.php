@@ -24,6 +24,18 @@ class TerritoryGlobalMap extends MapWidget
 {
     protected string $view = 'filament.widgets.territory-global-map';
 
+    /**
+     * The map shows every territory: it needs both its own permission and the one to view the territories.
+     */
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return $user !== null
+            && $user->can('View:TerritoryGlobalMap')
+            && $user->can('viewAny', Territory::class);
+    }
+
     protected int|Closure $maxZoom = 18;
 
     protected int|Closure $minZoom = 2;

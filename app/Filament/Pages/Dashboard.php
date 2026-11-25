@@ -2,9 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\StatsOverview;
-use App\Filament\Widgets\TerritoryCoverage;
-use App\Filament\Widgets\TerritoryGlobalMap;
+use App\Filament\Widgets\NoDashboardAccess;
 use Filament\Support\Icons\Heroicon;
 
 class Dashboard extends \Filament\Pages\Dashboard
@@ -17,10 +15,10 @@ class Dashboard extends \Filament\Pages\Dashboard
 
     public function getWidgets(): array
     {
+        // Each widget checks who can see it: the last one is shown only to who sees none of the others
         return [
-            StatsOverview::class,
-            TerritoryCoverage::class,
-            TerritoryGlobalMap::class,
+            ...NoDashboardAccess::DASHBOARD_WIDGETS,
+            NoDashboardAccess::class,
         ];
     }
 }
