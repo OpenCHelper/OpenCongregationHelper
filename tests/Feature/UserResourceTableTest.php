@@ -119,3 +119,29 @@ test('the two-factor authentication column tells whether the user has set it up'
         ->assertTableColumnStateSet('two_factor_authentication', true, $userWithTwoFactorAuthentication)
         ->assertTableColumnStateSet('two_factor_authentication', false, $userWithoutTwoFactorAuthentication);
 });
+
+test('users can be filtered by email verification', function () {
+    $verifiedUser = User::factory()->create(['email_verified_at' => now()]);
+    $unverifiedUser = User::factory()->create(['email_verified_at' => null]);
+
+    Livewire::test(ListUsers::class)
+        ->filterTable('email_verified_at', true)
+        ->assertCanSeeTableRecords([$verifiedUser])
+        ->assertCanNotSeeTableRecords([$unverifiedUser])
+        ->filterTable('email_verified_at', false)
+        ->assertCanSeeTableRecords([$unverifiedUser])
+        ->assertCanNotSeeTableRecords([$verifiedUser]);
+});
+
+test('users can be filtered by two-factor authentication', function () {
+    $userWithTwoFactorAuthentication = User::factory()->create(['app_authentication_secret' => 'secret']);
+    $userWithoutTwoFactorAuthentication = User::factory()->create();
+
+    Livewire::test(ListUsers::class)
+        ->filterTable('two_factor_authentication', true)
+        ->assertCanSeeTableRecords([$userWithTwoFactorAuthentication])
+        ->assertCanNotSeeTableRecords([$userWithoutTwoFactorAuthentication])
+        ->filterTable('two_factor_authentication', false)
+        ->assertCanSeeTableRecords([$userWithoutTwoFactorAuthentication])
+        ->assertCanNotSeeTableRecords([$userWithTwoFactorAuthentication]);
+});

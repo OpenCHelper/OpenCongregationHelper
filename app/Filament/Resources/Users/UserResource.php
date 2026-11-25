@@ -295,6 +295,21 @@ class UserResource extends Resource
                         false => [Indicator::make(__('filament-resources.user.filter_access_indicator_virtual'))],
                         null => [],
                     }),
+                TernaryFilter::make('email_verified_at')
+                    ->label(__('filament-resources.user.filter_email_verified'))
+                    ->placeholder(__('filament-resources.user.filter_all'))
+                    ->trueLabel(__('filament-resources.user.filter_email_verified_yes'))
+                    ->falseLabel(__('filament-resources.user.filter_email_verified_no'))
+                    ->nullable(),
+                TernaryFilter::make('two_factor_authentication')
+                    ->label(__('filament-resources.user.filter_two_factor_authentication'))
+                    ->placeholder(__('filament-resources.user.filter_all'))
+                    ->trueLabel(__('filament-resources.user.filter_two_factor_authentication_yes'))
+                    ->falseLabel(__('filament-resources.user.filter_two_factor_authentication_no'))
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNotNull('app_authentication_secret'),
+                        false: fn (Builder $query): Builder => $query->whereNull('app_authentication_secret'),
+                    ),
             ])
             ->recordActions([
                 ResendInvitationAction::make(),
