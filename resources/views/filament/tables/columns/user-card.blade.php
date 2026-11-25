@@ -28,7 +28,9 @@
 
             <div class="min-w-0">
                 <p class="leading-6 font-semibold text-gray-950 dark:text-white">{{ $record->getFullName() }}</p>
-                <p class="truncate text-sm text-gray-500 dark:text-gray-400">{{ $record->email }}</p>
+                @unless ($livewire->isTableColumnToggledHidden('email'))
+                    <p class="truncate text-sm text-gray-500 dark:text-gray-400">{{ $record->email }}</p>
+                @endunless
             </div>
         </div>
 

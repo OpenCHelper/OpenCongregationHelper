@@ -177,7 +177,8 @@ class PosterResource extends Resource implements HasKnowledgeBase
                     ->fontFamily(FontFamily::Mono)
                     ->placeholder('—')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('title')
                     ->label(__('filament-resources.poster.column_title'))
                     ->weight(FontWeight::Medium)

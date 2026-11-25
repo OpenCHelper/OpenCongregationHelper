@@ -54,13 +54,15 @@ test('the card has the heading and the status of the record, and its other enabl
         ->toContain(CampaignStatus::fromCampaign($campaign)->getLabel())
         ->toContain(__('filament-resources.campaign.column_short_name'))
         ->toContain('LTR')
-        ->toContain('Mario Rossi')
         // Hidden by default in the columns menu
+        ->not->toContain('Mario Rossi')
         ->not->toContain('Letters to the neighbours');
 
     $component->toggleAllTableColumns();
 
-    expect($renderCard())->toContain('Letters to the neighbours');
+    expect($renderCard())
+        ->toContain('Mario Rossi')
+        ->toContain('Letters to the neighbours');
 });
 
 test('the card leaves out the details without a value', function () {
@@ -70,6 +72,7 @@ test('the card leaves out the details without a value', function () {
     $campaign->refresh();
 
     $html = Livewire::test(ListCampaigns::class)
+        ->toggleAllTableColumns()
         ->instance()->getTable()->getColumn('card')->record($campaign)->toHtml();
 
     expect($html)

@@ -319,7 +319,8 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                     ->label(__('filament-resources.publication_request.column_requested_at'))
                     // As the dates of the other steps
                     ->date('j M Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('user.full_name')
                     ->label(__('filament-resources.publication_request.column_user'))
                     ->icon(Heroicon::OutlinedUser)
@@ -351,7 +352,8 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                     ->icon(fn (bool $state): ?Heroicon => $state ? Heroicon::OutlinedArrowPath : null)
                     ->tooltip(fn (bool $state): ?string => $state ? __('filament-resources.publication_request.renewal_tooltip') : null)
                     ->color('gray')
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->toggleable(),
                 TextColumn::make('notes')
                     ->label(__('filament-resources.publication_request.column_notes'))
                     ->limit(40)

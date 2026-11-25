@@ -135,7 +135,8 @@ class TagResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->fontFamily(FontFamily::Mono),
+                    ->fontFamily(FontFamily::Mono)
+                    ->toggleable(),
                 TextColumn::make('type')
                     ->label(__('filament-resources.tag.column_type'))
                     ->badge()
