@@ -45,9 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   them again, a failed creation of the app tables no longer drops them, the two-factor column is added only when
   missing and the mail log table can be rolled back
   ([#84](https://github.com/OpenCHelper/OpenCongregationHelper/pull/84)).
-
-### Fixed
-
 - **Contacts**: setting a contact as primary from the user's page in the admin panel now replaces the previous primary
   contact, as in the profile, instead of leaving the user with several
   ([#76](https://github.com/OpenCHelper/OpenCongregationHelper/pull/76)).
