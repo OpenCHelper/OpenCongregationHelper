@@ -27,6 +27,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -181,20 +182,31 @@ class UserResource extends Resource
         return $table
             ->recordUrl(fn (Model $record): string => UserResource::getUrl('view', ['record' => $record]))
             ->columns([
+                // On small screens, a single column with the name and the email replaces the columns hidden below
+                TextColumn::make('full_name')
+                    ->label(__('filament-resources.user.column_full_name'))
+                    ->state(fn (User $record): string => $record->getFullName())
+                    ->description(fn (User $record): ?string => $record->email)
+                    ->weight(FontWeight::SemiBold)
+                    ->sortable(['last_name', 'first_name'])
+                    ->hiddenFrom('md'),
                 TextColumn::make('first_name')
                     ->label(__('filament-resources.user.column_first_name'))
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('md'),
                 TextColumn::make('last_name')
                     ->label(__('filament-resources.user.column_last_name'))
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('md'),
                 TextColumn::make('email')
                     ->label(__('filament-resources.user.column_email'))
                     ->copyable()
                     ->icon(Heroicon::Envelope)
                     ->fontFamily(FontFamily::Mono)
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('md'),
                 TextColumn::make('roles.name')
                     ->label(__('filament-resources.user.column_role'))
                     ->badge()
@@ -213,7 +225,8 @@ class UserResource extends Resource
                         return $query->orderBy($firstRoleName->toBase(), $direction);
                     })
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('md'),
                 TextColumn::make('departments')
                     ->label(__('filament-resources.user.column_departments'))
                     ->state(fn (User $record): array => $record->departments->map(fn (Department $department): DepartmentKey => $department->key)->all())
@@ -221,12 +234,21 @@ class UserResource extends Resource
                     ->color(fn (DepartmentKey $state): string => $state->getColor())
                     ->badge()
                     ->listWithLineBreaks()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('md'),
                 IconColumn::make('email_verified_at')
                     ->label(__('filament-resources.user.column_email_verified'))
                     ->default(false)
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('md'),
+                IconColumn::make('two_factor_authentication')
+                    ->label(__('filament-resources.user.column_two_factor_authentication'))
+                    ->state(fn (User $record): bool => $record->hasTwoFactorAuthentication())
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visibleFrom('md'),
                 IconColumn::make('can_login')
                     ->label(__('filament-resources.user.column_access_enabled'))
                     ->boolean()

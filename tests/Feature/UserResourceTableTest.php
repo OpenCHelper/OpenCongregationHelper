@@ -33,6 +33,7 @@ test('users can be sorted by role', function () {
     $editorAndViewer->assignRole($viewerRole, $editorRole);
 
     Livewire::test(ListUsers::class)
+        ->toggleAllTableColumns()
         ->sortTable('roles.name')
         ->assertCanSeeTableRecords([$admin, $editorAndViewer, $viewer], inOrder: true)
         ->sortTable('roles.name', 'desc')
@@ -59,4 +60,38 @@ test('users can be filtered by access, with the number of users of each option',
         ->assertCanSeeTableRecords($virtualUsers)
         ->assertCanNotSeeTableRecords([$this->manager, $userWithAccess])
         ->assertSee(__('filament-resources.user.filter_access_indicator_virtual'));
+});
+
+test('secondary columns are hidden by default', function () {
+    Livewire::test(ListUsers::class)
+        ->assertCanRenderTableColumn('departments')
+        ->assertCanRenderTableColumn('can_login')
+        ->assertCanNotRenderTableColumn('roles.name')
+        ->assertCanNotRenderTableColumn('email_verified_at')
+        ->assertCanNotRenderTableColumn('two_factor_authentication')
+        ->toggleAllTableColumns()
+        ->assertCanRenderTableColumn('roles.name')
+        ->assertCanRenderTableColumn('email_verified_at')
+        ->assertCanRenderTableColumn('two_factor_authentication');
+});
+
+test('the full name column shows the name of the user', function () {
+    $user = User::factory()->create(['first_name' => 'Mario', 'last_name' => 'Rossi']);
+
+    Livewire::test(ListUsers::class)
+        ->assertTableColumnStateSet('full_name', 'Mario Rossi', $user)
+        ->sortTable('full_name')
+        ->assertCanSeeTableRecords(
+            User::query()->orderBy('last_name')->orderBy('first_name')->get(),
+            inOrder: true,
+        );
+});
+
+test('the two-factor authentication column tells whether the user has set it up', function () {
+    $userWithTwoFactorAuthentication = User::factory()->create(['app_authentication_secret' => 'secret']);
+    $userWithoutTwoFactorAuthentication = User::factory()->create();
+
+    Livewire::test(ListUsers::class)
+        ->assertTableColumnStateSet('two_factor_authentication', true, $userWithTwoFactorAuthentication)
+        ->assertTableColumnStateSet('two_factor_authentication', false, $userWithoutTwoFactorAuthentication);
 });
