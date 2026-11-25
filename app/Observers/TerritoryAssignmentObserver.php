@@ -7,6 +7,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Notifications\TerritoryAssignedNotification;
 use App\Notifications\TerritoryReturnedNotification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class TerritoryAssignmentObserver
@@ -16,6 +17,11 @@ class TerritoryAssignmentObserver
      */
     public function saving(TerritoryAssignment $territoryAssignment): void
     {
+        // Set here rather than left to the database default, which uses the database clock and timezone
+        if (! $territoryAssignment->exists) {
+            $territoryAssignment->started_at ??= now();
+        }
+
         if ($territoryAssignment->isDirty(['started_at', 'ended_at'])) {
             $this->ensureAssignmentDoesNotEndBeforeItStarts($territoryAssignment);
         }
@@ -26,6 +32,10 @@ class TerritoryAssignmentObserver
      */
     public function creating(TerritoryAssignment $territoryAssignment): void
     {
+        if (! $territoryAssignment->created_by && Auth::check()) {
+            $territoryAssignment->created_by = Auth::id();
+        }
+
         $this->ensureCampaignIsNotTerminated($territoryAssignment);
         $this->ensureTerritoryIsNotAlreadyAssigned($territoryAssignment);
     }
@@ -72,8 +82,6 @@ class TerritoryAssignmentObserver
 
     /**
      * An assignment cannot be returned before it is assigned.
-     *
-     * A new assignment saved without a start date is skipped: the database sets its start date when inserting it.
      *
      * @throws ValidationException
      */

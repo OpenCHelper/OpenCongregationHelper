@@ -51,6 +51,7 @@ class Territory extends Model
         'notes',
         'is_commercial',
         'territory_zone_id',
+        'created_by',
     ];
 
     protected $casts = [

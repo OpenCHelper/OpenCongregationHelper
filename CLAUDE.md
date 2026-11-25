@@ -12,6 +12,8 @@
 ## UI changes
 
 - Whenever applicable and whenever not explicitly asked by the user show before/after side-by-side comparison screenshots at the end;
+- Never put screenshots meant only for an issue or a PR in a temporary branch or anywhere else public (other branches,
+  gists, image hosts) unless explicitly asked: send them to the user instead;
 
 ## CI/CD
 
