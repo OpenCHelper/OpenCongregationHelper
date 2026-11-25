@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Tags;
 use App\Enums\NavigationGroup;
 use App\Enums\TagType;
 use App\Filament\Resources\Tags\Pages\ManageTags;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Tag;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -161,6 +162,7 @@ class TagResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->aside('type')->addTo($table))
             ->filters([
                 SelectFilter::make('type')
                     ->label(__('filament-resources.tag.filter_type'))

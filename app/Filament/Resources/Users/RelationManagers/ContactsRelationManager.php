@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\RelationManagers;
 
 use App\Enums\ContactType;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Contact;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -137,6 +138,7 @@ class ContactsRelationManager extends RelationManager
                     ->trueColor('warning')
                     ->falseColor('gray'),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->aside('is_primary')->addTo($table))
             ->defaultSort('is_primary', 'desc')
             ->recordActions([
                 ViewAction::make(),

@@ -9,6 +9,7 @@ use App\Filament\Resources\TerritoryZones\Pages\EditTerritoryZone;
 use App\Filament\Resources\TerritoryZones\Pages\ListTerritoryZones;
 use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Filament\Resources\TerritoryZones\Pages\ViewTerritoryZone;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Tag;
 use App\Models\TerritoryZone;
 use App\Observers\TerritoryZoneObserver;
@@ -137,6 +138,7 @@ class TerritoryZoneResource extends Resource
                     ->label(__('filament-resources.territory_zone.column_tags'))
                     ->type(TagType::ZONES->value),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->fullWidth('tags')->addTo($table))
             ->filters([
                 TrashedFilter::make(),
                 SelectFilter::make('tags')

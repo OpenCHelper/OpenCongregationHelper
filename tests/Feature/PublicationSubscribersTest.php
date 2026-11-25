@@ -476,3 +476,26 @@ test('a publication removed and added again in the same period is not requested 
 
     expect(PublicationRequest::query()->where('publication_id', $this->watchtower->id)->count())->toBe(2);
 });
+
+test('the card shown on phones lists only the publications received, and the table keeps its groups', function () {
+    $publisher = User::factory()->create();
+
+    $component = Livewire::test(ManagePublicationSubscribers::class)
+        ->callAction(TestAction::make('create'), [
+            'user_id' => $publisher->id,
+            'activeSubscriptions' => formItems([$this->workbook->id => 3]),
+        ])
+        ->assertHasNoFormErrors();
+
+    $table = $component->instance()->getTable();
+    $html = $table->getColumn('card')->record(PublicationSubscriber::query()->sole())->toHtml();
+
+    expect($html)
+        ->toMatch('/>\s*'.preg_quote($this->workbook->getShortLabel(), '/').'\s*<\/dt>/')
+        ->not->toMatch('/>\s*'.preg_quote($this->watchtower->getShortLabel(), '/').'\s*<\/dt>/')
+        ->not->toMatch('/>\s*'.preg_quote($this->largePrint->getShortLabel(), '/').'\s*<\/dt>/')
+        ->and($table->getColumnGroups())->not->toBeEmpty()
+        // In its own group without a label, which keeps it out of the columns menu: the card can't be hidden
+        ->and($table->getColumn('card')->isToggleable())->toBeFalse()
+        ->and($table->getColumn('card')->getLabel())->not->toBeEmpty();
+});

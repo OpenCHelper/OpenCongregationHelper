@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Departments\RelationManagers;
 
 use App\Enums\DepartmentRole;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Department;
 use App\Models\User;
 use Filament\Actions\AttachAction;
@@ -145,6 +146,7 @@ class MembersRelationManager extends RelationManager
                     ->copyable()
                     ->visibleFrom('md'),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('full_name')->aside('role')->fullWidth('email')->addTo($table))
             ->headerActions([
                 AttachAction::make()
                     ->label(__('departments.members.action_add'))

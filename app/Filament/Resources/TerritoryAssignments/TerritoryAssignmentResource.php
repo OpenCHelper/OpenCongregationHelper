@@ -6,6 +6,7 @@ use App\Enums\NavigationGroup;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\TerritoryAssignment;
 use App\Rules\NotTerminatedCampaign;
 use App\Rules\TerritoryNotAlreadyAssigned;
@@ -575,6 +576,7 @@ class TerritoryAssignmentResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('territory.name')->addTo($table))
             ->filters([
                 TrashedFilter::make(),
                 TernaryFilter::make('ended_at')

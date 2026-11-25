@@ -6,6 +6,7 @@ use App\Enums\NavigationGroup;
 use App\Enums\PublicationRequestStatus;
 use App\Filament\Resources\PublicationRequests\Pages\ManagePublicationRequests;
 use App\Filament\Resources\Users\Pages\ManageUserPublicationRequests;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Publication;
 use App\Models\PublicationRequest;
 use App\Models\PublicationSubscriber;
@@ -360,6 +361,7 @@ class PublicationRequestResource extends Resource implements HasKnowledgeBase
                     ->placeholder(__('filament-resources.publication_request.creator_scheduler'))
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('publication.name')->aside('status', 'renewal')->addTo($table))
             ->filters([
                 SelectFilter::make('publication')
                     ->label(__('filament-resources.publication_request.filter_publication'))

@@ -6,6 +6,7 @@ use App\Enums\NavigationGroup;
 use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
 use App\Filament\Resources\Publications\PublicationResource;
 use App\Filament\Resources\PublicationSubscribers\Pages\ManagePublicationSubscribers;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Publication;
 use App\Models\PublicationSubscriber;
 use App\Models\User;
@@ -207,6 +208,7 @@ class PublicationSubscriberResource extends Resource implements HasKnowledgeBase
                     ->values()
                     ->all(),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('user.full_name')->withoutEmptyDetails()->addTo($table))
             ->filters([
                 SelectFilter::make('publication')
                     ->label(__('filament-resources.publication_subscriber.filter_publication'))

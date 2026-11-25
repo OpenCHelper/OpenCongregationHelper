@@ -82,6 +82,8 @@ If you try to leave a page with unsaved changes, the application asks for confir
 
 On small screens the sidebar is replaced by a **bottom navigation bar**. Tap **More** to reach the other menu items.
 Forms and dialogs open as panels sliding from the side, which are easier to use with a finger.
+Tables show each row as a card, with its main information at the top and the other columns, as chosen with the
+columns button, below; sort them from the **Sort by** menu.
 
 ![The application on a smartphone](/docs/user-documentation/en/basics/assets/mobile-territories.webp)
 

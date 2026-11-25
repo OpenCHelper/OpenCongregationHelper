@@ -6,6 +6,7 @@ use App\Enums\NavigationGroup;
 use App\Enums\PublicationCategory;
 use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
 use App\Filament\Resources\Publications\Pages\ManagePublications;
+use App\Filament\Tables\Columns\RecordCardColumn;
 use App\Models\Publication;
 use App\Support\Translations;
 use Filament\Actions\Action;
@@ -163,6 +164,7 @@ class PublicationResource extends Resource implements HasKnowledgeBase
                     ->color(fn (int $state): string => $state > 0 ? 'warning' : 'gray')
                     ->alignCenter(),
             ])
+            ->tap(fn (Table $table) => RecordCardColumn::make()->heading('name')->addTo($table))
             ->filters([
                 SelectFilter::make('category')
                     ->label(__('filament-resources.publication.field_category'))
