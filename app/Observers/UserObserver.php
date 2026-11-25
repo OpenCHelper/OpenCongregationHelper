@@ -70,8 +70,10 @@ class UserObserver
     }
 
     /**
-     * Handle the User "deleting" event.
-     * This is called BEFORE the model is deleted.
+     * Guard the deletion of a user: the root user can never be deleted, and neither can a user who has assignments.
+     *
+     * It is not the "deleting" handler of the observer: `User::booting()` registers it before the "deleting" listeners
+     * of the traits (e.g. `HasRoles`, which detaches the roles), so that a refused deletion leaves the user untouched.
      *
      * A user who has assignments cannot be deleted: the history of the territories (the dates they were last worked,
      * the coverage, the campaigns...) would be lost with them, and their assignment in progress would disappear. The
@@ -79,7 +81,7 @@ class UserObserver
      *
      * @return false|null false cancels the deletion; null lets it (and the other "deleting" listeners) go on
      */
-    public function deleting(User $user): ?bool
+    public function guardDeletion(User $user): ?bool
     {
         // Prevent deletion of root user under any circumstances
         if ($user->isRootUser()) {

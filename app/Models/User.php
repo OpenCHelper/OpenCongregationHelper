@@ -57,6 +57,15 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     use Notifiable;
     use TwoFactorAuthenticatable;
 
+    /**
+     * The deletion guard is registered before the "deleting" listeners of the traits (registered by `boot()`), which
+     * would otherwise act on a deletion it then refuses, e.g. `HasRoles` detaching the roles.
+     */
+    protected static function booting(): void
+    {
+        static::deleting(fn (User $user): ?bool => app(UserObserver::class)->guardDeletion($user));
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -278,7 +287,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     /**
      * Whether any territory has ever been assigned to the user, deleted assignments included: such a user cannot be
-     * deleted, or the history of the territories would be lost with them (see `UserObserver::deleting()`).
+     * deleted, or the history of the territories would be lost with them (see `UserObserver::guardDeletion()`).
      */
     public function hasAssignments(): bool
     {

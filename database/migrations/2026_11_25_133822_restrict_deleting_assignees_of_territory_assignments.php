@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations: the database refuses to delete a user who has assignments, instead of permanently deleting
-     * their whole assignment history with them (`UserObserver::deleting()` explains it before getting here).
+     * their whole assignment history with them (`UserObserver::guardDeletion()` explains it before getting here).
      */
     public function up(): void
     {

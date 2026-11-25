@@ -27,7 +27,7 @@ class DeleteUser implements DeletesUsers
             throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
         }
 
-        // The history of the territories would be lost with the user (see `UserObserver::deleting()`): the error is
+        // The history of the territories would be lost with the user (see `UserObserver::guardDeletion()`): the error is
         // shown in the confirmation modal, before the user is logged out
         if ($user->hasAssignments()) {
             throw ValidationException::withMessages([

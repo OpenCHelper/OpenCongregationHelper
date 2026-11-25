@@ -14,11 +14,13 @@ use Filament\Facades\Filament;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Laravel\Jetstream\Http\Livewire\DeleteUserForm;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Notification::fake();
@@ -152,6 +154,67 @@ test('bulk deleting users skips the root user and the ones who have assignments,
     expect(User::find($this->rootUser->id))->not->toBeNull()
         ->and(User::find($this->publisher->id))->not->toBeNull()
         ->and(User::find($freeUser->id))->toBeNull();
+});
+
+test('a refused deletion keeps the roles and permissions of the user', function (bool $isRootUser) {
+    $user = $isRootUser ? $this->rootUser : $this->publisher;
+    $user->assignRole(Role::findOrCreate('publisher', 'web'));
+    $user->givePermissionTo(Permission::findOrCreate('View:Territory', 'web'));
+
+    if (! $isRootUser) {
+        assignTerritoryTo($user, returned: true);
+    }
+
+    try {
+        $user->delete();
+    } catch (Exception) {
+        // The root user cannot be deleted: the exception explains it
+    }
+
+    $user = User::find($user->id);
+
+    expect($user)->not->toBeNull()
+        ->and($user->roles()->pluck('name')->all())->toBe(['publisher'])
+        ->and($user->permissions()->pluck('name')->all())->toBe(['View:Territory']);
+})->with([
+    'user who has assignments' => false,
+    'root user' => true,
+]);
+
+test('bulk deleting users keeps the roles and permissions of the ones skipped', function () {
+    $this->publisher->assignRole(Role::findOrCreate('publisher', 'web'));
+    $this->publisher->givePermissionTo(Permission::findOrCreate('View:Territory', 'web'));
+    assignTerritoryTo($this->publisher, returned: true);
+    $this->actingAs($this->admin);
+
+    Livewire::test(ListUsers::class)
+        ->selectTableRecords([$this->publisher])
+        ->callAction(TestAction::make('delete')->table()->bulk());
+
+    expect($this->publisher->roles()->count())->toBe(1)
+        ->and($this->publisher->permissions()->count())->toBe(1);
+});
+
+test('bulk deleting users goes on with the others when the deletion of one fails', function () {
+    Exceptions::fake();
+    $failingUser = User::factory()->create();
+    $freeUser = User::factory()->create();
+    $this->actingAs($this->admin);
+
+    User::deleting(function (User $user) use ($failingUser): void {
+        if ($user->is($failingUser)) {
+            throw new RuntimeException('The database refused the deletion.');
+        }
+    });
+
+    Livewire::test(ListUsers::class)
+        ->selectTableRecords([$failingUser, $freeUser])
+        ->callAction(TestAction::make('delete')->table()->bulk())
+        ->assertNotified(trans_choice('filament-actions::delete.multiple.notifications.deleted_partial.title', 1, ['count' => 1, 'total' => 2]));
+
+    expect(User::find($failingUser->id))->not->toBeNull()
+        ->and(User::find($freeUser->id))->toBeNull();
+    Exceptions::assertReported(RuntimeException::class);
 });
 
 test('users who have assignments cannot delete their own account', function () {

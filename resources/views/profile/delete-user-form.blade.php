@@ -1,7 +1,7 @@
 @php
     use Filament\Support\Icons\Heroicon;
 
-    // A user who has assignments cannot be deleted (see `UserObserver::deleting()`): the form only explains it
+    // A user who has assignments cannot be deleted (see `UserObserver::guardDeletion()`): the form only explains it
     $canBeDeleted = ! auth()->user()->isRootUserProtected() && ! auth()->user()->hasAssignments();
 @endphp
 

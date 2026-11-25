@@ -13,7 +13,7 @@ use Livewire\Component;
 
 /**
  * Delete a user from their page. The root user cannot be deleted, and neither can a user who has assignments
- * ({@see UserObserver::deleting()}): the modal explains why, and offers to disable their access instead, making them a
+ * ({@see UserObserver::guardDeletion()}): the modal explains why, and offers to disable their access instead, making them a
  * virtual user whose assignments are kept.
  */
 class DeleteUserAction extends DeleteAction
