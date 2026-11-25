@@ -17,9 +17,10 @@ email and access columns.
 On a phone, each user is shown as a card with picture, name, email and access, plus the columns chosen with the columns
 button; the list can be sorted from the **Sort by** menu.
 
-The **Access** filter shows only the users with access or only the virtual users, and tells how many there are of each.
-The **Email verified** and **Two-factor authentication** filters show only the users who have (or have not) verified
-their email or set up two-factor authentication.
+The **Department** filter shows only the members of the chosen [departments](departments). The **Access** filter shows
+only the users with access or only the virtual users, and tells how many there are of each. The **Email verified** and
+**Two-factor authentication** filters show only the users who have (or have not) verified their email or set up
+two-factor authentication.
 
 ## Users and virtual users
 
@@ -56,10 +57,12 @@ Administrators cannot set or change the password of a user: people choose their 
 
 Click a user to open their page:
 
-- the **User** tab shows their data and their **Contact Information** (e.g. emergency contacts), which you can add,
+- the **User** tab shows their data and their **Contact information** (e.g. emergency contacts), which you can add,
   edit or delete here too (a user has only one **Primary contact**). **Call** and **Open in Maps** start a phone call
   or open the address;
-- the **Assignments** tab lists the territories assigned to them.
+- the **Assignments** tab lists the territories assigned to them;
+- the **Publication requests** tab lists the [publications they requested](../publications/requests), with the number
+  of pending ones next to it. It is shown only to those who can see the requests.
 
 At the bottom of the **User** tab, **Statistics** shows the **Preferred zones** (every zone the publisher took
 territories in, with how many assignments and their share) and the **Preferred territories** (the 5 they take most
@@ -110,4 +113,4 @@ The root user is the first user, created during the installation. To avoid losin
 
 - it can never be deleted (it is skipped by the bulk delete) nor impersonated;
 - outside of the production environment, its email, password, access and roles cannot be changed, and its **Edit**
-  button is disabled.
+  button is disabled (except for the root user itself).

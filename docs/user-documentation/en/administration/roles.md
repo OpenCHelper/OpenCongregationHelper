@@ -15,7 +15,9 @@ What each user can see and do is decided by their **roles**. A role is a named s
 The **super_admin** role (*Super Admin*) can do everything, including the actions reserved to it:
 
 - assigning roles to users;
-- impersonating users.
+- impersonating users;
+- changing the [settings](settings);
+- reading the logs.
 
 ## Creating or editing a role
 
@@ -29,8 +31,9 @@ The **super_admin** role (*Super Admin*) can do everything, including the action
 
 ## Meaning of the permissions
 
-For every resource (Territory, Territory Zone, Territory Assignment, Campaign, User, Role, …) there are the same
-permissions:
+For most resources (Territory, Territory Zone, Territory Assignment, Campaign, User, …) there are the same
+permissions (*Department* has only **View Any**, **View** and **Update**, *Role* only **View Any**, **View**,
+**Create**, **Update** and **Delete**):
 
 | Permission | Allows to |
 |------------|-----------|
