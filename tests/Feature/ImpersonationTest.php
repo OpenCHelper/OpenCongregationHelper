@@ -1,7 +1,9 @@
 <?php
 
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
@@ -51,6 +53,21 @@ test('super administrators can impersonate virtual users but not root', function
         ->assertActionVisible(TestAction::make('impersonate')->table($this->virtualUser))
         ->assertActionVisible(TestAction::make('impersonate')->table($this->regularUser))
         ->assertActionHidden(TestAction::make('impersonate')->table($this->rootUser));
+});
+
+test('impersonating asks for a confirmation, from the list and from the page of the user', function () {
+    $this->actingAs($this->superAdmin);
+    $requiresConfirmation = fn (Action $action): bool => $action->isConfirmationRequired();
+
+    Livewire::test(ListUsers::class)
+        ->assertActionExists(TestAction::make('impersonate')->table($this->regularUser), $requiresConfirmation);
+
+    Livewire::test(ViewUser::class, ['record' => $this->regularUser->getRouteKey()])
+        ->assertActionExists('impersonate', $requiresConfirmation)
+        ->mountAction('impersonate')
+        ->assertActionMounted('impersonate');
+
+    expect(app(ImpersonateManager::class)->isImpersonating())->toBeFalse();
 });
 
 test('virtual users can access the panel only while being impersonated', function () {
