@@ -7,6 +7,7 @@ use App\Models\Territory;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 
 class CampaignOverview extends BaseWidget
@@ -15,10 +16,13 @@ class CampaignOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        // Take all assignments into consideration, even unfinished ones, but count
-        // each territory once (a territory may be assigned more than once).
+        // Take all assignments into consideration, even unfinished ones, but count each territory once (a territory may
+        // be assigned more than once), and only the territories that still exist, like the assignments chart.
         $territories_count = Territory::count();
-        $assigned_territories_count = $this->record->assignments()->distinct()->count('territory_id');
+        $assigned_territories_count = Territory::whereHas(
+            'assignments',
+            fn (Builder $query): Builder => $query->where('campaign_id', $this->record->id),
+        )->count();
         $campaign_percentage = $territories_count > 0 ? $assigned_territories_count * 100 / $territories_count : 0;
 
         $campaign_remaining_days = $this->record->valid_until ? now()->diffInDays($this->record->valid_until) : null;

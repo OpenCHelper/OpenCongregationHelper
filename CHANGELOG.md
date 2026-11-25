@@ -51,6 +51,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Zone territories**: creating or editing a territory with an uploaded image from a zone's **Territories** tab no
   longer fails, and the image is saved. A territory with an uploaded image can be edited again without the image being
   rejected as an invalid URL ([#73](https://github.com/OpenCHelper/OpenCongregationHelper/pull/73)).
+- **Campaigns**: the assignment status chart counts each territory once, so "To be assigned" no longer goes negative
+  and the slices add up to the number of territories; the chart and the completion percentage leave out deleted
+  territories, so the completion no longer goes over 100%
+  ([#77](https://github.com/OpenCHelper/OpenCongregationHelper/pull/77)).
 
 ### Security
 
