@@ -788,13 +788,14 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
     }
 
     /**
-     * Whether a territory image is a path on the local disk rather than a URL: it has no scheme (`https:`, `ftp:`...)
-     * and is not protocol-relative (`//cdn...`).
+     * Whether a territory image is a path on the local disk rather than a URL: it has no scheme (`https:`, `ftp:`...),
+     * is not protocol-relative (`//cdn...`) and does not leave the disk (`../`), which the disk refuses to read.
      */
     public static function isLocalImagePath(?string $imagePath): bool
     {
         return filled($imagePath)
-            && ! Str::of($imagePath)->isMatch('/^([a-z][a-z0-9+.\-]*:|\/\/)/i');
+            && ! Str::of($imagePath)->isMatch('/^([a-z][a-z0-9+.\-]*:|\/\/)/i')
+            && ! Str::of($imagePath)->isMatch('#(^|[/\\\\])\.\.([/\\\\]|$)#');
     }
 
     /**

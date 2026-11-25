@@ -378,6 +378,7 @@ test('an image path that is not a stored file stays in the URL field of the edit
     'protocol-relative URL' => '//example.com/territory.png',
     'other scheme' => 'ftp://example.com/territory.png',
     'missing stored file' => 'territories/deleted.png',
+    'path leaving the disk' => '../maps/territory.png',
 ]);
 
 test('the image preview of the edit form shows the stored image', function () {
