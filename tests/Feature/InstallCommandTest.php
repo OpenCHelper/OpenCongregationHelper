@@ -100,6 +100,53 @@ test('it asks for the missing values when run interactively', function () {
         ->and($root->hasRole('super_admin'))->toBeTrue();
 });
 
+test('the typed password follows the password policy', function () {
+    config(['app.initial_root_user.password' => null]);
+
+    $this->artisan('och:install')
+        ->expectsQuestion('Password of the root user', 'short')
+        ->expectsOutputToContain(__('validation.min.string', ['attribute' => 'password', 'min' => 8]))
+        ->assertFailed();
+
+    expect(User::count())->toBe(0);
+});
+
+test('a configured password that breaks the password policy is refused', function () {
+    config(['app.initial_root_user.password' => 'short']);
+
+    $this->artisan('och:install', ['--no-interaction' => true])
+        ->expectsOutputToContain('INITIAL_ROOT_PASSWORD')
+        ->assertFailed();
+
+    expect(User::count())->toBe(0);
+});
+
+test('another password is asked for when the configured one breaks the password policy', function () {
+    config(['app.initial_root_user.password' => 'short']);
+
+    $this->artisan('och:install')
+        ->expectsOutputToContain('INITIAL_ROOT_PASSWORD')
+        ->expectsQuestion('Password of the root user', 'another-password')
+        ->assertSuccessful();
+
+    expect(Hash::check('another-password', User::sole()->password))->toBeTrue();
+});
+
+test('in production the configured password needs 12 characters and must not have leaked', function (string $password, string $errorKey) {
+    $this->app->detectEnvironment(fn () => 'production');
+    fakeLeakedPassword('leaked-password-123');
+    config(['app.initial_root_user.password' => $password]);
+
+    $this->artisan('och:install', ['--no-interaction' => true])
+        ->expectsOutputToContain(__($errorKey, ['attribute' => 'password', 'min' => 12]))
+        ->assertFailed();
+
+    expect(User::count())->toBe(0);
+})->with([
+    'too short' => ['elevenchars', 'validation.min.string'],
+    'leaked' => ['leaked-password-123', 'validation.password.uncompromised'],
+]);
+
 test('the root user gets ID 1 even when the next ID is higher', function () {
     User::factory()->create(['id' => 5])->delete();
 

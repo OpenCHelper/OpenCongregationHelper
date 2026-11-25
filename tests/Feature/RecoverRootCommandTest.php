@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 beforeEach(function () {
@@ -81,6 +82,32 @@ test('the typed password follows the password policy', function () {
         ->assertFailed();
 
     expect(Hash::check('short', User::rootUser()->password))->toBeFalse();
+});
+
+test('a configured password that breaks the password policy is refused', function () {
+    $this->app->detectEnvironment(fn () => 'production');
+    fakeLeakedPassword('leaked-password-123');
+    config(['app.initial_root_user.password' => 'leaked-password-123']);
+
+    $this->artisan('och:recover-root', ['--force' => true, '--no-interaction' => true])
+        ->expectsOutputToContain(__('validation.password.uncompromised', ['attribute' => 'password']))
+        ->assertFailed();
+
+    expect(Hash::check('leaked-password-123', User::rootUser()->password))->toBeFalse()
+        ->and(User::rootUser()->can_login)->toBeFalse();
+});
+
+test('another password is asked for when the configured one breaks the password policy', function () {
+    $this->app->detectEnvironment(fn () => 'production');
+    config(['app.initial_root_user.password' => 'elevenchars']);
+    Http::fake(['api.pwnedpasswords.com/*' => Http::response('')]);
+
+    $this->artisan('och:recover-root', ['--force' => true])
+        ->expectsOutputToContain(__('validation.min.string', ['attribute' => 'password', 'min' => 12]))
+        ->expectsQuestion('New password of the root user', 'a-long-and-unique-passphrase')
+        ->assertSuccessful();
+
+    expect(Hash::check('a-long-and-unique-passphrase', User::rootUser()->password))->toBeTrue();
 });
 
 test('it fails without a password when it cannot ask for one', function () {

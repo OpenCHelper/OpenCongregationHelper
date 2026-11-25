@@ -3,23 +3,15 @@
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Password as PasswordBroker;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\NotPwnedVerifier;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Jetstream\Http\Livewire\UpdatePasswordForm;
 use Livewire\Livewire;
-
-/**
- * Fake the Have I Been Pwned range API, which lists the given password as leaked.
- */
-function fakeLeakedPassword(string $password): void
-{
-    Http::fake([
-        'api.pwnedpasswords.com/*' => Http::response(strtoupper(substr(sha1($password), 5)).':42'),
-    ]);
-}
 
 /**
  * @return array<string, string>
@@ -50,6 +42,25 @@ test('in production the passwords need 12 characters and must not have leaked', 
     expect(passwordErrors('elevenchars'))->toBe([__('validation.min.string', ['attribute' => 'password', 'min' => 12])])
         ->and(passwordErrors('leaked-password-123'))->toBe([__('validation.password.uncompromised', ['attribute' => 'password'])])
         ->and(passwordErrors('a-long-and-unique-passphrase'))->toBeEmpty();
+});
+
+test('the leak check can be turned off', function () {
+    $this->app->detectEnvironment(fn () => 'production');
+    config(['auth.password_leak_check.enabled' => false]);
+    Http::fake();
+
+    expect(passwordErrors('leaked-password-123'))->toBeEmpty()
+        ->and(passwordErrors('elevenchars'))->not->toBeEmpty();
+
+    Http::assertNothingSent();
+});
+
+test('the leak check gives up quickly when the service does not answer', function () {
+    $verifier = app(UncompromisedVerifier::class);
+
+    expect($verifier)->toBeInstanceOf(NotPwnedVerifier::class)
+        ->and((fn (): int => $this->timeout)->call($verifier))->toBe(config('auth.password_leak_check.timeout'))
+        ->and(config('auth.password_leak_check.timeout'))->toBeLessThanOrEqual(5);
 });
 
 test('the profile applies the password policy', function () {

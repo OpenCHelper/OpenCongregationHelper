@@ -49,7 +49,7 @@ DB_ENGINE=InnoDB
 # Questo sarà l'utente root
 INITIAL_ROOT_USERNAME="Root User"
 INITIAL_ROOT_USERMAIL="root@example.com"
-INITIAL_ROOT_PASSWORD="password"
+INITIAL_ROOT_PASSWORD="una-frase-lunga-e-unica"
 ```
 
 ### Impostazioni principali
@@ -66,7 +66,8 @@ precedente.
 | `APP_LOCALE` | Lingua predefinita (`en`, `it` o `es`). Ogni utente può poi scegliere la propria lingua. |
 | `APP_TIMEZONE` | Fuso orario usato per mostrare le date, e in cui si contano il giorno e l'ora dei promemoria settimanali (vedi le pagine [Impostazioni](administration/settings)) e l'ora del rinnovo giornaliero delle pubblicazioni (alle 9:00). |
 | `DB_PREFIX` / `DB_ENGINE` | Prefisso delle tabelle e motore di archiviazione, facoltativi, utili sui database condivisi: `db:wipe` e `migrate:fresh` eliminano allora solo le tabelle con questo prefisso. |
-| `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Nome (nome e cognome separati da uno spazio), email e password dell'utente **root**, creato la prima volta che il database viene popolato. |
+| `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Nome (nome e cognome separati da uno spazio), email e password dell'utente **root**, creato la prima volta che il database viene popolato. La password segue le stesse regole delle password scelte dagli utenti (vedi `PASSWORD_LEAK_CHECK`): `och:install` e `och:recover-root` rifiutano una password che non le rispetta, oppure ne chiedono un'altra se eseguiti da terminale. |
+| `PASSWORD_LEAK_CHECK` | Quando `APP_ENV` è `production`, le password devono avere almeno 12 caratteri (8 altrove) e non devono comparire in fughe di dati note: vengono verificate con [Have I Been Pwned](https://haveibeenpwned.com/Passwords), inviando ad `api.pwnedpasswords.com` solo i primi 5 caratteri del loro hash SHA-1. Se il servizio non risponde entro 5 secondi la password viene accettata. Impostala a `false` sui server che non possono raggiungerlo. Predefinito: `true`. |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Come vengono inviate le email. `failover` prova prima la funzione nativa `mail()` di PHP e in caso di errore scrive l'email nel log. |
 | `QUEUE_CONNECTION` | `database` (consigliato in produzione) o `sync` (le email vengono inviate subito, durante la richiesta). |
 | `ARTISAN_CRON_TOKEN` | Segreto richiesto dagli endpoint che elaborano la coda e le attività pianificate. Se vuoto, gli endpoint sono disabilitati. |

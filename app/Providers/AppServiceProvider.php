@@ -23,8 +23,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +38,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\NotPwnedVerifier;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
 use Livewire\Livewire;
@@ -53,6 +57,13 @@ class AppServiceProvider extends ServiceProvider
         // `db:wipe` (also run by `migrate:fresh`) drops only the tables of this installation when the database is
         // shared (see the command). Extended, not bound: the deferred Artisan provider registers the command later.
         $this->app->extend(WipeCommand::class, fn (): PrefixAwareWipeCommand => new PrefixAwareWipeCommand);
+
+        // The leaked-password check waits 30 seconds by default for Have I Been Pwned: on servers that cannot reach it,
+        // every password change would hang that long. Extended for the same reason (the validation provider is deferred)
+        $this->app->extend(UncompromisedVerifier::class, fn (UncompromisedVerifier $verifier, Application $app): UncompromisedVerifier => new NotPwnedVerifier(
+            $app->make(HttpFactory::class),
+            (int) config('auth.password_leak_check.timeout'),
+        ));
     }
 
     /**
@@ -180,14 +191,21 @@ class AppServiceProvider extends ServiceProvider
      * profile and the Artisan commands all use `Password::default()`).
      *
      * In production a password needs at least 12 characters and must not appear in a known data leak (checked with
-     * the k-anonymity API of Have I Been Pwned, which only receives the first characters of its SHA-1 hash). Elsewhere
-     * the 8 characters of Laravel are enough, so that local and test environments do not call the external API.
+     * the k-anonymity API of Have I Been Pwned, which only receives the first characters of its SHA-1 hash), unless
+     * `PASSWORD_LEAK_CHECK` turns the check off. Elsewhere the 8 characters of Laravel are enough, so that local and
+     * test environments do not call the external API.
      */
     private function configurePasswordPolicy(): void
     {
-        Password::defaults(fn (): Password => app()->isProduction()
-            ? Password::min(12)->max(255)->uncompromised()
-            : Password::min(8)->max(255));
+        Password::defaults(function (): Password {
+            if (! app()->isProduction()) {
+                return Password::min(8)->max(255);
+            }
+
+            $rule = Password::min(12)->max(255);
+
+            return config('auth.password_leak_check.enabled') ? $rule->uncompromised() : $rule;
+        });
     }
 
     /**

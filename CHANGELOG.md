@@ -61,7 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sites can no longer frame the app, and no longer reveals the PHP version in `X-Powered-By`
   ([#88](https://github.com/OpenCHelper/OpenCongregationHelper/pull/88)).
 - **Passwords**: in production they need at least 12 characters and must not appear in a known data leak (checked
-  with Have I Been Pwned), wherever they are chosen: invitation, password reset, profile and Artisan commands
+  with Have I Been Pwned, which `PASSWORD_LEAK_CHECK=false` turns off), wherever they are chosen: invitation,
+  password reset, profile, and `och:install` and `och:recover-root`, including `INITIAL_ROOT_PASSWORD`
   ([#80](https://github.com/OpenCHelper/OpenCongregationHelper/pull/80)).
 
 ## [1.0.0-alpha15] - 2026-11-24

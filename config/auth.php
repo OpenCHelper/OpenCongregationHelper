@@ -118,6 +118,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Leaked Passwords
+    |--------------------------------------------------------------------------
+    |
+    | In production, the passwords chosen by the users are checked against the
+    | known data leaks of Have I Been Pwned (api.pwnedpasswords.com, which only
+    | receives the first 5 characters of their SHA-1 hash). Turn the check off
+    | on servers that cannot reach it. The check is skipped (the password is
+    | accepted) when the service does not answer within the timeout, in seconds.
+    |
+    */
+
+    'password_leak_check' => [
+        'enabled' => (bool) env('PASSWORD_LEAK_CHECK', true),
+        'timeout' => 5,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
     |

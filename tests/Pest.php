@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Vite;
 use Laravel\Passport\Passport;
 use phpseclib4\Crypt\RSA;
@@ -81,4 +82,14 @@ function usePassportTestKeys(): void
     }
 
     Passport::loadKeysFrom($keys);
+}
+
+/**
+ * Fake the Have I Been Pwned range API, which lists the given password as leaked.
+ */
+function fakeLeakedPassword(string $password): void
+{
+    Http::fake([
+        'api.pwnedpasswords.com/*' => Http::response(strtoupper(substr(sha1($password), 5)).':42'),
+    ]);
 }
