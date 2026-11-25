@@ -17,8 +17,12 @@ bar), **by email** and, if you enable them, as **push notifications** on your de
 |-------|-----------------|
 | **Territory assigned** | the person who received the territory |
 | **Territory returned** | the person who had the territory |
+| **Return requested** | the members of the territory department, except whoever asked |
 | **New campaign** | every user who can log in |
 | **Territory out for *N* days** | the person who has had a territory for more than the days set in the [Settings](../administration/settings) (60 by default). The reminder is sent once a week, on the day and at the time set there (Monday at 9:00 by default), until the territory is returned. |
+
+Virtual users, who cannot log in, receive no notification. Recording an assignment that is already returned notifies
+nobody, and so does correcting the date of a return.
 
 ## Push notifications
 

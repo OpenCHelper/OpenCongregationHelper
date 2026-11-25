@@ -19,7 +19,8 @@ assignment, which stays in the history of the territory.
 
 ![Assigning a territory](/docs/user-documentation/en/assignments/assets/assign-modal.webp)
 
-The assignee receives a notification and an email, and the territory shows up as out in the territories list.
+The assignee receives a notification and an email (unless they are a virtual user), and the territory shows up as out in
+the territories list.
 
 > ℹ️ **Note:** a territory can have only one assignment in progress. **Assign Territory** is shown only for available
 > territories: to give an assigned territory to someone else, return it first.
@@ -31,7 +32,7 @@ The assignee receives a notification and an email, and the territory shows up as
 
 ![Returning a territory](/docs/user-documentation/en/assignments/assets/return-modal.webp)
 
-The assignment is closed with today's date and the assignee is notified.
+The assignment is closed with today's date and the assignee is notified (unless they are a virtual user).
 
 ## Assigning or returning many territories at once
 
