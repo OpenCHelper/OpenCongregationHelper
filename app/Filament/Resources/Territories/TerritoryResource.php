@@ -776,6 +776,25 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
     }
 
     /**
+     * Move a stored image (`image_path` without a scheme) to the upload field (`image_file`), so that the
+     * `image_path` field, which only accepts URLs, keeps only external images.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function splitStoredImageFromFormData(array $data): array
+    {
+        $imagePath = $data['image_path'] ?? null;
+
+        if (filled($imagePath) && ! Str::of($imagePath)->isMatch('/^https?:\/\//')) {
+            $data['image_file'] = $imagePath;
+            $data['image_path'] = null;
+        }
+
+        return $data;
+    }
+
+    /**
      * Store the uploaded image file (`image_file`, a form-only field) as the territory image (`image_path`).
      *
      * @param  array<string, mixed>  $data

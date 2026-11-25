@@ -81,6 +81,7 @@ class ManageZoneTerritories extends ManageRelatedRecords
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
+                    ->mutateRecordDataUsing(fn (array $data): array => TerritoryResource::splitStoredImageFromFormData($data))
                     ->mutateDataUsing(fn (array $data): array => TerritoryResource::mergeUploadedImageIntoFormData($data)),
                 // Tables\Actions\DissociateAction::make(),
                 TerritoryResource::explainRefusedDeletion(DeleteAction::make()),

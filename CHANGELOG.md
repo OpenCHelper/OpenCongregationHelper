@@ -52,7 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Zone territories**: creating or editing a territory with an uploaded image from a zone's **Territories** tab no
-  longer fails, and the image is saved ([#73](https://github.com/OpenCHelper/OpenCongregationHelper/pull/73)).
+  longer fails, and the image is saved. A territory with an uploaded image can be edited again without the image being
+  rejected as an invalid URL ([#73](https://github.com/OpenCHelper/OpenCongregationHelper/pull/73)).
 
 ### Security
 

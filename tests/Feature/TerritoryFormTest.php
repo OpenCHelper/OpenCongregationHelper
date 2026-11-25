@@ -291,6 +291,73 @@ test('an image uploaded from the territories page of a zone becomes the territor
     'edit' => true,
 ]);
 
+test('a territory with a stored image can be edited', function (bool $isFromZonePage, string $imageChange) {
+    Storage::fake('local');
+    Storage::disk('local')->put('territories/stored.png', UploadedFile::fake()->image('stored.png')->getContent());
+
+    foreach (['ViewAny:TerritoryZone', 'View:TerritoryZone', 'Update:TerritoryZone'] as $permission) {
+        auth()->user()->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create([
+        'name' => 'Via Roma',
+        'image_path' => 'territories/stored.png',
+    ]);
+
+    // The upload field takes a single file: the stored one is removed before uploading another
+    $changes = match ($imageChange) {
+        'keep' => [['notes' => 'Only the notes changed']],
+        'replace' => [['image_file' => null], ['image_file' => [UploadedFile::fake()->image('new.png')]]],
+        'clear' => [['image_file' => null]],
+    };
+
+    $page = $isFromZonePage
+        ? Livewire::test(ManageZoneTerritories::class, ['record' => $this->zone->getKey()])
+            ->mountAction(TestAction::make('edit')->table($territory))
+        : Livewire::test(EditTerritory::class, ['record' => $territory->getKey()]);
+
+    // The stored image is in the upload field, not in the URL field, which only accepts URLs
+    $page->assertSchemaStateSet(['image_path' => null]);
+
+    foreach ($changes as $change) {
+        $page->fillForm($change);
+    }
+
+    ($isFromZonePage ? $page->callMountedAction() : $page->call('save'))
+        ->assertHasNoFormErrors();
+
+    $territory->refresh();
+
+    match ($imageChange) {
+        'keep' => expect($territory->image_path)->toBe('territories/stored.png')
+            ->and($territory->notes)->toBe('Only the notes changed'),
+        'replace' => expect($territory->image_path)->toStartWith('territories/')->not->toBe('territories/stored.png'),
+        'clear' => expect($territory->image_path)->toBeNull(),
+    };
+
+    if ($imageChange === 'replace') {
+        Storage::disk('local')->assertExists($territory->image_path);
+    }
+})->with([
+    'edit page' => false,
+    'zone page' => true,
+])->with(['keep', 'replace', 'clear']);
+
+test('a territory with an image URL keeps it in the URL field when edited', function () {
+    $territory = Territory::factory()->for($this->zone, 'territoryZone')->create([
+        'name' => 'Via Roma',
+        'image_path' => 'https://example.com/territory.png',
+    ]);
+
+    Livewire::test(EditTerritory::class, ['record' => $territory->getKey()])
+        ->assertSchemaStateSet(['image_path' => 'https://example.com/territory.png'])
+        ->fillForm(['notes' => 'Only the notes changed'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($territory->refresh()->image_path)->toBe('https://example.com/territory.png');
+});
+
 test('the map of a new territory opens on the configured default centre', function () {
     config(['filament-leaflet.default_map_center' => [39.8017, -89.6436]]);
 
