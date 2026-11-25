@@ -97,6 +97,20 @@ test('an assignment cannot end before it starts', function () {
     expect($assignment->refresh()->started_at->isSameDay(now()->subDays(10)))->toBeTrue();
 });
 
+test('an assignment without a start date starts now, in the app timezone rather than the database clock', function () {
+    $this->travelTo(Carbon::parse('2026-03-29 10:15:00'));
+
+    $assignment = ($this->assign)(['started_at' => null]);
+
+    expect($assignment->started_at)->toEqual(now())
+        ->and($assignment->refresh()->started_at)->toEqual(now());
+
+    $this->travel(30)->minutes();
+    $assignment->update(['ended_at' => now()]);
+
+    expect($assignment->refresh()->ended_at->gt($assignment->started_at))->toBeTrue();
+});
+
 test('an assignment can be returned the moment it starts', function () {
     $startedAt = now()->subDays(10)->startOfSecond();
 

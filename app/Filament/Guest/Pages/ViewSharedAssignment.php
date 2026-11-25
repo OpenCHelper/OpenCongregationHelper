@@ -12,6 +12,7 @@ use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Pages\Page;
 use Filament\Panel;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 
 class ViewSharedAssignment extends Page implements HasInfolists
@@ -66,6 +67,14 @@ class ViewSharedAssignment extends Page implements HasInfolists
     public function assignmentInfolist(Schema $schema): Schema
     {
         return TerritoryAssignmentResource::infolist($schema)->record($this->assignment);
+    }
+
+    /**
+     * Narrower than the pages of the application, which have a sidebar beside them: easier to read on a wide screen.
+     */
+    public function getMaxContentWidth(): Width
+    {
+        return Width::FiveExtraLarge;
     }
 
     public static function getRoutePath(Panel $panel): string

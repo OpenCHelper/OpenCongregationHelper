@@ -5,6 +5,7 @@ use App\Models\Territory;
 use App\Models\TerritoryAssignment;
 use App\Models\TerritoryZone;
 use App\Models\User;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
@@ -28,6 +29,8 @@ beforeEach(function () {
 
     // Sharing loads the settings: forget them, so that they follow the configuration set by each test
     app()->forgetScopedInstances();
+    // The Filament manager is scoped too: let its facade resolve the new one, which the layout reads the panel from
+    Facade::clearResolvedInstance('filament');
 });
 
 test('shared assignment pages render with the built frontend assets', function () {
@@ -82,4 +85,40 @@ test('the crawlers can fetch the shared pages, so that they read that they must 
 
 test('the pages of the application can still be indexed', function () {
     $this->get('/')->assertHeaderMissing('X-Robots-Tag');
+});
+
+test('shared assignment pages have no navigation', function () {
+    $this->withoutVite();
+
+    $this->get('/guest/shared-assignment/'.$this->sharedUrl->uid)
+        ->assertOk()
+        ->assertSee('fi-panel-guest', escape: false)
+        ->assertDontSee('fi-sidebar-nav', escape: false);
+});
+
+test('shared assignment pages show the dates formatted with the locale and the timezone of the application', function () {
+    $this->withoutVite();
+    config(['app.timezone' => 'Europe/Rome']);
+
+    $startedAt = now('UTC')->subDays(3)->setTime(21, 45);
+    $this->assignment->update(['started_at' => $startedAt]);
+
+    $this->get('/guest/shared-assignment/'.$this->sharedUrl->uid)
+        ->assertOk()
+        ->assertSee($startedAt->copy()->setTimezone('Europe/Rome')->locale(app()->getLocale())->isoFormat('LLL'))
+        ->assertDontSee($startedAt->format('Y-m-d H:i:s'));
+});
+
+test('shared assignment pages describe each section differently', function () {
+    $this->withoutVite();
+
+    foreach (['en', 'it', 'es'] as $locale) {
+        expect(__('filament-resources.territory_assignment.section_territory_info_description', locale: $locale))
+            ->not->toBe(__('filament-resources.territory_assignment.section_assignment_info_description', locale: $locale));
+    }
+
+    $this->get('/guest/shared-assignment/'.$this->sharedUrl->uid)
+        ->assertOk()
+        ->assertSee(__('filament-resources.territory_assignment.section_territory_info_description'))
+        ->assertSee(__('filament-resources.territory_assignment.section_assignment_info_description'));
 });
