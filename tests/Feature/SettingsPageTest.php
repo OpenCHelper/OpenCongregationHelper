@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
@@ -558,7 +559,7 @@ test('the address of the Kingdom Hall is optional', function () {
 });
 
 test('the global map opens on the default centre of the settings', function () {
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(User::factory()->create()->givePermissionTo(Permission::findOrCreate('ViewAny:Territory', 'web')));
 
     expect(Livewire::test(TerritoryGlobalMap::class)->instance()->getMapData()['defaultCoord'])
         ->toBe(config('filament-leaflet.default_map_center'));

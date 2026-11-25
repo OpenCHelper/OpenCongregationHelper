@@ -14,6 +14,14 @@ class StatsOverview extends BaseWidget
 {
     protected ?string $pollingInterval = '10s';
 
+    /**
+     * Only who can view the territories sees their statistics.
+     */
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('viewAny', Territory::class) ?? false;
+    }
+
     protected function getStats(): array
     {
         $durationExpr = TerritoryAssignment::durationInDaysExpression();
