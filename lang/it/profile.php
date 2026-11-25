@@ -26,8 +26,6 @@ return [
         'password_change_not_allowed' => 'Le modifiche alla password non sono consentite per l\'utente root in ambienti non di produzione.',
         'account_deletion_not_allowed' => 'L\'utente root non può essere eliminato in nessuna circostanza.',
         'edit_action_disabled' => 'La modifica non è consentita per l\'utente root in ambienti non di produzione.',
-        'bulk_delete_partial_success' => ':deleted utente/i eliminato/i con successo. L\'utente root è stato escluso e non può essere eliminato.',
-        'bulk_delete_only_root_selected' => 'Impossibile eliminare l\'utente/i selezionato/i. L\'utente root non può essere eliminato in nessuna circostanza.',
     ],
     'update_password' => [
         'title' => 'Aggiorna password',

@@ -26,8 +26,6 @@ return [
         'password_change_not_allowed' => 'Password changes are not allowed for the root user in non-production environments.',
         'account_deletion_not_allowed' => 'The root user cannot be deleted under any circumstances.',
         'edit_action_disabled' => 'Editing is not allowed for the root user in non-production environments.',
-        'bulk_delete_partial_success' => ':deleted user(s) deleted successfully. The root user was excluded and could not be deleted.',
-        'bulk_delete_only_root_selected' => 'Cannot delete the selected user(s). The root user cannot be deleted under any circumstances.',
     ],
     'update_password' => [
         'title' => 'Update password',
