@@ -181,32 +181,33 @@ class UserResource extends Resource
     {
         return $table
             ->recordUrl(fn (Model $record): string => UserResource::getUrl('view', ['record' => $record]))
+            ->stackedOnMobile()
             ->columns([
-                // On small screens, a single column with the name and the email replaces the columns hidden below
+                // On phones, where each user is a card, the name and the email replace the columns hidden below
                 TextColumn::make('full_name')
                     ->label(__('filament-resources.user.column_full_name'))
                     ->state(fn (User $record): string => $record->getFullName())
                     ->description(fn (User $record): ?string => $record->email)
                     ->weight(FontWeight::SemiBold)
                     ->sortable(['last_name', 'first_name'])
-                    ->hiddenFrom('md'),
+                    ->hiddenFrom('sm'),
                 TextColumn::make('first_name')
                     ->label(__('filament-resources.user.column_first_name'))
                     ->sortable()
                     ->searchable()
-                    ->visibleFrom('md'),
+                    ->visibleFrom('sm'),
                 TextColumn::make('last_name')
                     ->label(__('filament-resources.user.column_last_name'))
                     ->sortable()
                     ->searchable()
-                    ->visibleFrom('md'),
+                    ->visibleFrom('sm'),
                 TextColumn::make('email')
                     ->label(__('filament-resources.user.column_email'))
                     ->copyable()
                     ->icon(Heroicon::Envelope)
                     ->fontFamily(FontFamily::Mono)
                     ->searchable()
-                    ->visibleFrom('md'),
+                    ->visibleFrom('sm'),
                 TextColumn::make('roles.name')
                     ->label(__('filament-resources.user.column_role'))
                     ->badge()
