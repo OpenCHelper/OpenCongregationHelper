@@ -97,6 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   production only), wherever they are chosen: invitation, password reset, profile, and `och:install` and
   `och:recover-root`, including `INITIAL_ROOT_PASSWORD`
   ([#80](https://github.com/OpenCHelper/OpenCongregationHelper/pull/80)).
+- Updated the libraries used for passkeys and for CSV imports and exports, which had known vulnerabilities (forged
+  passkey attestations, and memory exhaustion while reading a crafted CSV file).
 
 ## [1.0.0-alpha15] - 2026-11-24
 
