@@ -38,9 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Territories**: the counts in the zone and campaign group headers now match the rows below them: they follow the
   filters and the search, no longer count returned assignments, and include under "No campaign" the territories
   assigned outside a campaign ([#87](https://github.com/OpenCHelper/OpenCongregationHelper/pull/87)).
-
-### Fixed
-
+- **Campaigns**: the slices of the assignment status chart have different colours (gray, amber and green), so "To be
+  assigned", "In progress" and "Completed" can be told apart
+  ([#89](https://github.com/OpenCHelper/OpenCongregationHelper/pull/89)).
 - **Migrations**: splitting the full name of the users keeps it in the first and last name, rolling it back joins
   them again, a failed creation of the app tables no longer drops them, the two-factor column is added only when
   missing and the mail log table can be rolled back
