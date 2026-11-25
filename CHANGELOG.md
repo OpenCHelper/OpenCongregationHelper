@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   name and status at the top and the enabled columns below, instead of a table to scroll sideways; the totals stay
   below the list
   ([#95](https://github.com/OpenCHelper/OpenCongregationHelper/pull/95)).
+- **Tables**: more secondary columns can be hidden from the columns button, such as the publications of the
+  subscribers, the tags of territories and zones, the campaign of the assignments and the email of the users; the
+  creator of the campaigns and the guard and last update of the roles are now hidden by default
+  ([#96](https://github.com/OpenCHelper/OpenCongregationHelper/pull/96)).
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 - **Shared assignment page**: no sidebar any more, the assignment dates are shown in the language of the page and in
