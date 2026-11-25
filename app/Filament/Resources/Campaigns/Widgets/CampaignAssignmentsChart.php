@@ -33,11 +33,6 @@ class CampaignAssignmentsChart extends ChartWidget
                         'rgba(245, 158, 11, 0.8)',
                         'rgba(34, 197, 94, 0.8)',
                     ],
-                    'borderColor' => [
-                        'rgb(156, 163, 175)',
-                        'rgb(245, 158, 11)',
-                        'rgb(34, 197, 94)',
-                    ],
                 ],
             ],
             'labels' => [

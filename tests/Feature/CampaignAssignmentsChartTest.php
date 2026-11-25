@@ -18,7 +18,5 @@ test('each slice of the assignment status chart has its own color', function () 
 
     expect($dataset['backgroundColor'])->toHaveCount(3)
         ->and(array_unique($dataset['backgroundColor']))->toHaveCount(3)
-        ->and($dataset['borderColor'])->toHaveCount(3)
-        ->and(array_unique($dataset['borderColor']))->toHaveCount(3)
         ->and($dataset['backgroundColor'])->toHaveCount(count($dataset['data']));
 });
