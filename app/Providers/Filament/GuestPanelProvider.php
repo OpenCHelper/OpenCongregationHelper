@@ -4,17 +4,15 @@ namespace App\Providers\Filament;
 
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Http\Middleware\PreventSearchIndexing;
+use App\Http\Middleware\RedirectGuestPanelRoot;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
-use Filament\Widgets;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -36,19 +34,13 @@ class GuestPanelProvider extends PanelProvider
             ->themeSwitcher(false)
             // The panel only hosts the pages opened from share links: a sidebar would have nothing useful to offer
             ->navigation(false)
+            ->homeUrl('/')
             // ->resources([
             //     // Resources can be added here if needed
             // ])
             ->discoverResources(in: app_path('Filament/Guest/Resources'), for: 'App\\Filament\\Guest\\Resources')
             ->discoverPages(in: app_path('Filament/Guest/Pages'), for: 'App\\Filament\\Guest\\Pages')
-            ->pages([
-                Dashboard::class,
-            ])
             ->discoverWidgets(in: app_path('Filament/Guest/Widgets'), for: 'App\\Filament\\Guest\\Widgets')
-            ->widgets([
-                // Widgets\AccountWidget::class,
-                FilamentInfoWidget::class,
-            ])
             ->plugins([
                 FilamentUiSwitcherPlugin::make()
                     ->withModeSwitcher(),
@@ -64,6 +56,7 @@ class GuestPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 PreventSearchIndexing::class,
+                RedirectGuestPanelRoot::class,
             ])
             // Also for the crawlers that read only the page, besides the header of `PreventSearchIndexing`
             ->renderHook(

@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- The public `/guest` address no longer shows a dashboard with the Filament version: it redirects to the welcome page
+  ([#79](https://github.com/OpenCHelper/OpenCongregationHelper/pull/79)).
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
   button. Returned or deleted assignments can no longer be shared, and their leftover links stop working
   ([#72](https://github.com/OpenCHelper/OpenCongregationHelper/pull/72)).
