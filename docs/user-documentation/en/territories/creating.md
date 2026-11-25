@@ -31,7 +31,7 @@ A territory can be described in two ways, and they can coexist:
 | | **Map** | **Image** |
 |-|---------|-----------|
 | What it is | A shape drawn on an interactive OpenStreetMap map | A picture, e.g. a photo or scan of the paper territory card |
-| Shown on the dashboard | Yes, colored like its zone | No |
+| Shown on the [dashboard](../basics/dashboard) | Yes, for residential territories (only the areas, see [Drawing maps](maps)) | No |
 | Can be zoomed and used to navigate | Yes | No |
 | Best for | New territories | Territories coming from the paper register |
 
@@ -45,9 +45,10 @@ In the **Image** tab you can either:
 - drag a file onto **Image from file** (or click **Browse**): a PNG, JPEG or WebP picture. The built-in editor lets
   you crop and rotate the image before saving it.
 
-The two options are alternative: filling one disables the other. Uploaded images are stored privately and can only be
-seen by logged-in users. When you edit a territory with an uploaded image, the image is in **Image from file**:
-remove it to upload another one or to use a link instead.
+The two options are alternative: filling one disables the other. Uploaded images are stored privately: they can only
+be seen in the application and on the public page of a [shared assignment](../assignments/sharing) of the territory.
+When you edit a territory with an uploaded image, the image is in **Image from file**: remove it to upload another one
+or to use a link instead.
 
 ![Image tab](/docs/user-documentation/en/territories/assets/territory-edit-image.webp)
 
@@ -55,4 +56,4 @@ remove it to upload another one or to use a link instead.
 
 Click **Edit** on the territory row (or **⋮ → Edit** in the territory page), change what you need and click
 **Save changes**. The **Delete** button at the top of the edit page moves the territory to the trash (see
-[Territories list](introduction)).
+[Territories list](introduction)), unless it is still assigned.

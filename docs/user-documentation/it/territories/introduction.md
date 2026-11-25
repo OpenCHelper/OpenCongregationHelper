@@ -108,11 +108,15 @@ l'assegnazione in corso: rimuovi il filtro *Stato assegnazione* per vederle tutt
 
 ## Eliminare e ripristinare
 
-I territori eliminati non vanno persi: vengono spostati nel cestino. Per recuperarne uno:
+I territori eliminati non vanno persi: vengono spostati nel cestino. Un territorio ancora assegnato non può essere
+eliminato: prima termina la sua assegnazione. Per recuperare un territorio eliminato:
 
 1. apri i filtri e imposta **Record eliminati** su *Con record eliminati* o *Solo record eliminati*;
 2. apri il menu **⋮** del territorio e clicca **Ripristina**.
 
-**Elimina forzatamente** rimuove un territorio in modo definitivo.
+**Forza eliminazione** rimuove un territorio in modo definitivo. Mentre sono mostrati i record eliminati, le azioni di
+massa comprendono anche **Ripristina selezionati** ed **Elimina forzatamente selezionati**.
 
-> ⚠️ **Attenzione:** quando una zona viene eliminata, vengono nascosti anche tutti i suoi territori.
+> ⚠️ **Attenzione:** una zona che contiene ancora dei territori non può essere eliminata (vedi [Zone](zones)). I
+> territori già eliminati di una zona eliminata restano nascosti, anche tra i record eliminati, finché la zona non
+> viene ripristinata.
