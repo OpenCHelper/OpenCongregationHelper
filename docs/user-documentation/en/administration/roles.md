@@ -40,11 +40,11 @@ Each resource has the permissions of the actions it offers:
 | **Create** / **Update** | create, edit records | all (*Department* only **Update**) |
 | **Delete** | delete a record | all but *Department* and *Regular publications* |
 | **Delete Any** | delete the selected records at once | Territory, Territory Zone, Territory Assignment, Campaign, User, Poster, Request, Tag, Role |
-| **Restore**, **Force Delete** (and their *Any* versions) | restore deleted records, delete them permanently | Territory, Territory Zone, Territory Assignment, Campaign, User |
+| **Restore**, **Force Delete** (and their *Any* versions) | restore deleted records, delete them permanently | Territory, Territory Zone, Territory Assignment, Campaign |
 | **Reorder** | change the order of the list | Publication |
 
-*User* also has **Replicate** and **Reorder**, not used at the moment. The activity log and the mail log have no
-permissions: only the super administrators read them.
+*User* also has **Restore**, **Force Delete** (and their *Any* versions), **Replicate** and **Reorder**, not used at
+the moment. The activity log and the mail log have no permissions: only the super administrators read them.
 
 Some permissions have a special meaning:
 

@@ -43,10 +43,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Roles**: a new installation now creates every permission that the policies check (e.g. those of posters,
-  publications, requests, storage locations and tags), and the role editor offers only the permissions of the actions
-  each resource has (e.g. no more **Replicate** or **Restore** where nothing can be replicated or restored); the
-  activity and mail logs, which only the super administrators read, have no permissions any more.
+- **Roles**: every permission that the policies check (e.g. those of posters, publications, requests, storage
+  locations and tags) is now created on installation and on every update, and the role editor offers only the
+  permissions of the actions each resource has (e.g. no more **Replicate** or **Restore** where nothing can be
+  replicated or restored); the activity and mail logs, which only the super administrators read, have no permissions
+  any more. The permissions no longer offered stay on the roles that had them, but they allow nothing.
 - **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
   page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown
   only on the territory's own map. The **Draw Text** tool is removed.
