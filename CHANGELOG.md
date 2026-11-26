@@ -38,7 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Assignments**: **End Assignment** returns a territory from the rows of the assignments in progress (also in the
   assignment history of a territory, a user or a campaign) and from the top of the page of an assignment, instead of
   editing its end date. Deleting an assignment now explains that it leaves the history and the statistics of the
-  territory, and that permanently deleting it cannot be undone.
+  territory, and that permanently deleting it cannot be undone
+  ([#110](https://github.com/OpenCHelper/OpenCongregationHelper/pull/110)).
 
 ### Removed
 
