@@ -33,4 +33,5 @@ pagina puoi anche:
 
 ## Eliminare i tag
 
-Un tag può essere eliminato solo se nessun territorio o zona lo usa: prima rimuovilo da questi.
+Eliminando un tag lo si toglie anche da tutti i territori e le zone che lo usano (che restano). Prima di eliminarlo, la
+conferma indica quanti territori e zone lo usano (o usano i tag selezionati, quando se ne eliminano più di uno).

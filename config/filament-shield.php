@@ -1,13 +1,20 @@
 <?php
 
 declare(strict_types=1);
+use App\Filament\Clusters\Settings\Pages\ManageCampaignSettings;
+use App\Filament\Clusters\Settings\Pages\ManageGeneralSettings;
+use App\Filament\Clusters\Settings\Pages\ManageSecuritySettings;
+use App\Filament\Clusters\Settings\Pages\ManageTerritorySettings;
+use App\Filament\Pages\ApiTokens;
+use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\EditProfile;
+use App\Filament\Pages\Logs;
 use App\Filament\Resources\Departments\DepartmentResource;
 use App\Filament\Widgets\NoDashboardAccess;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TerritoryCoverage;
 use App\Filament\Widgets\TerritoryGlobalMap;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
-use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 
@@ -29,7 +36,9 @@ return [
         'show_model_path' => true,
         'cluster' => null,
         'tabs' => [
-            'pages' => true,
+            // Every page is open to everyone (profile) or to the super administrators only (settings, logs), or is
+            // enabled by a feature (API tokens): none has a permission of its own (see `pages.exclude`)
+            'pages' => false,
             // Every widget is shown according to the permissions of the resources (see `widgets.exclude`)
             'widgets' => false,
             'resources' => true,
@@ -227,7 +236,14 @@ return [
         'subject' => 'class',
         'prefix' => 'view',
         'exclude' => [
+            ApiTokens::class,
             Dashboard::class,
+            EditProfile::class,
+            Logs::class,
+            ManageCampaignSettings::class,
+            ManageGeneralSettings::class,
+            ManageSecuritySettings::class,
+            ManageTerritorySettings::class,
         ],
     ],
 

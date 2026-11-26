@@ -28,9 +28,9 @@ class FakeRoleSeeder extends Seeder
     private const EDIT_ACTIONS = ['View', 'ViewAny', 'Create', 'Update'];
 
     /**
-     * The pages every role can open.
+     * The permissions every role has.
      */
-    private const COMMON_PAGES = ['View:EditProfile', 'View:TerritoryGlobalMap'];
+    private const COMMON_PERMISSIONS = ['View:TerritoryGlobalMap'];
 
     /**
      * Run the database seeds.
@@ -68,24 +68,24 @@ class FakeRoleSeeder extends Seeder
             'territory_servant' => [
                 ...$this->permissions(self::ALL_ACTIONS, ['Territory', 'TerritoryZone', 'TerritoryAssignment', 'Campaign', 'Tag']),
                 ...$this->permissions(self::READ_ACTIONS, ['User']),
-                ...self::COMMON_PAGES,
+                ...self::COMMON_PERMISSIONS,
             ],
             // Organizes the campaigns and oversees the ministry
             'service_overseer' => [
                 ...$this->permissions([...self::EDIT_ACTIONS, 'Delete'], ['Campaign']),
                 ...$this->permissions(self::READ_ACTIONS, ['Territory', 'TerritoryZone', 'TerritoryAssignment', 'Tag', 'User', 'Activity']),
-                ...self::COMMON_PAGES,
+                ...self::COMMON_PERMISSIONS,
             ],
             // Assigns the territories to the publishers of the group
             'group_overseer' => [
                 ...$this->permissions(self::EDIT_ACTIONS, ['TerritoryAssignment']),
                 ...$this->permissions(self::READ_ACTIONS, ['Territory', 'TerritoryZone', 'Campaign', 'User']),
-                ...self::COMMON_PAGES,
+                ...self::COMMON_PERMISSIONS,
             ],
             // Consults the territories
             'publisher' => [
                 ...$this->permissions(self::READ_ACTIONS, ['Territory', 'TerritoryZone', 'Campaign']),
-                ...self::COMMON_PAGES,
+                ...self::COMMON_PERMISSIONS,
             ],
         ];
     }

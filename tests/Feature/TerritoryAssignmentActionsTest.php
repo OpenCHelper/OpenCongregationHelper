@@ -10,6 +10,8 @@ use App\Models\TerritoryZone;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Notifications\Livewire\Notifications;
+use Filament\Notifications\NotificationMailbox;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -240,4 +242,105 @@ test('assignee options are sorted by first name, then last name', function () {
     expect($names)->toBe($expected)
         ->and(array_search('Anna Verdi', $names))->toBeLessThan(array_search('Annamarie Abbott', $names))
         ->and($names)->toContain('Zeno Bianchi');
+});
+
+/**
+ * The last notification sent by the page (title, status and body as plain text).
+ *
+ * @return array{title: string, status: ?string, body: ?string}
+ */
+function lastSentNotification(): array
+{
+    // Read like `Notification::assertNotified()` does
+    app(NotificationMailbox::class)->flush();
+    $notifications = new Notifications;
+    $notifications->mount();
+    $notifications->pullNotifications();
+    $notification = $notifications->notifications->last()?->toArray() ?? [];
+
+    return [
+        'title' => $notification['title'] ?? '',
+        'status' => $notification['status'] ?? null,
+        'body' => isset($notification['body']) ? strip_tags(str_replace('<br>', "\n", (string) $notification['body'])) : null,
+    ];
+}
+
+test('assigning territories in bulk tells which ones were skipped because already assigned', function () {
+    $this->territory->update(['name' => 'Busy one']);
+    TerritoryAssignment::factory()->create([
+        'territory_id' => $this->territory->id,
+        'assignee_id' => $this->assignee->id,
+        'ended_at' => null,
+    ]);
+    $freeTerritories = Territory::factory()->count(2)->for($this->territory->territoryZone, 'territoryZone')->create();
+
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Create:TerritoryAssignment']));
+
+    Livewire::test(ListTerritories::class)
+        ->selectTableRecords([$this->territory, ...$freeTerritories])
+        ->callAction(TestAction::make('create_assignment_bulk')->table()->bulk(), [
+            'assignee_id' => $this->assignee->id,
+        ])
+        ->assertHasNoFormErrors();
+
+    expect(lastSentNotification())->toBe([
+        'title' => trans_choice('filament-resources.territory.bulk_assigned', 2),
+        'status' => 'warning',
+        'body' => __('filament-resources.territory.bulk_skipped_already_assigned', ['territories' => 'Busy one']),
+    ])
+        ->and($freeTerritories->every(fn (Territory $territory): bool => $territory->currentAssignment()->exists()))->toBeTrue();
+});
+
+test('assigning territories in bulk confirms when all of them were assigned', function () {
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Create:TerritoryAssignment']));
+
+    Livewire::test(ListTerritories::class)
+        ->selectTableRecords([$this->territory])
+        ->callAction(TestAction::make('create_assignment_bulk')->table()->bulk(), [
+            'assignee_id' => $this->assignee->id,
+        ]);
+
+    expect(lastSentNotification())->toBe([
+        'title' => trans_choice('filament-resources.territory.bulk_assigned', 1),
+        'status' => 'success',
+        'body' => null,
+    ]);
+});
+
+test('returning territories in bulk tells which ones were skipped and why', function () {
+    $this->territory->update(['name' => 'Not out']);
+    TerritoryAssignment::factory()->create([
+        'territory_id' => Territory::factory()->for($this->territory->territoryZone, 'territoryZone')->create(['name' => 'Future start'])->id,
+        'assignee_id' => $this->assignee->id,
+        'started_at' => now()->addMonth(),
+        'ended_at' => null,
+    ]);
+
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Update:TerritoryAssignment']));
+
+    Livewire::test(ListTerritories::class)
+        ->selectTableRecords(Territory::all())
+        ->callAction(TestAction::make('cancel_assignment_bulk')->table()->bulk());
+
+    $notification = lastSentNotification();
+
+    expect($notification['title'])->toBe(trans_choice('filament-resources.territory.bulk_returned', 0))
+        ->and($notification['status'])->toBe('danger')
+        ->and($notification['body'])->toContain(__('filament-resources.territory.bulk_skipped_not_assigned', ['territories' => 'Not out']))
+        ->and($notification['body'])->toContain('Future start (');
+});
+
+test('a long list of skipped territories is shortened', function () {
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Update:TerritoryAssignment']));
+    $territories = Territory::factory()->count(11)->for($this->territory->territoryZone, 'territoryZone')
+        ->sequence(fn ($sequence): array => ['name' => 'T'.($sequence->index + 1)])
+        ->create();
+
+    Livewire::test(ListTerritories::class)
+        ->selectTableRecords($territories)
+        ->callAction(TestAction::make('cancel_assignment_bulk')->table()->bulk());
+
+    expect(lastSentNotification()['body'])->toBe(__('filament-resources.territory.bulk_skipped_not_assigned', [
+        'territories' => __('filament-resources.territory.bulk_and_more', ['territories' => 'T1, T2, T3, T4, T5, T6, T7, T8, T9, T10', 'count' => 1]),
+    ]));
 });
