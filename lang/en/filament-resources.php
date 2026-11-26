@@ -273,6 +273,10 @@ return [
         'action_end_assignment' => 'End Assignment',
         'action_create' => 'Create',
         'action_end' => 'End',
+        'delete_description' => 'The assignment is removed from the history of the territory and from the statistics (when it was last worked, the coverage, the campaigns). To record that the territory has been worked, end the assignment instead.',
+        'bulk_delete_description' => 'The assignments are removed from the history of their territories and from the statistics (when they were last worked, the coverage, the campaigns). To record that the territories have been worked, end the assignments instead.',
+        'force_delete_description' => 'The assignment is permanently removed from the history of the territory: this cannot be undone.',
+        'bulk_force_delete_description' => 'The assignments are permanently removed from the history of their territories: this cannot be undone.',
         'action_copy' => [
             'label' => 'Share',
             'tooltip' => 'Copy to clipboard the shareable URL for this assignment',

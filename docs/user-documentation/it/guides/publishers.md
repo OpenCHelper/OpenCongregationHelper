@@ -26,7 +26,7 @@ zoom per leggere i nomi delle vie e usa il pulsante **schermo intero** per veder
 
 Quando hai finito, apri la pagina dell'assegnazione (es. dalla sua notifica), clicca **Chiedi di riconsegnare** e
 conferma: il reparto territori riceve una notifica e chiude l'assegnazione. Se il tuo ruolo lo permette, puoi invece
-cliccare **Termina assegnazione** nella pagina del territorio.
+cliccare **Termina assegnazione** nella stessa pagina (o nella pagina del territorio) per riconsegnarlo subito.
 
 Se il territorio ti è stato assegnato per una campagna terminata, o che termina entro 7 giorni, la pagina
 dell'assegnazione mostra un promemoria per riconsegnarlo.
