@@ -31,7 +31,7 @@ Un territorio può essere descritto in due modi, che possono coesistere:
 | | **Mappa** | **Immagine** |
 |-|-----------|--------------|
 | Cos'è | Una forma disegnata su una mappa interattiva di OpenStreetMap | Un'immagine, es. la foto o la scansione della cartolina cartacea |
-| Mostrata nella dashboard | Sì, con il colore della sua zona | No |
+| Mostrata nella [dashboard](../basics/dashboard) | Sì, per i territori residenziali (solo le aree, vedi [Disegnare le mappe](maps)) | No |
 | Si può ingrandire e usare per orientarsi | Sì | No |
 | Ideale per | I nuovi territori | I territori provenienti dal registro cartaceo |
 
@@ -46,8 +46,9 @@ Nella scheda **Immagine** puoi:
   integrato permette di ritagliare e ruotare l'immagine prima di salvarla.
 
 Le due opzioni sono alternative: compilarne una disabilita l'altra. Le immagini caricate sono conservate in modo
-privato e possono vederle solo gli utenti che hanno effettuato l'accesso. Quando modifichi un territorio con
-un'immagine caricata, l'immagine si trova in **Immagine da file**: rimuovila per caricarne un'altra o per usare un link.
+privato: si possono vedere solo nell'applicazione e nella pagina pubblica di
+un'[assegnazione condivisa](../assignments/sharing) del territorio. Quando modifichi un territorio con un'immagine
+caricata, l'immagine si trova in **Immagine da file**: rimuovila per caricarne un'altra o per usare un link.
 
 ![Scheda Immagine](/docs/user-documentation/it/territories/assets/territory-edit-image.webp)
 
@@ -55,4 +56,4 @@ un'immagine caricata, l'immagine si trova in **Immagine da file**: rimuovila per
 
 Clicca **Modifica** sulla riga del territorio (o **⋮ → Modifica** nella pagina del territorio), cambia ciò che serve e
 clicca **Salva modifiche**. Il pulsante **Elimina** in alto nella pagina di modifica sposta il territorio nel cestino
-(vedi [Elenco dei territori](introduction)).
+(vedi [Elenco dei territori](introduction)), a meno che non sia ancora assegnato.

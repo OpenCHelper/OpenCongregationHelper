@@ -84,9 +84,10 @@ Protect your account with a code from an authenticator app on your phone (for ex
 Authenticator or Authy), asked after your password at every login.
 
 1. Under **Authenticator app**, click **Set up**.
-2. Scan the QR code with the authenticator app (or type the key shown below it).
-3. Save the **recovery codes** somewhere safe: each one lets you log in once if you lose your phone.
-4. Enter the 6-digit code shown by the app to confirm.
+2. Scan the QR code with the authenticator app (or type the code shown below it).
+3. Enter the 6-digit code shown by the app and your **Current password**, then go on.
+4. Save the **recovery codes** somewhere safe: each one lets you log in once if you lose your phone. They are shown
+   only once. Then click **Enable authenticator app**.
 
 From then on you can **Regenerate recovery codes** or **Turn off** two-factor authentication from the same section. If
 the administrators require it (see [Settings](../administration/settings#security)), you are asked to set it up before

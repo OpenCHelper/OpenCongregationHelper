@@ -20,6 +20,7 @@ bar), **by email** and, if you enable them, as **push notifications** on your de
 | **Return requested** | the members of the territory department, except whoever asked |
 | **New campaign** | every user who can log in |
 | **Territory out for *N* days** | the person who has had a territory for more than the days set in the [Settings](../administration/settings) (60 by default). The reminder is sent once a week, on the day and at the time set there (Monday at 9:00 by default), until the territory is returned. |
+| **Territories out for too long** | the members of the territory department, or only its overseers if so chosen in the [Settings](../administration/settings#territories): at the same time as the reminders, a weekly summary of the territories out for more than those days, to follow up with their assignees. |
 
 Virtual users, who cannot log in, receive no notification. Recording an assignment that is already returned notifies
 nobody, and so does correcting the date of a return.
@@ -27,7 +28,8 @@ nobody, and so does correcting the date of a return.
 ## Push notifications
 
 Push notifications appear on your phone or computer like those of any other app, even when the application is closed.
-Clicking one opens the related territory or assignment.
+Clicking one opens the related assignment (the list of the assignments for the summary of the territories out for
+too long, the dashboard when there is nothing to open).
 
 Right after you log in, a full-screen page offers to turn them on for the device you are using: click **Turn on
 notifications** and allow them when the browser asks. If you click **Not now**, it is offered again after 30 days. It
@@ -54,7 +56,8 @@ that device, so a shared device does not receive your notifications.
 ## Managing notifications
 
 - Click the **bell** to open the panel. Unread notifications are highlighted and counted on the bell.
-- Click **View** to open the related territory or assignment.
+- Click **View**, when present, to open the related assignment (or, for the summary of the territories out for too
+  long, the list of the assignments).
 - Click **×** to remove a single notification.
 - **Mark all as read** and **Clear** act on all of them at once.
 

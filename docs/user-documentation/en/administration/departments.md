@@ -47,4 +47,4 @@ select them, open **Bulk actions** and click **Add to department**, then choose 
 the department**. Those who already serve in the department keep their role.
 
 The administrators can manage the members of every department; the overseers only those of their own departments.
-The **Departments** column and filter of the [users list](users) show who serves where.
+The **Departments** column and the **Department** filter of the [users list](users) show who serves where.

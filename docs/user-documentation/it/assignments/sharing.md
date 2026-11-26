@@ -28,12 +28,16 @@ notifica dell'assegnazione, anche se non possono vedere le altre assegnazioni.
 ## Cosa vede il destinatario
 
 La pagina pubblica mostra il nome del territorio, la zona, la mappa, l'immagine e la descrizione, la campagna e la data
-di inizio dell'assegnazione.
+di inizio dell'assegnazione. Non ha barra laterale né menu, e le sue date sono nel fuso orario della congregazione.
+
+Se i super amministratori lo permettono dalle [impostazioni](../administration/settings#territori), la pagina mostra
+anche **Chiedi di riconsegnare**: chiunque abbia il link può chiedere al reparto territori di chiudere l'assegnazione,
+come può fare l'assegnatario dall'applicazione (vedi [Assegnare e riconsegnare](assigning#richieste-di-riconsegna)).
 
 ![Pagina pubblica di un'assegnazione condivisa](/docs/user-documentation/it/assignments/assets/shared-page.webp)
 
 > 🔒 **Privacy:** di default la pagina pubblica **non** mostra il nome dell'assegnatario né le note del territorio, che
-> possono contenere dati personali. L'amministratore può abilitarli dalla pagina
+> possono contenere dati personali. I super amministratori possono abilitarli dalla pagina
 > [Impostazioni](../administration/settings). Le pagine condivise chiedono anche ai motori di ricerca (es. Google) di
 > non indicizzarle, così non compaiono nei risultati delle ricerche.
 
