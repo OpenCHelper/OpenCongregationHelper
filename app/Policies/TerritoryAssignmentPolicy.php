@@ -8,6 +8,10 @@ use App\Models\TerritoryAssignment;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
+/**
+ * Only the actions offered by the resource have a permission (see `resources.manage` in `config/filament-shield.php`,
+ * which `ShieldSeeder` creates): the others are denied, since Filament would allow an action without a method here.
+ */
 class TerritoryAssignmentPolicy
 {
     use HandlesAuthorization;
@@ -77,11 +81,11 @@ class TerritoryAssignmentPolicy
 
     public function replicate(AuthUser $authUser, TerritoryAssignment $territoryAssignment): bool
     {
-        return $authUser->can('Replicate:TerritoryAssignment');
+        return false;
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:TerritoryAssignment');
+        return false;
     }
 }

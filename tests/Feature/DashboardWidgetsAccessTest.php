@@ -81,7 +81,7 @@ test('every widget follows the permission to view the territories', function () 
 });
 
 test('the former permission of the map alone does not show the territories', function () {
-    $user = User::factory()->create()->givePermissionTo(Permission::findByName('View:TerritoryGlobalMap', 'web'));
+    $user = User::factory()->create()->givePermissionTo(Permission::findOrCreate('View:TerritoryGlobalMap', 'web'));
 
     expect(visibleDashboardWidgets($user))->toBe([NoDashboardAccess::class]);
 });

@@ -12,6 +12,7 @@ use Database\Seeders\FakeDataSeeder;
 use Database\Seeders\FakeRoleSeeder;
 use Database\Seeders\FakeTagSeeder;
 use Database\Seeders\FakeTerritorySeeder;
+use Database\Seeders\ShieldSeeder;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -157,8 +158,9 @@ test('the fake role seeder gives a role to every user but the root one', functio
     expect(Role::pluck('name')->all())->toContain('territory_servant', 'service_overseer', 'group_overseer', 'publisher')
         ->and(User::find(1)->roles)->toBeEmpty()
         ->and(User::whereKeyNot(1)->with('roles')->get()->every(fn (User $user): bool => $user->roles->count() === 1))->toBeTrue()
-        ->and(Role::findByName('publisher', 'web')->permissions->pluck('name')->all())->toContain('ViewAny:Territory', 'View:TerritoryGlobalMap')
+        ->and(Role::findByName('publisher', 'web')->permissions->pluck('name')->all())->toContain('ViewAny:Territory')
         ->and(Role::findByName('publisher', 'web')->hasPermissionTo('Update:Territory'))->toBeFalse()
         ->and(Role::findByName('territory_servant', 'web')->hasPermissionTo('Create:Territory'))->toBeTrue()
-        ->and(Permission::where('name', 'like', '%::%')->exists())->toBeFalse();
+        ->and(Permission::where('name', 'like', '%::%')->exists())->toBeFalse()
+        ->and(Permission::pluck('name')->all())->each->toBeIn(ShieldSeeder::permissionNames());
 });
