@@ -205,15 +205,18 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * The super admin role cannot be deleted, from wherever (e.g. the Delete button of the role's edit page, which comes
-     * from Shield): there must always be a super administrator to manage the application.
+     * The super admin role cannot be deleted, renamed or moved to another guard, from wherever (e.g. the Delete button
+     * of the role's edit page, which comes from Shield): there must always be a super administrator to manage the
+     * application.
      */
     private function protectSuperAdminRole(): void
     {
         /** @var class-string<Model> $roleModel */
         $roleModel = Utils::getRoleModel();
+        $isSuperAdminRole = fn (Model $role): bool => $role->getOriginal('name') === Utils::getSuperAdminName();
 
-        $roleModel::deleting(fn (Model $role): ?bool => $role->getAttribute('name') === Utils::getSuperAdminName() ? false : null);
+        $roleModel::deleting(fn (Model $role): ?bool => $isSuperAdminRole($role) ? false : null);
+        $roleModel::updating(fn (Model $role): ?bool => $isSuperAdminRole($role) && $role->isDirty(['name', 'guard_name']) ? false : null);
     }
 
     /**

@@ -81,7 +81,7 @@ return [
             'failed' => 'la configurazione guidata non può scrivere i valori mancanti: impostali tu nel file .env',
         ],
         'root_user' => [
-            'label' => 'Utente root (ID 1)',
+            'label' => 'Utente root',
             'failed' => 'mancante: esegui `php artisan och:install`',
         ],
         'root_can_login' => [

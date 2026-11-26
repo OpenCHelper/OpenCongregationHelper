@@ -77,7 +77,8 @@ class Installation
         }
 
         try {
-            $installed = Schema::hasTable((new User)->getTable()) && User::query()->whereKey(1)->exists();
+            // The current root user, not the first user: after a handover, the first user can be deleted
+            $installed = Schema::hasTable((new User)->getTable()) && User::query()->whereKey(User::rootUserId())->exists();
         } catch (Throwable) {
             // The database cannot be reached: an installation in progress (with its `SETUP_TOKEN`) shows the error in
             // the wizard, an installed one shows its usual error page rather than the wizard

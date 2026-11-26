@@ -178,7 +178,8 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
   push notifications, cron endpoints, a `SETUP_TOKEN` left after the installation) and tells what to do about each
   problem. It changes nothing, so it can run any time. The [setup wizard](#from-the-browser) checks the server the same
   way.
-- **`php artisan och:recover-root`** gives the access to the root user back when nobody can manage the application
+- **`php artisan och:recover-root`** gives the access to the root user (the current one, also after a
+  [hand-over](administration/users#handing-the-root-user-over)) back when nobody can manage the application
   anymore (e.g. a lost password, or its access or roles removed in production): it sets its password from
   `INITIAL_ROOT_PASSWORD` (or asks for it), lets it log in again, marks its email as verified, turns off its two-factor
   authentication and makes it a super administrator. It asks for a confirmation, or needs `--force` when run without a

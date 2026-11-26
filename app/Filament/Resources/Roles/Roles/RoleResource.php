@@ -65,12 +65,15 @@ class RoleResource extends Resource
                             ->schema([
                                 TextInput::make('name')
                                     ->label(__('filament-shield::filament-shield.field.name'))
+                                    // Renaming the super admin role would leave nobody able to manage the application
+                                    ->disabled(fn (?Model $record): bool => $record?->getAttribute('name') === Utils::getSuperAdminName())
                                     ->unique(ignoreRecord: true)
                                     ->required()
                                     ->maxLength(255),
 
                                 TextInput::make('guard_name')
                                     ->label(__('filament-shield::filament-shield.field.guard_name'))
+                                    ->disabled(fn (?Model $record): bool => $record?->getAttribute('name') === Utils::getSuperAdminName())
                                     ->default(Utils::getFilamentAuthGuard())
                                     ->nullable()
                                     ->maxLength(255),

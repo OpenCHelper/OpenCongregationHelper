@@ -181,7 +181,8 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
   super amministratori, email, notifiche push, endpoint per il cron, un `SETUP_TOKEN` rimasto dopo l'installazione) e
   indica cosa fare per ogni problema. Non modifica nulla, quindi può essere eseguito in qualsiasi momento. La
   [configurazione guidata](#dal-browser) controlla il server allo stesso modo.
-- **`php artisan och:recover-root`** restituisce l'accesso all'utente root quando nessuno può più gestire
+- **`php artisan och:recover-root`** restituisce l'accesso all'utente root (quello attuale, anche dopo una
+  [cessione](administration/users#cedere-lutente-root)) quando nessuno può più gestire
   l'applicazione (es. password persa, oppure accesso o ruoli rimossi in produzione): imposta la sua password da
   `INITIAL_ROOT_PASSWORD` (o la chiede), gli permette di nuovo di accedere, segna la sua email come verificata,
   disattiva la sua autenticazione a due fattori e lo rende super amministratore. Chiede una conferma, oppure richiede

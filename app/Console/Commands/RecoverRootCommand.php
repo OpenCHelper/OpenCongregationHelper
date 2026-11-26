@@ -12,7 +12,7 @@ use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\password;
 
 /**
- * Give the access to the root user (ID 1) back, when nobody can manage the application anymore (e.g. its password was
+ * Give the access to the root user (the first user, or the one it handed its role over to) back, when nobody can manage the application anymore (e.g. its password was
  * lost, or its login or roles were removed in production): it sets its password, lets it log in again, marks its email
  * as verified, turns off its two-factor authentication and gives it the `super_admin` role.
  *
@@ -31,7 +31,7 @@ class RecoverRootCommand extends Command
         $root = User::rootUser();
 
         if ($root === null) {
-            $this->components->error('There is no root user (ID 1): run `php artisan och:install` to create it.');
+            $this->components->error('There is no root user: run `php artisan och:install` to create it.');
 
             return self::FAILURE;
         }

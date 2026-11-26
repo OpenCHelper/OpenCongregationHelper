@@ -5,7 +5,9 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Settings\SecuritySettings;
+use App\Support\Installation;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -117,4 +119,33 @@ test('creating the root user again makes the first user the root user', function
     expect($root->getKey())->toBe(1)
         ->and(app(SecuritySettings::class)->root_user_id)->toBe(1)
         ->and($root->isRootUser())->toBeTrue();
+});
+
+test('the application stays installed when the first user is deleted after the handover', function () {
+    $this->otherSuperAdmin->makeRootUser();
+    $this->rootUser->delete();
+    config(['app.setup.marker' => sys_get_temp_dir().'/och-installed-'.uniqid()]);
+    Installation::forget();
+
+    expect(User::find(1))->toBeNull()
+        ->and(Installation::isInstalled())->toBeTrue();
+
+    @unlink(Installation::markerPath());
+    Installation::forget();
+});
+
+test('a super administrator still waiting for the invitation cannot become the root user', function () {
+    $invited = tap(User::factory()->create(['can_login' => true, 'password' => null]))->assignRole('super_admin');
+
+    expect(TransferRootAction::getRefusal($invited))->toBe(__('filament-resources.user.transfer_root_requirements'))
+        ->and(fn () => $invited->makeRootUser())->toThrow(LogicException::class);
+});
+
+test('the first user is the root user only while the setting does not exist yet', function () {
+    $this->otherSuperAdmin->makeRootUser();
+
+    DB::table('settings')->where('group', 'security')->where('name', 'root_user_id')->delete();
+    app()->forgetScopedInstances();
+
+    expect(User::rootUserId())->toBe(1);
 });

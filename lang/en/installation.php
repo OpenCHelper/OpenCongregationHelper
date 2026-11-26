@@ -81,7 +81,7 @@ return [
             'failed' => 'the setup wizard cannot write the missing values: set them in .env yourself',
         ],
         'root_user' => [
-            'label' => 'Root user (ID 1)',
+            'label' => 'Root user',
             'failed' => 'missing: run `php artisan och:install`',
         ],
         'root_can_login' => [

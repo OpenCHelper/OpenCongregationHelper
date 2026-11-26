@@ -76,7 +76,7 @@ class TransferRootAction extends Action
             return __('filament-resources.user.transfer_root_not_in_production');
         }
 
-        if (! $user->can_login || ! $user->hasRole('super_admin')) {
+        if (! $user->canActuallyLogIn() || ! $user->hasRole('super_admin')) {
             return __('filament-resources.user.transfer_root_requirements');
         }
 

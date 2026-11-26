@@ -115,3 +115,31 @@ test('the super admin role cannot be deleted', function () {
     expect($this->superAdminRole->delete())->toBeFalse()
         ->and(Role::findByName('super_admin', 'web'))->not->toBeNull();
 });
+
+test('a super administrator still waiting for the invitation does not count as one who can log in', function () {
+    tap(User::factory()->create(['can_login' => true, 'password' => null]))->assignRole($this->superAdminRole);
+
+    expect($this->superAdmin->fresh()->isLastSuperAdmin())->toBeTrue()
+        ->and(fn () => $this->superAdmin->update(['can_login' => false]))->toThrow(ValidationException::class);
+});
+
+test('the super admin role cannot be renamed nor moved to another guard', function () {
+    $this->actingAs($this->superAdmin);
+
+    Livewire::test(EditRole::class, ['record' => $this->superAdminRole->getKey()])
+        ->assertFormFieldDisabled('name')
+        ->assertFormFieldDisabled('guard_name');
+
+    $this->superAdminRole->name = 'renamed';
+    expect($this->superAdminRole->save())->toBeFalse();
+
+    $role = Role::findByName('super_admin', 'web');
+    $role->guard_name = 'api';
+    expect($role->save())->toBeFalse()
+        ->and(Role::where('name', 'super_admin')->value('guard_name'))->toBe('web');
+
+    // The other roles can still be renamed
+    $other = Role::findOrCreate('publisher', 'web');
+    $other->name = 'proclamatore';
+    expect($other->save())->toBeTrue();
+});
