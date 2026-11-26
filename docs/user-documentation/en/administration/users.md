@@ -112,5 +112,5 @@ account either if they have assignments.
 The root user is the first user, created during the installation. To avoid losing access to the application:
 
 - it can never be deleted (it is skipped by the bulk delete) nor impersonated;
-- outside of the production environment, its email, password, access and roles cannot be changed, and its **Edit**
-  button is disabled (except for the root user itself).
+- outside of the production environment, its email, password, access and roles cannot be changed, and only the root
+  user itself can edit it: for the other users its **Edit** button is disabled, and its edit page cannot be opened.

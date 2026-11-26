@@ -116,5 +116,6 @@ con delle assegnazioni possono eliminare il proprio account.
 L'utente root è il primo utente, creato durante l'installazione. Per evitare di perdere l'accesso all'applicazione:
 
 - non può mai essere eliminato (viene escluso dall'eliminazione di massa) né impersonato;
-- al di fuori dell'ambiente di produzione, non se ne possono modificare email, password, accesso e ruoli, e il suo
-  pulsante **Modifica** è disabilitato (tranne che per l'utente root stesso).
+- al di fuori dell'ambiente di produzione, non se ne possono modificare email, password, accesso e ruoli, e solo
+  l'utente root stesso può modificarlo: per gli altri utenti il suo pulsante **Modifica** è disabilitato e la sua
+  pagina di modifica non si può aprire.
