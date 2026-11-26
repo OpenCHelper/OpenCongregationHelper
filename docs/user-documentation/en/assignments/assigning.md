@@ -48,9 +48,12 @@ assignment shows **Return requested on …** with **End Assignment**, which retu
 In the **Territories** list, tick the territories, then open the **bulk actions** menu and choose:
 
 - **Assign Massively**: choose the person (and optionally a campaign) and click **Submit**. Territories that are
-  already out are skipped, without a message;
+  already out are skipped;
 - **End Assignments**: returns all the selected territories that are out, after a confirmation. The others are skipped,
-  without a message.
+  as are those your role doesn't allow you to return.
+
+A message then tells how many territories were assigned or returned and lists the skipped ones, with the reason: it is
+green when none was skipped, amber when some were, and red when none went through.
 
 ![Assigning many territories](/docs/user-documentation/en/assignments/assets/territories-bulk-assign.webp)
 
