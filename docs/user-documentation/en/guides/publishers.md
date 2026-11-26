@@ -25,7 +25,7 @@ the street names, and use the **full screen** button to see it better on a smart
 
 When you have finished, open the page of the assignment (e.g. from its notification), click **Ask to return** and
 confirm: the territory department is notified and closes the assignment. If your role allows it, you can instead click
-**End Assignment** in the territory page.
+**End Assignment** on the same page (or in the territory page) to return it right away.
 
 If the territory was assigned to you for a campaign that has ended, or ends within 7 days, the page of the assignment
 shows a reminder to return it.
