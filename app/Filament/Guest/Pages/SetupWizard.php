@@ -188,7 +188,26 @@ class SetupWizard extends Page
             'guest_returns' => (bool) TerritorySettings::configuredValue('guest_returns'),
             'require_two_factor' => false,
             'require_email_verification' => false,
+            ...$this->configuredEnvironmentValues(),
         ]);
+    }
+
+    /**
+     * The values of the variables of `.env` that are already set, shown (but not editable) by the Configuration step,
+     * keyed by their field. The passwords are left out: they never reach the browser.
+     *
+     * @return array<string, mixed>
+     */
+    protected function configuredEnvironmentValues(): array
+    {
+        $connection = (string) config('database.default');
+
+        return collect(self::ENVIRONMENT_VARIABLES)
+            ->except([...$this->missingVariables, 'DB_PASSWORD', 'MAIL_PASSWORD'])
+            ->mapWithKeys(fn (string $configKey, string $variable): array => [
+                strtolower($variable) => config(str_replace('{connection}', $connection, $configKey)),
+            ])
+            ->all();
     }
 
     /**
@@ -339,8 +358,6 @@ class SetupWizard extends Page
     protected function environmentStep(): Step
     {
         $missing = fn (string ...$variables): bool => array_intersect($variables, $this->missingVariables) !== [];
-        $databaseConnection = fn (Get $get): string => $missing('DB_CONNECTION') ? (string) $get('db_connection') : (string) config('database.default');
-        $mailer = fn (Get $get): string => $missing('MAIL_MAILER') ? (string) $get('mail_mailer') : (string) config('mail.default');
 
         return Step::make('environment')
             ->label(__('setup.steps.environment.label'))
@@ -382,88 +399,61 @@ class SetupWizard extends Page
                     ]),
                 Section::make(__('setup.environment.database'))
                     ->columns(['default' => 1, 'md' => 2])
-                    ->visible(fn (): bool => $missing('DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'))
                     ->schema([
-                        Select::make('db_connection')
-                            ->label('DB_CONNECTION')
-                            ->validationAttribute('DB_CONNECTION')
+                        $this->environmentField(Select::make('db_connection')
                             ->options(self::DATABASE_CONNECTIONS)
                             ->required()
-                            ->live()
-                            ->visible(fn (): bool => $missing('DB_CONNECTION')),
-                        TextInput::make('db_database')
-                            ->label('DB_DATABASE')
-                            ->validationAttribute('DB_DATABASE')
-                            ->helperText(fn (Get $get): ?string => $databaseConnection($get) === 'sqlite' ? __('setup.environment.db_sqlite') : null)
+                            ->live(), 'DB_CONNECTION'),
+                        $this->environmentField(TextInput::make('db_database')
+                            ->helperText(fn (Get $get): ?string => $get('db_connection') === 'sqlite' ? __('setup.environment.db_sqlite') : null)
+                            ->required(), 'DB_DATABASE'),
+                        $this->environmentField(TextInput::make('db_host')
                             ->required()
-                            ->visible(fn (): bool => $missing('DB_DATABASE')),
-                        TextInput::make('db_host')
-                            ->label('DB_HOST')
-                            ->validationAttribute('DB_HOST')
-                            ->required()
-                            ->visible(fn (Get $get): bool => $missing('DB_HOST') && $databaseConnection($get) !== 'sqlite'),
-                        TextInput::make('db_port')
-                            ->label('DB_PORT')
-                            ->validationAttribute('DB_PORT')
+                            ->visible(fn (Get $get): bool => $get('db_connection') !== 'sqlite'), 'DB_HOST'),
+                        $this->environmentField(TextInput::make('db_port')
                             ->integer()
                             ->required()
-                            ->visible(fn (Get $get): bool => $missing('DB_PORT') && $databaseConnection($get) !== 'sqlite'),
-                        TextInput::make('db_username')
-                            ->label('DB_USERNAME')
-                            ->validationAttribute('DB_USERNAME')
+                            ->visible(fn (Get $get): bool => $get('db_connection') !== 'sqlite'), 'DB_PORT'),
+                        $this->environmentField(TextInput::make('db_username')
                             ->required()
-                            ->visible(fn (Get $get): bool => $missing('DB_USERNAME') && $databaseConnection($get) !== 'sqlite'),
-                        TextInput::make('db_password')
-                            ->label('DB_PASSWORD')
-                            ->validationAttribute('DB_PASSWORD')
+                            ->visible(fn (Get $get): bool => $get('db_connection') !== 'sqlite'), 'DB_USERNAME'),
+                        $this->environmentField(TextInput::make('db_password')
                             ->password()
                             ->revealable()
-                            ->visible(fn (Get $get): bool => $missing('DB_PASSWORD') && $databaseConnection($get) !== 'sqlite'),
+                            ->visible(fn (Get $get): bool => $get('db_connection') !== 'sqlite'), 'DB_PASSWORD'),
                     ]),
                 Section::make(__('setup.environment.mail'))
                     ->columns(['default' => 1, 'md' => 2])
-                    ->visible(fn (): bool => $missing('MAIL_MAILER', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM_ADDRESS'))
                     ->schema([
-                        Select::make('mail_mailer')
-                            ->label('MAIL_MAILER')
-                            ->validationAttribute('MAIL_MAILER')
-                            ->options([
+                        $this->environmentField(Select::make('mail_mailer')
+                            ->options(fn (): array => [
                                 'smtp' => 'SMTP',
                                 'sendmail' => 'Sendmail',
                                 'nativemailfx' => __('setup.environment.mail_native'),
                                 'log' => __('setup.environment.mail_log'),
-                            ])
+                            ] + array_filter([
+                                // The mailer already set in `.env` is shown even when the wizard does not offer it
+                                (string) config('mail.default') => (string) config('mail.default'),
+                            ]))
                             ->required()
-                            ->live()
-                            ->visible(fn (): bool => $missing('MAIL_MAILER')),
-                        TextInput::make('mail_from_address')
-                            ->label('MAIL_FROM_ADDRESS')
-                            ->validationAttribute('MAIL_FROM_ADDRESS')
+                            ->live(), 'MAIL_MAILER'),
+                        $this->environmentField(TextInput::make('mail_from_address')
                             ->helperText(__('setup.environment.mail_from_address'))
                             ->email()
+                            ->required(), 'MAIL_FROM_ADDRESS'),
+                        $this->environmentField(TextInput::make('mail_host')
                             ->required()
-                            ->visible(fn (): bool => $missing('MAIL_FROM_ADDRESS')),
-                        TextInput::make('mail_host')
-                            ->label('MAIL_HOST')
-                            ->validationAttribute('MAIL_HOST')
-                            ->required()
-                            ->visible(fn (Get $get): bool => $missing('MAIL_HOST') && $mailer($get) === 'smtp'),
-                        TextInput::make('mail_port')
-                            ->label('MAIL_PORT')
-                            ->validationAttribute('MAIL_PORT')
+                            ->visible(fn (Get $get): bool => $get('mail_mailer') === 'smtp'), 'MAIL_HOST'),
+                        $this->environmentField(TextInput::make('mail_port')
                             ->integer()
                             ->required()
-                            ->visible(fn (Get $get): bool => $missing('MAIL_PORT') && $mailer($get) === 'smtp'),
-                        TextInput::make('mail_username')
-                            ->label('MAIL_USERNAME')
-                            ->validationAttribute('MAIL_USERNAME')
-                            ->visible(fn (Get $get): bool => $missing('MAIL_USERNAME') && $mailer($get) === 'smtp'),
-                        TextInput::make('mail_password')
-                            ->label('MAIL_PASSWORD')
-                            ->validationAttribute('MAIL_PASSWORD')
+                            ->visible(fn (Get $get): bool => $get('mail_mailer') === 'smtp'), 'MAIL_PORT'),
+                        $this->environmentField(TextInput::make('mail_username')
+                            ->visible(fn (Get $get): bool => $get('mail_mailer') === 'smtp'), 'MAIL_USERNAME'),
+                        $this->environmentField(TextInput::make('mail_password')
                             ->password()
                             ->revealable()
-                            ->visible(fn (Get $get): bool => $missing('MAIL_PASSWORD') && $mailer($get) === 'smtp'),
+                            ->visible(fn (Get $get): bool => $get('mail_mailer') === 'smtp'), 'MAIL_PASSWORD'),
                     ]),
             ])
             ->afterValidation(function (): void {
@@ -627,6 +617,34 @@ class SetupWizard extends Page
                             ->disabled(fn (): bool => $this->testEmailSentTo === null),
                     ]),
             ]);
+    }
+
+    /**
+     * A field of a variable of `.env`, editable only while the variable is missing: otherwise it shows the value already
+     * set, which the wizard never changes (only that a password is set, never the password itself).
+     *
+     * @template TField of TextInput|Select
+     *
+     * @param  TField  $field
+     * @return TField
+     */
+    protected function environmentField(TextInput|Select $field, string $variable): TextInput|Select
+    {
+        $isMissing = fn (): bool => in_array($variable, $this->missingVariables, true);
+
+        $field
+            ->label($variable)
+            ->validationAttribute($variable)
+            ->disabled(fn (): bool => ! $isMissing())
+            ->dehydrated($isMissing)
+            ->hint(fn (): ?string => $isMissing() ? null : __('setup.environment.already_set'));
+
+        if ($field instanceof TextInput && $field->isPassword()) {
+            $field->placeholder(fn (): ?string => $isMissing() ? null : __('setup.environment.password_set'))
+                ->revealable($isMissing);
+        }
+
+        return $field;
     }
 
     /**

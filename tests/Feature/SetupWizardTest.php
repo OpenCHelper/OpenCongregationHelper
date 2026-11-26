@@ -203,8 +203,12 @@ test('only the missing values of .env are asked for and written', function () {
         ->assertSet('missingVariables', ['APP_URL', 'APP_TIMEZONE', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM_ADDRESS'])
         ->assertSchemaComponentVisible('app_timezone', 'form')
         ->assertSchemaComponentHidden('app_locale', 'form')
-        ->assertSchemaComponentHidden('db_host', 'form')
-        // Not for the log mailer
+        // The values already set are shown, but cannot be changed (and the passwords are never sent to the browser)
+        ->assertFormFieldDisabled('db_database')
+        ->assertSchemaStateSet(['db_database' => config('database.connections.'.config('database.default').'.database')], 'form')
+        ->assertFormFieldDisabled('mail_mailer')
+        ->assertSchemaStateSet(['db_password' => null], 'form')
+        // Not for the mailer of the tests
         ->assertSchemaComponentHidden('mail_host', 'form')
         ->fillForm([
             'app_url' => 'https://congregation.example.com/',

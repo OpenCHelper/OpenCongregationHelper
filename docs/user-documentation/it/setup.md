@@ -89,7 +89,8 @@ guidata** (`/setup`), che chiede il token e poi:
 
 1. controlla il server: versione ed estensioni di PHP, HTTPS e il suo certificato, cartelle e file `.env` scrivibili;
 2. chiede i valori che mancano nel file `.env` (indirizzo, fuso orario, lingua, database ed email) e li aggiunge al
-   file, dopo aver verificato che il database sia raggiungibile. I valori già impostati non vengono mai cambiati;
+   file, dopo aver verificato che il database sia raggiungibile. I valori già impostati vengono mostrati ma mai
+   cambiati (le password solo come impostate);
 3. crea le tabelle del database, i permessi e le chiavi degli [assistenti IA](#assistenti-ia);
 4. crea l'utente root, e può inviargli un'email di prova;
 5. imposta il nome, il logo e il colore dell'app, i suoi amministratori (invitati via email) e le sue funzionalità: gli

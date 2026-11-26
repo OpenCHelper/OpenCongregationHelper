@@ -107,3 +107,19 @@ test('an HTTPS certificate that is not valid is an error', function () {
         ->expectsOutputToContain('the certificate is not valid')
         ->assertFailed();
 });
+
+test('an HTTPS certificate that cannot be checked is a warning', function () {
+    $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
+
+    app()->instance(HttpsCertificate::class, new class extends HttpsCertificate
+    {
+        public function inspect(string $host, int $port = 443): array
+        {
+            return ['valid' => null, 'expires_at' => null, 'error' => 'the certificate could not be read'];
+        }
+    });
+
+    $this->artisan('och:doctor')
+        ->expectsOutputToContain('the certificate could not be checked')
+        ->assertSuccessful();
+});

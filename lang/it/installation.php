@@ -30,6 +30,7 @@ return [
             'invalid' => 'il certificato non è valido, i browser mostreranno un avviso: :error',
             'expiring' => 'il certificato scade il :date: rinnovalo',
             'valid' => 'certificato valido fino al :date',
+            'unknown' => 'non è stato possibile controllare il certificato dal server (:error): verifica che i browser non mostrino avvisi',
         ],
         'debug' => [
             'label' => 'Modalità debug (APP_DEBUG)',

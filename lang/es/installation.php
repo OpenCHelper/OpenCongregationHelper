@@ -30,6 +30,7 @@ return [
             'invalid' => 'el certificado no es válido, los navegadores mostrarán un aviso: :error',
             'expiring' => 'el certificado caduca el :date: renuévalo',
             'valid' => 'certificado válido hasta el :date',
+            'unknown' => 'no se pudo comprobar el certificado desde el servidor (:error): comprueba que los navegadores no muestren avisos',
         ],
         'debug' => [
             'label' => 'Modo de depuración (APP_DEBUG)',

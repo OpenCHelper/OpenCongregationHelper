@@ -120,20 +120,19 @@ class InstallationChecks
         $port = (int) (parse_url($url, PHP_URL_PORT) ?: 443);
         $certificate = $this->certificate->inspect($host, $port);
 
-        if (! $certificate['valid']) {
+        if ($certificate['valid'] === null) {
+            $this->report('https', InstallationCheckStatus::Warning, $this->text('checks.https.unknown', ['error' => (string) $certificate['error']]));
+
+            return;
+        }
+
+        if (! $certificate['valid'] || $certificate['expires_at'] === null) {
             $this->report('https', InstallationCheckStatus::Error, $this->text('checks.https.invalid', ['error' => (string) $certificate['error']]));
 
             return;
         }
 
         $expiresAt = $certificate['expires_at'];
-
-        if ($expiresAt === null) {
-            $this->report('https', InstallationCheckStatus::Ok);
-
-            return;
-        }
-
         $date = $expiresAt->toDateString();
 
         $expiresAt->isBefore(now()->addDays(self::CERTIFICATE_WARNING_DAYS))

@@ -88,7 +88,8 @@ choice to the `.env` file, then open the application: until it is installed, eve
 
 1. checks the server: PHP version and extensions, HTTPS and its certificate, writable folders and `.env` file;
 2. asks for the values missing from `.env` (address, timezone, language, database and email) and adds them to the file,
-   after checking that the database can be reached. The values already set are never changed;
+   after checking that the database can be reached. The values already set are shown but never changed (the
+   passwords only as set);
 3. creates the database tables, the permissions and the keys of the [AI assistants](#ai-assistants);
 4. creates the root user, and can send a test email to it;
 5. sets the name, logo and colour of the app, its administrators (who are invited by email) and its features: the AI

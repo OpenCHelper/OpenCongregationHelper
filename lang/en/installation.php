@@ -30,6 +30,7 @@ return [
             'invalid' => 'the certificate is not valid, the browsers will show a warning: :error',
             'expiring' => 'the certificate expires on :date: renew it',
             'valid' => 'certificate valid until :date',
+            'unknown' => 'the certificate could not be checked from the server (:error): make sure the browsers show no warning',
         ],
         'debug' => [
             'label' => 'Debug mode (APP_DEBUG)',
