@@ -45,6 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Tags**: deleting a tag asks for a confirmation that says how many territories and zones use it, since it is
   removed from all of them; it was removed silently, while the guide said that a tag in use could not be deleted.
+- **Roles**: no longer have a **Pages** tab, whose permissions did nothing: the profile is open to everyone, the
+  settings and the application logs only to the super administrators.
+- **Users**: **Impersonate** on the page of a user asks for a confirmation, as it already did from the list, instead
+  of signing in as the user right away.
 - **Users**: a user who has assignments can no longer be deleted, from their page, the bulk action or their profile:
   it permanently deleted the history of every territory they had (dates, coverage, campaigns) and freed their
   territories in progress. The delete modal explains why and offers to disable their access instead, making them a
