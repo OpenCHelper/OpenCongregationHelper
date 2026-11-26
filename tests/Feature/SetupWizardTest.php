@@ -251,6 +251,20 @@ test('the mailer can be changed, among the mailers of the configuration', functi
         ->and(config('mail.default'))->toBe('smtp');
 });
 
+test('the values with a fallback in the configuration can be left empty', function () {
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->assertSchemaComponentVisible('db_host', 'form')
+        ->fillForm(collect(SetupWizard::ENVIRONMENT_VARIABLES)->keys()->mapWithKeys(fn (string $variable): array => [strtolower($variable) => null])->all())
+        ->goToWizardStep(3)
+        ->assertHasNoFormErrors()
+        ->assertWizardCurrentStep(3);
+
+    // Nothing is written: the fallbacks apply
+    expect(file_get_contents($this->envPath))->toBe("SETUP_TOKEN=the-setup-token\n");
+});
+
 test('a database that cannot be reached stops the wizard', function () {
     file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_URL=https://congregation.example.com\nAPP_TIMEZONE=UTC\nAPP_LOCALE=en\nMAIL_MAILER=log\nMAIL_FROM_ADDRESS=noreply@example.com\n");
     unlockSetupWizard();
