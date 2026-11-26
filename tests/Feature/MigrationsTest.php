@@ -78,3 +78,16 @@ it('drops the unused team tables and rolls them back', function () {
         ->and(Schema::hasTable('team_invitations'))->toBeFalse()
         ->and(Schema::hasColumn('users', 'current_team_id'))->toBeFalse();
 });
+
+it('rolls back the password leak check setting and adds it again', function () {
+    $passwordLeakCheck = require database_path('settings/2026_11_25_120620_add_password_leak_check_setting.php');
+
+    $passwordLeakCheck->down();
+
+    expect(DB::table('settings')->where('group', 'security')->where('name', 'password_leak_check')->exists())->toBeFalse();
+
+    // Adding it again would throw if the rollback had left it in place
+    $passwordLeakCheck->up();
+
+    expect(DB::table('settings')->where('group', 'security')->where('name', 'password_leak_check')->exists())->toBeTrue();
+});
