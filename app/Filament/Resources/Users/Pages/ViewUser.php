@@ -6,10 +6,8 @@ use App\Filament\Resources\Users\Actions\DeleteUserAction;
 use App\Filament\Resources\Users\Actions\ResendInvitationAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\Users\Widgets\PublisherStatistics;
-use App\Models\User;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Support\Facades\Auth;
 use STS\FilamentImpersonate\Actions\Impersonate;
 
 class ViewUser extends ViewRecord
@@ -36,23 +34,9 @@ class ViewUser extends ViewRecord
                 ->record($this->getRecord())
                 ->requiresConfirmation()
                 ->redirectTo('/'),
+            // The policy denies editing the protected root user with a message, shown as the tooltip
             EditAction::make()
-                ->disabled(function () {
-                    $record = $this->getRecord();
-                    $currentUser = Auth::user();
-
-                    return $record->isRootUserProtected() &&
-                           ! ($currentUser instanceof User && $currentUser->isRootUser());
-                })
-                ->tooltip(function () {
-                    $record = $this->getRecord();
-                    $currentUser = Auth::user();
-
-                    return $record->isRootUserProtected() &&
-                           ! ($currentUser instanceof User && $currentUser->isRootUser())
-                        ? __('profile.root_user_protection.edit_action_disabled')
-                        : null;
-                }),
+                ->authorizationTooltip(),
             DeleteUserAction::make(),
         ];
     }

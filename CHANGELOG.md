@@ -130,6 +130,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   still block the sign-in with it for up to 15 minutes at a time. The new `TRUSTED_PROXIES` setting lists the addresses
   of the proxies in front of the app (by default `*`, any address, as Altervista needs): set it to the address of your
   proxy, or leave it empty if there is none, so that visitors can no longer pass themselves off as another IP address.
+- **Users**: outside of the production environment, the other users, super administrators included, can no longer
+  edit the root user by opening its edit page from the address bar (e.g. `/app/users/1/edit`): only the root user can
+  edit itself, as its disabled **Edit** button already said.
 
 ## [1.0.0-alpha15] - 2026-11-24
 
