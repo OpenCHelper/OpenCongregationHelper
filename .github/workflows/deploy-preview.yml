@@ -785,7 +785,7 @@ jobs:
       - name: Mark the deployments of the removed previews as inactive
         if: ${{ !cancelled() && steps.remove.outputs.prs != '' }}
         continue-on-error: true
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           PRS: ${{ steps.remove.outputs.prs }}
         with:
