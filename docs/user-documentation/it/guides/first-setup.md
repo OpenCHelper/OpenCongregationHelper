@@ -10,21 +10,9 @@ Questa guida è per chi inizia a usare l'applicazione per la prima volta, dopo a
 
 ## 1. Accedi come root
 
-Accedi con l'utente root creato durante l'installazione: su una nuova installazione si apre la **configurazione
-guidata**, in quattro passaggi:
-
-1. **Installazione**: i controlli del server (gli stessi di `php artisan och:doctor`). Correggi ciò che è segnato come
-   errore o avviso, invia un'**email di prova** per verificare che le email arrivino, e crea il collegamento dello
-   storage o le chiavi degli assistenti IA mancanti con i loro pulsanti;
-2. **Congregazione**: il nome dell'app, l'indirizzo della Sala del Regno, il logo e il colore principale;
-3. **Amministratori**: le persone che gestiranno l'app con te. Diventano super amministratori e ricevono un'email per
-   scegliere la password;
-4. **Funzionalità**: gli [assistenti IA](../basics/profile), la [condivisione](../assignments/sharing) delle
-   assegnazioni e i requisiti degli account.
-
-Tutto si può cambiare in seguito dalle [Impostazioni](../administration/settings) e dagli
-[utenti](../administration/users). Puoi anche **Saltare** la configurazione: finché non è completata o saltata, in cima
-alle pagine viene mostrato un promemoria.
+Accedi con l'utente root creato durante l'installazione, dalla [configurazione guidata](../setup#dal-browser) o dal
+terminale. Il nome, il logo e il colore dell'app, gli amministratori e le funzionalità si possono cambiare dalle
+[Impostazioni](../administration/settings) e dagli [utenti](../administration/users).
 
 Poi apri il tuo [profilo](../basics/profile) per impostare il tuo nome, la lingua preferita e un contatto di emergenza.
 

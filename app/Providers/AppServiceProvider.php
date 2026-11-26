@@ -13,6 +13,8 @@ use App\Settings\GeneralSettings;
 use App\Settings\SecuritySettings;
 use App\Support\AiAssistantConnections;
 use App\Support\AppName;
+use App\Support\EnvironmentFile;
+use App\Support\Installation;
 use App\Support\UserLocale;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
@@ -31,12 +33,14 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -189,10 +193,44 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureAppName();
 
+        $this->configureSetup();
+
         // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
         ExportColumn::configureUsing(function (ExportColumn $column): void {
             $column->preventFormulaInjection();
         });
+    }
+
+    /**
+     * While the application is not installed, the pages work without the database, which the setup wizard sets up: the
+     * sessions and the cache are kept in files, and the application key is created (in `.env`) when it is missing,
+     * so that the session cookies can be encrypted.
+     */
+    private function configureSetup(): void
+    {
+        if ($this->app->runningInConsole() || ! Installation::needsSetup()) {
+            return;
+        }
+
+        config(['session.driver' => 'file', 'cache.default' => 'file']);
+
+        // Already resolved by some packages while booting, with the store of the configuration
+        $this->app->forgetInstance('cache.store');
+        $this->app->forgetInstance(\Illuminate\Cache\RateLimiter::class);
+        Cache::clearResolvedInstances();
+        RateLimiter::clearResolvedInstances();
+
+        if (blank(config('app.key'))) {
+            $key = 'base64:'.base64_encode(Encrypter::generateKey((string) config('app.cipher')));
+            $environmentFile = new EnvironmentFile;
+
+            // Without a writable `.env` the key changes on every request: the wizard reports it
+            if ($environmentFile->isWritable()) {
+                $environmentFile->writeMissing(['APP_KEY' => $key]);
+            }
+
+            config(['app.key' => $key]);
+        }
     }
 
     /**

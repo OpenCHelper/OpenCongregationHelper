@@ -2,29 +2,34 @@
 
 namespace App\Http\Middleware;
 
-use App\Filament\Pages\SetupWizard;
+use App\Filament\Guest\Pages\SetupWizard;
+use App\Support\Installation;
 use Closure;
+use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Open the first-run setup wizard instead of the first page after the root user logs in, while the setup is not
- * completed (see `OfferSetupWizardAfterLogin`). The next pages show a reminder instead, so that the wizard can be left.
- *
- * The pages of the authentication (e.g. the set-up of the required two-factor authentication) leave it to the first
- * page of the app.
+ * Open the setup wizard instead of the pages of the application while it is not installed (see `Installation`).
  */
 class RedirectToSetupWizard
 {
+    /**
+     * The routes that work before the installation: the wizard itself and what its page loads.
+     */
+    private const ALLOWED_ROUTES = ['web-manifest', 'offline', 'storage.public', 'livewire.*'];
+
+    /**
+     * @param  Closure(Request): (Response)  $next
+     */
     public function handle(Request $request, Closure $next): Response
     {
         if (
             $request->isMethod('GET')
-            && ! $request->routeIs('filament.*.auth.*', SetupWizard::getRouteName())
-            && $request->session()->pull(SetupWizard::OFFER_SESSION_KEY)
-            && SetupWizard::canAccess()
+            && ! $request->routeIs(SetupWizard::getRouteName(Filament::getPanel('guest')), ...self::ALLOWED_ROUTES)
+            && Installation::needsSetup()
         ) {
-            return redirect()->to(SetupWizard::getUrl());
+            return redirect()->to(SetupWizard::getUrl(panel: 'guest'));
         }
 
         return $next($request);

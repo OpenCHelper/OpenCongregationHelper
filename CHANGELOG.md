@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Setup wizard**: on a new installation, the root user is guided through checking the server (with a test email and
-  one-click fixes), choosing the name, logo and colour of the app, inviting the administrators and enabling the
-  features.
+- **Setup wizard**: a new installation can be completed from the browser, protected by a `SETUP_TOKEN`: it checks the
+  server, fills in the missing values of `.env`, creates the database and the root user, and sets the name, logo and
+  colour of the app, its administrators and its features.
 - **Settings**: the name of the app can be changed from the General settings, instead of `APP_NAME` in `.env`.
-- `och:doctor` also checks HTTPS, the push notifications, the timezone and the two-factor authentication of the root
-  user.
+- `och:doctor` also checks the PHP version and extensions, the HTTPS certificate, the push notifications, the timezone
+  and the two-factor authentication of the root user.
 
 ### Changed
 

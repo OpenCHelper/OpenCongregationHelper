@@ -12,11 +12,6 @@ class GeneralSettings extends AppSettings
     public ?string $app_name = null;
 
     /**
-     * Whether the first-run setup wizard was completed or skipped by the root user (see `SetupWizard`).
-     */
-    public bool $setup_completed = false;
-
-    /**
      * The address of the Kingdom Hall of the congregation.
      */
     public ?string $kingdom_hall_address = null;

@@ -25,7 +25,21 @@ class InstallationChecks
 
     private ?string $locale = null;
 
-    public function __construct(private Migrator $migrator) {}
+    /**
+     * The PHP extensions the application needs (besides the ones PHP always has, e.g. `json`).
+     */
+    public const REQUIRED_EXTENSIONS = ['ctype', 'curl', 'dom', 'fileinfo', 'intl', 'mbstring', 'openssl', 'pdo', 'tokenizer', 'xml'];
+
+    /**
+     * Days before its expiry from which the HTTPS certificate is reported.
+     */
+    public const CERTIFICATE_WARNING_DAYS = 14;
+
+    public function __construct(
+        private Migrator $migrator,
+        private HttpsCertificate $certificate,
+        private EnvironmentFile $environmentFile,
+    ) {}
 
     /**
      * Run the checks, in the given language (the one of the application when `null`).
@@ -37,6 +51,7 @@ class InstallationChecks
         $this->results = [];
         $this->locale = $locale;
 
+        $this->checkServer((string) config('app.url'));
         $this->checkConfiguration();
         $databaseIsReachable = $this->checkDatabase();
         $this->checkFiles();
@@ -48,6 +63,100 @@ class InstallationChecks
         return $this->results;
     }
 
+    /**
+     * Only the checks of the server, which need neither the configuration nor the database: the first step of the setup
+     * wizard, before they are set up.
+     *
+     * @return list<array{key: string, check: string, status: InstallationCheckStatus, details: string}>
+     */
+    public function requirements(string $url, ?string $locale = null): array
+    {
+        $this->results = [];
+        $this->locale = $locale;
+
+        $this->checkServer($url);
+        $this->check('writable_storage', $this->storageIsWritable(), InstallationCheckStatus::Error);
+        $this->check('env_file', $this->environmentFile->isWritable(), InstallationCheckStatus::Warning);
+
+        return $this->results;
+    }
+
+    /**
+     * Whether the requirements of the server have errors, which the installation cannot go on with.
+     *
+     * @param  list<array{key: string, check: string, status: InstallationCheckStatus, details: string}>  $results
+     */
+    public static function hasErrors(array $results): bool
+    {
+        return collect($results)->contains(fn (array $result): bool => $result['status'] === InstallationCheckStatus::Error);
+    }
+
+    private function checkServer(string $url): void
+    {
+        $minimum = self::minimumPhpVersion();
+        $this->check('php_version', version_compare(PHP_VERSION, $minimum, '>='), InstallationCheckStatus::Error,
+            PHP_VERSION, ['version' => PHP_VERSION, 'minimum' => $minimum]);
+
+        $missing = array_values(array_filter(self::REQUIRED_EXTENSIONS, fn (string $extension): bool => ! extension_loaded($extension)));
+        $this->check('php_extensions', $missing === [], InstallationCheckStatus::Error,
+            failedReplace: ['extensions' => implode(', ', $missing)]);
+
+        $this->checkHttps($url);
+    }
+
+    /**
+     * The HTTPS of the application: browsers install the app and send the push notifications only over HTTPS, with a
+     * certificate they trust.
+     */
+    private function checkHttps(string $url): void
+    {
+        if (! str_starts_with($url, 'https://')) {
+            $this->report('https', InstallationCheckStatus::Warning, $this->text('checks.https.failed'));
+
+            return;
+        }
+
+        $host = (string) parse_url($url, PHP_URL_HOST);
+        $port = (int) (parse_url($url, PHP_URL_PORT) ?: 443);
+        $certificate = $this->certificate->inspect($host, $port);
+
+        if (! $certificate['valid']) {
+            $this->report('https', InstallationCheckStatus::Error, $this->text('checks.https.invalid', ['error' => (string) $certificate['error']]));
+
+            return;
+        }
+
+        $expiresAt = $certificate['expires_at'];
+
+        if ($expiresAt === null) {
+            $this->report('https', InstallationCheckStatus::Ok);
+
+            return;
+        }
+
+        $date = $expiresAt->toDateString();
+
+        $expiresAt->isBefore(now()->addDays(self::CERTIFICATE_WARNING_DAYS))
+            ? $this->report('https', InstallationCheckStatus::Warning, $this->text('checks.https.expiring', ['date' => $date]))
+            : $this->report('https', InstallationCheckStatus::Ok, $this->text('checks.https.valid', ['date' => $date]));
+    }
+
+    /**
+     * The lowest PHP version the application supports, from the requirements of `composer.json`.
+     */
+    public static function minimumPhpVersion(): string
+    {
+        $composer = json_decode((string) @file_get_contents(base_path('composer.json')), true);
+        $constraint = is_array($composer) ? (string) ($composer['require']['php'] ?? '') : '';
+
+        return preg_match('/(\d+\.\d+(?:\.\d+)?)/', $constraint, $matches) ? $matches[1] : '8.2';
+    }
+
+    private function storageIsWritable(): bool
+    {
+        return is_writable(storage_path('framework')) && is_writable(storage_path('logs')) && is_writable(base_path('bootstrap/cache'));
+    }
+
     private function checkConfiguration(): void
     {
         $isProduction = app()->environment('production');
@@ -57,8 +166,6 @@ class InstallationChecks
         $url = (string) config('app.url');
         $this->check('app_url', filled($url) && ! str_contains($url, 'localhost'),
             $isProduction ? InstallationCheckStatus::Error : InstallationCheckStatus::Warning, $url);
-
-        $this->check('https', str_starts_with($url, 'https://'), InstallationCheckStatus::Warning);
 
         $this->check('debug', ! ($isProduction && config('app.debug')), InstallationCheckStatus::Warning);
 
@@ -114,8 +221,7 @@ class InstallationChecks
         $this->check('passport_keys', file_exists(Passport::keyPath('oauth-private.key')) && file_exists(Passport::keyPath('oauth-public.key')),
             InstallationCheckStatus::Warning);
 
-        $this->check('writable_storage', is_writable(storage_path('framework')) && is_writable(storage_path('logs')),
-            InstallationCheckStatus::Error);
+        $this->check('writable_storage', $this->storageIsWritable(), InstallationCheckStatus::Error);
     }
 
     private function checkUsers(): void

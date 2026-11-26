@@ -10,21 +10,9 @@ This guide is for whoever starts using the application for the first time, after
 
 ## 1. Log in as root
 
-Log in with the root user created during the installation: on a new installation the **setup wizard** opens, with four
-steps:
-
-1. **Installation**: the checks of the server (the same as `php artisan och:doctor`). Fix what is marked as an error or
-   a warning, send a **test email** to check that the emails arrive, and create the missing storage link or keys of
-   the AI assistants with their buttons;
-2. **Congregation**: the name of the app, the address of the Kingdom Hall, the logo and the primary colour;
-3. **Administrators**: the people who will manage the app with you. They become super administrators and receive an
-   email to choose their password;
-4. **Features**: the [AI assistants](../basics/profile), the [sharing](../assignments/sharing) of the assignments and
-   the requirements of the accounts.
-
-Everything can be changed later from the [Settings](../administration/settings) and the
-[users](../administration/users). You can also **Skip** the wizard: until it is completed or skipped, a reminder is
-shown at the top of the pages.
+Log in with the root user created during the installation, from the [setup wizard](../setup#from-the-browser) or
+the terminal. Its name, logo and colour, administrators and features can be changed from the
+[Settings](../administration/settings) and the [users](../administration/users).
 
 Then open your [profile](../basics/profile) to set your name, your preferred language and an emergency contact.
 

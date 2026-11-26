@@ -27,6 +27,9 @@ Route::view('/offline', 'offline')->name('offline');
 
 Route::redirect('/login', '/app/login')->name('login');
 
+// The setup wizard, shown while the application is not installed (see `RedirectToSetupWizard`)
+Route::redirect('/setup', '/guest/setup')->name('setup');
+
 // The panel has a registration page only while the registration is enabled.
 if (Features::enabled(Features::registration())) {
     Route::redirect('/register', '/app/register')->name('register');

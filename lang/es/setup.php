@@ -1,14 +1,36 @@
 <?php
 
 return [
-    'title' => 'Configurar la aplicación',
-    'subheading' => 'Unos pocos pasos para preparar la aplicación para la congregación. Todo se puede cambiar más tarde desde los ajustes.',
-    'complete' => 'Completar la configuración',
+    'title' => 'Instalar la aplicación',
+    'subheading' => 'Unos pocos pasos para preparar la aplicación para la congregación. Todo lo que elijas después del usuario root se puede cambiar más tarde desde los ajustes.',
+    'complete' => 'Instalar',
+
+    'token' => [
+        'missing_heading' => 'Añade el token de configuración',
+        'missing_description' => 'La aplicación aún no está instalada. Para que nadie más pueda instalarla antes, añade un token de configuración de tu elección al archivo .env del servidor, p. ej. :example, y vuelve a cargar esta página.',
+        'description' => 'Escribe el token de configuración, el valor de SETUP_TOKEN en el archivo .env del servidor.',
+        'label' => 'Token de configuración',
+        'submit' => 'Continuar',
+        'invalid' => 'El token de configuración no es correcto.',
+        'throttled' => 'Demasiados intentos: vuelve a intentarlo en :seconds segundos.',
+    ],
 
     'steps' => [
-        'installation' => [
-            'label' => 'Instalación',
-            'description' => 'Comprobar el servidor',
+        'requirements' => [
+            'label' => 'Servidor',
+            'description' => 'Requisitos',
+        ],
+        'environment' => [
+            'label' => 'Configuración',
+            'description' => 'El archivo .env',
+        ],
+        'database' => [
+            'label' => 'Base de datos',
+            'description' => 'Crear las tablas',
+        ],
+        'root' => [
+            'label' => 'Usuario root',
+            'description' => 'Tu cuenta',
         ],
         'congregation' => [
             'label' => 'Congregación',
@@ -25,47 +47,67 @@ return [
     ],
 
     'checks' => [
-        'all_ok' => 'La instalación parece correcta.',
-        'problems' => '{1} :count comprobación requiere atención: la aplicación funciona, pero corrígela cuando puedas.|[2,*] :count comprobaciones requieren atención: la aplicación funciona, pero corrígelas cuando puedas.',
+        'all_ok' => 'El servidor cumple los requisitos.',
+        'problems' => '{1} :count comprobación requiere atención.|[2,*] :count comprobaciones requieren atención.',
+        'errors' => 'Corrige los errores antes de continuar y vuelve a comprobar.',
         'check_again' => 'Comprobar de nuevo',
-        'storage_link' => 'Crear el enlace del almacenamiento',
-        'passport_keys' => 'Crear las claves de los asistentes de IA',
-        'fixed' => 'Hecho.',
-        'fix_failed' => 'No ha funcionado: ejecuta `:command` en el servidor.',
         'test_email' => [
             'label' => 'Enviar un correo de prueba',
             'subject' => 'Correo de prueba de :app',
-            'body' => 'Este correo se envió desde la configuración de :app: los correos de la aplicación llegan a sus destinatarios.',
+            'body' => 'Este correo se envió desde la instalación de :app: los correos de la aplicación llegan a sus destinatarios.',
             'sent' => 'Correo de prueba enviado a :email.',
-            'sent_body' => 'Si no llega en unos minutos, revisa la carpeta de spam y los ajustes de correo del servidor (MAIL_*).',
+            'sent_body' => 'Si no llega en unos minutos, revisa la carpeta de spam y los ajustes de correo (MAIL_*).',
             'failed' => 'No se pudo enviar el correo de prueba.',
         ],
     ],
 
+    'environment' => [
+        'intro' => 'Estos valores faltan en el archivo .env: se añadirán. Los valores ya configurados nunca se cambian.',
+        'nothing_missing' => 'Todos los valores que necesita la aplicación ya están en el archivo .env.',
+        'not_writable' => 'No se puede escribir el archivo .env: añade tú los valores que faltan y vuelve a cargar esta página.',
+        'application' => 'Aplicación',
+        'app_url' => 'La dirección pública de la aplicación, usada en los enlaces de los correos.',
+        'app_timezone' => 'Se usa para las fechas y la hora de los recordatorios.',
+        'app_locale' => 'Idioma de la aplicación para los usuarios que no eligieron uno.',
+        'database' => 'Base de datos',
+        'db_sqlite' => 'La ruta completa del archivo de la base de datos: se crea si no existe.',
+        'mail' => 'Correo',
+        'mail_native' => 'Función mail() de PHP',
+        'mail_log' => 'No enviar, solo escribir en el registro',
+        'mail_from_address' => 'El remitente de los correos de la aplicación.',
+        'database_failed' => 'La aplicación no puede conectarse a la base de datos.',
+        'write_failed' => 'No se pudo escribir el archivo .env.',
+    ],
+
+    'database' => [
+        'intro' => 'Al continuar se crean las tablas de la base de datos, los permisos de los roles y las claves de los asistentes de IA. Puede tardar un minuto.',
+        'failed' => 'No se pudo preparar la base de datos (`:command`).',
+    ],
+
+    'root' => [
+        'intro' => 'El usuario root puede hacerlo todo y nunca se puede eliminar: es tu cuenta. Envía un correo de prueba para comprobar que los correos de la aplicación llegan.',
+        'password' => 'Contraseña',
+        'password_confirmation' => 'Confirma la contraseña',
+        'email_first' => 'Escribe primero una dirección de correo válida.',
+        'test_email_hint' => 'Aún no se ha enviado ningún correo de prueba: para exigir la confirmación del correo hace falta uno.',
+    ],
+
     'administrators' => [
-        'intro' => 'Añade a las personas que gestionarán la aplicación contigo: pasan a ser superadministradores y reciben un correo para elegir su contraseña. Tú (:email) ya lo eres.',
+        'intro' => 'Añade a las personas que gestionarán la aplicación contigo: pasan a ser superadministradores y reciben un correo para elegir su contraseña. También puedes añadirlas más tarde.',
         'add' => 'Añadir un administrador',
+        'root_email' => 'Esta es la dirección de correo del usuario root.',
     ],
 
     'features' => [
         'sharing' => 'Compartir asignaciones',
         'sharing_description' => 'Si las asignaciones se pueden compartir mediante un enlace público, con quienes no tienen cuenta.',
-    ],
-
-    'skip' => [
-        'label' => 'Omitir',
-        'heading' => '¿Omitir la configuración?',
-        'description' => 'El asistente no se volverá a ofrecer: todo lo que configura se puede cambiar más tarde desde los ajustes y los usuarios.',
-        'confirm' => 'Omitir la configuración',
+        'two_factor_root' => 'La configurarás justo después de iniciar sesión.',
+        'email_verification_needs_test' => 'Envía primero un correo de prueba, desde el paso Usuario root: sin correos que funcionen nadie podría confirmar su dirección.',
     ],
 
     'completed' => [
-        'title' => 'La aplicación está configurada',
-        'body' => '{0} Puedes cambiar estas opciones más tarde desde los ajustes.|{1} Se invitó por correo a :count administrador.|[2,*] Se invitó por correo a :count administradores.',
-    ],
-
-    'banner' => [
-        'text' => 'La aplicación aún no está configurada: elige su nombre, sus administradores y las funciones que activar.',
-        'action' => 'Configurar la aplicación',
+        'heading' => 'La aplicación está instalada',
+        'description' => 'Inicia sesión como usuario root. El token de configuración ya no se usa: puedes quitar SETUP_TOKEN del archivo .env.',
+        'log_in' => 'Iniciar sesión',
     ],
 ];

@@ -8,6 +8,14 @@ return [
     ],
 
     'checks' => [
+        'php_version' => [
+            'label' => 'Versione di PHP',
+            'failed' => 'PHP :version è troppo vecchio: l\'app richiede PHP :minimum o successivo',
+        ],
+        'php_extensions' => [
+            'label' => 'Estensioni di PHP',
+            'failed' => 'mancanti: :extensions',
+        ],
         'app_key' => [
             'label' => 'Chiave dell\'applicazione (APP_KEY)',
             'failed' => 'esegui `php artisan key:generate`',
@@ -19,6 +27,9 @@ return [
         'https' => [
             'label' => 'Connessione sicura (HTTPS)',
             'failed' => 'APP_URL non inizia con https://: i browser possono installare l\'app e ricevere le notifiche push solo in HTTPS',
+            'invalid' => 'il certificato non è valido, i browser mostreranno un avviso: :error',
+            'expiring' => 'il certificato scade il :date: rinnovalo',
+            'valid' => 'certificato valido fino al :date',
         ],
         'debug' => [
             'label' => 'Modalità debug (APP_DEBUG)',
@@ -63,6 +74,10 @@ return [
         'writable_storage' => [
             'label' => 'Storage scrivibile',
             'failed' => 'storage/framework e storage/logs devono essere scrivibili',
+        ],
+        'env_file' => [
+            'label' => 'File .env scrivibile',
+            'failed' => 'la configurazione guidata non può scrivere i valori mancanti: impostali tu nel file .env',
         ],
         'root_user' => [
             'label' => 'Utente root (ID 1)',

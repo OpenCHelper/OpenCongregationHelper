@@ -8,6 +8,14 @@ return [
     ],
 
     'checks' => [
+        'php_version' => [
+            'label' => 'PHP version',
+            'failed' => 'PHP :version is too old: the app needs PHP :minimum or newer',
+        ],
+        'php_extensions' => [
+            'label' => 'PHP extensions',
+            'failed' => 'missing: :extensions',
+        ],
         'app_key' => [
             'label' => 'Application key (APP_KEY)',
             'failed' => 'run `php artisan key:generate`',
@@ -19,6 +27,9 @@ return [
         'https' => [
             'label' => 'Secure connection (HTTPS)',
             'failed' => 'APP_URL does not start with https://: the browsers can install the app and receive the push notifications only over HTTPS',
+            'invalid' => 'the certificate is not valid, the browsers will show a warning: :error',
+            'expiring' => 'the certificate expires on :date: renew it',
+            'valid' => 'certificate valid until :date',
         ],
         'debug' => [
             'label' => 'Debug mode (APP_DEBUG)',
@@ -63,6 +74,10 @@ return [
         'writable_storage' => [
             'label' => 'Writable storage',
             'failed' => 'storage/framework and storage/logs must be writable',
+        ],
+        'env_file' => [
+            'label' => 'Writable .env file',
+            'failed' => 'the setup wizard cannot write the missing values: set them in .env yourself',
         ],
         'root_user' => [
             'label' => 'Root user (ID 1)',

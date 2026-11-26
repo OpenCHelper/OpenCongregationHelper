@@ -70,6 +70,8 @@ precedente.
 | `PASSWORD_LEAK_CHECK` | Quando `APP_ENV` è `production`, le password devono avere almeno 12 caratteri (8 altrove). Se è `true`, non devono nemmeno comparire in fughe di dati note: vengono verificate con [Have I Been Pwned](https://haveibeenpwned.com/Passwords), inviando ad `api.pwnedpasswords.com` solo i primi 5 caratteri del loro hash SHA-1. Se il servizio non risponde entro 5 secondi la password viene accettata. Predefinito: `true` in produzione (impostala a `false` sui server che non possono raggiungere il servizio) e `false` altrove. I super amministratori possono cambiarla dalle [impostazioni di sicurezza](administration/settings#sicurezza). |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Come vengono inviate le email. `failover` prova prima la funzione nativa `mail()` di PHP e in caso di errore scrive l'email nel log. |
 | `QUEUE_CONNECTION` | `database` (consigliato in produzione) o `sync` (le email vengono inviate subito, durante la richiesta). |
+| `SETUP_TOKEN` | Apre la [configurazione guidata](#dal-browser) finché l'applicazione non è installata. Scegli un valore casuale e lungo, e rimuovilo una volta installata. |
+| `SETUP_WIZARD` | `false` disattiva la configurazione guidata, es. per le installazioni fatte dal terminale. Predefinito: `true`. |
 | `ARTISAN_CRON_TOKEN` | Segreto richiesto dagli endpoint che elaborano la coda e le attività pianificate. Se vuoto, gli endpoint sono disabilitati. |
 | `ENABLE_SHARED_PII` | Se `true`, la pagina pubblica di un'assegnazione condivisa mostra anche il nome dell'assegnatario e le note del territorio. Predefinito: `false`. |
 | `GUEST_ALLOW_RETURNING_ASSIGNMENT` | Se `true`, chi apre la pagina pubblica di un'assegnazione condivisa può chiedere al reparto territori di chiuderla (come può fare l'assegnatario dall'applicazione). Predefinito: `false`. |
@@ -77,6 +79,27 @@ precedente.
 | `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | File da cui vengono letti il branch e il commit Git (di default `.git/HEAD` e `.git/refs/heads/<branch>`), mostrati in **Informazioni** nel menu utente fuori da `production`. Utili sui server senza la cartella `.git`. |
 
 ## Installazione
+
+### Dal browser
+
+Una volta caricati i file sul server (con le dipendenze PHP e gli asset del frontend), aggiungi un `SETUP_TOKEN` a tua
+scelta nel file `.env`, poi apri l'applicazione: finché non è installata, ogni pagina apre la **configurazione
+guidata** (`/setup`), che chiede il token e poi:
+
+1. controlla il server: versione ed estensioni di PHP, HTTPS e il suo certificato, cartelle e file `.env` scrivibili;
+2. chiede i valori che mancano nel file `.env` (indirizzo, fuso orario, lingua, database ed email) e li aggiunge al
+   file, dopo aver verificato che il database sia raggiungibile. I valori già impostati non vengono mai cambiati;
+3. crea le tabelle del database, i permessi e le chiavi degli [assistenti IA](#assistenti-ia);
+4. crea l'utente root, e può inviargli un'email di prova;
+5. imposta il nome, il logo e il colore dell'app, i suoi amministratori (invitati via email) e le sue funzionalità: gli
+   assistenti IA, la condivisione delle assegnazioni e i requisiti degli account. Per richiedere la conferma dell'email
+   serve prima un'email di prova andata a buon fine; richiedendo l'autenticazione a due fattori, l'utente root la
+   configura subito dopo l'accesso.
+
+Poi accedi come utente root e rimuovi `SETUP_TOKEN` dal file `.env`. Senza un token, la configurazione guidata spiega
+solo come aggiungerne uno, così che nessun altro possa installare l'applicazione prima di te.
+
+### Dal terminale
 
 1. Installa le dipendenze PHP e compila gli asset del frontend:
 
@@ -136,8 +159,7 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 - **`php artisan och:doctor`** controlla la configurazione (chiave e URL dell'applicazione, HTTPS, database e
   migrazioni, collegamento dello storage, chiavi degli assistenti IA, utente root e la sua autenticazione a due
   fattori, super amministratori, email, notifiche push, endpoint per il cron) e indica cosa fare per ogni problema. Non
-  modifica nulla, quindi può essere eseguito in qualsiasi momento. L'utente root vede questi controlli anche nel primo
-  passaggio della [configurazione guidata](guides/first-setup#1-accedi-come-root).
+  modifica nulla, quindi può essere eseguito in qualsiasi momento. La [configurazione guidata](#dal-browser) controlla il server allo stesso modo.
 - **`php artisan och:recover-root`** restituisce l'accesso all'utente root quando nessuno può più gestire
   l'applicazione (es. password persa, oppure accesso o ruoli rimossi in produzione): imposta la sua password da
   `INITIAL_ROOT_PASSWORD` (o la chiede), gli permette di nuovo di accedere, segna la sua email come verificata,

@@ -1,10 +1,20 @@
 <?php
 
 use App\Models\User;
+use App\Support\HttpsCertificate;
 use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function () {
     usePassportTestKeys();
+
+    // No connection to the host of APP_URL
+    app()->instance(HttpsCertificate::class, new class extends HttpsCertificate
+    {
+        public function inspect(string $host, int $port = 443): array
+        {
+            return ['valid' => true, 'expires_at' => now()->addYear()->toImmutable(), 'error' => null];
+        }
+    });
 
     config([
         'app.key' => 'base64:'.base64_encode(str_repeat('a', 32)),
@@ -79,5 +89,21 @@ test('the report is in English whatever the language of the app', function () {
 
     $this->artisan('och:doctor')
         ->expectsOutputToContain('Root user (ID 1)')
+        ->assertFailed();
+});
+
+test('an HTTPS certificate that is not valid is an error', function () {
+    $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
+
+    app()->instance(HttpsCertificate::class, new class extends HttpsCertificate
+    {
+        public function inspect(string $host, int $port = 443): array
+        {
+            return ['valid' => false, 'expires_at' => null, 'error' => 'certificate has expired'];
+        }
+    });
+
+    $this->artisan('och:doctor')
+        ->expectsOutputToContain('the certificate is not valid')
         ->assertFailed();
 });

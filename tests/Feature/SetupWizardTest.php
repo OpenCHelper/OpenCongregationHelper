@@ -1,281 +1,335 @@
 <?php
 
-use App\Filament\Clusters\Settings\Pages\ManageGeneralSettings;
-use App\Filament\Pages\SetupWizard;
-use App\Models\SharedUrl;
-use App\Models\Territory;
-use App\Models\TerritoryAssignment;
-use App\Models\TerritoryZone;
+use App\Filament\Guest\Pages\SetupWizard;
 use App\Models\User;
 use App\Notifications\TestEmailNotification;
 use App\Notifications\UserInvitationNotification;
 use App\Settings\GeneralSettings;
 use App\Settings\SecuritySettings;
 use App\Settings\TerritorySettings;
-use App\Support\AppName;
+use App\Support\EnvironmentFile;
+use App\Support\HttpsCertificate;
+use App\Support\Installation;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
-    Filament::setCurrentPanel('app');
-
     $this->withoutVite();
+    Filament::setCurrentPanel('guest');
 
-    $this->root = User::factory()->create(['id' => 1, 'can_login' => true]);
-    $this->root->assignRole(Role::findOrCreate('super_admin', 'web'));
+    config(['app.setup.enabled' => true, 'app.setup.token' => 'the-setup-token']);
+    @unlink(Installation::markerPath());
+    Installation::forget();
+
+    // The `.env` file of the wizard is a temporary one, where only what it holds is set
+    $this->envPath = tempnam(sys_get_temp_dir(), 'env');
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\n");
+    app()->instance(EnvironmentFile::class, new class($this->envPath) extends EnvironmentFile
+    {
+        public function isMissing(string $key): bool
+        {
+            return blank($this->fileValues()[$key] ?? null);
+        }
+    });
+
+    app()->instance(HttpsCertificate::class, new class extends HttpsCertificate
+    {
+        public function inspect(string $host, int $port = 443): array
+        {
+            return ['valid' => true, 'expires_at' => now()->addYear()->toImmutable(), 'error' => null];
+        }
+    });
+});
+
+afterEach(function () {
+    @unlink($this->envPath);
+    @unlink(Installation::markerPath());
+    Installation::forget();
 });
 
 /**
- * Mark the first-run setup as completed (or not).
+ * Open the wizard as if the setup token had been typed.
  */
-function setSetupCompleted(bool $completed): void
+function unlockSetupWizard(): void
 {
-    $settings = app(GeneralSettings::class);
-    $settings->setup_completed = $completed;
-    $settings->save();
+    session()->put(SetupWizard::UNLOCKED_SESSION_KEY, hash('sha256', 'the-setup-token'));
 }
 
 /**
- * Simulate the root user logging in, which offers the wizard on the first page (see `OfferSetupWizardAfterLogin`).
+ * Set every value of `.env` that the wizard asks for, as after its Configuration step.
  */
-function logInAsRoot(User $root): void
+function completeSetupEnvironmentFile(string $path): void
 {
-    test()->actingAs($root);
-    event(new Login('web', $root, false));
+    file_put_contents($path, "SETUP_TOKEN=the-setup-token\n".collect(array_keys(SetupWizard::ENVIRONMENT_VARIABLES))
+        ->map(fn (string $variable): string => "{$variable}=set\n")
+        ->implode(''));
 }
 
-test('a new installation is not set up, an existing one is', function () {
-    expect(app(GeneralSettings::class)->setup_completed)->toBeFalse();
+/**
+ * The values of the wizard for a complete installation.
+ *
+ * @return array<string, mixed>
+ */
+function setupWizardData(array $overrides = []): array
+{
+    return [
+        'root_first_name' => 'Anna',
+        'root_last_name' => 'Rossi',
+        'root_email' => 'anna@example.com',
+        'root_password' => 'Root-Pass-2026!',
+        'root_password_confirmation' => 'Root-Pass-2026!',
+        'app_name' => ' Congregation North ',
+        'kingdom_hall_address' => 'Main Street 1',
+        'primary_color' => '#2563eb',
+        'administrators' => [],
+        'ai_assistants_enabled' => true,
+        'sharing_enabled' => true,
+        'guest_returns' => true,
+        'require_two_factor' => true,
+        'require_email_verification' => true,
+        ...$overrides,
+    ];
+}
 
-    // Run the settings migration again on a database that already has users
-    DB::table('settings')->where('group', 'general')->whereIn('name', ['app_name', 'setup_completed'])->delete();
-    config(['app.name' => 'Existing congregation']);
-    (require database_path('settings/2026_11_26_120000_add_app_name_and_setup_settings.php'))->up();
+test('the application is not installed until it has the root user', function () {
+    expect(Installation::isInstalled())->toBeFalse();
 
-    $stored = DB::table('settings')->where('group', 'general')->pluck('payload', 'name');
+    User::factory()->create(['id' => 1]);
+    Installation::forget();
 
-    expect(json_decode($stored['setup_completed']))->toBeTrue()
-        ->and(json_decode($stored['app_name']))->toBe('Existing congregation');
+    expect(Installation::isInstalled())->toBeTrue()
+        ->and(file_exists(Installation::markerPath()))->toBeTrue();
 });
 
-test('only the root user can open the wizard, until the setup is completed', function () {
-    $this->actingAs($this->root);
-    Livewire::test(SetupWizard::class)->assertOk();
+test('the wizard can be turned off', function () {
+    config(['app.setup.enabled' => false]);
+    Installation::forget();
 
-    $this->actingAs(User::factory()->create(['can_login' => true])->assignRole('super_admin'));
-    Livewire::test(SetupWizard::class)->assertForbidden();
-
-    setSetupCompleted(true);
-    $this->actingAs($this->root);
-    Livewire::test(SetupWizard::class)->assertForbidden();
+    expect(Installation::needsSetup())->toBeFalse();
 });
 
-test('the wizard opens instead of the first page after the root user logs in', function () {
-    logInAsRoot($this->root);
+test('an unreachable database shows the wizard only during an installation', function () {
+    $defaultConnection = config('database.default');
+    config([
+        'database.connections.unreachable' => ['driver' => 'sqlite', 'database' => '/nonexistent/database.sqlite'],
+        'database.default' => 'unreachable',
+    ]);
 
-    $this->get(Filament::getUrl())->assertRedirect(SetupWizard::getUrl());
+    expect(Installation::isInstalled())->toBeFalse();
 
-    // The offers made after logging in wait for the next page, where the root user is reminded of the setup instead
-    $this->get(SetupWizard::getUrl())
-        ->assertOk()
-        ->assertDontSee('offerAfterLogin: true', escape: false);
+    // Without a token, it is an installed application whose database is down: its usual error page is shown
+    config(['app.setup.token' => null]);
+    Installation::forget();
 
-    $this->get(Filament::getUrl())
-        ->assertOk()
-        ->assertSee(__('setup.banner.text'))
-        ->assertSee('offerAfterLogin: true', escape: false);
+    expect(Installation::isInstalled())->toBeTrue();
+
+    config(['database.default' => $defaultConnection]);
 });
 
-test('the wizard is not offered once the setup is completed, nor to other users', function () {
-    setSetupCompleted(true);
-    logInAsRoot($this->root);
+test('the pages open the wizard until the application is installed', function () {
+    $this->get('/')->assertRedirect(SetupWizard::getUrl(panel: 'guest'));
+    $this->get('/app/login')->assertRedirect(SetupWizard::getUrl(panel: 'guest'));
+    $this->get('/setup')->assertRedirect('/guest/setup');
 
-    $this->get(Filament::getUrl())
-        ->assertOk()
-        ->assertDontSee(__('setup.banner.text'));
+    User::factory()->create(['id' => 1]);
+    Installation::forget();
 
-    setSetupCompleted(false);
-    $admin = User::factory()->create(['can_login' => true])->assignRole('super_admin');
-    $this->actingAs($admin);
-    event(new Login('web', $admin, false));
-
-    $this->get(Filament::getUrl())
-        ->assertOk()
-        ->assertDontSee(__('setup.banner.text'));
+    $this->get('/app/login')->assertOk();
+    $this->get(SetupWizard::getUrl(panel: 'guest'))->assertForbidden();
 });
 
-test('the wizard shows the checks of the installation', function () {
-    $this->actingAs($this->root);
+test('without a setup token the wizard explains how to add one', function () {
+    config(['app.setup.token' => null]);
 
     Livewire::test(SetupWizard::class)
-        ->assertSee(__('installation.checks.app_key.label'))
-        ->assertSee(__('installation.checks.root_user.label'))
-        ->assertSee(__('installation.checks.root_two_factor.failed'));
+        ->assertSee(__('setup.token.missing_heading'))
+        ->assertDontSee(__('setup.token.label'))
+        ->assertDontSee(__('setup.steps.requirements.label'));
+});
+
+test('the wizard opens only with the setup token', function () {
+    Livewire::test(SetupWizard::class)
+        ->assertSee(__('setup.token.label'))
+        ->assertDontSee(__('setup.steps.requirements.description'))
+        ->fillForm(['token' => 'wrong'], 'tokenForm')
+        ->call('unlockWizard')
+        ->assertHasErrors(['unlock.token'])
+        ->fillForm(['token' => 'the-setup-token'], 'tokenForm')
+        ->call('unlockWizard')
+        ->assertHasNoErrors()
+        ->assertSee(__('setup.steps.requirements.description'));
+});
+
+test('the attempts at the setup token are limited', function () {
+    $component = Livewire::test(SetupWizard::class);
+
+    foreach (range(1, SetupWizard::TOKEN_ATTEMPTS_PER_MINUTE) as $attempt) {
+        $component->fillForm(['token' => 'wrong'], 'tokenForm')->call('unlockWizard');
+    }
+
+    $component->fillForm(['token' => 'the-setup-token'], 'tokenForm')
+        ->call('unlockWizard')
+        ->assertHasErrors(['unlock.token'])
+        ->assertDontSee(__('setup.steps.requirements.description'));
+});
+
+test('the wizard cannot be completed without the setup token', function () {
+    Livewire::test(SetupWizard::class)
+        ->call('complete')
+        ->assertForbidden();
+
+    expect(User::query()->count())->toBe(0);
+});
+
+test('the wizard checks the requirements of the server', function () {
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->assertSee(__('installation.checks.php_version.label'))
+        ->assertSee(__('installation.checks.php_extensions.label'))
+        ->assertSee(__('installation.checks.https.label'))
+        ->assertSee(__('installation.checks.env_file.label'))
+        ->goToWizardStep(2)
+        ->assertWizardCurrentStep(2);
+});
+
+test('only the missing values of .env are asked for and written', function () {
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_LOCALE=it\nAPP_TIMEZONE=\nDB_CONNECTION=".config('database.default')."\nDB_HOST=x\nDB_PORT=1\nDB_DATABASE=x\nDB_USERNAME=x\nDB_PASSWORD=x\nMAIL_MAILER=log\n");
+    unlockSetupWizard();
+
+    $component = Livewire::test(SetupWizard::class)
+        ->assertSet('missingVariables', ['APP_URL', 'APP_TIMEZONE', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM_ADDRESS'])
+        ->assertSchemaComponentVisible('app_timezone', 'form')
+        ->assertSchemaComponentHidden('app_locale', 'form')
+        ->assertSchemaComponentHidden('db_host', 'form')
+        // Not for the log mailer
+        ->assertSchemaComponentHidden('mail_host', 'form')
+        ->fillForm([
+            'app_url' => 'https://congregation.example.com/',
+            'app_timezone' => 'Europe/Rome',
+            'mail_from_address' => 'noreply@example.com',
+        ])
+        ->goToWizardStep(3)
+        ->assertWizardCurrentStep(3);
+
+    expect(file_get_contents($this->envPath))->toBe(
+        "SETUP_TOKEN=the-setup-token\nAPP_LOCALE=it\nAPP_TIMEZONE=Europe/Rome\nDB_CONNECTION=".config('database.default')."\nDB_HOST=x\nDB_PORT=1\nDB_DATABASE=x\nDB_USERNAME=x\nDB_PASSWORD=x\nMAIL_MAILER=log\n"
+        ."APP_URL=https://congregation.example.com\nMAIL_FROM_ADDRESS=noreply@example.com\n",
+    );
+
+    $component->assertSet('missingVariables', ['MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD']);
+});
+
+test('a database that cannot be reached stops the wizard', function () {
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_URL=https://congregation.example.com\nAPP_TIMEZONE=UTC\nAPP_LOCALE=en\nMAIL_MAILER=log\nMAIL_FROM_ADDRESS=noreply@example.com\n");
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm([
+            'db_connection' => 'pgsql',
+            'db_host' => '127.0.0.1',
+            'db_port' => '1',
+            'db_database' => 'och',
+            'db_username' => 'och',
+            'db_password' => 'secret',
+        ])
+        ->goToWizardStep(3)
+        ->assertNotified(__('setup.environment.database_failed'))
+        ->assertWizardCurrentStep(2);
+
+    expect(file_get_contents($this->envPath))->not->toContain('DB_');
 });
 
 test('a test email can be sent to the root user', function () {
     Notification::fake();
-    $this->actingAs($this->root);
+    unlockSetupWizard();
 
     Livewire::test(SetupWizard::class)
-        ->callAction(TestAction::make('sendTestEmail')->schemaComponent('installationActions', 'form'))
-        ->assertNotified(__('setup.checks.test_email.sent', ['email' => $this->root->email]));
+        ->fillForm(['root_email' => 'anna@example.com'])
+        ->callAction(TestAction::make('sendTestEmail')->schemaComponent('rootActions', 'form'))
+        ->assertNotified(__('setup.checks.test_email.sent', ['email' => 'anna@example.com']))
+        ->assertSet('testEmailSentTo', 'anna@example.com')
+        ->assertFormFieldEnabled('require_email_verification');
 
-    Notification::assertSentTo($this->root, TestEmailNotification::class);
+    Notification::assertSentOnDemand(TestEmailNotification::class);
 });
 
-test('the test email is really sent', function () {
-    $this->actingAs($this->root);
+test('requiring the email confirmation needs a test email', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
 
     Livewire::test(SetupWizard::class)
-        ->callAction(TestAction::make('sendTestEmail')->schemaComponent('installationActions', 'form'))
-        ->assertNotified(__('setup.checks.test_email.sent', ['email' => $this->root->email]));
+        ->assertFormFieldDisabled('require_email_verification')
+        ->fillForm(setupWizardData())
+        ->call('complete')
+        ->assertHasNoFormErrors();
 
-    expect(DB::table('mail_logs')->where('to', 'like', "%{$this->root->email}%")->count())->toBe(1);
+    expect(app(SecuritySettings::class)->refresh()->require_email_verification)->toBeFalse();
 });
 
-test('the failed checks that the app can fix offer to fix them', function () {
-    $this->actingAs($this->root);
-
-    $component = Livewire::test(SetupWizard::class);
-
-    is_link(public_path('storage'))
-        ? $component->assertActionHidden(TestAction::make('createStorageLink')->schemaComponent('installationActions', 'form'))
-        : $component->assertActionVisible(TestAction::make('createStorageLink')->schemaComponent('installationActions', 'form'));
-});
-
-test('completing the wizard saves the settings and invites the administrators', function () {
+test('completing the wizard installs the application', function () {
+    completeSetupEnvironmentFile($this->envPath);
     Notification::fake();
-    $this->actingAs($this->root);
+    unlockSetupWizard();
 
     Livewire::test(SetupWizard::class)
-        ->fillForm([
-            'app_name' => ' Congregation North ',
-            'kingdom_hall_address' => 'Main Street 1',
-            'primary_color' => '#2563eb',
+        ->fillForm(['root_email' => 'anna@example.com'])
+        ->callAction(TestAction::make('sendTestEmail')->schemaComponent('rootActions', 'form'))
+        ->fillForm(setupWizardData([
             'administrators' => [
-                ['first_name' => 'Anna', 'last_name' => 'Rossi', 'email' => 'anna@example.com'],
                 ['first_name' => 'Marco', 'last_name' => 'Bianchi', 'email' => 'marco@example.com'],
             ],
-            'ai_assistants_enabled' => true,
-            'sharing_enabled' => true,
-            'guest_returns' => true,
-            'require_two_factor' => false,
-            'require_email_verification' => false,
-        ])
+        ]))
         ->call('complete')
         ->assertHasNoFormErrors()
-        ->assertRedirect(Filament::getUrl());
+        ->assertSet('completed', true)
+        ->assertSee(__('setup.completed.heading'));
 
-    $general = app(GeneralSettings::class)->refresh();
-    $security = app(SecuritySettings::class)->refresh();
-    $territories = app(TerritorySettings::class)->refresh();
+    $root = User::rootUser();
+    $administrator = User::query()->where('email', 'marco@example.com')->firstOrFail();
 
-    expect($general->app_name)->toBe('Congregation North')
-        ->and($general->kingdom_hall_address)->toBe('Main Street 1')
-        ->and($general->primary_color)->toBe('#2563eb')
-        ->and($general->setup_completed)->toBeTrue()
-        ->and($security->ai_assistants_enabled)->toBeTrue()
-        ->and($territories->guest_returns)->toBeTrue()
-        ->and(config('app.name'))->toBe('Congregation North');
+    expect($root->email)->toBe('anna@example.com')
+        ->and($root->hasVerifiedEmail())->toBeTrue()
+        ->and($root->hasRole('super_admin'))->toBeTrue()
+        ->and(password_verify('Root-Pass-2026!', $root->password))->toBeTrue()
+        ->and($administrator->hasRole('super_admin'))->toBeTrue()
+        ->and($administrator->password)->toBeNull()
+        ->and(app(GeneralSettings::class)->refresh()->app_name)->toBe('Congregation North')
+        ->and(app(SecuritySettings::class)->refresh()->require_two_factor)->toBeTrue()
+        ->and(app(SecuritySettings::class)->require_email_verification)->toBeTrue()
+        ->and(app(TerritorySettings::class)->refresh()->guest_returns)->toBeTrue()
+        ->and(file_exists(Installation::markerPath()))->toBeTrue()
+        ->and(Installation::needsSetup())->toBeFalse();
 
-    foreach (['anna@example.com', 'marco@example.com'] as $email) {
-        $administrator = User::query()->where('email', $email)->firstOrFail();
-
-        expect($administrator->can_login)->toBeTrue()
-            ->and($administrator->hasRole('super_admin'))->toBeTrue()
-            ->and($administrator->password)->toBeNull();
-
-        Notification::assertSentTo($administrator, UserInvitationNotification::class);
-    }
+    Notification::assertSentTo($administrator, UserInvitationNotification::class);
 });
 
-test('the administrators must have a new and distinct email address', function () {
-    $this->actingAs($this->root);
-    User::factory()->create(['email' => 'taken@example.com']);
+test('the administrators need a new email address, other than the one of the root user', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
+    User::factory()->create(['id' => 2, 'email' => 'taken@example.com']);
 
     Livewire::test(SetupWizard::class)
-        ->fillForm([
+        ->fillForm(setupWizardData([
             'administrators' => [
-                ['first_name' => 'Anna', 'last_name' => 'Rossi', 'email' => 'taken@example.com'],
+                ['first_name' => 'Marco', 'last_name' => 'Bianchi', 'email' => 'taken@example.com'],
+                ['first_name' => 'Anna', 'last_name' => 'Rossi', 'email' => 'anna@example.com'],
             ],
-        ])
+        ]))
         ->call('complete')
-        ->assertHasFormErrors(['administrators.0.email' => 'unique']);
+        ->assertHasFormErrors(['administrators.0.email' => 'unique', 'administrators.1.email']);
 
-    Livewire::test(SetupWizard::class)
-        ->fillForm([
-            'administrators' => [
-                ['first_name' => 'Anna', 'last_name' => 'Rossi', 'email' => 'same@example.com'],
-                ['first_name' => 'Marco', 'last_name' => 'Bianchi', 'email' => 'same@example.com'],
-            ],
-        ])
-        ->call('complete')
-        ->assertHasFormErrors(['administrators.0.email']);
-
-    expect(app(GeneralSettings::class)->refresh()->setup_completed)->toBeFalse();
+    expect(User::rootUser())->toBeNull();
 });
 
-test('the requirements cannot lock out the root user', function () {
-    $this->actingAs($this->root);
+test('the password of the root user follows the password policy', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
 
     Livewire::test(SetupWizard::class)
-        ->fillForm(['require_two_factor' => true])
+        ->fillForm(setupWizardData(['root_password' => 'short', 'root_password_confirmation' => 'short']))
         ->call('complete')
-        ->assertHasFormErrors(['require_two_factor']);
-});
-
-test('disabling the sharing deletes the shared links', function () {
-    $this->actingAs($this->root);
-
-    TerritoryAssignment::factory()->create([
-        'territory_id' => Territory::factory()->for(TerritoryZone::factory(), 'territoryZone')->create()->id,
-        'assignee_id' => $this->root->id,
-        'ended_at' => null,
-    ])->share();
-
-    Livewire::test(SetupWizard::class)
-        ->fillForm(['sharing_enabled' => false])
-        ->call('complete')
-        ->assertHasNoFormErrors();
-
-    expect(SharedUrl::query()->count())->toBe(0)
-        ->and(app(TerritorySettings::class)->refresh()->sharing_enabled)->toBeFalse();
-});
-
-test('the setup can be skipped', function () {
-    $this->actingAs($this->root);
-
-    Livewire::test(SetupWizard::class)
-        ->callAction('skip')
-        ->assertRedirect(Filament::getUrl());
-
-    expect(app(GeneralSettings::class)->refresh()->setup_completed)->toBeTrue();
-});
-
-test('the name of the application comes from the settings', function () {
-    $this->actingAs($this->root);
-    config(['app.name' => 'From APP_NAME']);
-
-    AppName::apply();
-    expect(config('app.name'))->toBe(app(GeneralSettings::class)->app_name);
-
-    Livewire::test(ManageGeneralSettings::class)
-        ->assertSchemaStateSet(['app_name' => app(GeneralSettings::class)->app_name])
-        ->fillForm(['app_name' => 'Renamed congregation'])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    expect(app(GeneralSettings::class)->refresh()->app_name)->toBe('Renamed congregation')
-        ->and(config('app.name'))->toBe('Renamed congregation');
-
-    Livewire::test(ManageGeneralSettings::class)
-        ->fillForm(['app_name' => ''])
-        ->call('save')
-        ->assertHasFormErrors(['app_name' => 'required']);
+        ->assertHasFormErrors(['root_password']);
 });

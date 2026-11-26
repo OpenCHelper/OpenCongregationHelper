@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Support\Installation;
 use App\Support\PasswordPolicy;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Database\Seeders\ShieldSeeder;
@@ -38,6 +39,9 @@ class InstallCommand extends Command
         }
 
         $this->grantSuperAdminRoleToRootUser();
+
+        // The setup wizard is no longer offered
+        Installation::markInstalled();
 
         return self::SUCCESS;
     }

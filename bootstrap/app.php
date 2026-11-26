@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureNotImpersonatingForOAuth;
+use App\Http\Middleware\RedirectToSetupWizard;
 use App\Http\Middleware\SetSecurityHeaders;
 use App\Jobs\DetectStaleAssignments;
 use App\Jobs\RenewPublicationSubscriptions;
@@ -47,6 +48,9 @@ return Application::configure(basePath: dirname(__DIR__))
         */
         // The OAuth authorization of the AI assistants (Passport, `web` group) cannot be approved while impersonating
         $middleware->web(append: [EnsureNotImpersonatingForOAuth::class]);
+
+        // Until the application is installed, its pages open the setup wizard
+        $middleware->web(append: [RedirectToSetupWizard::class]);
 
         // Anti-framing, MIME sniffing and referrer headers on every response, the API and the health check included
         $middleware->append(SetSecurityHeaders::class);

@@ -28,6 +28,8 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <!-- The tests of the setup wizard turn it on (see `SetupWizardTest`) -->
+        <env name="SETUP_WIZARD" value="false"/>
         
         <!-- 
             Hardcoded variables to override the default values in the .env.example file.

@@ -11,7 +11,6 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\Logs;
-use App\Filament\Pages\SetupWizard;
 use App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired;
 use App\Http\Middleware\EnsureMultiFactorAuthenticationWhenRequired;
 use App\Http\Middleware\RedirectToSetupWizard;
@@ -95,8 +94,7 @@ class AppPanelProvider extends PanelProvider
      */
     public static function takeLoginOffer(string $sessionKey): bool
     {
-        // The setup wizard, opened instead of the first page after the root user logs in, leaves them to the next page
-        if (request()->routeIs('filament.*.auth.*', SetupWizard::getRouteName())) {
+        if (request()->routeIs('filament.*.auth.*')) {
             return false;
         }
 
@@ -181,13 +179,6 @@ class AppPanelProvider extends PanelProvider
                 PanelsRenderHook::LAYOUT_END,
                 fn (): string => '<div class="app-ui-preferences">'.FilamentView::renderHook(self::UI_PREFERENCES_RENDER_HOOK)->toHtml().'</div>',
             )
-            // Remind the root user to complete the first-run setup, until it is completed or skipped
-            ->renderHook(
-                PanelsRenderHook::PAGE_START,
-                fn (array $scopes): ?View => ! in_array(SetupWizard::class, $scopes, true) && SetupWizard::canAccess()
-                    ? view('filament.setup.banner')
-                    : null,
-            )
             // Offer to install the app on the first page after logging in (on the login page it would cover the form),
             // at the start of the body to catch the event of the browser early. Rendered on the other pages too, where it
             // opens only from the user menu and the profile.
@@ -271,10 +262,11 @@ class AppPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                // Until the application is installed, the panel opens the setup wizard
+                RedirectToSetupWizard::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
-                RedirectToSetupWizard::class,
             ]);
 
         if (app()->environment(['local', 'nightly'])) {
