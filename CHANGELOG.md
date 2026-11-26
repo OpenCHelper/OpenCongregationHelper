@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   subscribers, the tags of territories and zones, the campaign of the assignments and the email of the users; the
   creator of the campaigns and the guard and last update of the roles are now hidden by default
   ([#96](https://github.com/OpenCHelper/OpenCongregationHelper/pull/96)).
+- **User guide**: every page now matches what the app does, e.g. the import columns, the deletion rules of territories
+  and zones, the map drawings that publishers don't see, return requests, the sidebar, notifications, two-factor setup
+  and the settings reserved to super administrators.
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 - **Shared assignment page**: no sidebar any more, the assignment dates are shown in the language of the page and in

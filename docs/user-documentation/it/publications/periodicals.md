@@ -45,7 +45,7 @@ disattivare o eliminare (una volta eliminati non vengono ricreati).
 
 ![Elenco pubblicazioni](/docs/user-documentation/it/publications/assets/publications.webp)
 
-1. Clicca **Nuovo** e inserisci il **Nome** nella tua lingua (es. *Vivi felice per sempre!*): puoi inserirlo anche
+1. Clicca **Nuovo** e inserisci il **Nome** nella tua lingua (es. *Puoi vivere felice per sempre*): puoi inserirlo anche
    nelle altre lingue, altrimenti mostrano quello che hai scritto.
 2. Scegli la **Categoria**, come nella Biblioteca online Watchtower: *Bibbie*, *Torre di Guardia*, *Svegliatevi!*,
    *Guide per l'adunanza*, *Libri*, *Opuscoli e brochure*, *Volantini*, *Indici*, *Programmi*, *Manuali e linee guida*,
@@ -53,7 +53,7 @@ disattivare o eliminare (una volta eliminati non vengono ricreati).
 3. Inserisci la sua **Sigla** (es. `lff`): è obbligatoria, la stessa in ogni lingua e mostrata nell'intestazione della
    sua colonna.
 4. Per le pubblicazioni ricevute regolarmente, attiva **Ricevuta regolarmente** e indica ogni quanti mesi **Si
-   rinnova** (es. 1 per *La Torre di Guardia*, 2 per la *Guida per l'adunanza*); lascialo disattivato per quelle
+   rinnova ogni** (es. 1 per *La Torre di Guardia*, 2 per la *Guida per l'adunanza*); lascialo disattivato per quelle
    richieste una volta sola (es. un libro).
 5. Clicca **Salva**: una pubblicazione che si rinnova avrà la sua colonna nelle pubblicazioni periodiche; tutte si
    possono [richiedere](requests).

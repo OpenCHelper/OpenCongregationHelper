@@ -85,9 +85,10 @@ Proteggi il tuo account con un codice di un'app di autenticazione sul telefono (
 Microsoft Authenticator o Authy), chiesto dopo la password a ogni accesso.
 
 1. In **App di autenticazione**, clicca **Configurazione**.
-2. Inquadra il codice QR con l'app di autenticazione (o inserisci la chiave mostrata sotto).
-3. Salva i **codici di recupero** in un posto sicuro: ognuno ti permette di accedere una volta se perdi il telefono.
-4. Inserisci il codice di 6 cifre mostrato dall'app per confermare.
+2. Inquadra il codice QR con l'app di autenticazione (o inserisci il codice mostrato sotto).
+3. Inserisci il codice di 6 cifre mostrato dall'app e la tua **Password attuale**, poi prosegui.
+4. Salva i **codici di recupero** in un posto sicuro: ognuno ti permette di accedere una volta se perdi il telefono.
+   Vengono mostrati una sola volta. Poi clicca **Abilita l'app di autenticazione**.
 
 Da allora puoi **Rigenerare i codici di recupero** o **Disabilitare** l'autenticazione a due fattori dalla stessa
 sezione. Se gli amministratori la richiedono (vedi [Impostazioni](../administration/settings#sicurezza)), ti viene

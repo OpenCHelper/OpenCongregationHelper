@@ -32,7 +32,9 @@ them, since when, and which ones have been covered. It runs in the browser and a
 - **Basics**: logging in, the interface, the dashboard, your profile and notifications.
 - **Territories**: browsing, creating, mapping and importing territories, and organizing them into zones.
 - **Assignments**: assigning and returning territories, the assignment history, sharing assignments and campaigns.
-- **Administration**: users, roles and permissions, and tags.
+- **Public Witnessing**: the posters and the places where they are stored.
+- **Publications**: the regular publications and the publication requests of the publishers.
+- **Administration**: users, roles and permissions, departments, tags and settings.
 - **Guides**: step-by-step walkthroughs of the most common tasks.
 
 > 💡 **Tip:** while using the application, the **Help** button in the top bar (where available) opens the page of this

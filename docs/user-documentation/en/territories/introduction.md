@@ -108,11 +108,14 @@ the assignment in progress: remove the *Assignment Status* filter to see all of 
 
 ## Deleting and restoring
 
-Deleted territories are not lost: they are moved to the trash. To get one back:
+Deleted territories are not lost: they are moved to the trash. A territory that is still assigned cannot be deleted:
+end its assignment first. To get a deleted territory back:
 
 1. open the filters and set **Deleted records** to *With deleted records* or *Only deleted records*;
 2. open the **⋮** menu of the territory and click **Restore**.
 
-**Force delete** removes a territory permanently.
+**Force delete** removes a territory permanently. While deleted records are shown, the bulk actions also include
+**Restore selected** and **Force delete selected**.
 
-> ⚠️ **Warning:** when a zone is deleted, all its territories are hidden as well.
+> ⚠️ **Warning:** a zone that still contains territories cannot be deleted (see [Zones](zones)). The territories
+> already deleted of a deleted zone stay hidden, even among the deleted records, until the zone is restored.
