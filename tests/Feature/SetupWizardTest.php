@@ -504,7 +504,10 @@ test('the review step shows the choices before installing', function () {
         ->assertSee('anna@example.com')
         ->assertSee('Congregation North')
         ->assertSee('marco@example.com')
-        ->assertSee(__('setup.review.test_email_not_sent'));
+        ->assertSee(__('setup.review.test_email_not_sent'))
+        ->assertSeeHtml('data-enabled="true"')
+        // Without a test email, the email confirmation is never required
+        ->assertSeeHtml('data-enabled="false"');
 });
 
 test('the administrators need a new email address, other than the one of the root user', function () {

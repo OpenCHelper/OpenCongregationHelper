@@ -893,12 +893,12 @@ class SetupWizard extends Page
     /**
      * What the installation is about to do, grouped by step, for the Review step.
      *
-     * @return list<array{title: string, icon: Heroicon, items: list<array{label: string, value: string, color?: string}>}>
+     * @return list<array{title: string, icon: Heroicon, items: list<array{label: string, value: string, color?: string, enabled?: bool}>}>
      */
     protected function reviewGroups(): array
     {
         $data = $this->data ?? [];
-        $toggle = fn (string $field): string => ($data[$field] ?? false) ? __('setup.review.enabled') : __('setup.review.disabled');
+        $toggle = fn (string $field): array => ['value' => ($data[$field] ?? false) ? __('setup.review.enabled') : __('setup.review.disabled'), 'enabled' => (bool) ($data[$field] ?? false)];
         $environment = fn (array $variables): array => collect($variables)
             ->map(fn (string $variable): array => ['label' => $variable, 'value' => $this->currentEnvironmentValue($variable)
                 ?: (string) config(str_replace('{connection}', (string) config('database.default'), self::ENVIRONMENT_VARIABLES[$variable]))
@@ -950,13 +950,13 @@ class SetupWizard extends Page
                 'title' => __('setup.steps.features.label'),
                 'icon' => Heroicon::OutlinedAdjustmentsHorizontal,
                 'items' => [
-                    ['label' => __('settings.fields.ai_assistants_enabled.label'), 'value' => $toggle('ai_assistants_enabled')],
-                    ['label' => __('settings.fields.sharing_enabled.label'), 'value' => $toggle('sharing_enabled')],
-                    ...(($data['sharing_enabled'] ?? false) ? [['label' => __('settings.fields.guest_returns.label'), 'value' => $toggle('guest_returns')]] : []),
-                    ['label' => __('settings.fields.require_two_factor.label'), 'value' => $toggle('require_two_factor')],
-                    ['label' => __('settings.fields.require_email_verification.label'), 'value' => $this->testEmailSentTo !== null
+                    ['label' => __('settings.fields.ai_assistants_enabled.label'), ...$toggle('ai_assistants_enabled')],
+                    ['label' => __('settings.fields.sharing_enabled.label'), ...$toggle('sharing_enabled')],
+                    ...(($data['sharing_enabled'] ?? false) ? [['label' => __('settings.fields.guest_returns.label'), ...$toggle('guest_returns')]] : []),
+                    ['label' => __('settings.fields.require_two_factor.label'), ...$toggle('require_two_factor')],
+                    ['label' => __('settings.fields.require_email_verification.label'), ...($this->testEmailSentTo !== null
                         ? $toggle('require_email_verification')
-                        : __('setup.review.disabled')],
+                        : ['value' => __('setup.review.disabled'), 'enabled' => false])],
                 ],
             ],
         ];
