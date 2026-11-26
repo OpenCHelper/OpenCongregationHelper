@@ -424,14 +424,14 @@ test('the image preview of the form shows a newly uploaded image only when it ca
     'not previewable' => false,
 ]);
 
-test('the map offers only the tools that draw areas', function () {
-    // Lines and text labels are not shown where the territory is used (assignment, shared page, dashboard)
+test('the map offers the tools that draw areas and lines, but not text labels', function () {
+    // Text labels are not shown where the territory is used (assignment, shared page, dashboard)
     Livewire::test(CreateTerritory::class)
         ->assertSchemaComponentExists('location', 'form', checkComponentUsing: function (Map $map): bool {
             $tools = json_decode($map->getMapConfig(), true)['geoMan'];
 
-            return $tools['drawPolygon'] && $tools['drawRectangle'] && $tools['cutPolygon']
-                && ! $tools['drawPolyline'] && ! $tools['drawText'];
+            return $tools['drawPolygon'] && $tools['drawRectangle'] && $tools['cutPolygon'] && $tools['drawPolyline']
+                && ! $tools['drawText'];
         });
 });
 

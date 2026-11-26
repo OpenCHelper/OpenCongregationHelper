@@ -31,7 +31,7 @@ Un territorio può essere descritto in due modi, che possono coesistere:
 | | **Mappa** | **Immagine** |
 |-|-----------|--------------|
 | Cos'è | Una forma disegnata su una mappa interattiva di OpenStreetMap | Un'immagine, es. la foto o la scansione della cartolina cartacea |
-| Mostrata nella [dashboard](../basics/dashboard) | Sì, per i territori residenziali (solo le aree, vedi [Disegnare le mappe](maps)) | No |
+| Mostrata nella [dashboard](../basics/dashboard) | Sì, per i territori residenziali (aree e linee, vedi [Disegnare le mappe](maps)) | No |
 | Si può ingrandire e usare per orientarsi | Sì | No |
 | Ideale per | I nuovi territori | I territori provenienti dal registro cartaceo |
 

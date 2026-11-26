@@ -261,12 +261,12 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->clickable(false) // click to move marker
                                             ->drawMarker(false)
                                             ->drawPolygon($schema->getOperation() !== 'view')
-                                            // Only areas are shown where the territory is used (assignment, shared page, dashboard):
-                                            // lines and text labels would be visible in the territory form only (UX-02)
-                                            ->drawPolyline(false)
+                                            ->drawPolyline($schema->getOperation() !== 'view')
                                             ->drawCircle(false)
                                             ->drawCircleMarker(false)
                                             ->dragMode(false)
+                                            // Text labels are not shown where the territory is used (assignment, shared page,
+                                            // dashboard), which draw only its areas and lines (see `Territory::getMapShapes()`)
                                             ->drawText(false)
                                             ->drawRectangle($schema->getOperation() !== 'view')
                                             ->cutPolygon($schema->getOperation() !== 'view')
