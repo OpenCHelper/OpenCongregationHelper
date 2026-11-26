@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Users**: **Impersonate** on the page of a user asks for a confirmation, as it already did from the list, instead
+  of signing in as the user right away.
 - **Users**: a user who has assignments can no longer be deleted, from their page, the bulk action or their profile:
   it permanently deleted the history of every territory they had (dates, coverage, campaigns) and freed their
   territories in progress. The delete modal explains why and offers to disable their access instead, making them a
