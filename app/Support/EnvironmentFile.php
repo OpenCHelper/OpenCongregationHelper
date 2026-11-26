@@ -122,6 +122,24 @@ class EnvironmentFile
     }
 
     /**
+     * Remove the line of a variable from the file, if it has one.
+     */
+    public function remove(string $key): void
+    {
+        if (! $this->exists()) {
+            return;
+        }
+
+        if (! $this->isWritable()) {
+            throw new RuntimeException("The {$this->path()} file is not writable.");
+        }
+
+        $contents = (string) file_get_contents($this->path());
+
+        file_put_contents($this->path(), (string) preg_replace('/^'.preg_quote($key, '/').'=.*(\R|$)/m', '', $contents));
+    }
+
+    /**
      * The values of the variables written in the file.
      *
      * @return array<string, string>

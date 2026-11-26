@@ -119,7 +119,8 @@ return [
         'sync_note' => 'With this queue nothing waits: the work is done right away, and no queue worker is needed.',
         'service_intro' => 'On a hosting without a shell, have an external cron service call these addresses every minute, with the POST method:',
         'token_intro' => 'Each call must send this header, which proves it comes from your service:',
-        'token_missing' => 'The secret of these addresses (ARTISAN_CRON_TOKEN) is missing from .env, and could not be created: set it yourself.',
+        'token_disabled' => 'These addresses are off until they have a secret (ARTISAN_CRON_TOKEN): turn them on only if you use them.',
+        'enable_endpoints' => 'Turn on the addresses',
         'copy' => 'Copy',
         'queues' => [
             'sync' => 'Sync: right away, during the request (no worker needed)',
@@ -128,16 +129,23 @@ return [
     ],
     'database' => [
         'intro' => 'Going on creates the tables of the database and the permissions of the roles. It can take a minute.',
+        'running' => 'Creating the tables… It can take a minute: do not close the page.',
         'failed' => 'The database could not be set up (`:command`).',
     ],
 
     'root' => [
         'intro' => 'The root user can do everything, and can never be deleted: it is your account. Send a test email to check that the emails of the app arrive.',
         'password' => 'Password',
+        'password_hint' => 'At least :min characters.',
+        'password_hint_uncompromised' => 'It must not be among the passwords leaked online.',
+        'generate_password' => 'Generate a password',
+        'password_generated' => 'Password generated',
+        'password_generated_body' => 'Save it now, e.g. in a password manager: :password',
         'password_confirmation' => 'Confirm the password',
         'email_first' => 'Type a valid email address first.',
         'test_email_hint' => 'No test email sent yet: requiring the email confirmation needs one.',
         'mailer_not_sending' => 'The emails are not sent (MAIL_MAILER is :mailer): the test email reaches no inbox. Choose a mailer that sends them in the Configuration step to receive it.',
+        'go_to_configuration' => 'Go to the Configuration step',
     ],
 
     'administrators' => [
@@ -173,6 +181,7 @@ return [
             'administrators' => '{0} No administrators added: you can add them later from the users|{1} :count administrator invited by email|[2,*] :count administrators invited by email',
             'invitations_failed' => '{1} :count invitation could not be sent: send it again from the users|[2,*] :count invitations could not be sent: send them again from the users',
             'two_factor' => 'Set up the two-factor authentication right after logging in',
+            'token_removed' => 'SETUP_TOKEN removed from the .env file',
             'remove_token' => 'Remove SETUP_TOKEN from the .env file: it is no longer used',
         ],
         'log_in' => 'Log in',

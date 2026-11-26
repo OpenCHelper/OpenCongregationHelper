@@ -80,3 +80,14 @@ test('the variables set by the server, and not by the file, are told apart', fun
     putenv('OCH_TEST_IN_FILE');
     putenv('OCH_TEST_SERVER');
 });
+
+test('a variable can be removed from the file', function () {
+    file_put_contents($this->path, "APP_NAME=Test\nSETUP_TOKEN=secret\nSETUP_TOKEN_OTHER=kept\nAPP_ENV=local");
+    $file = new EnvironmentFile($this->path);
+
+    $file->remove('SETUP_TOKEN');
+    $file->remove('OCH_TEST_ABSENT');
+    $file->remove('APP_ENV');
+
+    expect(file_get_contents($this->path))->toBe("APP_NAME=Test\nSETUP_TOKEN_OTHER=kept\n");
+});

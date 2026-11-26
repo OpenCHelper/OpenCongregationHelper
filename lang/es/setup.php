@@ -119,7 +119,8 @@ return [
         'sync_note' => 'Con esta cola nada queda en espera: el trabajo se hace en el momento y no hace falta un worker.',
         'service_intro' => 'En un hosting sin shell, haz que un servicio cron externo llame a estas direcciones cada minuto, con el método POST:',
         'token_intro' => 'Cada llamada debe enviar esta cabecera, que demuestra que viene de tu servicio:',
-        'token_missing' => 'Falta el secreto de estas direcciones (ARTISAN_CRON_TOKEN) en .env y no se pudo crear: configúralo tú.',
+        'token_disabled' => 'Estas direcciones están desactivadas hasta que tengan un secreto (ARTISAN_CRON_TOKEN): actívalas solo si las usas.',
+        'enable_endpoints' => 'Activar las direcciones',
         'copy' => 'Copiar',
         'queues' => [
             'sync' => 'Sync: en el momento, durante la petición (sin worker)',
@@ -128,16 +129,23 @@ return [
     ],
     'database' => [
         'intro' => 'Al continuar se crean las tablas de la base de datos y los permisos de los roles. Puede tardar un minuto.',
+        'running' => 'Creando las tablas… Puede tardar un minuto: no cierres la página.',
         'failed' => 'No se pudo preparar la base de datos (`:command`).',
     ],
 
     'root' => [
         'intro' => 'El usuario root puede hacerlo todo y nunca se puede eliminar: es tu cuenta. Envía un correo de prueba para comprobar que los correos de la aplicación llegan.',
         'password' => 'Contraseña',
+        'password_hint' => 'Al menos :min caracteres.',
+        'password_hint_uncompromised' => 'No debe estar entre las contraseñas filtradas en internet.',
+        'generate_password' => 'Generar una contraseña',
+        'password_generated' => 'Contraseña generada',
+        'password_generated_body' => 'Guárdala ahora, p. ej. en un gestor de contraseñas: :password',
         'password_confirmation' => 'Confirma la contraseña',
         'email_first' => 'Escribe primero una dirección de correo válida.',
         'test_email_hint' => 'Aún no se ha enviado ningún correo de prueba: para exigir la confirmación del correo hace falta uno.',
         'mailer_not_sending' => 'Los correos no se envían (MAIL_MAILER es :mailer): el correo de prueba no llega a ninguna bandeja. Para recibirlo, elige en el paso Configuración un mailer que los envíe.',
+        'go_to_configuration' => 'Ir al paso Configuración',
     ],
 
     'administrators' => [
@@ -173,6 +181,7 @@ return [
             'administrators' => '{0} Ningún administrador añadido: puedes añadirlos más tarde desde los usuarios|{1} :count administrador invitado por correo|[2,*] :count administradores invitados por correo',
             'invitations_failed' => '{1} :count invitación no se pudo enviar: envíala de nuevo desde los usuarios|[2,*] :count invitaciones no se pudieron enviar: envíalas de nuevo desde los usuarios',
             'two_factor' => 'Configura la autenticación en dos pasos justo después de iniciar sesión',
+            'token_removed' => 'SETUP_TOKEN quitado del archivo .env',
             'remove_token' => 'Quita SETUP_TOKEN del archivo .env: ya no se usa',
         ],
         'log_in' => 'Iniciar sesión',

@@ -70,7 +70,7 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 | `PASSWORD_LEAK_CHECK` | When `APP_ENV` is `production`, the passwords need at least 12 characters (8 elsewhere). When this is `true`, they must not appear in a known data leak either: they are checked with [Have I Been Pwned](https://haveibeenpwned.com/Passwords), by sending only the first 5 characters of their SHA-1 hash to `api.pwnedpasswords.com`. If the service does not answer within 5 seconds the password is accepted. Defaults to `true` in production (set it to `false` on servers that cannot reach the service) and to `false` elsewhere. The super administrators can change it from the [Security settings](administration/settings#security). |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | How emails are sent. `failover` tries the native PHP `mail()` function first and falls back to the log. |
 | `QUEUE_CONNECTION` | `database` (recommended in production) or `sync` (emails are sent immediately, during the request). |
-| `SETUP_TOKEN` | Opens the [setup wizard](#from-the-browser) while the application is not installed. Choose a long random value, and remove it once installed. |
+| `SETUP_TOKEN` | Opens the [setup wizard](#from-the-browser) while the application is not installed. Choose a long random value: the wizard removes it from `.env` once installed. |
 | `SETUP_WIZARD` | `false` turns the setup wizard off, e.g. for the installations set up from the terminal. Defaults to `true`. |
 | `ARTISAN_CRON_TOKEN` | Secret required by the endpoints that process the queue and the scheduled jobs. If empty, those endpoints are disabled. |
 | `ENABLE_SHARED_PII` | When `true`, the public page of a shared assignment also shows the assignee's name and the territory notes. Defaults to `false`. |
@@ -95,17 +95,19 @@ choice to the `.env` file, then open the application: until it is installed, eve
    [push notifications](#push-notifications) are created when both are missing, and those of the
    [AI assistants](#ai-assistants) when missing;
 3. shows how to run the [scheduled tasks and the queue](#scheduled-tasks-and-emails), with a shell (the cron lines)
-   or without one (the addresses an external cron service calls, with their `ARTISAN_CRON_TOKEN`, created if missing),
+   or without one (the addresses an external cron service calls, with their `ARTISAN_CRON_TOKEN`, created on request),
    and lets you choose the queue (`QUEUE_CONNECTION`);
 4. creates the database tables and the permissions;
-5. creates the root user, and can send a test email to it;
+5. creates the root user (a password can be generated), and can send a test email to it;
 6. sets the name, logo and colour of the app, its administrators (who are invited by email) and its features: the AI
    assistants, the sharing of the assignments and the requirements of the accounts. Requiring the email confirmation
    needs a test email that went through first; requiring two-factor authentication makes the root user set it up right
-   after logging in.
+   after logging in;
+7. shows a summary of the choices before installing.
 
-The root user it creates is also written in `INITIAL_ROOT_*` (replacing their values), for `och:recover-root`. Then
-log in as the root user and remove `SETUP_TOKEN` from `.env`. Without a token, the wizard only explains how to add
+The root user it creates is also written in `INITIAL_ROOT_*` (replacing their values), for `och:recover-root`, and
+`SETUP_TOKEN` is removed from `.env` (remove it yourself if the server sets it, or if the file cannot be written).
+Then log in as the root user. Without a token, the wizard only explains how to add
 one, so that nobody else can install the application first.
 
 ### From the terminal

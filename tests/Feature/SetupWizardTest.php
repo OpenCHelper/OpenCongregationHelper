@@ -285,7 +285,7 @@ test('the values with a fallback in the configuration can be left empty', functi
         ->assertWizardCurrentStep(3);
 
     // Nothing is written: the fallbacks apply
-    expect(file_get_contents($this->envPath))->toMatch('/^SETUP_TOKEN=the-setup-token\nVAPID_PUBLIC_KEY=\S+\nVAPID_PRIVATE_KEY=\S+\nARTISAN_CRON_TOKEN=\S+\n$/');
+    expect(file_get_contents($this->envPath))->toMatch('/^SETUP_TOKEN=the-setup-token\nVAPID_PUBLIC_KEY=\S+\nVAPID_PRIVATE_KEY=\S+\n$/');
 });
 
 test('the keys of the push notifications are created only when both are missing', function () {
@@ -428,7 +428,7 @@ test('completing the wizard installs the application', function () {
         ->assertSee(__('setup.completed.items.root', ['email' => 'anna@example.com']))
         ->assertSee(trans_choice('setup.completed.items.administrators', 1, ['count' => 1]))
         ->assertSee(__('setup.completed.items.two_factor'))
-        ->assertSee(__('setup.completed.items.remove_token'));
+        ->assertSee(__('setup.completed.items.token_removed'));
 
     $root = User::rootUser();
     $administrator = User::query()->where('email', 'marco@example.com')->firstOrFail();
@@ -446,9 +446,48 @@ test('completing the wizard installs the application', function () {
         ->and(file_exists(Installation::markerPath()))->toBeTrue()
         // The root user just created replaces the one of `.env`
         ->and(file_get_contents($this->envPath))->toContain("\nINITIAL_ROOT_USERNAME=\"Anna Rossi\"\nINITIAL_ROOT_USERMAIL=anna@example.com\nINITIAL_ROOT_PASSWORD=\"Root-Pass-2026!\"\n")
-        ->and(Installation::needsSetup())->toBeFalse();
+        ->and(Installation::needsSetup())->toBeFalse()
+        // The setup token is no longer used
+        ->and(file_get_contents($this->envPath))->not->toContain('SETUP_TOKEN');
 
     Notification::assertSentTo($administrator, UserInvitationNotification::class);
+});
+
+test('the timezone of the browser is the default of the missing APP_TIMEZONE', function () {
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_TIMEZONE=\n");
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->call('useBrowserTimezone', 'Not/A_Timezone')
+        ->assertSchemaStateSet(['app_timezone' => 'UTC'], 'form')
+        ->call('useBrowserTimezone', 'Europe/Rome')
+        ->assertSchemaStateSet(['app_timezone' => 'Europe/Rome'], 'form')
+        // Only once: never over the choice of the user
+        ->fillForm(['app_timezone' => 'Europe/Paris'])
+        ->call('useBrowserTimezone', 'Europe/Rome')
+        ->assertSchemaStateSet(['app_timezone' => 'Europe/Paris'], 'form');
+});
+
+test('the timezone of the browser does not replace APP_TIMEZONE when it is set', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->call('useBrowserTimezone', 'Europe/Rome')
+        ->assertSet('browserTimezoneUsed', false);
+});
+
+test('a password can be generated for the root user', function () {
+    unlockSetupWizard();
+
+    $component = Livewire::test(SetupWizard::class)
+        ->assertSee(__('setup.root.password_hint', ['min' => 8]))
+        ->callAction(TestAction::make('generatePassword')->schemaComponent('root_password', 'form'));
+
+    $password = $component->get('data.root_password');
+
+    expect($password)->toHaveLength(20)
+        ->and($component->get('data.root_password_confirmation'))->toBe($password);
 });
 
 test('the review step shows the choices before installing', function () {
@@ -540,16 +579,23 @@ test('the background tasks step saves the queue and tells how to run the tasks',
         ->and(config('queue.default'))->toBe('database');
 });
 
-test('the secret of the scheduler and queue endpoints is created when missing', function () {
+test('the scheduler and queue endpoints are turned on only on request', function () {
     unlockSetupWizard();
 
-    Livewire::test(SetupWizard::class)
+    $component = Livewire::test(SetupWizard::class)
         ->fillForm(collect(SetupWizard::ENVIRONMENT_VARIABLES)->keys()->mapWithKeys(fn (string $variable): array => [strtolower($variable) => null])->all())
         ->goToWizardStep(3)
-        ->assertHasNoFormErrors();
+        ->assertHasNoFormErrors()
+        ->assertSee(__('setup.tasks.token_disabled'));
+
+    expect((new EnvironmentFile($this->envPath))->fileValues())->not->toHaveKey('ARTISAN_CRON_TOKEN');
+
+    $component->callAction(TestAction::make('enableCronEndpoints')->schemaComponent('cronActions', 'form'));
 
     $token = (new EnvironmentFile($this->envPath))->fileValues()['ARTISAN_CRON_TOKEN'] ?? '';
 
     expect($token)->toHaveLength(64)
         ->and(config('app.artisan_cron_token'))->toBe($token);
+
+    $component->assertSee('X-Cron-Token: '.$token);
 });

@@ -35,6 +35,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
@@ -52,6 +53,7 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Notification as Notifications;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
@@ -213,6 +215,11 @@ class SetupWizard extends Page
     public bool $completed = false;
 
     /**
+     * Whether the timezone of the browser was already used as the default of APP_TIMEZONE.
+     */
+    public bool $browserTimezoneUsed = false;
+
+    /**
      * What the installation did, shown once it is completed.
      *
      * @var list<array{text: string, status: string}>
@@ -244,7 +251,7 @@ class SetupWizard extends Page
 
     public function getSubheading(): ?string
     {
-        return $this->showsCard() ? null : __('setup.subheading').' '.__('setup.changeable_later');
+        return $this->showsCard() ? null : __('setup.subheading');
     }
 
     /**
@@ -266,7 +273,8 @@ class SetupWizard extends Page
         $this->form->fill([
             'app_url' => $this->requestRoot,
             'app_timezone' => in_array($settingsTimezone, timezone_identifiers_list(), true) ? $settingsTimezone : 'UTC',
-            'app_locale' => (string) config('app.locale'),
+            // The language chosen on this page, rather than the default one
+            'app_locale' => array_key_exists(app()->getLocale(), (array) config('app.available_locales')) ? app()->getLocale() : (string) config('app.locale'),
             'db_connection' => 'mysql',
             'db_host' => '127.0.0.1',
             'db_port' => '3306',
@@ -385,6 +393,11 @@ class SetupWizard extends Page
                     ->id('form')
                     ->livewireSubmitHandler('complete')
                     ->visible(fn (): bool => ! $this->showsCard()),
+                Text::make(__('setup.changeable_later'))
+                    ->size(TextSize::ExtraSmall)
+                    ->color('gray')
+                    ->extraAttributes(['class' => 'block text-center'])
+                    ->visible(fn (): bool => ! $this->showsCard()),
             ]);
     }
 
@@ -454,8 +467,12 @@ class SetupWizard extends Page
                     $this->featuresStep(),
                     $this->reviewStep(),
                 ]))
-                    // Only the current step shows its label on wide screens (see `resources/css/app.css`)
-                    ->extraAttributes(['class' => 'och-setup-wizard'])
+                    // Only the current step shows its label on wide screens, the others on hover (see
+                    // `resources/css/app.css`). The timezone of the browser is the default of APP_TIMEZONE.
+                    ->extraAttributes([
+                        'class' => 'och-setup-wizard',
+                        'x-init' => '$wire.useBrowserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)',
+                    ])
                     ->submitAction(new HtmlString(Blade::render(
                         '<x-filament::button type="submit" icon="heroicon-o-check">{{ $label }}</x-filament::button>',
                         ['label' => __('setup.complete')],
@@ -643,6 +660,16 @@ class SetupWizard extends Page
                                         'queueUrl' => self::chosenQueue($get) === 'sync' ? null : $this->applicationUrl().'/api/artisan/queue/process',
                                         'token' => $this->currentEnvironmentValue('ARTISAN_CRON_TOKEN'),
                                     ]),
+                                // Opt-in: without their secret, the addresses stay off
+                                Actions::make([
+                                    Action::make('enableCronEndpoints')
+                                        ->label(__('setup.tasks.enable_endpoints'))
+                                        ->icon(Heroicon::OutlinedKey)
+                                        ->color('gray')
+                                        ->action(fn () => $this->enableCronEndpoints()),
+                                ])
+                                    ->key('cronActions')
+                                    ->visible(fn (): bool => blank($this->currentEnvironmentValue('ARTISAN_CRON_TOKEN'))),
                             ]),
                     ]),
             ])
@@ -660,6 +687,7 @@ class SetupWizard extends Page
             ->icon(Heroicon::OutlinedCircleStack)
             ->schema([
                 Text::make(__('setup.database.intro')),
+                View::make('filament.setup.database-progress'),
             ])
             ->afterValidation(function (): void {
                 $this->ensureUnlocked();
@@ -678,6 +706,13 @@ class SetupWizard extends Page
                 Text::make(__('setup.root.intro'))->columnSpanFull(),
                 Callout::make(__('setup.root.mailer_not_sending', ['mailer' => (string) config('mail.default')]))
                     ->warning()
+                    ->actions([
+                        Action::make('goToConfiguration')
+                            ->label(__('setup.root.go_to_configuration'))
+                            ->icon(Heroicon::OutlinedArrowUturnLeft)
+                            ->link()
+                            ->alpineClickHandler(self::goToStepHandler('environment')),
+                    ])
                     ->visible(fn (): bool => self::mailerDoesNotSend())
                     ->columnSpanFull(),
                 TextInput::make('root_first_name')
@@ -705,6 +740,13 @@ class SetupWizard extends Page
                     ->revealable()
                     ->required()
                     ->rule(fn (): Password => Password::default())
+                    ->helperText(fn (): string => self::passwordHint())
+                    ->suffixAction(
+                        Action::make('generatePassword')
+                            ->icon(Heroicon::OutlinedSparkles)
+                            ->tooltip(__('setup.root.generate_password'))
+                            ->action(fn (Set $set) => $this->generatePassword($set)),
+                    )
                     ->same('root_password_confirmation'),
                 TextInput::make('root_password_confirmation')
                     ->prefixIcon(Heroicon::OutlinedLockClosed)
@@ -1044,7 +1086,6 @@ class SetupWizard extends Page
             }
 
             $this->createVapidKeys();
-            $this->createCronToken();
         } catch (Throwable $exception) {
             $this->stopStep(__('setup.environment.write_failed'), $exception->getMessage());
         }
@@ -1085,6 +1126,29 @@ class SetupWizard extends Page
 
         if (app()->configurationIsCached()) {
             Artisan::call('config:clear');
+        }
+
+        $this->refreshEnvironmentVariables();
+    }
+
+    /**
+     * Turn on the endpoints that run the scheduler and the queue, for the hosting without a shell: only on request, as
+     * an installation with a shell does not need them.
+     */
+    protected function enableCronEndpoints(): void
+    {
+        $this->ensureUnlocked();
+
+        try {
+            $this->createCronToken();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            Notification::make()
+                ->danger()
+                ->title(__('setup.environment.write_failed'))
+                ->body($exception->getMessage())
+                ->send();
         }
 
         $this->refreshEnvironmentVariables();
@@ -1354,6 +1418,66 @@ class SetupWizard extends Page
     }
 
     /**
+     * The JavaScript that brings the wizard back to one of its steps (`setup.steps.<step>`), without the validation of
+     * the current one. The keys of the steps come from their labels (see `Step::getKey()`).
+     */
+    protected static function goToStepHandler(string $step): string
+    {
+        $stepKey = Str::slug(Str::transliterate(__("setup.steps.{$step}.label"), strict: true));
+
+        return '$dispatch('.Js::from('go-to-wizard-step').', { key: '.Js::from('form.data::wizard').', step: '
+            .Js::from("form.{$stepKey}::data::wizard-step").' })';
+    }
+
+    /**
+     * Fill the password of the root user with a random one, showing it so that it can be saved.
+     */
+    protected function generatePassword(Set $set): void
+    {
+        $password = Str::password(20, spaces: false);
+
+        $set('root_password', $password);
+        $set('root_password_confirmation', $password);
+
+        Notification::make()
+            ->success()
+            ->title(__('setup.root.password_generated'))
+            ->body(__('setup.root.password_generated_body', ['password' => $password]))
+            ->persistent()
+            ->send();
+    }
+
+    /**
+     * What the password policy requires, for the root user to choose a password that passes it.
+     */
+    protected static function passwordHint(): string
+    {
+        try {
+            // The policy reads the settings: no hint before the Database step creates their table
+            $rules = Password::default()->appliedRules();
+        } catch (Throwable) {
+            return '';
+        }
+
+        return trim(__('setup.root.password_hint', ['min' => $rules['min']])
+            .($rules['uncompromised'] ? ' '.__('setup.root.password_hint_uncompromised') : ''));
+    }
+
+    /**
+     * Use the timezone of the browser as the default of APP_TIMEZONE, when it is missing and not chosen yet.
+     */
+    public function useBrowserTimezone(string $timezone): void
+    {
+        if ($this->browserTimezoneUsed || ! in_array('APP_TIMEZONE', $this->missingVariables, true)
+            || ! in_array($timezone, timezone_identifiers_list(), true)) {
+            return;
+        }
+
+        $this->browserTimezoneUsed = true;
+        $this->data['app_timezone'] = $timezone;
+    }
+
+    /**
      * Send an email to the root user, to check that the emails reach their recipients.
      */
     protected function sendTestEmail(): void
@@ -1464,6 +1588,7 @@ class SetupWizard extends Page
         Installation::markInstalled();
 
         $this->saveInitialRootUser($data);
+        $tokenRemoved = $this->removeSetupToken();
 
         $invitedAdministrators = 0;
 
@@ -1490,7 +1615,9 @@ class SetupWizard extends Page
                 ? ['text' => trans_choice('setup.completed.items.invitations_failed', $failedInvitations, ['count' => $failedInvitations]), 'status' => 'warning']
                 : null,
             $data['require_two_factor'] ? ['text' => __('setup.completed.items.two_factor'), 'status' => 'todo'] : null,
-            ['text' => __('setup.completed.items.remove_token'), 'status' => 'todo'],
+            $tokenRemoved
+                ? ['text' => __('setup.completed.items.token_removed'), 'status' => 'done']
+                : ['text' => __('setup.completed.items.remove_token'), 'status' => 'todo'],
         ]));
 
         $this->completed = true;
@@ -1529,6 +1656,29 @@ class SetupWizard extends Page
             'email' => $values['INITIAL_ROOT_USERMAIL'],
             'password' => $values['INITIAL_ROOT_PASSWORD'],
         ]]);
+    }
+
+    /**
+     * Remove `SETUP_TOKEN` from `.env`, as it is no longer used: whether it is gone (not when the environment of the
+     * server sets it, or the file cannot be written).
+     */
+    protected function removeSetupToken(): bool
+    {
+        $environmentFile = app(EnvironmentFile::class);
+
+        if ($environmentFile->isSetOutsideFile('SETUP_TOKEN')) {
+            return false;
+        }
+
+        try {
+            $environmentFile->remove('SETUP_TOKEN');
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
+
+        return true;
     }
 
     /**

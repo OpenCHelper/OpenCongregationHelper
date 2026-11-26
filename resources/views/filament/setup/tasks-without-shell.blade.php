@@ -13,6 +13,6 @@
         <p>{{ __('setup.tasks.token_intro') }}</p>
         @include('filament.setup.copyable', ['value' => 'X-Cron-Token: '.$token])
     @else
-        <p>{{ __('setup.tasks.token_missing') }}</p>
+        <p>{{ __('setup.tasks.token_disabled') }}</p>
     @endif
 </div>

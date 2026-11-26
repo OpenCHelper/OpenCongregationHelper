@@ -71,7 +71,7 @@ precedente.
 | `PASSWORD_LEAK_CHECK` | Quando `APP_ENV` è `production`, le password devono avere almeno 12 caratteri (8 altrove). Se è `true`, non devono nemmeno comparire in fughe di dati note: vengono verificate con [Have I Been Pwned](https://haveibeenpwned.com/Passwords), inviando ad `api.pwnedpasswords.com` solo i primi 5 caratteri del loro hash SHA-1. Se il servizio non risponde entro 5 secondi la password viene accettata. Predefinito: `true` in produzione (impostala a `false` sui server che non possono raggiungere il servizio) e `false` altrove. I super amministratori possono cambiarla dalle [impostazioni di sicurezza](administration/settings#sicurezza). |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Come vengono inviate le email. `failover` prova prima la funzione nativa `mail()` di PHP e in caso di errore scrive l'email nel log. |
 | `QUEUE_CONNECTION` | `database` (consigliato in produzione) o `sync` (le email vengono inviate subito, durante la richiesta). |
-| `SETUP_TOKEN` | Apre la [configurazione guidata](#dal-browser) finché l'applicazione non è installata. Scegli un valore casuale e lungo, e rimuovilo una volta installata. |
+| `SETUP_TOKEN` | Apre la [configurazione guidata](#dal-browser) finché l'applicazione non è installata. Scegli un valore casuale e lungo: la configurazione guidata lo rimuove dal file `.env` una volta installata. |
 | `SETUP_WIZARD` | `false` disattiva la configurazione guidata, es. per le installazioni fatte dal terminale. Predefinito: `true`. |
 | `ARTISAN_CRON_TOKEN` | Segreto richiesto dagli endpoint che elaborano la coda e le attività pianificate. Se vuoto, gli endpoint sono disabilitati. |
 | `ENABLE_SHARED_PII` | Se `true`, la pagina pubblica di un'assegnazione condivisa mostra anche il nome dell'assegnatario e le note del territorio. Predefinito: `false`. |
@@ -96,17 +96,19 @@ guidata** (`/setup`), che chiede il token e poi:
    predefinito nella configurazione si possono lasciare vuoti. Le chiavi delle [notifiche push](#notifiche-push)
    vengono create se mancano entrambe, e quelle degli [assistenti IA](#assistenti-ia) se mancano;
 3. mostra come eseguire le [attività pianificate e la coda](#attività-pianificate-ed-email), con una shell (le righe
-   del cron) o senza (gli indirizzi che un servizio cron esterno chiama, con il loro `ARTISAN_CRON_TOKEN`, creato se
-   manca), e permette di scegliere la coda (`QUEUE_CONNECTION`);
+   del cron) o senza (gli indirizzi che un servizio cron esterno chiama, con il loro `ARTISAN_CRON_TOKEN`, creato su
+   richiesta), e permette di scegliere la coda (`QUEUE_CONNECTION`);
 4. crea le tabelle del database e i permessi;
-5. crea l'utente root, e può inviargli un'email di prova;
+5. crea l'utente root (la password si può generare), e può inviargli un'email di prova;
 6. imposta il nome, il logo e il colore dell'app, i suoi amministratori (invitati via email) e le sue funzionalità: gli
    assistenti IA, la condivisione delle assegnazioni e i requisiti degli account. Per richiedere la conferma dell'email
    serve prima un'email di prova andata a buon fine; richiedendo l'autenticazione a due fattori, l'utente root la
-   configura subito dopo l'accesso.
+   configura subito dopo l'accesso;
+7. mostra un riepilogo delle scelte prima di installare.
 
-L'utente root che crea viene anche scritto in `INITIAL_ROOT_*` (sostituendone i valori), per `och:recover-root`. Poi
-accedi come utente root e rimuovi `SETUP_TOKEN` dal file `.env`. Senza un token, la configurazione guidata spiega
+L'utente root che crea viene anche scritto in `INITIAL_ROOT_*` (sostituendone i valori), per `och:recover-root`, e
+`SETUP_TOKEN` viene rimosso dal file `.env` (rimuovilo tu se lo imposta il server, o se il file non è scrivibile).
+Poi accedi come utente root. Senza un token, la configurazione guidata spiega
 solo come aggiungerne uno, così che nessun altro possa installare l'applicazione prima di te.
 
 ### Dal terminale
