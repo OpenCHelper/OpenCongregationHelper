@@ -472,6 +472,8 @@ jobs:
           INITIAL_ROOT_USERMAIL='${ROOT_EMAIL}'
           INITIAL_ROOT_PASSWORD='${ROOT_PASSWORD}'
           DEMO_PREFILL_LOGIN_CREDENTIALS=true
+          # TEMPORARY (setup wizard): opens the wizard of the uninstalled preview, with the password of the root user
+          SETUP_TOKEN='${ROOT_PASSWORD}'
           EOF
 
           echo "${SHA}" > .git-commit-hash
@@ -514,8 +516,10 @@ jobs:
             # The tables were already dropped by the deployer (which works even when the application cannot boot).
             # Migrations, `och:install` (permissions, keys of the AI assistants, root user), `public/storage` link and
             # caches (see `app/Console/Commands/PostDeployCommand.php`)
-            artisan och:post-deploy
-            artisan db:seed --class=FakeDataSeeder
+            # TEMPORARY (setup wizard): the preview is left uninstalled, for the wizard to install it (restore
+            # `artisan och:post-deploy` and `artisan db:seed --class=FakeDataSeeder` before merging)
+            artisan storage:link --force
+            artisan optimize:clear
 
       # Once the preview runs with the new token: the jobs of its folder are matched by title, so that every push
       # updates them (with the new token) instead of creating them again.
