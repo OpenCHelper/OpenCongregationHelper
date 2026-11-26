@@ -40,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Territories**: **Assign Massively** and **End Assignments** tell how many territories were assigned or returned
+  and which were skipped, and why (already assigned, not assigned, not allowed or refused); they were skipped
+  silently.
 - **Users**: a user who has assignments can no longer be deleted, from their page, the bulk action or their profile:
   it permanently deleted the history of every territory they had (dates, coverage, campaigns) and freed their
   territories in progress. The delete modal explains why and offers to disable their access instead, making them a
