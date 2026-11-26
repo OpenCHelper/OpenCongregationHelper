@@ -863,15 +863,6 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
     }
 
     /**
-     * Explain why a territory has not been deleted: {@see TerritoryObserver::deleting()}
-     * refuses to (force) delete a territory that is still assigned.
-     *
-     * @template TAction of Action
-     *
-     * @param  TAction  $action  A (force) delete action, single or bulk
-     * @return TAction
-     */
-    /**
      * Tell the result of a bulk assignment or return: how many territories were assigned (or returned), and which were
      * skipped and why. Green when all of them went through, amber when some were skipped, red when none went through.
      *
@@ -913,6 +904,15 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
             : $shownNames;
     }
 
+    /**
+     * Explain why a territory has not been deleted: {@see TerritoryObserver::deleting()}
+     * refuses to (force) delete a territory that is still assigned.
+     *
+     * @template TAction of Action
+     *
+     * @param  TAction  $action  A (force) delete action, single or bulk
+     * @return TAction
+     */
     public static function explainRefusedDeletion(Action $action): Action
     {
         if ($action instanceof BulkAction) {
