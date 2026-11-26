@@ -64,6 +64,7 @@ return [
     'environment' => [
         'already_set' => 'Already set in .env',
         'password_set' => 'Set in .env',
+        'password_keep' => 'Set in .env: leave empty to keep it',
         'intro' => 'These values are missing from the .env file: they will be added to it. The values already set are never changed.',
         'nothing_missing' => 'All the values the app needs are already set in the .env file.',
         'not_writable' => 'The .env file cannot be written: add the missing values to it yourself, then reload this page.',
@@ -72,6 +73,7 @@ return [
         'app_timezone' => 'Used for the dates and the time of the reminders.',
         'app_locale' => 'Language of the app for the users who did not choose one.',
         'database' => 'Database',
+        'db_prefix' => 'Prefix of the names of the tables, to share the database with other applications (optional).',
         'db_sqlite' => 'The full path of the database file: it is created if it does not exist.',
         'mail' => 'Email',
         'mailers' => [

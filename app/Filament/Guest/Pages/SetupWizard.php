@@ -38,6 +38,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
@@ -93,6 +94,7 @@ class SetupWizard extends Page
         'DB_DATABASE' => 'database.connections.{connection}.database',
         'DB_USERNAME' => 'database.connections.{connection}.username',
         'DB_PASSWORD' => 'database.connections.{connection}.password',
+        'DB_PREFIX' => 'database.connections.{connection}.prefix',
         'MAIL_MAILER' => 'mail.default',
         'MAIL_HOST' => 'mail.mailers.smtp.host',
         'MAIL_PORT' => 'mail.mailers.smtp.port',
@@ -123,11 +125,12 @@ class SetupWizard extends Page
 
     /**
      * The variables of `.env` that the wizard can also change when they are already set (in `.env`, not in the
-     * environment of the server, which comes first): the mailer, so that the test email can be sent another way.
+     * environment of the server, which comes first): the database, and the mailer so that the test email can be sent
+     * another way. A password left empty is kept.
      *
      * @var list<string>
      */
-    public const CHANGEABLE_VARIABLES = ['MAIL_MAILER'];
+    public const CHANGEABLE_VARIABLES = ['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_PREFIX', 'MAIL_MAILER'];
 
     /**
      * The database drivers the wizard offers.
@@ -229,20 +232,24 @@ class SetupWizard extends Page
     }
 
     /**
-     * The values of the variables of `.env` that are already set, shown (but not editable) by the Configuration step,
-     * keyed by their field. The passwords are left out: they never reach the browser.
+     * The current value of a variable: the one written in `.env`, or else the one of the environment of the server.
+     */
+    protected function currentEnvironmentValue(string $variable): string
+    {
+        return (string) (app(EnvironmentFile::class)->fileValues()[$variable] ?? Env::get($variable));
+    }
+
+    /**
+     * The values of the variables of `.env` that are already set, shown by the Configuration step (editable only for
+     * the ones that can be changed), keyed by their field. The passwords are left out: they never reach the browser.
      *
      * @return array<string, mixed>
      */
     protected function configuredEnvironmentValues(): array
     {
-        $connection = (string) config('database.default');
-
-        return collect(self::ENVIRONMENT_VARIABLES)
-            ->except([...$this->missingVariables, 'DB_PASSWORD', 'MAIL_PASSWORD'])
-            ->mapWithKeys(fn (string $configKey, string $variable): array => [
-                strtolower($variable) => config(str_replace('{connection}', $connection, $configKey)),
-            ])
+        return collect(array_keys(self::ENVIRONMENT_VARIABLES))
+            ->diff([...$this->missingVariables, 'DB_PASSWORD', 'MAIL_PASSWORD'])
+            ->mapWithKeys(fn (string $variable): array => [strtolower($variable) => $this->currentEnvironmentValue($variable)])
             ->all();
     }
 
@@ -443,6 +450,10 @@ class SetupWizard extends Page
                             ->password()
                             ->revealable()
                             ->visible(fn (Get $get): bool => self::chosenConnection($get) !== 'sqlite'), 'DB_PASSWORD'),
+                        $this->environmentField(TextInput::make('db_prefix')
+                            ->helperText(__('setup.environment.db_prefix'))
+                            ->maxLength(32)
+                            ->regex('/^[A-Za-z0-9_]*$/'), 'DB_PREFIX'),
                     ]),
                 Section::make(__('setup.environment.mail'))
                     ->columns(['default' => 1, 'md' => 2])
@@ -657,6 +668,7 @@ class SetupWizard extends Page
             ->required(fn (Get $get): bool => $required && $isEditable() && blank($fallback($get)))
             ->placeholder(fn (Get $get): ?string => match (true) {
                 ! $isEditable() && $field instanceof TextInput && $field->isPassword() => __('setup.environment.password_set'),
+                $field instanceof TextInput && $field->isPassword() && in_array($variable, $this->changeableVariables, true) => __('setup.environment.password_keep'),
                 $isEditable() && $field instanceof TextInput && $field->isPassword() => null,
                 $isEditable() => $fallback($get),
                 default => null,
@@ -716,45 +728,30 @@ class SetupWizard extends Page
      */
     protected function saveEnvironment(): void
     {
-        $isMissing = fn (string $variable): bool => in_array($variable, $this->missingVariables, true);
         // Left empty, the connection and the mailer are the ones the configuration falls back on
-        $connection = $isMissing('DB_CONNECTION') ? (string) ($this->data['db_connection'] ?? '') : '';
+        $connection = $this->isEditableVariable('DB_CONNECTION') ? (string) ($this->data['db_connection'] ?? '') : '';
         $connection = $connection !== '' ? $connection : (string) config('database.default');
         $mailer = $this->isEditableVariable('MAIL_MAILER') ? (string) ($this->data['mail_mailer'] ?? '') : '';
         $mailer = $mailer !== '' ? $mailer : (string) config('mail.default');
 
-        // The variables already set that were changed: written over their current value
-        $changedValues = collect(['MAIL_MAILER' => $mailer])
-            ->only($this->changeableVariables)
-            ->reject(fn (string $value, string $variable): bool => $value === '' || $value === (string) config(self::ENVIRONMENT_VARIABLES[$variable]))
-            ->all();
-
-        $values = collect([
-            'APP_URL' => rtrim((string) ($this->data['app_url'] ?? ''), '/'),
-            'APP_TIMEZONE' => $this->data['app_timezone'] ?? null,
-            'APP_LOCALE' => $this->data['app_locale'] ?? null,
-            'DB_CONNECTION' => $this->data['db_connection'] ?? null,
-            'DB_HOST' => $this->data['db_host'] ?? null,
-            'DB_PORT' => $this->data['db_port'] ?? null,
-            'DB_DATABASE' => $this->data['db_database'] ?? null,
-            'DB_USERNAME' => $this->data['db_username'] ?? null,
-            'DB_PASSWORD' => $this->data['db_password'] ?? null,
-            'MAIL_MAILER' => $this->data['mail_mailer'] ?? null,
-            'MAIL_HOST' => $this->data['mail_host'] ?? null,
-            'MAIL_PORT' => $this->data['mail_port'] ?? null,
-            'MAIL_USERNAME' => $this->data['mail_username'] ?? null,
-            'MAIL_PASSWORD' => $this->data['mail_password'] ?? null,
-            'MAIL_FROM_ADDRESS' => $this->data['mail_from_address'] ?? null,
-        ])
-            ->only($this->missingVariables)
+        $typed = collect(array_keys(self::ENVIRONMENT_VARIABLES))
+            ->mapWithKeys(fn (string $variable): array => [$variable => trim((string) ($this->data[strtolower($variable)] ?? ''))])
+            ->put('APP_URL', rtrim(trim((string) ($this->data['app_url'] ?? '')), '/'))
             // The fields hidden for the chosen database and mailer keep their default value: it is not written
             ->except($connection === 'sqlite' ? ['DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD'] : [])
             ->except($mailer !== 'smtp' ? ['MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD'] : [])
-            ->map(fn (mixed $value): string => trim((string) $value))
-            ->filter(fn (string $value): bool => $value !== '')
+            // Left empty, a missing value keeps the fallback of the configuration, and a value already set is kept
+            ->filter(fn (string $value): bool => $value !== '');
+
+        $values = $typed->only($this->missingVariables)->all();
+
+        // The variables already set that were changed: written over their current value
+        $changedValues = $typed
+            ->only($this->changeableVariables)
+            ->reject(fn (string $value, string $variable): bool => $value === $this->currentEnvironmentValue($variable))
             ->all();
 
-        $this->checkDatabase($connection, $values);
+        $this->checkDatabase($connection, [...$values, ...$changedValues]);
         $this->applyToConfiguration([...$values, ...$changedValues]);
 
         try {

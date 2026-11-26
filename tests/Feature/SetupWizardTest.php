@@ -62,8 +62,18 @@ function unlockSetupWizard(): void
  */
 function completeSetupEnvironmentFile(string $path): void
 {
+    $connection = config('database.default');
+    $values = [
+        'DB_CONNECTION' => $connection,
+        'DB_DATABASE' => config("database.connections.{$connection}.database"),
+        'DB_PORT' => '3306',
+        'MAIL_MAILER' => 'log',
+        'MAIL_PORT' => '587',
+        'MAIL_FROM_ADDRESS' => 'noreply@example.com',
+    ];
+
     file_put_contents($path, "SETUP_TOKEN=the-setup-token\n".collect(array_keys(SetupWizard::ENVIRONMENT_VARIABLES))
-        ->map(fn (string $variable): string => "{$variable}=set\n")
+        ->map(fn (string $variable): string => $variable.'='.($values[$variable] ?? 'set')."\n")
         ->implode(''));
 }
 
@@ -200,15 +210,15 @@ test('only the missing values of .env are asked for and written', function () {
     unlockSetupWizard();
 
     $component = Livewire::test(SetupWizard::class)
-        ->assertSet('missingVariables', ['APP_URL', 'APP_TIMEZONE', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM_ADDRESS'])
+        ->assertSet('missingVariables', ['APP_URL', 'APP_TIMEZONE', 'DB_PREFIX', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM_ADDRESS'])
         ->assertSchemaComponentVisible('app_timezone', 'form')
         ->assertSchemaComponentHidden('app_locale', 'form')
-        // The values already set are shown, but cannot be changed (and the passwords are never sent to the browser)
-        ->assertFormFieldDisabled('db_database')
-        ->assertSchemaStateSet(['db_database' => config('database.connections.'.config('database.default').'.database')], 'form')
-        // The mailer can be changed, even when set
+        // The values already set are shown (but the passwords are never sent to the browser): only the database and the
+        // mailer can be changed
+        ->assertFormFieldEnabled('db_database')
+        ->assertSchemaStateSet(['db_database' => 'x'], 'form')
         ->assertFormFieldEnabled('mail_mailer')
-        ->assertSet('changeableVariables', ['MAIL_MAILER'])
+        ->assertSet('changeableVariables', ['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'MAIL_MAILER'])
         ->assertSchemaStateSet(['db_password' => null], 'form')
         // Not for the mailer of the tests
         ->assertSchemaComponentHidden('mail_host', 'form')
@@ -225,7 +235,7 @@ test('only the missing values of .env are asked for and written', function () {
         ."APP_URL=https://congregation.example.com\nMAIL_FROM_ADDRESS=noreply@example.com\n",
     );
 
-    $component->assertSet('missingVariables', ['MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD']);
+    $component->assertSet('missingVariables', ['DB_PREFIX', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD']);
 });
 
 test('the mailer can be changed, among the mailers of the configuration', function () {
@@ -263,6 +273,30 @@ test('the values with a fallback in the configuration can be left empty', functi
 
     // Nothing is written: the fallbacks apply
     expect(file_get_contents($this->envPath))->toBe("SETUP_TOKEN=the-setup-token\n");
+});
+
+test('the database settings can be changed, keeping the password left empty', function () {
+    $connection = config('database.default');
+    $database = config("database.connections.{$connection}.database");
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nDB_CONNECTION={$connection}\nDB_DATABASE={$database}\nDB_PASSWORD=secret\nDB_PREFIX=old_\n");
+    config(["database.connections.{$connection}.prefix" => 'old_']);
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->assertSet('changeableVariables', ['DB_CONNECTION', 'DB_DATABASE', 'DB_PASSWORD', 'DB_PREFIX'])
+        ->assertSchemaStateSet(['db_prefix' => 'old_', 'db_password' => null], 'form')
+        ->fillForm(['db_prefix' => 'och_'])
+        ->goToWizardStep(3)
+        ->assertHasNoFormErrors()
+        ->assertWizardCurrentStep(3);
+
+    expect(file_get_contents($this->envPath))
+        ->toContain("\nDB_PREFIX=och_\n")
+        ->toContain("\nDB_PASSWORD=secret\n")
+        ->toContain("\nDB_DATABASE={$database}\n")
+        ->and(config("database.connections.{$connection}.prefix"))->toBe('och_');
+
+    config(["database.connections.{$connection}.prefix" => '']);
 });
 
 test('a database that cannot be reached stops the wizard', function () {

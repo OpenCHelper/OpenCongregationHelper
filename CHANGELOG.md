@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The table prefix (`DB_PREFIX`) now applies to every database (MariaDB, PostgreSQL, SQLite and SQL Server too), not
+  only to MySQL.
+
 - **Users**: the **Access enabled?** filter of the list is now **Access**, with the options **With access** and
   **Virtual**, and the new **Email verified** and **Two-factor authentication** filters show the users who have (or
   have not) verified their email or set up two-factor authentication; each option shows how many users it matches

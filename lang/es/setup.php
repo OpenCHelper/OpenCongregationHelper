@@ -64,6 +64,7 @@ return [
     'environment' => [
         'already_set' => 'Ya configurado en .env',
         'password_set' => 'Configurada en .env',
+        'password_keep' => 'Configurada en .env: déjala vacía para mantenerla',
         'intro' => 'Estos valores faltan en el archivo .env: se añadirán. Los valores ya configurados nunca se cambian.',
         'nothing_missing' => 'Todos los valores que necesita la aplicación ya están en el archivo .env.',
         'not_writable' => 'No se puede escribir el archivo .env: añade tú los valores que faltan y vuelve a cargar esta página.',
@@ -72,6 +73,7 @@ return [
         'app_timezone' => 'Se usa para las fechas y la hora de los recordatorios.',
         'app_locale' => 'Idioma de la aplicación para los usuarios que no eligieron uno.',
         'database' => 'Base de datos',
+        'db_prefix' => 'Prefijo de los nombres de las tablas, para compartir la base de datos con otras aplicaciones (opcional).',
         'db_sqlite' => 'La ruta completa del archivo de la base de datos: se crea si no existe.',
         'mail' => 'Correo',
         'mailers' => [

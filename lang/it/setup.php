@@ -64,6 +64,7 @@ return [
     'environment' => [
         'already_set' => 'Già impostato nel file .env',
         'password_set' => 'Impostata nel file .env',
+        'password_keep' => 'Impostata nel file .env: lascia vuoto per mantenerla',
         'intro' => 'Questi valori mancano nel file .env: verranno aggiunti. I valori già impostati non vengono mai cambiati.',
         'nothing_missing' => 'Tutti i valori che servono all\'app sono già impostati nel file .env.',
         'not_writable' => 'Il file .env non può essere scritto: aggiungi tu i valori mancanti, poi ricarica questa pagina.',
@@ -72,6 +73,7 @@ return [
         'app_timezone' => 'Usato per le date e per l\'orario dei promemoria.',
         'app_locale' => 'Lingua dell\'app per gli utenti che non ne hanno scelta una.',
         'database' => 'Database',
+        'db_prefix' => 'Prefisso dei nomi delle tabelle, per condividere il database con altre applicazioni (facoltativo).',
         'db_sqlite' => 'Il percorso completo del file del database: viene creato se non esiste.',
         'mail' => 'Email',
         'mailers' => [

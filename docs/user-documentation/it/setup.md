@@ -90,8 +90,10 @@ guidata** (`/setup`), che chiede il token e poi:
 1. controlla il server: versione ed estensioni di PHP, HTTPS e il suo certificato, cartelle e file `.env` scrivibili;
 2. chiede i valori che mancano nel file `.env` (indirizzo, fuso orario, lingua, database ed email) e li aggiunge al
    file, dopo aver verificato che il database sia raggiungibile. I valori già impostati vengono mostrati ma mai
-   cambiati (le password solo come impostate), tranne il mailer (`MAIL_MAILER`), che si può cambiare tra quelli di
-   `config/mail.php`, così che l'email di prova possa essere inviata in un altro modo;
+   cambiati (le password solo come impostate), tranne le impostazioni del database (`DB_*`, prefisso delle tabelle
+   compreso: una password lasciata vuota viene mantenuta) e il mailer (`MAIL_MAILER`), che si può cambiare tra quelli
+   di `config/mail.php` così che l'email di prova possa essere inviata in un altro modo. I valori con un valore
+   predefinito nella configurazione si possono lasciare vuoti;
 3. crea le tabelle del database, i permessi e le chiavi degli [assistenti IA](#assistenti-ia);
 4. crea l'utente root, e può inviargli un'email di prova;
 5. imposta il nome, il logo e il colore dell'app, i suoi amministratori (invitati via email) e le sue funzionalità: gli
