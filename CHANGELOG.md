@@ -36,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shows the start and end dates the same way, and the same section descriptions
   ([#86](https://github.com/OpenCHelper/OpenCongregationHelper/pull/86)).
 
+### Removed
+
+- The teams inherited from the Jetstream starter kit, which the app never used: the database update drops their empty
+  tables (`teams`, `team_user`, `team_invitations`) and the `current_team_id` column of the users.
+
 ### Fixed
 
 - **Users**: a user who has assignments can no longer be deleted, from their page, the bulk action or their profile:

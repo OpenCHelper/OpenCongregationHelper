@@ -4,11 +4,8 @@ use App\Http\Controllers\PublicStorageController;
 use App\Http\Controllers\WebManifestController;
 use App\Http\Middleware\PreventSearchIndexing;
 use App\Models\SharedUrl;
-use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
-use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
-use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,7 +27,7 @@ Route::view('/offline', 'offline')->name('offline');
 
 Route::redirect('/login', '/app/login')->name('login');
 
-// The panel has a registration page only while the registration is enabled (e.g. team invitations link here).
+// The panel has a registration page only while the registration is enabled.
 if (Features::enabled(Features::registration())) {
     Route::redirect('/register', '/app/register')->name('register');
 }
@@ -42,11 +39,6 @@ Route::redirect('/dashboard', '/app')->name('dashboard');
 
 // Jetstream sends the user here after uploading a new profile photo, but the profile page is in the Filament panel.
 Route::redirect('/user/profile', '/app/edit-profile')->name('profile.show');
-
-// Users with an unverified email are sent to the verification of the panel, as Fortify's `verification.notice` route is not registered.
-Route::get('/team-invitations/{invitation}', [TeamInvitationController::class, 'accept'])
-    ->middleware(['signed', EnsureEmailIsVerified::redirectTo('filament.app.auth.email-verification.prompt'), 'auth', AuthenticateSession::class])
-    ->name('team-invitations.accept');
 
 // Share route that redirects to Filament Guest panel
 Route::get('/share/{uuid}', function ($uuid) {
