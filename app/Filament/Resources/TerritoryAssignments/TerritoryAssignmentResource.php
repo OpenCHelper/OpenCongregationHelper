@@ -16,6 +16,7 @@ use Carbon\CarbonInterval;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
+use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polyline;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -322,31 +323,19 @@ class TerritoryAssignmentResource extends Resource
                                                 'Google Satellite' => TileLayer::GoogleSatellite,
                                                 'Google Hybrid' => TileLayer::GoogleHybrid,
                                             ])
-                                            ->shapes(function ($record): array {
+                                            ->shapes(function (TerritoryAssignment $record): array {
                                                 $territory = $record->territory;
-                                                $geojson = json_decode($territory->geojson, true);
+                                                $color = $territory->territoryZone?->color;
+                                                $mapShapes = $territory->getMapShapes();
 
-                                                $polygons = [];
-                                                foreach ($geojson['features'] as $feature) {
-                                                    if ($feature['geometry']['type'] != 'Polygon') {
-                                                        continue;
-                                                    }
-
-                                                    // The first two elements are longitude and latitude, but we need latitude and longitude
-                                                    // Swap all the coordinates
-                                                    $coords_lat_long = array_map(function ($coord) {
-                                                        return array_map(function ($c) {
-                                                            return [$c[1], $c[0]];
-                                                        }, $coord);
-                                                    }, $feature['geometry']['coordinates']);
-
-                                                    $popup = '';
-                                                    $polygons[] = Polygon::make($coords_lat_long)
-                                                        ->fillColor($territory->territoryZone->color)
-                                                        ->fillOpacity(0.3);
-                                                }
-
-                                                return $polygons;
+                                                return [
+                                                    ...array_map(fn (array $rings): Polygon => Polygon::make($rings)
+                                                        ->fillColor($color)
+                                                        ->fillOpacity(0.3), $mapShapes['areas']),
+                                                    ...array_map(fn (array $points): Polyline => Polyline::make($points)
+                                                        ->color($color)
+                                                        ->weight(5), $mapShapes['lines']),
+                                                ];
                                             }),
                                     ]),
                                 Tab::make('TabImage')

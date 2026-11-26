@@ -23,13 +23,12 @@ territory from the **Territories** tab of a [zone](zones)), or on the **Default 
 
 1. **Zoom in / zoom out**.
 2. **Full screen**: enlarges the map, handy when drawing large territories.
-3. **Draw Polyline**: draws a line (e.g. a street to work; see the note below).
+3. **Draw Polyline**: draws a line (e.g. a street to work).
 4. **Draw Rectangle**: click and drag to draw a rectangle.
 5. **Draw Polygons**: the tool used for most territories (see below).
-6. **Draw Text**: adds a text label on the map.
-7. **Edit Layers**: drag the vertices of the existing shapes to fix them.
-8. **Cut Layers**: draw a shape to cut it out of an existing one (e.g. to exclude a park).
-9. **Remove Layers**: click a shape to delete it.
+6. **Edit Layers**: drag the vertices of the existing shapes to fix them.
+7. **Cut Layers**: draw a shape to cut it out of an existing one (e.g. to exclude a park).
+8. **Remove Layers**: click a shape to delete it.
 
 ## Drawing a polygon
 
@@ -44,10 +43,8 @@ territory from the **Territories** tab of a [zone](zones)), or on the **Default 
 > 💡 **Tip:** zoom in before drawing, so that the vertices follow the streets precisely. You can always fix them later
 > with **Edit Layers**.
 
-> ⚠️ **Warning:** only the areas (polygons and rectangles) are shown outside the territory form and page: on the
-> assignment page, on the public page of a [shared assignment](../assignments/sharing) and on the
-> [dashboard](../basics/dashboard) map. Lines and text labels are saved, but stay visible only in the map of the
-> territory itself, so do not rely on them to give directions to whoever works the territory.
+> ℹ️ **Note:** the areas and the lines are shown wherever the territory is used: on the assignment page, on the public
+> page of a [shared assignment](../assignments/sharing) and on the [dashboard](../basics/dashboard) map.
 
 The drawn shapes are stored in GeoJSON format (shown in the **Geojson** field below the map). Territories with many
 existing maps can also be loaded in one go with the [import](importing), which accepts a GeoJSON column.

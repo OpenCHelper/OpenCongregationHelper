@@ -43,6 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
+  page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown
+  only on the territory's own map. The **Draw Text** tool is removed.
 - **Territories**: **Assign Massively** and **End Assignments** tell how many territories were assigned or returned
   and which were skipped, and why (already assigned, not assigned, not allowed or refused); they were skipped
   silently.
