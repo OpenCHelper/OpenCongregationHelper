@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Support\HttpsCertificate;
+use App\Support\InstallationChecks;
 use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function () {
@@ -122,4 +123,11 @@ test('an HTTPS certificate that cannot be checked is a warning', function () {
     $this->artisan('och:doctor')
         ->expectsOutputToContain('the certificate could not be checked')
         ->assertSuccessful();
+});
+
+test('the PHP extensions required by the packages are checked', function () {
+    expect(InstallationChecks::requiredExtensions())
+        // Required by packages (e.g. lcobucci/jwt, openspout/openspout), not only by the application
+        ->toContain('sodium', 'zip', 'intl', 'pdo')
+        ->not->toContain('xdebug');
 });

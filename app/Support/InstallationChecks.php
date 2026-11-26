@@ -26,7 +26,8 @@ class InstallationChecks
     private ?string $locale = null;
 
     /**
-     * The PHP extensions the application needs (besides the ones PHP always has, e.g. `json`).
+     * The PHP extensions the application always needs, besides the ones its packages require (see
+     * `requiredExtensions()`), e.g. those Laravel uses without declaring them.
      */
     public const REQUIRED_EXTENSIONS = ['ctype', 'curl', 'dom', 'fileinfo', 'intl', 'mbstring', 'openssl', 'pdo', 'tokenizer', 'xml'];
 
@@ -97,8 +98,9 @@ class InstallationChecks
         $this->check('php_version', version_compare(PHP_VERSION, $minimum, '>='), InstallationCheckStatus::Error,
             PHP_VERSION, ['version' => PHP_VERSION, 'minimum' => $minimum]);
 
-        $missing = array_values(array_filter(self::REQUIRED_EXTENSIONS, fn (string $extension): bool => ! extension_loaded($extension)));
-        $this->check('php_extensions', $missing === [], InstallationCheckStatus::Error,
+        $required = self::requiredExtensions();
+        $missing = array_values(array_filter($required, fn (string $extension): bool => ! extension_loaded($extension)));
+        $this->check('php_extensions', $missing === [], InstallationCheckStatus::Error, implode(', ', $required),
             failedReplace: ['extensions' => implode(', ', $missing)]);
 
         $this->checkHttps($url);
@@ -138,6 +140,34 @@ class InstallationChecks
         $expiresAt->isBefore(now()->addDays(self::CERTIFICATE_WARNING_DAYS))
             ? $this->report('https', InstallationCheckStatus::Warning, $this->text('checks.https.expiring', ['date' => $date]))
             : $this->report('https', InstallationCheckStatus::Ok, $this->text('checks.https.valid', ['date' => $date]));
+    }
+
+    /**
+     * The PHP extensions the application needs: those required (`ext-*`) by `composer.json` and by the packages
+     * installed for production (`vendor/composer/installed.json`), besides `REQUIRED_EXTENSIONS`.
+     *
+     * @return list<string>
+     */
+    public static function requiredExtensions(): array
+    {
+        $composer = json_decode((string) @file_get_contents(base_path('composer.json')), true);
+        $installed = json_decode((string) @file_get_contents(base_path('vendor/composer/installed.json')), true);
+
+        $developmentPackages = is_array($installed) ? (array) ($installed['dev-package-names'] ?? []) : [];
+        $packages = is_array($installed) ? (array) ($installed['packages'] ?? $installed) : [];
+
+        $requirements = collect([is_array($composer) ? $composer : [], ...$packages])
+            ->filter(fn (mixed $package): bool => is_array($package) && ! in_array($package['name'] ?? null, $developmentPackages, true))
+            ->flatMap(fn (array $package): array => array_keys((array) ($package['require'] ?? [])));
+
+        return $requirements
+            ->filter(fn (string $requirement): bool => str_starts_with($requirement, 'ext-'))
+            ->map(fn (string $requirement): string => strtolower(substr($requirement, 4)))
+            ->merge(self::REQUIRED_EXTENSIONS)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
     }
 
     /**
