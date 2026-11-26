@@ -532,12 +532,14 @@ class SetupWizard extends Page
             ->schema([
                 Text::make(__('setup.tasks.intro')),
                 $this->environmentField(Select::make('queue_connection')
+                    ->prefixIcon(Heroicon::OutlinedQueueList)
                     ->helperText(__('setup.tasks.queue_helper'))
                     ->options(fn (): array => self::queueOptions())
                     ->live(), 'QUEUE_CONNECTION', required: true),
                 Tabs::make('tasks')
                     ->tabs([
                         Tab::make(__('setup.tasks.with_shell'))
+                            ->icon(Heroicon::OutlinedCommandLine)
                             ->schema([
                                 View::make('filament.setup.tasks-with-shell')
                                     ->viewData(fn (Get $get): array => [
@@ -548,6 +550,7 @@ class SetupWizard extends Page
                                     ]),
                             ]),
                         Tab::make(__('setup.tasks.without_shell'))
+                            ->icon(Heroicon::OutlinedGlobeAlt)
                             ->schema([
                                 View::make('filament.setup.tasks-without-shell')
                                     ->viewData(fn (Get $get): array => [
