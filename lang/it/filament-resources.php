@@ -448,7 +448,7 @@ return [
         'delete_refused_last_super_admin_bulk' => '{1} :count utente non è stato eliminato perché è l\'unico super amministratore che può accedere.|[2,*] :count utenti non sono stati eliminati perché sono gli unici super amministratori che possono accedere.',
         'action_transfer_root' => 'Rendi utente root',
         'transfer_root_heading' => 'Rendi :name l\'utente root',
-        'transfer_root_description' => 'L\'utente root non può essere eliminato, impersonato o modificato dagli altri utenti. :name diventerà l\'utente root al tuo posto: resterai super amministratore, ma perderai queste protezioni. Inserisci la tua password per confermare.',
+        'transfer_root_description' => 'L\'utente root non può essere eliminato o impersonato dagli altri utenti. :name diventerà l\'utente root al tuo posto: resterai super amministratore, ma perderai queste protezioni. Inserisci la tua password per confermare.',
         'transfer_root_password' => 'La tua password',
         'transfer_root_requirements' => 'Solo un super amministratore che può accedere può diventare l\'utente root.',
         'transfer_root_not_in_production' => 'L\'utente root si può cambiare solo in produzione: nelle demo e nelle anteprime resta il primo utente.',

@@ -448,7 +448,7 @@ return [
         'delete_refused_last_super_admin_bulk' => '{1} :count usuario no se eliminó porque es el único superadministrador que puede iniciar sesión.|[2,*] :count usuarios no se eliminaron porque son los únicos superadministradores que pueden iniciar sesión.',
         'action_transfer_root' => 'Convertir en usuario root',
         'transfer_root_heading' => 'Convertir a :name en el usuario root',
-        'transfer_root_description' => 'El usuario root no puede ser eliminado, suplantado ni editado por los demás usuarios. :name se convertirá en el usuario root en tu lugar: seguirás siendo superadministrador, pero perderás estas protecciones. Introduce tu contraseña para confirmar.',
+        'transfer_root_description' => 'El usuario root no puede ser eliminado ni suplantado por los demás usuarios. :name se convertirá en el usuario root en tu lugar: seguirás siendo superadministrador, pero perderás estas protecciones. Introduce tu contraseña para confirmar.',
         'transfer_root_password' => 'Tu contraseña',
         'transfer_root_requirements' => 'Solo un superadministrador que puede iniciar sesión puede convertirse en el usuario root.',
         'transfer_root_not_in_production' => 'El usuario root solo se puede cambiar en producción: en las demos y vistas previas sigue siendo el primer usuario.',

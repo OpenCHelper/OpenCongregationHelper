@@ -57,6 +57,16 @@ test('the root user can hand its role over to another super administrator', func
         ->and($this->rootUser->fresh()->canBeImpersonated())->toBeTrue();
 });
 
+test('in production the root user cannot be deleted or impersonated, as the handover explains', function () {
+    $this->actingAs($this->otherSuperAdmin);
+
+    // In production the other super administrators can edit the root user, but cannot delete or impersonate it
+    expect(UserResource::canEdit($this->rootUser))->toBeTrue()
+        ->and($this->rootUser->canBeDeleted())->toBeFalse()
+        ->and(fn () => $this->rootUser->delete())->toThrow(Exception::class)
+        ->and($this->rootUser->canBeImpersonated())->toBeFalse();
+});
+
 test('a wrong password does not hand the role over', function () {
     $this->actingAs($this->rootUser);
 

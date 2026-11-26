@@ -447,7 +447,7 @@ return [
         'delete_refused_last_super_admin_bulk' => '{1} :count user was not deleted because they are the only super administrator who can log in.|[2,*] :count users were not deleted because they are the only super administrators who can log in.',
         'action_transfer_root' => 'Make root user',
         'transfer_root_heading' => 'Make :name the root user',
-        'transfer_root_description' => 'The root user cannot be deleted, impersonated or edited by the other users. :name will become the root user in your place: you will stay a super administrator, but you will lose these protections. Enter your password to confirm.',
+        'transfer_root_description' => 'The root user cannot be deleted or impersonated by the other users. :name will become the root user in your place: you will stay a super administrator, but you will lose these protections. Enter your password to confirm.',
         'transfer_root_password' => 'Your password',
         'transfer_root_requirements' => 'Only a super administrator who can log in can become the root user.',
         'transfer_root_not_in_production' => 'The root user can be changed only in production: on demos and previews it stays the first user.',
