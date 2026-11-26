@@ -158,6 +158,7 @@ test('the root user gets ID 1 even when the next ID is higher', function () {
 test('the users created after the root user get the next IDs', function () {
     $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
 
-    // An explicit ID does not move the sequence of PostgreSQL on by itself
-    expect(User::factory()->create()->id)->toBe(2);
+    // An explicit ID does not move the sequence of PostgreSQL on by itself: the next user would get ID 1 again (MySQL
+    // does not reuse the IDs of the tests rolled back, so the next one can be any higher ID)
+    expect(User::factory()->create()->id)->toBeGreaterThan(1);
 });
