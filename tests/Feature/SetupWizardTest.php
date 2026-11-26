@@ -12,6 +12,7 @@ use App\Support\HttpsCertificate;
 use App\Support\Installation;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
@@ -546,6 +547,13 @@ test('a password can be generated for the root user', function () {
 
     expect($password)->toHaveLength(20)
         ->and($component->get('data.root_password_confirmation'))->toBe($password);
+
+    // Never in the notification
+    $component->assertNotified(FilamentNotification::make()
+        ->success()
+        ->title(__('setup.root.password_generated'))
+        ->body(__('setup.root.password_generated_body'))
+        ->persistent());
 });
 
 test('reloading the page keeps the values typed and goes on from the last step completed', function () {

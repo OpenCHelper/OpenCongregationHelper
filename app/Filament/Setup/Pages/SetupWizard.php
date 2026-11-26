@@ -1612,7 +1612,7 @@ class SetupWizard extends Page
     }
 
     /**
-     * Fill the password of the root user with a random one, showing it so that it can be saved.
+     * Fill the password of the root user with a random one. The notification never shows it: the eye of the field does.
      */
     protected function generatePassword(Set $set): void
     {
@@ -1624,7 +1624,7 @@ class SetupWizard extends Page
         Notification::make()
             ->success()
             ->title(__('setup.root.password_generated'))
-            ->body(__('setup.root.password_generated_body', ['password' => $password]))
+            ->body(__('setup.root.password_generated_body'))
             ->persistent()
             ->send();
     }

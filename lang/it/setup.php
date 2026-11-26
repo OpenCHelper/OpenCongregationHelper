@@ -145,7 +145,7 @@ return [
         'password_hint_uncompromised' => 'Non deve essere tra le password trapelate online.',
         'generate_password' => 'Genera una password',
         'password_generated' => 'Password generata',
-        'password_generated_body' => 'Salvala ora, es. in un gestore di password: :password',
+        'password_generated_body' => 'Mostrala con l\'occhio del campo e salvala ora, es. in un gestore di password.',
         'password_confirmation' => 'Conferma la password',
         'email_first' => 'Scrivi prima un indirizzo email valido.',
         'test_email_hint' => 'Nessuna email di prova inviata: per richiedere la conferma dell\'email ne serve una.',

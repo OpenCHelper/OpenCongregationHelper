@@ -145,7 +145,7 @@ return [
         'password_hint_uncompromised' => 'No debe estar entre las contraseñas filtradas en internet.',
         'generate_password' => 'Generar una contraseña',
         'password_generated' => 'Contraseña generada',
-        'password_generated_body' => 'Guárdala ahora, p. ej. en un gestor de contraseñas: :password',
+        'password_generated_body' => 'Muéstrala con el ojo del campo y guárdala ahora, p. ej. en un gestor de contraseñas.',
         'password_confirmation' => 'Confirma la contraseña',
         'email_first' => 'Escribe primero una dirección de correo válida.',
         'test_email_hint' => 'Aún no se ha enviado ningún correo de prueba: para exigir la confirmación del correo hace falta uno.',

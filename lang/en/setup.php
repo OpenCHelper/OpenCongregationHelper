@@ -145,7 +145,7 @@ return [
         'password_hint_uncompromised' => 'It must not be among the passwords leaked online.',
         'generate_password' => 'Generate a password',
         'password_generated' => 'Password generated',
-        'password_generated_body' => 'Save it now, e.g. in a password manager: :password',
+        'password_generated_body' => 'Show it with the eye of the field and save it now, e.g. in a password manager.',
         'password_confirmation' => 'Confirm the password',
         'email_first' => 'Type a valid email address first.',
         'test_email_hint' => 'No test email sent yet: requiring the email confirmation needs one.',
