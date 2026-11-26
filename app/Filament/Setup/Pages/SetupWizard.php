@@ -593,14 +593,17 @@ class SetupWizard extends Page
                     ->visible(fn (): bool => self::mailerDoesNotSend())
                     ->columnSpanFull(),
                 TextInput::make('root_first_name')
+                    ->prefixIcon(Heroicon::OutlinedUser)
                     ->label(__('filament-resources.user.field_first_name'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('root_last_name')
+                    ->prefixIcon(Heroicon::OutlinedUser)
                     ->label(__('filament-resources.user.field_last_name'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('root_email')
+                    ->prefixIcon(Heroicon::OutlinedEnvelope)
                     ->label(__('filament-resources.user.field_email'))
                     ->email()
                     ->required()
@@ -608,6 +611,7 @@ class SetupWizard extends Page
                     ->live(onBlur: true)
                     ->columnSpanFull(),
                 TextInput::make('root_password')
+                    ->prefixIcon(Heroicon::OutlinedLockClosed)
                     ->label(__('setup.root.password'))
                     ->password()
                     ->revealable()
@@ -615,6 +619,7 @@ class SetupWizard extends Page
                     ->rule(fn (): Password => Password::default())
                     ->same('root_password_confirmation'),
                 TextInput::make('root_password_confirmation')
+                    ->prefixIcon(Heroicon::OutlinedLockClosed)
                     ->label(__('setup.root.password_confirmation'))
                     ->password()
                     ->revealable()
