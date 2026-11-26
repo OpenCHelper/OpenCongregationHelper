@@ -64,7 +64,7 @@ test('deleting a tag removes it from its territories and zones, which are kept',
 
     Livewire::test(ManageTags::class)
         ->callAction(TestAction::make('delete')->table($this->tag))
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     expect(Tag::find($this->tag->id))->toBeNull()
         ->and($territory->fresh()->tags->pluck('id')->all())->toBe([$this->otherTag->id])
