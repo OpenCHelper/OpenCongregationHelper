@@ -7,8 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Setup wizard**: a new installation can be completed from the browser, protected by a `SETUP_TOKEN`: it checks the
+  server, fills in the missing values of `.env` (testing the database and the emails first, and keeping a copy of the
+  file), shows how to run the scheduled tasks and the queue, creates the database and the root user, and sets the name,
+  logo and colour of the app, its administrators and its features. A summary comes before installing, reloading the
+  page goes on from the last step, and the token is removed from `.env` once installed
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- **Settings**: the name of the app can be changed from the General settings, instead of `APP_NAME` in `.env`
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- `och:doctor` also checks the PHP version and extensions, the HTTPS certificate, the push notifications, the timezone,
+  the two-factor authentication of the root user and a `SETUP_TOKEN` left after the installation
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+
 ### Changed
 
+- The table prefix (`DB_PREFIX`) now applies to every database (MariaDB, PostgreSQL, SQLite and SQL Server too), not
+  only to MySQL ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
 - **Users**: the **Access enabled?** filter of the list is now **Access**, with the options **With access** and
   **Virtual**, and the new **Email verified** and **Two-factor authentication** filters show the users who have (or
   have not) verified their email or set up two-factor authentication; each option shows how many users it matches

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Settings\GeneralSettings;
+use App\Support\Installation;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -22,10 +23,15 @@ class WebManifestController extends Controller
     public const BACKGROUND_COLOR = '#fafaf9';
 
     /**
-     * Get the color of the browser UI around the installed app: the primary color chosen on the Settings page, if any.
+     * Get the color of the browser UI around the installed app: the primary color chosen on the Settings page, if any
+     * (none before the installation, while the settings cannot be read yet).
      */
     public static function themeColor(): string
     {
+        if (Installation::needsSetup()) {
+            return self::THEME_COLOR;
+        }
+
         return app(GeneralSettings::class)->primary_color ?? self::THEME_COLOR;
     }
 

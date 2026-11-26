@@ -13,6 +13,7 @@ use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\Logs;
 use App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired;
 use App\Http\Middleware\EnsureMultiFactorAuthenticationWhenRequired;
+use App\Http\Middleware\RedirectToSetupWizard;
 use App\Livewire\PushNotificationsPrompt;
 use App\Settings\GeneralSettings;
 use App\Support\AppVersions;
@@ -261,6 +262,8 @@ class AppPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                // Until the application is installed, the panel opens the setup wizard
+                RedirectToSetupWizard::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

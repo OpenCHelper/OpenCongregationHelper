@@ -5,6 +5,13 @@ namespace App\Settings;
 class GeneralSettings extends AppSettings
 {
     /**
+     * The name of the application shown to the users (title, top bar, installed app, emails), replacing `APP_NAME` at
+     * runtime (see `AppName`). `APP_NAME` only names the installation (e.g. the session cookie and the cache prefix),
+     * and gives its first value.
+     */
+    public ?string $app_name = null;
+
+    /**
      * The address of the Kingdom Hall of the congregation.
      */
     public ?string $kingdom_hall_address = null;
