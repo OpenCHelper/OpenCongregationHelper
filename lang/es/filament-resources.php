@@ -110,8 +110,8 @@ return [
         'delete_description_unused' => 'Ningún territorio o zona usa esta etiqueta. Esta acción no se puede deshacer.',
         'bulk_delete_description' => 'Estas etiquetas las usan :territories y :zones: al eliminarlas se quitan de ellos. Esta acción no se puede deshacer.',
         'bulk_delete_description_unused' => 'Ningún territorio o zona usa estas etiquetas. Esta acción no se puede deshacer.',
-        'delete_usage_territories' => '{0} ningún territorio|{1} 1 territorio|[2,*] :count territorios',
-        'delete_usage_zones' => '{0} ninguna zona|{1} 1 zona|[2,*] :count zonas',
+        'delete_usage_territories' => '{0} 0 territorios|{1} 1 territorio|[2,*] :count territorios',
+        'delete_usage_zones' => '{0} 0 zonas|{1} 1 zona|[2,*] :count zonas',
     ],
     'territory' => [
         'model_label' => 'territorio',

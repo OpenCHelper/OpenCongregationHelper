@@ -110,8 +110,8 @@ return [
         'delete_description_unused' => 'No territory or zone uses this tag. This cannot be undone.',
         'bulk_delete_description' => 'These tags are used by :territories and :zones: deleting them removes them from those. This cannot be undone.',
         'bulk_delete_description_unused' => 'No territory or zone uses these tags. This cannot be undone.',
-        'delete_usage_territories' => '{0} no territories|{1} 1 territory|[2,*] :count territories',
-        'delete_usage_zones' => '{0} no zones|{1} 1 zone|[2,*] :count zones',
+        'delete_usage_territories' => '{0} 0 territories|{1} 1 territory|[2,*] :count territories',
+        'delete_usage_zones' => '{0} 0 zones|{1} 1 zone|[2,*] :count zones',
     ],
     'territory' => [
         'model_label' => 'territory',

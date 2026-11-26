@@ -110,8 +110,8 @@ return [
         'delete_description_unused' => 'Nessun territorio o zona usa questo tag. L\'operazione non può essere annullata.',
         'bulk_delete_description' => 'Questi tag sono usati da :territories e :zones: eliminandoli vengono tolti da questi. L\'operazione non può essere annullata.',
         'bulk_delete_description_unused' => 'Nessun territorio o zona usa questi tag. L\'operazione non può essere annullata.',
-        'delete_usage_territories' => '{0} nessun territorio|{1} 1 territorio|[2,*] :count territori',
-        'delete_usage_zones' => '{0} nessuna zona|{1} 1 zona|[2,*] :count zone',
+        'delete_usage_territories' => '{0} 0 territori|{1} 1 territorio|[2,*] :count territori',
+        'delete_usage_zones' => '{0} 0 zone|{1} 1 zona|[2,*] :count zone',
     ],
     'territory' => [
         'model_label' => 'territorio',

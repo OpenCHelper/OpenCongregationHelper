@@ -30,13 +30,19 @@ beforeEach(function () {
     $this->otherTag = Tag::findOrCreate('Shops');
 });
 
-test('the usage counts read naturally', function () {
-    app()->setLocale('en');
+test('the usage counts read naturally, also when one of them is zero', function (string $locale, string $expected) {
+    app()->setLocale($locale);
 
-    expect(trans_choice('filament-resources.tag.delete_usage_territories', 0))->toBe('no territories')
-        ->and(trans_choice('filament-resources.tag.delete_usage_territories', 1))->toBe('1 territory')
-        ->and(trans_choice('filament-resources.tag.delete_usage_zones', 3))->toBe('3 zones');
-});
+    expect(__('filament-resources.tag.delete_description', [
+        'territories' => trans_choice('filament-resources.tag.delete_usage_territories', 0),
+        'zones' => trans_choice('filament-resources.tag.delete_usage_zones', 3),
+    ]))->toStartWith($expected)
+        ->and(trans_choice('filament-resources.tag.delete_usage_territories', 1))->not->toContain(':count');
+})->with([
+    'English' => ['en', 'This tag is used by 0 territories and 3 zones:'],
+    'Italian' => ['it', 'Questo tag è usato da 0 territori e 3 zone:'],
+    'Spanish' => ['es', 'Esta etiqueta la usan 0 territorios y 3 zonas:'],
+]);
 
 test('the confirmation of a deletion tells how many territories and zones use the tag', function () {
     Territory::factory()->count(2)->create(['territory_zone_id' => $this->zone->id])
