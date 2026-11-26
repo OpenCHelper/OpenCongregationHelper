@@ -163,6 +163,7 @@ return [
 
     'review' => [
         'intro' => 'Revisa tus elecciones y luego instala. Vuelve a cualquier paso para cambiarlas.',
+        'edit' => 'Editar',
         'test_email' => 'Correo de prueba',
         'test_email_sent' => 'Enviado a :email',
         'test_email_not_sent' => 'No enviado',

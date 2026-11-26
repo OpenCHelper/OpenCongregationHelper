@@ -163,6 +163,7 @@ return [
 
     'review' => [
         'intro' => 'Controlla le tue scelte, poi installa. Torna a un passaggio qualsiasi per cambiarle.',
+        'edit' => 'Modifica',
         'test_email' => 'Email di prova',
         'test_email_sent' => 'Inviata a :email',
         'test_email_not_sent' => 'Non inviata',

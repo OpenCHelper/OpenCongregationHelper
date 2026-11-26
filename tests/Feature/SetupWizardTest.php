@@ -13,6 +13,7 @@ use App\Support\Installation;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
 use Livewire\Livewire;
 
@@ -507,7 +508,9 @@ test('the review step shows the choices before installing', function () {
         ->assertSee(__('setup.review.test_email_not_sent'))
         ->assertSeeHtml('data-enabled="true"')
         // Without a test email, the email confirmation is never required
-        ->assertSeeHtml('data-enabled="false"');
+        ->assertSeeHtml('data-enabled="false"')
+        // The links to edit each group bring back to its step
+        ->assertSeeHtml(e("step: 'form.".Str::slug(__('setup.steps.root.label'))."::data::wizard-step'"));
 });
 
 test('the administrators need a new email address, other than the one of the root user', function () {

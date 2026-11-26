@@ -4,7 +4,17 @@
         <section class="rounded-lg border border-gray-200 dark:border-white/10" data-review-group="{{ $loop->index }}">
             <h3 class="flex items-center gap-2 border-b border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-950 dark:border-white/10 dark:text-white">
                 <x-filament::icon :icon="$group['icon']" class="size-5 text-gray-400 dark:text-gray-500" />
-                {{ $group['title'] }}
+                <span class="flex-1">{{ $group['title'] }}</span>
+                <x-filament::link
+                    tag="button"
+                    type="button"
+                    size="sm"
+                    icon="heroicon-m-pencil-square"
+                    :x-on:click="$group['edit']"
+                    data-edit-step
+                >
+                    {{ __('setup.review.edit') }}
+                </x-filament::link>
             </h3>
             <dl class="divide-y divide-gray-100 dark:divide-white/5">
                 @foreach ($group['items'] as $item)

@@ -893,7 +893,7 @@ class SetupWizard extends Page
     /**
      * What the installation is about to do, grouped by step, for the Review step.
      *
-     * @return list<array{title: string, icon: Heroicon, items: list<array{label: string, value: string, color?: string, enabled?: bool}>}>
+     * @return list<array{title: string, edit: string, icon: Heroicon, items: list<array{label: string, value: string, color?: string, enabled?: bool}>}>
      */
     protected function reviewGroups(): array
     {
@@ -917,11 +917,13 @@ class SetupWizard extends Page
         return [
             [
                 'title' => __('setup.steps.environment.label'),
+                'edit' => self::goToStepHandler('environment'),
                 'icon' => Heroicon::OutlinedCog6Tooth,
                 'items' => $environment(['APP_URL', 'APP_TIMEZONE', 'APP_LOCALE', 'DB_CONNECTION', 'DB_DATABASE', 'MAIL_MAILER', 'MAIL_FROM_ADDRESS', 'QUEUE_CONNECTION']),
             ],
             [
                 'title' => __('setup.steps.root.label'),
+                'edit' => self::goToStepHandler('root'),
                 'icon' => Heroicon::OutlinedUserCircle,
                 'items' => [
                     ['label' => __('filament-resources.user.field_first_name'), 'value' => (string) ($data['root_first_name'] ?? '')],
@@ -934,6 +936,7 @@ class SetupWizard extends Page
             ],
             [
                 'title' => __('setup.steps.congregation.label'),
+                'edit' => self::goToStepHandler('congregation'),
                 'icon' => Heroicon::OutlinedHome,
                 'items' => [
                     ['label' => __('settings.fields.app_name.label'), 'value' => (string) ($data['app_name'] ?? '')],
@@ -943,11 +946,13 @@ class SetupWizard extends Page
             ],
             [
                 'title' => __('setup.steps.administrators.label'),
+                'edit' => self::goToStepHandler('administrators'),
                 'icon' => Heroicon::OutlinedUserGroup,
                 'items' => $administrators ?: [['label' => __('setup.review.none'), 'value' => '']],
             ],
             [
                 'title' => __('setup.steps.features.label'),
+                'edit' => self::goToStepHandler('features'),
                 'icon' => Heroicon::OutlinedAdjustmentsHorizontal,
                 'items' => [
                     ['label' => __('settings.fields.ai_assistants_enabled.label'), ...$toggle('ai_assistants_enabled')],

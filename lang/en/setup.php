@@ -163,6 +163,7 @@ return [
 
     'review' => [
         'intro' => 'Check your choices, then install. Go back to any step to change them.',
+        'edit' => 'Edit',
         'test_email' => 'Test email',
         'test_email_sent' => 'Sent to :email',
         'test_email_not_sent' => 'Not sent',
