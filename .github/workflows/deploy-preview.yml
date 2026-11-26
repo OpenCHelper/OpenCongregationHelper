@@ -472,8 +472,8 @@ jobs:
           INITIAL_ROOT_USERMAIL='${ROOT_EMAIL}'
           INITIAL_ROOT_PASSWORD='${ROOT_PASSWORD}'
           DEMO_PREFILL_LOGIN_CREDENTIALS=true
-          # TEMPORARY (setup wizard): opens the wizard of the uninstalled preview, with the password of the root user
-          SETUP_TOKEN='${ROOT_PASSWORD}'
+          # TEMPORARY (setup wizard): opens the wizard of the uninstalled preview (a public demo with dummy data)
+          SETUP_TOKEN='token'
           EOF
 
           echo "${SHA}" > .git-commit-hash
