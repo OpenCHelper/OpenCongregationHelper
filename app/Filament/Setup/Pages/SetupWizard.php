@@ -647,10 +647,21 @@ class SetupWizard extends Page
             ->icon(Heroicon::OutlinedHome)
             ->columns(['default' => 1, 'md' => 2])
             ->schema([
-                ManageGeneralSettings::appNameField()->columnSpanFull(),
-                ManageGeneralSettings::kingdomHallAddressField()->columnSpanFull(),
-                ManageGeneralSettings::logoField(),
-                ManageGeneralSettings::primaryColorField(),
+                Section::make(__('settings.sections.congregation'))
+                    ->icon(Heroicon::OutlinedHome)
+                    ->columnSpanFull()
+                    ->schema([
+                        ManageGeneralSettings::appNameField()->prefixIcon(Heroicon::OutlinedTag),
+                        ManageGeneralSettings::kingdomHallAddressField(),
+                    ]),
+                Section::make(__('settings.sections.appearance'))
+                    ->icon(Heroicon::OutlinedPaintBrush)
+                    ->columns(['default' => 1, 'md' => 2])
+                    ->columnSpanFull()
+                    ->schema([
+                        ManageGeneralSettings::logoField(),
+                        ManageGeneralSettings::primaryColorField(),
+                    ]),
             ]);
     }
 
@@ -669,14 +680,17 @@ class SetupWizard extends Page
                     ->columns(['default' => 1, 'md' => 3])
                     ->schema([
                         TextInput::make('first_name')
+                            ->prefixIcon(Heroicon::OutlinedUser)
                             ->label(__('filament-resources.user.field_first_name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('last_name')
+                            ->prefixIcon(Heroicon::OutlinedUser)
                             ->label(__('filament-resources.user.field_last_name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('email')
+                            ->prefixIcon(Heroicon::OutlinedEnvelope)
                             ->label(__('filament-resources.user.field_email'))
                             ->email()
                             ->required()
