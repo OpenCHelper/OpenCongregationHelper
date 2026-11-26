@@ -206,7 +206,9 @@ test('only the missing values of .env are asked for and written', function () {
         // The values already set are shown, but cannot be changed (and the passwords are never sent to the browser)
         ->assertFormFieldDisabled('db_database')
         ->assertSchemaStateSet(['db_database' => config('database.connections.'.config('database.default').'.database')], 'form')
-        ->assertFormFieldDisabled('mail_mailer')
+        // The mailer can be changed, even when set
+        ->assertFormFieldEnabled('mail_mailer')
+        ->assertSet('changeableVariables', ['MAIL_MAILER'])
         ->assertSchemaStateSet(['db_password' => null], 'form')
         // Not for the mailer of the tests
         ->assertSchemaComponentHidden('mail_host', 'form')
@@ -224,6 +226,29 @@ test('only the missing values of .env are asked for and written', function () {
     );
 
     $component->assertSet('missingVariables', ['MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD']);
+});
+
+test('the mailer can be changed, among the mailers of the configuration', function () {
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_URL=https://congregation.example.com\nAPP_TIMEZONE=UTC\nAPP_LOCALE=en\nDB_CONNECTION=".config('database.default')."\nDB_HOST=x\nDB_PORT=1\nDB_DATABASE=x\nDB_USERNAME=x\nDB_PASSWORD=x\nMAIL_MAILER=log\nMAIL_FROM_ADDRESS=noreply@example.com\n");
+    unlockSetupWizard();
+
+    expect(array_keys(SetupWizard::mailerOptions()))->toBe(array_keys(config('mail.mailers')));
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm([
+            'mail_mailer' => 'smtp',
+            'mail_host' => 'smtp.example.com',
+            'mail_port' => '587',
+        ])
+        ->assertSchemaComponentVisible('mail_host', 'form')
+        ->goToWizardStep(3)
+        ->assertWizardCurrentStep(3);
+
+    expect(file_get_contents($this->envPath))
+        ->toContain("\nMAIL_MAILER=smtp\n")
+        ->not->toContain('MAIL_MAILER=log')
+        ->toContain("MAIL_HOST=smtp.example.com\nMAIL_PORT=587\n")
+        ->and(config('mail.default'))->toBe('smtp');
 });
 
 test('a database that cannot be reached stops the wizard', function () {

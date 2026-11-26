@@ -91,6 +91,37 @@ class EnvironmentFile
     }
 
     /**
+     * Whether a variable is set by the environment of the server rather than by the file: writing the file would not
+     * change it, as the environment of the server comes first.
+     */
+    public function isSetOutsideFile(string $key): bool
+    {
+        $value = Env::get($key);
+
+        return $value !== null && $value !== '' && ! array_key_exists($key, $this->fileValues());
+    }
+
+    /**
+     * Write the value of a variable, replacing its line when the file has one, otherwise adding it at the end.
+     */
+    public function set(string $key, string $value): void
+    {
+        if (! $this->isWritable()) {
+            throw new RuntimeException("The {$this->path()} file is not writable.");
+        }
+
+        $contents = $this->exists() ? (string) file_get_contents($this->path()) : '';
+        $line = $key.'='.self::quote($value);
+        $existingLine = '/^'.preg_quote($key, '/').'=.*$/m';
+
+        $contents = preg_match($existingLine, $contents)
+            ? (string) preg_replace($existingLine, addcslashes($line, '\\$'), $contents, 1)
+            : rtrim($contents, "\n").($contents === '' ? '' : "\n").$line."\n";
+
+        file_put_contents($this->path(), $contents);
+    }
+
+    /**
      * The values of the variables written in the file.
      *
      * @return array<string, string>

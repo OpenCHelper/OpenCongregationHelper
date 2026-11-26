@@ -41,6 +41,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Notification as Notifications;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\HtmlString;
@@ -101,6 +102,27 @@ class SetupWizard extends Page
     ];
 
     /**
+     * The names of the mailers sending through a service, for the others see `setup.environment.mailers`.
+     *
+     * @var array<string, string>
+     */
+    public const MAILER_NAMES = [
+        'smtp' => 'SMTP',
+        'ses' => 'Amazon SES',
+        'postmark' => 'Postmark',
+        'resend' => 'Resend',
+        'sendmail' => 'Sendmail',
+    ];
+
+    /**
+     * The variables of `.env` that the wizard can also change when they are already set (in `.env`, not in the
+     * environment of the server, which comes first): the mailer, so that the test email can be sent another way.
+     *
+     * @var list<string>
+     */
+    public const CHANGEABLE_VARIABLES = ['MAIL_MAILER'];
+
+    /**
      * The database drivers the wizard offers.
      *
      * @var array<string, string>
@@ -128,6 +150,13 @@ class SetupWizard extends Page
      * @var list<string>
      */
     public array $missingVariables = [];
+
+    /**
+     * The variables already set in `.env` that the Configuration step can change (see `CHANGEABLE_VARIABLES`).
+     *
+     * @var list<string>
+     */
+    public array $changeableVariables = [];
 
     /**
      * The address of the page, used while `APP_URL` is not set.
@@ -164,7 +193,7 @@ class SetupWizard extends Page
     public function mount(): void
     {
         $this->requestRoot = request()->root();
-        $this->missingVariables = app(EnvironmentFile::class)->missing(array_keys(self::ENVIRONMENT_VARIABLES));
+        $this->refreshEnvironmentVariables();
 
         $settingsTimezone = (string) config('app.timezone');
         [$rootFirstName, $rootLastName] = array_pad(explode(' ', (string) config('app.initial_root_user.name'), 2), 2, '');
@@ -426,15 +455,7 @@ class SetupWizard extends Page
                     ->columns(['default' => 1, 'md' => 2])
                     ->schema([
                         $this->environmentField(Select::make('mail_mailer')
-                            ->options(fn (): array => [
-                                'smtp' => 'SMTP',
-                                'sendmail' => 'Sendmail',
-                                'nativemailfx' => __('setup.environment.mail_native'),
-                                'log' => __('setup.environment.mail_log'),
-                            ] + array_filter([
-                                // The mailer already set in `.env` is shown even when the wizard does not offer it
-                                (string) config('mail.default') => (string) config('mail.default'),
-                            ]))
+                            ->options(fn (): array => self::mailerOptions())
                             ->required()
                             ->live(), 'MAIL_MAILER'),
                         $this->environmentField(TextInput::make('mail_from_address')
@@ -630,7 +651,7 @@ class SetupWizard extends Page
      */
     protected function environmentField(TextInput|Select $field, string $variable): TextInput|Select
     {
-        $isMissing = fn (): bool => in_array($variable, $this->missingVariables, true);
+        $isMissing = fn (): bool => $this->isEditableVariable($variable);
 
         $field
             ->label($variable)
@@ -667,7 +688,13 @@ class SetupWizard extends Page
     {
         $isMissing = fn (string $variable): bool => in_array($variable, $this->missingVariables, true);
         $connection = $isMissing('DB_CONNECTION') ? (string) ($this->data['db_connection'] ?? '') : (string) config('database.default');
-        $mailer = $isMissing('MAIL_MAILER') ? (string) ($this->data['mail_mailer'] ?? '') : (string) config('mail.default');
+        $mailer = $this->isEditableVariable('MAIL_MAILER') ? (string) ($this->data['mail_mailer'] ?? '') : (string) config('mail.default');
+
+        // The variables already set that were changed: written over their current value
+        $changedValues = collect(['MAIL_MAILER' => $mailer])
+            ->only($this->changeableVariables)
+            ->reject(fn (string $value, string $variable): bool => $value === '' || $value === (string) config(self::ENVIRONMENT_VARIABLES[$variable]))
+            ->all();
 
         $values = collect([
             'APP_URL' => rtrim((string) ($this->data['app_url'] ?? ''), '/'),
@@ -695,10 +722,14 @@ class SetupWizard extends Page
             ->all();
 
         $this->checkDatabase($connection, $values);
-        $this->applyToConfiguration($values);
+        $this->applyToConfiguration([...$values, ...$changedValues]);
 
         try {
             app(EnvironmentFile::class)->writeMissing($values);
+
+            foreach ($changedValues as $variable => $value) {
+                app(EnvironmentFile::class)->set($variable, $value);
+            }
         } catch (Throwable $exception) {
             $this->stopStep(__('setup.environment.write_failed'), $exception->getMessage());
         }
@@ -709,7 +740,45 @@ class SetupWizard extends Page
         }
 
         Installation::forget();
-        $this->missingVariables = app(EnvironmentFile::class)->missing(array_keys(self::ENVIRONMENT_VARIABLES));
+        $this->refreshEnvironmentVariables();
+    }
+
+    /**
+     * Find the variables of `.env` that the Configuration step asks for, and those it can change.
+     */
+    protected function refreshEnvironmentVariables(): void
+    {
+        $environmentFile = app(EnvironmentFile::class);
+
+        $this->missingVariables = $environmentFile->missing(array_keys(self::ENVIRONMENT_VARIABLES));
+        $this->changeableVariables = array_values(array_filter(
+            self::CHANGEABLE_VARIABLES,
+            fn (string $variable): bool => ! in_array($variable, $this->missingVariables, true) && ! $environmentFile->isSetOutsideFile($variable),
+        ));
+    }
+
+    /**
+     * Whether the Configuration step lets the user type the value of a variable: when it is missing, or can be changed.
+     */
+    protected function isEditableVariable(string $variable): bool
+    {
+        return in_array($variable, $this->missingVariables, true) || in_array($variable, $this->changeableVariables, true);
+    }
+
+    /**
+     * The mailers of the configuration (`config/mail.php`), with a description of the ones not named after a service.
+     *
+     * @return array<string, string>
+     */
+    public static function mailerOptions(): array
+    {
+        return collect(array_keys((array) config('mail.mailers')))
+            ->mapWithKeys(fn (string $mailer): array => [
+                $mailer => Lang::has("setup.environment.mailers.{$mailer}")
+                    ? __("setup.environment.mailers.{$mailer}")
+                    : (self::MAILER_NAMES[$mailer] ?? $mailer),
+            ])
+            ->all();
     }
 
     /**

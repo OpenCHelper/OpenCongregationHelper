@@ -55,3 +55,28 @@ test('a file that cannot be written is reported', function () {
     expect(fn () => (new EnvironmentFile($this->path))->writeMissing(['OCH_TEST_NEW' => 'value']))
         ->toThrow(RuntimeException::class);
 })->skip(fn (): bool => function_exists('posix_getuid') && posix_getuid() === 0, 'The root user can write any file.');
+
+test('a value can be changed in place, or added', function () {
+    file_put_contents($this->path, "OCH_TEST_MAILER=log # comment\nOCH_TEST_OTHER=kept\n");
+    $file = new EnvironmentFile($this->path);
+
+    $file->set('OCH_TEST_MAILER', 'smtp');
+    $file->set('OCH_TEST_NEW', 'with space');
+
+    expect(file_get_contents($this->path))->toBe("OCH_TEST_MAILER=smtp\nOCH_TEST_OTHER=kept\nOCH_TEST_NEW=\"with space\"\n");
+});
+
+test('the variables set by the server, and not by the file, are told apart', function () {
+    file_put_contents($this->path, "OCH_TEST_IN_FILE=value\n");
+    putenv('OCH_TEST_IN_FILE=value');
+    putenv('OCH_TEST_SERVER=value');
+
+    $file = new EnvironmentFile($this->path);
+
+    expect($file->isSetOutsideFile('OCH_TEST_IN_FILE'))->toBeFalse()
+        ->and($file->isSetOutsideFile('OCH_TEST_SERVER'))->toBeTrue()
+        ->and($file->isSetOutsideFile('OCH_TEST_ABSENT'))->toBeFalse();
+
+    putenv('OCH_TEST_IN_FILE');
+    putenv('OCH_TEST_SERVER');
+});
