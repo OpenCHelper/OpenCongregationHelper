@@ -89,8 +89,23 @@ test('the shield seeder creates the permissions of the app panel from another pa
 
     expect(Filament::getCurrentPanel()->getId())->toBe('setup')
         ->and(Permission::pluck('name')->all())->toContain('ViewAny:Territory', 'Update:Department', 'Delete:Role')
-        ->and(Permission::count())->toBe(count(ShieldSeeder::permissionNames()))
         ->and(Permission::pluck('guard_name')->unique()->all())->toBe(['web']);
+
+    Filament::setCurrentPanel('app');
+
+    expect(Permission::count())->toBe(count(ShieldSeeder::permissionNames()));
+});
+
+test('the shield seeder ignores the resources that Shield already read from another panel', function () {
+    Filament::setCurrentPanel('setup');
+
+    // Shield keeps the (empty) resources of the setup panel for the rest of the request
+    expect(FilamentShield::getResources())->toBeEmpty();
+
+    $this->seed(ShieldSeeder::class);
+
+    expect(Permission::pluck('name')->all())->toContain('ViewAny:Territory', 'Update:Department', 'Delete:Role')
+        ->and(FilamentShield::getResources())->toBeEmpty();
 });
 
 test('seeding twice keeps the permissions of the super administrators', function () {

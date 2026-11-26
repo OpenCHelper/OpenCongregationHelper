@@ -7,6 +7,7 @@ use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Once;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
@@ -15,6 +16,7 @@ use Spatie\Permission\PermissionRegistrar;
  *
  * It only adds what is missing, so that `och:install` can run it on every deployment. Shield reads the resources of the
  * current panel, so the `app` panel is made current meanwhile: the setup wizard runs this seeder from its own panel.
+ * Shield keeps what it found with `once()` for the whole request, so that cache is cleared before and after.
  */
 class ShieldSeeder extends Seeder
 {
@@ -22,11 +24,13 @@ class ShieldSeeder extends Seeder
     {
         $currentPanel = Filament::getCurrentPanel();
         Filament::setCurrentPanel('app');
+        Once::flush();
 
         try {
             $this->seedPermissions();
         } finally {
             Filament::setCurrentPanel($currentPanel);
+            Once::flush();
         }
 
         $this->command?->info('Shield Seeding Completed.');
