@@ -84,7 +84,10 @@ return [
             'roundrobin' => 'Round robin: distribuisci le email tra i mailer della configurazione',
             'nativemailfx' => 'Funzione mail() di PHP',
         ],
-        'push' => 'Notifiche push',
+        'keys' => 'Chiavi',
+        'passport_set' => 'Le chiavi degli assistenti IA esistono già.',
+        'passport_created' => 'Le chiavi degli assistenti IA mancano: vengono create proseguendo.',
+        'keys_failed' => 'Non è stato possibile creare le chiavi (`:command`).',
         'push_set' => 'Le chiavi delle notifiche push sono già impostate nel file .env.',
         'push_created' => 'Le chiavi delle notifiche push mancano: vengono create e aggiunte al file .env proseguendo.',
         'push_not_writable' => 'Le chiavi delle notifiche push mancano e il file .env non può essere scritto: creale con `php artisan webpush:vapid`.',
@@ -94,7 +97,7 @@ return [
     ],
 
     'database' => [
-        'intro' => 'Proseguendo vengono create le tabelle del database, i permessi dei ruoli e le chiavi degli assistenti IA. Può richiedere un minuto.',
+        'intro' => 'Proseguendo vengono create le tabelle del database e i permessi dei ruoli. Può richiedere un minuto.',
         'failed' => 'Non è stato possibile preparare il database (`:command`).',
     ],
 

@@ -13,6 +13,7 @@ use App\Support\Installation;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Notification;
+use Laravel\Passport\Passport;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -465,4 +466,23 @@ test('the password of the root user follows the password policy', function () {
         ->fillForm(setupWizardData(['root_password' => 'short', 'root_password_confirmation' => 'short']))
         ->call('complete')
         ->assertHasFormErrors(['root_password']);
+});
+
+test('the keys of the AI assistants are created by the configuration step', function () {
+    $keysPath = sys_get_temp_dir().'/och-setup-keys-'.uniqid();
+    mkdir($keysPath);
+    Passport::loadKeysFrom($keysPath);
+
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->assertSee(__('setup.environment.passport_created'))
+        ->goToWizardStep(3)
+        ->assertWizardCurrentStep(3);
+
+    expect(SetupWizard::hasPassportKeys())->toBeTrue();
+
+    array_map('unlink', glob("{$keysPath}/*"));
+    rmdir($keysPath);
 });

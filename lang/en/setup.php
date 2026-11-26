@@ -84,7 +84,10 @@ return [
             'roundrobin' => 'Round robin: share the emails among the mailers of the configuration',
             'nativemailfx' => 'PHP mail() function',
         ],
-        'push' => 'Push notifications',
+        'keys' => 'Keys',
+        'passport_set' => 'The keys of the AI assistants already exist.',
+        'passport_created' => 'The keys of the AI assistants are missing: they are created when you go on.',
+        'keys_failed' => 'The keys could not be created (`:command`).',
         'push_set' => 'The keys of the push notifications are already set in .env.',
         'push_created' => 'The keys of the push notifications are missing: they are created and added to .env when you go on.',
         'push_not_writable' => 'The keys of the push notifications are missing, and the .env file cannot be written: create them with `php artisan webpush:vapid`.',
@@ -94,7 +97,7 @@ return [
     ],
 
     'database' => [
-        'intro' => 'Going on creates the tables of the database, the permissions of the roles and the keys of the AI assistants. It can take a minute.',
+        'intro' => 'Going on creates the tables of the database and the permissions of the roles. It can take a minute.',
         'failed' => 'The database could not be set up (`:command`).',
     ],
 

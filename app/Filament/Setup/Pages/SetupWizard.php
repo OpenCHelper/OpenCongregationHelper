@@ -50,6 +50,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Passport\Passport;
 use Livewire\Attributes\Computed;
 use Minishlink\WebPush\VAPID;
 use Throwable;
@@ -495,13 +496,16 @@ class SetupWizard extends Page
                             ->revealable()
                             ->visible(fn (Get $get): bool => self::chosenMailer($get) === 'smtp'), 'MAIL_PASSWORD'),
                     ]),
-                Section::make(__('setup.environment.push'))
+                Section::make(__('setup.environment.keys'))
                     ->schema([
                         Text::make(fn (): string => match (true) {
                             ! $this->hasMissingVapidKeys() => __('setup.environment.push_set'),
                             app(EnvironmentFile::class)->isWritable() => __('setup.environment.push_created'),
                             default => __('setup.environment.push_not_writable'),
                         }),
+                        Text::make(fn (): string => self::hasPassportKeys()
+                            ? __('setup.environment.passport_set')
+                            : __('setup.environment.passport_created')),
                     ]),
             ])
             ->afterValidation(function (): void {
@@ -787,14 +791,17 @@ class SetupWizard extends Page
 
         try {
             app(EnvironmentFile::class)->writeMissing($values);
-            $this->createVapidKeys();
 
             foreach ($changedValues as $variable => $value) {
                 app(EnvironmentFile::class)->set($variable, $value);
             }
+
+            $this->createVapidKeys();
         } catch (Throwable $exception) {
             $this->stopStep(__('setup.environment.write_failed'), $exception->getMessage());
         }
+
+        $this->createPassportKeys();
 
         // A cached configuration would hide the new values from the next requests
         if (app()->configurationIsCached()) {
@@ -803,6 +810,32 @@ class SetupWizard extends Page
 
         Installation::forget();
         $this->refreshEnvironmentVariables();
+    }
+
+    /**
+     * Whether the keys signing the tokens of the AI assistants exist.
+     */
+    public static function hasPassportKeys(): bool
+    {
+        return file_exists(Passport::keyPath('oauth-private.key')) && file_exists(Passport::keyPath('oauth-public.key'));
+    }
+
+    /**
+     * Create the keys signing the tokens of the AI assistants, only when missing (as `och:install` does): replacing
+     * them would disconnect every assistant.
+     */
+    protected function createPassportKeys(): void
+    {
+        try {
+            $exitCode = Artisan::call('och:ensure-passport-keys');
+        } catch (Throwable $exception) {
+            report($exception);
+            $exitCode = 1;
+        }
+
+        if ($exitCode !== 0) {
+            $this->stopStep(__('setup.environment.keys_failed', ['command' => 'php artisan och:ensure-passport-keys']), trim(Artisan::output()));
+        }
     }
 
     /**
@@ -938,7 +971,7 @@ class SetupWizard extends Page
     }
 
     /**
-     * Create the tables, the permissions of the roles and the keys of the AI assistants, as `och:install` does.
+     * Create the tables and the permissions of the roles, as `och:install` does.
      */
     protected function setUpDatabase(): void
     {
@@ -949,7 +982,6 @@ class SetupWizard extends Page
         $steps = [
             ['migrate', ['--force' => true]],
             ['db:seed', ['--class' => ShieldSeeder::class, '--force' => true]],
-            ['och:ensure-passport-keys', []],
         ];
 
         foreach ($steps as [$command, $arguments]) {

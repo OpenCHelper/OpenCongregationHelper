@@ -94,8 +94,8 @@ guidata** (`/setup`), che chiede il token e poi:
    compreso: una password lasciata vuota viene mantenuta) e il mailer (`MAIL_MAILER`), che si può cambiare tra quelli
    di `config/mail.php` così che l'email di prova possa essere inviata in un altro modo. I valori con un valore
    predefinito nella configurazione si possono lasciare vuoti. Le chiavi delle [notifiche push](#notifiche-push)
-   vengono create se mancano entrambe;
-3. crea le tabelle del database, i permessi e le chiavi degli [assistenti IA](#assistenti-ia);
+   vengono create se mancano entrambe, e quelle degli [assistenti IA](#assistenti-ia) se mancano;
+3. crea le tabelle del database e i permessi;
 4. crea l'utente root, e può inviargli un'email di prova;
 5. imposta il nome, il logo e il colore dell'app, i suoi amministratori (invitati via email) e le sue funzionalità: gli
    assistenti IA, la condivisione delle assegnazioni e i requisiti degli account. Per richiedere la conferma dell'email
