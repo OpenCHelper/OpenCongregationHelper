@@ -101,7 +101,8 @@ guidata** (`/setup`), che chiede il token e poi:
    serve prima un'email di prova andata a buon fine; richiedendo l'autenticazione a due fattori, l'utente root la
    configura subito dopo l'accesso.
 
-Poi accedi come utente root e rimuovi `SETUP_TOKEN` dal file `.env`. Senza un token, la configurazione guidata spiega
+L'utente root che crea viene anche scritto in `INITIAL_ROOT_*` (sostituendone i valori), per `och:recover-root`. Poi
+accedi come utente root e rimuovi `SETUP_TOKEN` dal file `.env`. Senza un token, la configurazione guidata spiega
 solo come aggiungerne uno, così che nessun altro possa installare l'applicazione prima di te.
 
 ### Dal terminale

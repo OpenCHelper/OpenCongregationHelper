@@ -99,7 +99,8 @@ choice to the `.env` file, then open the application: until it is installed, eve
    needs a test email that went through first; requiring two-factor authentication makes the root user set it up right
    after logging in.
 
-Then log in as the root user and remove `SETUP_TOKEN` from `.env`. Without a token, the wizard only explains how to add
+The root user it creates is also written in `INITIAL_ROOT_*` (replacing their values), for `och:recover-root`. Then
+log in as the root user and remove `SETUP_TOKEN` from `.env`. Without a token, the wizard only explains how to add
 one, so that nobody else can install the application first.
 
 ### From the terminal

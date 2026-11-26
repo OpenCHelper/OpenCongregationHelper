@@ -74,7 +74,8 @@ function completeSetupEnvironmentFile(string $path): void
 
     file_put_contents($path, "SETUP_TOKEN=the-setup-token\n".collect(array_keys(SetupWizard::ENVIRONMENT_VARIABLES))
         ->map(fn (string $variable): string => $variable.'='.($values[$variable] ?? 'set')."\n")
-        ->implode(''));
+        ->implode('')
+        ."INITIAL_ROOT_USERNAME=\"Root User\"\nINITIAL_ROOT_USERMAIL=root@example.com\nINITIAL_ROOT_PASSWORD=old-password\n");
 }
 
 /**
@@ -397,6 +398,8 @@ test('completing the wizard installs the application', function () {
         ->and(app(SecuritySettings::class)->require_email_verification)->toBeTrue()
         ->and(app(TerritorySettings::class)->refresh()->guest_returns)->toBeTrue()
         ->and(file_exists(Installation::markerPath()))->toBeTrue()
+        // The root user just created replaces the one of `.env`
+        ->and(file_get_contents($this->envPath))->toContain("\nINITIAL_ROOT_USERNAME=\"Anna Rossi\"\nINITIAL_ROOT_USERMAIL=anna@example.com\nINITIAL_ROOT_PASSWORD=\"Root-Pass-2026!\"\n")
         ->and(Installation::needsSetup())->toBeFalse();
 
     Notification::assertSentTo($administrator, UserInvitationNotification::class);

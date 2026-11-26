@@ -1019,6 +1019,8 @@ class SetupWizard extends Page
 
         Installation::markInstalled();
 
+        $this->saveInitialRootUser($data);
+
         foreach ($administrators as $administrator) {
             try {
                 UserInvitationNotification::sendTo($administrator);
@@ -1030,6 +1032,41 @@ class SetupWizard extends Page
 
         session()->forget(self::UNLOCKED_SESSION_KEY);
         $this->completed = true;
+    }
+
+    /**
+     * Write the root user in `INITIAL_ROOT_*`, replacing the values of `.env`, so that `och:recover-root` (and the login
+     * pre-filled on the demos) use the account just created. The variables set by the environment of the server are
+     * left as they are, as writing `.env` would not change them.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function saveInitialRootUser(array $data): void
+    {
+        $environmentFile = app(EnvironmentFile::class);
+
+        $values = [
+            'INITIAL_ROOT_USERNAME' => trim($data['root_first_name'].' '.$data['root_last_name']),
+            'INITIAL_ROOT_USERMAIL' => (string) $data['root_email'],
+            'INITIAL_ROOT_PASSWORD' => (string) $data['root_password'],
+        ];
+
+        try {
+            foreach ($values as $variable => $value) {
+                if (! $environmentFile->isSetOutsideFile($variable)) {
+                    $environmentFile->set($variable, $value);
+                }
+            }
+        } catch (Throwable $exception) {
+            // The application is installed all the same: only the recovery of the root user needs them
+            report($exception);
+        }
+
+        config(['app.initial_root_user' => [
+            'name' => $values['INITIAL_ROOT_USERNAME'],
+            'email' => $values['INITIAL_ROOT_USERMAIL'],
+            'password' => $values['INITIAL_ROOT_PASSWORD'],
+        ]]);
     }
 
     /**
