@@ -37,7 +37,8 @@
 #   -b, --base-url <url>                URL of the root of the space (the deployer listens on
 #                                       `/_deployer/<version>/index.php`, installed by this script)
 #   --ftp-hostname, --ftp-username, --ftp-password
-#   --keep <path>                       Path of the live release to keep (repeatable; `deploy` and `activate`)
+#   --keep <path>                       Path (folder or file) of the live release to keep, skipped when missing
+#                                       (repeatable; `deploy` and `activate`)
 #   --reuse <folder>                    Folder of the live release whose entries missing from the new release are
 #                                       moved into it, e.g. `vendor` when the archive carries only its changed parts
 #                                       (repeatable; `deploy` and `activate`)

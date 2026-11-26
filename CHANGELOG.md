@@ -124,6 +124,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the **Map** tab when the territory has a map and on the **Image** tab when it has only an image. The edit page and
   the form opened on the other tab, and the page of a territory with both a map and an image opened on the **Image**
   tab ([#108](https://github.com/OpenCHelper/OpenCongregationHelper/pull/108)).
+- **AI assistants**: the deployments of the environments that keep their database (e.g. TEST) keep the keys signing
+  the tokens of the assistants, which were replaced on every deployment, disconnecting every assistant
+  ([#112](https://github.com/OpenCHelper/OpenCongregationHelper/pull/112)).
 
 ### Security
 
