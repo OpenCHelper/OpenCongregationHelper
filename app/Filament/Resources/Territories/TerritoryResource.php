@@ -608,7 +608,8 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                     //         return $query->withAnyTags($search, TagType::TERRITORIES->value);
                     //     });
                     // })
-                    ->type(TagType::TERRITORIES->value),
+                    ->type(TagType::TERRITORIES->value)
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('filament-resources.territory.column_created_at'))
                     ->dateTime()

@@ -15,7 +15,7 @@ Ogni assegnazione, in corso o riconsegnata, viene conservata. Le trovi:
 ![Elenco delle assegnazioni](/docs/user-documentation/it/assignments/assets/assignments-list.webp)
 
 La tabella mostra il **Territorio**, l'**Assegnatario**, le date **Iniziato il** e **Terminato il** (*(in lavorazione)*
-se non ancora riconsegnato) e la **Campagna**.
+se non ancora riconsegnato) e la **Campagna**, che si può nascondere con il pulsante delle colonne.
 
 ## Assegnazioni di campagne terminate o in scadenza
 

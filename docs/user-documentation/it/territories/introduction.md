@@ -34,7 +34,8 @@ Apri **Territori** dalla barra laterale per vederli tutti.
 | **Tempo assegnazione** | Per un territorio fuori: da quanto tempo è fuori (es. *40 giorni*). Per un territorio disponibile: da quanto è stato riconsegnato (es. *Finito 4 giorni fa*). Un trattino indica che non è mai stato assegnato. |
 | **Tag** | I tag del territorio. |
 
-Le colonne **Commerciale?**, **Creato il** e **Aggiornato il** sono nascoste: mostrale con il pulsante **Colonne**.
+Le colonne **Commerciale?**, **Creato il** e **Aggiornato il** sono nascoste: mostrale con il pulsante **Colonne**, che
+può anche nascondere i **Tag**.
 
 > 💡 **Suggerimento:** ordina per **Tempo assegnazione** per trovare subito i territori fuori da più tempo, oppure
 > quelli che non vengono lavorati da molto.

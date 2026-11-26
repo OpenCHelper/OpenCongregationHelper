@@ -276,6 +276,7 @@ class PublicationSubscriberResource extends Resource implements HasKnowledgeBase
             ->badge(fn (int $state): bool => $state > 0)
             ->color(fn (int $state): string => $state > 0 ? 'info' : 'gray')
             ->alignCenter()
+            ->toggleable()
             ->summarize(Summarizer::make('total')
                 ->label(__('filament-resources.publication_subscriber.summary_total'))
                 ->using(fn (QueryBuilder $query): int => PublicationSubscriber::totals($query->pluck('id'))[$publication->getKey()]['copies'] ?? 0));

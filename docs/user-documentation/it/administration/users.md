@@ -11,8 +11,8 @@ Apri **Amministrazione → Utenti** per gestire le persone registrate nell'appli
 
 La tabella mostra nome, email, **Reparti** e se l'utente può accedere (**Accesso abilitato**: una chiave verde per gli
 utenti con accesso, grigia per gli utenti virtuali). Dal pulsante delle colonne accanto ai filtri puoi mostrare anche il
-**Ruolo**, se l'email è stata verificata e se l'utente ha attivato l'autenticazione a due fattori, oppure nascondere la
-colonna dell'accesso.
+**Ruolo**, se l'email è stata verificata e se l'utente ha attivato l'autenticazione a due fattori, oppure nascondere le
+colonne dell'email e dell'accesso.
 
 Sul telefono, ogni utente è mostrato come una scheda con immagine, nome, email e accesso, più le colonne scelte con il
 pulsante delle colonne; l'elenco si può ordinare dal menu **Ordina per**.

@@ -175,10 +175,12 @@ class CampaignResource extends Resource
                     ->color(fn (Campaign $record): string => CampaignStatus::fromCampaign($record)->getColor()),
                 TextColumn::make('short_name')
                     ->label(__('filament-resources.campaign.column_short_name'))
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('creator.full_name')
                     ->label(__('filament-resources.campaign.column_creator'))
-                    ->sortable(['first_name', 'last_name']),
+                    ->sortable(['first_name', 'last_name'])
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('description')
                     ->label(__('filament-resources.campaign.column_description'))
                     ->searchable()

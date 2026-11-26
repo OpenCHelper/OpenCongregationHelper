@@ -205,7 +205,8 @@ class UserResource extends Resource
                     ->icon(Heroicon::Envelope)
                     ->fontFamily(FontFamily::Mono)
                     ->searchable()
-                    ->visibleFrom('sm'),
+                    ->visibleFrom('sm')
+                    ->toggleable(),
                 TextColumn::make('roles.name')
                     ->label(__('filament-resources.user.column_role'))
                     ->badge()

@@ -12,7 +12,8 @@ automaticamente ogni periodo (es. ogni mese), e ogni richiesta resta nello stori
 ![Pubblicazioni periodiche](/docs/user-documentation/it/publications/assets/periodicals.webp)
 
 C'è una riga per ogni proclamatore e una colonna per ogni pubblicazione (**—** se non la riceve), raggruppate per
-categoria. I riquadri in alto e la riga **Riepilogo** in fondo mostrano il **totale delle copie da ordinare** di ogni
+categoria; nascondi quelle che non ti servono con il pulsante delle colonne. I riquadri in alto e la riga **Riepilogo**
+in fondo mostrano il **totale delle copie da ordinare** di ogni
 pubblicazione e quanti proclamatori la ricevono. Usa il filtro **Riceve** per vedere solo chi riceve una pubblicazione:
 i totali seguono i filtri e la ricerca.
 

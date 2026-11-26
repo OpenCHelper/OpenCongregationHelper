@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **User guide**: every page now matches what the app does, e.g. the import columns, the deletion rules of territories
   and zones, the map drawings that publishers don't see, return requests, the sidebar, notifications, two-factor setup
   and the settings reserved to super administrators.
+- **Tables**: more secondary columns can be hidden from the columns button, such as the publications of the
+  subscribers, the tags of territories and zones, the campaign of the assignments and the email of the users; the
+  creator of the campaigns and the guard and last update of the roles are now hidden by default
+  ([#96](https://github.com/OpenCHelper/OpenCongregationHelper/pull/96)).
 - **Welcome page**: lists notifications, publications and public witnessing among the features, and no longer mentions
   teams, which the app doesn't have.
 - **Shared assignment page**: no sidebar any more, the assignment dates are shown in the language of the page and in
@@ -116,8 +120,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   production only), wherever they are chosen: invitation, password reset, profile, and `och:install` and
   `och:recover-root`, including `INITIAL_ROOT_PASSWORD`
   ([#80](https://github.com/OpenCHelper/OpenCongregationHelper/pull/80)).
-- Updated the libraries used for passkeys and for CSV imports and exports, which had known vulnerabilities (forged
-  passkey attestations, and memory exhaustion while reading a crafted CSV file).
+- Updated the libraries used for passkeys, CSV imports and exports, emails, HTML sanitizing and URL generation, which
+  had known vulnerabilities (e.g. forged passkey attestations, memory exhaustion while reading a crafted CSV file, a
+  man in the middle bypassing the TLS required to send emails, and generated URLs pointing to another host).
 - **Login**: after 10 failed attempts for the same email (wrong password or two-factor code) the login with that email
   is blocked for 15 minutes, whatever the device or network it comes from: changing the IP address on each attempt no
   longer allows guessing a password indefinitely. The new `TRUSTED_PROXIES` setting lists the addresses of the proxies
