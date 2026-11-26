@@ -46,8 +46,7 @@ territorio:
 
 > ℹ️ **Nota:** le aree e le linee vengono mostrate ovunque il territorio viene usato: nella pagina dell'assegnazione,
 > nella pagina pubblica di un'[assegnazione condivisa](../assignments/sharing) e nella mappa della
-> [dashboard](../basics/dashboard). I testi disegnati con le versioni precedenti si vedono solo nella mappa del
-> territorio stesso: eliminali con **Remove Layers** e scrivi le indicazioni nelle **Note**.
+> [dashboard](../basics/dashboard).
 
 Le forme disegnate vengono salvate in formato GeoJSON (mostrato nel campo **Geojson** sotto la mappa). Se hai molte
 mappe già pronte, puoi caricarle tutte insieme con l'[importazione](importing), che accetta una colonna GeoJSON.

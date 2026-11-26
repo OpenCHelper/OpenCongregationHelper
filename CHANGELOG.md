@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
   page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown
-  only on the territory's own map. The **Draw Text** tool is removed, since its labels could not be shown there either.
+  only on the territory's own map. The **Draw Text** tool is removed.
 - **Users**: a user who has assignments can no longer be deleted, from their page, the bulk action or their profile:
   it permanently deleted the history of every territory they had (dates, coverage, campaigns) and freed their
   territories in progress. The delete modal explains why and offers to disable their access instead, making them a

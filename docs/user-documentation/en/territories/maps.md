@@ -44,9 +44,7 @@ territory from the **Territories** tab of a [zone](zones)), or on the **Default 
 > with **Edit Layers**.
 
 > ℹ️ **Note:** the areas and the lines are shown wherever the territory is used: on the assignment page, on the public
-> page of a [shared assignment](../assignments/sharing) and on the [dashboard](../basics/dashboard) map. Text labels
-> drawn with earlier versions are shown only in the map of the territory itself: remove them with **Remove Layers**,
-> and write the directions in the **Notes** instead.
+> page of a [shared assignment](../assignments/sharing) and on the [dashboard](../basics/dashboard) map.
 
 The drawn shapes are stored in GeoJSON format (shown in the **Geojson** field below the map). Territories with many
 existing maps can also be loaded in one go with the [import](importing), which accepts a GeoJSON column.
