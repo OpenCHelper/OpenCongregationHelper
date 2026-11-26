@@ -13,6 +13,9 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 
 ![Impostazioni generali](/docs/user-documentation/it/administration/assets/settings-general.webp)
 
+- **Nome dell'app**: mostrato nella scheda del browser, nella barra in alto (quando non c'è un logo), sull'[app
+  installata](../basics/interface#installare-lapp) e nelle email. Parte da `APP_NAME`, che continua a identificare
+  l'installazione sul server;
 - **Indirizzo della Sala del Regno**: l'indirizzo della Sala del Regno della congregazione (facoltativo);
 - **Logo**: mostrato nella barra in alto al posto del nome (al massimo 2 MB);
 - **Colore principale**: il colore dei pulsanti, dei link e degli elementi selezionati, per gli utenti che non ne hanno

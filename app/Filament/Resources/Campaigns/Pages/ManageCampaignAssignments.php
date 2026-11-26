@@ -11,8 +11,6 @@ use Exception;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -231,8 +229,7 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                         ->deselectRecordsAfterCompletion(),
 
                     // Keep existing bulk actions from TerritoryAssignmentResource
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
+                    ...TerritoryAssignmentResource::getBulkDeletionActions(),
                     RestoreBulkAction::make(),
                 ]),
             ]);

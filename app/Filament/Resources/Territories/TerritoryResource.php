@@ -164,6 +164,21 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
         return $record instanceof Territory && $record->territory_zone_id !== null ? (int) $record->territory_zone_id : null;
     }
 
+    /**
+     * Get the Map/Image tab the form opens on: the Map tab, unless the territory has only an image.
+     *
+     * Filament numbers the visible tabs from 1. The Map tab comes first, but the view page hides it
+     * when the territory has no map, which leaves the Image tab as the first one.
+     */
+    public static function getMapImageActiveTab(?Territory $record, ?string $operation): int
+    {
+        if (filled($record?->geojson) || blank($record?->image_path)) {
+            return 1;
+        }
+
+        return $operation === 'view' ? 1 : 2;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -207,6 +222,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                             ->onIcon(Heroicon::OutlinedBuildingStorefront)
                             ->offIcon(Heroicon::OutlinedHome),
                         Tabs::make('Tabs')
+                            ->key('mapImageTabs', isInheritable: false)
                             ->columnSpanFull()
                             // ->contained(false)
                             ->hidden(fn (?Territory $record) => $schema->getOperation() === 'view' && is_null($record?->geojson) && is_null($record?->image_path))
@@ -385,9 +401,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ]),
                                     ]),
                             ])
-                            ->activeTab(function (?Model $record) {
-                                return $record?->geojson ? 2 : 1;
-                            }),
+                            ->activeTab(fn (?Territory $record): int => static::getMapImageActiveTab($record, $schema->getOperation())),
                     ]),
                 Section::make(__('filament-resources.territory.section_additional_info'))
                     ->description(__('filament-resources.territory.section_additional_info_description'))

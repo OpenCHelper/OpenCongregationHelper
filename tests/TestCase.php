@@ -21,6 +21,12 @@ abstract class TestCase extends BaseTestCase
         Fortify::$registersRoutes = true;
         Jetstream::$registersRoutes = true;
 
-        return parent::createApplication();
+        $app = parent::createApplication();
+
+        // Each process of the parallel tests has its own marker of the installation, which `och:install` writes: a shared
+        // one would make the setup wizard of the other processes disappear (and the one of the checkout too)
+        $app['config']->set('app.setup.marker', sys_get_temp_dir().'/och-installed-'.getmypid());
+
+        return $app;
     }
 }

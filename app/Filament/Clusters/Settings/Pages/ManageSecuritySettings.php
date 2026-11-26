@@ -41,20 +41,8 @@ class ManageSecuritySettings extends AppSettingsPage
                     ->description(__('settings.sections.account_requirements_description'))
                     ->columnSpanFull()
                     ->schema([
-                        Toggle::make('require_two_factor')
-                            ->label(__('settings.fields.require_two_factor.label'))
-                            ->helperText(__('settings.fields.require_two_factor.helper'))
-                            ->rule($this->rootUserMustMeet(
-                                fn (User $root): bool => $root->hasTwoFactorAuthentication(),
-                                __('settings.fields.require_two_factor.root_required'),
-                            )),
-                        Toggle::make('require_email_verification')
-                            ->label(__('settings.fields.require_email_verification.label'))
-                            ->helperText(__('settings.fields.require_email_verification.helper'))
-                            ->rule($this->rootUserMustMeet(
-                                fn (User $root): bool => $root->hasVerifiedEmail(),
-                                __('settings.fields.require_email_verification.root_required'),
-                            )),
+                        self::requireTwoFactorField(),
+                        self::requireEmailVerificationField(),
                     ]),
                 Section::make(__('settings.sections.passwords'))
                     ->description(__('settings.sections.passwords_description'))
@@ -70,11 +58,41 @@ class ManageSecuritySettings extends AppSettingsPage
                     ->description(__('settings.sections.ai_assistants_description'))
                     ->columnSpanFull()
                     ->schema([
-                        Toggle::make('ai_assistants_enabled')
-                            ->label(__('settings.fields.ai_assistants_enabled.label'))
-                            ->helperText(__('settings.fields.ai_assistants_enabled.helper')),
+                        self::aiAssistantsEnabledField(),
                     ]),
             ]);
+    }
+
+    /**
+     * The fields below are shared with the first-run setup wizard (`SetupWizard`).
+     */
+    public static function requireTwoFactorField(): Toggle
+    {
+        return Toggle::make('require_two_factor')
+            ->label(__('settings.fields.require_two_factor.label'))
+            ->helperText(__('settings.fields.require_two_factor.helper'))
+            ->rule(self::rootUserMustMeet(
+                fn (User $root): bool => $root->hasTwoFactorAuthentication(),
+                __('settings.fields.require_two_factor.root_required'),
+            ));
+    }
+
+    public static function requireEmailVerificationField(): Toggle
+    {
+        return Toggle::make('require_email_verification')
+            ->label(__('settings.fields.require_email_verification.label'))
+            ->helperText(__('settings.fields.require_email_verification.helper'))
+            ->rule(self::rootUserMustMeet(
+                fn (User $root): bool => $root->hasVerifiedEmail(),
+                __('settings.fields.require_email_verification.root_required'),
+            ));
+    }
+
+    public static function aiAssistantsEnabledField(): Toggle
+    {
+        return Toggle::make('ai_assistants_enabled')
+            ->label(__('settings.fields.ai_assistants_enabled.label'))
+            ->helperText(__('settings.fields.ai_assistants_enabled.helper'));
     }
 
     /**
@@ -93,7 +111,7 @@ class ManageSecuritySettings extends AppSettingsPage
      *
      * @param  Closure(User): bool  $isMetByRootUser
      */
-    protected function rootUserMustMeet(Closure $isMetByRootUser, string $message): Closure
+    protected static function rootUserMustMeet(Closure $isMetByRootUser, string $message): Closure
     {
         return fn (): Closure => function (string $attribute, mixed $value, Closure $fail) use ($isMetByRootUser, $message): void {
             if (! $value) {

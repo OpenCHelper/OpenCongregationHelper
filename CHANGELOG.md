@@ -7,8 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Setup wizard**: a new installation can be completed from the browser, protected by a `SETUP_TOKEN`: it checks the
+  server, fills in the missing values of `.env` (testing the database and the emails first, and keeping a copy of the
+  file), shows how to run the scheduled tasks and the queue, creates the database and the root user, and sets the name,
+  logo and colour of the app, its administrators and its features. A summary comes before installing, reloading the
+  page goes on from the last step, and the token is removed from `.env` once installed
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- **Settings**: the name of the app can be changed from the General settings, instead of `APP_NAME` in `.env`
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- `och:doctor` also checks the PHP version and extensions, the HTTPS certificate, the push notifications, the timezone,
+  the two-factor authentication of the root user and a `SETUP_TOKEN` left after the installation
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+
 ### Changed
 
+- The table prefix (`DB_PREFIX`) now applies to every database (MariaDB, PostgreSQL, SQLite and SQL Server too), not
+  only to MySQL ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
 - **Users**: the **Access enabled?** filter of the list is now **Access**, with the options **With access** and
   **Virtual**, and the new **Email verified** and **Two-factor authentication** filters show the users who have (or
   have not) verified their email or set up two-factor authentication; each option shows how many users it matches
@@ -35,6 +51,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the timezone of the congregation, and each section has its own description. The page of an assignment in the app
   shows the start and end dates the same way, and the same section descriptions
   ([#86](https://github.com/OpenCHelper/OpenCongregationHelper/pull/86)).
+- **Assignments**: **End Assignment** returns a territory from the rows of the assignments in progress (also in the
+  assignment history of a territory, a user or a campaign) and from the top of the page of an assignment, instead of
+  editing its end date. On the rows, **Edit**, **Delete**, **Force delete** and **Restore** move to the **⋮** menu.
+  Deleting an assignment now explains that it leaves the history and the statistics of the territory, and that
+  permanently deleting it cannot be undone ([#110](https://github.com/OpenCHelper/OpenCongregationHelper/pull/110)).
 
 ### Removed
 
@@ -105,6 +126,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Notifications**: recording an assignment that is already returned no longer notifies it as assigned, correcting the
   date of a return no longer notifies it again, and virtual users no longer receive assignment or return request
   notifications ([#74](https://github.com/OpenCHelper/OpenCongregationHelper/pull/74)).
+- **Territories**: the page of a territory, its edit page and its form in the **Territories** tab of a zone open on
+  the **Map** tab when the territory has a map and on the **Image** tab when it has only an image. The edit page and
+  the form opened on the other tab, and the page of a territory with both a map and an image opened on the **Image**
+  tab ([#108](https://github.com/OpenCHelper/OpenCongregationHelper/pull/108)).
 
 ### Security
 
@@ -136,6 +161,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   still block the sign-in with it for up to 15 minutes at a time. The new `TRUSTED_PROXIES` setting lists the addresses
   of the proxies in front of the app (by default `*`, any address, as Altervista needs): set it to the address of your
   proxy, or leave it empty if there is none, so that visitors can no longer pass themselves off as another IP address.
+- **Users**: outside of the production environment, the other users, super administrators included, can no longer
+  edit the root user by opening its edit page from the address bar (e.g. `/app/users/1/edit`): only the root user can
+  edit itself, as its disabled **Edit** button already said.
 
 ## [1.0.0-alpha15] - 2026-11-24
 
