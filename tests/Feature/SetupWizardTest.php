@@ -449,7 +449,8 @@ test('completing the wizard installs the application', function () {
         ->and(file_get_contents($this->envPath))->toContain("\nINITIAL_ROOT_USERNAME=\"Anna Rossi\"\nINITIAL_ROOT_USERMAIL=anna@example.com\nINITIAL_ROOT_PASSWORD=\"Root-Pass-2026!\"\n")
         ->and(Installation::needsSetup())->toBeFalse()
         // The setup token is no longer used
-        ->and(file_get_contents($this->envPath))->not->toContain('SETUP_TOKEN');
+        ->and(file_get_contents($this->envPath))->not->toContain('SETUP_TOKEN')
+        ->and(session()->has(SetupWizard::PROGRESS_SESSION_KEY))->toBeFalse();
 
     Notification::assertSentTo($administrator, UserInvitationNotification::class);
 });
@@ -489,6 +490,30 @@ test('a password can be generated for the root user', function () {
 
     expect($password)->toHaveLength(20)
         ->and($component->get('data.root_password_confirmation'))->toBe($password);
+});
+
+test('reloading the page keeps the values typed and goes on from the last step completed', function () {
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm([
+            'root_first_name' => 'Anna',
+            'root_password' => 'Root-Pass-2026!',
+            'app_name' => 'Congregation North',
+        ])
+        ->goToWizardStep(2)
+        ->assertWizardCurrentStep(2);
+
+    expect(session(SetupWizard::PROGRESS_SESSION_KEY.'.step'))->toBe(1);
+
+    Livewire::test(SetupWizard::class)
+        ->assertWizardCurrentStep(2)
+        ->assertSchemaStateSet([
+            'root_first_name' => 'Anna',
+            'app_name' => 'Congregation North',
+            // The passwords are never kept
+            'root_password' => null,
+        ], 'form');
 });
 
 test('the review step shows the choices before installing', function () {

@@ -106,6 +106,8 @@ guidata** (`/setup`), che chiede il token e poi:
    configura subito dopo l'accesso;
 7. mostra un riepilogo delle scelte prima di installare.
 
+Ricaricando la pagina si riprende dall'ultimo passaggio completato, con i valori inseriti finora (tranne le password).
+
 L'utente root che crea viene anche scritto in `INITIAL_ROOT_*` (sostituendone i valori), per `och:recover-root`, e
 `SETUP_TOKEN` viene rimosso dal file `.env` (rimuovilo tu se lo imposta il server, o se il file non è scrivibile).
 Poi accedi come utente root. Senza un token, la configurazione guidata spiega

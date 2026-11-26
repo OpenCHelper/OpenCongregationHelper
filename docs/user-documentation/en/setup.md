@@ -105,6 +105,8 @@ choice to the `.env` file, then open the application: until it is installed, eve
    after logging in;
 7. shows a summary of the choices before installing.
 
+Reloading the page goes on from the last step completed, with the values typed so far (except the passwords).
+
 The root user it creates is also written in `INITIAL_ROOT_*` (replacing their values), for `och:recover-root`, and
 `SETUP_TOKEN` is removed from `.env` (remove it yourself if the server sets it, or if the file cannot be written).
 Then log in as the root user. Without a token, the wizard only explains how to add

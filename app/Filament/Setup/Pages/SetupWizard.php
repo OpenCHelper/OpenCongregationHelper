@@ -15,6 +15,7 @@ use App\Support\EnvironmentFile;
 use App\Support\Installation;
 use App\Support\InstallationChecks;
 use BezhanSalleh\FilamentShield\Support\Utils;
+use Closure;
 use Database\Seeders\ShieldSeeder;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -45,6 +46,7 @@ use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
@@ -86,12 +88,23 @@ class SetupWizard extends Page
         return '/';
     }
 
-    protected Width|string|null $maxContentWidth = Width::FiveExtraLarge;
+    protected Width|string|null $maxContentWidth = Width::SevenExtraLarge;
 
     /**
      * Session key of the hash of the token with which the wizard was opened.
      */
     public const UNLOCKED_SESSION_KEY = 'setup_wizard.unlocked';
+
+    /**
+     * Session key of the progress of the wizard (the last step completed, the values typed and the test email), so that
+     * reloading the page goes on from where it was.
+     */
+    public const PROGRESS_SESSION_KEY = 'setup_wizard.progress';
+
+    /**
+     * The fields never kept in the session: the passwords, and the uploads (only valid during the request).
+     */
+    public const NOT_REMEMBERED_FIELDS = ['root_password', 'root_password_confirmation', 'db_password', 'mail_password', 'logo'];
 
     /**
      * Attempts allowed per minute at typing the token, from the same address.
@@ -290,8 +303,45 @@ class SetupWizard extends Page
             'guest_returns' => (bool) TerritorySettings::configuredValue('guest_returns'),
             'require_two_factor' => false,
             'require_email_verification' => false,
+            ...(array) session(self::PROGRESS_SESSION_KEY.'.data', []),
             ...$this->configuredEnvironmentValues(),
         ]);
+
+        $this->testEmailSentTo = session(self::PROGRESS_SESSION_KEY.'.test_email');
+    }
+
+    /**
+     * Keep the values typed so far, so that reloading the page does not lose them.
+     */
+    public function updatedData(): void
+    {
+        $this->rememberProgress();
+    }
+
+    /**
+     * Keep the progress of the wizard in the session: the values typed (except `NOT_REMEMBERED_FIELDS`), the test email
+     * and, when given, the last step completed.
+     */
+    protected function rememberProgress(?int $completedStep = null): void
+    {
+        if (! $this->isUnlocked()) {
+            return;
+        }
+
+        session()->put(self::PROGRESS_SESSION_KEY.'.data', Arr::except($this->data ?? [], self::NOT_REMEMBERED_FIELDS));
+        session()->put(self::PROGRESS_SESSION_KEY.'.test_email', $this->testEmailSentTo);
+
+        if ($completedStep !== null) {
+            session()->put(self::PROGRESS_SESSION_KEY.'.step', max($completedStep, (int) session(self::PROGRESS_SESSION_KEY.'.step', 0)));
+        }
+    }
+
+    /**
+     * The step to open: the one after the last step completed (each step can be done again from there, going back).
+     */
+    protected function startStep(int $steps): int
+    {
+        return min((int) session(self::PROGRESS_SESSION_KEY.'.step', 0) + 1, $steps);
     }
 
     /**
@@ -456,7 +506,7 @@ class SetupWizard extends Page
         return $schema
             ->statePath('data')
             ->components([
-                Wizard::make($this->numberedSteps([
+                Wizard::make($steps = $this->numberedSteps([
                     $this->requirementsStep(),
                     $this->environmentStep(),
                     $this->tasksStep(),
@@ -467,6 +517,7 @@ class SetupWizard extends Page
                     $this->featuresStep(),
                     $this->reviewStep(),
                 ]))
+                    ->startOnStep(fn (): int => $this->startStep(count($steps)))
                     // Only the current step shows its label on wide screens, the others on hover (see
                     // `resources/css/app.css`). The timezone of the browser is the default of APP_TIMEZONE.
                     ->extraAttributes([
@@ -490,6 +541,17 @@ class SetupWizard extends Page
     {
         foreach ($steps as $index => $step) {
             $step->description(__('setup.steps.counter', ['step' => $index + 1, 'total' => count($steps)]).' · '.$step->getDescription());
+
+            // After its own work (if any), the step is remembered as completed
+            $afterValidation = (fn (): ?Closure => $this->afterValidation)->call($step);
+
+            $step->afterValidation(function () use ($step, $afterValidation, $index): void {
+                if ($afterValidation !== null) {
+                    $step->evaluate($afterValidation);
+                }
+
+                $this->rememberProgress(completedStep: $index + 1);
+            });
         }
 
         return $steps;
@@ -1516,6 +1578,7 @@ class SetupWizard extends Page
         }
 
         $this->testEmailSentTo = $email;
+        $this->rememberProgress();
 
         Notification::make()
             ->success()
@@ -1607,7 +1670,7 @@ class SetupWizard extends Page
             }
         }
 
-        session()->forget(self::UNLOCKED_SESSION_KEY);
+        session()->forget([self::UNLOCKED_SESSION_KEY, self::PROGRESS_SESSION_KEY]);
 
         $failedInvitations = count($administrators) - $invitedAdministrators;
 
