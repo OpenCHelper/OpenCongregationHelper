@@ -16,6 +16,7 @@ use App\Support\AppName;
 use App\Support\EnvironmentFile;
 use App\Support\Installation;
 use App\Support\UserLocale;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonInterval;
@@ -195,10 +196,27 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureSetup();
 
+        $this->protectSuperAdminRole();
+
         // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
         ExportColumn::configureUsing(function (ExportColumn $column): void {
             $column->preventFormulaInjection();
         });
+    }
+
+    /**
+     * The super admin role cannot be deleted, renamed or moved to another guard, from wherever (e.g. the Delete button
+     * of the role's edit page, which comes from Shield): there must always be a super administrator to manage the
+     * application.
+     */
+    private function protectSuperAdminRole(): void
+    {
+        /** @var class-string<Model> $roleModel */
+        $roleModel = Utils::getRoleModel();
+        $isSuperAdminRole = fn (Model $role): bool => $role->getOriginal('name') === Utils::getSuperAdminName();
+
+        $roleModel::deleting(fn (Model $role): ?bool => $isSuperAdminRole($role) ? false : null);
+        $roleModel::updating(fn (Model $role): ?bool => $isSuperAdminRole($role) && $role->isDirty(['name', 'guard_name']) ? false : null);
     }
 
     /**

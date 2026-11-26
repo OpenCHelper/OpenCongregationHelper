@@ -106,4 +106,4 @@ Elimina definitivamente il tuo account. L'operazione non può essere annullata.
 Se ti sono stati assegnati dei territori, il tuo account non può essere eliminato: con esso andrebbe persa la loro
 storia. Chiedi invece a un amministratore di disabilitare il tuo accesso.
 
-> ⚠️ **Attenzione:** l'utente root (il primo utente creato durante l'installazione) non può mai essere eliminato.
+> ⚠️ **Attenzione:** l'utente root (il primo utente creato durante l'installazione, se non ha ceduto il ruolo) non può mai essere eliminato.

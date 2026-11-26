@@ -16,7 +16,9 @@ beforeEach(function () {
 
     $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
 
-    // A root user locked out in production: no login, no role, two-factor authentication on, another password
+    // A root user locked out in production: no login, no role, two-factor authentication on, another password. The
+    // application refuses to disable the access of the last super administrator, so this happens outside of it (e.g.
+    // a change in the database, or an older version): saved without the observer's guard
     $this->app->detectEnvironment(fn () => 'production');
     User::rootUser()->forceFill([
         'password' => 'lost-password',
@@ -24,7 +26,7 @@ beforeEach(function () {
         'email_verified_at' => null,
         'app_authentication_secret' => 'secret',
         'app_authentication_recovery_codes' => ['code'],
-    ])->save();
+    ])->saveQuietly();
     User::rootUser()->removeRole('super_admin');
     $this->app->detectEnvironment(fn () => 'testing');
 

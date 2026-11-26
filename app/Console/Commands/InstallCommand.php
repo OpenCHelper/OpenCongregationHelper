@@ -55,7 +55,7 @@ class InstallCommand extends Command
         $root = User::rootUser();
 
         if ($root === null) {
-            $this->components->warn('There is no root user (ID 1): no user was given the super admin role.');
+            $this->components->warn('There is no root user: no user was given the super admin role.');
 
             return;
         }

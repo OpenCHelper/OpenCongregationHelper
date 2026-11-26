@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Users**: in production, the root user can hand its role over to another super administrator who can log in, with
+  **Make root user** on their page after confirming its password; the former root user stays a super administrator,
+  and the protections of the root user move to the new one
+  ([#113](https://github.com/OpenCHelper/OpenCongregationHelper/pull/113)).
 - **Setup wizard**: a new installation can be completed from the browser, protected by a `SETUP_TOKEN`: it checks the
   server, fills in the missing values of `.env` (testing the database and the emails first, and keeping a copy of the
   file), shows how to run the scheduled tasks and the queue, creates the database and the root user, and sets the name,
@@ -64,6 +68,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Users**: there is always a super administrator who can log in: the last one can no longer lose its access or its
+  **super_admin** role, nor be deleted (from the list, its page or its profile), and the **super_admin** role can no
+  longer be deleted, renamed or moved to another guard. In production, the profile of the root user no longer offers
+  to delete the account, which always failed ([#113](https://github.com/OpenCHelper/OpenCongregationHelper/pull/113)).
 - **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
   page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown
   only on the territory's own map. The **Draw Text** tool is removed.

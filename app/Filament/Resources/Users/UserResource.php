@@ -17,6 +17,7 @@ use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
 use App\Models\Department;
 use App\Models\User;
 use App\Policies\UserPolicy;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
@@ -175,7 +176,13 @@ class UserResource extends Resource
                                     .' '.__('filament-resources.user.field_can_login_invitation_helper'),
                                 default => __('filament-resources.user.field_can_login_helper'),
                             })
-                            ->disabled(fn (?User $record) => $record?->isRootUserProtected()),
+                            ->disabled(fn (?User $record) => $record?->isRootUserProtected())
+                            // There must always be a super administrator who can log in (see `UserObserver::updating()`)
+                            ->rule(fn (?User $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($record): void {
+                                if (! $value && $record?->isLastSuperAdmin()) {
+                                    $fail(__('filament-resources.user.last_super_admin_access'));
+                                }
+                            }),
                         Select::make('roles')
                             ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Get $get) => $get('can_login') === false)
@@ -184,6 +191,13 @@ class UserResource extends Resource
                                 || ! static::canManageRoles()
                             )
                             ->relationship('roles', 'name')
+                            ->rule(fn (?User $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($record): void {
+                                $superAdminRole = Utils::getRoleModel()::query()->where('name', Utils::getSuperAdminName())->value('id');
+
+                                if ($record?->isLastSuperAdmin() && ! in_array($superAdminRole, array_map('intval', (array) $value), true)) {
+                                    $fail(__('filament-resources.user.last_super_admin_role'));
+                                }
+                            })
                             ->multiple()
                             ->preload()
                             ->searchable()

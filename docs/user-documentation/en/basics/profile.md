@@ -105,4 +105,4 @@ Permanently deletes your account. This cannot be undone.
 If territories have ever been assigned to you, your account cannot be deleted: their history would be lost with it.
 Ask an administrator to disable your access instead.
 
-> ⚠️ **Warning:** the root user (the first user created during the installation) can never be deleted.
+> ⚠️ **Warning:** the root user (the first user created during the installation, unless it handed its role over) can never be deleted.

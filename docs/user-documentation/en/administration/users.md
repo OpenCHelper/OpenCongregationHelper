@@ -109,8 +109,23 @@ account either if they have assignments.
 
 ## The root user
 
-The root user is the first user, created during the installation. To avoid losing access to the application:
+The root user is the first user, created during the installation, until it hands its role over to another user. To
+avoid losing access to the application:
 
 - it can never be deleted (it is skipped by the bulk delete) nor impersonated;
 - outside of the production environment, its email, password, access and roles cannot be changed, and only the root
   user itself can edit it: for the other users its **Edit** button is disabled, and its edit page cannot be opened.
+
+### Handing the root user over
+
+In production, the root user can make another user the root user, e.g. when the person who installed the application
+hands it over to someone else: on the page of a super administrator who can log in, it clicks **Make root user** and
+confirms with its own password. The new root user gets the protections above; the former one stays a super
+administrator, and can then be edited, impersonated or deleted like the other users. On demos and previews the root user
+stays the first user.
+
+### The last super administrator
+
+There must always be a super administrator who can log in, to manage the application. As long as there is only one, its
+access cannot be disabled, its **super_admin** role cannot be removed, and it cannot be deleted, not even from its
+profile: give the role to another user first. The **super_admin** role itself cannot be deleted either.
