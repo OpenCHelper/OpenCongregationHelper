@@ -51,6 +51,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Computed;
+use Minishlink\WebPush\VAPID;
 use Throwable;
 
 /**
@@ -133,6 +134,13 @@ class SetupWizard extends Page
      * @var list<string>
      */
     public const NOT_SENDING_MAILERS = ['log', 'array'];
+
+    /**
+     * The keys of the push notifications, created by the Configuration step when both are missing.
+     *
+     * @var list<string>
+     */
+    public const VAPID_VARIABLES = ['VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY'];
 
     /**
      * The variables of `.env` that the wizard can also change when they are already set (in `.env`, not in the
@@ -487,6 +495,14 @@ class SetupWizard extends Page
                             ->revealable()
                             ->visible(fn (Get $get): bool => self::chosenMailer($get) === 'smtp'), 'MAIL_PASSWORD'),
                     ]),
+                Section::make(__('setup.environment.push'))
+                    ->schema([
+                        Text::make(fn (): string => match (true) {
+                            ! $this->hasMissingVapidKeys() => __('setup.environment.push_set'),
+                            app(EnvironmentFile::class)->isWritable() => __('setup.environment.push_created'),
+                            default => __('setup.environment.push_not_writable'),
+                        }),
+                    ]),
             ])
             ->afterValidation(function (): void {
                 $this->ensureUnlocked();
@@ -771,6 +787,7 @@ class SetupWizard extends Page
 
         try {
             app(EnvironmentFile::class)->writeMissing($values);
+            $this->createVapidKeys();
 
             foreach ($changedValues as $variable => $value) {
                 app(EnvironmentFile::class)->set($variable, $value);
@@ -786,6 +803,38 @@ class SetupWizard extends Page
 
         Installation::forget();
         $this->refreshEnvironmentVariables();
+    }
+
+    /**
+     * Whether both keys of the push notifications are missing: one set alone is left as it is, as replacing a key would
+     * unsubscribe every device.
+     */
+    protected function hasMissingVapidKeys(): bool
+    {
+        return app(EnvironmentFile::class)->missing(self::VAPID_VARIABLES) === self::VAPID_VARIABLES;
+    }
+
+    /**
+     * Create the keys of the push notifications (as `php artisan webpush:vapid` does) when both are missing, so that
+     * the devices can subscribe to them right away.
+     */
+    protected function createVapidKeys(): void
+    {
+        if (! $this->hasMissingVapidKeys()) {
+            return;
+        }
+
+        $keys = VAPID::createVapidKeys();
+
+        app(EnvironmentFile::class)->writeMissing([
+            'VAPID_PUBLIC_KEY' => $keys['publicKey'],
+            'VAPID_PRIVATE_KEY' => $keys['privateKey'],
+        ]);
+
+        config([
+            'webpush.vapid.public_key' => $keys['publicKey'],
+            'webpush.vapid.private_key' => $keys['privateKey'],
+        ]);
     }
 
     /**

@@ -234,9 +234,10 @@ test('only the missing values of .env are asked for and written', function () {
         ->goToWizardStep(3)
         ->assertWizardCurrentStep(3);
 
-    expect(file_get_contents($this->envPath))->toBe(
+    // The keys of the push notifications, missing too, are created
+    expect(file_get_contents($this->envPath))->toStartWith(
         "SETUP_TOKEN=the-setup-token\nAPP_LOCALE=it\nAPP_TIMEZONE=Europe/Rome\nDB_CONNECTION=".config('database.default')."\nDB_HOST=x\nDB_PORT=1\nDB_DATABASE=x\nDB_USERNAME=x\nDB_PASSWORD=x\nMAIL_MAILER=log\n"
-        ."APP_URL=https://congregation.example.com\nMAIL_FROM_ADDRESS=noreply@example.com\n",
+        ."APP_URL=https://congregation.example.com\nMAIL_FROM_ADDRESS=noreply@example.com\nVAPID_PUBLIC_KEY=",
     );
 
     $component->assertSet('missingVariables', ['DB_PREFIX', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD']);
@@ -276,7 +277,37 @@ test('the values with a fallback in the configuration can be left empty', functi
         ->assertWizardCurrentStep(3);
 
     // Nothing is written: the fallbacks apply
-    expect(file_get_contents($this->envPath))->toBe("SETUP_TOKEN=the-setup-token\n");
+    expect(file_get_contents($this->envPath))->toMatch('/^SETUP_TOKEN=the-setup-token\nVAPID_PUBLIC_KEY=\S+\nVAPID_PRIVATE_KEY=\S+\n$/');
+});
+
+test('the keys of the push notifications are created only when both are missing', function () {
+    unlockSetupWizard();
+
+    // Kept as they are: replacing them would unsubscribe every device
+    foreach (["VAPID_PUBLIC_KEY=public\nVAPID_PRIVATE_KEY=private\n", "VAPID_PUBLIC_KEY=public\n"] as $keys) {
+        completeSetupEnvironmentFile($this->envPath);
+        file_put_contents($this->envPath, $keys, FILE_APPEND);
+        $before = file_get_contents($this->envPath);
+
+        Livewire::test(SetupWizard::class)
+            ->assertSee(__('setup.environment.push_set'))
+            ->goToWizardStep(3)
+            ->assertWizardCurrentStep(3);
+
+        expect(file_get_contents($this->envPath))->toBe($before);
+    }
+
+    completeSetupEnvironmentFile($this->envPath);
+
+    Livewire::test(SetupWizard::class)
+        ->assertSee(__('setup.environment.push_created'))
+        ->goToWizardStep(3);
+
+    $keys = (new EnvironmentFile($this->envPath))->fileValues();
+
+    expect($keys['VAPID_PUBLIC_KEY'])->toHaveLength(87)
+        ->and($keys['VAPID_PRIVATE_KEY'])->toHaveLength(43)
+        ->and(config('webpush.vapid.public_key'))->toBe($keys['VAPID_PUBLIC_KEY']);
 });
 
 test('the database settings can be changed, keeping the password left empty', function () {
