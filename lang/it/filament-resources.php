@@ -273,6 +273,10 @@ return [
         'action_end_assignment' => 'Termina assegnazione',
         'action_create' => 'Crea',
         'action_end' => 'Termina',
+        'delete_description' => "L'assegnazione viene tolta dallo storico del territorio e dalle statistiche (quando è stato percorso l'ultima volta, la copertura, le campagne). Per registrare che il territorio è stato percorso, termina invece l'assegnazione.",
+        'bulk_delete_description' => "Le assegnazioni vengono tolte dallo storico dei loro territori e dalle statistiche (quando sono stati percorsi l'ultima volta, la copertura, le campagne). Per registrare che i territori sono stati percorsi, termina invece le assegnazioni.",
+        'force_delete_description' => "L'assegnazione viene tolta definitivamente dallo storico del territorio: l'operazione non può essere annullata.",
+        'bulk_force_delete_description' => "Le assegnazioni vengono tolte definitivamente dallo storico dei loro territori: l'operazione non può essere annullata.",
         'action_copy' => [
             'label' => 'Condividi',
             'tooltip' => 'Copia negli appunti l\'URL condivisibile per questa assegnazione',

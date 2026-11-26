@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TerritoryAssignments\Actions;
 
 use App\Models\Campaign;
 use App\Models\Territory;
+use App\Models\TerritoryAssignment;
 use App\Models\User;
 use Exception;
 use Filament\Actions\Action;
@@ -11,11 +12,39 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Return a territory, closing its assignment in progress.
+ *
+ * Used on the territories (whose current assignment is closed) and on the assignments themselves (e.g. their list,
+ * the assignment history of a territory, a user or a campaign, and the assignment page).
+ */
 class ReturnAssignmentAction extends Action
 {
+    /**
+     * The assignment in progress the action closes: the record itself when it is an assignment, or the current
+     * assignment of a territory. Null when there is none (e.g. a returned or deleted assignment), or when it starts in
+     * the future: it cannot end before it starts.
+     */
+    public static function getAssignmentInProgress(Model $record): ?TerritoryAssignment
+    {
+        $assignment = $record instanceof Territory ? $record->currentAssignment : $record;
+
+        if (
+            ! $assignment instanceof TerritoryAssignment
+            || $assignment->ended_at !== null
+            || $assignment->trashed()
+            || $assignment->started_at?->isFuture()
+        ) {
+            return null;
+        }
+
+        return $assignment;
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -26,18 +55,14 @@ class ReturnAssignmentAction extends Action
             ->modalHeading(__('filament-resources.database_notifications.end_assignment_modal'))
             ->modalSubmitAction(fn (Action $action) => $action->label(__('filament-resources.territory_assignment.action_end')))
             ->color('primary')
-            ->authorize(function (Territory $record): bool {
-                $assignment = $record->currentAssignment;
+            ->authorize(function (Model $record): bool {
+                $assignment = static::getAssignmentInProgress($record);
 
                 return $assignment !== null && Gate::allows('update', $assignment);
             })
-            ->visible(function (Territory $record): bool {
-                $assignment = $record->currentAssignment;
-
-                return $assignment !== null && $assignment->ended_at === null;
-            })
-            ->mountUsing(function (Schema $schema, Territory $record) {
-                $last_assignment = $record->currentAssignment;
+            ->visible(fn (Model $record): bool => static::getAssignmentInProgress($record) !== null)
+            ->mountUsing(function (Schema $schema, Model $record) {
+                $last_assignment = static::getAssignmentInProgress($record);
                 if (! $last_assignment) {
                     return $schema;
                 }
@@ -65,12 +90,12 @@ class ReturnAssignmentAction extends Action
                     ->native(false),
             ])
             ->requiresConfirmation()
-            ->action(function (Territory $record, array $data): void {
-                $last_assignment = $record->currentAssignment;
+            ->action(function (Model $record): void {
+                $last_assignment = static::getAssignmentInProgress($record);
 
-                // Skip if the last assignment is not null
-                if ($last_assignment === null || $last_assignment->ended_at !== null) {
-                    Log::warning("Skipping record {$record->id} because it does not has an active assignment");
+                // Skip if there is no assignment in progress anymore
+                if ($last_assignment === null) {
+                    Log::warning("Skipping record {$record->getKey()} because it does not has an active assignment");
 
                     return;
                 }

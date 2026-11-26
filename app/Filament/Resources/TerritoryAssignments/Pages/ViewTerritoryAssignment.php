@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TerritoryAssignments\Pages;
 
 use App\Filament\Resources\TerritoryAssignments\Actions\RequestReturnAction;
+use App\Filament\Resources\TerritoryAssignments\Actions\ReturnAssignmentAction;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\SharedUrl;
 use App\Models\TerritoryAssignment;
@@ -66,6 +67,8 @@ class ViewTerritoryAssignment extends ViewRecord
     {
         return [
             RequestReturnAction::make(),
+            ReturnAssignmentAction::make('return_assignment')
+                ->hidden(fn (TerritoryAssignment $record): bool => TerritoryAssignmentResource::hasReturnCallout($record)),
             ActionGroup::make([
                 Action::make('share')
                     ->color('primary')

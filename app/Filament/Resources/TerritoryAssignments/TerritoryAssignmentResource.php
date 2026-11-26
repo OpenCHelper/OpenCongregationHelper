@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TerritoryAssignments;
 
 use App\Enums\NavigationGroup;
 use App\Filament\Resources\Territories\TerritoryResource;
+use App\Filament\Resources\TerritoryAssignments\Actions\ReturnAssignmentAction;
 use App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Filament\Tables\Columns\RecordCardColumn;
@@ -18,6 +19,7 @@ use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polyline;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -581,19 +583,50 @@ class TerritoryAssignmentResource extends Resource
                     ->query(fn (Builder $query) => $query->where('assignee_id', Auth::user()->id))
                     ->hidden(! static::canViewAllAssignments()),
             ])
+            // Ending an assignment is far more common than editing it: only the return is shown on the row
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-                ForceDeleteAction::make(),
-                RestoreAction::make(),
+                ReturnAssignmentAction::make('return_assignment'),
+                ActionGroup::make([
+                    EditAction::make(),
+                    // Returning the territory keeps the assignment in its history: deleting it does not
+                    DeleteAction::make()
+                        ->modalDescription(__('filament-resources.territory_assignment.delete_description')),
+                    ForceDeleteAction::make()
+                        ->modalDescription(__('filament-resources.territory_assignment.force_delete_description')),
+                    RestoreAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
+                    ...static::getBulkDeletionActions(),
                     RestoreBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Bulk actions deleting assignments, whose confirmation tells that they leave the history of their territories
+     * (to be used by the pages replacing the bulk actions of the table, e.g. the assignments of a campaign).
+     *
+     * @return array<int, DeleteBulkAction|ForceDeleteBulkAction>
+     */
+    public static function getBulkDeletionActions(): array
+    {
+        return [
+            DeleteBulkAction::make()
+                ->modalDescription(__('filament-resources.territory_assignment.bulk_delete_description')),
+            ForceDeleteBulkAction::make()
+                ->modalDescription(__('filament-resources.territory_assignment.bulk_force_delete_description')),
+        ];
+    }
+
+    /**
+     * Whether a banner of the assignment page offers to return the territory (its campaign has ended or is about to,
+     * or its return has been asked): the button at the top of the page is then hidden, so that only one is shown.
+     */
+    public static function hasReturnCallout(TerritoryAssignment $record): bool
+    {
+        return $record->isOverdue() || $record->isDueSoon() || $record->isReturnRequested();
     }
 
     public static function getPages(): array
