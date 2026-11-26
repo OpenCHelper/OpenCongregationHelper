@@ -285,6 +285,18 @@ test('a test email can be sent to the root user', function () {
     Notification::assertSentOnDemand(TestEmailNotification::class);
 });
 
+test('the root user step tells when the mailer does not send the emails', function () {
+    unlockSetupWizard();
+
+    config(['mail.default' => 'log']);
+    Livewire::test(SetupWizard::class)
+        ->assertSee(__('setup.root.mailer_not_sending', ['mailer' => 'log']));
+
+    config(['mail.default' => 'smtp']);
+    Livewire::test(SetupWizard::class)
+        ->assertDontSee(__('setup.root.mailer_not_sending', ['mailer' => 'smtp']));
+});
+
 test('requiring the email confirmation needs a test email', function () {
     completeSetupEnvironmentFile($this->envPath);
     unlockSetupWizard();

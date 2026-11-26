@@ -97,6 +97,7 @@ return [
         'password_confirmation' => 'Confirma la contraseña',
         'email_first' => 'Escribe primero una dirección de correo válida.',
         'test_email_hint' => 'Aún no se ha enviado ningún correo de prueba: para exigir la confirmación del correo hace falta uno.',
+        'mailer_not_sending' => 'Los correos no se envían (MAIL_MAILER es :mailer): el correo de prueba no llega a ninguna bandeja. Para recibirlo, elige en el paso Configuración un mailer que los envíe.',
     ],
 
     'administrators' => [

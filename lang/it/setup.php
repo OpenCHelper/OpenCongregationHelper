@@ -97,6 +97,7 @@ return [
         'password_confirmation' => 'Conferma la password',
         'email_first' => 'Scrivi prima un indirizzo email valido.',
         'test_email_hint' => 'Nessuna email di prova inviata: per richiedere la conferma dell\'email ne serve una.',
+        'mailer_not_sending' => 'Le email non vengono inviate (MAIL_MAILER è :mailer): l\'email di prova non arriva in nessuna casella. Per riceverla scegli un mailer che le invia nel passaggio Configurazione.',
     ],
 
     'administrators' => [

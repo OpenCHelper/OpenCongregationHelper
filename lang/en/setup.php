@@ -97,6 +97,7 @@ return [
         'password_confirmation' => 'Confirm the password',
         'email_first' => 'Type a valid email address first.',
         'test_email_hint' => 'No test email sent yet: requiring the email confirmation needs one.',
+        'mailer_not_sending' => 'The emails are not sent (MAIL_MAILER is :mailer): the test email reaches no inbox. Choose a mailer that sends them in the Configuration step to receive it.',
     ],
 
     'administrators' => [

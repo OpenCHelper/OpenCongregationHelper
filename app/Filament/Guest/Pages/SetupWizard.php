@@ -115,6 +115,13 @@ class SetupWizard extends Page
     ];
 
     /**
+     * The mailers that keep the emails instead of sending them.
+     *
+     * @var list<string>
+     */
+    public const NOT_SENDING_MAILERS = ['log', 'array'];
+
+    /**
      * The variables of `.env` that the wizard can also change when they are already set (in `.env`, not in the
      * environment of the server, which comes first): the mailer, so that the test email can be sent another way.
      *
@@ -507,6 +514,10 @@ class SetupWizard extends Page
             ->columns(['default' => 1, 'md' => 2])
             ->schema([
                 Text::make(__('setup.root.intro'))->columnSpanFull(),
+                Callout::make(__('setup.root.mailer_not_sending', ['mailer' => (string) config('mail.default')]))
+                    ->warning()
+                    ->visible(fn (): bool => self::mailerDoesNotSend())
+                    ->columnSpanFull(),
                 TextInput::make('root_first_name')
                     ->label(__('filament-resources.user.field_first_name'))
                     ->required()
@@ -766,6 +777,15 @@ class SetupWizard extends Page
     }
 
     /**
+     * Whether the mailer in use keeps the emails instead of sending them (e.g. writing them in the log), so that the test
+     * email reaches no inbox.
+     */
+    public static function mailerDoesNotSend(): bool
+    {
+        return in_array(config('mail.default'), self::NOT_SENDING_MAILERS, true);
+    }
+
+    /**
      * The mailers of the configuration (`config/mail.php`), with a description of the ones not named after a service.
      *
      * @return array<string, string>
@@ -908,7 +928,9 @@ class SetupWizard extends Page
         Notification::make()
             ->success()
             ->title(__('setup.checks.test_email.sent', ['email' => $email]))
-            ->body(__('setup.checks.test_email.sent_body'))
+            ->body(self::mailerDoesNotSend()
+                ? __('setup.root.mailer_not_sending', ['mailer' => (string) config('mail.default')])
+                : __('setup.checks.test_email.sent_body'))
             ->send();
     }
 
