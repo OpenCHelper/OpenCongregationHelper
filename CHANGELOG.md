@@ -103,6 +103,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Notifications**: recording an assignment that is already returned no longer notifies it as assigned, correcting the
   date of a return no longer notifies it again, and virtual users no longer receive assignment or return request
   notifications ([#74](https://github.com/OpenCHelper/OpenCongregationHelper/pull/74)).
+- **Territories**: the page of a territory, its edit page and its form in the **Territories** tab of a zone open on
+  the **Map** tab when the territory has a map and on the **Image** tab when it has only an image. The edit page and
+  the form opened on the other tab, and the page of a territory with both a map and an image opened on the **Image**
+  tab ([#108](https://github.com/OpenCHelper/OpenCongregationHelper/pull/108)).
 
 ### Security
 
