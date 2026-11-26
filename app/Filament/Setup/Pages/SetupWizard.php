@@ -692,11 +692,13 @@ class SetupWizard extends Page
             ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
             ->schema([
                 Section::make(__('settings.sections.ai_assistants'))
+                    ->icon(Heroicon::OutlinedSparkles)
                     ->description(__('settings.sections.ai_assistants_description'))
                     ->schema([
                         ManageSecuritySettings::aiAssistantsEnabledField(),
                     ]),
                 Section::make(__('setup.features.sharing'))
+                    ->icon(Heroicon::OutlinedShare)
                     ->description(__('setup.features.sharing_description'))
                     ->schema([
                         Toggle::make('sharing_enabled')
@@ -710,6 +712,7 @@ class SetupWizard extends Page
                             ->helperText(__('settings.fields.guest_returns.helper')),
                     ]),
                 Section::make(__('settings.sections.account_requirements'))
+                    ->icon(Heroicon::OutlinedShieldCheck)
                     ->description(__('settings.sections.account_requirements_description'))
                     ->schema([
                         Toggle::make('require_two_factor')
