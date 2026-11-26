@@ -407,17 +407,21 @@ class SetupWizard extends Page
             ->description(__('setup.steps.requirements.description'))
             ->icon(Heroicon::OutlinedWrenchScrewdriver)
             ->schema([
-                View::make('filament.setup.installation-checks')
-                    ->viewData(fn (): array => ['checks' => $this->requirements]),
-                Actions::make([
-                    Action::make('checkAgain')
-                        ->label(__('setup.checks.check_again'))
-                        ->icon(Heroicon::OutlinedArrowPath)
-                        ->color('gray')
-                        ->action(function (): void {
-                            unset($this->requirements);
-                        }),
-                ])->key('requirementsActions'),
+                Section::make(__('setup.steps.requirements.description'))
+                    ->icon(Heroicon::OutlinedServer)
+                    ->schema([
+                        View::make('filament.setup.installation-checks')
+                            ->viewData(fn (): array => ['checks' => $this->requirements]),
+                        Actions::make([
+                            Action::make('checkAgain')
+                                ->label(__('setup.checks.check_again'))
+                                ->icon(Heroicon::OutlinedArrowPath)
+                                ->color('gray')
+                                ->action(function (): void {
+                                    unset($this->requirements);
+                                }),
+                        ])->key('requirementsActions'),
+                    ]),
             ])
             ->afterValidation(function (): void {
                 $this->ensureUnlocked();
