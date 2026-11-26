@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users;
 
 use App\Enums\DepartmentKey;
 use App\Enums\NavigationGroup;
+use App\Filament\Resources\ServiceGroups\Pages\ManageServiceGroupMembers;
 use App\Filament\Resources\Users\Actions\AddToDepartmentBulkAction;
 use App\Filament\Resources\Users\Actions\DeleteUsersBulkAction;
 use App\Filament\Resources\Users\Actions\ResendInvitationAction;
@@ -15,13 +16,16 @@ use App\Filament\Resources\Users\Pages\ManageUserPublicationRequests;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
 use App\Models\Department;
+use App\Models\ServiceGroup;
 use App\Models\User;
 use Closure;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -38,10 +42,12 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Override;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use UnitEnum;
@@ -144,6 +150,13 @@ class UserResource extends Resource
                                 (bool) $record?->isAwaitingInvitation() => __('filament-resources.user.field_email_invitation_helper'),
                                 default => null,
                             }),
+                        Select::make('service_group_id')
+                            ->label(__('filament-resources.user.field_service_group'))
+                            ->relationship('serviceGroup', 'name', fn (Builder $query): Builder => $query->orderBy('name'))
+                            ->searchable()
+                            ->preload()
+                            ->placeholder(__('filament-resources.user.placeholder_service_group'))
+                            ->helperText(fn (?User $record): ?string => static::getServiceGroupRoleLabel($record)),
                     ]),
                 Section::make(__('filament-resources.user.section_login_info'))
                     ->schema([
@@ -236,6 +249,11 @@ class UserResource extends Resource
                     ->listWithLineBreaks()
                     ->toggleable()
                     ->visibleFrom('sm'),
+                TextColumn::make('serviceGroup.name')
+                    ->label(__('filament-resources.user.column_service_group'))
+                    ->placeholder('—')
+                    ->sortable()
+                    ->toggleable(),
                 IconColumn::make('email_verified_at')
                     ->label(__('filament-resources.user.column_email_verified'))
                     ->default(false)
@@ -279,6 +297,11 @@ class UserResource extends Resource
                     ->relationship('departments', 'key', fn (Builder $query): Builder => $query->ordered())
                     ->getOptionLabelFromRecordUsing(fn (Department $record): string => $record->getLabel())
                     ->multiple(),
+                SelectFilter::make('service_group_id')
+                    ->label(__('filament-resources.user.filter_service_group'))
+                    ->relationship('serviceGroup', 'name', fn (Builder $query): Builder => $query->orderBy('name'))
+                    ->multiple()
+                    ->preload(),
                 TernaryFilter::make('can_login')
                     ->label(__('filament-resources.user.filter_access'))
                     ->placeholder(fn (): string => __('filament-resources.user.filter_access_all', [
@@ -357,9 +380,56 @@ class UserResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     AddToDepartmentBulkAction::make(),
+                    static::changeServiceGroupBulkAction(),
                     DeleteUsersBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Move the selected users to a service group, or out of any group.
+     */
+    public static function changeServiceGroupBulkAction(): BulkAction
+    {
+        return BulkAction::make('changeServiceGroup')
+            ->label(__('filament-resources.user.action_change_service_group'))
+            ->icon(Heroicon::OutlinedUserGroup)
+            ->visible(fn (): bool => Gate::allows('update', User::class))
+            ->schema([
+                Select::make('service_group_id')
+                    ->label(__('filament-resources.user.field_service_group'))
+                    ->options(fn (): array => ServiceGroup::query()->orderBy('name')->pluck('name', 'id')->all())
+                    ->placeholder(__('filament-resources.user.placeholder_service_group'))
+                    ->searchable(),
+            ])
+            ->action(function (EloquentCollection $records, array $data): void {
+                $serviceGroupId = $data['service_group_id'] ?? null;
+
+                // Saved one by one, so that the change is recorded in the activity log
+                $records->each(fn (User $record): bool => $record->update(['service_group_id' => $serviceGroupId]));
+
+                Notification::make()
+                    ->success()
+                    ->title(trans_choice('filament-resources.user.service_group_changed', $records->count()))
+                    ->send();
+            })
+            ->deselectRecordsAfterCompletion();
+    }
+
+    /**
+     * The role of the user in their service group, if they lead it (e.g. "Coordinator of Group 1").
+     */
+    public static function getServiceGroupRoleLabel(?User $user): ?string
+    {
+        $serviceGroup = $user?->serviceGroup;
+
+        if ($serviceGroup === null) {
+            return null;
+        }
+
+        $role = ManageServiceGroupMembers::getRoleInGroup($serviceGroup, $user);
+
+        return $role !== null ? __('filament-resources.user.hint_service_group_role', ['role' => $role]) : null;
     }
 
     public static function getRelations(): array

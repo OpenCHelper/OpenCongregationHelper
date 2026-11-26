@@ -19,6 +19,7 @@ class FakeDataSeeder extends Seeder
 
         $this->call([
             FakeUserSeeder::class,
+            FakeServiceGroupSeeder::class,
             FakeRoleSeeder::class,
             FakeTagSeeder::class,
             FakeCampaignSeeder::class,

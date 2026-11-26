@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -66,7 +67,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     {
         return LogOptions::defaults()
             ->logOnlyDirty()
-            ->logOnly(['first_name', 'last_name', 'email']);
+            ->logOnly(['first_name', 'last_name', 'email', 'service_group_id']);
     }
 
     /**
@@ -87,6 +88,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         'password',
         'can_login',
         'locale',
+        'service_group_id',
     ];
 
     /**
@@ -102,12 +104,13 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     ];
 
     /**
-     * The default values of the attributes, so that the two-factor authentication can be read from a user just created
-     * (the missing attributes are not lazily loaded).
+     * The default values of the attributes, so that the activity log and the two-factor authentication can be read from
+     * a user just created (the missing attributes are not lazily loaded).
      *
      * @var array<string, mixed>
      */
     protected $attributes = [
+        'service_group_id' => null,
         'app_authentication_secret' => null,
         'app_authentication_recovery_codes' => null,
     ];
@@ -264,6 +267,14 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function isAwaitingInvitation(): bool
     {
         return $this->can_login && blank($this->password) && ! $this->isRootUser();
+    }
+
+    /**
+     * Get the service group the user belongs to.
+     */
+    public function serviceGroup(): BelongsTo
+    {
+        return $this->belongsTo(ServiceGroup::class);
     }
 
     public function assignments(): HasMany
