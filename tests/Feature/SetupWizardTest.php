@@ -437,8 +437,10 @@ test('the database step warns about the tables of another application', function
 
     DB::table('migrations')->delete();
 
-    Livewire::test(SetupWizard::class)
-        ->assertSee(__('setup.database.foreign_tables_heading'));
+    // With a prefix the tables of the app never mix with the others
+    DB::connection()->getTablePrefix() === ''
+        ? Livewire::test(SetupWizard::class)->assertSee(__('setup.database.foreign_tables_heading'))
+        : Livewire::test(SetupWizard::class)->assertDontSee(__('setup.database.foreign_tables_heading'));
 });
 
 test('the root user step tells when the mailer does not send the emails', function () {

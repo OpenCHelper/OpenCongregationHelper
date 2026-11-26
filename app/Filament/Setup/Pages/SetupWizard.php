@@ -235,6 +235,13 @@ class SetupWizard extends Page
     public bool $browserTimezoneUsed = false;
 
     /**
+     * The tables of another application in the database, found once per request (see `foreignTables()`).
+     *
+     * @var list<string>|null
+     */
+    protected ?array $foreignTables = null;
+
+    /**
      * What the installation did, shown once it is completed.
      *
      * @var list<array{text: string, status: string}>
@@ -776,12 +783,12 @@ class SetupWizard extends Page
             ->schema([
                 Text::make(__('setup.database.intro')),
                 Callout::make(__('setup.database.foreign_tables_heading'))
-                    ->description(fn (): string => trans_choice('setup.database.foreign_tables', count($this->foreignTables), [
-                        'count' => count($this->foreignTables),
-                        'tables' => implode(', ', array_slice($this->foreignTables, 0, 5)).(count($this->foreignTables) > 5 ? '…' : ''),
+                    ->description(fn (): string => trans_choice('setup.database.foreign_tables', count($this->foreignTables()), [
+                        'count' => count($this->foreignTables()),
+                        'tables' => implode(', ', array_slice($this->foreignTables(), 0, 5)).(count($this->foreignTables()) > 5 ? '…' : ''),
                     ]))
                     ->warning()
-                    ->visible(fn (): bool => $this->foreignTables !== [])
+                    ->visible(fn (): bool => $this->foreignTables() !== [])
                     ->actions([
                         Action::make('goToDatabaseConfiguration')
                             ->label(__('setup.root.go_to_configuration'))
@@ -1537,8 +1544,15 @@ class SetupWizard extends Page
      *
      * @return list<string>
      */
-    #[Computed]
-    public function foreignTables(): array
+    protected function foreignTables(): array
+    {
+        return $this->foreignTables ??= $this->findForeignTables();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function findForeignTables(): array
     {
         if ((int) session(self::PROGRESS_SESSION_KEY.'.step', 0) < 2) {
             return [];
