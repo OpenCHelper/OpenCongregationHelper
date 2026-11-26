@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Filament\Guest\Pages\SetupWizard;
+use App\Filament\Setup\Pages\SetupWizard;
 use App\Support\Installation;
 use Closure;
 use Filament\Facades\Filament;
@@ -26,10 +26,10 @@ class RedirectToSetupWizard
     {
         if (
             $request->isMethod('GET')
-            && ! $request->routeIs(SetupWizard::getRouteName(Filament::getPanel('guest')), ...self::ALLOWED_ROUTES)
+            && ! $request->routeIs(SetupWizard::getRouteName(Filament::getPanel('setup')), ...self::ALLOWED_ROUTES)
             && Installation::needsSetup()
         ) {
-            return redirect()->to(SetupWizard::getUrl(panel: 'guest'));
+            return redirect()->to(SetupWizard::getUrl(panel: 'setup'));
         }
 
         return $next($request);

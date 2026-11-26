@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Guest\Pages;
+namespace App\Filament\Setup\Pages;
 
 use App\Enums\InstallationCheckStatus;
 use App\Filament\Clusters\Settings\Pages\ManageGeneralSettings;
@@ -24,6 +24,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Panel;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\EmbeddedSchema;
@@ -35,6 +36,7 @@ use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
+use Filament\Support\Components\Attributes\Unexposed;
 use Filament\Support\Enums\Width;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
@@ -66,6 +68,15 @@ use Throwable;
 class SetupWizard extends Page
 {
     protected static ?string $slug = 'setup';
+
+    /**
+     * The wizard is the root of its own panel (`/setup`, see `SetupPanelProvider`).
+     */
+    #[Unexposed]
+    public static function getRoutePath(Panel $panel): string
+    {
+        return '/';
+    }
 
     protected Width|string|null $maxContentWidth = Width::FiveExtraLarge;
 
@@ -670,6 +681,10 @@ class SetupWizard extends Page
                 ! $isEditable() && $field instanceof TextInput && $field->isPassword() => __('setup.environment.password_set'),
                 $field instanceof TextInput && $field->isPassword() && in_array($variable, $this->changeableVariables, true) => __('setup.environment.password_keep'),
                 $isEditable() && $field instanceof TextInput && $field->isPassword() => null,
+                // A select tells its default apart from its options
+                $isEditable() && $field instanceof Select && filled($fallback($get)) => __('setup.environment.default_option', [
+                    'value' => $field->getOptions()[$fallback($get)] ?? $fallback($get),
+                ]),
                 $isEditable() => $fallback($get),
                 default => null,
             });

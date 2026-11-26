@@ -65,6 +65,7 @@ return [
         'already_set' => 'Già impostato nel file .env',
         'password_set' => 'Impostata nel file .env',
         'password_keep' => 'Impostata nel file .env: lascia vuoto per mantenerla',
+        'default_option' => 'Predefinito: :value',
         'intro' => 'Questi valori mancano nel file .env: verranno aggiunti. I valori già impostati non vengono mai cambiati.',
         'nothing_missing' => 'Tutti i valori che servono all\'app sono già impostati nel file .env.',
         'not_writable' => 'Il file .env non può essere scritto: aggiungi tu i valori mancanti, poi ricarica questa pagina.',

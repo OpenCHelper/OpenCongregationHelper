@@ -1,6 +1,6 @@
 <?php
 
-use App\Filament\Guest\Pages\SetupWizard;
+use App\Filament\Setup\Pages\SetupWizard;
 use App\Models\User;
 use App\Notifications\TestEmailNotification;
 use App\Notifications\UserInvitationNotification;
@@ -17,7 +17,7 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->withoutVite();
-    Filament::setCurrentPanel('guest');
+    Filament::setCurrentPanel('setup');
 
     config(['app.setup.enabled' => true, 'app.setup.token' => 'the-setup-token']);
     @unlink(Installation::markerPath());
@@ -140,15 +140,18 @@ test('an unreachable database shows the wizard only during an installation', fun
 });
 
 test('the pages open the wizard until the application is installed', function () {
-    $this->get('/')->assertRedirect(SetupWizard::getUrl(panel: 'guest'));
-    $this->get('/app/login')->assertRedirect(SetupWizard::getUrl(panel: 'guest'));
-    $this->get('/setup')->assertRedirect('/guest/setup');
+    // First: the pages of the app panel opened by a test stay registered for the next requests of the same test
+    expect(SetupWizard::getUrl(panel: 'setup'))->toBe(url('/setup'));
+    $this->get('/setup')->assertOk();
+
+    $this->get('/')->assertRedirect(SetupWizard::getUrl(panel: 'setup'));
+    $this->get('/app/login')->assertRedirect(SetupWizard::getUrl(panel: 'setup'));
 
     User::factory()->create(['id' => 1]);
     Installation::forget();
 
     $this->get('/app/login')->assertOk();
-    $this->get(SetupWizard::getUrl(panel: 'guest'))->assertForbidden();
+    $this->get(SetupWizard::getUrl(panel: 'setup'))->assertForbidden();
 });
 
 test('without a setup token the wizard explains how to add one', function () {
