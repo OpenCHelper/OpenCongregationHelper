@@ -60,7 +60,8 @@ Sotto la mappa, la **legenda** elenca i colori con il numero di territori di cia
 
 - Usa **+** e **−** (o la rotellina del mouse) per lo zoom, e trascina per spostarti.
 - Passa sopra un territorio per vederne il nome, e cliccalo per vederne la zona, il significato del suo colore (con
-  **Frequenza di assegnazione**, anche quante volte è stato assegnato) e il link **Vai al territorio** alla sua pagina.
+  **Frequenza di assegnazione**, anche quante volte è stato assegnato) e, se il tuo ruolo permette di vedere i
+  territori, il link **Vai al territorio** alla sua pagina.
 - Il pulsante **schermo intero** ingrandisce la mappa a tutto lo schermo.
 - Il pulsante dei **livelli** (in alto a destra) permette di:
   - scegliere la **mappa di base**: *Street Map* (OpenStreetMap), *Google Streets*, *Google Satellite* o

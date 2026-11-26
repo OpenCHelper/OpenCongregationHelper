@@ -61,7 +61,8 @@ Under the map, the **legend** lists the colors with the number of territories of
 
 - Use **+** and **−** (or the mouse wheel) to zoom, and drag to move around.
 - Hover a territory to see its name, and click it to see its zone, what its color means (with **Assignment
-  frequency**, also how many times it was assigned) and a **Go to territory** link to its page.
+  frequency**, also how many times it was assigned) and, if your role lets you view the territories, a **Go to
+  territory** link to its page.
 - The **full screen** button enlarges the map to the whole screen.
 - The **layers** button (top right) lets you:
   - choose the **base map**: *Street Map* (OpenStreetMap), *Google Streets*, *Google Satellite* or *Google Hybrid*;

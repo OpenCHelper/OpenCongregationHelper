@@ -17,7 +17,7 @@ Il ruolo **super_admin** (*Super Admin*) può fare tutto, comprese le azioni ris
 - assegnare i ruoli agli utenti;
 - impersonare gli utenti;
 - modificare le [impostazioni](settings);
-- leggere i log.
+- leggere i log dell'applicazione.
 
 ## Creare o modificare un ruolo
 

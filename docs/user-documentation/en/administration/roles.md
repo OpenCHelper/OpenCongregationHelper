@@ -17,7 +17,7 @@ The **super_admin** role (*Super Admin*) can do everything, including the action
 - assigning roles to users;
 - impersonating users;
 - changing the [settings](settings);
-- reading the logs.
+- reading the application logs.
 
 ## Creating or editing a role
 
