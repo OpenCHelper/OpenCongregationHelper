@@ -69,17 +69,19 @@ condividere l'assegnazione con un link pubblico (vedi [Condividere un'assegnazio
 
 ## Correggere un'assegnazione
 
-Clicca **Modifica** su una riga per cambiare la **Data inizio**, la **Data fine** o le note: il territorio,
-l'assegnatario, la campagna e chi ha creato l'assegnazione sono mostrati ma non si possono cambiare. Impostando la
-**Data fine** il territorio viene riconsegnato.
+La riga di un'assegnazione in corso mostra **Termina assegnazione** (vedi
+[Assegnare e riconsegnare](assigning#riconsegnare-un-territorio)); le altre azioni sono nel menu **⋮** della riga.
+Clicca lì **Modifica** per cambiare la **Data inizio**, la **Data fine** o le note: il territorio, l'assegnatario, la
+campagna e chi ha creato l'assegnazione sono mostrati ma non si possono cambiare. Impostando la **Data fine** il
+territorio viene riconsegnato.
 
 ![Modifica di un'assegnazione](/docs/user-documentation/it/assignments/assets/assignment-edit.webp)
 
-**Elimina** sposta un'assegnazione nel cestino, da cui può essere ripristinata. Le assegnazioni eliminate non vengono
-considerate nello storico e nelle statistiche (quando il territorio è stato percorso l'ultima volta, la copertura, le
-campagne), come ricorda la conferma: per registrare che un territorio è stato percorso, riconsegnalo invece con
-**Termina assegnazione**. **Forza eliminazione** rimuove definitivamente un'assegnazione eliminata, senza possibilità
-di annullare.
+**Elimina**, nello stesso menu, sposta un'assegnazione nel cestino, da cui può essere ripristinata con **Ripristina**.
+Le assegnazioni eliminate non vengono considerate nello storico e nelle statistiche (quando il territorio è stato
+percorso l'ultima volta, la copertura, le campagne), come ricorda la conferma: per registrare che un territorio è stato
+percorso, riconsegnalo invece con **Termina assegnazione**. **Forza eliminazione** rimuove definitivamente
+un'assegnazione eliminata, senza possibilità di annullare.
 
 ## Chi vede cosa
 

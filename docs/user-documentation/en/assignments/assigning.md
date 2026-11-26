@@ -36,7 +36,7 @@ The assignment is closed with today's date and the assignee is notified (unless 
 
 You can also return it from **Assignments** (and from the assignment history of a territory, a person or a campaign):
 click **End Assignment** on the row of an assignment in progress, or at the top of the page of the assignment. To
-record a return on another date, click **Edit** instead and set the **End Date** (see
+record a return on another date, click **Edit** in the **⋮** menu of the row instead and set the **End Date** (see
 [Assignment history](history#correcting-an-assignment)).
 
 ### Return requests

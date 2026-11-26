@@ -64,15 +64,17 @@ assignment with a public link (see [Sharing an assignment](sharing)).
 
 ## Correcting an assignment
 
-Click **Edit** on a row to change the **Start Date**, the **End Date** or the notes: the territory, the assignee, the
-campaign and who created the assignment are shown but cannot be changed. Setting the **End Date** returns the territory.
+The row of an assignment in progress shows **End Assignment** (see
+[Assigning and returning](assigning#returning-a-territory)); the other actions are in the **⋮** menu of the row. Click
+**Edit** there to change the **Start Date**, the **End Date** or the notes: the territory, the assignee, the campaign
+and who created the assignment are shown but cannot be changed. Setting the **End Date** returns the territory.
 
 ![Editing an assignment](/docs/user-documentation/en/assignments/assets/assignment-edit.webp)
 
-**Delete** moves an assignment to the trash, from where it can be restored. Deleted assignments do not count in the
-history and the statistics (when the territory was last worked, the coverage, the campaigns), as the confirmation
-reminds: to record that a territory has been worked, return it with **End Assignment** instead. **Force delete**
-removes a deleted assignment permanently, and cannot be undone.
+**Delete**, in the same menu, moves an assignment to the trash, from where it can be restored with **Restore**. Deleted
+assignments do not count in the history and the statistics (when the territory was last worked, the coverage, the
+campaigns), as the confirmation reminds: to record that a territory has been worked, return it with **End Assignment**
+instead. **Force delete** removes a deleted assignment permanently, and cannot be undone.
 
 ## Who can see what
 

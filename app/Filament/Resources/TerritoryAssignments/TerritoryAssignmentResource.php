@@ -19,6 +19,7 @@ use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polyline;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -582,15 +583,18 @@ class TerritoryAssignmentResource extends Resource
                     ->query(fn (Builder $query) => $query->where('assignee_id', Auth::user()->id))
                     ->hidden(! static::canViewAllAssignments()),
             ])
+            // Ending an assignment is far more common than editing it: only the return is shown on the row
             ->recordActions([
                 ReturnAssignmentAction::make('return_assignment'),
-                EditAction::make(),
-                // Returning the territory keeps the assignment in its history: deleting it does not
-                DeleteAction::make()
-                    ->modalDescription(__('filament-resources.territory_assignment.delete_description')),
-                ForceDeleteAction::make()
-                    ->modalDescription(__('filament-resources.territory_assignment.force_delete_description')),
-                RestoreAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    // Returning the territory keeps the assignment in its history: deleting it does not
+                    DeleteAction::make()
+                        ->modalDescription(__('filament-resources.territory_assignment.delete_description')),
+                    ForceDeleteAction::make()
+                        ->modalDescription(__('filament-resources.territory_assignment.force_delete_description')),
+                    RestoreAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
