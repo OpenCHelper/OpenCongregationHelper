@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Settings\SecuritySettings;
 use App\Support\Installation;
 use Filament\Facades\Filament;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -124,7 +125,7 @@ test('creating the root user again makes the first user the root user', function
 test('the application stays installed when the first user is deleted after the handover', function () {
     $this->otherSuperAdmin->makeRootUser();
     $this->rootUser->delete();
-    config(['app.setup.marker' => sys_get_temp_dir().'/och-installed-'.uniqid()]);
+    config(['app.setup.enabled' => true, 'app.setup.marker' => sys_get_temp_dir().'/och-installed-'.uniqid()]);
     Installation::forget();
 
     expect(User::find(1))->toBeNull()
@@ -141,11 +142,25 @@ test('a super administrator still waiting for the invitation cannot become the r
         ->and(fn () => $invited->makeRootUser())->toThrow(LogicException::class);
 });
 
-test('the first user is the root user only while the setting does not exist yet', function () {
+test('the first user is the root user while the setting is not migrated yet', function () {
     $this->otherSuperAdmin->makeRootUser();
 
     DB::table('settings')->where('group', 'security')->where('name', 'root_user_id')->delete();
     app()->forgetScopedInstances();
 
     expect(User::rootUserId())->toBe(1);
+});
+
+test('the first user is the root user while the settings table does not exist yet', function () {
+    config(['settings.repositories.database.table' => 'missing_settings']);
+    app()->forgetScopedInstances();
+
+    expect(User::rootUserId())->toBe(1);
+});
+
+test('other errors reading the root user setting are raised', function () {
+    config(['settings.repositories.database.table' => 'users']);
+    app()->forgetScopedInstances();
+
+    expect(fn () => User::rootUserId())->toThrow(QueryException::class);
 });
