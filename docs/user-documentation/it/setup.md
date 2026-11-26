@@ -74,7 +74,6 @@ precedente.
 | `ENABLE_SHARED_PII` | Se `true`, la pagina pubblica di un'assegnazione condivisa mostra anche il nome dell'assegnatario e le note del territorio. Predefinito: `false`. |
 | `GUEST_ALLOW_RETURNING_ASSIGNMENT` | Se `true`, chi apre la pagina pubblica di un'assegnazione condivisa può chiedere al reparto territori di chiuderla (come può fare l'assegnatario dall'applicazione). Predefinito: `false`. |
 | `DEMO_PREFILL_LOGIN_CREDENTIALS` | **Solo per installazioni dimostrative**, con dati fittizi: se `true`, la pagina di accesso è precompilata con le credenziali dell'utente **root**, quindi chiunque può accedere come root. Non attivarla mai su un'installazione con dati reali. Sempre ignorata quando `APP_ENV` è `production`. Predefinito: `false`. |
-| `TRUSTED_PROXIES` | Indirizzi (o intervalli CIDR, separati da virgole) dei reverse proxy davanti all'applicazione, di cui ci si fida per le intestazioni `X-Forwarded-For` e `X-Forwarded-Proto`. Predefinito: `*` (qualsiasi peer, necessario quando l'indirizzo del proxy non è noto, es. su Altervista); lasciala vuota quando l'applicazione è raggiunta direttamente, senza proxy. |
 | `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | File da cui vengono letti il branch e il commit Git (di default `.git/HEAD` e `.git/refs/heads/<branch>`), mostrati in **Informazioni** nel menu utente fuori da `production`. Utili sui server senza la cartella `.git`. |
 
 ## Installazione

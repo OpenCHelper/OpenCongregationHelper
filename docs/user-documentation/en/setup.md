@@ -73,7 +73,6 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 | `ENABLE_SHARED_PII` | When `true`, the public page of a shared assignment also shows the assignee's name and the territory notes. Defaults to `false`. |
 | `GUEST_ALLOW_RETURNING_ASSIGNMENT` | When `true`, whoever opens the public page of a shared assignment can ask the territory department to close it (as the assignee can from the application). Defaults to `false`. |
 | `DEMO_PREFILL_LOGIN_CREDENTIALS` | **Demo installations only**, with dummy data: when `true`, the login page is pre-filled with the credentials of the **root** user, so anyone can log in as root. Never enable it on an installation with real data. Always ignored when `APP_ENV` is `production`. Defaults to `false`. |
-| `TRUSTED_PROXIES` | Addresses (or CIDR ranges, comma-separated) of the reverse proxies in front of the application, whose `X-Forwarded-For` and `X-Forwarded-Proto` headers are trusted. Defaults to `*` (any peer, needed when the address of the proxy is not known, e.g. on Altervista); leave it empty when the application is reached directly, without a proxy. |
 | `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | Files the Git branch and commit are read from (by default `.git/HEAD` and `.git/refs/heads/<branch>`), shown in **About** in the user menu outside of `production`. Useful on servers without the `.git` folder. |
 
 ## Installation
