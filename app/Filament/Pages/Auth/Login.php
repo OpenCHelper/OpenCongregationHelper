@@ -5,13 +5,11 @@ namespace App\Filament\Pages\Auth;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Auth\Pages\Login as BaseLogin;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Filament\Support\Components\Attributes\Unexposed;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Login page of the app panel.
@@ -20,27 +18,28 @@ use Illuminate\Validation\ValidationException;
  * the credentials of the root user, so that whoever opens the demo can test it right away: see
  * `DEMO_PREFILL_LOGIN_CREDENTIALS`.
  *
- * Besides the throttling by IP address of Filament, the failed attempts are also counted per account: the IP address
- * can be chosen by the client when every peer is trusted as a proxy (see `TRUSTED_PROXIES`), so it alone would not
- * stop guessing the password (or the two-factor code) of an account.
+ * Besides the throttling by IP address of Filament, the attempts are also counted per email: the IP address can be
+ * chosen by the client when every peer is trusted as a proxy (see `TRUSTED_PROXIES`), so it alone would not stop
+ * guessing the password (or the two-factor code) of an account.
  */
 class Login extends BaseLogin
 {
     /**
-     * Failed attempts allowed for the same account (or email) before the login is blocked for it.
+     * Attempts allowed with the same email in each period of `ATTEMPTS_DECAY_SECONDS`: a successful login starts over.
      */
-    public const MAX_FAILED_ATTEMPTS_PER_EMAIL = 10;
+    public const MAX_ATTEMPTS_PER_EMAIL = 10;
 
     /**
-     * Seconds after which the failed attempts for an account (or email) are forgotten.
+     * Length in seconds of the period in which the attempts of an email are counted, from the first one.
      */
-    public const FAILED_ATTEMPTS_DECAY_SECONDS = 15 * 60;
+    public const ATTEMPTS_DECAY_SECONDS = 15 * 60;
 
     public function authenticate(): ?LoginResponse
     {
         $rateLimitKey = $this->getEmailRateLimitKey();
 
-        if (($rateLimitKey !== null) && RateLimiter::tooManyAttempts($rateLimitKey, self::MAX_FAILED_ATTEMPTS_PER_EMAIL)) {
+        // Counted before the password is checked, so that requests sent in parallel cannot go past the limit
+        if (($rateLimitKey !== null) && (RateLimiter::increment($rateLimitKey, self::ATTEMPTS_DECAY_SECONDS) > self::MAX_ATTEMPTS_PER_EMAIL)) {
             $this->getRateLimitedNotification(new TooManyRequestsException(
                 static::class,
                 'authenticate',
@@ -51,16 +50,7 @@ class Login extends BaseLogin
             return null;
         }
 
-        try {
-            $response = parent::authenticate();
-        } catch (ValidationException $exception) {
-            // Wrong credentials or two-factor code
-            if ($rateLimitKey !== null) {
-                RateLimiter::hit($rateLimitKey, self::FAILED_ATTEMPTS_DECAY_SECONDS);
-            }
-
-            throw $exception;
-        }
+        $response = parent::authenticate();
 
         if (($response !== null) && ($rateLimitKey !== null)) {
             RateLimiter::clear($rateLimitKey);
@@ -70,11 +60,11 @@ class Login extends BaseLogin
     }
 
     /**
-     * Key of the failed attempts for the email typed in the form, or `null` when there is none.
+     * Key of the attempts of the email typed in the form, or `null` when there is none.
      *
-     * The attempts are counted per account, found like the login finds it: the database compares the emails ignoring
-     * case and accents (e.g. `utf8mb4_unicode_ci` on MySQL), so every variant of an email that signs in to an account
-     * shares its counter. Emails of no account are counted by their lower-cased text.
+     * The database finds an account ignoring case and accents (e.g. `utf8mb4_unicode_ci` on MySQL), so the email is
+     * folded the same way: every spelling that signs in to an account shares its counter. The account is not looked up,
+     * so that the counter behaves the same whether it exists or not, and does not tell which emails have an account.
      */
     protected function getEmailRateLimitKey(): ?string
     {
@@ -84,11 +74,7 @@ class Login extends BaseLogin
             return null;
         }
 
-        $user = Filament::auth()->getProvider()->retrieveByCredentials(['email' => trim($email)]);
-
-        return $user !== null
-            ? 'login-user:'.sha1((string) $user->getAuthIdentifier())
-            : 'login-email:'.sha1(Str::lower(trim($email)));
+        return 'login-email:'.sha1(Str::lower(Str::ascii(trim($email))));
     }
 
     #[Unexposed]

@@ -3,8 +3,8 @@
 use App\Filament\Pages\Auth\Login;
 use App\Models\User;
 use Filament\Facades\Filament;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
@@ -38,7 +38,7 @@ function attemptLoginFromNewAddress(string $email, string $password): Testable
 }
 
 it('blocks an email after too many failed attempts, whatever the IP address', function () {
-    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL) as $attempt) {
+    foreach (range(1, Login::MAX_ATTEMPTS_PER_EMAIL) as $attempt) {
         attemptLoginFromNewAddress('publisher@example.com', 'wrong-password-'.$attempt)
             ->assertHasFormErrors(['email']);
     }
@@ -46,15 +46,15 @@ it('blocks an email after too many failed attempts, whatever the IP address', fu
     attemptLoginFromNewAddress('publisher@example.com', 'correct-horse-battery-staple')
         ->assertHasNoFormErrors()
         ->assertNotified(__('filament-panels::auth/pages/login.notifications.throttled.title', [
-            'seconds' => Login::FAILED_ATTEMPTS_DECAY_SECONDS,
-            'minutes' => Login::FAILED_ATTEMPTS_DECAY_SECONDS / 60,
+            'seconds' => Login::ATTEMPTS_DECAY_SECONDS,
+            'minutes' => Login::ATTEMPTS_DECAY_SECONDS / 60,
         ]));
 
     $this->assertGuest();
 });
 
 it('counts the email without regard to case and surrounding spaces', function () {
-    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL) as $attempt) {
+    foreach (range(1, Login::MAX_ATTEMPTS_PER_EMAIL) as $attempt) {
         attemptLoginFromNewAddress(' Publisher@Example.com ', 'wrong-password-'.$attempt);
     }
 
@@ -63,33 +63,41 @@ it('counts the email without regard to case and surrounding spaces', function ()
     $this->assertGuest();
 });
 
-it('counts every variant of an email that signs in to the same account together', function () {
-    // MySQL compares the emails ignoring accents too (`utf8mb4_unicode_ci`): each variant finds the same account
-    $variants = ['publishér@example.com', 'publìsher@example.com', 'publisher@exámple.com', 'pùblisher@example.com', 'publisher@example.com'];
+it('counts every spelling of an email together, whether or not it has an account', function (string $email) {
+    // MySQL finds an account ignoring case and accents (`utf8mb4_unicode_ci`): every spelling would sign in to it.
+    // An email without an account is blocked the same way, so the limit does not tell which emails have one.
+    $variants = [Str::upper($email), Str::replaceFirst('e', 'é', $email), Str::replaceFirst('a', 'á', $email), " {$email} ", $email];
 
-    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL) as $attempt) {
+    foreach (range(1, Login::MAX_ATTEMPTS_PER_EMAIL) as $attempt) {
         attemptLoginFromNewAddress($variants[$attempt % count($variants)], 'wrong-password-'.$attempt);
     }
 
-    attemptLoginFromNewAddress('publisher@example.com', 'correct-horse-battery-staple');
+    attemptLoginFromNewAddress($email, 'correct-horse-battery-staple')
+        ->assertNotified(__('filament-panels::auth/pages/login.notifications.throttled.title', [
+            'seconds' => Login::ATTEMPTS_DECAY_SECONDS,
+            'minutes' => Login::ATTEMPTS_DECAY_SECONDS / 60,
+        ]));
 
     $this->assertGuest();
-})->skip(fn (): bool => DB::getDriverName() !== 'mysql', 'Only MySQL compares the emails ignoring accents.');
+})->with([
+    'with an account' => ['publisher@example.com'],
+    'without an account' => ['nobody@example.com'],
+]);
 
 it('counts the failed attempts of an email without an account by its text', function () {
-    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL) as $attempt) {
+    foreach (range(1, Login::MAX_ATTEMPTS_PER_EMAIL) as $attempt) {
         attemptLoginFromNewAddress('Nobody@Example.com', 'wrong-password-'.$attempt);
     }
 
     attemptLoginFromNewAddress('nobody@example.com', 'any-password')
         ->assertNotified(__('filament-panels::auth/pages/login.notifications.throttled.title', [
-            'seconds' => Login::FAILED_ATTEMPTS_DECAY_SECONDS,
-            'minutes' => Login::FAILED_ATTEMPTS_DECAY_SECONDS / 60,
+            'seconds' => Login::ATTEMPTS_DECAY_SECONDS,
+            'minutes' => Login::ATTEMPTS_DECAY_SECONDS / 60,
         ]));
 });
 
 it('does not block the other emails', function () {
-    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL) as $attempt) {
+    foreach (range(1, Login::MAX_ATTEMPTS_PER_EMAIL) as $attempt) {
         attemptLoginFromNewAddress('someone-else@example.com', 'wrong-password-'.$attempt);
     }
 
@@ -100,7 +108,7 @@ it('does not block the other emails', function () {
 });
 
 it('forgets the failed attempts of an email after a successful login', function () {
-    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL - 1) as $attempt) {
+    foreach (range(1, Login::MAX_ATTEMPTS_PER_EMAIL - 1) as $attempt) {
         attemptLoginFromNewAddress('publisher@example.com', 'wrong-password-'.$attempt);
     }
 
@@ -109,7 +117,7 @@ it('forgets the failed attempts of an email after a successful login', function 
     auth()->logout();
 
     // A new series of failed attempts starts from zero
-    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL - 1) as $attempt) {
+    foreach (range(1, Login::MAX_ATTEMPTS_PER_EMAIL - 1) as $attempt) {
         attemptLoginFromNewAddress('publisher@example.com', 'wrong-password-'.$attempt);
     }
 
