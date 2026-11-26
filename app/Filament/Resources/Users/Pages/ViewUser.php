@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\Actions\DeleteUserAction;
 use App\Filament\Resources\Users\Actions\ResendInvitationAction;
+use App\Filament\Resources\Users\Actions\TransferRootAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\Users\Widgets\PublisherStatistics;
 use Filament\Actions\EditAction;
@@ -37,6 +38,7 @@ class ViewUser extends ViewRecord
             // The policy denies editing the protected root user with a message, shown as the tooltip
             EditAction::make()
                 ->authorizationTooltip(),
+            TransferRootAction::make(),
             DeleteUserAction::make(),
         ];
     }

@@ -146,7 +146,8 @@ one, so that nobody else can install the application first.
     php artisan och:doctor
     ```
 
-> 🔒 **The root user** is the user with ID 1. It can never be deleted nor impersonated and, outside of the `production`
+> 🔒 **The root user** is the user with ID 1, until it hands its role over to another super administrator (see
+> [Users](administration/users#handing-the-root-user-over)). It can never be deleted nor impersonated and, outside of the `production`
 > environment, its email, password, access and roles cannot be changed by anyone.
 
 ## Updating

@@ -6,6 +6,7 @@ use App\Filament\Pages\Auth\ResetPassword;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\ValidationException;
 
 class UserObserver
 {
@@ -33,6 +34,13 @@ class UserObserver
                     $user->$field = $user->getOriginal($field);
                 }
             }
+        }
+
+        // There must always be a super administrator who can log in, to manage the application
+        if ($user->isDirty('can_login') && ! $user->can_login && $user->isLastSuperAdmin()) {
+            throw ValidationException::withMessages([
+                'can_login' => __('filament-resources.user.last_super_admin_access'),
+            ]);
         }
     }
 
@@ -70,7 +78,8 @@ class UserObserver
     }
 
     /**
-     * Guard the deletion of a user: the root user can never be deleted, and neither can a user who has assignments.
+     * Guard the deletion of a user: the root user can never be deleted, and neither can a user who has assignments, or
+     * the last super administrator who can log in (nobody could manage the application anymore).
      *
      * It is not the "deleting" handler of the observer: `User::booting()` registers it before the "deleting" listeners
      * of the traits (e.g. `HasRoles`, which detaches the roles), so that a refused deletion leaves the user untouched.
@@ -88,7 +97,7 @@ class UserObserver
             throw new Exception(__('profile.root_user_protection.account_deletion_not_allowed'));
         }
 
-        if ($user->hasAssignments()) {
+        if ($user->hasAssignments() || $user->isLastSuperAdmin()) {
             return false;
         }
 

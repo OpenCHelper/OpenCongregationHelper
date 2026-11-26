@@ -149,7 +149,8 @@ solo come aggiungerne uno, così che nessun altro possa installare l'applicazion
     php artisan och:doctor
     ```
 
-> 🔒 **L'utente root** è l'utente con ID 1. Non può mai essere eliminato né impersonato e, al di fuori dell'ambiente
+> 🔒 **L'utente root** è l'utente con ID 1, finché non cede il ruolo a un altro super amministratore (vedi
+> [Utenti](administration/users#cedere-lutente-root)). Non può mai essere eliminato né impersonato e, al di fuori dell'ambiente
 > `production`, nessuno può modificarne email, password, accesso e ruoli.
 
 ## Aggiornamento

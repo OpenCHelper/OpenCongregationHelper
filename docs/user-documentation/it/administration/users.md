@@ -113,9 +113,24 @@ con delle assegnazioni possono eliminare il proprio account.
 
 ## L'utente root
 
-L'utente root è il primo utente, creato durante l'installazione. Per evitare di perdere l'accesso all'applicazione:
+L'utente root è il primo utente, creato durante l'installazione, finché non cede il ruolo a un altro utente. Per evitare
+di perdere l'accesso all'applicazione:
 
 - non può mai essere eliminato (viene escluso dall'eliminazione di massa) né impersonato;
 - al di fuori dell'ambiente di produzione, non se ne possono modificare email, password, accesso e ruoli, e solo
   l'utente root stesso può modificarlo: per gli altri utenti il suo pulsante **Modifica** è disabilitato e la sua
   pagina di modifica non si può aprire.
+
+### Cedere l'utente root
+
+In produzione, l'utente root può rendere un altro utente l'utente root, ad esempio quando chi ha installato
+l'applicazione la affida a qualcun altro: nella pagina di un super amministratore che può accedere, clicca **Rendi
+utente root** e conferma con la propria password. Il nuovo utente root riceve le protezioni qui sopra; il precedente
+resta super amministratore, e da quel momento si può modificare, impersonare o eliminare come gli altri utenti. Nelle
+demo e nelle anteprime l'utente root resta il primo utente.
+
+### L'ultimo super amministratore
+
+Deve esserci sempre un super amministratore che può accedere, per gestire l'applicazione. Finché ce n'è uno solo, non se
+ne può disabilitare l'accesso, non gli si può togliere il ruolo **super_admin** e non si può eliminare, nemmeno dal suo
+profilo: assegna prima il ruolo a un altro utente. Nemmeno il ruolo **super_admin** si può eliminare.

@@ -8,6 +8,7 @@ use App\Filament\Resources\Roles\Roles\RoleResource;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Override;
@@ -21,7 +22,9 @@ class EditRole extends EditRecord
     protected function getActions(): array
     {
         return [
-            DeleteAction::make(),
+            // The super admin role cannot be deleted (see `AppServiceProvider::protectSuperAdminRole()`)
+            DeleteAction::make()
+                ->hidden(fn (Model $record): bool => $record->getAttribute('name') === Utils::getSuperAdminName()),
         ];
     }
 

@@ -6,6 +6,7 @@ use App\Enums\ContactType;
 use App\Enums\DepartmentKey;
 use App\Enums\DepartmentRole;
 use App\Observers\UserObserver;
+use App\Settings\SecuritySettings;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
@@ -30,11 +31,13 @@ use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use LogicException;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 use STS\FilamentImpersonate\Facades\Impersonation;
+use Throwable;
 
 #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasAvatar, HasLocalePreference, HasName, MustVerifyEmail
@@ -189,19 +192,61 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
-     * Check if this user is the root user (user with ID 1).
+     * The ID of the root user: the first user (ID 1), until the root user hands its role over to another super
+     * administrator ({@see SecuritySettings::$root_user_id}).
+     *
+     * Before the settings exist (e.g. while the installation creates the tables) it is the first user.
      */
-    public function isRootUser(): bool
+    public static function rootUserId(): int
     {
-        return $this->exists && $this->id === 1;
+        try {
+            return app(SecuritySettings::class)->root_user_id;
+        } catch (Throwable) {
+            return 1;
+        }
     }
 
     /**
-     * Get the root user (user with ID 1), if it exists.
+     * Check if this user is the root user.
+     */
+    public function isRootUser(): bool
+    {
+        return $this->exists && $this->getKey() === static::rootUserId();
+    }
+
+    /**
+     * Get the root user, if it exists.
      */
     public static function rootUser(): ?self
     {
-        return static::query()->find(1);
+        return static::query()->find(static::rootUserId());
+    }
+
+    /**
+     * Make this user the root user, in place of the current one. Only a super administrator who can log in can be
+     * the root user, so that there is always someone to manage the application.
+     */
+    public function makeRootUser(): void
+    {
+        if (! $this->exists || ! $this->can_login || ! $this->hasRole('super_admin')) {
+            throw new LogicException('Only a super administrator who can log in can become the root user.');
+        }
+
+        $settings = app(SecuritySettings::class);
+        $settings->root_user_id = $this->getKey();
+        $settings->save();
+    }
+
+    /**
+     * Whether this user is a super administrator who can log in, and the only one: removing their role or their
+     * access, or deleting them, would leave nobody able to manage the application.
+     */
+    public function isLastSuperAdmin(): bool
+    {
+        return $this->exists
+            && $this->getOriginal('can_login')
+            && $this->hasRole('super_admin')
+            && static::role('super_admin')->where('can_login', true)->whereKeyNot($this->getKey())->doesntExist();
     }
 
     /**
@@ -235,6 +280,18 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             $connection->select("select setval(pg_get_serial_sequence(?, 'id'), (select max(id) from {$table}))", [
                 $connection->getTablePrefix().$model->getTable(),
             ]);
+        }
+
+        // The root user may have been handed over to another user before the users were wiped
+        try {
+            $settings = app(SecuritySettings::class);
+
+            if ($settings->root_user_id !== $root->getKey()) {
+                $settings->root_user_id = $root->getKey();
+                $settings->save();
+            }
+        } catch (Throwable) {
+            // The settings don't exist yet: the root user is the first user
         }
 
         return $root;

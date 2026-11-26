@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 /**
- * Delete a user from their page. The root user cannot be deleted, and neither can a user who has assignments
- * ({@see UserObserver::guardDeletion()}): the modal explains why, and offers to disable their access instead, making them a
- * virtual user whose assignments are kept.
+ * Delete a user from their page. The root user cannot be deleted, and neither can a user who has assignments or the last
+ * super administrator who can log in ({@see UserObserver::guardDeletion()}): the modal explains why and, for a user who has
+ * assignments, offers to disable their access instead, making them a virtual user whose assignments are kept.
  */
 class DeleteUserAction extends DeleteAction
 {
@@ -24,13 +24,21 @@ class DeleteUserAction extends DeleteAction
 
         $this
             ->visible(fn (User $record): bool => ! $record->isRootUser())
-            ->modalDescription(fn (User $record): string => $record->hasAssignments()
+            ->modalDescription(fn (User $record): string => static::isRefused($record)
                 ? static::getRefusalExplanation($record)
                 : __('filament-actions::modal.confirmation'))
-            ->modalSubmitAction(fn (User $record): ?bool => $record->hasAssignments() ? false : null)
+            ->modalSubmitAction(fn (User $record): ?bool => static::isRefused($record) ? false : null)
             ->extraModalFooterActions(fn (): array => [static::makeDisableAccessAction()])
             ->failureNotificationTitle(__('filament-resources.user.delete_refused_title'))
             ->failureNotificationBody(fn (User $record): string => static::getRefusalExplanation($record));
+    }
+
+    /**
+     * Whether the user cannot be deleted (the root user is not offered the action at all).
+     */
+    public static function isRefused(User $user): bool
+    {
+        return $user->isLastSuperAdmin() || $user->hasAssignments();
     }
 
     /**
@@ -38,6 +46,10 @@ class DeleteUserAction extends DeleteAction
      */
     public static function getRefusalExplanation(User $user): string
     {
+        if ($user->isLastSuperAdmin()) {
+            return __('filament-resources.user.last_super_admin');
+        }
+
         $explanation = __('filament-resources.user.delete_refused_body');
 
         if ($user->can_login) {
@@ -56,7 +68,7 @@ class DeleteUserAction extends DeleteAction
             ->label(__('filament-resources.user.action_disable_access'))
             ->icon(Heroicon::OutlinedNoSymbol)
             ->color('warning')
-            ->visible(fn (User $record): bool => $record->can_login && $record->hasAssignments() && Gate::allows('update', $record))
+            ->visible(fn (User $record): bool => $record->can_login && $record->hasAssignments() && ! $record->isLastSuperAdmin() && Gate::allows('update', $record))
             ->action(function (User $record, Component $livewire): void {
                 $record->update(['can_login' => false]);
 
