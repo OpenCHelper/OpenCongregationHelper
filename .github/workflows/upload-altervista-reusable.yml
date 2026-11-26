@@ -80,10 +80,11 @@ on:
         type: string
       cron-folder:
         description: >-
-          Folder of cron-job.org whose job calls the scheduler of the deployment (Altervista has no cron), created or
-          updated on every deployment with the `CRON_JOB_ORG_API_KEY` secret of the environment. Needs the `dotenv`
-          input: a new `ARTISAN_CRON_TOKEN` is written in the `.env` file and given to the job on every deployment.
-          Empty for no cron job.
+          Folder of cron-job.org whose job calls the scheduler of the deployment (Altervista has no cron), with the
+          `CRON_JOB_ORG_API_KEY` secret of the environment. Needs the `dotenv` input, which receives the token of the
+          job as `ARTISAN_CRON_TOKEN`: the `ARTISAN_CRON_TOKEN` secret of the environment, when set, so that the job is
+          only created or updated by manual runs (`workflow_dispatch`) and re-runs; otherwise a new random one on every
+          deployment, given to the job each time. Empty for no cron job.
         required: false
         default: ""
         type: string
@@ -181,6 +182,9 @@ jobs:
           CRON_FOLDER: ${{ inputs.cron-folder }}
           CRON_OPTIONAL: ${{ inputs.cron-optional }}
           CRON_JOB_ORG_API_KEY: ${{ secrets.CRON_JOB_ORG_API_KEY }}
+          FIXED_CRON_TOKEN: ${{ secrets.ARTISAN_CRON_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           ROOT_PASSWORD: ${{ secrets.ROOT_PASSWORD }}
           RESET_DATABASE: ${{ inputs.reset-database }}
@@ -193,21 +197,36 @@ jobs:
             echo "::error::The dotenv input needs an archive deployment: set the environment-folder input too."
             exit 1
           fi
-          if [[ -n "$CRON_FOLDER" ]] && [[ -z "$CRON_JOB_ORG_API_KEY" ]]; then
+
+          # Secret sent by the cron job to the scheduler endpoint. A fixed one (`ARTISAN_CRON_TOKEN` secret) never
+          # changes, so the job is only synchronized by manual runs and re-runs (e.g. to create it): fewer calls to the API of
+          # cron-job.org, which rate limits them. Otherwise a new random one on every deployment, given to the job too
+          cron_token=""
+          cron_sync=false
+          if [[ -n "$FIXED_CRON_TOKEN" ]]; then
+            cron_token="$FIXED_CRON_TOKEN"
+            if [[ "$EVENT_NAME" == "workflow_dispatch" ]] || (( RUN_ATTEMPT > 1 )); then
+              cron_sync=true
+            fi
+          elif [[ -n "$CRON_FOLDER" ]]; then
+            cron_token="$(openssl rand -hex 32)"
+            echo "::add-mask::${cron_token}"
+            cron_sync=true
+          fi
+
+          if [[ -n "$CRON_FOLDER" ]] && [[ "$cron_sync" == "true" ]] && [[ -z "$CRON_JOB_ORG_API_KEY" ]]; then
             if [[ "$CRON_OPTIONAL" != "true" ]]; then
               echo "::error::Set the CRON_JOB_ORG_API_KEY secret of the environment, needed by the cron-folder input."
               exit 1
             fi
             echo "::warning::No CRON_JOB_ORG_API_KEY secret in the environment: the cron job is not created nor updated."
-            CRON_FOLDER=""
+            cron_sync=false
           fi
 
-          # Secret sent by the cron job to the scheduler endpoint: a new one on every deployment, also given to the job
-          cron_token=""
-          if [[ -n "$CRON_FOLDER" ]]; then
-            cron_token="$(openssl rand -hex 32)"
-            echo "::add-mask::${cron_token}"
+          if [[ -n "$CRON_FOLDER" ]] && [[ "$cron_sync" == "true" ]]; then
             echo "cron-token=${cron_token}" >> "$GITHUB_OUTPUT"
+          elif [[ -n "$CRON_FOLDER" ]] && [[ -n "$FIXED_CRON_TOKEN" ]]; then
+            echo "Fixed ARTISAN_CRON_TOKEN: the cron job is left as it is (run the workflow manually to create or update it)."
           fi
 
           # Values are single-quoted, so that they are read literally (no `${...}` interpolation)
@@ -217,6 +236,10 @@ jobs:
               exit 1
             fi
           done
+          if [[ "$FIXED_CRON_TOKEN" == *"'"* ]]; then
+            echo "::error::The ARTISAN_CRON_TOKEN secret cannot contain single quotes."
+            exit 1
+          fi
 
           # Without the empty placeholders of the push keys (e.g. copied from `.env.example`), as the first value wins
           DOTENV="$(printf '%s\n' "$DOTENV" | sed -E "/^VAPID_[A-Z_]*=(''|\"\")?[[:space:]]*$/d")"
@@ -472,8 +495,8 @@ jobs:
 
             ${{ inputs.seed-dummy-data && 'artisan db:seed --class=FakeDataSeeder' || '' }}
 
-      # Once the deployment runs with the new token (see the `cron-folder` input): the job of the folder is matched by
-      # title, so that every deployment updates it (with the new token) instead of creating it again
+      # Once the deployment runs with the token (see the `cron-folder` input): the job of the folder is matched by title,
+      # so that every synchronization updates it (with the token) instead of creating it again
       - name: Create or update the cron job
         if: steps.dotenv.outputs.cron-token != ''
         continue-on-error: ${{ inputs.cron-optional }}

@@ -177,6 +177,9 @@ FTP_PASSWORD=password
 # PREVIEW only: password of the root user of the previews, and API key of cron-job.org
 ROOT_PASSWORD=MyVerySecretPassword
 CRON_JOB_ORG_API_KEY=MyCronJobOrgApiKey
+
+# Optional (PREVIEW and Nightly): fixed token of the cron jobs, so they are not updated on every deployment
+ARTISAN_CRON_TOKEN=MyCronToken
 ```
 
 ## Deploying
