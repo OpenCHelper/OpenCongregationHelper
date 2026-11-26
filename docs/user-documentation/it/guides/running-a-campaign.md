@@ -20,9 +20,9 @@ Tutti gli utenti che possono accedere ricevono una notifica della nuova campagna
 
 Puoi collegare i territori alla campagna in due modi:
 
-- dall'elenco **Territori**: filtra i territori **Non assegnati**, selezionali e usa **Assegna massivamente**, scegliendo
-  la campagna nel campo **Campagna**;
-- dalla pagina della campagna: apri la scheda **Assegnazioni** e crea una nuova assegnazione.
+- dall'elenco **Territori**: imposta il filtro **Stato assegnazione** su **Non assegnati**, seleziona i territori e usa
+  **Assegna massivamente**, scegliendo la campagna nel campo **Campagna**;
+- dalla pagina della campagna: apri la scheda **Assegnazioni** e crea una nuova assegnazione, un territorio alla volta.
 
 Vedi [Campagne](../assignments/campaigns) per i dettagli.
 

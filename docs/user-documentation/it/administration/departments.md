@@ -48,4 +48,4 @@ dall'[elenco degli utenti](users): selezionali, apri il menu **Azioni** e clicca
 **Reparto** e il **Ruolo nel reparto**. Chi serve già nel reparto mantiene il suo ruolo.
 
 Gli amministratori possono gestire i membri di ogni reparto; i responsabili solo quelli dei propri reparti.
-La colonna e il filtro **Reparti** dell'[elenco degli utenti](users) mostrano chi serve in quale reparto.
+La colonna **Reparti** e il filtro **Reparto** dell'[elenco degli utenti](users) mostrano chi serve in quale reparto.

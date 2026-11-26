@@ -24,6 +24,9 @@ La colonna **Stato campagna** viene calcolata a partire dalla data **Valida fino
 | **Quasi scaduta** | Mancano 3 giorni o meno. |
 | **Terminata** | La data di fine è passata. Non è più possibile assegnare territori alla campagna. |
 
+7 e 3 giorni sono i valori predefiniti: i super amministratori possono cambiarli dalle
+[impostazioni](../administration/settings#campagne). Le altre pagine di questa guida usano i valori predefiniti.
+
 Il numero di campagne che terminano entro 7 giorni compare in arancione accanto a **Campagne** nella barra laterale.
 
 ## Creare una campagna
@@ -59,7 +62,7 @@ La scheda **Assegnazioni** di una campagna ne elenca le assegnazioni (di default
 
 - Il pulsante per creare una nuova assegnazione apre una procedura guidata in tre passaggi: **Dettagli Assegnazione**
   (territorio, assegnatario e data di inizio), **Informazioni Aggiuntive** (note) e **Revisione**. Vengono proposti solo
-  i territori non già fuori.
+  i territori non già fuori. Il pulsante non compare più quando la campagna è terminata.
 - Spunta alcune assegnazioni e scegli **Termina assegnazioni** dalle azioni di massa per riconsegnarle tutte insieme, ad
   esempio alla fine della campagna. Le assegnazioni già riconsegnate vengono saltate.
 - Le assegnazioni ancora in corso quando la campagna è terminata, o termina entro 7 giorni, sono evidenziate in rosso o

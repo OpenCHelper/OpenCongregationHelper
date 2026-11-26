@@ -20,9 +20,10 @@ All the users who can log in are notified of the new campaign.
 
 You can link territories to the campaign in two ways:
 
-- from the **Territories** list: filter the **Unassigned** territories, select them and use **Assign Massively**,
-  choosing the campaign in the **Campaign** field;
-- from the campaign page: open the **Assignments** tab and click **New territory assignment**.
+- from the **Territories** list: set the **Assignment Status** filter to **Unassigned**, select the territories and use
+  **Assign Massively**, choosing the campaign in the **Campaign** field;
+- from the campaign page: open the **Assignments** tab and click **New territory assignment**, one territory at a
+  time.
 
 See [Campaigns](../assignments/campaigns) for the details.
 
