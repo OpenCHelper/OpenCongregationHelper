@@ -31,7 +31,7 @@ A territory can be described in two ways, and they can coexist:
 | | **Map** | **Image** |
 |-|---------|-----------|
 | What it is | A shape drawn on an interactive OpenStreetMap map | A picture, e.g. a photo or scan of the paper territory card |
-| Shown on the [dashboard](../basics/dashboard) | Yes, for residential territories (only the areas, see [Drawing maps](maps)) | No |
+| Shown on the [dashboard](../basics/dashboard) | Yes, for residential territories (areas and lines, see [Drawing maps](maps)) | No |
 | Can be zoomed and used to navigate | Yes | No |
 | Best for | New territories | Territories coming from the paper register |
 

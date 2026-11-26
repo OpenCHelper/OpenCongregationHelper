@@ -12,6 +12,7 @@ use Closure;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\BaseLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
+use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polyline;
 use EduardoRibeiroDev\FilamentLeaflet\Widgets\MapWidget;
 use Filament\Support\Colors\Color;
 use Illuminate\Database\Eloquent\Builder;
@@ -220,12 +221,15 @@ class TerritoryGlobalMap extends MapWidget
             $color = $category?->getColor() ?? ($territory->territoryZone?->color ?: null);
             $popupContent = $this->getTerritoryPopupContent($territory, $category);
 
-            foreach ($this->getTerritoryPolygons($territory) as $index => $coordinates) {
-                $polygons[] = Polygon::make($coordinates)
-                    // The map only redraws the polygons whose id changed, so the id must change with their look
+            $mapShapes = $territory->getMapShapes();
+
+            foreach ([...$mapShapes['areas'], ...$mapShapes['lines']] as $index => $coordinates) {
+                $isArea = $index < count($mapShapes['areas']);
+
+                $polygons[] = ($isArea ? Polygon::make($coordinates)->fillColor($color) : Polyline::make($coordinates)->weight(5))
+                    // The map only redraws the shapes whose id changed, so the id must change with their look
                     ->id(sprintf('territory-%d-%d-%s', $territory->id, $index, md5(json_encode([$color, $popupContent, $coordinates]))))
                     ->color($color)
-                    ->fillColor($color)
                     ->title(e($territory->name))
                     ->popupContent($popupContent)
                     // The layers control shows the group names as HTML
@@ -320,32 +324,6 @@ class TerritoryGlobalMap extends MapWidget
         }
 
         return implode('<br>', $lines);
-    }
-
-    /**
-     * Get the polygons of the map of a territory, as lists of rings of [latitude, longitude] points.
-     *
-     * @return list<list<list<array{0: float, 1: float}>>>
-     */
-    protected function getTerritoryPolygons(Territory $territory): array
-    {
-        $geojson = json_decode($territory->geojson, true);
-
-        $polygons = [];
-
-        foreach ($geojson['features'] ?? [] as $feature) {
-            if (($feature['geometry']['type'] ?? null) !== 'Polygon') {
-                continue;
-            }
-
-            // GeoJSON points are [longitude, latitude], while Leaflet expects [latitude, longitude]
-            $polygons[] = array_map(
-                fn (array $ring): array => array_map(fn (array $point): array => [$point[1], $point[0]], $ring),
-                $feature['geometry']['coordinates'],
-            );
-        }
-
-        return $polygons;
     }
 
     /**

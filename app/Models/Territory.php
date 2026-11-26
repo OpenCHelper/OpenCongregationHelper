@@ -179,4 +179,33 @@ class Territory extends Model
             },
         );
     }
+
+    /**
+     * Get the shapes drawn on the map of the territory, with [latitude, longitude] points as Leaflet expects them
+     * (GeoJSON points are [longitude, latitude]): the areas (`Polygon` and `MultiPolygon` features, each a list of
+     * rings, the first being the outline and the others its holes) and the lines (`LineString` and `MultiLineString`).
+     * Other features, such as the points of old text labels, are left out.
+     *
+     * @return array{areas: list<list<list<array{0: float, 1: float}>>>, lines: list<list<array{0: float, 1: float}>>}
+     */
+    public function getMapShapes(): array
+    {
+        $geojson = json_decode((string) $this->geojson, true);
+        $toLatLng = fn (array $points): array => array_map(fn (array $point): array => [$point[1], $point[0]], $points);
+        $shapes = ['areas' => [], 'lines' => []];
+
+        foreach ($geojson['features'] ?? [] as $feature) {
+            $coordinates = $feature['geometry']['coordinates'] ?? [];
+
+            match ($feature['geometry']['type'] ?? null) {
+                'Polygon' => $shapes['areas'][] = array_map($toLatLng, $coordinates),
+                'MultiPolygon' => array_push($shapes['areas'], ...array_map(fn (array $polygon): array => array_map($toLatLng, $polygon), $coordinates)),
+                'LineString' => $shapes['lines'][] = $toLatLng($coordinates),
+                'MultiLineString' => array_push($shapes['lines'], ...array_map($toLatLng, $coordinates)),
+                default => null,
+            };
+        }
+
+        return $shapes;
+    }
 }

@@ -265,7 +265,9 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                             ->drawCircle(false)
                                             ->drawCircleMarker(false)
                                             ->dragMode(false)
-                                            ->drawText($schema->getOperation() !== 'view')
+                                            // Text labels are not shown where the territory is used (assignment, shared page,
+                                            // dashboard), which draw only its areas and lines (see `Territory::getMapShapes()`)
+                                            ->drawText(false)
                                             ->drawRectangle($schema->getOperation() !== 'view')
                                             ->cutPolygon($schema->getOperation() !== 'view')
                                             ->editPolygon($schema->getOperation() !== 'view')
