@@ -34,6 +34,7 @@ class ViewUser extends ViewRecord
             ResendInvitationAction::make(),
             Impersonate::make()
                 ->record($this->getRecord())
+                ->requiresConfirmation()
                 ->redirectTo('/'),
             EditAction::make()
                 ->disabled(function () {
