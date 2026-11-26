@@ -33,7 +33,6 @@ test('users can authenticate using the login screen', function () {
 
     // Test that authenticated user can access protected routes
     $response = $this->get('/app');
-    // Accept redirect as valid (user might need team assignment)
     $this->assertTrue(in_array($response->getStatusCode(), [200, 302]));
 });
 

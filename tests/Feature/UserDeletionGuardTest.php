@@ -1,6 +1,5 @@
 <?php
 
-use App\Actions\Jetstream\DeleteTeam;
 use App\Actions\Jetstream\DeleteUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -236,6 +235,6 @@ test('users who have assignments cannot delete their own account', function () {
 test('the account deletion refuses users who have assignments', function () {
     assignTerritoryTo($this->publisher);
 
-    expect(fn () => (new DeleteUser(new DeleteTeam))->delete($this->publisher))->toThrow(ValidationException::class)
+    expect(fn () => (new DeleteUser)->delete($this->publisher))->toThrow(ValidationException::class)
         ->and(User::find($this->publisher->id))->not->toBeNull();
 });

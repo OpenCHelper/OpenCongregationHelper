@@ -54,3 +54,27 @@ it('does not add the two factor confirmation column twice', function () {
 
     expect(Schema::hasColumn('users', 'two_factor_confirmed_at'))->toBeTrue();
 });
+
+it('drops the unused team tables and rolls them back', function () {
+    $dropTeamTables = loadMigration('2026_11_25_233937_drop_team_tables');
+
+    expect(Schema::hasTable('teams'))->toBeFalse()
+        ->and(Schema::hasTable('team_user'))->toBeFalse()
+        ->and(Schema::hasTable('team_invitations'))->toBeFalse()
+        ->and(Schema::hasColumn('users', 'current_team_id'))->toBeFalse();
+
+    $dropTeamTables->down();
+
+    expect(Schema::hasTable('teams'))->toBeTrue()
+        ->and(Schema::hasTable('team_user'))->toBeTrue()
+        ->and(Schema::hasTable('team_invitations'))->toBeTrue()
+        ->and(Schema::hasColumn('users', 'current_team_id'))->toBeTrue();
+
+    $dropTeamTables->up();
+    // Running it again on a database without the tables does nothing
+    $dropTeamTables->up();
+
+    expect(Schema::hasTable('teams'))->toBeFalse()
+        ->and(Schema::hasTable('team_invitations'))->toBeFalse()
+        ->and(Schema::hasColumn('users', 'current_team_id'))->toBeFalse();
+});

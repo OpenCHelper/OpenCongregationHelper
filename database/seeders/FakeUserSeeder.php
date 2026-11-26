@@ -21,6 +21,6 @@ class FakeUserSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        User::factory(10)->withPersonalTeam()->create();
+        User::factory(10)->create();
     }
 }

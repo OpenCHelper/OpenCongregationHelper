@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Actions\Jetstream\DeleteTeam;
 use App\Actions\Jetstream\DeleteUser;
 use App\Models\User;
 use App\Policies\UserPolicy;
@@ -27,7 +26,7 @@ class RootUserDeletionPreventionTest extends TestCase
 
     public function test_jetstream_delete_action_prevents_root_user_deletion()
     {
-        $deleteUser = new DeleteUser(new DeleteTeam);
+        $deleteUser = new DeleteUser;
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage(__('profile.root_user_protection.account_deletion_not_allowed'));
@@ -37,7 +36,7 @@ class RootUserDeletionPreventionTest extends TestCase
 
     public function test_jetstream_delete_action_allows_regular_user_deletion()
     {
-        $deleteUser = new DeleteUser(new DeleteTeam);
+        $deleteUser = new DeleteUser;
 
         // This should not throw an exception
         $deleteUser->delete($this->regularUser);
