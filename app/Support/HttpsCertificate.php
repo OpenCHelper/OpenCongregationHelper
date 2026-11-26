@@ -9,7 +9,7 @@ use Carbon\CarbonImmutable;
  *
  * Besides the verification of PHP, the certificate itself is checked (its names and its dates), as the browsers do: on
  * some hosting the connection the server makes to itself is not the one the browsers make. A certificate that cannot be
- * read is reported as not checked, never as valid.
+ * read, or a host that cannot be reached from the server, is reported as not checked, never as valid nor as invalid.
  *
  * Bound in the container, so that the tests replace it instead of connecting to the host.
  */
@@ -26,10 +26,46 @@ class HttpsCertificate
      */
     public function inspect(string $host, int $port = 443): array
     {
+        $verified = $this->connect($host, $port, verify: true);
+
+        if ($verified['connected']) {
+            return is_array($verified['details'])
+                ? self::assess($verified['details'], $host)
+                : ['valid' => null, 'expires_at' => null, 'error' => 'the certificate could not be read'];
+        }
+
+        // The verification of PHP fails both for a certificate it does not trust and for a host it cannot reach: only a
+        // certificate read without it tells them apart
+        $unverified = $this->connect($host, $port, verify: false);
+
+        if (! $unverified['connected']) {
+            return ['valid' => null, 'expires_at' => null, 'error' => $verified['error'] ?: $unverified['error'] ?: 'connection failed'];
+        }
+
+        if (! is_array($unverified['details'])) {
+            return ['valid' => null, 'expires_at' => null, 'error' => 'the certificate could not be read'];
+        }
+
+        $assessment = self::assess($unverified['details'], $host);
+
+        // Right names and dates, but not trusted (e.g. self-signed, or an incomplete chain)
+        return $assessment['valid']
+            ? ['valid' => false, 'expires_at' => $assessment['expires_at'], 'error' => $verified['error'] ?: 'the certificate is not trusted']
+            : $assessment;
+    }
+
+    /**
+     * Connect to the host over TLS, with or without the verification of its certificate, and read the certificate.
+     *
+     * @return array{connected: bool, details: array<string, mixed>|null, error: string}
+     */
+    protected function connect(string $host, int $port, bool $verify): array
+    {
         $context = stream_context_create(['ssl' => [
             'capture_peer_cert' => true,
-            'verify_peer' => true,
-            'verify_peer_name' => true,
+            'verify_peer' => $verify,
+            'verify_peer_name' => $verify,
+            'allow_self_signed' => ! $verify,
             'SNI_enabled' => true,
             'peer_name' => $host,
         ]]);
@@ -49,9 +85,7 @@ class HttpsCertificate
         }
 
         if ($client === false) {
-            $error = trim($errorString !== '' ? $errorString : $errorMessage);
-
-            return ['valid' => false, 'expires_at' => null, 'error' => $error !== '' ? $error : 'connection failed'];
+            return ['connected' => false, 'details' => null, 'error' => trim($errorString !== '' ? $errorString : $errorMessage)];
         }
 
         $certificate = stream_context_get_params($client)['options']['ssl']['peer_certificate'] ?? null;
@@ -59,11 +93,7 @@ class HttpsCertificate
 
         $details = $certificate !== null ? openssl_x509_parse($certificate) : false;
 
-        if (! is_array($details)) {
-            return ['valid' => null, 'expires_at' => null, 'error' => 'the certificate could not be read'];
-        }
-
-        return self::assess($details, $host);
+        return ['connected' => true, 'details' => is_array($details) ? $details : null, 'error' => ''];
     }
 
     /**

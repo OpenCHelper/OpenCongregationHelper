@@ -647,6 +647,44 @@ test('the review step shows the choices before installing', function () {
         ->assertSeeHtml(e("step: 'form.".Str::slug(__('setup.steps.root.label'))."::data::wizard-step'"));
 });
 
+test('the values of .env reach the page only with the setup token', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    file_put_contents($this->envPath, str_replace('DB_HOST=set', 'DB_HOST=db.internal.example', file_get_contents($this->envPath)));
+
+    Livewire::test(SetupWizard::class)
+        ->assertDontSee('db.internal.example')
+        ->set('unlock.token', 'the-setup-token')
+        ->call('unlockWizard')
+        ->assertSchemaStateSet(['db_host' => 'db.internal.example'], 'form');
+});
+
+test('a relative SQLite path is inside the database folder, never in the public one', function () {
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_URL=https://congregation.example.com\nAPP_TIMEZONE=UTC\nAPP_LOCALE=en\nMAIL_MAILER=log\nMAIL_FROM_ADDRESS=noreply@example.com\n");
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm(['db_connection' => 'sqlite', 'db_database' => '../public/och.sqlite'])
+        ->goToWizardStep(3)
+        ->assertNotified(__('setup.environment.db_sqlite_public'))
+        ->assertWizardCurrentStep(2);
+
+    expect(file_exists(public_path('och.sqlite')))->toBeFalse();
+
+    $path = database_path('och-setup-test.sqlite');
+
+    try {
+        Livewire::test(SetupWizard::class)
+            ->fillForm(['db_connection' => 'sqlite', 'db_database' => 'och-setup-test.sqlite'])
+            ->goToWizardStep(3)
+            ->assertWizardCurrentStep(3);
+
+        expect(file_get_contents($this->envPath))->toContain("DB_DATABASE={$path}")
+            ->and(file_exists($path))->toBeTrue();
+    } finally {
+        @unlink($path);
+    }
+});
+
 test('the administrators need a new email address, other than the one of the root user', function () {
     completeSetupEnvironmentFile($this->envPath);
     unlockSetupWizard();

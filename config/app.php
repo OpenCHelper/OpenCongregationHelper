@@ -192,6 +192,8 @@ return [
     'setup' => [
         'enabled' => (bool) env('SETUP_WIZARD', true),
         'token' => env('SETUP_TOKEN'),
+        // The file that remembers that the application is installed (`storage/framework/installed` when not set)
+        'marker' => null,
     ],
 
     /*

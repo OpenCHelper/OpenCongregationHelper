@@ -86,7 +86,8 @@ return [
         'app_locale' => 'Lingua dell\'app per gli utenti che non ne hanno scelta una.',
         'database' => 'Database',
         'db_prefix' => 'Prefisso dei nomi delle tabelle, per condividere il database con altre applicazioni (facoltativo).',
-        'db_sqlite' => 'Il percorso completo del file del database: viene creato se non esiste.',
+        'db_sqlite' => 'Il percorso del file del database (uno relativo è nella cartella database): viene creato se non esiste.',
+        'db_sqlite_public' => 'Il file del database non può stare nella cartella public, da cui chiunque potrebbe scaricarlo.',
         'mail' => 'Email',
         'mailers' => [
             'log' => 'Log: non inviare, scrivi solo nel log',

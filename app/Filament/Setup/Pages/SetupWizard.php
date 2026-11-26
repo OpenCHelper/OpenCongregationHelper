@@ -191,6 +191,7 @@ class SetupWizard extends Page
         'mariadb' => 'MariaDB',
         'pgsql' => 'PostgreSQL',
         'sqlite' => 'SQLite',
+        'sqlsrv' => 'SQL Server',
     ];
 
     /**
@@ -289,6 +290,15 @@ class SetupWizard extends Page
         $this->requestRoot = request()->root();
         $this->refreshEnvironmentVariables();
 
+        // The values already set in `.env` reach the page (and its Livewire state) only with the token
+        $this->isUnlocked() ? $this->fillWizard() : $this->form->fill();
+    }
+
+    /**
+     * Fill the wizard with its defaults, the values already set in `.env` and the ones typed before a reload.
+     */
+    protected function fillWizard(): void
+    {
         $settingsTimezone = (string) config('app.timezone');
         [$rootFirstName, $rootLastName] = array_pad(explode(' ', (string) config('app.initial_root_user.name'), 2), 2, '');
 
@@ -508,6 +518,7 @@ class SetupWizard extends Page
         RateLimiter::clear($rateLimiterKey);
         session()->put(self::UNLOCKED_SESSION_KEY, hash('sha256', $token));
         $this->unlock = [];
+        $this->fillWizard();
     }
 
     public function form(Schema $schema): Schema
@@ -1235,6 +1246,11 @@ class SetupWizard extends Page
             // Left empty, a missing value keeps the fallback of the configuration, and a value already set is kept
             ->filter(fn (string $value): bool => $value !== '');
 
+        // Only a path typed (or changed): the one already set works for the app as it is
+        if ($connection === 'sqlite' && $typed->has('DB_DATABASE') && $typed->get('DB_DATABASE') !== $this->currentEnvironmentValue('DB_DATABASE')) {
+            $typed->put('DB_DATABASE', self::sqlitePath((string) $typed->get('DB_DATABASE')));
+        }
+
         // The variables already set that were changed: written over their current value
         $changedValues = $typed
             ->only($this->changeableVariables)
@@ -1550,6 +1566,11 @@ class SetupWizard extends Page
             }
         }
 
+        // Anyone could download it from there
+        if (($settings['driver'] ?? null) === 'sqlite' && self::isInPublicFolder((string) ($settings['database'] ?? ''))) {
+            $this->stopStep(__('setup.environment.db_sqlite_public'));
+        }
+
         try {
             if (($settings['driver'] ?? null) === 'sqlite') {
                 $this->createSqliteDatabase((string) ($settings['database'] ?? ''));
@@ -1576,6 +1597,30 @@ class SetupWizard extends Page
         foreach ($values as $variable => $value) {
             config([str_replace('{connection}', $connection, self::ENVIRONMENT_VARIABLES[$variable]) => $value]);
         }
+    }
+
+    /**
+     * The path of an SQLite database: a relative one is inside the `database` folder, as the web server (in `public`)
+     * and the command line (in the folder of the app) would look for it in different places.
+     */
+    protected static function sqlitePath(string $path): string
+    {
+        if ($path === ':memory:' || str_starts_with($path, '/') || str_starts_with($path, '\\') || preg_match('#^[A-Za-z]:[\\\\/]#', $path)) {
+            return $path;
+        }
+
+        return database_path($path);
+    }
+
+    /**
+     * Whether a file is in the public folder of the app (also through `..` or a link in its path).
+     */
+    protected static function isInPublicFolder(string $path): bool
+    {
+        $folder = realpath(dirname($path)) ?: dirname($path);
+        $public = realpath(public_path()) ?: public_path();
+
+        return $folder === $public || str_starts_with($folder.DIRECTORY_SEPARATOR, $public.DIRECTORY_SEPARATOR);
     }
 
     protected function createSqliteDatabase(string $path): void
@@ -1804,8 +1849,7 @@ class SetupWizard extends Page
 
             // The ID is set: the root user is the one with ID 1. Its email is confirmed: it was typed by whoever has the
             // token of the installation, and it must never lock the root user out.
-            $root = User::forceCreate([
-                'id' => 1,
+            $root = User::createRoot([
                 'first_name' => $data['root_first_name'],
                 'last_name' => $data['root_last_name'],
                 'email' => $data['root_email'],

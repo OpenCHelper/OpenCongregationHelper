@@ -154,3 +154,10 @@ test('the root user gets ID 1 even when the next ID is higher', function () {
 
     expect(User::sole()->isRootUser())->toBeTrue();
 });
+
+test('the users created after the root user get the next IDs', function () {
+    $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
+
+    // An explicit ID does not move the sequence of PostgreSQL on by itself
+    expect(User::factory()->create()->id)->toBe(2);
+});

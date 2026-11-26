@@ -86,7 +86,8 @@ return [
         'app_locale' => 'Language of the app for the users who did not choose one.',
         'database' => 'Database',
         'db_prefix' => 'Prefix of the names of the tables, to share the database with other applications (optional).',
-        'db_sqlite' => 'The full path of the database file: it is created if it does not exist.',
+        'db_sqlite' => 'The path of the database file (a relative one is inside the database folder): it is created if it does not exist.',
+        'db_sqlite_public' => 'The database file cannot be in the public folder, where anyone could download it.',
         'mail' => 'Email',
         'mailers' => [
             'log' => 'Log: do not send, only write in the log',

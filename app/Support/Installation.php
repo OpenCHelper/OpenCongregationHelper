@@ -45,9 +45,13 @@ class Installation
         self::$installed = null;
     }
 
+    /**
+     * The file that remembers that the application is installed (`app.setup.marker`, e.g. a temporary one per process in
+     * the tests, which run in parallel).
+     */
     public static function markerPath(): string
     {
-        return storage_path('framework/installed');
+        return (string) (config('app.setup.marker') ?: storage_path('framework/installed'));
     }
 
     /**

@@ -86,7 +86,8 @@ return [
         'app_locale' => 'Idioma de la aplicación para los usuarios que no eligieron uno.',
         'database' => 'Base de datos',
         'db_prefix' => 'Prefijo de los nombres de las tablas, para compartir la base de datos con otras aplicaciones (opcional).',
-        'db_sqlite' => 'La ruta completa del archivo de la base de datos: se crea si no existe.',
+        'db_sqlite' => 'La ruta del archivo de la base de datos (una relativa está en la carpeta database): se crea si no existe.',
+        'db_sqlite_public' => 'El archivo de la base de datos no puede estar en la carpeta public, desde donde cualquiera podría descargarlo.',
         'mail' => 'Correo',
         'mailers' => [
             'log' => 'Log: no enviar, solo escribir en el registro',
