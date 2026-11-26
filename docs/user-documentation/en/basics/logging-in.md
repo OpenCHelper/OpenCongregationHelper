@@ -15,11 +15,14 @@ The home page of the application describes the project and has three links: **Gu
 1. Click **Log in** (or open `/app/login` directly).
 2. Enter your **email address** and **password**.
 3. Tick **Remember me** if you are on a personal device, then click **Sign in**.
+4. If you turned on [two-factor authentication](profile#two-factor-authentication), enter the 6-digit code shown by
+   your authenticator app (or a recovery code) and click **Confirm sign in**.
 
 ![Login page](/docs/user-documentation/en/basics/assets/login.webp)
 
-> ℹ️ **Note:** accounts are created by an administrator: there is no self-registration. If you do not have an account,
-> ask the person who manages the territories in your congregation.
+> ℹ️ **Note:** accounts are created by an administrator: there is no self-registration. When you are given access, you
+> receive an email: click **Choose password** in it to choose your password. If you do not have an account, ask the
+> person who manages the territories in your congregation.
 
 ## Forgotten password
 

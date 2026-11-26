@@ -9,7 +9,10 @@ La scheda **Mappa** del modulo del territorio contiene una mappa interattiva su 
 
 ## Trovare la zona
 
-Una nuova mappa parte con uno zoom molto ridotto. Per raggiungere l'area del territorio:
+Una nuova mappa si apre sull'area dei territori che hanno già una mappa (su quelli della sua zona, quando crei il
+territorio dalla scheda **Territori** di una [zona](zones)), oppure sul **Centro predefinito delle mappe** delle
+[impostazioni](../administration/settings) finché nessun territorio ha una mappa. Per raggiungere l'area del
+territorio:
 
 - clicca il pulsante di **posizione** (segnaposto rosso, in basso a destra) per centrare la mappa sulla tua posizione
   attuale (la prima volta il browser chiede il permesso), oppure
@@ -21,7 +24,7 @@ Una nuova mappa parte con uno zoom molto ridotto. Per raggiungere l'area del ter
 
 1. **Zoom avanti / indietro**.
 2. **Schermo intero**: ingrandisce la mappa, comodo per disegnare territori grandi.
-3. **Draw Polyline**: disegna una linea (es. una via da lavorare).
+3. **Draw Polyline**: disegna una linea (es. una via da lavorare; vedi la nota più sotto).
 4. **Draw Rectangle**: clicca e trascina per disegnare un rettangolo.
 5. **Draw Polygons**: lo strumento usato per la maggior parte dei territori (vedi sotto).
 6. **Draw Text**: aggiunge un testo sulla mappa.
@@ -41,6 +44,12 @@ Una nuova mappa parte con uno zoom molto ridotto. Per raggiungere l'area del ter
 
 > 💡 **Suggerimento:** aumenta lo zoom prima di disegnare, così i vertici seguono le strade con precisione. Puoi sempre
 > correggerli in seguito con **Edit Layers**.
+
+> ⚠️ **Attenzione:** fuori dal modulo e dalla pagina del territorio vengono mostrate solo le aree (poligoni e
+> rettangoli): nella pagina dell'assegnazione, nella pagina pubblica di
+> un'[assegnazione condivisa](../assignments/sharing) e nella mappa della [dashboard](../basics/dashboard). Linee e
+> testi vengono salvati, ma restano visibili solo nella mappa del territorio stesso, quindi non usarli per dare
+> indicazioni a chi lavora il territorio.
 
 Le forme disegnate vengono salvate in formato GeoJSON (mostrato nel campo **Geojson** sotto la mappa). Se hai molte
 mappe già pronte, puoi caricarle tutte insieme con l'[importazione](importing), che accetta una colonna GeoJSON.

@@ -20,6 +20,7 @@ tuo [profilo](profile).
 | **Riconsegna richiesta** | i membri del reparto territori, tranne chi l'ha chiesta |
 | **Nuova campagna** | tutti gli utenti che possono accedere |
 | **Territorio fuori da *N* giorni** | chi ha un territorio da più dei giorni impostati nelle [Impostazioni](../administration/settings) (60 di default). Il promemoria viene inviato una volta a settimana, nel giorno e all'ora impostati lì (lunedì alle 9:00 di default), finché il territorio non viene riconsegnato. |
+| **Territori fuori da troppo tempo** | i membri del reparto territori, o solo i suoi responsabili se così scelto nelle [Impostazioni](../administration/settings#territori): insieme ai promemoria, un riepilogo settimanale dei territori fuori da più di quei giorni, per seguire chi li ha. |
 
 Gli utenti virtuali, che non possono accedere, non ricevono notifiche. Registrare un'assegnazione già riconsegnata
 non avvisa nessuno, e lo stesso vale per correggere la data di una riconsegna.
@@ -27,7 +28,8 @@ non avvisa nessuno, e lo stesso vale per correggere la data di una riconsegna.
 ## Notifiche push
 
 Le notifiche push compaiono sul telefono o sul computer come quelle di qualsiasi altra app, anche ad applicazione
-chiusa. Cliccandone una si apre il territorio o l'assegnazione collegata.
+chiusa. Cliccandone una si apre l'assegnazione collegata (l'elenco delle assegnazioni per il riepilogo dei territori
+fuori da troppo tempo, la dashboard quando non c'è nulla da aprire).
 
 Subito dopo l'accesso, una pagina a schermo intero propone di attivarle sul dispositivo che stai usando: clicca
 **Attiva le notifiche** e consentile quando il browser lo chiede. Se clicchi **Non ora**, viene riproposta dopo 30
@@ -54,7 +56,8 @@ dall'account le disattiva su quel dispositivo, così un dispositivo condiviso no
 ## Gestire le notifiche
 
 - Clicca la **campanella** per aprire il pannello. Le notifiche non lette sono evidenziate e contate sulla campanella.
-- Clicca **Vedi** per aprire il territorio o l'assegnazione collegata.
+- Clicca **Vedi**, se presente, per aprire l'assegnazione collegata (o, per il riepilogo dei territori fuori da troppo
+  tempo, l'elenco delle assegnazioni).
 - Clicca **×** per rimuovere una singola notifica.
 - **Imposta tutto come letto** e **Pulisci** agiscono su tutte le notifiche.
 

@@ -65,7 +65,7 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 | `APP_LOCALE` | Default language (`en`, `it` or `es`). Each user can then pick their own language. |
 | `APP_TIMEZONE` | Timezone used to display dates, and in which the day and time of the weekly reminders (see the [Settings](administration/settings) pages) and the daily renewal of the publications (at 9:00) are counted. |
 | `DB_PREFIX` / `DB_ENGINE` | Optional table prefix and storage engine, useful on shared databases: `db:wipe` and `migrate:fresh` then drop only the tables with this prefix. |
-| `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Name (first and last name separated by a space), email and password of the **root** user, created the first time the database is seeded. The password follows the same rules as the passwords chosen by the users (see `PASSWORD_LEAK_CHECK`): `och:install` and `och:recover-root` refuse one that breaks them, or ask for another one when run from a terminal. |
+| `INITIAL_ROOT_USERNAME`, `INITIAL_ROOT_USERMAIL`, `INITIAL_ROOT_PASSWORD` | Name (first and last name separated by a space), email and password of the **root** user, created by `och:install` while the database has no users. The password follows the same rules as the passwords chosen by the users (see `PASSWORD_LEAK_CHECK`): `och:install` and `och:recover-root` refuse one that breaks them, or ask for another one when run from a terminal. |
 | `PASSWORD_LEAK_CHECK` | When `APP_ENV` is `production`, the passwords need at least 12 characters (8 elsewhere). When this is `true`, they must not appear in a known data leak either: they are checked with [Have I Been Pwned](https://haveibeenpwned.com/Passwords), by sending only the first 5 characters of their SHA-1 hash to `api.pwnedpasswords.com`. If the service does not answer within 5 seconds the password is accepted. Defaults to `true` in production (set it to `false` on servers that cannot reach the service) and to `false` elsewhere. The super administrators can change it from the [Security settings](administration/settings#security). |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | How emails are sent. `failover` tries the native PHP `mail()` function first and falls back to the log. |
 | `QUEUE_CONNECTION` | `database` (recommended in production) or `sync` (emails are sent immediately, during the request). |
@@ -73,7 +73,7 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 | `ENABLE_SHARED_PII` | When `true`, the public page of a shared assignment also shows the assignee's name and the territory notes. Defaults to `false`. |
 | `GUEST_ALLOW_RETURNING_ASSIGNMENT` | When `true`, whoever opens the public page of a shared assignment can ask the territory department to close it (as the assignee can from the application). Defaults to `false`. |
 | `DEMO_PREFILL_LOGIN_CREDENTIALS` | **Demo installations only**, with dummy data: when `true`, the login page is pre-filled with the credentials of the **root** user, so anyone can log in as root. Never enable it on an installation with real data. Always ignored when `APP_ENV` is `production`. Defaults to `false`. |
-| `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | Files used to show the Git branch and commit in the sidebar on servers without `git`. |
+| `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | Files the Git branch and commit are read from (by default `.git/HEAD` and `.git/refs/heads/<branch>`), shown in **About** in the user menu outside of `production`. Useful on servers without the `.git` folder. |
 
 ## Installation
 
@@ -143,8 +143,8 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 
 ## Scheduled tasks and emails
 
-Notification emails are queued and a weekly job sends the reminders for territories that have been out for a long time.
-Both need something that runs periodically:
+Notification emails are queued, a weekly job sends the reminders for territories that have been out for a long time and
+a daily one renews the regular publications. They need something that runs periodically:
 
 - **With shell access**, run the queue worker (`php artisan queue:work`) and the Laravel scheduler, either from the
   crontab (`* * * * * php /path/to/artisan schedule:run`) or as a long-running process (`php artisan schedule:work`,
@@ -203,5 +203,6 @@ internet over HTTPS, with a valid certificate.
 
 ## Environments
 
-On environments other than `production` (e.g. `local`, `nightly`, `staging`), super administrators see a colored
-border and badge with the name of the environment, so they never confuse a test installation with the real one.
+Super administrators see a colored border and badge with the name of the environment (`APP_ENV`): red in
+`production`, other colors elsewhere (e.g. `local`, `nightly`, `staging`), so they never confuse a test installation
+with the real one.

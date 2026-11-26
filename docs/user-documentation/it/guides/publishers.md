@@ -24,8 +24,9 @@ zoom per leggere i nomi delle vie e usa il pulsante **schermo intero** per veder
 
 ## Riconsegnare un territorio
 
-Quando hai finito, avvisa chi gestisce i territori, oppure clicca **Termina assegnazione** nella pagina del territorio
-se il tuo ruolo lo permette.
+Quando hai finito, apri la pagina dell'assegnazione (es. dalla sua notifica), clicca **Chiedi di riconsegnare** e
+conferma: il reparto territori riceve una notifica e chiude l'assegnazione. Se il tuo ruolo lo permette, puoi invece
+cliccare **Termina assegnazione** nella pagina del territorio.
 
 Se il territorio ti è stato assegnato per una campagna terminata, o che termina entro 7 giorni, la pagina
 dell'assegnazione mostra un promemoria per riconsegnarlo.
@@ -38,4 +39,5 @@ di emergenza.
 ## Usarla dallo smartphone
 
 L'applicazione funziona nel browser del telefono: apri il suo indirizzo, accedi e usa la barra in basso per spostarti
-tra le pagine. Dal menu del browser puoi aggiungerla alla schermata Home per aprirla come un'app.
+tra le pagine. Gli elenchi mostrano ogni elemento come una scheda. Dal menu del browser puoi aggiungerla alla schermata
+Home per aprirla come un'app.
