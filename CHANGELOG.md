@@ -49,6 +49,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Migrations**: the setting of the compromised passwords check can be rolled back, so that upgrading again after a
+  `migrate:rollback` no longer fails.
+- `scripts/remote_artisan.sh` runs on macOS too (`#!/usr/bin/env bash`).
 - **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
   page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown
   only on the territory's own map. The **Draw Text** tool is removed.
@@ -114,7 +117,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The public `/guest` address no longer shows a dashboard with the Filament version: it redirects to the welcome page
   ([#79](https://github.com/OpenCHelper/OpenCongregationHelper/pull/79)).
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
-  button. Returned or deleted assignments can no longer be shared, and their leftover links stop working
+  button. Returned or deleted assignments can no longer be shared, and their leftover links stop working. An
+  assignment has one link at most: the database update keeps only the oldest link of each one, deleting the others
   ([#72](https://github.com/OpenCHelper/OpenCongregationHelper/pull/72)).
 - The unused `/api` endpoints (`/api/user`, `/api/assignees`, `/api/assignments`, `/api/territories`, `/api/zones`)
   are removed: they returned whole user and assignment records

@@ -81,22 +81,32 @@ From time to time, try to restore a backup on a test installation: it is the onl
 1. If the application is running, put it in [maintenance mode](#maintenance-mode).
 2. Make sure the files of the application are those of the **same version** as the backup (see
    [Upgrading to a new version](#upgrading-to-a-new-version) to replace them).
-3. Put back the `.env` file and the `storage/` folder of the backup.
+3. Put back the `.env` file and the `storage/` folder of the backup, without deleting or overwriting the
+   `storage/framework/down` file, which keeps the maintenance mode on.
 4. Delete the tables of the installation, then import the dump, so that no table created after the backup is left
    behind:
     - **with shell access**, `php artisan db:wipe --force` drops the tables of the installation (only those starting
-      with `DB_PREFIX`, when it is set), then `mysql -u <user> -p <database> < och-backup.sql` imports the dump;
+      with `DB_PREFIX`, when it is set: before version 1.0.0-alpha13 it drops **every** table of the database, so on a
+      shared database drop them with the `mysql` client instead), then `mysql -u <user> -p <database> < och-backup.sql`
+      imports the dump;
     - **without shell access**, in phpMyAdmin select the tables of the installation (only those starting with the
       prefix, if any), choose **Drop**, then import the dump from the **Import** tab.
-5. Rebuild the `public/storage` link and the caches, which may refer to the previous files, and check the
-   installation (through `scripts/remote_artisan.sh` without shell access, see below):
+5. Rebuild the `public/storage` link and the caches, which may refer to the previous files, then check the
+   installation and leave the maintenance mode:
+    - **with shell access**:
 
-    ```shell
-    php artisan och:post-deploy
-    php artisan och:doctor
-    ```
+        ```shell
+        php artisan och:post-deploy
+        php artisan och:doctor
+        php artisan up
+        ```
 
-6. Leave the maintenance mode.
+    - **without shell access**, the Artisan endpoint is unavailable in maintenance mode: first delete the
+      `storage/framework/down` file through FTP, then run `och:post-deploy` and `och:doctor` right away with
+      `scripts/remote_artisan.sh` (see [Upgrading without shell access](#upgrading-without-shell-access)).
+
+    `och:post-deploy` and `och:doctor` exist from version 1.0.0-alpha15: with the files of an older version, follow
+    the **Updating** section of its own Setup guide instead.
 
 Everything that was entered in the application after the backup is lost.
 
@@ -185,8 +195,9 @@ Choose a moment when few people use the application (e.g. late in the evening): 
 On shared hosting without shell access (e.g. Altervista), the files are uploaded through FTP and the commands run
 through the `/api/artisan/execute` endpoint, authorized by a one-time token that `scripts/remote_artisan.sh` uploads
 through FTP and deletes after the command. The script runs on your computer: it needs `bash`, `curl`, `jq` and `lftp`
-(on Windows, e.g. in WSL). If the application is not in the root folder of the FTP account, give the path of its token
-with `--token-file <folder>/storage/framework/.artisan-token`.
+(on Windows, e.g. in WSL; with a version older than 1.0.0, run it as `bash scripts/remote_artisan.sh` on macOS). If
+the application is not in the root folder of the FTP account, give the path of its token with
+`--token-file <folder>/storage/framework/.artisan-token`.
 
 1. **On your computer**, download the archive of the new version (**Source code** on its release page), unpack it,
    then install the dependencies and build the assets in its folder (you need PHP, Composer and Node.js):
@@ -207,6 +218,8 @@ with `--token-file <folder>/storage/framework/.artisan-token`.
 3. **Upload the files** through FTP, replacing those on the server:
     - never overwrite the `.env` file and the `storage/` folder of the server, and do not upload the `public/storage`
       folder, if your computer has one;
+    - do not upload what is only needed to build or develop the application: `node_modules/` (tens of thousands of
+      files), `tests/`, `.git/` and `.github/`;
     - delete from the server the folders that the new version replaces (`app/`, `bootstrap/`, `config/`,
       `database/`, `docs/`, `lang/`, `resources/`, `routes/`, `vendor/`, and everything in `public/` except
       `public/storage`) before uploading them again, so that no file removed by the new version is left behind.
@@ -223,6 +236,8 @@ with `--token-file <folder>/storage/framework/.artisan-token`.
         och:post-deploy --no-interaction
     ```
 
+    From now on the application is online: if `och:post-deploy` fails, put it back in maintenance mode right away
+    (step 2) before looking for the cause (see [If the upgrade fails](#if-the-upgrade-fails)).
 5. [Check the installation](#after-upgrading).
 
 The queue and the scheduled jobs keep running through the same endpoints (see
@@ -257,7 +272,9 @@ Anything entered in the application between the upgrade and the restore is lost.
 ### Undoing the migrations
 
 `php artisan migrate:rollback --force` undoes the migrations run by the last `och:post-deploy`, without restoring a
-backup. It is safe only when all of the following are true:
+backup. If `och:post-deploy` ran more than once during the upgrade (e.g. again after fixing an error), the last run
+holds only the migrations it ran itself: `--step=<number>` undoes that number of migrations instead, the last ones
+first. It is safe only when all of the following are true:
 
 - all the migrations of the upgrade succeeded: if one failed halfway, MySQL does not undo the part already done, and
   the rollback would undo the previous migrations around it, leaving the database in a state no version expects;
@@ -276,11 +293,17 @@ restore the backup instead.
 
 Read the release notes of every alpha version after yours too. In addition:
 
-- **Database**: the upgrade runs three new migrations, which can all be undone with `migrate:rollback`:
+- **Going back to an alpha version**: `och:post-deploy` and `och:doctor` exist from 1.0.0-alpha15, and before
+  1.0.0-alpha13 `db:wipe` drops every table of the database, whatever `DB_PREFIX`. To restore or roll back to an older
+  version, follow the Setup guide of that version, and drop the tables by hand (with phpMyAdmin or the `mysql` client).
+
+- **Database**: the upgrade runs four new migrations, which can all be undone with `migrate:rollback`:
     - the tables of the teams (`teams`, `team_user`, `team_invitations`) and the `current_team_id` column of the
       `users` table are dropped: the application never used them, and they are always empty;
     - an assignment can have only one shared link: if the same assignment had more (shared twice at the same time),
-      only the oldest one is kept;
+      only the oldest one is kept, and the others are deleted for good (undoing the migration does not bring them
+      back);
+    - the new **Refuse compromised passwords** setting is added (see **Passwords** below);
     - the database refuses to delete a user who has assignments, whose history would be lost: disable their access
       instead (see [Users](administration/users)).
 - **`TRUSTED_PROXIES`** (new, optional): the addresses of the proxies in front of the application. The default, `*`,
