@@ -2,6 +2,7 @@
 
 use App\Filament\Resources\Territories\Pages\CreateTerritory;
 use App\Filament\Resources\Territories\Pages\EditTerritory;
+use App\Filament\Resources\Territories\Pages\ViewTerritory;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\TerritoryZones\Pages\ManageZoneTerritories;
 use App\Models\Territory;
@@ -10,6 +11,7 @@ use App\Models\User;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Filament\Schemas\Components\Tabs;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
@@ -481,4 +483,80 @@ test('the map of a new territory of a zone opens on the territories of that zone
         ->mountAction(TestAction::make('create')->table())
         ->assertSchemaComponentExists('location', 'mountedActionSchema0', checkComponentUsing: fn (Map $map): bool => abs(mapDefaultLocation($map)[0] - 41.93) < 0.000001
             && abs(mapDefaultLocation($map)[1] - 12.41) < 0.000001);
+});
+
+/**
+ * Get the label of the Map/Image tab a form opens on.
+ */
+function openMapImageTabLabel(Tabs $tabs): string
+{
+    $visibleTabs = array_values($tabs->getChildSchema()->getComponents());
+
+    return (string) $visibleTabs[$tabs->getActiveTab() - 1]->getLabel();
+}
+
+dataset('territory map and image', [
+    'a map' => [['withMap' => true, 'withImage' => false], 'tab_map'],
+    'only an image' => [['withMap' => false, 'withImage' => true], 'tab_image'],
+    'a map and an image' => [['withMap' => true, 'withImage' => true], 'tab_map'],
+    'neither' => [['withMap' => false, 'withImage' => false], 'tab_map'],
+]);
+
+/**
+ * Create a territory of the zone with a map and/or an image.
+ *
+ * @param  array{withMap: bool, withImage: bool}  $content
+ */
+function territoryWithContent(TerritoryZone $zone, array $content): Territory
+{
+    $factory = Territory::factory()->for($zone, 'territoryZone');
+
+    if ($content['withMap']) {
+        $factory = $factory->withMap();
+    }
+
+    if ($content['withImage']) {
+        $factory = $factory->withImage();
+    }
+
+    return $factory->create();
+}
+
+test('the edit page of a territory opens on the tab of its map or image', function (array $content, string $expectedTab) {
+    $territory = territoryWithContent($this->zone, $content);
+
+    Livewire::test(EditTerritory::class, ['record' => $territory->getKey()])
+        ->assertSchemaComponentExists('mapImageTabs', 'form', checkComponentUsing: fn (Tabs $tabs): bool => openMapImageTabLabel($tabs) === __("filament-resources.territory.{$expectedTab}"));
+})->with('territory map and image');
+
+test('the view page of a territory opens on the tab of its map or image', function (array $content, string $expectedTab) {
+    $territory = territoryWithContent($this->zone, $content);
+
+    $page = Livewire::test(ViewTerritory::class, ['record' => $territory->getKey()]);
+
+    if (! $content['withMap'] && ! $content['withImage']) {
+        // The view page shows no tabs for a territory with neither a map nor an image
+        $page->assertSchemaComponentHidden('mapImageTabs', 'form');
+
+        return;
+    }
+
+    $page->assertSchemaComponentExists('mapImageTabs', 'form', checkComponentUsing: fn (Tabs $tabs): bool => openMapImageTabLabel($tabs) === __("filament-resources.territory.{$expectedTab}"));
+})->with('territory map and image');
+
+test('the territories page of a zone opens a territory on the tab of its map or image', function (array $content, string $expectedTab) {
+    foreach (['ViewAny:TerritoryZone', 'View:TerritoryZone', 'Update:TerritoryZone'] as $permission) {
+        auth()->user()->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+
+    $territory = territoryWithContent($this->zone, $content);
+
+    Livewire::test(ManageZoneTerritories::class, ['record' => $this->zone->getKey()])
+        ->mountAction(TestAction::make('edit')->table($territory))
+        ->assertSchemaComponentExists('mapImageTabs', 'mountedActionSchema0', checkComponentUsing: fn (Tabs $tabs): bool => openMapImageTabLabel($tabs) === __("filament-resources.territory.{$expectedTab}"));
+})->with('territory map and image');
+
+test('the form of a new territory opens on the map tab', function () {
+    Livewire::test(CreateTerritory::class)
+        ->assertSchemaComponentExists('mapImageTabs', 'form', checkComponentUsing: fn (Tabs $tabs): bool => openMapImageTabLabel($tabs) === __('filament-resources.territory.tab_map'));
 });
