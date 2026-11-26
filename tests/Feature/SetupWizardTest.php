@@ -278,12 +278,21 @@ test('the values with a fallback in the configuration can be left empty', functi
 test('the database settings can be changed, keeping the password left empty', function () {
     $connection = config('database.default');
     $database = config("database.connections.{$connection}.database");
-    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nDB_CONNECTION={$connection}\nDB_DATABASE={$database}\nDB_PASSWORD=secret\nDB_PREFIX=old_\n");
+
+    // The settings of the database of the tests (but the password), so that it can still be reached
+    $settings = collect(['DB_HOST' => 'host', 'DB_PORT' => 'port', 'DB_USERNAME' => 'username'])
+        ->map(fn (string $key): mixed => config("database.connections.{$connection}.{$key}"))
+        ->filter(fn (mixed $value): bool => filled($value))
+        ->map(fn (mixed $value, string $variable): string => "{$variable}={$value}\n")
+        ->implode('');
+
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nDB_CONNECTION={$connection}\nDB_DATABASE={$database}\n{$settings}DB_PASSWORD=secret\nDB_PREFIX=old_\n");
     config(["database.connections.{$connection}.prefix" => 'old_']);
     unlockSetupWizard();
 
     Livewire::test(SetupWizard::class)
-        ->assertSet('changeableVariables', ['DB_CONNECTION', 'DB_DATABASE', 'DB_PASSWORD', 'DB_PREFIX'])
+        ->assertFormFieldEnabled('db_prefix')
+        ->assertFormFieldEnabled('db_password')
         ->assertSchemaStateSet(['db_prefix' => 'old_', 'db_password' => null], 'form')
         ->fillForm(['db_prefix' => 'och_'])
         ->goToWizardStep(3)
@@ -295,8 +304,6 @@ test('the database settings can be changed, keeping the password left empty', fu
         ->toContain("\nDB_PASSWORD=secret\n")
         ->toContain("\nDB_DATABASE={$database}\n")
         ->and(config("database.connections.{$connection}.prefix"))->toBe('och_');
-
-    config(["database.connections.{$connection}.prefix" => '']);
 });
 
 test('a database that cannot be reached stops the wizard', function () {
