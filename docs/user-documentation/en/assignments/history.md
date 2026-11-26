@@ -58,7 +58,9 @@ If the assignee has asked to return the territory (see [Assigning and returning]
 says when: **End Assignment** in the banner returns it, if your role allows it. The assignee asks it with
 **Ask to return** at the top of the page, offered until they have asked.
 
-From the **Actions** menu you can share the assignment with a public link (see [Sharing an assignment](sharing)).
+While the assignment is in progress and no banner offers it, **End Assignment** at the top of the page returns the
+territory, if your role allows it (see [Assigning and returning](assigning#returning-a-territory)). From the **Actions** menu you can share the
+assignment with a public link (see [Sharing an assignment](sharing)).
 
 ## Correcting an assignment
 
@@ -68,7 +70,9 @@ campaign and who created the assignment are shown but cannot be changed. Setting
 ![Editing an assignment](/docs/user-documentation/en/assignments/assets/assignment-edit.webp)
 
 **Delete** moves an assignment to the trash, from where it can be restored. Deleted assignments do not count in the
-history and the statistics.
+history and the statistics (when the territory was last worked, the coverage, the campaigns), as the confirmation
+reminds: to record that a territory has been worked, return it with **End Assignment** instead. **Force delete**
+removes a deleted assignment permanently, and cannot be undone.
 
 ## Who can see what
 

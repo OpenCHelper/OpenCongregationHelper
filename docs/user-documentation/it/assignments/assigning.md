@@ -34,8 +34,10 @@ nell'elenco dei territori.
 
 L'assegnazione viene chiusa con la data di oggi e l'assegnatario riceve una notifica (tranne se è un utente virtuale).
 
-Da **Assegnazioni** non c'è un pulsante per riconsegnare un territorio: clicca **Modifica** sulla sua riga e imposta la
-**Data fine** (vedi [Storico delle assegnazioni](history#correggere-unassegnazione)).
+Puoi riconsegnarlo anche da **Assegnazioni** (e dallo storico delle assegnazioni di un territorio, di una persona o di
+una campagna): clicca **Termina assegnazione** sulla riga di un'assegnazione in corso, oppure in cima alla pagina
+dell'assegnazione. Per registrare una riconsegna in un'altra data, clicca invece **Modifica** e imposta la **Data fine**
+(vedi [Storico delle assegnazioni](history#correggere-unassegnazione)).
 
 ### Richieste di riconsegna
 

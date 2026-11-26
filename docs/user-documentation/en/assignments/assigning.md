@@ -34,7 +34,9 @@ the territories list.
 
 The assignment is closed with today's date and the assignee is notified (unless they are a virtual user).
 
-From **Assignments** there is no button to return a territory: click **Edit** on its row and set the **End Date** (see
+You can also return it from **Assignments** (and from the assignment history of a territory, a person or a campaign):
+click **End Assignment** on the row of an assignment in progress, or at the top of the page of the assignment. To
+record a return on another date, click **Edit** instead and set the **End Date** (see
 [Assignment history](history#correcting-an-assignment)).
 
 ### Return requests

@@ -273,6 +273,10 @@ return [
         'action_end_assignment' => 'Terminar Asignación',
         'action_create' => 'Crear',
         'action_end' => 'Terminar',
+        'delete_description' => 'La asignación se quita del historial del territorio y de las estadísticas (cuándo se trabajó por última vez, la cobertura, las campañas). Para registrar que el territorio se ha trabajado, termina la asignación en su lugar.',
+        'bulk_delete_description' => 'Las asignaciones se quitan del historial de sus territorios y de las estadísticas (cuándo se trabajaron por última vez, la cobertura, las campañas). Para registrar que los territorios se han trabajado, termina las asignaciones en su lugar.',
+        'force_delete_description' => 'La asignación se quita definitivamente del historial del territorio: esto no se puede deshacer.',
+        'bulk_force_delete_description' => 'Las asignaciones se quitan definitivamente del historial de sus territorios: esto no se puede deshacer.',
         'action_copy' => [
             'label' => 'Compartir',
             'tooltip' => 'Copiar al portapapeles la URL compartible para esta asignación',
