@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Roles**: no longer have a **Pages** tab, whose permissions did nothing: the profile is open to everyone, the
+  settings and the application logs only to the super administrators.
 - **Users**: **Impersonate** on the page of a user asks for a confirmation, as it already did from the list, instead
   of signing in as the user right away.
 - **Users**: a user who has assignments can no longer be deleted, from their page, the bulk action or their profile:
