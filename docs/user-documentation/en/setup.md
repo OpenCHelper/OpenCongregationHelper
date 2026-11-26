@@ -2,11 +2,12 @@
 type: documentation
 icon: heroicon-o-wrench-screwdriver
 title: Setup guide
-order: 0
+order: -1
 ---
 
 This page is meant for whoever **installs and maintains** the application. If you only need to use it, start from the
-**Basics** section.
+**Basics** section. How to back up an installation and upgrade it to a new version is explained in
+[Backup and upgrade](backup-and-upgrade).
 
 ## Requirements
 
@@ -111,6 +112,10 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 > environment, its email, password, access and roles cannot be changed by anyone.
 
 ## Updating
+
+> ⚠️ **Before updating**, read the release notes and back up the database, the `.env` file and the `storage/` folder:
+> [Backup and upgrade](backup-and-upgrade) explains every step, with and without shell access, and what to do if the
+> update fails.
 
 Replace the files with the ones of the new version (keeping `.env` and `storage/`), then run:
 

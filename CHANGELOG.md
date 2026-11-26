@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **User guide**: the new **Backup and upgrade** page explains what to back up (database, `.env`, uploaded files and
+  keys of the AI assistants) and how to restore it, how to upgrade with or without shell access, what to do if an
+  upgrade fails, and what changes when upgrading to 1.0.0 from the alpha versions.
+
 ### Changed
 
 - **Users**: the **Access enabled?** filter of the list is now **Access**, with the options **With access** and

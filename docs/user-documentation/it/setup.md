@@ -2,11 +2,12 @@
 type: documentation
 icon: heroicon-o-wrench-screwdriver
 title: Guida al setup
-order: 0
+order: -1
 ---
 
 Questa pagina è rivolta a chi **installa e gestisce** l'applicazione. Se devi solo usarla, parti dalla sezione
-**Nozioni di base**.
+**Nozioni di base**. Come fare il backup di un'installazione e aggiornarla a una nuova versione è spiegato in
+[Backup e aggiornamento](backup-and-upgrade).
 
 ## Requisiti
 
@@ -112,6 +113,10 @@ precedente.
 > `production`, nessuno può modificarne email, password, accesso e ruoli.
 
 ## Aggiornamento
+
+> ⚠️ **Prima di aggiornare**, leggi le note di rilascio e fai il backup del database, del file `.env` e della cartella
+> `storage/`: [Backup e aggiornamento](backup-and-upgrade) spiega ogni passaggio, con e senza accesso alla shell, e cosa
+> fare se l'aggiornamento non riesce.
 
 Sostituisci i file con quelli della nuova versione (mantenendo `.env` e `storage/`), poi esegui:
 
