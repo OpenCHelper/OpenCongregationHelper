@@ -39,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Territories**: **Assign Massively** and **End Assignments** tell how many territories were assigned or returned
+  and which were skipped, and why (already assigned, not assigned, not allowed or refused); they were skipped
+  silently.
+- **Territory maps**: the **Draw Polyline** and **Draw Text** tools are removed: lines and text labels were saved but
+  shown only on the territory's own map, never on the assignment page, the shared page or the dashboard.
 - **Tags**: deleting a tag asks for a confirmation that says how many territories and zones use it, since it is
   removed from all of them; it was removed silently, while the guide said that a tag in use could not be deleted.
 - **Roles**: no longer have a **Pages** tab, whose permissions did nothing: the profile is open to everyone, the

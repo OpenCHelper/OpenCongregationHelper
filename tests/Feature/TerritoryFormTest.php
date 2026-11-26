@@ -424,6 +424,17 @@ test('the image preview of the form shows a newly uploaded image only when it ca
     'not previewable' => false,
 ]);
 
+test('the map offers only the tools that draw areas', function () {
+    // Lines and text labels are not shown where the territory is used (assignment, shared page, dashboard)
+    Livewire::test(CreateTerritory::class)
+        ->assertSchemaComponentExists('location', 'form', checkComponentUsing: function (Map $map): bool {
+            $tools = json_decode($map->getMapConfig(), true)['geoMan'];
+
+            return $tools['drawPolygon'] && $tools['drawRectangle'] && $tools['cutPolygon']
+                && ! $tools['drawPolyline'] && ! $tools['drawText'];
+        });
+});
+
 test('the map of a new territory opens on the configured default centre', function () {
     config(['filament-leaflet.default_map_center' => [39.8017, -89.6436]]);
 
