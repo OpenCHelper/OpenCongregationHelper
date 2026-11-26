@@ -81,6 +81,18 @@ test('the shield seeder creates only the permissions offered in the role editor'
         );
 });
 
+test('the shield seeder creates the permissions of the app panel from another panel', function () {
+    // As when the setup wizard creates the database (nothing has read the permissions of the app panel yet)
+    Filament::setCurrentPanel('setup');
+
+    $this->seed(ShieldSeeder::class);
+
+    expect(Filament::getCurrentPanel()->getId())->toBe('setup')
+        ->and(Permission::pluck('name')->all())->toContain('ViewAny:Territory', 'Update:Department', 'Delete:Role')
+        ->and(Permission::count())->toBe(count(ShieldSeeder::permissionNames()))
+        ->and(Permission::pluck('guard_name')->unique()->all())->toBe(['web']);
+});
+
 test('seeding twice keeps the permissions of the super administrators', function () {
     $this->seed(ShieldSeeder::class);
     $this->seed(ShieldSeeder::class);
