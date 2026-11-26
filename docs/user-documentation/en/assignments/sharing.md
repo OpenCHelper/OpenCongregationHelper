@@ -28,14 +28,18 @@ of the assignment, even if they cannot see the other assignments.
 ## What the recipient sees
 
 The public page shows the territory name, its zone, map, image and description, the campaign and the start date of the
-assignment.
+assignment. It has no sidebar or menu, and its dates are in the timezone of the congregation.
+
+If the super administrators allow it from the [settings](../administration/settings#territories), the page also shows
+**Ask to return**: whoever has the link can ask the territory department to close the assignment, as the assignee can
+from the application (see [Assigning and returning](assigning#return-requests)).
 
 ![Public page of a shared assignment](/docs/user-documentation/en/assignments/assets/shared-page.webp)
 
 > 🔒 **Privacy:** by default the public page does **not** show the name of the assignee nor the territory notes, which
-> may contain personal information. The administrator can enable them from the [Settings](../administration/settings)
-> page. The shared pages also ask search engines (e.g. Google) not to index them, so they don't show up in search
-> results.
+> may contain personal information. The super administrators can enable them from the
+> [Settings](../administration/settings) page. The shared pages also ask search engines (e.g. Google) not to index them,
+> so they don't show up in search results.
 
 ## Stopping sharing
 

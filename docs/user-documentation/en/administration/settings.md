@@ -38,8 +38,9 @@ Then you choose what the public page of a shared assignment shows to anyone who 
   it and the notes hold no personal data. Before choosing it you are asked to confirm that you understand what it
   means: if you cancel, the personal data stay hidden.
 
-There you also choose whether anyone who opens the public page can **ask to return** the territory, without an
-account: the members of the territory department are then notified, as when the assignee asks from the application.
+There you also choose, with **Ask to return from shared pages**, whether anyone who opens the public page can ask to
+return the territory, without an account: the members of the territory department are then notified, as when the
+assignee asks from the application.
 
 Under **Assignments out for too long** the levels are listed in order, each with its colour, and the bar below draws
 them to scale while you type:
