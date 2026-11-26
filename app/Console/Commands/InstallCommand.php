@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Support\Installation;
 use App\Support\PasswordPolicy;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Database\Seeders\ShieldSeeder;
@@ -38,6 +39,9 @@ class InstallCommand extends Command
         }
 
         $this->grantSuperAdminRoleToRootUser();
+
+        // The setup wizard is no longer offered
+        Installation::markInstalled();
 
         return self::SUCCESS;
     }
@@ -113,9 +117,7 @@ class InstallCommand extends Command
 
         [$firstName, $lastName] = array_pad(explode(' ', $root['name'], 2), 2, '');
 
-        // The ID is set: the root user is the one with ID 1, while the next ID may be higher (e.g. after deleted users)
-        User::forceCreate([
-            'id' => 1,
+        User::createRoot([
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => $root['email'],

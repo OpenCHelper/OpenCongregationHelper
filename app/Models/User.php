@@ -205,6 +205,42 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * Create the root user, with ID 1 whatever the next ID of the table (e.g. after a failed attempt or deleted users).
+     *
+     * An explicit ID needs `IDENTITY_INSERT` on SQL Server, and does not move the sequence of PostgreSQL on: the next
+     * user would get ID 1 again.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public static function createRoot(array $attributes): self
+    {
+        $model = new self;
+        $connection = $model->getConnection();
+        $table = $connection->getQueryGrammar()->wrapTable($model->getTable());
+        $driver = $connection->getDriverName();
+
+        if ($driver === 'sqlsrv') {
+            $connection->unprepared("SET IDENTITY_INSERT {$table} ON");
+        }
+
+        try {
+            $root = static::forceCreate(['id' => 1, ...$attributes]);
+        } finally {
+            if ($driver === 'sqlsrv') {
+                $connection->unprepared("SET IDENTITY_INSERT {$table} OFF");
+            }
+        }
+
+        if ($driver === 'pgsql') {
+            $connection->select("select setval(pg_get_serial_sequence(?, 'id'), (select max(id) from {$table}))", [
+                $connection->getTablePrefix().$model->getTable(),
+            ]);
+        }
+
+        return $root;
+    }
+
+    /**
      * Check if the user has set up two-factor authentication (with an authenticator app).
      */
     public function hasTwoFactorAuthentication(): bool

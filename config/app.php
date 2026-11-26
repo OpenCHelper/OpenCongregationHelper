@@ -179,6 +179,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Setup Wizard
+    |--------------------------------------------------------------------------
+    |
+    | The wizard installing the application from the browser (`/setup`), shown
+    | while it is not installed yet. It opens only with the `SETUP_TOKEN`, so
+    | that nobody else can install it first; it can be turned off entirely
+    | (e.g. for the installations set up from the terminal with `och:install`).
+    |
+    */
+
+    'setup' => [
+        'enabled' => (bool) env('SETUP_WIZARD', true),
+        'token' => env('SETUP_TOKEN'),
+        // The file that remembers that the application is installed (`storage/framework/installed` when not set)
+        'marker' => null,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Initial Root User
     |--------------------------------------------------------------------------
     |

@@ -10,8 +10,11 @@ This guide is for whoever starts using the application for the first time, after
 
 ## 1. Log in as root
 
-Log in with the root user created during the installation, and open your [profile](../basics/profile) to set your
-name, your preferred language and an emergency contact.
+Log in with the root user created during the installation, from the [setup wizard](../setup#from-the-browser) or
+the terminal. Its name, logo and colour, administrators and features can be changed from the
+[Settings](../administration/settings) and the [users](../administration/users).
+
+Then open your [profile](../basics/profile) to set your name, your preferred language and an emergency contact.
 
 ## 2. Create the zones
 
