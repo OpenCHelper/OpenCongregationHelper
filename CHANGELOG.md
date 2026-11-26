@@ -52,6 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
+  page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown
+  only on the territory's own map. The **Draw Text** tool is removed.
 - **Territories**: **Assign Massively** and **End Assignments** tell how many territories were assigned or returned
   and which were skipped, and why (already assigned, not assigned, not allowed or refused); they were skipped
   silently.
@@ -130,6 +133,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated the libraries used for passkeys, CSV imports and exports, emails, HTML sanitizing and URL generation, which
   had known vulnerabilities (e.g. forged passkey attestations, memory exhaustion while reading a crafted CSV file, a
   man in the middle bypassing the TLS required to send emails, and generated URLs pointing to another host).
+- **Login**: at most 10 attempts to sign in with the same email (whatever its case or accents) are allowed every 15
+  minutes, whatever the device or network they come from, and a successful login starts over: changing the IP address
+  on each attempt no longer allows guessing a password, or a two-factor code, indefinitely. Whoever knows an email can
+  still block the sign-in with it for up to 15 minutes at a time. The new `TRUSTED_PROXIES` setting lists the addresses
+  of the proxies in front of the app (by default `*`, any address, as Altervista needs): set it to the address of your
+  proxy, or leave it empty if there is none, so that visitors can no longer pass themselves off as another IP address.
 
 ## [1.0.0-alpha15] - 2026-11-24
 

@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
-    Every peer is trusted as a proxy (see `bootstrap/app.php` and GH36), so the
-    forwarded headers below can be sent by any client. Only the scheme and the
+    By default every peer is trusted as a proxy (`TRUSTED_PROXIES=*`, see
+    `bootstrap/app.php` and GH36), so the forwarded headers below can be sent
+    by any client. Only the scheme and the
     client IP may be taken from them; the host, port and prefix of the URLs the
     application generates must always come from the request itself.
 */
@@ -73,4 +74,43 @@ test('the client IP is the right-most address of the forwarded chain', function 
     'address appended by the proxy' => ['5.6.7.8', '5.6.7.8'],
     // A client may prepend any address, but the proxy appends the one it received the request from
     'address supplied by the client before the proxy one' => ['1.2.3.4, 5.6.7.8', '5.6.7.8'],
+]);
+
+test('only the configured proxies can set the client IP', function (?string $trustedProxies, string $peer, string $expectedIp) {
+    config(['trustedproxy.proxies' => $trustedProxies]);
+    Route::get('/trusted-proxy-test/client-ip', fn (Request $request): ?string => $request->ip());
+
+    $this->withServerVariables(['REMOTE_ADDR' => $peer])
+        ->get('/trusted-proxy-test/client-ip', ['X-Forwarded-For' => '5.6.7.8'])
+        ->assertOk()
+        ->assertContent($expectedIp);
+})->with([
+    'any peer, by default' => ['*', '10.0.0.1', '5.6.7.8'],
+    'the configured proxy' => ['10.0.0.2', '10.0.0.2', '5.6.7.8'],
+    'a proxy in the configured range' => ['192.168.0.0/16, 10.0.0.0/8', '10.0.0.3', '5.6.7.8'],
+    'a peer that is not the configured proxy' => ['10.0.0.2', '10.0.0.1', '10.0.0.1'],
+    'any peer, when no proxy is configured' => [null, '10.0.0.1', '10.0.0.1'],
+]);
+
+test('trusts every peer when TRUSTED_PROXIES is not set, and none when it is empty', function (?string $value, ?string $expected) {
+    $previous = getenv('TRUSTED_PROXIES');
+
+    if ($value === null) {
+        putenv('TRUSTED_PROXIES');
+        unset($_ENV['TRUSTED_PROXIES'], $_SERVER['TRUSTED_PROXIES']);
+    } else {
+        putenv('TRUSTED_PROXIES='.$value);
+        $_ENV['TRUSTED_PROXIES'] = $_SERVER['TRUSTED_PROXIES'] = $value;
+    }
+
+    try {
+        expect((require config_path('trustedproxy.php'))['proxies'])->toBe($expected);
+    } finally {
+        $previous === false ? putenv('TRUSTED_PROXIES') : putenv('TRUSTED_PROXIES='.$previous);
+        unset($_ENV['TRUSTED_PROXIES'], $_SERVER['TRUSTED_PROXIES']);
+    }
+})->with([
+    'not set' => [null, '*'],
+    'empty' => ['', null],
+    'an address' => ['10.0.0.2', '10.0.0.2'],
 ]);
