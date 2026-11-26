@@ -49,9 +49,12 @@ ruolo che lo permette.
 Nell'elenco **Territori**, spunta i territori, poi apri il menu delle **azioni di massa** e scegli:
 
 - **Assegna massivamente**: scegli la persona (e, se vuoi, una campagna) e clicca **Invia**. I territori già fuori
-  vengono saltati, senza alcun messaggio;
+  vengono saltati;
 - **Termina assegnazioni**: riconsegna, dopo una conferma, tutti i territori selezionati che sono fuori. Gli altri
-  vengono saltati, senza alcun messaggio.
+  vengono saltati, come quelli che il tuo ruolo non ti permette di riconsegnare.
+
+Un messaggio indica poi quanti territori sono stati assegnati o riconsegnati ed elenca quelli saltati, con il motivo: è
+verde se non ne è stato saltato nessuno, giallo se alcuni sono stati saltati, rosso se nessuno è andato a buon fine.
 
 ![Assegnare più territori](/docs/user-documentation/it/assignments/assets/territories-bulk-assign.webp)
 

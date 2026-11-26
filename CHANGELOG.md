@@ -43,6 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Territories**: **Assign Massively** and **End Assignments** tell how many territories were assigned or returned
+  and which were skipped, and why (already assigned, not assigned, not allowed or refused); they were skipped
+  silently.
 - **Tags**: deleting a tag asks for a confirmation that says how many territories and zones use it, since it is
   removed from all of them; it was removed silently, while the guide said that a tag in use could not be deleted.
 - **Roles**: no longer have a **Pages** tab, whose permissions did nothing: the profile is open to everyone, the

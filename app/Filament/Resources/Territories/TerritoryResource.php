@@ -43,6 +43,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -74,7 +75,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -679,10 +679,12 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                 ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
                         ])
                         ->action(function (Collection $records, array $data): void {
+                            $assigned = 0;
+                            $skipped = ['already_assigned' => [], 'refused' => []];
+
                             foreach ($records as $record) {
-                                // Skip if the last assignment is not null
                                 if ($record->currentAssignment !== null && $record->currentAssignment->ended_at === null) {
-                                    Log::warning("Skipping record {$record->id} because it has an active assignment");
+                                    $skipped['already_assigned'][] = $record->name;
 
                                     continue;
                                 }
@@ -695,11 +697,14 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                                         'campaign_id' => $data['campaign_id'] ?? null,
                                         'created_by' => Auth::id(),
                                     ]));
+                                    $assigned++;
                                 } catch (ValidationException $exception) {
                                     // Rejected by TerritoryAssignmentObserver (e.g. the territory has been assigned in the meantime)
-                                    Log::warning("Skipping record {$record->id}: {$exception->getMessage()}");
+                                    $skipped['refused'][] = "{$record->name} ({$exception->getMessage()})";
                                 }
                             }
+
+                            static::notifyBulkAssignmentResult('bulk_assigned', $assigned, $skipped);
                         })
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('cancel_assignment_bulk')
@@ -707,35 +712,40 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                         ->icon(Heroicon::OutlinedDocumentArrowDown)
                         ->authorize(fn (): bool => Gate::allows('update', new TerritoryAssignment))
                         ->requiresConfirmation()
-                        ->action(function (Collection $records, array $data): void {
+                        ->action(function (Collection $records): void {
+                            $returned = 0;
+                            $skipped = ['not_assigned' => [], 'unauthorized' => [], 'refused' => []];
+
                             foreach ($records as $record) {
-                                // Skip if the last assignment is not null
-                                if ($record->currentAssignment === null || $record->currentAssignment->ended_at !== null) {
-                                    Log::warning("Skipping record {$record->id} because it does not has an active assignment");
-
-                                    continue;
-                                }
-
                                 $currentAssignment = $record->currentAssignment;
 
-                                if (Gate::denies('update', $currentAssignment)) {
-                                    Log::warning("Skipping record {$record->id} because the user cannot update its assignment");
+                                if ($currentAssignment === null || $currentAssignment->ended_at !== null) {
+                                    $skipped['not_assigned'][] = $record->name;
 
                                     continue;
                                 }
 
-                                // Carica la relazione territory prima dell'update per evitare lazy loading errors
+                                if (Gate::denies('update', $currentAssignment)) {
+                                    $skipped['unauthorized'][] = $record->name;
+
+                                    continue;
+                                }
+
+                                // Load the territory before the update, to avoid lazy loading errors
                                 $currentAssignment->load('territory');
 
                                 try {
                                     $currentAssignment->update([
                                         'ended_at' => now(),
                                     ]);
+                                    $returned++;
                                 } catch (ValidationException $exception) {
                                     // Rejected by TerritoryAssignmentObserver (e.g. the assignment starts in the future)
-                                    Log::warning("Skipping record {$record->id}: {$exception->getMessage()}");
+                                    $skipped['refused'][] = "{$record->name} ({$exception->getMessage()})";
                                 }
                             }
+
+                            static::notifyBulkAssignmentResult('bulk_returned', $returned, $skipped);
                         })
                         ->deselectRecordsAfterCompletion(),
                     static::explainRefusedDeletion(DeleteBulkAction::make())
@@ -850,6 +860,48 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
     public static function getImageAlt(?string $territoryName): string
     {
         return filled($territoryName) ? $territoryName : __('filament-resources.territory.image_alt');
+    }
+
+    /**
+     * Tell the result of a bulk assignment or return: how many territories were assigned (or returned), and which were
+     * skipped and why. Green when all of them went through, amber when some were skipped, red when none went through.
+     *
+     * @param  string  $doneKey  key of the title, with the number of territories that went through (e.g. `bulk_assigned`)
+     * @param  array<string, list<string>>  $skipped  names of the skipped territories, by reason (e.g. `already_assigned`)
+     */
+    public static function notifyBulkAssignmentResult(string $doneKey, int $doneCount, array $skipped): void
+    {
+        $skippedLines = collect($skipped)
+            ->filter()
+            ->map(fn (array $territories, string $reason): string => e(__("filament-resources.territory.bulk_skipped_{$reason}", [
+                'territories' => static::listTerritoryNames($territories),
+            ])));
+
+        $notification = Notification::make()
+            ->title(trans_choice("filament-resources.territory.{$doneKey}", $doneCount))
+            ->body($skippedLines->isEmpty() ? null : new HtmlString($skippedLines->implode('<br>')));
+
+        match (true) {
+            $skippedLines->isEmpty() => $notification->success(),
+            $doneCount > 0 => $notification->warning()->persistent(),
+            default => $notification->danger()->persistent(),
+        };
+
+        $notification->send();
+    }
+
+    /**
+     * The given names separated by commas, with at most 10 of them followed by how many more there are.
+     *
+     * @param  list<string>  $names
+     */
+    private static function listTerritoryNames(array $names): string
+    {
+        $shownNames = implode(', ', array_slice($names, 0, 10));
+
+        return count($names) > 10
+            ? __('filament-resources.territory.bulk_and_more', ['territories' => $shownNames, 'count' => count($names) - 10])
+            : $shownNames;
     }
 
     /**
