@@ -3,6 +3,7 @@
 use App\Filament\Pages\Auth\Login;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -60,6 +61,31 @@ it('counts the email without regard to case and surrounding spaces', function ()
     attemptLoginFromNewAddress('publisher@example.com', 'correct-horse-battery-staple');
 
     $this->assertGuest();
+});
+
+it('counts every variant of an email that signs in to the same account together', function () {
+    // MySQL compares the emails ignoring accents too (`utf8mb4_unicode_ci`): each variant finds the same account
+    $variants = ['publishér@example.com', 'publìsher@example.com', 'publisher@exámple.com', 'pùblisher@example.com', 'publisher@example.com'];
+
+    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL) as $attempt) {
+        attemptLoginFromNewAddress($variants[$attempt % count($variants)], 'wrong-password-'.$attempt);
+    }
+
+    attemptLoginFromNewAddress('publisher@example.com', 'correct-horse-battery-staple');
+
+    $this->assertGuest();
+})->skip(fn (): bool => DB::getDriverName() !== 'mysql', 'Only MySQL compares the emails ignoring accents.');
+
+it('counts the failed attempts of an email without an account by its text', function () {
+    foreach (range(1, Login::MAX_FAILED_ATTEMPTS_PER_EMAIL) as $attempt) {
+        attemptLoginFromNewAddress('Nobody@Example.com', 'wrong-password-'.$attempt);
+    }
+
+    attemptLoginFromNewAddress('nobody@example.com', 'any-password')
+        ->assertNotified(__('filament-panels::auth/pages/login.notifications.throttled.title', [
+            'seconds' => Login::FAILED_ATTEMPTS_DECAY_SECONDS,
+            'minutes' => Login::FAILED_ATTEMPTS_DECAY_SECONDS / 60,
+        ]));
 });
 
 it('does not block the other emails', function () {
