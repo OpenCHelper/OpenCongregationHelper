@@ -52,6 +52,7 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    array_map(unlink(...), glob($this->envPath.'.backup-*') ?: []);
     @unlink($this->envPath);
     @unlink(Installation::markerPath());
     Installation::forget();
@@ -387,6 +388,47 @@ test('a test email can be sent to the root user', function () {
     Notification::assertSentOnDemand(TestEmailNotification::class);
 });
 
+test('the .env file is copied before the wizard first changes it', function () {
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_LOCALE=it\n");
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm(['app_url' => 'https://congregation.example.com', 'app_timezone' => 'Europe/Rome', 'mail_mailer' => 'log', 'mail_from_address' => 'noreply@example.com'])
+        ->goToWizardStep(3)
+        ->assertHasNoFormErrors()
+        ->fillForm(['queue_connection' => 'database'])
+        ->goToWizardStep(4);
+
+    $backups = glob($this->envPath.'.backup-*');
+
+    // Only once, as the file was before
+    expect($backups)->toHaveCount(1)
+        ->and(file_get_contents($backups[0]))->toBe("SETUP_TOKEN=the-setup-token\nAPP_LOCALE=it\n")
+        ->and(file_get_contents($this->envPath))->toContain('QUEUE_CONNECTION=database');
+});
+
+test('the configuration step warns when APP_URL is not the address of the page', function () {
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_URL=https://other.example.com\n");
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->assertSee(__('setup.environment.app_url_mismatch', ['url' => 'https://other.example.com', 'page' => 'http://localhost']));
+
+    // The default port is the same address
+    file_put_contents($this->envPath, "SETUP_TOKEN=the-setup-token\nAPP_URL=http://localhost:80/\n");
+
+    Livewire::test(SetupWizard::class)
+        ->assertDontSee(__('setup.environment.app_url_mismatch', ['url' => 'http://localhost:80/', 'page' => 'http://localhost']));
+});
+
+test('the administrators step tells when the invitations would not be sent', function () {
+    config(['mail.default' => 'log']);
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->assertSee(__('setup.administrators.mailer_not_sending', ['mailer' => 'log']));
+});
+
 test('the database can be tested from the configuration step, before saving', function () {
     completeSetupEnvironmentFile($this->envPath);
     unlockSetupWizard();
@@ -488,7 +530,8 @@ test('completing the wizard installs the application', function () {
         ->assertSee(__('setup.completed.items.root', ['email' => 'anna@example.com']))
         ->assertSee(trans_choice('setup.completed.items.administrators', 1, ['count' => 1]))
         ->assertSee(__('setup.completed.items.two_factor'))
-        ->assertSee(__('setup.completed.items.token_removed'));
+        ->assertSee(__('setup.completed.items.token_removed'))
+        ->assertSee(str(__('setup.completed.items.env_backup', ['file' => '']))->beforeLast(':')->toString());
 
     $root = User::rootUser();
     $administrator = User::query()->where('email', 'marco@example.com')->firstOrFail();

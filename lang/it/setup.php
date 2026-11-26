@@ -79,6 +79,7 @@ return [
         'intro' => 'Questi valori mancano nel file .env: verranno aggiunti. I valori già impostati non vengono mai cambiati.',
         'nothing_missing' => 'Tutti i valori che servono all\'app sono già impostati nel file .env.',
         'not_writable' => 'Il file .env non può essere scritto: aggiungi tu i valori mancanti, poi ricarica questa pagina.',
+        'app_url_mismatch' => 'APP_URL è :url, ma questa pagina si trova su :page: i link nelle email e nelle notifiche push puntano ad APP_URL. Se è sbagliato, cambialo nel file .env.',
         'application' => 'Applicazione',
         'app_url' => 'L\'indirizzo pubblico dell\'app, usato nei link delle email.',
         'app_timezone' => 'Usato per le date e per l\'orario dei promemoria.',
@@ -157,6 +158,7 @@ return [
         'intro' => 'Aggiungi le persone che gestiranno l\'app con te: diventano super amministratori e ricevono un\'email per scegliere la password. Puoi aggiungerle anche in seguito.',
         'add' => 'Aggiungi un amministratore',
         'root_email' => 'Questo è l\'indirizzo email dell\'utente root.',
+        'mailer_not_sending' => 'Le email non vengono inviate (MAIL_MAILER è :mailer): gli inviti non arrivano in nessuna casella. Scegli un mailer che le invii nel passaggio Configurazione, o invita di nuovo gli amministratori in seguito dagli utenti.',
     ],
 
     'features' => [
@@ -184,6 +186,7 @@ return [
             'database' => 'Tabelle e permessi creati',
             'root' => 'Utente root creato: :email',
             'settings' => 'Impostazioni salvate',
+            'env_backup' => 'Copia del file .env com\'era prima: :file',
             'administrators' => '{0} Nessun amministratore aggiunto: puoi aggiungerli in seguito dagli utenti|{1} :count amministratore invitato via email|[2,*] :count amministratori invitati via email',
             'invitations_failed' => '{1} :count invito non è stato inviato: invialo di nuovo dagli utenti|[2,*] :count inviti non sono stati inviati: inviali di nuovo dagli utenti',
             'two_factor' => 'Configura l\'autenticazione a due fattori subito dopo l\'accesso',

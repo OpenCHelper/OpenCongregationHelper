@@ -108,6 +108,8 @@ guidata** (`/setup`), che chiede il token e poi:
 7. mostra un riepilogo delle scelte prima di installare.
 
 Ricaricando la pagina si riprende dall'ultimo passaggio completato, con i valori inseriti finora (tranne le password).
+Prima della sua prima modifica, la configurazione guidata copia il file `.env` in `.env.backup-<data>-<ora>`, accanto
+a esso.
 
 L'utente root che crea viene anche scritto in `INITIAL_ROOT_*` (sostituendone i valori), per `och:recover-root`, e
 `SETUP_TOKEN` viene rimosso dal file `.env` (rimuovilo tu se lo imposta il server, o se il file non è scrivibile).

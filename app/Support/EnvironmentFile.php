@@ -122,6 +122,25 @@ class EnvironmentFile
     }
 
     /**
+     * Copy the file as it is next to it (`.env.backup-<date>-<time>`), returning the path of the copy: `null` when there
+     * is no file to copy.
+     */
+    public function backup(): ?string
+    {
+        if (! $this->exists()) {
+            return null;
+        }
+
+        $backupPath = $this->path().'.backup-'.now()->format('Ymd-His');
+
+        if (! @copy($this->path(), $backupPath)) {
+            throw new RuntimeException("The {$this->path()} file could not be copied to {$backupPath}.");
+        }
+
+        return $backupPath;
+    }
+
+    /**
      * Remove the line of a variable from the file, if it has one.
      */
     public function remove(string $key): void

@@ -91,3 +91,15 @@ test('a variable can be removed from the file', function () {
 
     expect(file_get_contents($this->path))->toBe("APP_NAME=Test\nSETUP_TOKEN_OTHER=kept\n");
 });
+
+test('the file can be copied next to it', function () {
+    file_put_contents($this->path, "APP_NAME=Test\n");
+
+    $backup = (new EnvironmentFile($this->path))->backup();
+
+    expect($backup)->toStartWith($this->path.'.backup-')
+        ->and(file_get_contents($backup))->toBe("APP_NAME=Test\n")
+        ->and((new EnvironmentFile($this->path.'-missing'))->backup())->toBeNull();
+
+    unlink($backup);
+});

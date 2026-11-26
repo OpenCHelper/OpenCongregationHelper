@@ -614,6 +614,13 @@ class SetupWizard extends Page
                 Text::make(fn (): string => $this->missingVariables === []
                     ? __('setup.environment.nothing_missing')
                     : __('setup.environment.intro')),
+                Callout::make(fn (): string => __('setup.environment.app_url_mismatch', [
+                    'url' => $this->currentEnvironmentValue('APP_URL'),
+                    'page' => $this->requestRoot,
+                ]))
+                    ->warning()
+                    ->visible(fn (): bool => ! in_array('APP_URL', $this->missingVariables, true)
+                        && self::origin($this->currentEnvironmentValue('APP_URL')) !== self::origin($this->requestRoot)),
                 Callout::make(__('setup.environment.not_writable'))
                     ->warning()
                     ->visible(fn (): bool => $this->missingVariables !== [] && ! app(EnvironmentFile::class)->isWritable()),
@@ -912,6 +919,16 @@ class SetupWizard extends Page
             ->icon(Heroicon::OutlinedUserGroup)
             ->schema([
                 Text::make(__('setup.administrators.intro')),
+                Callout::make(fn (): string => __('setup.administrators.mailer_not_sending', ['mailer' => (string) config('mail.default')]))
+                    ->warning()
+                    ->visible(fn (): bool => self::mailerDoesNotSend())
+                    ->actions([
+                        Action::make('goToMailerConfiguration')
+                            ->label(__('setup.root.go_to_configuration'))
+                            ->icon(Heroicon::OutlinedArrowUturnLeft)
+                            ->link()
+                            ->alpineClickHandler(self::goToStepHandler('environment')),
+                    ]),
                 Repeater::make('administrators')
                     ->hiddenLabel()
                     ->defaultItems(0)
@@ -1170,6 +1187,7 @@ class SetupWizard extends Page
         $this->applyToConfiguration([...$values, ...$changedValues]);
 
         try {
+            $this->backupEnvironmentFile();
             app(EnvironmentFile::class)->writeMissing($values);
 
             foreach ($changedValues as $variable => $value) {
@@ -1269,6 +1287,8 @@ class SetupWizard extends Page
         }
 
         try {
+            $this->backupEnvironmentFile();
+
             if (in_array('QUEUE_CONNECTION', $this->missingVariables, true)) {
                 app(EnvironmentFile::class)->writeMissing(['QUEUE_CONNECTION' => $queue]);
             } elseif (in_array('QUEUE_CONNECTION', $this->changeableVariables, true) && $queue !== $this->currentEnvironmentValue('QUEUE_CONNECTION')) {
@@ -1288,6 +1308,32 @@ class SetupWizard extends Page
     }
 
     /**
+     * The scheme, host and port of an address (`https://example.com:8443`), without the default ports, to compare two.
+     */
+    protected static function origin(string $url): string
+    {
+        $parts = parse_url(trim($url));
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        $port = $parts['port'] ?? null;
+        $port = ($scheme === 'https' && $port === 443) || ($scheme === 'http' && $port === 80) ? null : $port;
+
+        return $scheme.'://'.strtolower((string) ($parts['host'] ?? '')).($port !== null ? ":{$port}" : '');
+    }
+
+    /**
+     * Copy `.env` before the wizard first changes it, so that a wrong change can be undone by hand: once per
+     * installation (the copy is remembered in the session).
+     */
+    protected function backupEnvironmentFile(): void
+    {
+        if (session()->has(self::PROGRESS_SESSION_KEY.'.env_backup')) {
+            return;
+        }
+
+        session()->put(self::PROGRESS_SESSION_KEY.'.env_backup', app(EnvironmentFile::class)->backup());
+    }
+
+    /**
      * Turn on the endpoints that run the scheduler and the queue, for the hosting without a shell: only on request, as
      * an installation with a shell does not need them.
      */
@@ -1296,6 +1342,7 @@ class SetupWizard extends Page
         $this->ensureUnlocked();
 
         try {
+            $this->backupEnvironmentFile();
             $this->createCronToken();
         } catch (Throwable $exception) {
             report($exception);
@@ -1806,6 +1853,7 @@ class SetupWizard extends Page
 
         $this->saveInitialRootUser($data);
         $tokenRemoved = $this->removeSetupToken();
+        $environmentBackup = session(self::PROGRESS_SESSION_KEY.'.env_backup');
 
         $invitedAdministrators = 0;
 
@@ -1827,6 +1875,9 @@ class SetupWizard extends Page
             ['text' => __('setup.completed.items.database'), 'status' => 'done'],
             ['text' => __('setup.completed.items.root', ['email' => $data['root_email']]), 'status' => 'done'],
             ['text' => __('setup.completed.items.settings'), 'status' => 'done'],
+            filled($environmentBackup)
+                ? ['text' => __('setup.completed.items.env_backup', ['file' => basename((string) $environmentBackup)]), 'status' => 'done']
+                : null,
             ['text' => trans_choice('setup.completed.items.administrators', $invitedAdministrators, ['count' => $invitedAdministrators]), 'status' => 'done'],
             $failedInvitations > 0
                 ? ['text' => trans_choice('setup.completed.items.invitations_failed', $failedInvitations, ['count' => $failedInvitations]), 'status' => 'warning']
@@ -1858,6 +1909,8 @@ class SetupWizard extends Page
         ];
 
         try {
+            $this->backupEnvironmentFile();
+
             foreach ($values as $variable => $value) {
                 if (! $environmentFile->isSetOutsideFile($variable)) {
                     $environmentFile->set($variable, $value);

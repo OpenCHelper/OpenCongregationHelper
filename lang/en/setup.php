@@ -79,6 +79,7 @@ return [
         'intro' => 'These values are missing from the .env file: they will be added to it. The values already set are never changed.',
         'nothing_missing' => 'All the values the app needs are already set in the .env file.',
         'not_writable' => 'The .env file cannot be written: add the missing values to it yourself, then reload this page.',
+        'app_url_mismatch' => 'APP_URL is :url, but this page is at :page: the links in the emails and the push notifications point to APP_URL. If it is wrong, change it in the .env file.',
         'application' => 'Application',
         'app_url' => 'The public address of the app, used in the links of the emails.',
         'app_timezone' => 'Used for the dates and the time of the reminders.',
@@ -157,6 +158,7 @@ return [
         'intro' => 'Add the people who will manage the app with you: they become super administrators and receive an email to choose their password. You can also add them later.',
         'add' => 'Add an administrator',
         'root_email' => 'This is the email address of the root user.',
+        'mailer_not_sending' => 'The emails are not sent (MAIL_MAILER is :mailer): the invitations reach no inbox. Choose a mailer that sends them in the Configuration step, or invite the administrators again later from the users.',
     ],
 
     'features' => [
@@ -184,6 +186,7 @@ return [
             'database' => 'Tables and permissions created',
             'root' => 'Root user created: :email',
             'settings' => 'Settings saved',
+            'env_backup' => 'Copy of the .env file as it was before: :file',
             'administrators' => '{0} No administrators added: you can add them later from the users|{1} :count administrator invited by email|[2,*] :count administrators invited by email',
             'invitations_failed' => '{1} :count invitation could not be sent: send it again from the users|[2,*] :count invitations could not be sent: send them again from the users',
             'two_factor' => 'Set up the two-factor authentication right after logging in',

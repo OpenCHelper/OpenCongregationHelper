@@ -79,6 +79,7 @@ return [
         'intro' => 'Estos valores faltan en el archivo .env: se añadirán. Los valores ya configurados nunca se cambian.',
         'nothing_missing' => 'Todos los valores que necesita la aplicación ya están en el archivo .env.',
         'not_writable' => 'No se puede escribir el archivo .env: añade tú los valores que faltan y vuelve a cargar esta página.',
+        'app_url_mismatch' => 'APP_URL es :url, pero esta página está en :page: los enlaces de los correos y de las notificaciones push apuntan a APP_URL. Si es incorrecto, cámbialo en el archivo .env.',
         'application' => 'Aplicación',
         'app_url' => 'La dirección pública de la aplicación, usada en los enlaces de los correos.',
         'app_timezone' => 'Se usa para las fechas y la hora de los recordatorios.',
@@ -157,6 +158,7 @@ return [
         'intro' => 'Añade a las personas que gestionarán la aplicación contigo: pasan a ser superadministradores y reciben un correo para elegir su contraseña. También puedes añadirlas más tarde.',
         'add' => 'Añadir un administrador',
         'root_email' => 'Esta es la dirección de correo del usuario root.',
+        'mailer_not_sending' => 'Los correos no se envían (MAIL_MAILER es :mailer): las invitaciones no llegan a ningún buzón. Elige un mailer que los envíe en el paso Configuración, o invita de nuevo a los administradores más tarde desde los usuarios.',
     ],
 
     'features' => [
@@ -184,6 +186,7 @@ return [
             'database' => 'Tablas y permisos creados',
             'root' => 'Usuario root creado: :email',
             'settings' => 'Ajustes guardados',
+            'env_backup' => 'Copia del archivo .env como estaba antes: :file',
             'administrators' => '{0} Ningún administrador añadido: puedes añadirlos más tarde desde los usuarios|{1} :count administrador invitado por correo|[2,*] :count administradores invitados por correo',
             'invitations_failed' => '{1} :count invitación no se pudo enviar: envíala de nuevo desde los usuarios|[2,*] :count invitaciones no se pudieron enviar: envíalas de nuevo desde los usuarios',
             'two_factor' => 'Configura la autenticación en dos pasos justo después de iniciar sesión',
