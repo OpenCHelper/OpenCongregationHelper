@@ -24,10 +24,10 @@ I tag vengono creati automaticamente quando ne scrivi uno nuovo nel modulo di un
 pagina puoi anche:
 
 1. Cliccare **Nuovo** (o **Modifica** su un tag esistente).
-2. Compilare **Nome** e **Slug** (una versione semplificata del nome, es. `condomini`) per ogni lingua, usando le schede
-   delle lingue. Così il tag viene mostrato nella lingua di ogni utente.
+2. Compilare **Nome** e **Slug** (una versione semplificata del nome, es. `condomini`: quando crei un tag, viene
+   compilato dal nome). Un tag ha un solo nome, uguale in tutte le lingue dell'interfaccia.
 3. Scegliere il **Tipo** e, se vuoi, un numero di **Ordine** per ordinare i tag.
-4. Cliccare **Crea** (o **Salva modifiche**).
+4. Cliccare **Salva**.
 
 ![Modulo del tag](/docs/user-documentation/it/administration/assets/tag-form.webp)
 

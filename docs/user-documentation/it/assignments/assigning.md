@@ -34,21 +34,33 @@ nell'elenco dei territori.
 
 L'assegnazione viene chiusa con la data di oggi e l'assegnatario riceve una notifica (tranne se è un utente virtuale).
 
+Da **Assegnazioni** non c'è un pulsante per riconsegnare un territorio: clicca **Modifica** sulla sua riga e imposta la
+**Data fine** (vedi [Storico delle assegnazioni](history#correggere-unassegnazione)).
+
+### Richieste di riconsegna
+
+L'assegnatario può chiedere di riconsegnare il territorio: nella pagina dell'assegnazione (es. aperta dalla notifica)
+clicca **Chiedi di riconsegnare** e conferma. I membri del reparto territori ricevono una notifica, e la pagina
+dell'assegnazione mostra **Riconsegna richiesta il …** con **Termina assegnazione**, che la riconsegna per chi ha un
+ruolo che lo permette.
+
 ## Assegnare o riconsegnare più territori insieme
 
 Nell'elenco **Territori**, spunta i territori, poi apri il menu delle **azioni di massa** e scegli:
 
 - **Assegna massivamente**: scegli la persona (e, se vuoi, una campagna) e clicca **Invia**. I territori già fuori
-  vengono saltati;
-- **Termina assegnazioni**: riconsegna, dopo una conferma, tutti i territori selezionati che sono fuori.
+  vengono saltati, senza alcun messaggio;
+- **Termina assegnazioni**: riconsegna, dopo una conferma, tutti i territori selezionati che sono fuori. Gli altri
+  vengono saltati, senza alcun messaggio.
 
 ![Assegnare più territori](/docs/user-documentation/it/assignments/assets/territories-bulk-assign.webp)
 
-> 💡 **Suggerimento:** combina il filtro **Non assegnati** con **Raggruppa per Zona** per trovare subito tutti i
-> territori disponibili di una zona e assegnarli alla stessa persona.
+> 💡 **Suggerimento:** combina il filtro **Stato assegnazione** impostato su **Non assegnati** con
+> **Raggruppa per Zona** per trovare subito tutti i territori disponibili di una zona e assegnarli alla stessa persona.
 
 ## Registrare assegnazioni passate
 
 Per registrare un'assegnazione con date diverse (es. quando ricopi il registro cartaceo), apri **Assegnazioni**, clicca
-**Nuovo** e indica il territorio, l'assegnatario, la **Data inizio** e, se già riconsegnato, la **Data fine**. Valgono
-gli stessi controlli: un territorio non può avere due assegnazioni in corso e non si possono usare campagne terminate.
+**Nuovo** e indica il territorio, l'assegnatario, la **Data inizio** e, se già riconsegnato, la **Data fine** (nessuna
+delle due può essere nel futuro). Valgono gli stessi controlli: un territorio non può avere due assegnazioni in corso e
+non si possono usare campagne terminate.

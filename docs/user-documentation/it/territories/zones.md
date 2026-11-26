@@ -31,6 +31,9 @@ direttamente in questa zona, e visualizzare, modificare o eliminare quelli esist
 
 ## Filtri
 
-Il filtro **Tag** mostra solo le zone con i tag selezionati.
+Il filtro **Tag** mostra solo le zone con i tag selezionati. Il filtro **Record eliminati** mostra anche le zone
+eliminate, per ripristinarle con **Ripristina**.
 
-> ⚠️ **Attenzione:** eliminando una zona vengono nascosti anche tutti i suoi territori.
+> ⚠️ **Attenzione:** una zona che contiene ancora dei territori non può essere eliminata: prima spostali in
+> un'altra zona o eliminali. Per eliminare una zona definitivamente (**Forza eliminazione**), anche i suoi territori
+> eliminati devono prima essere spostati o eliminati definitivamente.

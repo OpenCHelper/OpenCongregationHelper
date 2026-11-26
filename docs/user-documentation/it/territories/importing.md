@@ -11,17 +11,18 @@ Invece di crearli uno alla volta, puoi importarli da un **file CSV**.
 ## Preparare il file
 
 Clicca **Scarica un file CSV di esempio** nella finestra di importazione per ottenere un modello. Ogni riga è un
-territorio, con queste colonne:
+territorio, con queste colonne (una colonna viene associata automaticamente quando la sua intestazione è quella del
+file di esempio o il nome del campo):
 
-| Colonna | Obbligatoria | Contenuto |
-|---------|--------------|-----------|
-| **Name** | Sì | Nome del territorio, es. `CS-01`. |
-| **Territory zone** | Sì | Nome della zona. Se non esiste una zona con quel nome, viene creata. |
-| **Is commercial?** | Sì | `1`/`0`, `yes`/`no` o `true`/`false`. |
-| **Description** | No | Di solito l'elenco delle vie. |
-| **Notes** | No | Note per chi lavora il territorio. |
-| **Image path** | No | Link assoluto (`http://` o `https://`) a un'immagine del territorio. |
-| **Geojson** | No | La mappa del territorio, come `FeatureCollection` GeoJSON. |
+| Campo | Colonna del file di esempio | Obbligatoria | Contenuto |
+|-------|-----------------------------|--------------|-----------|
+| **Nome** | `name` | Sì | Nome del territorio, es. `CS-01`. |
+| **Zona** | `territoryZone` | Sì | Nome della zona. Se non esiste una zona con quel nome, viene creata. |
+| **Commerciale?** | `is_commercial` | Sì | `1`/`0`, `yes`/`no` o `true`/`false`. |
+| **Descrizione** | `description` | No | Di solito l'elenco delle vie. |
+| **Note** | `notes` | No | Note per chi lavora il territorio. |
+| **Immagine** | `image_path` | No | Link assoluto (`http://` o `https://`) a un'immagine del territorio. |
+| **GeoJSON** | `geojson` | No | La mappa del territorio, come `FeatureCollection` GeoJSON. |
 
 > 💡 **Suggerimento:** i programmi di fogli di calcolo (LibreOffice Calc, Excel, Fogli Google) possono salvare un foglio
 > in formato CSV con *File → Salva con nome / Scarica → CSV*.
@@ -48,5 +49,7 @@ nuovo.
 
 - Una riga viene scartata se esiste già un territorio con lo stesso nome nella stessa zona (anche tra quelli eliminati),
   a meno che non sia selezionato **Aggiorna record esistenti**.
+- Una riga viene scartata anche se aggiornerebbe un territorio che non hai il permesso di modificare, oppure se la sua
+  zona non esiste e non hai il permesso di creare zone.
 - Con **Salva una copia**, le immagini vengono scaricate solo da indirizzi pubblici, devono essere vere immagini
   (`image/*`) e pesare al massimo 10 MB.

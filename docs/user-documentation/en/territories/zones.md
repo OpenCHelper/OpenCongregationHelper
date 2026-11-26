@@ -30,6 +30,9 @@ directly in this zone, and view, edit or delete the existing ones.
 
 ## Filtering
 
-The **Tags** filter shows only the zones with the selected tags.
+The **Tags** filter shows only the zones with the selected tags. The **Deleted records** filter shows the deleted
+zones too, to restore them with **Restore**.
 
-> ⚠️ **Warning:** deleting a zone also hides all its territories.
+> ⚠️ **Warning:** a zone that still contains territories cannot be deleted: move them to another zone or delete them
+> first. To delete a zone permanently (**Force delete**), its deleted territories must also be moved or permanently
+> deleted first.

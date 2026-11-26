@@ -23,8 +23,8 @@ only one type.
 Tags are created automatically when you type a new one in a territory or zone form. From this page you can also:
 
 1. Click **New Tag** (or **Edit** on an existing one).
-2. Fill in **Name** and **Slug** (a simplified version of the name, e.g. `apartment-blocks`) for each language, using
-   the language tabs. This way the tag is shown in the language of each user.
+2. Fill in **Name** and **Slug** (a simplified version of the name, e.g. `apartment-blocks`: when creating a tag, it is
+   filled in from the name). A tag has one name, the same in every interface language.
 3. Choose the **Type** and, optionally, an **Order** number to sort the tags.
 4. Click **Create** (or **Save changes**).
 
