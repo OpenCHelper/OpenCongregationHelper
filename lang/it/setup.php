@@ -106,6 +106,9 @@ return [
         'keys_failed' => 'Non è stato possibile creare le chiavi (`:command`).',
         'mail_from_address' => 'Il mittente delle email dell\'app.',
         'database_failed' => 'L\'app non riesce a collegarsi al database.',
+        'test_connection' => 'Prova la connessione',
+        'database_ok' => 'L\'app riesce a connettersi al database.',
+        'test_email_to' => 'Invia a',
         'write_failed' => 'Non è stato possibile scrivere il file .env.',
     ],
 
@@ -130,6 +133,8 @@ return [
     'database' => [
         'intro' => 'Proseguendo vengono create le tabelle del database e i permessi dei ruoli. Può richiedere un minuto.',
         'running' => 'Creazione delle tabelle… Può richiedere un minuto: non chiudere la pagina.',
+        'foreign_tables_heading' => 'Il database contiene già altre tabelle',
+        'foreign_tables' => '{1} Contiene :count tabella di un\'altra applicazione (:tables): imposta DB_PREFIX nel passaggio Configurazione, così che le tabelle dell\'app non si mescolino con essa.|[2,*] Contiene :count tabelle di un\'altra applicazione (:tables): imposta DB_PREFIX nel passaggio Configurazione, così che le tabelle dell\'app non si mescolino con esse.',
         'failed' => 'Non è stato possibile preparare il database (`:command`).',
     ],
 

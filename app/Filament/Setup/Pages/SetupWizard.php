@@ -46,11 +46,13 @@ use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Notification as Notifications;
 use Illuminate\Support\Facades\RateLimiter;
@@ -651,6 +653,13 @@ class SetupWizard extends Page
                             ->helperText(__('setup.environment.db_prefix'))
                             ->maxLength(32)
                             ->regex('/^[A-Za-z0-9_]*$/'), 'DB_PREFIX'),
+                        Actions::make([
+                            Action::make('testDatabase')
+                                ->label(__('setup.environment.test_connection'))
+                                ->icon(Heroicon::OutlinedSignal)
+                                ->color('gray')
+                                ->action(fn () => $this->testDatabase()),
+                        ])->key('databaseActions')->columnSpanFull(),
                     ]),
                 Section::make(__('setup.environment.mail'))
                     ->icon(Heroicon::OutlinedEnvelope)
@@ -673,6 +682,23 @@ class SetupWizard extends Page
                             ->password()
                             ->revealable()
                             ->visible(fn (Get $get): bool => self::chosenMailer($get) === 'smtp'), 'MAIL_PASSWORD'),
+                        Actions::make([
+                            Action::make('sendConfigurationTestEmail')
+                                ->label(__('setup.checks.test_email.label'))
+                                ->icon(Heroicon::OutlinedEnvelope)
+                                ->color('gray')
+                                ->modalWidth(Width::Medium)
+                                ->modalSubmitActionLabel(__('setup.checks.test_email.label'))
+                                ->fillForm(fn (): array => ['email' => (string) ($this->data['root_email'] ?? '') ?: null])
+                                ->schema([
+                                    TextInput::make('email')
+                                        ->label(__('setup.environment.test_email_to'))
+                                        ->prefixIcon(Heroicon::OutlinedEnvelope)
+                                        ->email()
+                                        ->required(),
+                                ])
+                                ->action(fn (array $data) => $this->sendConfigurationTestEmail((string) $data['email'])),
+                        ])->key('mailActions')->columnSpanFull(),
                     ]),
                 Section::make(__('setup.environment.keys'))
                     ->icon(Heroicon::OutlinedKey)
@@ -749,6 +775,20 @@ class SetupWizard extends Page
             ->icon(Heroicon::OutlinedCircleStack)
             ->schema([
                 Text::make(__('setup.database.intro')),
+                Callout::make(__('setup.database.foreign_tables_heading'))
+                    ->description(fn (): string => trans_choice('setup.database.foreign_tables', count($this->foreignTables), [
+                        'count' => count($this->foreignTables),
+                        'tables' => implode(', ', array_slice($this->foreignTables, 0, 5)).(count($this->foreignTables) > 5 ? '…' : ''),
+                    ]))
+                    ->warning()
+                    ->visible(fn (): bool => $this->foreignTables !== [])
+                    ->actions([
+                        Action::make('goToDatabaseConfiguration')
+                            ->label(__('setup.root.go_to_configuration'))
+                            ->icon(Heroicon::OutlinedArrowUturnLeft)
+                            ->link()
+                            ->alpineClickHandler(self::goToStepHandler('environment')),
+                    ]),
                 View::make('filament.setup.database-progress'),
             ])
             ->afterValidation(function (): void {
@@ -1117,30 +1157,7 @@ class SetupWizard extends Page
      */
     protected function saveEnvironment(): void
     {
-        // Left empty, the connection and the mailer are the ones the configuration falls back on
-        $connection = $this->isEditableVariable('DB_CONNECTION') ? (string) ($this->data['db_connection'] ?? '') : '';
-        $connection = $connection !== '' ? $connection : (string) config('database.default');
-        $mailer = $this->isEditableVariable('MAIL_MAILER') ? (string) ($this->data['mail_mailer'] ?? '') : '';
-        $mailer = $mailer !== '' ? $mailer : (string) config('mail.default');
-
-        $typed = collect(array_keys(self::ENVIRONMENT_VARIABLES))
-            ->mapWithKeys(fn (string $variable): array => [$variable => trim((string) ($this->data[strtolower($variable)] ?? ''))])
-            ->put('APP_URL', rtrim(trim((string) ($this->data['app_url'] ?? '')), '/'))
-            // Asked for by the Background tasks step, which saves them
-            ->except(self::TASKS_VARIABLES)
-            // The fields hidden for the chosen database and mailer keep their default value: it is not written
-            ->except($connection === 'sqlite' ? ['DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD'] : [])
-            ->except($mailer !== 'smtp' ? ['MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD'] : [])
-            // Left empty, a missing value keeps the fallback of the configuration, and a value already set is kept
-            ->filter(fn (string $value): bool => $value !== '');
-
-        $values = $typed->only($this->missingVariables)->all();
-
-        // The variables already set that were changed: written over their current value
-        $changedValues = $typed
-            ->only($this->changeableVariables)
-            ->reject(fn (string $value, string $variable): bool => $value === $this->currentEnvironmentValue($variable))
-            ->all();
+        ['connection' => $connection, 'values' => $values, 'changed' => $changedValues] = $this->typedEnvironment();
 
         $this->checkDatabase($connection, [...$values, ...$changedValues]);
         $this->applyToConfiguration([...$values, ...$changedValues]);
@@ -1166,6 +1183,71 @@ class SetupWizard extends Page
 
         Installation::forget();
         $this->refreshEnvironmentVariables();
+    }
+
+    /**
+     * The values typed in the Configuration step: the connection and the mailer chosen, the missing variables to add and
+     * the variables already set that were changed.
+     *
+     * @return array{connection: string, mailer: string, values: array<string, string>, changed: array<string, string>}
+     */
+    protected function typedEnvironment(): array
+    {
+        // Left empty, the connection and the mailer are the ones the configuration falls back on
+        $connection = $this->isEditableVariable('DB_CONNECTION') ? (string) ($this->data['db_connection'] ?? '') : '';
+        $connection = $connection !== '' ? $connection : (string) config('database.default');
+        $mailer = $this->isEditableVariable('MAIL_MAILER') ? (string) ($this->data['mail_mailer'] ?? '') : '';
+        $mailer = $mailer !== '' ? $mailer : (string) config('mail.default');
+
+        $typed = collect(array_keys(self::ENVIRONMENT_VARIABLES))
+            ->mapWithKeys(fn (string $variable): array => [$variable => trim((string) ($this->data[strtolower($variable)] ?? ''))])
+            ->put('APP_URL', rtrim(trim((string) ($this->data['app_url'] ?? '')), '/'))
+            // Asked for by the Background tasks step, which saves them
+            ->except(self::TASKS_VARIABLES)
+            // The fields hidden for the chosen database and mailer keep their default value: it is not written
+            ->except($connection === 'sqlite' ? ['DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD'] : [])
+            ->except($mailer !== 'smtp' ? ['MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD'] : [])
+            // Left empty, a missing value keeps the fallback of the configuration, and a value already set is kept
+            ->filter(fn (string $value): bool => $value !== '');
+
+        // The variables already set that were changed: written over their current value
+        $changedValues = $typed
+            ->only($this->changeableVariables)
+            ->reject(fn (string $value, string $variable): bool => $value === $this->currentEnvironmentValue($variable))
+            ->all();
+
+        return ['connection' => $connection, 'mailer' => $mailer, 'values' => $typed->only($this->missingVariables)->all(), 'changed' => $changedValues];
+    }
+
+    /**
+     * Check the connection to the database typed in the Configuration step, without saving anything.
+     */
+    protected function testDatabase(): void
+    {
+        $this->ensureUnlocked();
+
+        ['connection' => $connection, 'values' => $values, 'changed' => $changedValues] = $this->typedEnvironment();
+
+        $this->checkDatabase($connection, [...$values, ...$changedValues]);
+
+        Notification::make()->success()->title(__('setup.environment.database_ok'))->send();
+    }
+
+    /**
+     * Send a test email with the email settings typed in the Configuration step, without saving them.
+     */
+    protected function sendConfigurationTestEmail(string $email): void
+    {
+        $this->ensureUnlocked();
+
+        ['values' => $values, 'changed' => $changedValues] = $this->typedEnvironment();
+
+        $this->applyToConfiguration(collect([...$values, ...$changedValues])
+            ->filter(fn (string $value, string $variable): bool => str_starts_with($variable, 'MAIL_'))
+            ->all());
+        app('mail.manager')->purge((string) config('mail.default'));
+
+        $this->sendTestEmailTo($email, trim(($this->data['root_first_name'] ?? '').' '.($this->data['root_last_name'] ?? '')));
     }
 
     /**
@@ -1450,6 +1532,39 @@ class SetupWizard extends Page
     }
 
     /**
+     * The tables of another application in the database, which the tables of the app would mix with: only without a
+     * prefix, and only once the Configuration step set the database up.
+     *
+     * @return list<string>
+     */
+    #[Computed]
+    public function foreignTables(): array
+    {
+        if ((int) session(self::PROGRESS_SESSION_KEY.'.step', 0) < 2) {
+            return [];
+        }
+
+        try {
+            if (DB::connection()->getTablePrefix() !== '') {
+                return [];
+            }
+
+            $tables = DB::connection()->getSchemaBuilder()->getTableListing(schemaQualified: false);
+
+            // The tables of an earlier installation of the app, e.g. stopped halfway
+            $ownMigrations = array_map(fn (string $file): string => pathinfo($file, PATHINFO_FILENAME), glob(database_path('migrations/*.php')) ?: []);
+
+            if (in_array('migrations', $tables, true) && DB::table('migrations')->whereIn('migration', $ownMigrations)->exists()) {
+                return [];
+            }
+
+            return array_values($tables);
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /**
      * Create the tables and the permissions of the roles, as `och:install` does.
      */
     protected function setUpDatabase(): void
@@ -1559,7 +1674,18 @@ class SetupWizard extends Page
             return;
         }
 
-        $name = trim(($this->data['root_first_name'] ?? '').' '.($this->data['root_last_name'] ?? ''));
+        $this->sendTestEmailTo($email, trim(($this->data['root_first_name'] ?? '').' '.($this->data['root_last_name'] ?? '')));
+    }
+
+    /**
+     * Send the test email right away, telling whether it went through: requiring the email confirmation needs one.
+     */
+    protected function sendTestEmailTo(string $email, string $name): void
+    {
+        // Before the Database step there is no table to log the emails in (see `MailLogEventHandler`)
+        if (! $this->hasMailLogTable()) {
+            Event::forget(MessageSending::class);
+        }
 
         try {
             // Right away, also when the notifications are queued, so that the errors are shown here
@@ -1587,6 +1713,15 @@ class SetupWizard extends Page
                 ? __('setup.root.mailer_not_sending', ['mailer' => (string) config('mail.default')])
                 : __('setup.checks.test_email.sent_body'))
             ->send();
+    }
+
+    protected function hasMailLogTable(): bool
+    {
+        try {
+            return DB::connection()->getSchemaBuilder()->hasTable('mail_logs');
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     /**

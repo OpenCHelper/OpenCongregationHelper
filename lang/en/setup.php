@@ -106,6 +106,9 @@ return [
         'keys_failed' => 'The keys could not be created (`:command`).',
         'mail_from_address' => 'The sender of the emails of the app.',
         'database_failed' => 'The app cannot connect to the database.',
+        'test_connection' => 'Test the connection',
+        'database_ok' => 'The app can connect to the database.',
+        'test_email_to' => 'Send it to',
         'write_failed' => 'The .env file could not be written.',
     ],
 
@@ -130,6 +133,8 @@ return [
     'database' => [
         'intro' => 'Going on creates the tables of the database and the permissions of the roles. It can take a minute.',
         'running' => 'Creating the tables… It can take a minute: do not close the page.',
+        'foreign_tables_heading' => 'The database already has other tables',
+        'foreign_tables' => '{1} It has :count table of another application (:tables): set DB_PREFIX in the Configuration step, so that the tables of the app do not mix with it.|[2,*] It has :count tables of another application (:tables): set DB_PREFIX in the Configuration step, so that the tables of the app do not mix with them.',
         'failed' => 'The database could not be set up (`:command`).',
     ],
 

@@ -92,6 +92,10 @@ return [
             'label' => 'Two-factor authentication of the root user',
             'failed' => 'recommended: the root user can do everything, set it up from its profile',
         ],
+        'setup_token' => [
+            'label' => 'Setup token (SETUP_TOKEN)',
+            'failed' => 'still set although the app is installed: remove it from .env',
+        ],
         'super_admins' => [
             'label' => 'Super administrators',
             'failed' => 'nobody can manage the application: run `php artisan och:install`',

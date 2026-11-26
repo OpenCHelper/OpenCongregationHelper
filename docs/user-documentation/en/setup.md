@@ -88,12 +88,12 @@ choice to the `.env` file, then open the application: until it is installed, eve
 
 1. checks the server: PHP version and extensions, HTTPS and its certificate, writable folders and `.env` file;
 2. asks for the values missing from `.env` (address, timezone, language, database and email) and adds them to the file,
-   after checking that the database can be reached. The values already set are shown but never changed (the
-   passwords only as set), except the database settings (`DB_*`, table prefix included: a password left empty is
-   kept) and the mailer (`MAIL_MAILER`), which can be switched among those of `config/mail.php` so that the test
-   email can be sent another way. The values with a fallback in the configuration can be left empty. The keys of the
-   [push notifications](#push-notifications) are created when both are missing, and those of the
-   [AI assistants](#ai-assistants) when missing;
+   after checking that the database can be reached. The values already set are shown but never changed (the passwords
+   only as set), except the database settings (`DB_*`, table prefix included: a password left empty is kept) and the
+   mailer (`MAIL_MAILER`), which can be switched among those of `config/mail.php` so that the test email can be sent
+   another way. The database connection and the email settings can be tested before going on. The values with a fallback
+   in the configuration can be left empty. The keys of the [push notifications](#push-notifications) are created when
+   both are missing, and those of the [AI assistants](#ai-assistants) when missing;
 3. shows how to run the [scheduled tasks and the queue](#scheduled-tasks-and-emails), with a shell (the cron lines)
    or without one (the addresses an external cron service calls, with their `ARTISAN_CRON_TOKEN`, created on request),
    and lets you choose the queue (`QUEUE_CONNECTION`);

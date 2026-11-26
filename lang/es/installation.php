@@ -92,6 +92,10 @@ return [
             'label' => 'Autenticación en dos pasos del usuario root',
             'failed' => 'recomendada: el usuario root puede hacerlo todo, actívala desde su perfil',
         ],
+        'setup_token' => [
+            'label' => 'Token de configuración (SETUP_TOKEN)',
+            'failed' => 'todavía definido aunque la aplicación está instalada: quítalo del archivo .env',
+        ],
         'super_admins' => [
             'label' => 'Superadministradores',
             'failed' => 'nadie puede gestionar la aplicación: ejecuta `php artisan och:install`',

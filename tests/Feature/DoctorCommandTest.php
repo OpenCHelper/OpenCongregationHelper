@@ -131,3 +131,19 @@ test('the PHP extensions required by the packages are checked', function () {
         ->toContain('sodium', 'zip', 'intl', 'pdo')
         ->not->toContain('xdebug');
 });
+
+test('a setup token left after the installation is reported', function () {
+    $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
+
+    config(['app.setup.token' => 'the-setup-token']);
+
+    $this->artisan('och:doctor')
+        ->expectsOutputToContain('still set although the app is installed')
+        ->assertSuccessful();
+
+    config(['app.setup.token' => null]);
+
+    $this->artisan('och:doctor')
+        ->doesntExpectOutputToContain('still set although the app is installed')
+        ->assertSuccessful();
+});

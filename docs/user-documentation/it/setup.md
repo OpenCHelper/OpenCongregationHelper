@@ -89,12 +89,13 @@ guidata** (`/setup`), che chiede il token e poi:
 
 1. controlla il server: versione ed estensioni di PHP, HTTPS e il suo certificato, cartelle e file `.env` scrivibili;
 2. chiede i valori che mancano nel file `.env` (indirizzo, fuso orario, lingua, database ed email) e li aggiunge al
-   file, dopo aver verificato che il database sia raggiungibile. I valori già impostati vengono mostrati ma mai
-   cambiati (le password solo come impostate), tranne le impostazioni del database (`DB_*`, prefisso delle tabelle
-   compreso: una password lasciata vuota viene mantenuta) e il mailer (`MAIL_MAILER`), che si può cambiare tra quelli
-   di `config/mail.php` così che l'email di prova possa essere inviata in un altro modo. I valori con un valore
-   predefinito nella configurazione si possono lasciare vuoti. Le chiavi delle [notifiche push](#notifiche-push)
-   vengono create se mancano entrambe, e quelle degli [assistenti IA](#assistenti-ia) se mancano;
+   file, dopo aver verificato che il database sia raggiungibile. I valori già impostati vengono mostrati ma mai cambiati
+   (le password solo come impostate), tranne le impostazioni del database (`DB_*`, prefisso delle tabelle compreso: una
+   password lasciata vuota viene mantenuta) e il mailer (`MAIL_MAILER`), che si può cambiare tra quelli di
+   `config/mail.php` così che l'email di prova possa essere inviata in un altro modo. La connessione al database e le
+   impostazioni email si possono provare prima di andare avanti. I valori con un valore predefinito nella configurazione
+   si possono lasciare vuoti. Le chiavi delle [notifiche push](#notifiche-push) vengono create se mancano entrambe, e
+   quelle degli [assistenti IA](#assistenti-ia) se mancano;
 3. mostra come eseguire le [attività pianificate e la coda](#attività-pianificate-ed-email), con una shell (le righe
    del cron) o senza (gli indirizzi che un servizio cron esterno chiama, con il loro `ARTISAN_CRON_TOKEN`, creato su
    richiesta), e permette di scegliere la coda (`QUEUE_CONNECTION`);

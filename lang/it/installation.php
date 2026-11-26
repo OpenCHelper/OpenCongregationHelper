@@ -92,6 +92,10 @@ return [
             'label' => 'Autenticazione a due fattori dell\'utente root',
             'failed' => 'consigliata: l\'utente root può fare tutto, attivala dal suo profilo',
         ],
+        'setup_token' => [
+            'label' => 'Token di configurazione (SETUP_TOKEN)',
+            'failed' => 'ancora impostato anche se l\'app è installata: rimuovilo dal file .env',
+        ],
         'super_admins' => [
             'label' => 'Super amministratori',
             'failed' => 'nessuno può gestire l\'applicazione: esegui `php artisan och:install`',

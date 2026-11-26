@@ -212,6 +212,11 @@ class InstallationChecks
 
         $this->check('initial_root', filled(config('app.initial_root_user.email')) && filled(config('app.initial_root_user.password')),
             InstallationCheckStatus::Warning);
+
+        // Only opens the setup wizard before the installation: once installed, it is no longer used
+        if (Installation::isInstalled()) {
+            $this->check('setup_token', blank(config('app.setup.token')), InstallationCheckStatus::Warning);
+        }
     }
 
     private function checkDatabase(): bool

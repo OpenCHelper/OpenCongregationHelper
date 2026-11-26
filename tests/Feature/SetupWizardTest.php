@@ -12,7 +12,9 @@ use App\Support\HttpsCertificate;
 use App\Support\Installation;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
 use Livewire\Livewire;
@@ -382,6 +384,60 @@ test('a test email can be sent to the root user', function () {
         ->assertFormFieldEnabled('require_email_verification');
 
     Notification::assertSentOnDemand(TestEmailNotification::class);
+});
+
+test('the database can be tested from the configuration step, before saving', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->callAction(TestAction::make('testDatabase')->schemaComponent('databaseActions', 'form'))
+        ->assertNotified(__('setup.environment.database_ok'))
+        ->fillForm(['db_connection' => 'pgsql', 'db_host' => '127.0.0.1', 'db_port' => '1', 'db_database' => 'och', 'db_username' => 'och'])
+        ->callAction(TestAction::make('testDatabase')->schemaComponent('databaseActions', 'form'))
+        ->assertNotified(__('setup.environment.database_failed'));
+
+    // Nothing is saved
+    expect(file_get_contents($this->envPath))->not->toContain('DB_CONNECTION=pgsql');
+});
+
+test('a test email can be sent from the configuration step, with the mailer chosen', function () {
+    Notification::fake();
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm(['mail_mailer' => 'array', 'mail_from_address' => 'noreply@example.com'])
+        ->callAction(TestAction::make('sendConfigurationTestEmail')->schemaComponent('mailActions', 'form'), ['email' => 'anna@example.com'])
+        ->assertNotified(__('setup.checks.test_email.sent', ['email' => 'anna@example.com']))
+        ->assertSet('testEmailSentTo', 'anna@example.com');
+
+    Notification::assertSentOnDemand(TestEmailNotification::class);
+    expect(config('mail.default'))->toBe('array');
+});
+
+test('the test email is sent also before the database has its tables', function () {
+    Schema::drop('mail_logs');
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm(['mail_mailer' => 'array', 'mail_from_address' => 'noreply@example.com'])
+        ->callAction(TestAction::make('sendConfigurationTestEmail')->schemaComponent('mailActions', 'form'), ['email' => 'anna@example.com'])
+        ->assertNotified(__('setup.checks.test_email.sent', ['email' => 'anna@example.com']));
+});
+
+test('the database step warns about the tables of another application', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
+    session()->put(SetupWizard::PROGRESS_SESSION_KEY.'.step', 2);
+
+    // The tables of an earlier installation of the app are not another application
+    Livewire::test(SetupWizard::class)
+        ->assertDontSee(__('setup.database.foreign_tables_heading'));
+
+    DB::table('migrations')->delete();
+
+    Livewire::test(SetupWizard::class)
+        ->assertSee(__('setup.database.foreign_tables_heading'));
 });
 
 test('the root user step tells when the mailer does not send the emails', function () {
