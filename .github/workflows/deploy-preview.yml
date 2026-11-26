@@ -502,6 +502,15 @@ jobs:
             --ftp-hostname "$FTP_SERVER" --ftp-username "$FTP_USERNAME" --ftp-password "$FTP_PASSWORD" \
             reset-database "$SLUG" | jq -r '.dropped | length | "Dropped \(.) tables"'
 
+      # TEMPORARY (setup wizard): a request reaching the new release before the tables were dropped (e.g. an open tab
+      # of the installed preview) marks it as installed: remove the marker, which cannot come back without the tables
+      - name: Mark the preview as not installed
+        env:
+          SLUG: ${{ steps.resolve.outputs.slug }}
+        run: |
+          lftp -e "set ssl:check-hostname no; rm -f 'previews/${SLUG}/storage/framework/installed'; bye" \
+            -u "${FTP_USERNAME},${FTP_PASSWORD}" "$FTP_SERVER"
+
       - name: Migrate and seed the database
         id: migrate
         uses: ./.github/actions/altervista-artisan-action
