@@ -176,9 +176,10 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 ## Risoluzione dei problemi
 
 - **`php artisan och:doctor`** controlla la configurazione (chiave e URL dell'applicazione, HTTPS, database e
-  migrazioni, collegamento dello storage, chiavi degli assistenti IA, utente root e la sua autenticazione a due
-  fattori, super amministratori, email, notifiche push, endpoint per il cron) e indica cosa fare per ogni problema. Non
-  modifica nulla, quindi può essere eseguito in qualsiasi momento. La [configurazione guidata](#dal-browser) controlla il server allo stesso modo.
+  migrazioni, collegamento dello storage, chiavi degli assistenti IA, utente root e la sua autenticazione a due fattori,
+  super amministratori, email, notifiche push, endpoint per il cron, un `SETUP_TOKEN` rimasto dopo l'installazione) e
+  indica cosa fare per ogni problema. Non modifica nulla, quindi può essere eseguito in qualsiasi momento. La
+  [configurazione guidata](#dal-browser) controlla il server allo stesso modo.
 - **`php artisan och:recover-root`** restituisce l'accesso all'utente root quando nessuno può più gestire
   l'applicazione (es. password persa, oppure accesso o ruoli rimossi in produzione): imposta la sua password da
   `INITIAL_ROOT_PASSWORD` (o la chiede), gli permette di nuovo di accedere, segna la sua email come verificata,

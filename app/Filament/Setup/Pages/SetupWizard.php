@@ -1652,7 +1652,7 @@ class SetupWizard extends Page
             }
         }
 
-        // The web server may not follow the link (e.g. Altervista), where the files are served by the application
+        // The web server may not follow the link (e.g. on some shared hosting), where the files are served by the app
         try {
             Artisan::call('storage:link', ['--force' => true]);
         } catch (Throwable $exception) {
