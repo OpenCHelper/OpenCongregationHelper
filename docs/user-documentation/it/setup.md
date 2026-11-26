@@ -83,6 +83,8 @@ precedente.
 
 ### Dal browser
 
+![La configurazione guidata, dal token di configurazione all'app installata](/docs/user-documentation/it/assets/setup-wizard.gif)
+
 Una volta caricati i file sul server (con le dipendenze PHP e gli asset del frontend), aggiungi un `SETUP_TOKEN` a tua
 scelta nel file `.env`, poi apri l'applicazione: finché non è installata, ogni pagina apre la **configurazione
 guidata** (`/setup`), che chiede il token e poi:

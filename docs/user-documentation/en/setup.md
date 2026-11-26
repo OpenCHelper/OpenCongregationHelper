@@ -82,6 +82,8 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 
 ### From the browser
 
+![The setup wizard, from the setup token to the installed app](/docs/user-documentation/en/assets/setup-wizard.gif)
+
 Once the files are on the server (with the PHP dependencies and the frontend assets), add a `SETUP_TOKEN` of your
 choice to the `.env` file, then open the application: until it is installed, every page opens the **setup wizard**
 (`/setup`), which asks for the token and then:
