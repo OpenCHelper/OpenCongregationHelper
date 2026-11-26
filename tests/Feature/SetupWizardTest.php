@@ -211,6 +211,7 @@ test('the wizard checks the requirements of the server', function () {
         ->assertSee(__('installation.checks.php_extensions.label'))
         ->assertSee(__('installation.checks.https.label'))
         ->assertSee(__('installation.checks.env_file.label'))
+        ->assertSee(__('setup.steps.counter', ['step' => 1, 'total' => 9]))
         ->goToWizardStep(2)
         ->assertWizardCurrentStep(2);
 });
@@ -423,7 +424,11 @@ test('completing the wizard installs the application', function () {
         ->call('complete')
         ->assertHasNoFormErrors()
         ->assertSet('completed', true)
-        ->assertSee(__('setup.completed.heading'));
+        ->assertSee(__('setup.completed.heading'))
+        ->assertSee(__('setup.completed.items.root', ['email' => 'anna@example.com']))
+        ->assertSee(trans_choice('setup.completed.items.administrators', 1, ['count' => 1]))
+        ->assertSee(__('setup.completed.items.two_factor'))
+        ->assertSee(__('setup.completed.items.remove_token'));
 
     $root = User::rootUser();
     $administrator = User::query()->where('email', 'marco@example.com')->firstOrFail();
@@ -444,6 +449,23 @@ test('completing the wizard installs the application', function () {
         ->and(Installation::needsSetup())->toBeFalse();
 
     Notification::assertSentTo($administrator, UserInvitationNotification::class);
+});
+
+test('the review step shows the choices before installing', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm(setupWizardData([
+            'administrators' => [
+                ['first_name' => 'Marco', 'last_name' => 'Bianchi', 'email' => 'marco@example.com'],
+            ],
+        ]))
+        ->assertSee(__('setup.review.intro'))
+        ->assertSee('anna@example.com')
+        ->assertSee('Congregation North')
+        ->assertSee('marco@example.com')
+        ->assertSee(__('setup.review.test_email_not_sent'));
 });
 
 test('the administrators need a new email address, other than the one of the root user', function () {

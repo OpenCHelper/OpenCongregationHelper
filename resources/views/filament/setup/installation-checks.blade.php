@@ -3,6 +3,13 @@
     use App\Enums\InstallationCheckStatus;
 
     $problems = collect($checks)->where('status', '!=', InstallationCheckStatus::Ok)->count();
+
+    // The problems first, the errors before the warnings
+    $checks = collect($checks)->sortBy(fn (array $check): int => match ($check['status']) {
+        InstallationCheckStatus::Error => 0,
+        InstallationCheckStatus::Warning => 1,
+        default => 2,
+    })->values()->all();
 @endphp
 
 <div class="flex flex-col gap-3">

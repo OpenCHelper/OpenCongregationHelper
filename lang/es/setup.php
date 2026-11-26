@@ -9,7 +9,7 @@ return [
     'token' => [
         'missing_heading' => 'Añade el token de configuración',
         'missing_description' => 'La aplicación aún no está instalada. Para que nadie más pueda instalarla antes, añade un token de configuración de tu elección al archivo .env del servidor, p. ej. :example, y vuelve a cargar esta página.',
-        'description' => 'Escribe el token de configuración, el valor de SETUP_TOKEN en el archivo .env del servidor.',
+        'description' => 'Escribe el valor de SETUP_TOKEN, del archivo .env del servidor.',
         'label' => 'Token de configuración',
         'submit' => 'Continuar',
         'invalid' => 'El token de configuración no es correcto.',
@@ -17,6 +17,7 @@ return [
     ],
 
     'steps' => [
+        'counter' => 'Paso :step de :total',
         'requirements' => [
             'label' => 'Servidor',
             'description' => 'Requisitos',
@@ -48,6 +49,10 @@ return [
         'features' => [
             'label' => 'Funciones',
             'description' => 'Qué activar',
+        ],
+        'review' => [
+            'label' => 'Resumen',
+            'description' => 'Revisa e instala',
         ],
     ],
 
@@ -148,9 +153,28 @@ return [
         'email_verification_needs_test' => 'Envía primero un correo de prueba, desde el paso Usuario root: sin correos que funcionen nadie podría confirmar su dirección.',
     ],
 
+    'review' => [
+        'intro' => 'Revisa tus elecciones y luego instala. Vuelve a cualquier paso para cambiarlas.',
+        'test_email' => 'Correo de prueba',
+        'test_email_sent' => 'Enviado a :email',
+        'test_email_not_sent' => 'No enviado',
+        'none' => 'Ninguno',
+        'enabled' => 'Sí',
+        'disabled' => 'No',
+    ],
+
     'completed' => [
         'heading' => 'La aplicación está instalada',
-        'description' => 'Inicia sesión como usuario root. El token de configuración ya no se usa: puedes quitar SETUP_TOKEN del archivo .env.',
+        'description' => 'Inicia sesión como usuario root para empezar a usar la aplicación.',
+        'items' => [
+            'database' => 'Tablas y permisos creados',
+            'root' => 'Usuario root creado: :email',
+            'settings' => 'Ajustes guardados',
+            'administrators' => '{0} Ningún administrador añadido: puedes añadirlos más tarde desde los usuarios|{1} :count administrador invitado por correo|[2,*] :count administradores invitados por correo',
+            'invitations_failed' => '{1} :count invitación no se pudo enviar: envíala de nuevo desde los usuarios|[2,*] :count invitaciones no se pudieron enviar: envíalas de nuevo desde los usuarios',
+            'two_factor' => 'Configura la autenticación en dos pasos justo después de iniciar sesión',
+            'remove_token' => 'Quita SETUP_TOKEN del archivo .env: ya no se usa',
+        ],
         'log_in' => 'Iniciar sesión',
     ],
 ];

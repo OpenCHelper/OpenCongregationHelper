@@ -69,3 +69,18 @@ div.filament-versions-nav-widget>ul>li {
         overflow-x: auto;
     }
 }
+
+/*
+   ------------ Setup wizard ------------
+
+   On wide screens only the current step shows its label, so that all the steps fit without scrolling.
+*/
+@media (min-width: 48rem) {
+    .och-setup-wizard .fi-sc-wizard-header-step:not(.fi-active) .fi-sc-wizard-header-step-text {
+        display: none;
+    }
+
+    .och-setup-wizard .fi-sc-wizard-header-step:not(.fi-active) .fi-sc-wizard-header-step-btn {
+        padding-inline: 1rem 1.75rem;
+    }
+}

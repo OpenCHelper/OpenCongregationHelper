@@ -9,7 +9,7 @@ return [
     'token' => [
         'missing_heading' => 'Add the setup token',
         'missing_description' => 'The app is not installed yet. So that nobody else can install it first, add a setup token of your choice to the .env file on the server, e.g. :example, then reload this page.',
-        'description' => 'Type the setup token, the value of SETUP_TOKEN in the .env file on the server.',
+        'description' => 'Type the value of SETUP_TOKEN, from the .env file on the server.',
         'label' => 'Setup token',
         'submit' => 'Continue',
         'invalid' => 'The setup token is not correct.',
@@ -17,6 +17,7 @@ return [
     ],
 
     'steps' => [
+        'counter' => 'Step :step of :total',
         'requirements' => [
             'label' => 'Server',
             'description' => 'Requirements',
@@ -48,6 +49,10 @@ return [
         'features' => [
             'label' => 'Features',
             'description' => 'What to enable',
+        ],
+        'review' => [
+            'label' => 'Review',
+            'description' => 'Check and install',
         ],
     ],
 
@@ -148,9 +153,28 @@ return [
         'email_verification_needs_test' => 'Send a test email first, from the Root user step: without working emails nobody could confirm their address.',
     ],
 
+    'review' => [
+        'intro' => 'Check your choices, then install. Go back to any step to change them.',
+        'test_email' => 'Test email',
+        'test_email_sent' => 'Sent to :email',
+        'test_email_not_sent' => 'Not sent',
+        'none' => 'None',
+        'enabled' => 'On',
+        'disabled' => 'Off',
+    ],
+
     'completed' => [
         'heading' => 'The app is installed',
-        'description' => 'Log in as the root user. The setup token is no longer used: you can remove SETUP_TOKEN from the .env file.',
+        'description' => 'Log in as the root user to start using the app.',
+        'items' => [
+            'database' => 'Tables and permissions created',
+            'root' => 'Root user created: :email',
+            'settings' => 'Settings saved',
+            'administrators' => '{0} No administrators added: you can add them later from the users|{1} :count administrator invited by email|[2,*] :count administrators invited by email',
+            'invitations_failed' => '{1} :count invitation could not be sent: send it again from the users|[2,*] :count invitations could not be sent: send them again from the users',
+            'two_factor' => 'Set up the two-factor authentication right after logging in',
+            'remove_token' => 'Remove SETUP_TOKEN from the .env file: it is no longer used',
+        ],
         'log_in' => 'Log in',
     ],
 ];

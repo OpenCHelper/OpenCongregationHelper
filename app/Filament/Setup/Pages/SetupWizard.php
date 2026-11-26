@@ -212,6 +212,13 @@ class SetupWizard extends Page
 
     public bool $completed = false;
 
+    /**
+     * What the installation did, shown once it is completed.
+     *
+     * @var list<array{text: string, status: string}>
+     */
+    public array $completedItems = [];
+
     public static function canAccess(): bool
     {
         return Installation::needsSetup();
@@ -355,6 +362,9 @@ class SetupWizard extends Page
                                     ])->fullWidth(),
                                 ])
                                 ->visible(fn (): bool => ! $this->completed && ! $this->isMissingToken()),
+                            View::make('filament.setup.completed')
+                                ->viewData(fn (): array => ['items' => $this->completedItems])
+                                ->visible(fn (): bool => $this->completed),
                             Actions::make([
                                 Action::make('logIn')
                                     ->label(__('setup.completed.log_in'))
@@ -433,7 +443,7 @@ class SetupWizard extends Page
         return $schema
             ->statePath('data')
             ->components([
-                Wizard::make([
+                Wizard::make($this->numberedSteps([
                     $this->requirementsStep(),
                     $this->environmentStep(),
                     $this->tasksStep(),
@@ -442,12 +452,30 @@ class SetupWizard extends Page
                     $this->congregationStep(),
                     $this->administratorsStep(),
                     $this->featuresStep(),
-                ])
+                    $this->reviewStep(),
+                ]))
+                    // Only the current step shows its label on wide screens (see `resources/css/app.css`)
+                    ->extraAttributes(['class' => 'och-setup-wizard'])
                     ->submitAction(new HtmlString(Blade::render(
                         '<x-filament::button type="submit" icon="heroicon-o-check">{{ $label }}</x-filament::button>',
                         ['label' => __('setup.complete')],
                     ))),
             ]);
+    }
+
+    /**
+     * Add the position of each step ("Step 2 of 9") to its description, as small screens only show the current step.
+     *
+     * @param  list<Step>  $steps
+     * @return list<Step>
+     */
+    protected function numberedSteps(array $steps): array
+    {
+        foreach ($steps as $index => $step) {
+            $step->description(__('setup.steps.counter', ['step' => $index + 1, 'total' => count($steps)]).' · '.$step->getDescription());
+        }
+
+        return $steps;
     }
 
     protected function requirementsStep(): Step
@@ -460,6 +488,9 @@ class SetupWizard extends Page
                 Section::make(__('setup.steps.requirements.description'))
                     ->icon(Heroicon::OutlinedServer)
                     ->schema([
+                        Callout::make(__('setup.checks.errors'))
+                            ->danger()
+                            ->visible(fn (): bool => InstallationChecks::hasErrors($this->requirements)),
                         View::make('filament.setup.installation-checks')
                             ->viewData(fn (): array => ['checks' => $this->requirements]),
                         Actions::make([
@@ -802,6 +833,91 @@ class SetupWizard extends Page
                             ->disabled(fn (): bool => $this->testEmailSentTo === null),
                     ]),
             ]);
+    }
+
+    protected function reviewStep(): Step
+    {
+        return Step::make('review')
+            ->label(__('setup.steps.review.label'))
+            ->description(__('setup.steps.review.description'))
+            ->icon(Heroicon::OutlinedClipboardDocumentCheck)
+            ->schema([
+                Text::make(__('setup.review.intro')),
+                View::make('filament.setup.review')
+                    ->viewData(fn (): array => ['groups' => $this->reviewGroups()]),
+            ]);
+    }
+
+    /**
+     * What the installation is about to do, grouped by step, for the Review step.
+     *
+     * @return list<array{title: string, icon: Heroicon, items: list<array{label: string, value: string, color?: string}>}>
+     */
+    protected function reviewGroups(): array
+    {
+        $data = $this->data ?? [];
+        $toggle = fn (string $field): string => ($data[$field] ?? false) ? __('setup.review.enabled') : __('setup.review.disabled');
+        $environment = fn (array $variables): array => collect($variables)
+            ->map(fn (string $variable): array => ['label' => $variable, 'value' => $this->currentEnvironmentValue($variable)
+                ?: (string) config(str_replace('{connection}', (string) config('database.default'), self::ENVIRONMENT_VARIABLES[$variable]))
+                ?: '—'])
+            ->values()
+            ->all();
+
+        $administrators = collect($data['administrators'] ?? [])
+            ->map(fn (array $administrator): array => [
+                'label' => trim(($administrator['first_name'] ?? '').' '.($administrator['last_name'] ?? '')),
+                'value' => (string) ($administrator['email'] ?? ''),
+            ])
+            ->values()
+            ->all();
+
+        return [
+            [
+                'title' => __('setup.steps.environment.label'),
+                'icon' => Heroicon::OutlinedCog6Tooth,
+                'items' => $environment(['APP_URL', 'APP_TIMEZONE', 'APP_LOCALE', 'DB_CONNECTION', 'DB_DATABASE', 'MAIL_MAILER', 'MAIL_FROM_ADDRESS', 'QUEUE_CONNECTION']),
+            ],
+            [
+                'title' => __('setup.steps.root.label'),
+                'icon' => Heroicon::OutlinedUserCircle,
+                'items' => [
+                    ['label' => __('filament-resources.user.field_first_name'), 'value' => (string) ($data['root_first_name'] ?? '')],
+                    ['label' => __('filament-resources.user.field_last_name'), 'value' => (string) ($data['root_last_name'] ?? '')],
+                    ['label' => __('filament-resources.user.field_email'), 'value' => (string) ($data['root_email'] ?? '')],
+                    ['label' => __('setup.review.test_email'), 'value' => $this->testEmailSentTo !== null
+                        ? __('setup.review.test_email_sent', ['email' => $this->testEmailSentTo])
+                        : __('setup.review.test_email_not_sent')],
+                ],
+            ],
+            [
+                'title' => __('setup.steps.congregation.label'),
+                'icon' => Heroicon::OutlinedHome,
+                'items' => [
+                    ['label' => __('settings.fields.app_name.label'), 'value' => (string) ($data['app_name'] ?? '')],
+                    ['label' => __('settings.fields.kingdom_hall_address.label'), 'value' => (string) ($data['kingdom_hall_address'] ?? '') ?: '—'],
+                    ['label' => __('settings.fields.primary_color.label'), 'value' => (string) ($data['primary_color'] ?? '') ?: '—', 'color' => (string) ($data['primary_color'] ?? '')],
+                ],
+            ],
+            [
+                'title' => __('setup.steps.administrators.label'),
+                'icon' => Heroicon::OutlinedUserGroup,
+                'items' => $administrators ?: [['label' => __('setup.review.none'), 'value' => '']],
+            ],
+            [
+                'title' => __('setup.steps.features.label'),
+                'icon' => Heroicon::OutlinedAdjustmentsHorizontal,
+                'items' => [
+                    ['label' => __('settings.fields.ai_assistants_enabled.label'), 'value' => $toggle('ai_assistants_enabled')],
+                    ['label' => __('settings.fields.sharing_enabled.label'), 'value' => $toggle('sharing_enabled')],
+                    ...(($data['sharing_enabled'] ?? false) ? [['label' => __('settings.fields.guest_returns.label'), 'value' => $toggle('guest_returns')]] : []),
+                    ['label' => __('settings.fields.require_two_factor.label'), 'value' => $toggle('require_two_factor')],
+                    ['label' => __('settings.fields.require_email_verification.label'), 'value' => $this->testEmailSentTo !== null
+                        ? $toggle('require_email_verification')
+                        : __('setup.review.disabled')],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -1349,9 +1465,12 @@ class SetupWizard extends Page
 
         $this->saveInitialRootUser($data);
 
+        $invitedAdministrators = 0;
+
         foreach ($administrators as $administrator) {
             try {
                 UserInvitationNotification::sendTo($administrator);
+                $invitedAdministrators++;
             } catch (Throwable $exception) {
                 // The invitation can be sent again from the users, once the emails work
                 report($exception);
@@ -1359,6 +1478,21 @@ class SetupWizard extends Page
         }
 
         session()->forget(self::UNLOCKED_SESSION_KEY);
+
+        $failedInvitations = count($administrators) - $invitedAdministrators;
+
+        $this->completedItems = array_values(array_filter([
+            ['text' => __('setup.completed.items.database'), 'status' => 'done'],
+            ['text' => __('setup.completed.items.root', ['email' => $data['root_email']]), 'status' => 'done'],
+            ['text' => __('setup.completed.items.settings'), 'status' => 'done'],
+            ['text' => trans_choice('setup.completed.items.administrators', $invitedAdministrators, ['count' => $invitedAdministrators]), 'status' => 'done'],
+            $failedInvitations > 0
+                ? ['text' => trans_choice('setup.completed.items.invitations_failed', $failedInvitations, ['count' => $failedInvitations]), 'status' => 'warning']
+                : null,
+            $data['require_two_factor'] ? ['text' => __('setup.completed.items.two_factor'), 'status' => 'todo'] : null,
+            ['text' => __('setup.completed.items.remove_token'), 'status' => 'todo'],
+        ]));
+
         $this->completed = true;
     }
 
