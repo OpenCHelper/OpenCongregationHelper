@@ -9,15 +9,11 @@ use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\Auth\EmailVerificationPrompt;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\ResetPassword;
-use App\Filament\Pages\CreateTeam;
 use App\Filament\Pages\EditProfile;
-use App\Filament\Pages\EditTeam;
 use App\Filament\Pages\Logs;
 use App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired;
 use App\Http\Middleware\EnsureMultiFactorAuthenticationWhenRequired;
-use App\Listeners\SwitchTeam;
 use App\Livewire\PushNotificationsPrompt;
-use App\Models\Team;
 use App\Settings\GeneralSettings;
 use App\Support\AppVersions;
 use App\Support\BugReport;
@@ -28,7 +24,6 @@ use DiscoveryDesign\FilamentGaze\FilamentGazePlugin;
 use Filament\Actions\Action;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Enums\GlobalSearchPosition;
-use Filament\Events\TenantSet;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -53,7 +48,6 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -295,21 +289,6 @@ class AppPanelProvider extends PanelProvider
             ]);
         }
 
-        if (Features::hasTeamFeatures()) {
-            $panel
-                ->tenant(Team::class)
-                ->tenantRegistration(CreateTeam::class)
-                ->tenantProfile(EditTeam::class)
-                ->userMenuItems([
-                    Action::make('teamSettings')
-                        ->label(fn (): string => __('Team Settings'))
-                        ->icon(Heroicon::OutlinedUserGroup)
-                        ->url(fn (): string => $this->shouldRegisterMenuItem()
-                            ? url(EditTeam::getUrl())
-                            : url($panel->getPath())),
-                ]);
-        }
-
         return $panel;
     }
 
@@ -330,30 +309,11 @@ class AppPanelProvider extends PanelProvider
         };
     }
 
-    public function boot()
-    {
-        /**
-         * Listen and switch team if tenant was changed
-         */
-        Event::listen(
-            TenantSet::class,
-            SwitchTeam::class,
-        );
-    }
-
+    /**
+     * Whether the user menu items link to their page: only for logged-in users, users without a verified email included.
+     */
     public function shouldRegisterMenuItem(): bool
     {
-        $user = Auth::user();
-        if (! $user) {
-            return false;
-        }
-
-        $hasVerifiedEmail = $user->email_verified_at !== null;
-
-        // Allow the profile page to be accessible even to users without a verified email
-        // when tenancy is NOT enabled.
-        return Filament::hasTenancy()
-            ? $hasVerifiedEmail && Filament::getTenant()
-            : true;
+        return Auth::check();
     }
 }

@@ -15,7 +15,7 @@ This application uses the following specific versions and technologies:
 
 ### Frontend & UI
 - **Filament V3**: Modern admin panel with panels, resources, widgets, and advanced features
-- **Laravel Jetstream**: Authentication scaffolding with teams, 2FA, session management
+- **Laravel Jetstream**: Authentication scaffolding with 2FA, session management
 - **Livewire 3**: Full-stack reactive components with improved performance
 - **Tailwind CSS**: Utility-first CSS framework
 - **Vite 5**: Fast build tool with hot module replacement
@@ -247,7 +247,6 @@ This application uses the following specific versions and technologies:
 2. **Laravel Jetstream Authentication**:
    - Navigate to `${APP_URL}/login` (Jetstream login)
    - Test registration, password reset
-   - Verify teams functionality if enabled
    - Test two-factor authentication setup
 
 3. **Territory Management (Core Features)**:
@@ -308,7 +307,7 @@ php artisan tinker
   /Pages/              # Custom Filament pages (Dashboard, Profile, etc.)
   /Resources/          # Filament resources (Territory, User, etc.)
   /Widgets/           # Dashboard widgets and statistics
-/app/Models/           # Eloquent models (User, Territory, TerritoryZone, Team, etc.)
+/app/Models/           # Eloquent models (User, Territory, TerritoryZone, etc.)
 /app/Http/Controllers/ # API and web controllers
 /app/Providers/Filament/ # Filament panel providers (AppPanelProvider, GuestPanelProvider)
 /database/migrations/  # Database schema migrations

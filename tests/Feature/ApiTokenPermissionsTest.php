@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 test('api token permissions can be updated', function () {
     if (Features::hasTeamFeatures()) {
-        $this->actingAs($user = User::factory()->withPersonalTeam()->create());
+        $this->actingAs($user = User::factory()->create());
     } else {
         $this->actingAs($user = User::factory()->create());
     }
