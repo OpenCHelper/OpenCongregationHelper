@@ -9,6 +9,7 @@ use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\Logs;
+use App\Filament\Pages\SetupWizard;
 use App\Filament\Resources\Departments\DepartmentResource;
 use App\Filament\Widgets\NoDashboardAccess;
 use App\Filament\Widgets\StatsOverview;
@@ -240,6 +241,7 @@ return [
             Dashboard::class,
             EditProfile::class,
             Logs::class,
+            SetupWizard::class,
             ManageCampaignSettings::class,
             ManageGeneralSettings::class,
             ManageSecuritySettings::class,

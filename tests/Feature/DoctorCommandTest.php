@@ -62,3 +62,22 @@ test('a root user that cannot log in is reported', function () {
         ->expectsOutputToContain('och:recover-root')
         ->assertSuccessful();
 });
+
+test('the push notifications and the security of the root user are reported', function () {
+    $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
+    config(['webpush.vapid.public_key' => null, 'app.url' => 'http://och-instance.example.com']);
+
+    $this->artisan('och:doctor')
+        ->expectsOutputToContain('the push notifications are off')
+        ->expectsOutputToContain('APP_URL does not start')
+        ->expectsOutputToContain('Two-factor authentication of the root user')
+        ->assertSuccessful();
+});
+
+test('the report is in English whatever the language of the app', function () {
+    app()->setLocale('it');
+
+    $this->artisan('och:doctor')
+        ->expectsOutputToContain('Root user (ID 1)')
+        ->assertFailed();
+});

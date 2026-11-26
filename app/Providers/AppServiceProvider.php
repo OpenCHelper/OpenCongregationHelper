@@ -9,8 +9,10 @@ use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
 use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
+use App\Settings\GeneralSettings;
 use App\Settings\SecuritySettings;
 use App\Support\AiAssistantConnections;
+use App\Support\AppName;
 use App\Support\UserLocale;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
@@ -24,6 +26,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Database\Console\WipeCommand;
@@ -31,8 +34,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -44,6 +49,7 @@ use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\LaravelSettings\Events\SettingsSaved;
 use Spatie\Translatable\Facades\Translatable;
 use STS\FilamentImpersonate\Facades\Impersonation;
 use Tapp\FilamentMailLog\Models\MailLog;
@@ -181,9 +187,31 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configurePasswordPolicy();
 
+        $this->configureAppName();
+
         // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
         ExportColumn::configureUsing(function (ExportColumn $column): void {
             $column->preventFormulaInjection();
+        });
+    }
+
+    /**
+     * Show the name of the application from the General settings (see `AppName`): on every web request, in the queued
+     * jobs and the scheduled tasks (e.g. the notifications they send), and as soon as it is changed. The other Artisan
+     * commands keep `APP_NAME`, so that they work without a database (e.g. while building a release).
+     */
+    private function configureAppName(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            $this->app->booted(fn () => AppName::apply());
+        }
+
+        Event::listen(JobProcessing::class, fn () => AppName::apply());
+        Event::listen(ScheduledTaskStarting::class, fn () => AppName::apply());
+        Event::listen(SettingsSaved::class, function (SettingsSaved $event): void {
+            if ($event->settings instanceof GeneralSettings) {
+                AppName::apply($event->settings);
+            }
         });
     }
 

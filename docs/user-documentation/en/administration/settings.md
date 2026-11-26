@@ -13,6 +13,9 @@ role. The options are grouped by area, with one page each in the menu on the sid
 
 ![General settings](/docs/user-documentation/en/administration/assets/settings-general.webp)
 
+- **Name of the app**: shown in the browser tab, in the top bar (when there is no logo), on the
+  [installed app](../basics/interface#installing-the-app) and in the emails. It starts as `APP_NAME`, which keeps
+  naming the installation on the server;
 - **Kingdom Hall address**: the address of the Kingdom Hall of the congregation (optional);
 - **Logo**: shown in the top bar instead of the name (at most 2 MB);
 - **Primary colour**: the colour of the buttons, links and selected items, for the users who did not choose their own

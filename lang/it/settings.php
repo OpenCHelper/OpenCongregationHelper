@@ -72,6 +72,10 @@ return [
             'label' => 'Consenti gli assistenti IA',
             'helper' => 'Ogni utente può collegare un assistente IA dal proprio profilo: può leggere e modificare ciò che può quell\'utente (es. territori, assegnazioni), quindi i dati vengono inviati al fornitore dell\'assistente. Disattivandolo, vengono scollegati tutti.',
         ],
+        'app_name' => [
+            'label' => 'Nome dell\'app',
+            'helper' => 'Mostrato nella scheda del browser, nella barra in alto (senza logo), sull\'app installata e nelle email.',
+        ],
         'kingdom_hall_address' => [
             'label' => 'Indirizzo della Sala del Regno',
             'placeholder' => 'Via, numero civico, CAP e città',

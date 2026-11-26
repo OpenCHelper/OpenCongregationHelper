@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Setup wizard**: on a new installation, the root user is guided through checking the server (with a test email and
+  one-click fixes), choosing the name, logo and colour of the app, inviting the administrators and enabling the
+  features.
+- **Settings**: the name of the app can be changed from the General settings, instead of `APP_NAME` in `.env`.
+- `och:doctor` also checks HTTPS, the push notifications, the timezone and the two-factor authentication of the root
+  user.
+
 ### Changed
 
 - **Users**: the **Access enabled?** filter of the list is now **Access**, with the options **With access** and

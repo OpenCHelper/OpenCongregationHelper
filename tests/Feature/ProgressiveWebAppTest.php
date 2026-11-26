@@ -4,6 +4,7 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\EditProfile;
 use App\Http\Controllers\WebManifestController;
 use App\Models\User;
+use App\Settings\GeneralSettings;
 use App\Support\ServiceWorker;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
@@ -151,6 +152,12 @@ it('offers to install the app in a full-screen dialog that recommends it', funct
 
 it('opens the offer to install the app by itself only on the first page after logging in', function () {
     Filament::setCurrentPanel('app');
+
+    // Otherwise the root user would be sent to the setup wizard first (see `SetupWizardTest`)
+    $settings = app(GeneralSettings::class);
+    $settings->setup_completed = true;
+    $settings->save();
+
     $user = User::factory()->withPassword('a-password')->create(['can_login' => true, 'email_verified_at' => now()]);
 
     Livewire::test(Login::class)

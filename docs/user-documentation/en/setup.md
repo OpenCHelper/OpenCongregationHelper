@@ -132,9 +132,11 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 
 ## Troubleshooting
 
-- **`php artisan och:doctor`** checks the configuration (application key and URL, database and migrations, storage
-  link, keys of the AI assistants, root user and super administrators, emails, cron endpoints) and tells what to do
-  about each problem. It changes nothing, so it can run any time.
+- **`php artisan och:doctor`** checks the configuration (application key and URL, HTTPS, database and migrations,
+  storage link, keys of the AI assistants, root user and its two-factor authentication, super administrators, emails,
+  push notifications, cron endpoints) and tells what to do about each problem. It changes nothing, so it can run any
+  time. The root user also sees these checks in the first step of the
+  [setup wizard](guides/first-setup#1-log-in-as-root).
 - **`php artisan och:recover-root`** gives the access to the root user back when nobody can manage the application
   anymore (e.g. a lost password, or its access or roles removed in production): it sets its password from
   `INITIAL_ROOT_PASSWORD` (or asks for it), lets it log in again, marks its email as verified, turns off its two-factor

@@ -72,6 +72,10 @@ return [
             'label' => 'Allow AI assistants',
             'helper' => 'Each user can connect an AI assistant from their profile: it can read and change what that user can (e.g. territories, assignments), so the data is sent to the provider of the assistant. Turning it off disconnects all of them.',
         ],
+        'app_name' => [
+            'label' => 'Name of the app',
+            'helper' => 'Shown in the browser tab, in the top bar (without a logo), on the installed app and in the emails.',
+        ],
         'kingdom_hall_address' => [
             'label' => 'Kingdom Hall address',
             'placeholder' => 'Street, number, postcode and city',
