@@ -18,6 +18,9 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->withoutVite();
+
+    // The keys of the AI assistants exist: the Configuration step would create them otherwise
+    usePassportTestKeys();
     Filament::setCurrentPanel('setup');
 
     config(['app.setup.enabled' => true, 'app.setup.token' => 'the-setup-token']);
@@ -488,6 +491,7 @@ test('the keys of the AI assistants are created by the configuration step', func
 
     array_map('unlink', glob("{$keysPath}/*"));
     rmdir($keysPath);
+    Passport::$keyPath = null;
 });
 
 test('the background tasks step saves the queue and tells how to run the tasks', function () {

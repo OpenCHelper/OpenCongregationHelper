@@ -12,6 +12,9 @@ beforeEach(function () {
 afterEach(function () {
     array_map('unlink', glob($this->keys.'/*') ?: []);
     rmdir($this->keys);
+
+    // The next tests of the same process would look for the keys in the folder just deleted
+    Passport::$keyPath = null;
 });
 
 test('the keys are created when missing, and kept when they exist', function () {
