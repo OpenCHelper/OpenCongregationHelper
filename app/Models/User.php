@@ -214,7 +214,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
      */
     public static function createRoot(array $attributes): self
     {
-        $model = new static;
+        $model = new self;
         $connection = $model->getConnection();
         $table = $connection->getQueryGrammar()->wrapTable($model->getTable());
         $driver = $connection->getDriverName();

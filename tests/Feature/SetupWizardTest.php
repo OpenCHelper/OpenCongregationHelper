@@ -431,6 +431,7 @@ test('the administrators step tells when the invitations would not be sent', fun
 
 test('the database can be tested from the configuration step, before saving', function () {
     completeSetupEnvironmentFile($this->envPath);
+    $environment = file_get_contents($this->envPath);
     unlockSetupWizard();
 
     Livewire::test(SetupWizard::class)
@@ -441,7 +442,7 @@ test('the database can be tested from the configuration step, before saving', fu
         ->assertNotified(__('setup.environment.database_failed'));
 
     // Nothing is saved
-    expect(file_get_contents($this->envPath))->not->toContain('DB_CONNECTION=pgsql');
+    expect(file_get_contents($this->envPath))->toBe($environment);
 });
 
 test('a test email can be sent from the configuration step, with the mailer chosen', function () {
@@ -671,6 +672,7 @@ test('a relative SQLite path is inside the database folder, never in the public 
     expect(file_exists(public_path('och.sqlite')))->toBeFalse();
 
     $path = database_path('och-setup-test.sqlite');
+    $databaseConfiguration = config('database');
 
     try {
         Livewire::test(SetupWizard::class)
@@ -681,6 +683,13 @@ test('a relative SQLite path is inside the database folder, never in the public 
         expect(file_get_contents($this->envPath))->toContain("DB_DATABASE={$path}")
             ->and(file_exists($path))->toBeTrue();
     } finally {
+        // The wizard switched the app to this database: back to the one of the tests before removing it
+        config(['database' => $databaseConfiguration]);
+
+        if ($databaseConfiguration['default'] !== 'sqlite') {
+            DB::purge('sqlite');
+        }
+
         @unlink($path);
     }
 });
