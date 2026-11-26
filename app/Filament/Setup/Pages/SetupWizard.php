@@ -29,6 +29,7 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -39,6 +40,7 @@ use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Filament\Support\Components\Attributes\Unexposed;
+use Filament\Support\Enums\TextSize;
 use Filament\Support\Enums\Width;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
@@ -225,9 +227,25 @@ class SetupWizard extends Page
         return __('setup.title');
     }
 
+    /**
+     * The heading of the wizard: before it is unlocked and once it is completed, the page shows a card with its own.
+     */
+    public function getHeading(): ?string
+    {
+        return $this->showsCard() ? null : $this->getTitle();
+    }
+
     public function getSubheading(): ?string
     {
-        return $this->completed ? null : __('setup.subheading');
+        return $this->showsCard() ? null : __('setup.subheading').' '.__('setup.changeable_later');
+    }
+
+    /**
+     * Whether the page shows a single card (to add or type the token, or once installed) instead of the wizard.
+     */
+    protected function showsCard(): bool
+    {
+        return $this->completed || ! $this->isUnlocked();
     }
 
     public function mount(): void
@@ -302,37 +320,70 @@ class SetupWizard extends Page
     {
         return $schema
             ->components([
-                Callout::make(__('setup.token.missing_heading'))
-                    ->description(fn (): HtmlString => new HtmlString(__('setup.token.missing_description', [
-                        'example' => '<code>SETUP_TOKEN='.e(Str::random(32)).'</code>',
-                    ])))
-                    ->warning()
-                    ->visible(fn (): bool => ! $this->completed && blank(config('app.setup.token'))),
-                Form::make([EmbeddedSchema::make('tokenForm')])
-                    ->id('tokenForm')
-                    ->livewireSubmitHandler('unlockWizard')
-                    ->footer([
-                        Actions::make([
-                            Action::make('unlockWizard')
-                                ->label(__('setup.token.submit'))
-                                ->submit('unlockWizard'),
+                Group::make([
+                    Section::make(fn (): string => match (true) {
+                        $this->completed => __('setup.completed.heading'),
+                        $this->isMissingToken() => __('setup.token.missing_heading'),
+                        default => __('setup.title'),
+                    })
+                        ->description(fn (): string|HtmlString => match (true) {
+                            $this->completed => __('setup.completed.description'),
+                            $this->isMissingToken() => new HtmlString(__('setup.token.missing_description', [
+                                'example' => '<code>SETUP_TOKEN='.e(Str::random(32)).'</code>',
+                            ])),
+                            default => __('setup.token.description'),
+                        })
+                        ->icon(fn (): Heroicon => match (true) {
+                            $this->completed => Heroicon::OutlinedCheckCircle,
+                            $this->isMissingToken() => Heroicon::OutlinedExclamationTriangle,
+                            default => Heroicon::OutlinedKey,
+                        })
+                        ->iconColor(fn (): string => match (true) {
+                            $this->completed => 'success',
+                            $this->isMissingToken() => 'warning',
+                            default => 'primary',
+                        })
+                        ->schema([
+                            Form::make([EmbeddedSchema::make('tokenForm')])
+                                ->id('tokenForm')
+                                ->livewireSubmitHandler('unlockWizard')
+                                ->footer([
+                                    Actions::make([
+                                        Action::make('unlockWizard')
+                                            ->label(__('setup.token.submit'))
+                                            ->submit('unlockWizard'),
+                                    ])->fullWidth(),
+                                ])
+                                ->visible(fn (): bool => ! $this->completed && ! $this->isMissingToken()),
+                            Actions::make([
+                                Action::make('logIn')
+                                    ->label(__('setup.completed.log_in'))
+                                    ->url(fn (): string => Filament::getPanel('app')->getLoginUrl() ?? '/app/login'),
+                            ])
+                                ->fullWidth()
+                                ->visible(fn (): bool => $this->completed),
                         ]),
-                    ])
-                    ->visible(fn (): bool => ! $this->completed && filled(config('app.setup.token')) && ! $this->isUnlocked()),
+                    Text::make(__('setup.changeable_later'))
+                        ->size(TextSize::ExtraSmall)
+                        ->color('gray')
+                        ->extraAttributes(['class' => 'block text-center'])
+                        ->visible(fn (): bool => ! $this->completed),
+                ])
+                    ->extraAttributes(['class' => 'mx-auto flex min-h-[calc(100dvh-12rem)] w-full max-w-md flex-col justify-center'])
+                    ->visible(fn (): bool => $this->showsCard()),
                 Form::make([EmbeddedSchema::make('form')])
                     ->id('form')
                     ->livewireSubmitHandler('complete')
-                    ->visible(fn (): bool => ! $this->completed && $this->isUnlocked()),
-                Callout::make(__('setup.completed.heading'))
-                    ->description(__('setup.completed.description'))
-                    ->success()
-                    ->actions([
-                        Action::make('logIn')
-                            ->label(__('setup.completed.log_in'))
-                            ->url(fn (): string => Filament::getPanel('app')->getLoginUrl() ?? '/app/login'),
-                    ])
-                    ->visible(fn (): bool => $this->completed),
+                    ->visible(fn (): bool => ! $this->showsCard()),
             ]);
+    }
+
+    /**
+     * Whether `SETUP_TOKEN` is not set yet, so that the wizard cannot be opened.
+     */
+    protected function isMissingToken(): bool
+    {
+        return blank(config('app.setup.token'));
     }
 
     public function tokenForm(Schema $schema): Schema
@@ -340,7 +391,6 @@ class SetupWizard extends Page
         return $schema
             ->statePath('unlock')
             ->components([
-                Text::make(__('setup.token.description')),
                 TextInput::make('token')
                     ->label(__('setup.token.label'))
                     ->password()

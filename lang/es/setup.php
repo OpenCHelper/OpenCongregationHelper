@@ -2,7 +2,8 @@
 
 return [
     'title' => 'Instalar la aplicación',
-    'subheading' => 'Unos pocos pasos para preparar la aplicación para la congregación. Todo lo que elijas después del usuario root se puede cambiar más tarde desde los ajustes.',
+    'subheading' => 'Unos pocos pasos para preparar la aplicación para la congregación.',
+    'changeable_later' => 'Todo lo que elijas después del usuario root se puede cambiar más tarde desde los ajustes.',
     'complete' => 'Instalar',
 
     'token' => [

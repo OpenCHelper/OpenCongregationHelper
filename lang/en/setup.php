@@ -2,7 +2,8 @@
 
 return [
     'title' => 'Install the app',
-    'subheading' => 'A few steps to get the app ready for the congregation. Everything chosen after the root user can be changed later from the settings.',
+    'subheading' => 'A few steps to get the app ready for the congregation.',
+    'changeable_later' => 'Everything chosen after the root user can be changed later from the settings.',
     'complete' => 'Install',
 
     'token' => [
