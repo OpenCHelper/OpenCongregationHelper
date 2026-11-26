@@ -81,7 +81,7 @@ return [
             'failed' => 'el asistente de configuración no puede escribir los valores que faltan: configúralos tú en .env',
         ],
         'root_user' => [
-            'label' => 'Usuario root (ID 1)',
+            'label' => 'Usuario root',
             'failed' => 'falta: ejecuta `php artisan och:install`',
         ],
         'root_can_login' => [

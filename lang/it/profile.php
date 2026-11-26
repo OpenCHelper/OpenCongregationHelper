@@ -74,6 +74,7 @@ return [
         'warning' => 'Una volta eliminato il tuo account, tutte le sue risorse e dati verranno eliminati permanentemente. Prima di eliminare il tuo account, scarica tutti i dati o le informazioni che desideri conservare.',
         'delete_button' => 'Elimina account',
         'confirm_deletion' => 'Sei sicuro di voler eliminare il tuo account? Una volta eliminato il tuo account, tutte le sue risorse e dati verranno eliminati permanentemente. Inserisci la tua password per confermare che desideri eliminare permanentemente il tuo account.',
+        'last_super_admin' => 'Sei l\'unico super amministratore che può accedere: assegna il ruolo di super amministratore a un altro utente prima di eliminare il tuo account.',
         'has_assignments' => 'Ti sono stati assegnati dei territori: eliminare il tuo account cancellerebbe definitivamente la storia di quei territori, quindi non può essere eliminato. Chiedi invece a un amministratore di disabilitare il tuo accesso.',
         'password_placeholder' => 'Password',
         'cancel' => 'Annulla',

@@ -29,7 +29,7 @@ test('a complete installation has no errors', function () {
     $this->artisan('och:install', ['--no-interaction' => true])->assertSuccessful();
 
     $this->artisan('och:doctor')
-        ->expectsOutputToContain('Root user (ID 1)')
+        ->expectsOutputToContain('Root user')
         ->doesntExpectOutputToContain('ERROR')
         ->assertSuccessful();
 });
@@ -89,7 +89,7 @@ test('the report is in English whatever the language of the app', function () {
     app()->setLocale('it');
 
     $this->artisan('och:doctor')
-        ->expectsOutputToContain('Root user (ID 1)')
+        ->expectsOutputToContain('Root user')
         ->assertFailed();
 });
 

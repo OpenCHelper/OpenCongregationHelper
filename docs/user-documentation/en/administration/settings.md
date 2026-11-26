@@ -95,7 +95,7 @@ default:
 The users already logged in are asked at their next page. With both enabled, they first confirm their email, then set
 up two-factor authentication.
 
-> ⚠️ **Warning:** so that the root user (the first user created during the installation) can never be locked out, a
+> ⚠️ **Warning:** so that the root user (the first user created during the installation, unless it handed its role over) can never be locked out, a
 > requirement can be enabled only once the root user meets it: set up two-factor authentication or confirm the email
 > address of the root user first. Disabling a requirement is always possible. The root user is also never asked to
 > confirm its email, even if it changes it later, so that it can always reach these settings.

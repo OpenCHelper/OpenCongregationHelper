@@ -33,6 +33,15 @@ class DeleteUsersBulkAction extends DeleteBulkAction
                             return;
                         }
 
+                        if ($record->isLastSuperAdmin()) {
+                            $action->reportBulkProcessingFailure(
+                                'last_super_admin',
+                                fn (int $failureCount): string => trans_choice('filament-resources.user.delete_refused_last_super_admin_bulk', $failureCount),
+                            );
+
+                            return;
+                        }
+
                         // As in `DeleteBulkAction`, an error (e.g. an assignment created in the meantime, which the
                         // database refuses) skips the user without stopping the deletion of the others
                         try {
