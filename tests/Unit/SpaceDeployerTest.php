@@ -239,6 +239,26 @@ test('activating a release keeps the given paths of the live one', function () {
         ->and(treeOf($this->root.'/test.old'))->toBe(['public/index.php' => 'old']);
 });
 
+test('files to keep are moved on their own, and skipped while the live release lacks them', function () {
+    $keys = ['storage/oauth-private.key', 'storage/oauth-public.key'];
+    createFiles($this->root.'/test.next', ['storage/app/.gitignore' => '*', 'public/index.php' => 'first']);
+
+    expect($this->deployer->activate('test', $keys))
+        ->toBe(['activated' => true, 'replaced' => false, 'kept' => [], 'reused' => []]);
+
+    createFiles($this->root.'/test', ['storage/oauth-private.key' => 'private', 'storage/oauth-public.key' => 'public']);
+    createFiles($this->root.'/test.next', ['storage/app/.gitignore' => '*', 'public/index.php' => 'second']);
+
+    expect($this->deployer->activate('test', $keys))
+        ->toBe(['activated' => true, 'replaced' => true, 'kept' => $keys, 'reused' => []])
+        ->and(treeOf($this->root.'/test'))->toBe([
+            'public/index.php' => 'second',
+            'storage/app/.gitignore' => '*',
+            'storage/oauth-private.key' => 'private',
+            'storage/oauth-public.key' => 'public',
+        ]);
+});
+
 test('activating a release resumes after a request stopped halfway', function () {
     // The previous request moved the kept `.env` and the live release, then stopped before the last rename
     createFiles($this->root.'/test.next', ['.env' => 'APP_KEY=live', 'public/index.php' => 'new']);
