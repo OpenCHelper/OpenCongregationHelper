@@ -95,9 +95,12 @@ guidata** (`/setup`), che chiede il token e poi:
    di `config/mail.php` così che l'email di prova possa essere inviata in un altro modo. I valori con un valore
    predefinito nella configurazione si possono lasciare vuoti. Le chiavi delle [notifiche push](#notifiche-push)
    vengono create se mancano entrambe, e quelle degli [assistenti IA](#assistenti-ia) se mancano;
-3. crea le tabelle del database e i permessi;
-4. crea l'utente root, e può inviargli un'email di prova;
-5. imposta il nome, il logo e il colore dell'app, i suoi amministratori (invitati via email) e le sue funzionalità: gli
+3. mostra come eseguire le [attività pianificate e la coda](#attività-pianificate-ed-email), con una shell (le righe
+   del cron) o senza (gli indirizzi che un servizio cron esterno chiama, con il loro `ARTISAN_CRON_TOKEN`, creato se
+   manca), e permette di scegliere la coda (`QUEUE_CONNECTION`);
+4. crea le tabelle del database e i permessi;
+5. crea l'utente root, e può inviargli un'email di prova;
+6. imposta il nome, il logo e il colore dell'app, i suoi amministratori (invitati via email) e le sue funzionalità: gli
    assistenti IA, la condivisione delle assegnazioni e i requisiti degli account. Per richiedere la conferma dell'email
    serve prima un'email di prova andata a buon fine; richiedendo l'autenticazione a due fattori, l'utente root la
    configura subito dopo l'accesso.

@@ -94,9 +94,12 @@ choice to the `.env` file, then open the application: until it is installed, eve
    email can be sent another way. The values with a fallback in the configuration can be left empty. The keys of the
    [push notifications](#push-notifications) are created when both are missing, and those of the
    [AI assistants](#ai-assistants) when missing;
-3. creates the database tables and the permissions;
-4. creates the root user, and can send a test email to it;
-5. sets the name, logo and colour of the app, its administrators (who are invited by email) and its features: the AI
+3. shows how to run the [scheduled tasks and the queue](#scheduled-tasks-and-emails), with a shell (the cron lines)
+   or without one (the addresses an external cron service calls, with their `ARTISAN_CRON_TOKEN`, created if missing),
+   and lets you choose the queue (`QUEUE_CONNECTION`);
+4. creates the database tables and the permissions;
+5. creates the root user, and can send a test email to it;
+6. sets the name, logo and colour of the app, its administrators (who are invited by email) and its features: the AI
    assistants, the sharing of the assignments and the requirements of the accounts. Requiring the email confirmation
    needs a test email that went through first; requiring two-factor authentication makes the root user set it up right
    after logging in.

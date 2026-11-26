@@ -30,6 +30,8 @@ use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
@@ -114,7 +116,15 @@ class SetupWizard extends Page
         'MAIL_USERNAME' => 'mail.mailers.smtp.username',
         'MAIL_PASSWORD' => 'mail.mailers.smtp.password',
         'MAIL_FROM_ADDRESS' => 'mail.from.address',
+        'QUEUE_CONNECTION' => 'queue.default',
     ];
+
+    /**
+     * The variables of `.env` asked for by the Background tasks step instead of the Configuration step.
+     *
+     * @var list<string>
+     */
+    public const TASKS_VARIABLES = ['QUEUE_CONNECTION'];
 
     /**
      * The names of the mailers sending through a service, for the others see `setup.environment.mailers`.
@@ -150,7 +160,7 @@ class SetupWizard extends Page
      *
      * @var list<string>
      */
-    public const CHANGEABLE_VARIABLES = ['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_PREFIX', 'MAIL_MAILER'];
+    public const CHANGEABLE_VARIABLES = ['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_PREFIX', 'MAIL_MAILER', 'QUEUE_CONNECTION'];
 
     /**
      * The database drivers the wizard offers.
@@ -376,6 +386,7 @@ class SetupWizard extends Page
                 Wizard::make([
                     $this->requirementsStep(),
                     $this->environmentStep(),
+                    $this->tasksStep(),
                     $this->databaseStep(),
                     $this->rootUserStep(),
                     $this->congregationStep(),
@@ -434,6 +445,7 @@ class SetupWizard extends Page
                     ->warning()
                     ->visible(fn (): bool => $this->missingVariables !== [] && ! app(EnvironmentFile::class)->isWritable()),
                 Section::make(__('setup.environment.application'))
+                    ->icon(Heroicon::OutlinedGlobeAlt)
                     ->columns(['default' => 1, 'md' => 3])
                     ->visible(fn (): bool => $missing('APP_URL', 'APP_TIMEZONE', 'APP_LOCALE'))
                     ->schema([
@@ -452,6 +464,7 @@ class SetupWizard extends Page
                             ->visible(fn (): bool => $missing('APP_LOCALE')), 'APP_LOCALE', required: true),
                     ]),
                 Section::make(__('setup.environment.database'))
+                    ->icon(Heroicon::OutlinedCircleStack)
                     ->columns(['default' => 1, 'md' => 2])
                     ->schema([
                         $this->environmentField(Select::make('db_connection')
@@ -476,6 +489,7 @@ class SetupWizard extends Page
                             ->regex('/^[A-Za-z0-9_]*$/'), 'DB_PREFIX'),
                     ]),
                 Section::make(__('setup.environment.mail'))
+                    ->icon(Heroicon::OutlinedEnvelope)
                     ->columns(['default' => 1, 'md' => 2])
                     ->schema([
                         $this->environmentField(Select::make('mail_mailer')
@@ -497,20 +511,56 @@ class SetupWizard extends Page
                             ->visible(fn (Get $get): bool => self::chosenMailer($get) === 'smtp'), 'MAIL_PASSWORD'),
                     ]),
                 Section::make(__('setup.environment.keys'))
+                    ->icon(Heroicon::OutlinedKey)
                     ->schema([
-                        Text::make(fn (): string => match (true) {
-                            ! $this->hasMissingVapidKeys() => __('setup.environment.push_set'),
-                            app(EnvironmentFile::class)->isWritable() => __('setup.environment.push_created'),
-                            default => __('setup.environment.push_not_writable'),
-                        }),
-                        Text::make(fn (): string => self::hasPassportKeys()
-                            ? __('setup.environment.passport_set')
-                            : __('setup.environment.passport_created')),
+                        View::make('filament.setup.keys')
+                            ->viewData(fn (): array => ['keys' => $this->keysStatus()]),
                     ]),
             ])
             ->afterValidation(function (): void {
                 $this->ensureUnlocked();
                 $this->saveEnvironment();
+            });
+    }
+
+    protected function tasksStep(): Step
+    {
+        return Step::make('tasks')
+            ->label(__('setup.steps.tasks.label'))
+            ->description(__('setup.steps.tasks.description'))
+            ->icon(Heroicon::OutlinedClock)
+            ->schema([
+                Text::make(__('setup.tasks.intro')),
+                $this->environmentField(Select::make('queue_connection')
+                    ->helperText(__('setup.tasks.queue_helper'))
+                    ->options(fn (): array => self::queueOptions())
+                    ->live(), 'QUEUE_CONNECTION', required: true),
+                Tabs::make('tasks')
+                    ->tabs([
+                        Tab::make(__('setup.tasks.with_shell'))
+                            ->schema([
+                                View::make('filament.setup.tasks-with-shell')
+                                    ->viewData(fn (Get $get): array => [
+                                        'scheduler' => 'cd '.base_path().' && '.PHP_BINARY.' artisan schedule:run >> /dev/null 2>&1',
+                                        'worker' => self::chosenQueue($get) === 'sync'
+                                            ? null
+                                            : 'cd '.base_path().' && '.PHP_BINARY.' artisan queue:work --stop-when-empty >> /dev/null 2>&1',
+                                    ]),
+                            ]),
+                        Tab::make(__('setup.tasks.without_shell'))
+                            ->schema([
+                                View::make('filament.setup.tasks-without-shell')
+                                    ->viewData(fn (Get $get): array => [
+                                        'schedulerUrl' => $this->applicationUrl().'/api/artisan/schedule/process',
+                                        'queueUrl' => self::chosenQueue($get) === 'sync' ? null : $this->applicationUrl().'/api/artisan/queue/process',
+                                        'token' => $this->currentEnvironmentValue('ARTISAN_CRON_TOKEN'),
+                                    ]),
+                            ]),
+                    ]),
+            ])
+            ->afterValidation(function (): void {
+                $this->ensureUnlocked();
+                $this->saveTasks();
             });
     }
 
@@ -772,6 +822,8 @@ class SetupWizard extends Page
         $typed = collect(array_keys(self::ENVIRONMENT_VARIABLES))
             ->mapWithKeys(fn (string $variable): array => [$variable => trim((string) ($this->data[strtolower($variable)] ?? ''))])
             ->put('APP_URL', rtrim(trim((string) ($this->data['app_url'] ?? '')), '/'))
+            // Asked for by the Background tasks step, which saves them
+            ->except(self::TASKS_VARIABLES)
             // The fields hidden for the chosen database and mailer keep their default value: it is not written
             ->except($connection === 'sqlite' ? ['DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD'] : [])
             ->except($mailer !== 'smtp' ? ['MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD'] : [])
@@ -797,6 +849,7 @@ class SetupWizard extends Page
             }
 
             $this->createVapidKeys();
+            $this->createCronToken();
         } catch (Throwable $exception) {
             $this->stopStep(__('setup.environment.write_failed'), $exception->getMessage());
         }
@@ -810,6 +863,106 @@ class SetupWizard extends Page
 
         Installation::forget();
         $this->refreshEnvironmentVariables();
+    }
+
+    /**
+     * Save the queue chosen by the Background tasks step.
+     */
+    protected function saveTasks(): void
+    {
+        $queue = trim((string) ($this->data['queue_connection'] ?? ''));
+
+        if ($queue === '') {
+            return;
+        }
+
+        try {
+            if (in_array('QUEUE_CONNECTION', $this->missingVariables, true)) {
+                app(EnvironmentFile::class)->writeMissing(['QUEUE_CONNECTION' => $queue]);
+            } elseif (in_array('QUEUE_CONNECTION', $this->changeableVariables, true) && $queue !== $this->currentEnvironmentValue('QUEUE_CONNECTION')) {
+                app(EnvironmentFile::class)->set('QUEUE_CONNECTION', $queue);
+            }
+        } catch (Throwable $exception) {
+            $this->stopStep(__('setup.environment.write_failed'), $exception->getMessage());
+        }
+
+        config(['queue.default' => $queue]);
+
+        if (app()->configurationIsCached()) {
+            Artisan::call('config:clear');
+        }
+
+        $this->refreshEnvironmentVariables();
+    }
+
+    /**
+     * Create the secret of the endpoints that run the scheduler and the queue (`ARTISAN_CRON_TOKEN`) when missing, for
+     * the hosting without a shell, where an external service calls them.
+     */
+    protected function createCronToken(): void
+    {
+        if (! app(EnvironmentFile::class)->isMissing('ARTISAN_CRON_TOKEN')) {
+            return;
+        }
+
+        $token = Str::random(64);
+
+        app(EnvironmentFile::class)->writeMissing(['ARTISAN_CRON_TOKEN' => $token]);
+        config(['app.artisan_cron_token' => $token]);
+    }
+
+    /**
+     * The connections of the queue (`config/queue.php`), with a description of the most common ones.
+     *
+     * @return array<string, string>
+     */
+    public static function queueOptions(): array
+    {
+        return collect(array_keys((array) config('queue.connections')))
+            ->mapWithKeys(fn (string $connection): array => [
+                $connection => Lang::has("setup.tasks.queues.{$connection}") ? __("setup.tasks.queues.{$connection}") : $connection,
+            ])
+            ->all();
+    }
+
+    protected static function chosenQueue(Get $get): string
+    {
+        return (string) ($get('queue_connection') ?: config('queue.default'));
+    }
+
+    /**
+     * The address of the application: the one of `.env`, or else the one of the page.
+     */
+    protected function applicationUrl(): string
+    {
+        $url = in_array('APP_URL', $this->missingVariables, true) ? $this->requestRoot : (string) config('app.url');
+
+        return rtrim($url, '/');
+    }
+
+    /**
+     * The keys the Configuration step creates when missing: whether they exist, or are created on going on.
+     *
+     * @return list<array{key: string, label: string, status: 'set'|'created'|'unavailable', details: ?string}>
+     */
+    protected function keysStatus(): array
+    {
+        $writable = app(EnvironmentFile::class)->isWritable();
+
+        return [
+            [
+                'key' => 'push',
+                'label' => __('setup.environment.push_keys'),
+                'status' => ! $this->hasMissingVapidKeys() ? 'set' : ($writable ? 'created' : 'unavailable'),
+                'details' => $this->hasMissingVapidKeys() && ! $writable ? __('setup.environment.push_not_writable') : null,
+            ],
+            [
+                'key' => 'passport',
+                'label' => __('setup.environment.passport_keys'),
+                'status' => self::hasPassportKeys() ? 'set' : 'created',
+                'details' => null,
+            ],
+        ];
     }
 
     /**

@@ -71,11 +71,13 @@ function completeSetupEnvironmentFile(string $path): void
         'MAIL_MAILER' => 'log',
         'MAIL_PORT' => '587',
         'MAIL_FROM_ADDRESS' => 'noreply@example.com',
+        'QUEUE_CONNECTION' => 'sync',
     ];
 
     file_put_contents($path, "SETUP_TOKEN=the-setup-token\n".collect(array_keys(SetupWizard::ENVIRONMENT_VARIABLES))
         ->map(fn (string $variable): string => $variable.'='.($values[$variable] ?? 'set')."\n")
         ->implode('')
+        ."ARTISAN_CRON_TOKEN=cron-token\n"
         ."INITIAL_ROOT_USERNAME=\"Root User\"\nINITIAL_ROOT_USERMAIL=root@example.com\nINITIAL_ROOT_PASSWORD=old-password\n");
 }
 
@@ -215,7 +217,7 @@ test('only the missing values of .env are asked for and written', function () {
     unlockSetupWizard();
 
     $component = Livewire::test(SetupWizard::class)
-        ->assertSet('missingVariables', ['APP_URL', 'APP_TIMEZONE', 'DB_PREFIX', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM_ADDRESS'])
+        ->assertSet('missingVariables', ['APP_URL', 'APP_TIMEZONE', 'DB_PREFIX', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'MAIL_FROM_ADDRESS', 'QUEUE_CONNECTION'])
         ->assertSchemaComponentVisible('app_timezone', 'form')
         ->assertSchemaComponentHidden('app_locale', 'form')
         // The values already set are shown (but the passwords are never sent to the browser): only the database and the
@@ -241,7 +243,8 @@ test('only the missing values of .env are asked for and written', function () {
         ."APP_URL=https://congregation.example.com\nMAIL_FROM_ADDRESS=noreply@example.com\nVAPID_PUBLIC_KEY=",
     );
 
-    $component->assertSet('missingVariables', ['DB_PREFIX', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD']);
+    // The queue is saved by the Background tasks step
+    $component->assertSet('missingVariables', ['DB_PREFIX', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USERNAME', 'MAIL_PASSWORD', 'QUEUE_CONNECTION']);
 });
 
 test('the mailer can be changed, among the mailers of the configuration', function () {
@@ -278,7 +281,7 @@ test('the values with a fallback in the configuration can be left empty', functi
         ->assertWizardCurrentStep(3);
 
     // Nothing is written: the fallbacks apply
-    expect(file_get_contents($this->envPath))->toMatch('/^SETUP_TOKEN=the-setup-token\nVAPID_PUBLIC_KEY=\S+\nVAPID_PRIVATE_KEY=\S+\n$/');
+    expect(file_get_contents($this->envPath))->toMatch('/^SETUP_TOKEN=the-setup-token\nVAPID_PUBLIC_KEY=\S+\nVAPID_PRIVATE_KEY=\S+\nARTISAN_CRON_TOKEN=\S+\n$/');
 });
 
 test('the keys of the push notifications are created only when both are missing', function () {
@@ -291,7 +294,7 @@ test('the keys of the push notifications are created only when both are missing'
         $before = file_get_contents($this->envPath);
 
         Livewire::test(SetupWizard::class)
-            ->assertSee(__('setup.environment.push_set'))
+            ->assertSeeHtml('data-key="push" data-status="set"')
             ->goToWizardStep(3)
             ->assertWizardCurrentStep(3);
 
@@ -301,7 +304,7 @@ test('the keys of the push notifications are created only when both are missing'
     completeSetupEnvironmentFile($this->envPath);
 
     Livewire::test(SetupWizard::class)
-        ->assertSee(__('setup.environment.push_created'))
+        ->assertSeeHtml('data-key="push" data-status="created"')
         ->goToWizardStep(3);
 
     $keys = (new EnvironmentFile($this->envPath))->fileValues();
@@ -477,7 +480,7 @@ test('the keys of the AI assistants are created by the configuration step', func
     unlockSetupWizard();
 
     Livewire::test(SetupWizard::class)
-        ->assertSee(__('setup.environment.passport_created'))
+        ->assertSeeHtml('data-key="passport" data-status="created"')
         ->goToWizardStep(3)
         ->assertWizardCurrentStep(3);
 
@@ -485,4 +488,42 @@ test('the keys of the AI assistants are created by the configuration step', func
 
     array_map('unlink', glob("{$keysPath}/*"));
     rmdir($keysPath);
+});
+
+test('the background tasks step saves the queue and tells how to run the tasks', function () {
+    completeSetupEnvironmentFile($this->envPath);
+    unlockSetupWizard();
+
+    expect(array_keys(SetupWizard::queueOptions()))->toBe(array_keys(config('queue.connections')));
+
+    Livewire::test(SetupWizard::class)
+        ->assertSee('artisan schedule:run')
+        ->assertSee(url('/api/artisan/schedule/process'))
+        ->assertSee('X-Cron-Token: cron-token')
+        // With the sync queue there is no worker to run
+        ->assertDontSee('artisan queue:work --stop-when-empty')
+        ->fillForm(['queue_connection' => 'database'])
+        ->assertSee('artisan queue:work --stop-when-empty')
+        ->goToWizardStep(4)
+        ->assertHasNoFormErrors()
+        ->assertWizardCurrentStep(4);
+
+    expect(file_get_contents($this->envPath))
+        ->toContain("\nQUEUE_CONNECTION=database\n")
+        ->not->toContain('QUEUE_CONNECTION=sync')
+        ->and(config('queue.default'))->toBe('database');
+});
+
+test('the secret of the scheduler and queue endpoints is created when missing', function () {
+    unlockSetupWizard();
+
+    Livewire::test(SetupWizard::class)
+        ->fillForm(collect(SetupWizard::ENVIRONMENT_VARIABLES)->keys()->mapWithKeys(fn (string $variable): array => [strtolower($variable) => null])->all())
+        ->goToWizardStep(3)
+        ->assertHasNoFormErrors();
+
+    $token = (new EnvironmentFile($this->envPath))->fileValues()['ARTISAN_CRON_TOKEN'] ?? '';
+
+    expect($token)->toHaveLength(64)
+        ->and(config('app.artisan_cron_token'))->toBe($token);
 });
