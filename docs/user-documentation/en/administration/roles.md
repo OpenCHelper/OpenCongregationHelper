@@ -48,7 +48,7 @@ Some permissions have a special meaning:
   [dashboard](../basics/dashboard).
 
 The pages have no permissions of their own: everyone can open their [profile](../basics/profile), and only the super
-administrators the [settings](settings) and the logs.
+administrators the [settings](settings) and the application logs.
 
 ## Suggested roles
 

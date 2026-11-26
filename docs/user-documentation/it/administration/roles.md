@@ -47,7 +47,7 @@ Alcuni permessi hanno un significato particolare:
   [dashboard](../basics/dashboard).
 
 Le pagine non hanno permessi propri: tutti possono aprire il proprio [profilo](../basics/profile), e solo i super
-amministratori le [impostazioni](settings) e i log.
+amministratori le [impostazioni](settings) e i log dell'applicazione.
 
 ## Ruoli consigliati
 
