@@ -47,6 +47,7 @@ test('the files never deployed include what serves only to develop, build or tes
     'tests/Unit/GitFtpIgnoreTest.php',
     'AGENTS.md',
     'README.md',
+    'CONTRIBUTING.md',
     'composer.lock',
     'package.json',
     'vite.config.js',

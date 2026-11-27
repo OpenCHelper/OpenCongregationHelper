@@ -1,6 +1,6 @@
 {
     "name": "openchelper/opencongregationhelper",
-    "version": "v1.0.0-alpha15",
+    "version": "v1.0.0-rc1",
     "type": "project",
     "description": "Open source territory management system for congregations of Jehovah's Witnesses.",
     "keywords": ["territory-management", "congregation", "jehovahs-witnesses", "self-hosted", "laravel", "filament"],

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc1] - 2026-11-27
+
 ### Added
 
 - **Users**: in production, the root user can hand its role over to another super administrator who can log in, with
