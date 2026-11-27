@@ -1,4 +1,4 @@
-name: Run E2E tests
+name: E2E tests
 
 on:
   # Every pull request (forks included), and what lands on main
@@ -22,8 +22,8 @@ env:
     ,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib
 
 jobs:
-  run-e2e:
-    name: Run E2E tests (${{ matrix.database }})
+  run-e2e-tests:
+    name: E2E (${{ matrix.database }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
