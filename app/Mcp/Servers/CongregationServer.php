@@ -20,6 +20,7 @@ use App\Mcp\Tools\ReturnTerritoryTool;
 use App\Mcp\Tools\SearchTool;
 use App\Mcp\Tools\UpdatePublicationRequestStatusTool;
 use Laravel\Mcp\Server;
+use Laravel\Mcp\Server\Attributes\Icon;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
 
@@ -28,6 +29,9 @@ use Laravel\Mcp\Server\Attributes\Name;
  * ChatGPT, Claude) help them manage the congregation, with the permissions of that user.
  */
 #[Name('Open Congregation Helper')]
+#[Icon('icons/icon.svg', 'image/svg+xml', ['any'])]
+#[Icon('icons/icon-192.png', 'image/png', ['192x192'])]
+#[Icon('icons/icon-512.png', 'image/png', ['512x512'])]
 #[Instructions(<<<'MARKDOWN'
     This server manages the territories of a congregation of Jehovah's Witnesses: the territories (grouped in zones) are
     assigned to the publishers, who return them once worked. Campaigns are special periods in which territories are
