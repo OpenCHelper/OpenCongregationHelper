@@ -88,6 +88,8 @@ class E2eSeeder extends Seeder
                 'password' => self::PASSWORD,
                 'email_verified_at' => now(),
                 'can_login' => true,
+                // The tests read the pages, emails and notifications in English
+                'locale' => 'en',
             ]);
 
             if ($data['role'] !== null) {

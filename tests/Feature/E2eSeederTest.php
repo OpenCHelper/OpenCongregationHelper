@@ -25,6 +25,7 @@ test('the users of the end-to-end tests have their role and the known password',
         expect($user->first_name)->toBe($data['first_name'])
             ->and($user->can_login)->toBeTrue()
             ->and($user->hasVerifiedEmail())->toBeTrue()
+            ->and($user->locale)->toBe('en')
             ->and(Hash::check(E2eSeeder::PASSWORD, $user->password))->toBeTrue()
             ->and($user->roles->pluck('name')->all())->toBe(array_filter([$data['role']]));
     }

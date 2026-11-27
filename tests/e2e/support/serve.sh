@@ -31,8 +31,11 @@ mkdir -p "${LARAVEL_STORAGE_PATH}"/{app/public,framework/{cache/data,sessions,te
 if [[ "${connection}" == "sqlite" ]]; then
     database="${LARAVEL_STORAGE_PATH}/database.sqlite"
     touch "${database}"
+    # Many requests write at once (parallel tests, several server workers): they wait for each other
     db_variables="DB_CONNECTION=sqlite
-DB_DATABASE=\"${database}\""
+DB_DATABASE=\"${database}\"
+DB_BUSY_TIMEOUT=15000
+DB_JOURNAL_MODE=wal"
 else
     database="e2e_${instance}"
     db_variables="DB_CONNECTION=${connection}
@@ -68,7 +71,7 @@ LOG_CHANNEL=single
 LOG_LEVEL=debug
 PASSWORD_LEAK_CHECK=false
 ${db_variables}
-SESSION_DRIVER=file
+SESSION_DRIVER=database
 SESSION_LIFETIME=120
 SESSION_COOKIE=och_e2e_${instance}_session
 BROADCAST_CONNECTION=log
