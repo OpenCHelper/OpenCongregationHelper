@@ -68,12 +68,22 @@ async function enableAuthenticatorApp(page: Page, password: string): Promise<{ s
 }
 
 test.describe('Login', () => {
-    test('signs in with the right credentials and opens the dashboard @mobile', async ({ page }) => {
+    test('signs in with the right credentials and opens the dashboard @mobile', async ({ page, browserName, isMobile }) => {
         const user = createThrowawayUser();
 
         await logIn(page, user.email, 'password');
 
         await expect(page).toHaveURL(/\/app$/);
+
+        // On an iPhone, which has no install prompt of its own, the first page offers the steps to add the app to the
+        // home screen, over the dashboard (the browsers with one, Chromium here, only offer it when they fire it)
+        if (browserName === 'webkit' && isMobile) {
+            const installOffer = page.getByRole('dialog', { name: /^Install / });
+            await expect(installOffer).toContainText('"Add to Home Screen"');
+            await installOffer.getByRole('button', { name: 'Not now' }).click();
+            await expect(installOffer).toBeHidden();
+        }
+
         await expect(page.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
     });
 

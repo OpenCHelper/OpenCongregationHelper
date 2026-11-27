@@ -139,9 +139,13 @@ development ones: `app`, installed and seeded with `E2eSeeder` (a user for each 
 `setup`, empty, for the setup wizard. They are served by
 [`tests/e2e/support/serve.sh`](./tests/e2e/support/serve.sh) on the ports 8010 and 8011.
 
-1. Build the frontend assets and install Chromium (once):
+They run on Chromium (desktop), and the ones tagged `@mobile` in their title also on a phone: an Android one (Pixel 7,
+Chromium) and an iPhone (iPhone 14, WebKit, the engine of Safari and of every browser on iOS). Run the tests of one of
+them with `npx playwright test --project=<name>` (`chromium`, `mobile` or `mobile-webkit`).
+
+1. Build the frontend assets and install the browsers (once):
     ```shell
-    npm run build && npx playwright install chromium
+    npm run build && npx playwright install chromium webkit
     ```
 2. Run the tests (`npm run test:e2e:ui` opens the interactive runner):
     ```shell

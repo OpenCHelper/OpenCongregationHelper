@@ -283,6 +283,31 @@ test.describe('User menu', () => {
     });
 });
 
+test.describe('Installing the app', () => {
+    test('an iPhone shows the steps to add the app to the home screen, from the profile and the user menu @mobile', async ({ adminPage, browserName, isMobile }) => {
+        test.skip(browserName !== 'webkit' || !isMobile, 'Elsewhere the browser offers to install the app itself, when it decides to (Chromium does not here).');
+
+        await visit(adminPage, '/app/edit-profile');
+        const installOffer = adminPage.getByRole('dialog', { name: /^Install / });
+
+        const installSection = section(adminPage, 'Install the app');
+        await expect(installSection).toContainText('Open it from your home screen or desktop');
+        await installSection.getByRole('button', { name: 'Install' }).click();
+
+        // iOS has no install prompt: the steps are shown instead, with the notifications that need the app installed
+        await expect(installOffer).toContainText('"Add to Home Screen"');
+        await expect(installOffer).toContainText('Notifications on iPhone and iPad');
+        await expect(installOffer.getByRole('button', { name: 'Install', exact: true })).toBeHidden();
+        await installOffer.getByRole('button', { name: 'Not now' }).click();
+        await expect(installOffer).toBeHidden();
+
+        await openUserMenuItem(adminPage, 'Install app');
+        await expect(installOffer).toContainText('"Add to Home Screen"');
+        await adminPage.keyboard.press('Escape');
+        await expect(installOffer).toBeHidden();
+    });
+});
+
 test.describe('Language', () => {
     test('switches the interface to Italian from the top bar', async ({ browser }) => {
         const { page } = await signInAsThrowawayUser(browser);
