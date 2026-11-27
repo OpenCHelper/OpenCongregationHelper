@@ -75,8 +75,8 @@ jobs:
       DB_PORT: ${{ matrix.port || 3306 }}
       DB_USERNAME: ${{ matrix.username || 'root' }}
       DB_PASSWORD: password
-      # A file on SQLite, like the installations (each parallel process copies it): an in-memory database is lost when
-      # `db:wipe` disconnects from it (see `SharedDatabaseSafetyTest`)
+      # A file on SQLite, like the installations (each parallel process creates its own `<file>_test_<N>`): an in-memory
+      # database is lost when `db:wipe` disconnects from it (see `SharedDatabaseSafetyTest`)
       DB_DATABASE: ${{ matrix.database == 'sqlite' && format('{0}/database/testing.sqlite', github.workspace) || 'testing' }}
       DB_PREFIX: ${{ matrix.db-prefix }}
 
@@ -93,7 +93,8 @@ jobs:
           php-version: "8.2"
           extensions: ${{ env.php_extensions }}
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
-          ini-values: pcov.directory=.
+          # Only the code measured by phpunit.xml (`<source>`), not `vendor/`
+          ini-values: ${{ matrix.coverage && 'pcov.directory=app' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           fail-fast: true
