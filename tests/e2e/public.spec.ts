@@ -100,6 +100,29 @@ test.describe('Progressive Web App', () => {
         await expect(page.getByRole('heading', { name: 'You are offline' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
     });
+
+    test('shows the offline page without a connection, then the page once it is back @mobile', async ({ publisherPage: page, browserName }) => {
+        test.skip(browserName === 'webkit', "Playwright's WebKit fails the requests offline before the service worker gets them, even the cached ones.");
+
+        await page.goto('/app');
+        // The service worker (`public/sw.js`) caches the offline page when it installs, and takes over the open page
+        await expect.poll(() => page.evaluate(async () => {
+            await navigator.serviceWorker.ready;
+
+            return navigator.serviceWorker.controller !== null;
+        })).toBe(true);
+
+        await page.context().setOffline(true);
+        await page.goto('/app/territories');
+
+        await expect(page.getByRole('heading', { level: 1, name: 'You are offline' })).toBeVisible();
+        await expect(page).toHaveURL(/\/app\/territories$/);
+
+        await page.context().setOffline(false);
+        await page.getByRole('button', { name: 'Try again' }).click();
+
+        await expect(page.getByRole('heading', { level: 1, name: 'Territories' })).toBeVisible();
+    });
 });
 
 test.describe('Error pages and headers', () => {
