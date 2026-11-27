@@ -136,7 +136,7 @@ test('the yearly fake campaigns are named after the year they start in', functio
         ->and(Campaign::whereIn('short_name', ['H2H', 'COM'])->exists())->toBeFalse();
 });
 
-test('the fake assignments use started campaigns and one territory each', function () {
+test('the fake assignments use started, not terminated campaigns and one territory each', function () {
     Notification::fake();
     User::factory()->create(['id' => 1]);
 
@@ -146,7 +146,8 @@ test('the fake assignments use started campaigns and one territory each', functi
 
     expect($assignments)->not->toBeEmpty()
         ->and($assignments->pluck('territory_id')->duplicates())->toBeEmpty()
-        ->and($assignments->every(fn (TerritoryAssignment $assignment): bool => $assignment->campaign->valid_from === null || $assignment->campaign->valid_from->isPast()))->toBeTrue();
+        ->and($assignments->every(fn (TerritoryAssignment $assignment): bool => $assignment->campaign->valid_from === null || $assignment->campaign->valid_from->isPast()))->toBeTrue()
+        ->and($assignments->contains(fn (TerritoryAssignment $assignment): bool => $assignment->campaign->isTerminated()))->toBeFalse();
 });
 
 test('the fake role seeder gives a role to every user but the root one', function () {
