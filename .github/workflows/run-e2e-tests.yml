@@ -38,7 +38,9 @@ jobs:
           # Every project but the setup wizard: keep it in sync with the projects of `playwright.config.ts`
           - suite: all
             database: mysql
-            projects: --project=auth-setup --project=chromium --project=mobile --project=global-state
+            projects: --project=auth-setup --project=chromium --project=mobile --project=mobile-webkit --project=global-state
+            # WebKit for the `@mobile` tests on an iPhone (`mobile-webkit`)
+            browsers: chromium webkit
             timeout: 45
             # Same version as docker-compose.yml
             mysql_image: mysql:8.0
@@ -47,11 +49,13 @@ jobs:
           - suite: setup-wizard
             database: sqlite
             projects: --project=setup-wizard
+            browsers: chromium
             timeout: 15
             mysql_image: ""
           - suite: setup-wizard
             database: mysql
             projects: --project=setup-wizard
+            browsers: chromium
             timeout: 15
             mysql_image: mysql:8.0
             port: 3306
@@ -130,17 +134,22 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
-          # The browsers in the key: a cache saved with fewer of them would miss the others
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium-webkit
+          # One cache per suite, since each one installs its own browsers (`matrix.browsers`): a cache saved with fewer
+          # of them would miss the others
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.suite }}
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        # Chromium for the whole suite, WebKit for the `@mobile` tests on an iPhone (see `playwright.config.ts`)
-        run: npx playwright install --with-deps chromium webkit
+        env:
+          BROWSERS: ${{ matrix.browsers }}
+        # Word splitting is wanted: one argument per browser
+        run: npx playwright install --with-deps ${BROWSERS}
 
       - name: Install Playwright system dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium webkit
+        env:
+          BROWSERS: ${{ matrix.browsers }}
+        run: npx playwright install-deps ${BROWSERS}
 
       - name: Run E2E tests
         env:
