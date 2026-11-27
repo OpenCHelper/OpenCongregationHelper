@@ -13,4 +13,13 @@ return new class extends SettingsMigration
         $this->migrator->add('security.require_two_factor', false);
         $this->migrator->add('security.require_email_verification', false);
     }
+
+    /**
+     * Reverse the migrations, so that running them again (e.g. after `migrate:rollback`) does not find the settings.
+     */
+    public function down(): void
+    {
+        $this->migrator->deleteIfExists('security.require_two_factor');
+        $this->migrator->deleteIfExists('security.require_email_verification');
+    }
 };

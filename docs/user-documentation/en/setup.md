@@ -2,11 +2,12 @@
 type: documentation
 icon: heroicon-o-wrench-screwdriver
 title: Setup guide
-order: 0
+order: -1
 ---
 
 This page is meant for whoever **installs and maintains** the application. If you only need to use it, start from the
-**Basics** section.
+**Basics** section. How to back up an installation and restore it is explained in
+[Backup and restore](backup).
 
 ## Requirements
 
@@ -151,6 +152,9 @@ one, so that nobody else can install the application first.
 > environment, its email, password, access and roles cannot be changed by anyone.
 
 ## Updating
+
+> ⚠️ **Before updating**, back up the database, the `.env` file and the `storage/` folder (see
+> [Backup and restore](backup)): if the update fails, you can go back to the previous version.
 
 Replace the files with the ones of the new version (keeping `.env` and `storage/`), then run:
 

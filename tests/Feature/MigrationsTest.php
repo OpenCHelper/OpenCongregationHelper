@@ -78,3 +78,20 @@ it('drops the unused team tables and rolls them back', function () {
         ->and(Schema::hasTable('team_invitations'))->toBeFalse()
         ->and(Schema::hasColumn('users', 'current_team_id'))->toBeFalse();
 });
+
+it('rolls back the settings and adds them again', function (string $file) {
+    $migration = require $file;
+    $settings = fn () => DB::table('settings')->get(['group', 'name'])->map(fn (object $setting): string => "{$setting->group}.{$setting->name}");
+    preg_match_all("/migrator->add\\('([^']+)'/", file_get_contents($file), $matches);
+
+    $migration->down();
+
+    expect($settings()->intersect($matches[1]))->toBeEmpty();
+
+    // Adding them again would throw if the rollback had left any of them in place
+    $migration->up();
+
+    expect($settings()->intersect($matches[1])->sort()->values()->all())->toBe(collect($matches[1])->sort()->values()->all());
+})->with(fn (): array => collect(glob(dirname(__DIR__, 2).'/database/settings/*.php'))
+    ->mapWithKeys(fn (string $file): array => [basename($file, '.php') => [$file]])
+    ->all());

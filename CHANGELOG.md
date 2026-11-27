@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#118](https://github.com/OpenCHelper/OpenCongregationHelper/pull/118)).
 - The busy timeout and the journal mode of SQLite can be set with `DB_BUSY_TIMEOUT` and `DB_JOURNAL_MODE`
   ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116)).
+- **User guide**: the new **Backup and restore** page explains what to back up (database, `.env`, uploaded files and
+  keys of the AI assistants), how and how often, with or without shell access, and how to restore a backup
+  ([#119](https://github.com/OpenCHelper/OpenCongregationHelper/pull/119)).
 
 ### Changed
 
@@ -96,6 +99,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   **super_admin** role, nor be deleted (from the list, its page or its profile), and the **super_admin** role can no
   longer be deleted, renamed or moved to another guard. In production, the profile of the root user no longer offers
   to delete the account, which always failed ([#113](https://github.com/OpenCHelper/OpenCongregationHelper/pull/113)).
+- **Migrations**: the settings migrations can be rolled back, so that running the migrations again after a
+  `migrate:rollback` no longer fails because a setting already exists
+  ([#119](https://github.com/OpenCHelper/OpenCongregationHelper/pull/119)).
+- `scripts/remote_artisan.sh` runs on macOS too (`#!/usr/bin/env bash`)
+  ([#119](https://github.com/OpenCHelper/OpenCongregationHelper/pull/119)).
 - **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
   page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown
   only on the territory's own map. The **Draw Text** tool is removed.
@@ -170,7 +178,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The public `/guest` address no longer shows a dashboard with the Filament version: it redirects to the welcome page
   ([#79](https://github.com/OpenCHelper/OpenCongregationHelper/pull/79)).
 - Opening **Share** on an assignment no longer publishes a link: it is created only with the new **Create link**
-  button. Returned or deleted assignments can no longer be shared, and their leftover links stop working
+  button. Returned or deleted assignments can no longer be shared, and their leftover links stop working. An
+  assignment has one link at most: the database update keeps only the oldest link of each one, deleting the others
   ([#72](https://github.com/OpenCHelper/OpenCongregationHelper/pull/72)).
 - The unused `/api` endpoints (`/api/user`, `/api/assignees`, `/api/assignments`, `/api/territories`, `/api/zones`)
   are removed: they returned whole user and assignment records

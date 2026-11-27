@@ -2,11 +2,12 @@
 type: documentation
 icon: heroicon-o-wrench-screwdriver
 title: Guida al setup
-order: 0
+order: -1
 ---
 
 Questa pagina è rivolta a chi **installa e gestisce** l'applicazione. Se devi solo usarla, parti dalla sezione
-**Nozioni di base**.
+**Nozioni di base**. Come fare il backup di un'installazione e ripristinarla è spiegato in
+[Backup e ripristino](backup).
 
 ## Requisiti
 
@@ -154,6 +155,9 @@ solo come aggiungerne uno, così che nessun altro possa installare l'applicazion
 > `production`, nessuno può modificarne email, password, accesso e ruoli.
 
 ## Aggiornamento
+
+> ⚠️ **Prima di aggiornare**, fai il backup del database, del file `.env` e della cartella `storage/` (vedi
+> [Backup e ripristino](backup)): se l'aggiornamento non riesce, potrai tornare alla versione precedente.
 
 Sostituisci i file con quelli della nuova versione (mantenendo `.env` e `storage/`), poi esegui:
 

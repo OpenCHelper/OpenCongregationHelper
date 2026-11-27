@@ -51,6 +51,16 @@ test.describe('Knowledge base', () => {
         await expect(article).toBeHidden();
     });
 
+    test('explains how to back up and restore the application', async ({ page }) => {
+        await visit(page, '/knowledge-base/setup');
+
+        await page.getByRole('main').getByRole('article').getByRole('link', { name: 'Backup and restore' }).first().click();
+
+        await expect(page).toHaveURL(/\/knowledge-base\/backup$/);
+        await expect(articleTitle(page)).toHaveText('Backup and restore');
+        await expect(sidebar(page).getByRole('link', { name: 'Backup and restore', exact: true })).toBeVisible();
+    });
+
     test('follows the links between articles', async ({ page }) => {
         await visit(page, '/knowledge-base/territories/introduction');
 
@@ -91,7 +101,7 @@ test.describe('Knowledge base', () => {
     test('leads guests back to the welcome page', async ({ page }) => {
         await visit(page, '/knowledge-base/getting-started');
 
-        await page.getByRole('link', { name: 'Back' }).click();
+        await page.getByRole('link', { name: 'Back', exact: true }).click();
         await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
     });
 });
@@ -104,7 +114,7 @@ test.describe('Documentation from the app', () => {
         await expect(adminPage).toHaveURL(/\/knowledge-base/);
         await expect(articleTitle(adminPage)).toHaveText('Getting started');
 
-        await adminPage.getByRole('link', { name: 'Back' }).click();
+        await adminPage.getByRole('link', { name: 'Back', exact: true }).click();
         await expect(adminPage).toHaveURL(/\/app$/);
     });
 

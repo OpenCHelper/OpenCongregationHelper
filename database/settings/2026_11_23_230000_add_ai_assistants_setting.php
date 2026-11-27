@@ -12,4 +12,12 @@ return new class extends SettingsMigration
     {
         $this->migrator->add('security.ai_assistants_enabled', false);
     }
+
+    /**
+     * Reverse the migrations, so that running them again (e.g. after `migrate:rollback`) does not find the setting.
+     */
+    public function down(): void
+    {
+        $this->migrator->deleteIfExists('security.ai_assistants_enabled');
+    }
 };

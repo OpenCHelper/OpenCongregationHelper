@@ -24,4 +24,21 @@ return new class extends SettingsMigration
         $this->migrator->add('campaigns.expiring_days', 7);
         $this->migrator->add('campaigns.almost_expired_days', 3);
     }
+
+    /**
+     * Reverse the migrations, so that running them again (e.g. after `migrate:rollback`) does not find the settings.
+     */
+    public function down(): void
+    {
+        $this->migrator->deleteIfExists('general.logo');
+        $this->migrator->deleteIfExists('general.primary_color');
+        $this->migrator->deleteIfExists('territories.map_default_center');
+        $this->migrator->deleteIfExists('territories.shared_pii');
+        $this->migrator->deleteIfExists('territories.stale_after_days');
+        $this->migrator->deleteIfExists('territories.dead_after_days');
+        $this->migrator->deleteIfExists('territories.stale_check_day');
+        $this->migrator->deleteIfExists('territories.stale_check_time');
+        $this->migrator->deleteIfExists('campaigns.expiring_days');
+        $this->migrator->deleteIfExists('campaigns.almost_expired_days');
+    }
 };

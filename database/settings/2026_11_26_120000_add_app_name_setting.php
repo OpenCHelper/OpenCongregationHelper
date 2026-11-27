@@ -11,4 +11,9 @@ return new class extends SettingsMigration
     {
         $this->migrator->add('general.app_name', config('app.name'));
     }
+
+    public function down(): void
+    {
+        $this->migrator->deleteIfExists('general.app_name');
+    }
 };
