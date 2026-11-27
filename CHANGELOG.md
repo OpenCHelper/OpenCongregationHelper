@@ -30,9 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#114](https://github.com/OpenCHelper/OpenCongregationHelper/pull/114)).
 - **End-to-end tests**: browser tests of every feature of the app and of the main workflows (e.g. a zone, then a
   territory in it, assigned and returned), run on every pull request on MySQL (the setup wizard on SQLite and MySQL),
-  while the unit and feature tests run on MySQL and SQLite; a failed test keeps a video and a trace to replay it
+  while the unit and feature tests run on MySQL and SQLite; the ones for phones run on Android and on iPhone (Safari's
+  engine), and a failed test keeps a video and a trace to replay it
   ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116),
-  [#117](https://github.com/OpenCHelper/OpenCongregationHelper/pull/117)).
+  [#117](https://github.com/OpenCHelper/OpenCongregationHelper/pull/117),
+  [#118](https://github.com/OpenCHelper/OpenCongregationHelper/pull/118)).
 - The busy timeout and the journal mode of SQLite can be set with `DB_BUSY_TIMEOUT` and `DB_JOURNAL_MODE`
   ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116)).
 
