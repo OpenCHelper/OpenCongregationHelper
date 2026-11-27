@@ -152,8 +152,8 @@ They use SQLite by default: set `E2E_DB_CONNECTION` (`mysql`, `mariadb` or `pgsq
 `E2E_DB_USERNAME`, `E2E_DB_PASSWORD` to run them on another database (the databases `e2e_app` and `e2e_setup` are
 created). Outside of CI, servers already running on the ports are reused: stop them to start from fresh data. The
 `E2E tests` workflow (`run-e2e-tests.yml`) runs them on MySQL, and the setup wizard on SQLite and MySQL: the support of
-the databases is tested by the `Pest tests` workflow (`run-pest-tests.yml`), on MySQL (with and without a table prefix)
-and SQLite.
+the databases is tested by the `Pest tests` workflow (`run-pest-tests.yml`), on MySQL and SQLite, each with and
+without a table prefix.
 
 ### Run workflows locally
 

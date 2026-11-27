@@ -24,34 +24,34 @@ env:
 
 jobs:
   run-pest-tests:
-    name: Pest (${{ matrix.database }}${{ matrix.database != 'sqlite' && format(', prefixed={0}', matrix.db-prefix != '' && 'yes' || 'no') || '' }})
+    name: Pest (${{ matrix.database }}, prefixed=${{ matrix.db-prefix != '' && 'yes' || 'no' }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     # The database support is tested here, where the query layer (raw SQL, JSON operators, migrations, prefixes) is
-    # exercised: the E2E tests only run on MySQL. Each supported database is an entry below; to add one (e.g.
-    # `mariadb` or `pgsql`), add an entry with its image, port and user, and its PHP extension to `php_extensions`.
+    # exercised: the E2E tests only run on MySQL. To add a database (e.g. `mariadb` or `pgsql`), add it to `database`,
+    # an `include` entry with its image, port and user, and its PHP extension to `php_extensions`.
     #
-    # MySQL also runs with the longest prefix: the PR previews share one database, prefixing their tables with `p<N>_`
-    # (`DB_PREFIX`), so this catches raw SQL missing the prefix and index names longer than the 64 characters of MySQL.
+    # Each database also runs with the longest table prefix: the PR previews share one database, prefixing their tables
+    # with `p<N>_` (`DB_PREFIX`), so this catches raw SQL missing the prefix and, on MySQL, index names longer than its
+    # 64 characters.
     strategy:
       fail-fast: false
       matrix:
+        database: [mysql, sqlite]
+        db-prefix: ["", "p9999_"]
         include:
           - database: mysql
-            db-prefix: ""
-            coverage: true
             # Same version as docker-compose.yml
-            image: mysql:8.0
-            port: 3306
-            username: root
-          - database: mysql
-            db-prefix: p9999_
             image: mysql:8.0
             port: 3306
             username: root
           - database: sqlite
             image: ""
+          # The coverage is measured once
+          - database: mysql
+            db-prefix: ""
+            coverage: true
 
     # A service with an empty image is not started: only the runs on a database server have it
     services:
