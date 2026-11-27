@@ -76,7 +76,7 @@ jobs:
             for source in "origin/$DEFAULT_BRANCH" "$tag"; do
               changelog=$(git show "$source:CHANGELOG.md" 2>/dev/null || true)
               notes=$(printf '%s\n' "$changelog" | awk -v version="$version" '
-                index($0, "## [" version "]") == 1 || index($0, "## [v" version "]") == 1 { found = 1; next }
+                index($0, "## [" version "]") == 1 { found = 1; next }
                 found && /^## \[/ { exit }
                 found { print }
               ')
