@@ -9,9 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **User guide**: the new **Backup and upgrade** page explains what to back up (database, `.env`, uploaded files and
-  keys of the AI assistants) and how to restore it, how to upgrade with or without shell access, what to do if an
-  upgrade fails, and what changes when upgrading to 1.0.0 from the alpha versions.
+- **User guide**: the new **Backup and restore** page explains what to back up (database, `.env`, uploaded files and
+  keys of the AI assistants), how and how often, with or without shell access, and how to restore a backup.
 
 ### Changed
 
@@ -49,8 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Migrations**: the setting of the compromised passwords check can be rolled back, so that upgrading again after a
-  `migrate:rollback` no longer fails.
+- **Migrations**: the settings migrations can be rolled back, so that running the migrations again after a
+  `migrate:rollback` no longer fails because a setting already exists.
 - `scripts/remote_artisan.sh` runs on macOS too (`#!/usr/bin/env bash`).
 - **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
   page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown

@@ -6,8 +6,8 @@ order: -1
 ---
 
 This page is meant for whoever **installs and maintains** the application. If you only need to use it, start from the
-**Basics** section. How to back up an installation and upgrade it to a new version is explained in
-[Backup and upgrade](backup-and-upgrade).
+**Basics** section. How to back up an installation and restore it is explained in
+[Backup and restore](backup).
 
 ## Requirements
 
@@ -113,9 +113,8 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 
 ## Updating
 
-> ⚠️ **Before updating**, read the release notes and back up the database, the `.env` file and the `storage/` folder:
-> [Backup and upgrade](backup-and-upgrade) explains every step, with and without shell access, and what to do if the
-> update fails.
+> ⚠️ **Before updating**, back up the database, the `.env` file and the `storage/` folder (see
+> [Backup and restore](backup)): if the update fails, you can go back to the previous version.
 
 Replace the files with the ones of the new version (keeping `.env` and `storage/`), then run:
 

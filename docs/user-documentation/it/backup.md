@@ -1,12 +1,12 @@
 ---
 type: documentation
-icon: heroicon-o-arrow-path
-title: Backup e aggiornamento
+icon: heroicon-o-circle-stack
+title: Backup e ripristino
 order: 0
 ---
 
-Questa pagina è rivolta a chi **gestisce** un'installazione dell'applicazione: come farne il backup, ripristinarla e
-aggiornarla a una nuova versione. Per installarla la prima volta, vedi la [Guida al setup](setup).
+Questa pagina è rivolta a chi **gestisce** un'installazione dell'applicazione: come farne il backup e ripristinarla.
+Per installarla o aggiornarla, vedi la [Guida al setup](setup).
 
 ## Cosa salvare
 
@@ -69,7 +69,7 @@ tempo.
 ### Ogni quanto
 
 - **Il database**: almeno una volta alla settimana, più spesso se l'applicazione viene usata ogni giorno, e **sempre
-  subito prima di un aggiornamento**.
+  subito prima di [aggiornare](setup#aggiornamento) l'applicazione**.
 - **I file caricati** (`storage/app/`): insieme al database, dato che il database vi fa riferimento.
 - **Il file `.env` e le chiavi degli assistenti IA**: una volta dopo l'installazione, poi ogni volta che cambiano (es.
   una nuova password del database, o dopo aver attivato le notifiche push).
@@ -77,39 +77,6 @@ tempo.
 Conserva più di una copia (es. gli ultimi quattro backup settimanali): un problema notato in ritardo potrebbe essere già
 nell'ultimo. Ogni tanto prova a ripristinare un backup su un'installazione di prova: è l'unico modo per sapere che
 funziona.
-
-### Ripristinare un backup
-
-1. Se l'applicazione è in funzione, mettila in [modalità manutenzione](#modalità-manutenzione).
-2. Assicurati che i file dell'applicazione siano quelli della **stessa versione** del backup (vedi
-   [Aggiornare a una nuova versione](#aggiornare-a-una-nuova-versione) per sostituirli).
-3. Rimetti al loro posto il file `.env` e la cartella `storage/` del backup, senza eliminare né sovrascrivere il file
-   `storage/framework/down`, che tiene attiva la modalità manutenzione.
-4. Elimina le tabelle dell'installazione, poi importa il dump, così che non resti nessuna tabella creata dopo il backup:
-    - **con accesso alla shell**, `php artisan db:wipe --force` elimina le tabelle dell'installazione (solo quelle che
-      iniziano con `DB_PREFIX`, se è impostato: prima della versione 1.0.0-alpha13 elimina **tutte** le tabelle del
-      database, quindi su un database condiviso eliminale invece con il client `mysql`), poi
-      `mysql -u <utente> -p <database> < och-backup.sql` importa il dump;
-    - **senza accesso alla shell**, in phpMyAdmin seleziona le tabelle dell'installazione (solo quelle che iniziano con
-      il prefisso, se c'è), scegli **Elimina**, poi importa il dump dalla scheda **Importa**.
-5. Ricrea il collegamento `public/storage` e le cache, che potrebbero riferirsi ai file precedenti, poi controlla
-   l'installazione ed esci dalla modalità manutenzione:
-    - **con accesso alla shell**:
-
-        ```shell
-        php artisan och:post-deploy
-        php artisan och:doctor
-        php artisan up
-        ```
-
-    - **senza accesso alla shell**, in modalità manutenzione l'endpoint Artisan non è disponibile: prima elimina il
-      file `storage/framework/down` via FTP, poi esegui subito `och:post-deploy` e `och:doctor` con
-      `scripts/remote_artisan.sh` (vedi [Aggiornare senza accesso alla shell](#aggiornare-senza-accesso-alla-shell)).
-
-    `och:post-deploy` e `och:doctor` esistono dalla versione 1.0.0-alpha15: con i file di una versione precedente,
-    segui invece la sezione **Aggiornamento** della sua Guida al setup.
-
-Tutto ciò che è stato inserito nell'applicazione dopo il backup va perso.
 
 ## Modalità manutenzione
 
@@ -125,7 +92,7 @@ php artisan up
 ```
 
 **Senza accesso alla shell**, attivala tramite l'endpoint Artisan, con `scripts/remote_artisan.sh` (vedi
-[Aggiornare senza accesso alla shell](#aggiornare-senza-accesso-alla-shell)):
+[Aggiornamento](setup#aggiornamento)):
 
 ```shell
 scripts/remote_artisan.sh --base-url https://och-instance.example.com \
@@ -137,200 +104,31 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 > comandi non possono essere eseguiti tramite esso. Per disattivare la modalità manutenzione, elimina il file
 > `storage/framework/down` via FTP.
 
-## Aggiornare a una nuova versione
+## Ripristinare un backup
 
-### Prima di aggiornare
+1. Se l'applicazione è in funzione, mettila in [modalità manutenzione](#modalità-manutenzione).
+2. Assicurati che i file dell'applicazione siano quelli della **stessa versione** del backup: se non lo sono, rimetti i
+   file di quella versione, mantenendo `.env` e `storage/` (vedi [Aggiornamento](setup#aggiornamento)).
+3. Rimetti al loro posto il file `.env` e la cartella `storage/` del backup, senza eliminare né sovrascrivere il file
+   `storage/framework/down`, che tiene attiva la modalità manutenzione.
+4. Elimina le tabelle dell'installazione, poi importa il dump, così che non resti nessuna tabella creata dopo il backup:
+    - **con accesso alla shell**, `php artisan db:wipe --force` elimina le tabelle dell'installazione (solo quelle che
+      iniziano con `DB_PREFIX`, se è impostato), poi `mysql -u <utente> -p <database> < och-backup.sql` importa il
+      dump;
+    - **senza accesso alla shell**, in phpMyAdmin seleziona le tabelle dell'installazione (solo quelle che iniziano con
+      il prefisso, se c'è), scegli **Elimina**, poi importa il dump dalla scheda **Importa**.
+5. Ricrea il collegamento `public/storage` e le cache, che potrebbero riferirsi ai file precedenti, poi controlla
+   l'installazione ed esci dalla modalità manutenzione:
+    - **con accesso alla shell**:
 
-1. **Controlla la versione che hai**: è mostrata in **Informazioni**, nel menu utente.
-2. **Leggi le note di rilascio** di tutte le versioni tra la tua e quella nuova, nella pagina
-   [Releases](https://github.com/OpenCHelper/OpenCongregationHelper/releases) (sono le stesse del file `CHANGELOG.md`
-   del progetto), e le [Note per versione](#note-per-versione) qui sotto: dicono cosa è cambiato e se devi fare
-   qualcosa (es. una nuova impostazione in `.env`). Le versioni con un suffisso (es. `1.0.0-alpha15`) sono
-   pre-release.
-3. **Controlla i [requisiti](setup#requisiti)** della nuova versione (es. la versione di PHP).
-4. **Fai il backup** del database, del file `.env` e della cartella `storage/` (vedi [Cosa salvare](#cosa-salvare)), e
-   annota la versione a cui appartengono.
+        ```shell
+        php artisan och:post-deploy
+        php artisan och:doctor
+        php artisan up
+        ```
 
-Scegli un momento in cui poche persone usano l'applicazione (es. la sera tardi): durante l'aggiornamento non è
-disponibile.
+    - **senza accesso alla shell**, in modalità manutenzione l'endpoint Artisan non è disponibile: prima elimina il
+      file `storage/framework/down` via FTP, poi esegui subito `och:post-deploy` e `och:doctor` con
+      `scripts/remote_artisan.sh` (vedi [Aggiornamento](setup#aggiornamento)).
 
-### Aggiornare con accesso alla shell
-
-1. Metti l'applicazione in modalità manutenzione:
-
-    ```shell
-    php artisan down --render="errors::503"
-    ```
-
-2. Sostituisci i file con quelli della nuova versione, mantenendo `.env` e `storage/`:
-    - se l'applicazione è stata installata con Git, `git fetch --tags && git checkout v1.0.0` (con il tag della nuova
-      versione);
-    - altrimenti scarica l'archivio della nuova versione (**Source code** nella sua pagina di rilascio), estrailo in
-      una nuova cartella, sposta `.env` e `storage/` al suo interno, poi scambiala con la vecchia cartella. Copiare i
-      nuovi file sopra quelli vecchi lascerebbe i file che la nuova versione ha rimosso.
-3. Installa le dipendenze PHP e compila gli asset del frontend, come per l'installazione:
-
-    ```shell
-    composer install --no-dev --optimize-autoloader
-    npm ci && npm run build
-    ```
-
-4. Aggiorna il database e il resto:
-
-    ```shell
-    php artisan och:post-deploy
-    ```
-
-    Esegue le nuove migrazioni, crea ciò che ancora manca (`och:install`: i nuovi permessi, le chiavi degli assistenti
-    IA), ricrea il collegamento `public/storage`, svuota le cache della versione precedente e costruisce quelle nuove.
-    Si ferma al primo passaggio che non riesce (vedi [Se l'aggiornamento non riesce](#se-laggiornamento-non-riesce)).
-5. Esci dalla modalità manutenzione e, se ne usi uno, riavvia il worker della coda, così che carichi il nuovo codice:
-
-    ```shell
-    php artisan up
-    php artisan queue:restart
-    ```
-
-6. [Controlla l'installazione](#dopo-laggiornamento).
-
-### Aggiornare senza accesso alla shell
-
-Sugli hosting condivisi senza accesso alla shell (es. Altervista), i file vengono caricati via FTP e i comandi eseguiti
-tramite l'endpoint `/api/artisan/execute`, autorizzato da un token monouso che `scripts/remote_artisan.sh` carica via
-FTP ed elimina dopo il comando. Lo script viene eseguito sul tuo computer: richiede `bash`, `curl`, `jq` e `lftp` (su
-Windows, ad esempio in WSL; con una versione precedente alla 1.0.0, su macOS eseguilo come
-`bash scripts/remote_artisan.sh`). Se l'applicazione non è nella cartella principale dell'account FTP, indica il
-percorso del suo token con `--token-file <cartella>/storage/framework/.artisan-token`.
-
-1. **Sul tuo computer**, scarica l'archivio della nuova versione (**Source code** nella sua pagina di rilascio),
-   estrailo, poi installa le dipendenze e compila gli asset nella sua cartella (servono PHP, Composer e Node.js):
-
-    ```shell
-    composer install --no-dev --optimize-autoloader
-    npm ci && npm run build
-    ```
-
-2. Metti l'applicazione in modalità manutenzione, dalla stessa cartella:
-
-    ```shell
-    scripts/remote_artisan.sh --base-url https://och-instance.example.com \
-        --ftp-hostname <host> --ftp-username <utente> --ftp-password <password> \
-        down --render="errors::503"
-    ```
-
-3. **Carica i file** via FTP, sostituendo quelli sul server:
-    - non sovrascrivere mai il file `.env` e la cartella `storage/` del server, e non caricare la cartella
-      `public/storage`, se il tuo computer ne ha una;
-    - non caricare ciò che serve solo per compilare o sviluppare l'applicazione: `node_modules/` (decine di migliaia
-      di file), `tests/`, `.git/` e `.github/`;
-    - elimina dal server le cartelle che la nuova versione sostituisce (`app/`, `bootstrap/`, `config/`,
-      `database/`, `docs/`, `lang/`, `resources/`, `routes/`, `vendor/`, e tutto il contenuto di `public/` tranne
-      `public/storage`) prima di caricarle di nuovo, così che non resti nessun file rimosso dalla nuova versione.
-
-    > ⚠️ **Attenzione:** non eliminare mai `public/storage` via FTP: è un collegamento a `storage/app/public/`, che un
-    > client FTP può mostrare come una cartella, ed eliminarlo può eliminare i file caricati a cui porta.
-    > `och:post-deploy` lo ricrea comunque.
-
-4. Elimina il file `storage/framework/down` via FTP, per uscire dalla modalità manutenzione, poi **subito** aggiorna il
-   database e il resto:
-
-    ```shell
-    scripts/remote_artisan.sh --base-url https://och-instance.example.com \
-        --ftp-hostname <host> --ftp-username <utente> --ftp-password <password> \
-        och:post-deploy --no-interaction
-    ```
-
-    Da questo momento l'applicazione è online: se `och:post-deploy` non riesce, rimettila subito in modalità
-    manutenzione (passaggio 2) prima di cercarne la causa (vedi
-    [Se l'aggiornamento non riesce](#se-laggiornamento-non-riesce)).
-5. [Controlla l'installazione](#dopo-laggiornamento).
-
-La coda e le attività pianificate continuano a funzionare tramite gli stessi endpoint (vedi
-[Attività pianificate ed email](setup#attività-pianificate-ed-email)): lì non c'è nulla da cambiare.
-
-### Dopo l'aggiornamento
-
-- Esegui `och:doctor` (tramite `scripts/remote_artisan.sh` senza accesso alla shell): controlla la configurazione, il
-  database e le sue migrazioni, il collegamento `public/storage`, le chiavi degli assistenti IA e i super
-  amministratori, e dice cosa fare per ogni problema.
-- Apri **Informazioni** nel menu utente: deve mostrare la nuova versione.
-- Accedi e apri qualche pagina (es. un territorio con la sua mappa, un'assegnazione).
-
-> ℹ️ **Nota:** la configurazione viene messa in cache da `och:post-deploy`. Se in seguito modifichi il file `.env` (es.
-> per aggiungere una nuova impostazione), esegui di nuovo `och:post-deploy`, altrimenti la modifica viene ignorata.
-
-## Se l'aggiornamento non riesce
-
-`och:post-deploy` dice quale passaggio non è riuscito. I dettagli dell'errore sono scritti in
-`storage/logs/laravel.log` (i super amministratori possono leggere i log dell'applicazione anche dal menu
-**Sviluppatore**, se si apre ancora). Se la causa si può correggere (es. un'impostazione sbagliata in `.env`, un
-database non raggiungibile), correggila ed esegui di nuovo `och:post-deploy`: si può eseguire quante volte serve, perché
-esegue solo le migrazioni non ancora eseguite e crea solo ciò che manca.
-
-Altrimenti, torna alla versione precedente:
-
-1. Metti l'applicazione in [modalità manutenzione](#modalità-manutenzione).
-2. Rimetti i file della versione precedente (mantenendo `.env` e `storage/`).
-3. [Ripristina il backup](#ripristinare-un-backup) fatto prima dell'aggiornamento, poi esci dalla modalità
-   manutenzione.
-
-Tutto ciò che è stato inserito nell'applicazione tra l'aggiornamento e il ripristino va perso.
-
-### Annullare le migrazioni
-
-`php artisan migrate:rollback --force` annulla le migrazioni eseguite dall'ultimo `och:post-deploy`, senza ripristinare
-un backup. Se durante l'aggiornamento `och:post-deploy` è stato eseguito più di una volta (es. di nuovo dopo aver
-corretto un errore), l'ultima esecuzione contiene solo le migrazioni eseguite da essa: `--step=<numero>` annulla invece
-quel numero di migrazioni, a partire dalle ultime. È sicuro solo quando sono vere tutte queste condizioni:
-
-- tutte le migrazioni dell'aggiornamento sono riuscite: se una si è interrotta a metà, MySQL non annulla la parte già
-  fatta, e il rollback annullerebbe le migrazioni precedenti attorno a essa, lasciando il database in uno stato che
-  nessuna versione si aspetta;
-- viene eseguito **prima** di rimettere i file della versione precedente, perché le istruzioni per annullare le
-  migrazioni sono nei file della nuova;
-- le note di rilascio non dicono che annullare una migrazione fa perdere dati (es. una colonna o una tabella rimossa
-  dalla nuova versione non può essere riempita di nuovo);
-- nessuno ha ancora usato la nuova versione: ciò che è stato salvato nelle sue nuove colonne o tabelle andrebbe perso.
-
-Poi rimetti i file della versione precedente ed esegui di nuovo `och:post-deploy`, per ricostruire le cache. Nel
-dubbio, ripristina il backup.
-
-## Note per versione
-
-### Aggiornare alla 1.0.0 dalle versioni alpha
-
-Leggi anche le note di rilascio di tutte le versioni alpha successive alla tua. Inoltre:
-
-- **Tornare a una versione alpha**: `och:post-deploy` e `och:doctor` esistono dalla 1.0.0-alpha15, e prima della
-  1.0.0-alpha13 `db:wipe` elimina tutte le tabelle del database, qualunque sia `DB_PREFIX`. Per ripristinare o tornare
-  a una versione precedente, segui la Guida al setup di quella versione ed elimina le tabelle a mano (con phpMyAdmin o
-  il client `mysql`).
-
-- **Database**: l'aggiornamento esegue quattro nuove migrazioni, che si possono annullare tutte con `migrate:rollback`:
-    - vengono eliminate le tabelle dei team (`teams`, `team_user`, `team_invitations`) e la colonna `current_team_id`
-      della tabella `users`: l'applicazione non le ha mai usate e sono sempre vuote;
-    - un'assegnazione può avere un solo link condiviso: se la stessa assegnazione ne aveva più di uno (condivisa due
-      volte nello stesso momento), viene mantenuto solo il più vecchio, e gli altri vengono eliminati definitivamente
-      (annullare la migrazione non li riporta indietro);
-    - viene aggiunta la nuova impostazione **Rifiuta le password compromesse** (vedi **Password** qui sotto);
-    - il database rifiuta di eliminare un utente che ha delle assegnazioni, il cui storico andrebbe perso: disabilita
-      invece il suo accesso (vedi [Utenti](administration/users)).
-- **`TRUSTED_PROXIES`** (nuova, facoltativa): gli indirizzi dei proxy davanti all'applicazione. Il valore predefinito,
-  `*`, si comporta come prima ed è necessario su Altervista: lì lascialo così. Se conosci l'indirizzo del tuo proxy,
-  impostalo; se l'applicazione è raggiunta direttamente, senza proxy, lasciala vuota (`TRUSTED_PROXIES=`), così che i
-  visitatori non possano spacciarsi per un altro indirizzo IP. Vedi
-  [Impostazioni principali](setup#impostazioni-principali).
-- **Password**: in produzione le nuove password devono avere almeno 12 caratteri e non comparire in una fuga di dati
-  nota, verificata con Have I Been Pwned. Le password già impostate continuano a funzionare: le regole si applicano
-  quando una password viene scelta, compresa `INITIAL_ROOT_PASSWORD` quando viene usata da `och:recover-root`
-  (aggiornala in `.env` se non le rispetta). Se il server non riesce a raggiungere `api.pwnedpasswords.com`, imposta
-  `PASSWORD_LEAK_CHECK=false`, oppure disattiva **Rifiuta le password compromesse** nelle
-  [impostazioni di Sicurezza](administration/settings#sicurezza).
-- **Accesso**: sono consentiti al massimo 10 tentativi con la stessa email ogni 15 minuti.
-- **Dashboard**: le sue statistiche e mappe sono mostrate solo agli utenti che possono vedere i territori (**View Any**
-  su *Territory*); gli altri vedono un messaggio di benvenuto. Controlla che i [ruoli](administration/roles) di chi deve
-  vederle abbiano questo permesso.
-- **Assegnazioni condivise**: **Condividi** non crea più un link da solo, il link va creato con **Crea link**, e i link
-  delle assegnazioni già riconsegnate o eliminate smettono di funzionare.
-- **API**: gli endpoint `/api/user`, `/api/assignees`, `/api/assignments`, `/api/territories` e `/api/zones` sono
-  rimossi. Gli endpoint `/api/artisan` non cambiano.
+Tutto ciò che è stato inserito nell'applicazione dopo il backup va perso.

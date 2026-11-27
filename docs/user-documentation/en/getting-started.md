@@ -36,7 +36,7 @@ them, since when, and which ones have been covered. It runs in the browser and a
 - **Publications**: the regular publications and the publication requests of the publishers.
 - **Administration**: users, roles and permissions, departments, tags and settings.
 - **Guides**: step-by-step walkthroughs of the most common tasks.
-- **[Setup guide](setup)** and **[Backup and upgrade](backup-and-upgrade)**: installing, backing up and upgrading the
+- **[Setup guide](setup)** and **[Backup and restore](backup)**: installing, updating, backing up and restoring the
   application, for whoever maintains it.
 
 > 💡 **Tip:** while using the application, the **Help** button in the top bar (where available) opens the page of this

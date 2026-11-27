@@ -36,7 +36,7 @@ sta lavorando, da quando e quali sono stati percorsi. Funziona nel browser, anch
 - **Pubblicazioni**: le pubblicazioni periodiche e le richieste di pubblicazioni dei proclamatori.
 - **Amministrazione**: utenti, ruoli e permessi, reparti, tag e impostazioni.
 - **Guide**: procedure passo passo per le attività più comuni.
-- **[Guida al setup](setup)** e **[Backup e aggiornamento](backup-and-upgrade)**: installare, salvare e aggiornare
+- **[Guida al setup](setup)** e **[Backup e ripristino](backup)**: installare, aggiornare, salvare e ripristinare
   l'applicazione, per chi la gestisce.
 
 > 💡 **Suggerimento:** mentre usi l'applicazione, il pulsante **Aiuto** nella barra in alto (dove disponibile) apre la
