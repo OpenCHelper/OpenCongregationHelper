@@ -56,11 +56,19 @@ export default defineConfig({
             use: { ...devices['Desktop Chrome'] },
             testMatch: /global-state\/.*\.spec\.ts/,
             workers: 1,
-            dependencies: ['chromium', 'mobile'],
+            dependencies: ['chromium', 'mobile', 'mobile-webkit'],
         },
         {
             name: 'mobile',
             use: { ...devices['Pixel 7'] },
+            grep: /@mobile/,
+            testIgnore: [/global-state\//, /setup-wizard\.spec\.ts/, /\.setup\.ts/],
+            dependencies: ['auth-setup'],
+        },
+        {
+            // The same tests on an iPhone: on iOS every browser, and the installed app, use WebKit (Safari's engine)
+            name: 'mobile-webkit',
+            use: { ...devices['iPhone 14'] },
             grep: /@mobile/,
             testIgnore: [/global-state\//, /setup-wizard\.spec\.ts/, /\.setup\.ts/],
             dependencies: ['auth-setup'],
