@@ -123,7 +123,46 @@ jobs:
         run: npx playwright install-deps chromium
 
       - name: Run E2E tests
-        run: npx playwright test
+        run: |
+          # Note when the app server stops answering, with its processes and the memory at that moment (printed by
+          # the "Print the state of the test servers" step)
+          (
+            up=""
+            while true; do
+              if curl -s -o /dev/null --max-time 10 http://127.0.0.1:8010/up; then now=yes; else now=no; fi
+              if [[ "$now" != "$up" ]]; then
+                echo "$(date -u +%T) answering: ${now}"
+                ps -eo pid,ppid,etime,rss,args | grep -E "[p]hp .*-S " || echo "No PHP server is running"
+                free -m | head -2
+                up="$now"
+              fi
+              sleep 5
+            done
+          ) > "${RUNNER_TEMP}/server-watch.log" 2>&1 &
+
+          npx playwright test
+
+      # Printed at the end of the log (the earlier lines of a long log can be hard to reach): why the test servers may
+      # have stopped, e.g. a crash or the kernel killing them for lack of memory
+      - name: Print the state of the test servers
+        if: failure()
+        run: |
+          echo "::group::When the app server answered (checked every 5 seconds)"
+          cat "${RUNNER_TEMP}/server-watch.log" || true
+          echo "::endgroup::"
+          echo "::group::Errors of the test servers"
+          tail -n 200 storage/e2e/*/logs/server.log || true
+          echo "::endgroup::"
+          echo "::group::Last errors of the application"
+          grep -h "\.ERROR:" storage/e2e/*/logs/laravel.log | cut -c1-400 | tail -n 50 || true
+          echo "::endgroup::"
+          echo "::group::Processes killed by the kernel"
+          sudo dmesg 2>/dev/null | grep -iE "killed process|out of memory|segfault" | tail -n 20 || true
+          echo "::endgroup::"
+          echo "::group::Memory and PHP servers"
+          free -m
+          ps -eo pid,ppid,etime,rss,args | grep -E "[p]hp .*-S " || echo "No PHP server is running"
+          echo "::endgroup::"
 
       - name: Upload test report
         if: failure()
