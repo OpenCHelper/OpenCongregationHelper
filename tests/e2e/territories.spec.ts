@@ -204,7 +204,7 @@ test.describe('Territories list', () => {
 });
 
 test.describe('Territory form', () => {
-    test('creates a territory with a map, an image, notes and tags', async ({ adminPage: page }) => {
+    test('creates a territory with a map, an image, notes and tags @mobile', async ({ adminPage: page }) => {
         const zone = uniqueName('Form Zone');
         createZoneWith(zone, []);
         const name = uniqueName('Created Territory');
@@ -267,7 +267,7 @@ test.describe('Territory form', () => {
         await expect(page).toHaveURL(/\/create$/);
     });
 
-    test('shows the details and the map of a territory on its page', async ({ adminPage: page }) => {
+    test('shows the details and the map of a territory on its page @mobile', async ({ adminPage: page }) => {
         const zone = uniqueName('View Zone');
         const name = `${zone} Viewed`;
         const { ids } = createZoneWith(zone, [{ name, geojson: polygon, notes: 'Beware of the dog', tags: ['Viewed tag'] }]);
@@ -281,6 +281,8 @@ test.describe('Territory form', () => {
         await expect(page.getByRole('group', { name: 'Tags' })).toContainText('Viewed tag');
         await expect(page.getByText('Never covered yet')).toBeVisible();
         await expect(page.getByRole('tab', { name: 'Map' })).toBeVisible();
+        // The map is drawn once it is scrolled into view (below the fold on a phone, see `filament-map-picker-fix.js`)
+        await page.getByRole('tabpanel', { name: 'Map' }).scrollIntoViewIfNeeded();
         await expect(page.locator('.leaflet-overlay-pane path').first()).toBeVisible();
     });
 

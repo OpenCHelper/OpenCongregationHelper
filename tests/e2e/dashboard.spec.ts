@@ -113,7 +113,7 @@ test.describe('Territory coverage', () => {
 });
 
 test.describe('Territory map', () => {
-    test('draws the territories with a legend of the zones', async ({ adminPage }) => {
+    test('draws the territories with a legend of the zones @mobile', async ({ adminPage }) => {
         await visit(adminPage, '/app');
 
         const map = adminPage.locator('.leaflet-container');
