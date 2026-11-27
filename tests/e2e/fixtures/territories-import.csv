@@ -1,0 +1,3 @@
+name,description,notes,is_commercial,territoryZone
+{prefix} North,Imported residential territory,Ring twice,false,{zone}
+{prefix} Market,Imported commercial territory,Shops only,true,{zone}

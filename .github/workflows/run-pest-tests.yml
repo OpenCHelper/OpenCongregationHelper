@@ -1,4 +1,4 @@
-name: Run tests
+name: Pest tests
 
 on:
   # Every pull request (forks included), and what lands on main
@@ -26,8 +26,8 @@ env:
   sail_image_max_age_days: 7
 
 jobs:
-  run-tests:
-    name: Run tests (prefixed=${{ matrix.db-prefix != '' && 'yes' || 'no' }})
+  run-pest-tests:
+    name: Pest (prefixed=${{ matrix.db-prefix != '' && 'yes' || 'no' }})
     runs-on: ubuntu-latest
 
     # The PR previews share one database, prefixing their tables with `p<N>_` (`DB_PREFIX`): the suite also runs with

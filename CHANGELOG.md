@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   confirmation (from the territories list and the campaign assignments); the bulk assignment skips such territories
   unless asked to include them, and the AI assistants ask the user before assigning it again
   ([#114](https://github.com/OpenCHelper/OpenCongregationHelper/pull/114)).
+- **End-to-end tests**: browser tests of every feature of the app and of the main workflows (e.g. a zone, then a
+  territory in it, assigned and returned), run on every pull request on SQLite and MySQL; a failed test keeps a video
+  and a trace to replay it ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116)).
+- The busy timeout and the journal mode of SQLite can be set with `DB_BUSY_TIMEOUT` and `DB_JOURNAL_MODE`
+  ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116)).
 
 ### Changed
 
@@ -150,6 +155,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **AI assistants**: the deployments of the environments that keep their database (e.g. TEST) keep the keys signing
   the tokens of the assistants, which were replaced on every deployment, disconnecting every assistant
   ([#112](https://github.com/OpenCHelper/OpenCongregationHelper/pull/112)).
+- The fake data (`FakeDataSeeder`, used by the PR previews) could fail to seed when an assignment picked a campaign that
+  had already ended ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116)).
 
 ### Security
 

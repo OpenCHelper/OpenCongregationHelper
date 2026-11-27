@@ -33,3 +33,10 @@ _ide_helper_models.php
 .secrets.*
 .vars
 .vars.*
+
+# End-to-end tests (see `playwright.config.ts`)
+/storage/e2e
+/tests/e2e/.auth
+/test-results
+/playwright-report
+/blob-report

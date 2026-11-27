@@ -15,6 +15,20 @@
 - Never put screenshots meant only for an issue or a PR in a temporary branch or anywhere else public (other branches,
   gists, image hosts) unless explicitly asked: send them to the user instead;
 
+## E2E tests
+
+- The Playwright tests in `tests/e2e/` (one spec per feature area, run by `run-e2e-tests.yml`) must always follow the
+  UI: every change that adds, changes or removes something in the UI (a page, field, action, filter, label, navigation
+  item, permission) updates, adds or removes the E2E tests that cover it, in the same change;
+- They document what a user does and check that it works end to end: beside the single features, cover the whole
+  workflows that chain them (e.g. creating a zone, then a territory in it, then assigning the territory and returning
+  it), so that the tests read as the steps a user follows;
+- Prefer the helpers of `tests/e2e/support/` (`filament.ts`, `fixtures.ts`, `artisan.ts`, `mail.ts`) and give the
+  records unique names (`uniqueName()`), since the tests run in parallel on one database; tests that change the whole
+  app (settings, root user) go in `tests/e2e/global-state/`;
+- A bug found by an E2E test that is not fixed in the same change stays visible as a `test.fixme` explaining it, never
+  as a removed or weakened test.
+
 ## CI/CD
 
 - **PR previews** (`deploy-preview.yml`): the `PREVIEW_MODE` repository variable sets which PRs get a preview
