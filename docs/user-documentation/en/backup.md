@@ -110,11 +110,17 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
    `storage/framework/down` file, which keeps the maintenance mode on.
 4. Delete the tables of the installation, then import the dump, so that no table created after the backup is left
    behind:
-    - **with shell access**, `php artisan db:wipe --force` drops the tables of the installation (only those starting
-      with `DB_PREFIX`, when it is set), then `mysql -u <user> -p <database> < och-backup.sql` imports the dump;
+    - **with shell access**, `php artisan config:clear` makes the application read the `.env` file just put back
+      (instead of the cached settings), `php artisan db:wipe --force` drops the tables of the installation (only those
+      starting with `DB_PREFIX`, when it is set), then `mysql -u <user> -p <database> < och-backup.sql` imports the
+      dump;
     - **without shell access**, in phpMyAdmin select the tables of the installation (only those starting with the
-      prefix, if any), choose **Drop**, then import the dump from the **Import** tab.
-5. Rebuild the `public/storage` link and the caches, which may refer to the previous files, then check the
+      prefix, if any) and choose **Drop**, unticking **Enable foreign key checks** in the confirmation (otherwise some
+      tables may refuse to be dropped), then import the dump from the **Import** tab.
+5. Empty the queue (the `jobs` table): the jobs saved in the backup were most likely already processed after it, and
+   would send their emails and notifications a second time. With shell access run `php artisan queue:clear --force`;
+   without, in phpMyAdmin choose **Empty** on the `jobs` table (with its prefix, if any).
+6. Rebuild the `public/storage` link and the caches, which may refer to the previous files, then check the
    installation and leave the maintenance mode:
     - **with shell access**:
 

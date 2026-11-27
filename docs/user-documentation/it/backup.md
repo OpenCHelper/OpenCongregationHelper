@@ -112,12 +112,17 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 3. Rimetti al loro posto il file `.env` e la cartella `storage/` del backup, senza eliminare né sovrascrivere il file
    `storage/framework/down`, che tiene attiva la modalità manutenzione.
 4. Elimina le tabelle dell'installazione, poi importa il dump, così che non resti nessuna tabella creata dopo il backup:
-    - **con accesso alla shell**, `php artisan db:wipe --force` elimina le tabelle dell'installazione (solo quelle che
-      iniziano con `DB_PREFIX`, se è impostato), poi `mysql -u <utente> -p <database> < och-backup.sql` importa il
-      dump;
+    - **con accesso alla shell**, `php artisan config:clear` fa leggere all'applicazione il file `.env` appena rimesso
+      (invece delle impostazioni in cache), `php artisan db:wipe --force` elimina le tabelle dell'installazione (solo
+      quelle che iniziano con `DB_PREFIX`, se è impostato), poi `mysql -u <utente> -p <database> < och-backup.sql`
+      importa il dump;
     - **senza accesso alla shell**, in phpMyAdmin seleziona le tabelle dell'installazione (solo quelle che iniziano con
-      il prefisso, se c'è), scegli **Elimina**, poi importa il dump dalla scheda **Importa**.
-5. Ricrea il collegamento `public/storage` e le cache, che potrebbero riferirsi ai file precedenti, poi controlla
+      il prefisso, se c'è) e scegli **Elimina**, togliendo nella conferma la spunta dal controllo delle chiavi esterne
+      (altrimenti alcune tabelle potrebbero non essere eliminate), poi importa il dump dalla scheda **Importa**.
+5. Svuota la coda (la tabella `jobs`): i job salvati nel backup sono stati quasi certamente già eseguiti dopo di esso, e
+   invierebbero di nuovo le loro email e notifiche. Con accesso alla shell esegui `php artisan queue:clear --force`;
+   senza, in phpMyAdmin scegli **Svuota** sulla tabella `jobs` (con il suo prefisso, se c'è).
+6. Ricrea il collegamento `public/storage` e le cache, che potrebbero riferirsi ai file precedenti, poi controlla
    l'installazione ed esci dalla modalità manutenzione:
     - **con accesso alla shell**:
 
