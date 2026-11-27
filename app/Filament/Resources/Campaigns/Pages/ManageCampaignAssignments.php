@@ -76,6 +76,8 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                 ->withoutGlobalScopes([
                     SoftDeletingScope::class,
                 ])
+                // Read by the highlight of every row, even with the campaign column hidden
+                ->with('campaign')
             ))
             ->defaultSort('started_at', 'desc')
             ->heading(ucfirst(__('filament-resources.territory_assignment.plural_model_label')))

@@ -669,6 +669,8 @@ class TerritoryAssignmentResource extends Resource
     {
         return static::scopeToVisibleAssignments(
             parent::getEloquentQuery()
+                // Read by the highlight of every row of the table, even with the campaign column hidden
+                ->with('campaign')
                 ->whereHas('assignee')
                 ->withoutGlobalScopes([
                     SoftDeletingScope::class,
