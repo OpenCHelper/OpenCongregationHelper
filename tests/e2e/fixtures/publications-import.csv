@@ -1,0 +1,3 @@
+"Name (English)",Code,Category,"Renews every (months)",Offered,"Name (Italiano)","Name (Español)"
+"Imported Book {suffix}",imp-book-{suffix},Books,,yes,"Libro importato {suffix}",
+"Imported Monthly {suffix}",imp-monthly-{suffix},Watchtower,1,no,,"Mensual importado {suffix}"
