@@ -135,3 +135,18 @@ jobs:
             test-results/
             storage/e2e/*/logs/
           retention-days: 14
+
+      - name: Explain how to debug the failed tests
+        if: failure()
+        env:
+          DATABASE: ${{ matrix.database }}
+        run: |
+          {
+            echo "### Debugging the failed E2E tests (${DATABASE})"
+            echo
+            echo "Download the \`playwright-report-${DATABASE}\` artifact of this run, unzip it, then:"
+            echo
+            echo "- \`npx playwright show-report playwright-report\`: the report, with the screenshot, the video and the trace of each failed test;"
+            echo "- \`npx playwright show-trace test-results/<test>/trace.zip\` (or drop the file on https://trace.playwright.dev) to replay a test step by step, with the page, the network and the console;"
+            echo "- \`storage/e2e/<instance>/logs/laravel.log\`: the errors of the application."
+          } >> "$GITHUB_STEP_SUMMARY"

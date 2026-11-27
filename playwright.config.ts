@@ -29,7 +29,11 @@ export default defineConfig({
         baseURL: appURL,
         locale: 'en-US',
         timezoneId: 'UTC',
-        trace: 'retain-on-failure',
+        // What helps to debug a failed test: on CI its retry is recorded (a trace, to replay it step by step with the
+        // page, the network and the console, and a video), so that the tests that pass are not slowed down; locally
+        // the trace of every failed test is kept
+        trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
+        video: process.env.CI ? 'on-first-retry' : 'off',
         screenshot: 'only-on-failure',
     },
     projects: [
