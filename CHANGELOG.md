@@ -75,6 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Assignments**: the assignments of a campaign no longer fail to open while some are in progress, nor do the other
   lists of assignments with the campaign column hidden
   ([#114](https://github.com/OpenCHelper/OpenCongregationHelper/pull/114)).
+- **AI assistants**: the connectors (e.g. in Claude) show the icon of the app, which the site lacked as `favicon.ico`
+  ([#115](https://github.com/OpenCHelper/OpenCongregationHelper/pull/115)).
 - **Roles**: every permission that the policies check (e.g. those of posters, publications, requests, storage
   locations and tags) is now created on installation and on every update, and the role editor offers only the
   permissions of the actions each resource has (e.g. no more **Replicate** or **Restore** where nothing can be
