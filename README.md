@@ -131,6 +131,28 @@ The preferred way of developing is by using **Docker Compose** to build the cont
     sail npm install && sail npm run dev
     ```
 
+### End-to-end tests
+
+The browser tests in [`tests/e2e`](./tests/e2e) use [Playwright](https://playwright.dev) on two instances of the
+application, each with its own `.env.e2e-*` file, storage (`storage/e2e/`) and database, so they never touch the
+development ones: `app`, installed and seeded with `E2eSeeder` (a user for each role, password `password`), and
+`setup`, empty, for the setup wizard. They are served by
+[`tests/e2e/support/serve.sh`](./tests/e2e/support/serve.sh) on the ports 8010 and 8011.
+
+1. Build the frontend assets and install Chromium (once):
+    ```shell
+    npm run build && npx playwright install chromium
+    ```
+2. Run the tests (`npm run test:e2e:ui` opens the interactive runner):
+    ```shell
+    npm run test:e2e
+    ```
+
+They use SQLite by default: set `E2E_DB_CONNECTION` (`mysql`, `mariadb` or `pgsql`) and `E2E_DB_HOST`, `E2E_DB_PORT`,
+`E2E_DB_USERNAME`, `E2E_DB_PASSWORD` to run them on another database (the databases `e2e_app` and `e2e_setup` are
+created). Outside of CI, servers already running on the ports are reused: stop them to start from fresh data. The
+`Run E2E tests` workflow runs them on SQLite, MySQL and PostgreSQL.
+
 ### Run workflows locally
 
 You can run the Github Action workflows locally using [`nektos/act`](https://github.com/nektos/act) (already included in the [DevContainer](./.devcontainer/devcontainer.json)).
