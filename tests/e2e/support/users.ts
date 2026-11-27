@@ -18,4 +18,5 @@ export const roles = Object.keys(users) as Role[];
 /**
  * The file of the signed-in browser state of a user (see `auth.setup.ts`).
  */
-export const storageStateOf = (role: Role): string => `tests/e2e/.auth/${role}.json`;
+export const storageStateOf = (role: Role): string =>
+    `tests/e2e/.auth/${process.env.E2E_APP_INSTANCE ?? 'app'}/${role}.json`;

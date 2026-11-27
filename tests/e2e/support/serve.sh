@@ -4,7 +4,7 @@
 #
 #   tests/e2e/support/serve.sh <instance> <port>
 #
-# `app` is installed and seeded with the fixtures of `E2eSeeder`; `setup` is left empty, for the setup wizard. Each
+# `setup` is left empty, for the setup wizard; any other instance (`app`) is installed and seeded with `E2eSeeder`. Each
 # instance has its own `.env.e2e-<instance>` (picked by `APP_ENV`), storage directory and database, so that it never
 # touches the `.env`, storage and database of development.
 #
@@ -70,6 +70,7 @@ PASSWORD_LEAK_CHECK=false
 ${db_variables}
 SESSION_DRIVER=file
 SESSION_LIFETIME=120
+SESSION_COOKIE=och_e2e_${instance}_session
 BROADCAST_CONNECTION=log
 FILESYSTEM_DISK=local
 QUEUE_CONNECTION=sync
@@ -98,10 +99,12 @@ if [[ "${connection}" != "sqlite" ]]; then
         "${E2E_DB_USERNAME:-root}" "${E2E_DB_PASSWORD:-}" "${database}"
 fi
 
-if [[ "${instance}" == "app" ]]; then
+if [[ "${instance}" != "setup" ]]; then
     php artisan migrate:fresh --force --no-interaction > /dev/null
     php artisan och:install --no-interaction > /dev/null
     php artisan db:seed --class=E2eSeeder --force --no-interaction > /dev/null
+    # The scripts and styles of Filament (in `public/`, shared by the instances)
+    php artisan filament:assets --no-interaction > /dev/null
 fi
 
 # Several workers, so that the parallel tests (and the requests of a page) don't queue up behind each other. The

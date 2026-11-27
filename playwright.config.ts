@@ -7,6 +7,8 @@ import { defineConfig, devices } from '@playwright/test';
  * database: `app`, installed and seeded with `E2eSeeder`, and `setup`, empty, for the setup wizard.
  */
 const appPort = Number(process.env.E2E_APP_PORT ?? 8010);
+// The name of the seeded instance (its `.env`, storage and database), e.g. to run a second one next to the first
+export const appInstance = process.env.E2E_APP_INSTANCE ?? 'app';
 const setupPort = Number(process.env.E2E_SETUP_PORT ?? 8011);
 
 export const appURL = `http://127.0.0.1:${appPort}`;
@@ -66,7 +68,7 @@ export default defineConfig({
     ],
     webServer: [
         {
-            command: `tests/e2e/support/serve.sh app ${appPort}`,
+            command: `tests/e2e/support/serve.sh ${appInstance} ${appPort}`,
             url: `${appURL}/up`,
             reuseExistingServer: !process.env.CI,
             timeout: 180_000,
