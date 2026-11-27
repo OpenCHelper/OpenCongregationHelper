@@ -71,11 +71,13 @@ jobs:
     env:
       DB_CONNECTION: ${{ matrix.database }}
       DB_HOST: 127.0.0.1
-      DB_PORT: ${{ matrix.port }}
-      DB_USERNAME: ${{ matrix.username }}
+      # Not empty on SQLite either: the setup wizard tests fall back to them for the database server fields
+      DB_PORT: ${{ matrix.port || 3306 }}
+      DB_USERNAME: ${{ matrix.username || 'root' }}
       DB_PASSWORD: password
-      # Each parallel process of SQLite has its own in-memory database
-      DB_DATABASE: ${{ matrix.database == 'sqlite' && ':memory:' || 'testing' }}
+      # A file on SQLite, like the installations (each parallel process copies it): an in-memory database is lost when
+      # `db:wipe` disconnects from it (see `SharedDatabaseSafetyTest`)
+      DB_DATABASE: ${{ matrix.database == 'sqlite' && format('{0}/database/testing.sqlite', github.workspace) || 'testing' }}
       DB_PREFIX: ${{ matrix.db-prefix }}
 
     steps:
@@ -123,6 +125,10 @@ jobs:
           sed 's/^/    | /' < .env
 
           php artisan key:generate --force
+
+          if [[ "$DB_CONNECTION" == "sqlite" ]]; then
+            touch "$DB_DATABASE"
+          fi
 
       # The assets must be built after the Composer dependencies are installed, since the Filament themes import CSS
       # from `vendor`
