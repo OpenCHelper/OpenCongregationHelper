@@ -36,6 +36,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieTagsInput;
@@ -683,7 +684,7 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                         ->label(__('filament-resources.territory.action_assign_massively'))
                         ->icon(Heroicon::OutlinedDocumentArrowUp)
                         ->authorize(fn (): bool => Gate::allows('create', TerritoryAssignment::class))
-                        ->schema([
+                        ->schema(fn (Collection $records): array => [
                             Select::make('assignee_id')
                                 ->label(__('filament-resources.territory_assignment.action_assigned_to'))
                                 ->options(fn (): array => User::getAssigneeOptions())
@@ -692,15 +693,27 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
                             Select::make('campaign_id')
                                 ->label(__('filament-resources.territory_assignment.field_campaign'))
                                 ->options(fn (): array => Campaign::query()->notTerminated()->pluck('name', 'id')->all())
-                                ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
+                                ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign'))
+                                ->live(),
+                            static::includeTerritoriesWorkedInCampaignField($records),
                         ])
                         ->action(function (Collection $records, array $data): void {
                             $assigned = 0;
-                            $skipped = ['already_assigned' => [], 'refused' => []];
+                            $skipped = ['already_assigned' => [], 'already_worked' => [], 'refused' => []];
+                            $campaignId = filled($data['campaign_id'] ?? null) ? (int) $data['campaign_id'] : null;
+                            $workedTerritoryIds = ($data['include_worked_in_campaign'] ?? false)
+                                ? []
+                                : TerritoryAssignment::territoriesWorkedInCampaign($records->modelKeys(), $campaignId);
 
                             foreach ($records as $record) {
                                 if ($record->currentAssignment !== null && $record->currentAssignment->ended_at === null) {
                                     $skipped['already_assigned'][] = $record->name;
+
+                                    continue;
+                                }
+
+                                if (in_array($record->id, $workedTerritoryIds, true)) {
+                                    $skipped['already_worked'][] = $record->name;
 
                                     continue;
                                 }
@@ -904,6 +917,35 @@ class TerritoryResource extends Resource implements HasKnowledgeBase
         };
 
         $notification->send();
+    }
+
+    /**
+     * Checkbox of the bulk assignment to also assign the selected territories already worked (assigned and returned)
+     * in the chosen campaign, which are skipped otherwise: shown only when some of them have been, naming them.
+     *
+     * @param  Collection<int, Territory>  $records  the selected territories
+     */
+    private static function includeTerritoriesWorkedInCampaignField(Collection $records): Checkbox
+    {
+        $getWorkedTerritoryNames = fn (Get $get): array => $records
+            ->whereIn('id', TerritoryAssignment::territoriesWorkedInCampaign(
+                $records->modelKeys(),
+                filled($get('campaign_id')) ? (int) $get('campaign_id') : null,
+            ))
+            ->pluck('name')
+            ->values()
+            ->all();
+
+        return Checkbox::make('include_worked_in_campaign')
+            ->label(function (Get $get) use ($getWorkedTerritoryNames): string {
+                $names = $getWorkedTerritoryNames($get);
+
+                return trans_choice('filament-resources.territory.field_include_worked_in_campaign', count($names), [
+                    'territories' => static::listTerritoryNames($names),
+                ]);
+            })
+            ->helperText(__('filament-resources.territory.field_include_worked_in_campaign_help'))
+            ->visible(fn (Get $get): bool => $getWorkedTerritoryNames($get) !== []);
     }
 
     /**

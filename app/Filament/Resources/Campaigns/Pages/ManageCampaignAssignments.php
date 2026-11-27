@@ -105,7 +105,8 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                     ->relationship('territory', 'name', fn (Builder $query) => $query->unassigned())
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->live(),
                                 Select::make('assignee_id')
                                     ->label(__('filament-resources.territory_assignment.field_assignee'))
                                     ->searchable(['first_name', 'last_name'])
@@ -126,6 +127,10 @@ class ManageCampaignAssignments extends ManageRelatedRecords
                                         'before_or_equal' => __('validation.territory_assignment.started_in_future'),
                                     ])
                                     ->required(),
+                                TerritoryAssignmentResource::getCampaignRepeatConfirmation(
+                                    fn (Get $get): mixed => $get('territory_id'),
+                                    fn (): int => $this->getRecord()->id,
+                                ),
                             ])->columnSpanFull(),
                         Step::make(__('filament-resources.campaign.assignments_create_step_additional'))
                             ->schema([

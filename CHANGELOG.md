@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `och:doctor` also checks the PHP version and extensions, the HTTPS certificate, the push notifications, the timezone,
   the two-factor authentication of the root user and a `SETUP_TOKEN` left after the installation
   ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- **Assignments**: assigning a territory again for a campaign in which it has already been worked now asks for a
+  confirmation (from the territories list and the campaign assignments); the bulk assignment skips such territories
+  unless asked to include them.
 
 ### Changed
 
