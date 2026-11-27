@@ -115,8 +115,11 @@ fi
 # `LARAVEL_STORAGE_PATH` from.
 export PHP_CLI_SERVER_WORKERS="${PHP_CLI_SERVER_WORKERS:-6}"
 #
+# The JIT of OPcache is turned off (e.g. `shivammathur/setup-php` turns it on, in CI): its workers, which serve many
+# requests each, crashed with segmentation faults on PHP 8.2, one after the other, until none was left.
+#
 # Its log of each connection and request is left out (as `php artisan serve` does), keeping the errors, also written
 # to `logs/server.log` of the instance (e.g. a crash of the server, kept with the test results on CI).
 cd public
-exec php -d variables_order=EGPCS -S "127.0.0.1:${port}" ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php \
+exec php -d variables_order=EGPCS -d opcache.jit=disable -S "127.0.0.1:${port}" ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php \
     2> >(grep --line-buffered -vE '^\[[0-9]+\] \[[^]]+\] (127\.0\.0\.1:[0-9]+ (Accepted|Closing|\[[0-9]{3}\]: )|PHP [0-9.]+ Development Server|Failed to poll event|Closed without sending a request)' | tee -a "${LARAVEL_STORAGE_PATH}/logs/server.log" >&2)

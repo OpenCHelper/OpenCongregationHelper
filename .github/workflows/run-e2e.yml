@@ -79,6 +79,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           fail-fast: true
 
+      - name: Print the OPcache settings of PHP
+        run: php -i | grep -E "^opcache\.(enable|enable_cli|jit|jit_buffer_size) " || echo "OPcache is not loaded"
+
       - name: Setup NodeJS
         uses: actions/setup-node@v7
         with:
