@@ -57,6 +57,15 @@ class AssignTerritoryTool extends CongregationTool
         if (! ($validated['confirm_campaign_repeat'] ?? false) && TerritoryAssignment::territoryWorkedInCampaign($territory->id, $campaignId)) {
             $campaign = Campaign::query()->find($campaignId);
 
+            // Not worth a confirmation when the assignment would be refused anyway (see TerritoryAssignmentObserver)
+            if (TerritoryAssignment::territoryHasOpenAssignment($territory->id)) {
+                return Response::error(__('validation.territory_assignment.already_assigned'));
+            }
+
+            if ($campaign?->isTerminated()) {
+                return Response::error(__('validation.campaign.not_terminated'));
+            }
+
             return Response::error("Territory {$territory->name} has already been worked in the campaign {$campaign?->name}, so it most likely should not go out again for it. Tell the user and, only if they confirm, call this tool again with `confirm_campaign_repeat` set to true.");
         }
 
