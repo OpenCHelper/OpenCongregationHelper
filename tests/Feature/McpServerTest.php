@@ -202,13 +202,18 @@ test('the assistants can register themselves as OAuth clients', function (string
     'Cursor' => 'cursor://anysphere.cursor-retrieval/oauth/callback',
 ]);
 
+test('the site has a favicon, which the assistants show as the icon of the connector', function () {
+    expect(getimagesize(public_path('favicon.ico')))->not->toBeFalse();
+});
+
 test('an authorized assistant lists the tools of the user', function () {
     allowAiAssistants();
     Passport::actingAs($this->user, ['mcp:use'], 'api');
 
     mcpRequest('initialize', ['protocolVersion' => '2025-06-18', 'capabilities' => [], 'clientInfo' => ['name' => 'test', 'version' => '1']])
         ->assertOk()
-        ->assertJsonPath('result.serverInfo.name', 'Open Congregation Helper');
+        ->assertJsonPath('result.serverInfo.name', 'Open Congregation Helper')
+        ->assertJsonPath('result.serverInfo.icons.1', ['src' => asset('icons/icon-192.png'), 'mimeType' => 'image/png', 'sizes' => ['192x192']]);
 
     $tools = collect(mcpRequest('tools/list')->assertOk()->json('result.tools'))->pluck('name');
 
