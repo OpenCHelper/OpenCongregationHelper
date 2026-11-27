@@ -159,8 +159,8 @@ test.describe('Creating users', () => {
         expect(created.password).toBeNull();
         expect(created.roles).toEqual(['publisher']);
 
-        const mail = lastMailTo(email);
-        expect(mail?.subject).toBe('Your OCH E2E account');
+        // Among the emails of the address: others (e.g. a new campaign) may reach it meanwhile
+        expect(lastMailTo(email, 'Your OCH E2E account')).not.toBeNull();
         const invitation = linkInLastMailTo(email, /\/password-reset\/reset/);
         expect(invitation).toContain('invitation=1');
 
@@ -202,7 +202,7 @@ test.describe('Creating users', () => {
         await confirmModal(adminPage, 'Resend invitation');
         await expectNotification(adminPage, `An invitation to choose the password has been sent to ${user.email}.`);
 
-        expect(lastMailTo(user.email)?.subject).toBe('Your OCH E2E account');
+        expect(lastMailTo(user.email, 'Your OCH E2E account')).not.toBeNull();
         const firstLink = linkInLastMailTo(user.email, /\/password-reset\/reset/);
 
         await row(adminPage, user.email).getByRole('button', { name: 'Resend invitation' }).click();
