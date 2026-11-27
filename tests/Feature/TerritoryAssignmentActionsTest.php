@@ -612,9 +612,9 @@ test('assigning a territory already worked in the campaign asks for a confirmati
     Livewire::test(ListTerritories::class)
         ->mountAction(TestAction::make('create_assignment')->table($this->territory))
         ->fillForm(['assignee_id' => $this->assignee->id, 'campaign_id' => $otherCampaign->id])
-        ->assertFormFieldHidden('confirm_campaign_repeat')
+        ->assertSchemaComponentHidden('confirm_campaign_repeat', 'mountedActionSchema0')
         ->fillForm(['campaign_id' => $campaign->id])
-        ->assertFormFieldVisible('confirm_campaign_repeat')
+        ->assertSchemaComponentVisible('confirm_campaign_repeat', 'mountedActionSchema0')
         ->callMountedAction()
         ->assertHasFormErrors(['confirm_campaign_repeat' => 'accepted']);
 
@@ -641,9 +641,9 @@ test('assigning territories in bulk skips the ones already worked in the campaig
     Livewire::test(ListTerritories::class)
         ->selectTableRecords([$this->territory, $freeTerritory])
         ->mountAction(TestAction::make('create_assignment_bulk')->table()->bulk())
-        ->assertFormFieldHidden('include_worked_in_campaign')
+        ->assertSchemaComponentHidden('include_worked_in_campaign', 'mountedActionSchema0')
         ->fillForm(['assignee_id' => $this->assignee->id, 'campaign_id' => $campaign->id])
-        ->assertFormFieldVisible('include_worked_in_campaign')
+        ->assertSchemaComponentVisible('include_worked_in_campaign', 'mountedActionSchema0')
         ->callMountedAction()
         ->assertHasNoFormErrors();
 
