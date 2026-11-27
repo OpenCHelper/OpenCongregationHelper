@@ -71,6 +71,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Roles**: every permission that the policies check (e.g. those of posters, publications, requests, storage
+  locations and tags) is now created on installation and on every update, and the role editor offers only the
+  permissions of the actions each resource has (e.g. no more **Replicate** or **Restore** where nothing can be
+  replicated or restored); the activity and mail logs, which only the super administrators read, have no permissions
+  any more. The permissions no longer offered stay on the roles that had them, but they allow nothing
+  ([#111](https://github.com/OpenCHelper/OpenCongregationHelper/pull/111)).
 - **Users**: there is always a super administrator who can log in: the last one can no longer lose its access or its
   **super_admin** role, nor be deleted (from the list, its page or its profile), and the **super_admin** role can no
   longer be deleted, renamed or moved to another guard. In production, the profile of the root user no longer offers

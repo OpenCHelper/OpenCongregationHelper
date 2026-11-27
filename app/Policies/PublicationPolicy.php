@@ -8,6 +8,10 @@ use App\Models\Publication;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
+/**
+ * Only the actions offered by the resource have a permission (see `resources.manage` in `config/filament-shield.php`,
+ * which `ShieldSeeder` creates): the others are denied, since Filament would allow an action without a method here.
+ */
 class PublicationPolicy
 {
     use HandlesAuthorization;
@@ -39,32 +43,32 @@ class PublicationPolicy
 
     public function deleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('DeleteAny:Publication');
+        return false;
     }
 
     public function restore(AuthUser $authUser, Publication $publication): bool
     {
-        return $authUser->can('Restore:Publication');
+        return false;
     }
 
     public function forceDelete(AuthUser $authUser, Publication $publication): bool
     {
-        return $authUser->can('ForceDelete:Publication');
+        return false;
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:Publication');
+        return false;
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:Publication');
+        return false;
     }
 
     public function replicate(AuthUser $authUser, Publication $publication): bool
     {
-        return $authUser->can('Replicate:Publication');
+        return false;
     }
 
     public function reorder(AuthUser $authUser): bool

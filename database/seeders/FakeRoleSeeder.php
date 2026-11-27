@@ -11,12 +11,13 @@ use Spatie\Permission\PermissionRegistrar;
 /**
  * Seed the roles of a congregation, besides `super_admin`, and give them to the fake users.
  *
- * The permission names are the ones checked by the policies (`Action:Model`, see `ShieldSeeder`).
+ * The permission names are the ones checked by the policies (`Action:Model`, see `ShieldSeeder`): the actions that a
+ * resource doesn't offer are left out.
  */
 class FakeRoleSeeder extends Seeder
 {
     /**
-     * Every action of a resource.
+     * Every action of a resource (only the ones it offers are given).
      */
     private const ALL_ACTIONS = [
         'View', 'ViewAny', 'Create', 'Update', 'Delete', 'DeleteAny', 'Restore', 'RestoreAny',
@@ -26,11 +27,6 @@ class FakeRoleSeeder extends Seeder
     private const READ_ACTIONS = ['View', 'ViewAny'];
 
     private const EDIT_ACTIONS = ['View', 'ViewAny', 'Create', 'Update'];
-
-    /**
-     * The permissions every role has.
-     */
-    private const COMMON_PERMISSIONS = ['View:TerritoryGlobalMap'];
 
     /**
      * Run the database seeds.
@@ -68,30 +64,26 @@ class FakeRoleSeeder extends Seeder
             'territory_servant' => [
                 ...$this->permissions(self::ALL_ACTIONS, ['Territory', 'TerritoryZone', 'TerritoryAssignment', 'Campaign', 'Tag']),
                 ...$this->permissions(self::READ_ACTIONS, ['User']),
-                ...self::COMMON_PERMISSIONS,
             ],
             // Organizes the campaigns and oversees the ministry
             'service_overseer' => [
                 ...$this->permissions([...self::EDIT_ACTIONS, 'Delete'], ['Campaign']),
                 ...$this->permissions(self::READ_ACTIONS, ['Territory', 'TerritoryZone', 'TerritoryAssignment', 'Tag', 'User', 'Activity']),
-                ...self::COMMON_PERMISSIONS,
             ],
             // Assigns the territories to the publishers of the group
             'group_overseer' => [
                 ...$this->permissions(self::EDIT_ACTIONS, ['TerritoryAssignment']),
                 ...$this->permissions(self::READ_ACTIONS, ['Territory', 'TerritoryZone', 'Campaign', 'User']),
-                ...self::COMMON_PERMISSIONS,
             ],
             // Consults the territories
             'publisher' => [
                 ...$this->permissions(self::READ_ACTIONS, ['Territory', 'TerritoryZone', 'Campaign']),
-                ...self::COMMON_PERMISSIONS,
             ],
         ];
     }
 
     /**
-     * Build the permission names of the given actions on the given models.
+     * Build the permission names of the given actions on the given models, among the ones the resources offer.
      *
      * @param  list<string>  $actions
      * @param  list<string>  $models
@@ -99,11 +91,14 @@ class FakeRoleSeeder extends Seeder
      */
     private function permissions(array $actions, array $models): array
     {
+        $offered = ShieldSeeder::permissionNames();
         $permissions = [];
 
         foreach ($models as $model) {
             foreach ($actions as $action) {
-                $permissions[] = "{$action}:{$model}";
+                if (in_array("{$action}:{$model}", $offered, true)) {
+                    $permissions[] = "{$action}:{$model}";
+                }
             }
         }
 

@@ -101,11 +101,11 @@ test('the assistants of a department manage its sections but cannot delete, unle
     expect($assistant->fresh()->can('Delete:Poster'))->toBeTrue();
 });
 
-test('the territory department grants the territories, zones, assignments, campaigns and global map', function () {
+test('the territory department grants the territories, zones, assignments and campaigns', function () {
     $member = User::factory()->create();
     joinDepartment($member, DepartmentKey::Territories);
 
-    foreach (['Territory', 'TerritoryZone', 'TerritoryAssignment', 'Campaign', 'TerritoryGlobalMap'] as $subject) {
+    foreach (['Territory', 'TerritoryZone', 'TerritoryAssignment', 'Campaign'] as $subject) {
         expect($member->can("Update:{$subject}"))->toBeTrue();
     }
 

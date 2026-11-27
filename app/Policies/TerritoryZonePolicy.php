@@ -8,6 +8,10 @@ use App\Models\TerritoryZone;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
+/**
+ * Only the actions offered by the resource have a permission (see `resources.manage` in `config/filament-shield.php`,
+ * which `ShieldSeeder` creates): the others are denied, since Filament would allow an action without a method here.
+ */
 class TerritoryZonePolicy
 {
     use HandlesAuthorization;
@@ -64,11 +68,11 @@ class TerritoryZonePolicy
 
     public function replicate(AuthUser $authUser, TerritoryZone $territoryZone): bool
     {
-        return $authUser->can('Replicate:TerritoryZone');
+        return false;
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:TerritoryZone');
+        return false;
     }
 }

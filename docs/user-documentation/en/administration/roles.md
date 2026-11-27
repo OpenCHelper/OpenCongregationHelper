@@ -31,17 +31,20 @@ The **super_admin** role (*Super Admin*) can do everything, including the action
 
 ## Meaning of the permissions
 
-For most resources (Territory, Territory Zone, Territory Assignment, Campaign, User, …) there are the same
-permissions (*Department* has only **View Any**, **View** and **Update**, *Role* only **View Any**, **View**,
-**Create**, **Update** and **Delete**):
+Each resource has the permissions of the actions it offers:
 
-| Permission | Allows to |
-|------------|-----------|
-| **View Any** | open the list of that resource |
-| **View** | open the details of a record |
-| **Create** / **Update** / **Delete** | create, edit, delete records |
-| **Restore**, **Force Delete** (and their *Any* versions) | restore deleted records, delete them permanently |
-| **Replicate**, **Reorder** | not used at the moment |
+| Permission | Allows to | Resources |
+|------------|-----------|-----------|
+| **View Any** | open the list of that resource | all |
+| **View** | open the details of a record | all |
+| **Create** / **Update** | create, edit records | all (*Department* only **Update**) |
+| **Delete** | delete a record | all but *Department* and *Regular publications* |
+| **Delete Any** | delete the selected records at once | Territory, Territory Zone, Territory Assignment, Campaign, User, Poster, Request, Tag, Role |
+| **Restore**, **Force Delete** (and their *Any* versions) | restore deleted records, delete them permanently | Territory, Territory Zone, Territory Assignment, Campaign |
+| **Reorder** | change the order of the list | Publication |
+
+*User* also has **Restore**, **Force Delete** (and their *Any* versions), **Replicate** and **Reorder**, not used at
+the moment. The activity log and the mail log have no permissions: only the super administrators read them.
 
 Some permissions have a special meaning:
 

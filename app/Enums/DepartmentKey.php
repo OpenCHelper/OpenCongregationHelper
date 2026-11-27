@@ -11,7 +11,6 @@ use App\Filament\Resources\StorageLocations\StorageLocationResource;
 use App\Filament\Resources\Territories\TerritoryResource;
 use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
-use App\Filament\Widgets\TerritoryGlobalMap;
 use BackedEnum;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasDescription;
@@ -99,23 +98,15 @@ enum DepartmentKey: string implements HasColor, HasDescription, HasIcon, HasLabe
 
     /**
      * The subjects of the permissions (`Action:Subject`) granted to the members of the department: the models of
-     * its resources, plus its pages and widgets.
+     * its resources.
      *
      * @return list<string>
      */
     public function getPermissionSubjects(): array
     {
-        $models = array_map(
+        return array_map(
             static fn (string $resource): string => class_basename($resource::getModel()),
             $this->getResources(),
         );
-
-        return [
-            ...$models,
-            ...match ($this) {
-                self::Territories => [class_basename(TerritoryGlobalMap::class)],
-                default => [],
-            },
-        ];
     }
 }

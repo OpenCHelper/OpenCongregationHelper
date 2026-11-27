@@ -8,6 +8,10 @@ use App\Models\StorageLocation;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
+/**
+ * Only the actions offered by the resource have a permission (see `resources.manage` in `config/filament-shield.php`,
+ * which `ShieldSeeder` creates): the others are denied, since Filament would allow an action without a method here.
+ */
 class StorageLocationPolicy
 {
     use HandlesAuthorization;
@@ -39,36 +43,36 @@ class StorageLocationPolicy
 
     public function deleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('DeleteAny:StorageLocation');
+        return false;
     }
 
     public function restore(AuthUser $authUser, StorageLocation $storageLocation): bool
     {
-        return $authUser->can('Restore:StorageLocation');
+        return false;
     }
 
     public function forceDelete(AuthUser $authUser, StorageLocation $storageLocation): bool
     {
-        return $authUser->can('ForceDelete:StorageLocation');
+        return false;
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:StorageLocation');
+        return false;
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:StorageLocation');
+        return false;
     }
 
     public function replicate(AuthUser $authUser, StorageLocation $storageLocation): bool
     {
-        return $authUser->can('Replicate:StorageLocation');
+        return false;
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:StorageLocation');
+        return false;
     }
 }
