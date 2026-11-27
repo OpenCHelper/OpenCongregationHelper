@@ -214,6 +214,45 @@ test('a territory cannot be assigned for a campaign already ended', function () 
         ->assertHasErrors([__('validation.campaign.not_terminated')]);
 });
 
+test('a territory already worked in the campaign is assigned again only once confirmed', function () {
+    $territory = mcpTerritory(['name' => 'Worked']);
+    $campaign = Campaign::factory()->create(['name' => 'Convention', 'valid_from' => now()->subWeek(), 'valid_until' => now()->addMonth()]);
+    mcpAssignment($territory, $this->publisher, ['campaign_id' => $campaign->id, 'ended_at' => now()->subDay()]);
+    $arguments = ['territory_id' => $territory->id, 'assignee_id' => $this->publisher->id, 'campaign_id' => $campaign->id];
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(AssignTerritoryTool::class, $arguments)
+        ->assertHasErrors(['already been worked in the campaign Convention', 'confirm_campaign_repeat']);
+
+    expect($territory->assignments()->count())->toBe(1);
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(AssignTerritoryTool::class, [...$arguments, 'confirm_campaign_repeat' => true])
+        ->assertOk();
+
+    expect($territory->assignments()->count())->toBe(2);
+});
+
+test('the confirmation of a repeat in the campaign is not asked for an assignment refused anyway', function () {
+    $campaign = Campaign::factory()->create(['valid_from' => now()->subWeek(), 'valid_until' => now()->addMonth()]);
+    $assignedAgain = mcpTerritory();
+    mcpAssignment($assignedAgain, $this->publisher, ['campaign_id' => $campaign->id, 'started_at' => now()->subDays(10), 'ended_at' => now()->subDays(5)]);
+    mcpAssignment($assignedAgain, $this->publisher, ['started_at' => now()->subDays(2)]);
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(AssignTerritoryTool::class, ['territory_id' => $assignedAgain->id, 'assignee_id' => $this->publisher->id, 'campaign_id' => $campaign->id])
+        ->assertHasErrors([__('validation.territory_assignment.already_assigned')]);
+
+    $endedCampaign = Campaign::factory()->create(['valid_from' => now()->subMonth(), 'valid_until' => now()->addDay()]);
+    $worked = mcpTerritory();
+    mcpAssignment($worked, $this->publisher, ['campaign_id' => $endedCampaign->id, 'started_at' => now()->subDays(10), 'ended_at' => now()->subDays(5)]);
+    $endedCampaign->update(['valid_until' => now()->subDay()]);
+
+    CongregationServer::actingAs($this->overseer)
+        ->tool(AssignTerritoryTool::class, ['territory_id' => $worked->id, 'assignee_id' => $this->publisher->id, 'campaign_id' => $endedCampaign->id])
+        ->assertHasErrors([__('validation.campaign.not_terminated')]);
+});
+
 test('a territory can be returned, with notes', function () {
     $territory = mcpTerritory(['name' => 'To return']);
     $assignment = mcpAssignment($territory, $this->publisher, ['notes' => null]);

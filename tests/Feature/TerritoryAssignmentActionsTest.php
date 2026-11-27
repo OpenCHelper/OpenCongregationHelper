@@ -585,3 +585,134 @@ test('deleting assignments in bulk explains that they leave the history of their
     'assignments' => [ManageTerritoryAssignments::class, fn () => null, []],
     'campaign history' => [ManageCampaignAssignments::class, fn () => $this->campaign, ['View:Campaign', 'ViewAny:Campaign']],
 ]);
+
+/**
+ * A campaign in progress, in which the territory of the test has already been worked (assigned and returned).
+ */
+function campaignWorkedBy(Territory $territory, User $assignee): Campaign
+{
+    $campaign = Campaign::factory()->create(['valid_from' => now()->subWeek(), 'valid_until' => now()->addMonth()]);
+    TerritoryAssignment::factory()->create([
+        'territory_id' => $territory->id,
+        'assignee_id' => $assignee->id,
+        'campaign_id' => $campaign->id,
+        'started_at' => now()->subDays(5),
+        'ended_at' => now()->subDay(),
+    ]);
+
+    return $campaign;
+}
+
+test('assigning a territory already worked in the campaign asks for a confirmation', function () {
+    $campaign = campaignWorkedBy($this->territory, $this->assignee);
+    $otherCampaign = Campaign::factory()->create(['valid_until' => now()->addMonth()]);
+
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Create:TerritoryAssignment']));
+
+    Livewire::test(ListTerritories::class)
+        ->mountAction(TestAction::make('create_assignment')->table($this->territory))
+        ->fillForm(['assignee_id' => $this->assignee->id, 'campaign_id' => $otherCampaign->id])
+        ->assertSchemaComponentHidden('confirm_campaign_repeat', 'mountedActionSchema0')
+        ->fillForm(['campaign_id' => $campaign->id])
+        ->assertSchemaComponentVisible('confirm_campaign_repeat', 'mountedActionSchema0')
+        ->callMountedAction()
+        ->assertHasFormErrors(['confirm_campaign_repeat' => 'accepted']);
+
+    expect($this->territory->assignments()->count())->toBe(1);
+
+    Livewire::test(ListTerritories::class)
+        ->callAction(TestAction::make('create_assignment')->table($this->territory), [
+            'assignee_id' => $this->assignee->id,
+            'campaign_id' => $campaign->id,
+            'confirm_campaign_repeat' => true,
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($this->territory->assignments()->where('campaign_id', $campaign->id)->count())->toBe(2);
+});
+
+test('assigning territories in bulk skips the ones already worked in the campaign unless asked', function () {
+    $this->territory->update(['name' => 'Worked one']);
+    $campaign = campaignWorkedBy($this->territory, $this->assignee);
+    $freeTerritory = Territory::factory()->for($this->territory->territoryZone, 'territoryZone')->create();
+
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Create:TerritoryAssignment']));
+
+    Livewire::test(ListTerritories::class)
+        ->selectTableRecords([$this->territory, $freeTerritory])
+        ->mountAction(TestAction::make('create_assignment_bulk')->table()->bulk())
+        ->assertSchemaComponentHidden('include_worked_in_campaign', 'mountedActionSchema0')
+        ->fillForm(['assignee_id' => $this->assignee->id, 'campaign_id' => $campaign->id])
+        ->assertSchemaComponentVisible('include_worked_in_campaign', 'mountedActionSchema0')
+        ->callMountedAction()
+        ->assertHasNoFormErrors();
+
+    expect(lastSentNotification())->toBe([
+        'title' => trans_choice('filament-resources.territory.bulk_assigned', 1),
+        'status' => 'warning',
+        'body' => __('filament-resources.territory.bulk_skipped_already_worked', ['territories' => 'Worked one']),
+    ])
+        ->and($this->territory->currentAssignment()->exists())->toBeFalse()
+        ->and($freeTerritory->currentAssignment()->exists())->toBeTrue();
+});
+
+test('assigning territories in bulk can include the ones already worked in the campaign', function () {
+    $campaign = campaignWorkedBy($this->territory, $this->assignee);
+
+    $this->actingAs(userWithPermissions(['ViewAny:Territory', 'Create:TerritoryAssignment']));
+
+    Livewire::test(ListTerritories::class)
+        ->selectTableRecords([$this->territory])
+        ->callAction(TestAction::make('create_assignment_bulk')->table()->bulk(), [
+            'assignee_id' => $this->assignee->id,
+            'campaign_id' => $campaign->id,
+            'include_worked_in_campaign' => true,
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($this->territory->currentAssignment()->first()?->campaign_id)->toBe($campaign->id);
+});
+
+test('campaign assignments ask for a confirmation for a territory already worked in the campaign', function () {
+    $campaign = campaignWorkedBy($this->territory, $this->assignee);
+
+    $this->actingAs(userWithPermissions([
+        'View:Campaign', 'ViewAny:Campaign', 'Update:Campaign',
+        'ViewAny:TerritoryAssignment', 'Create:TerritoryAssignment',
+    ]));
+
+    $data = [
+        'territory_id' => $this->territory->id,
+        'assignee_id' => $this->assignee->id,
+        'started_at' => now()->toDateString(),
+    ];
+
+    Livewire::test(ManageCampaignAssignments::class, ['record' => $campaign->id])
+        ->callAction(TestAction::make('create')->table(), $data)
+        ->assertHasFormErrors(['confirm_campaign_repeat' => 'accepted']);
+
+    expect($this->territory->assignments()->count())->toBe(1);
+
+    Livewire::test(ManageCampaignAssignments::class, ['record' => $campaign->id])
+        ->callAction(TestAction::make('create')->table(), [...$data, 'confirm_campaign_repeat' => true])
+        ->assertHasNoFormErrors();
+
+    expect($this->territory->assignments()->count())->toBe(2);
+});
+
+test('only the returned assignments of the same campaign count as already worked', function () {
+    $campaign = campaignWorkedBy($this->territory, $this->assignee);
+    $otherTerritory = Territory::factory()->for($this->territory->territoryZone, 'territoryZone')->create();
+    // In progress, not worked yet
+    TerritoryAssignment::factory()->create([
+        'territory_id' => $otherTerritory->id,
+        'assignee_id' => $this->assignee->id,
+        'campaign_id' => $campaign->id,
+        'ended_at' => null,
+    ]);
+
+    expect(TerritoryAssignment::territoriesWorkedInCampaign([$this->territory->id, $otherTerritory->id], $campaign->id))
+        ->toBe([$this->territory->id])
+        ->and(TerritoryAssignment::territoryWorkedInCampaign($this->territory->id, null))->toBeFalse()
+        ->and(TerritoryAssignment::territoryWorkedInCampaign($this->territory->id, Campaign::factory()->create()->id))->toBeFalse();
+});

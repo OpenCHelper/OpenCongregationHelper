@@ -49,7 +49,8 @@ class ManageTerritoryAssignments extends ManageRelatedRecords
     public function table(Table $table): Table
     {
         return TerritoryAssignmentResource::table($table)
-            ->modifyQueryUsing(fn (Builder $query): Builder => TerritoryAssignmentResource::scopeToVisibleAssignments($query))
+            // The campaign is read by the highlight of every row, even with its column hidden
+            ->modifyQueryUsing(fn (Builder $query): Builder => TerritoryAssignmentResource::scopeToVisibleAssignments($query->with('campaign')))
             ->defaultSort('started_at', 'desc');
     }
 }

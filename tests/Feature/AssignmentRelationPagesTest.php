@@ -173,3 +173,66 @@ test('an assignment can be created from the page of its campaign', function () {
         ->campaign_id->toBe($campaign->id)
         ->started_at->isToday()->toBeTrue();
 });
+
+test('the assignments in progress of a campaign are listed without lazy loading it', function (string $page, Closure $record) {
+    $campaign = Campaign::factory()->create(['valid_from' => now()->subDays(10), 'valid_until' => now()->addDays(2)]);
+    // Lazy loading is reported only on the models retrieved together with others: every page lists at least two
+    // assignments (once its default filter of the ones in progress is removed), one of them in progress
+    $otherTerritory = Territory::factory()->for($this->territory->territoryZone, 'territoryZone')->create();
+    TerritoryAssignment::factory()->create([
+        'territory_id' => $this->territory->id,
+        'assignee_id' => $this->assignee->id,
+        'campaign_id' => $campaign->id,
+        'started_at' => now()->subDays(8),
+        'ended_at' => now()->subDays(6),
+    ]);
+
+    foreach ([$this->territory, $otherTerritory] as $territory) {
+        TerritoryAssignment::factory()->create([
+            'territory_id' => $territory->id,
+            'assignee_id' => $this->assignee->id,
+            'campaign_id' => $campaign->id,
+            'ended_at' => null,
+        ]);
+    }
+
+    actingAsUserAllowedTo([
+        'View:Campaign', 'ViewAny:Campaign', 'View:Territory', 'ViewAny:Territory', 'View:User', 'ViewAny:User',
+        'ViewAny:TerritoryAssignment',
+    ]);
+
+    // The highlight of the assignments whose campaign is about to end reads the campaign of every row
+    Livewire::test($page, ['record' => $record($campaign)->getKey()])
+        ->removeTableFilter('ended_at')
+        ->assertCountTableRecords($page === ManageCampaignAssignments::class || $page === ManageUserAssignments::class ? 3 : 2)
+        ->assertSee('fi-ta-row-assignment-due-soon', escape: false)
+        // Without its column (hidden with the other optional ones), the campaign is not loaded with it
+        ->toggleAllTableColumns(false)
+        ->assertOk()
+        ->assertSee('fi-ta-row-assignment-due-soon', escape: false);
+})->with([
+    'campaign assignments' => [ManageCampaignAssignments::class, fn (Campaign $campaign) => $campaign],
+    'territory assignments' => [ManageTerritoryAssignments::class, fn () => test()->territory],
+    'user assignments' => [ManageUserAssignments::class, fn () => test()->assignee],
+]);
+
+test('the assignments list reads the campaign of every row even with its column hidden', function () {
+    $campaign = Campaign::factory()->create(['valid_from' => now()->subDays(10), 'valid_until' => now()->addDays(2)]);
+    $otherTerritory = Territory::factory()->for($this->territory->territoryZone, 'territoryZone')->create();
+
+    foreach ([$this->territory, $otherTerritory] as $territory) {
+        TerritoryAssignment::factory()->create([
+            'territory_id' => $territory->id,
+            'assignee_id' => $this->assignee->id,
+            'campaign_id' => $campaign->id,
+            'ended_at' => null,
+        ]);
+    }
+
+    actingAsUserAllowedTo(['ViewAny:TerritoryAssignment']);
+
+    Livewire::test(App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments::class)
+        ->toggleAllTableColumns(false)
+        ->assertOk()
+        ->assertSee('fi-ta-row-assignment-due-soon', escape: false);
+});

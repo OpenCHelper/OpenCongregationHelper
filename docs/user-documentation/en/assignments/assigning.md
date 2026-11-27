@@ -17,6 +17,9 @@ assignment, which stays in the history of the territory.
 4. Optionally choose a **Campaign** (only campaigns that have not ended are offered).
 5. Click **Create**.
 
+If the territory has already been worked (assigned and returned) in the chosen campaign, a checkbox asks you to confirm
+that it should go out again for it: a territory normally goes out only once per campaign.
+
 ![Assigning a territory](/docs/user-documentation/en/assignments/assets/assign-modal.webp)
 
 The assignee receives a notification and an email (unless they are a virtual user), and the territory shows up as out in
@@ -50,7 +53,8 @@ assignment shows **Return requested on …** with **End Assignment**, which retu
 In the **Territories** list, tick the territories, then open the **bulk actions** menu and choose:
 
 - **Assign Massively**: choose the person (and optionally a campaign) and click **Submit**. Territories that are
-  already out are skipped;
+  already out are skipped, as are those already worked in the chosen campaign, unless you tick **Also assign …**,
+  which lists them;
 - **End Assignments**: returns all the selected territories that are out, after a confirmation. The others are skipped,
   as are those your role doesn't allow you to return.
 
