@@ -1,7 +1,7 @@
 import { type Browser, type Page } from '@playwright/test';
 import { php } from '../support/artisan';
 import { expect, pageAs, test, uniqueName } from '../support/fixtures';
-import { confirmModal, field, modal, settle, visit } from '../support/filament';
+import { confirmModal, field, modal, searchTableUntilApplied, settle, visit } from '../support/filament';
 
 /**
  * The settings of the application (Administration > Settings), which change what every user sees: these tests run
@@ -32,8 +32,16 @@ test.afterEach(() => {
     `);
 });
 
-async function save(page: Page): Promise<void> {
+/**
+ * Save the settings, waiting until they are saved (unless the form is expected to be refused).
+ */
+async function save(page: Page, { refused = false }: { refused?: boolean } = {}): Promise<void> {
     await page.getByRole('button', { name: 'Save changes' }).click();
+
+    if (!refused) {
+        await expect(page.locator('.fi-no-notification').filter({ hasText: 'Saved' }).last()).toBeVisible();
+    }
+
     await settle(page);
 }
 
@@ -93,7 +101,7 @@ test.describe('general settings', () => {
         await visit(adminPage, '/app/settings/general');
         const name = field(adminPage, 'Name of the app');
         await name.fill('');
-        await save(adminPage);
+        await save(adminPage, { refused: true });
 
         // The browser refuses to submit the form, and the name is kept
         expect(await name.evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
@@ -107,7 +115,7 @@ test.describe('territory settings', () => {
         const centre = field(adminPage, 'Default map centre');
 
         await centre.fill('not a position');
-        await save(adminPage);
+        await save(adminPage, { refused: true });
         await expect(adminPage.locator('.fi-fo-field-wrp-error-message, [data-validation-error]').first()).toBeVisible();
 
         await centre.fill('45.464211, 9.191383');
@@ -230,9 +238,10 @@ test.describe('campaign settings', () => {
             return true;
         `);
 
+        // Searched for, since the other tests may have added enough campaigns to push it to another page
         await visit(adminPage, '/app/campaigns');
-        const row = adminPage.locator('.fi-ta-row').filter({ hasText: name });
-        await expect(row).toContainText('Expiring');
+        await searchTableUntilApplied(adminPage, name);
+        await expect(adminPage.locator('.fi-ta-row').filter({ hasText: name })).toContainText('Expiring');
 
         await visit(adminPage, '/app/settings/campaigns');
         await field(adminPage, 'Expiring').fill('4');
@@ -240,6 +249,7 @@ test.describe('campaign settings', () => {
         await save(adminPage);
 
         await visit(adminPage, '/app/campaigns');
+        await searchTableUntilApplied(adminPage, name);
         await expect(adminPage.locator('.fi-ta-row').filter({ hasText: name })).toContainText('Active');
     });
 });
