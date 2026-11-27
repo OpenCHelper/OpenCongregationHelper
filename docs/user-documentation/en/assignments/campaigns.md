@@ -61,7 +61,8 @@ The **Assignments** tab of a campaign lists its assignments (by default the ones
 ![Campaign assignments](/docs/user-documentation/en/assignments/assets/campaign-assignments.webp)
 
 - **New territory assignment** opens a guided procedure in three steps: **Assignment Details** (territory, assignee and
-  start date), **Additional Information** (notes) and **Review**. Only territories that are not already out are offered.
+  start date), **Additional Information** (notes) and **Review**. Only territories that are not already out are offered;
+  for one already worked in the campaign, a checkbox asks you to confirm that it should go out again.
   The button is not shown once the campaign has ended.
 - Tick some assignments and choose **Terminate assignments** from the bulk actions to return them all at once, for
   example when the campaign ends. Assignments that were already returned are skipped.

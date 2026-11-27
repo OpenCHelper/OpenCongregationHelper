@@ -8,12 +8,14 @@ use App\Filament\Resources\TerritoryAssignments\Actions\ReturnAssignmentAction;
 use App\Filament\Resources\TerritoryAssignments\Pages\ManageTerritoryAssignments;
 use App\Filament\Resources\TerritoryAssignments\Pages\ViewTerritoryAssignment;
 use App\Filament\Tables\Columns\RecordCardColumn;
+use App\Models\Campaign;
 use App\Models\TerritoryAssignment;
 use App\Rules\NotTerminatedCampaign;
 use App\Rules\TerritoryNotAlreadyAssigned;
 use App\Settings\TerritorySettings;
 use Carbon\CarbonInterface;
 use Carbon\CarbonInterval;
+use Closure;
 use EduardoRibeiroDev\FilamentLeaflet\Enums\TileLayer;
 use EduardoRibeiroDev\FilamentLeaflet\Infolists\MapEntry;
 use EduardoRibeiroDev\FilamentLeaflet\Layers\Shapes\Polygon;
@@ -29,6 +31,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -621,6 +624,31 @@ class TerritoryAssignmentResource extends Resource
     }
 
     /**
+     * Checkbox asking to confirm the assignment of a territory already worked (assigned and returned) in the chosen
+     * campaign, which most likely should not go out again for it: shown, and required, only in that case.
+     *
+     * @param  Closure(Get): mixed  $getTerritoryId  the id of the territory being assigned
+     * @param  Closure(Get): mixed  $getCampaignId  the id of the chosen campaign
+     */
+    public static function getCampaignRepeatConfirmation(Closure $getTerritoryId, Closure $getCampaignId): Checkbox
+    {
+        $toId = fn (mixed $id): ?int => filled($id) ? (int) $id : null;
+
+        return Checkbox::make('confirm_campaign_repeat')
+            ->label(fn (Get $get): string => __('filament-resources.territory_assignment.confirm_campaign_repeat', [
+                'campaign' => Campaign::find($toId($getCampaignId($get)))?->name,
+            ]))
+            ->visible(fn (Get $get): bool => TerritoryAssignment::territoryWorkedInCampaign(
+                $toId($getTerritoryId($get)),
+                $toId($getCampaignId($get)),
+            ))
+            ->accepted()
+            ->validationMessages(['accepted' => __('filament-resources.territory_assignment.confirm_campaign_repeat_required')])
+            ->dehydrated(false)
+            ->columnSpanFull();
+    }
+
+    /**
      * Whether a banner of the assignment page offers to return the territory (its campaign has ended or is about to,
      * or its return has been asked): the button at the top of the page is then hidden, so that only one is shown.
      */
@@ -641,6 +669,8 @@ class TerritoryAssignmentResource extends Resource
     {
         return static::scopeToVisibleAssignments(
             parent::getEloquentQuery()
+                // Read by the highlight of every row of the table, even with the campaign column hidden
+                ->with('campaign')
                 ->whereHas('assignee')
                 ->withoutGlobalScopes([
                     SoftDeletingScope::class,

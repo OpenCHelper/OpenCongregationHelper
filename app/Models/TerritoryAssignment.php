@@ -111,6 +111,39 @@ class TerritoryAssignment extends Model
     }
 
     /**
+     * The ids of the given territories that have already been worked (assigned and returned) in the given campaign,
+     * which most likely should not go out again for it.
+     *
+     * @param  iterable<int>  $territoryIds
+     * @return list<int>
+     */
+    public static function territoriesWorkedInCampaign(iterable $territoryIds, ?int $campaignId): array
+    {
+        $territoryIds = collect($territoryIds)->filter()->map(fn (mixed $id): int => (int) $id)->unique()->values();
+
+        if ($campaignId === null || $territoryIds->isEmpty()) {
+            return [];
+        }
+
+        return static::query()
+            ->where('campaign_id', $campaignId)
+            ->whereIn('territory_id', $territoryIds)
+            ->whereNotNull('ended_at')
+            ->distinct()
+            ->pluck('territory_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+    }
+
+    /**
+     * Whether the given territory has already been worked (assigned and returned) in the given campaign.
+     */
+    public static function territoryWorkedInCampaign(?int $territoryId, ?int $campaignId): bool
+    {
+        return static::territoriesWorkedInCampaign([$territoryId], $campaignId) !== [];
+    }
+
+    /**
      * Whether the assignment is still in progress although its campaign has already ended.
      */
     public function isOverdue(): bool

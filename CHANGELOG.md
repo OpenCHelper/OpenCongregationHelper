@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `och:doctor` also checks the PHP version and extensions, the HTTPS certificate, the push notifications, the timezone,
   the two-factor authentication of the root user and a `SETUP_TOKEN` left after the installation
   ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- **Assignments**: assigning a territory again for a campaign in which it has already been worked now asks for a
+  confirmation (from the territories list and the campaign assignments); the bulk assignment skips such territories
+  unless asked to include them, and the AI assistants ask the user before assigning it again
+  ([#114](https://github.com/OpenCHelper/OpenCongregationHelper/pull/114)).
 
 ### Changed
 
@@ -68,6 +72,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Assignments**: the assignments of a campaign no longer fail to open while some are in progress, nor do the other
+  lists of assignments with the campaign column hidden
+  ([#114](https://github.com/OpenCHelper/OpenCongregationHelper/pull/114)).
+- **AI assistants**: the connectors (e.g. in Claude) show the icon of the app, which the site lacked as `favicon.ico`
+  ([#115](https://github.com/OpenCHelper/OpenCongregationHelper/pull/115)).
 - **Roles**: every permission that the policies check (e.g. those of posters, publications, requests, storage
   locations and tags) is now created on installation and on every update, and the role editor offers only the
   permissions of the actions each resource has (e.g. no more **Replicate** or **Restore** where nothing can be
