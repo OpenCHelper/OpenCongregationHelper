@@ -325,8 +325,9 @@ php artisan tinker
 
 The application includes GitHub Actions workflows in `.github/workflows/`:
 - `deploy-preview.yml` - PR previews, `deploy-nightly.yml` - nightly build of `main`, and `upload-altervista-reusable.yml` - deployments, called by other repositories
-- `run-pest-tests.yml` - Pest tests (unit and feature), with coverage
-- `run-e2e-tests.yml` - Playwright end-to-end tests (`tests/e2e`), on SQLite and MySQL
+- `run-pest-tests.yml` - Pest tests (unit and feature), on MySQL (with coverage) and SQLite, each with and without a
+  table prefix: the database support is tested here
+- `run-e2e-tests.yml` - Playwright end-to-end tests (`tests/e2e`), on MySQL; the setup wizard on SQLite and MySQL
 - `check-translations.yml` - Translation validation
 
 - **PR previews** (`deploy-preview.yml`): the `PREVIEW_MODE` repository variable sets which PRs get a preview

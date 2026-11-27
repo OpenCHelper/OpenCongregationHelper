@@ -36,6 +36,8 @@ export default defineConfig({
         video: process.env.CI ? 'on-first-retry' : 'off',
         screenshot: 'only-on-failure',
     },
+    // The `E2E all` run of `.github/workflows/run-e2e-tests.yml` lists every project but `setup-wizard` (which runs on
+    // each database): add a new project there too
     projects: [
         {
             name: 'auth-setup',

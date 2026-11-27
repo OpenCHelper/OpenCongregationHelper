@@ -23,21 +23,36 @@ env:
 
 jobs:
   run-e2e-tests:
-    name: E2E (${{ matrix.database }})
+    name: ${{ matrix.suite == 'setup-wizard' && format('E2E setup wizard ({0})', matrix.database) || 'E2E all' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: ${{ matrix.timeout }}
 
-    # The application supports these databases: each one runs the whole suite, the setup wizard included (which
-    # configures the database of its run, see `tests/e2e/setup-wizard.spec.ts`). PostgreSQL is not supported yet.
+    # The browser tests run once, on MySQL (the database of production and of the PR previews): the database support
+    # is tested by the Pest tests (`run-pest-tests.yml`), where the query layer is. The setup wizard is the exception:
+    # it configures the database of its run (see `tests/e2e/setup-wizard.spec.ts`), so it runs on each supported
+    # database. To add one (e.g. `mariadb` or `pgsql`), add a `setup-wizard` entry with its image, port and user.
     strategy:
       fail-fast: false
       matrix:
-        database: [sqlite, mysql]
         include:
-          - database: sqlite
-            mysql_image: ""
-          - database: mysql
+          # Every project but the setup wizard: keep it in sync with the projects of `playwright.config.ts`
+          - suite: all
+            database: mysql
+            projects: --project=auth-setup --project=chromium --project=mobile --project=global-state
+            timeout: 45
             # Same version as docker-compose.yml
+            mysql_image: mysql:8.0
+            port: 3306
+            username: root
+          - suite: setup-wizard
+            database: sqlite
+            projects: --project=setup-wizard
+            timeout: 15
+            mysql_image: ""
+          - suite: setup-wizard
+            database: mysql
+            projects: --project=setup-wizard
+            timeout: 15
             mysql_image: mysql:8.0
             port: 3306
             username: root
@@ -126,6 +141,8 @@ jobs:
         run: npx playwright install-deps chromium
 
       - name: Run E2E tests
+        env:
+          PROJECTS: ${{ matrix.projects }}
         run: |
           # Note when the app server stops answering, with its processes and the memory at that moment (printed by
           # the "Print the state of the test servers" step)
@@ -143,7 +160,9 @@ jobs:
             done
           ) > "${RUNNER_TEMP}/server-watch.log" 2>&1 &
 
-          npx playwright test
+          # Word splitting is wanted: one argument per project
+          # shellcheck disable=SC2086
+          npx playwright test ${PROJECTS}
 
       # Printed at the end of the log (the earlier lines of a long log can be hard to reach): why the test servers may
       # have stopped, e.g. a crash or the kernel killing them for lack of memory
@@ -171,7 +190,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report-${{ matrix.database }}
+          name: playwright-report-${{ matrix.suite }}-${{ matrix.database }}
           path: |
             playwright-report/
             test-results/
@@ -181,12 +200,13 @@ jobs:
       - name: Explain how to debug the failed tests
         if: failure()
         env:
-          DATABASE: ${{ matrix.database }}
+          REPORT: playwright-report-${{ matrix.suite }}-${{ matrix.database }}
+          RUN: ${{ matrix.suite }}, ${{ matrix.database }}
         run: |
           {
-            echo "### Debugging the failed E2E tests (${DATABASE})"
+            echo "### Debugging the failed E2E tests (${RUN})"
             echo
-            echo "Download the \`playwright-report-${DATABASE}\` artifact of this run, unzip it, then:"
+            echo "Download the \`${REPORT}\` artifact of this run, unzip it, then:"
             echo
             echo "- \`npx playwright show-report playwright-report\`: the report, with the screenshot, the video and the trace of each failed test;"
             echo "- \`npx playwright show-trace test-results/<test>/trace.zip\` (or drop the file on https://trace.playwright.dev) to replay a test step by step, with the page, the network and the console;"
