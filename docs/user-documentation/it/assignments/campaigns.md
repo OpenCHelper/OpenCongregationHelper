@@ -62,7 +62,8 @@ La scheda **Assegnazioni** di una campagna ne elenca le assegnazioni (di default
 
 - Il pulsante per creare una nuova assegnazione apre una procedura guidata in tre passaggi: **Dettagli Assegnazione**
   (territorio, assegnatario e data di inizio), **Informazioni Aggiuntive** (note) e **Revisione**. Vengono proposti solo
-  i territori non già fuori. Il pulsante non compare più quando la campagna è terminata.
+  i territori non già fuori; per uno già lavorato nella campagna, una casella ti chiede di confermare che debba uscire
+  di nuovo. Il pulsante non compare più quando la campagna è terminata.
 - Spunta alcune assegnazioni e scegli **Termina assegnazioni** dalle azioni di massa per riconsegnarle tutte insieme, ad
   esempio alla fine della campagna. Le assegnazioni già riconsegnate vengono saltate.
 - Le assegnazioni ancora in corso quando la campagna è terminata, o termina entro 7 giorni, sono evidenziate in rosso o

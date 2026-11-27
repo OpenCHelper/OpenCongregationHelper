@@ -17,6 +17,9 @@ l'assegnazione, che resta nello storico del territorio.
 4. Se vuoi, scegli una **Campagna** (vengono proposte solo le campagne non ancora terminate).
 5. Clicca **Crea**.
 
+Se il territorio è già stato lavorato (assegnato e riconsegnato) nella campagna scelta, una casella ti chiede di
+confermare che debba uscire di nuovo: di norma un territorio esce una sola volta per campagna.
+
 ![Assegnare un territorio](/docs/user-documentation/it/assignments/assets/assign-modal.webp)
 
 L'assegnatario riceve una notifica e un'email (tranne se è un utente virtuale), e il territorio risulta fuori
@@ -51,7 +54,8 @@ ruolo che lo permette.
 Nell'elenco **Territori**, spunta i territori, poi apri il menu delle **azioni di massa** e scegli:
 
 - **Assegna massivamente**: scegli la persona (e, se vuoi, una campagna) e clicca **Invia**. I territori già fuori
-  vengono saltati;
+  vengono saltati, come quelli già lavorati nella campagna scelta, a meno che spunti **Assegna anche …**, che li
+  elenca;
 - **Termina assegnazioni**: riconsegna, dopo una conferma, tutti i territori selezionati che sono fuori. Gli altri
   vengono saltati, come quelli che il tuo ruolo non ti permette di riconsegnare.
 
