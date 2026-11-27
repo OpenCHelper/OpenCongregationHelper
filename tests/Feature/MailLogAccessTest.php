@@ -41,15 +41,18 @@ test('users without a role cannot open the mail log', function () {
         ->assertForbidden();
 });
 
-test('users who can list the mail log cannot view an email without the permission to view it', function () {
+test('no permission of a role opens the mail log', function () {
     $user = User::factory()->create(['can_login' => true, 'email_verified_at' => now()]);
-    $user->givePermissionTo(Permission::findOrCreate('ViewAny:MailLog', 'web'));
+    $user->givePermissionTo(Permission::findOrCreate('ViewAny:MailLog', 'web'), Permission::findOrCreate('View:MailLog', 'web'));
 
     $this->actingAs($user);
 
+    $this->get(MailLogResource::getUrl())
+        ->assertForbidden()
+        ->assertDontSee('Reset Password Notification');
+
     Livewire::test(ListMailLogs::class)
-        ->assertOk()
-        ->assertActionHidden(TestAction::make('view')->table($this->mailLog));
+        ->assertForbidden();
 });
 
 test('super administrators can open the mail log and view an email', function () {

@@ -10,8 +10,11 @@ Questa guida è per chi inizia a usare l'applicazione per la prima volta, dopo a
 
 ## 1. Accedi come root
 
-Accedi con l'utente root creato durante l'installazione e apri il tuo [profilo](../basics/profile) per impostare il
-tuo nome, la lingua preferita e un contatto di emergenza.
+Accedi con l'utente root creato durante l'installazione, dalla [configurazione guidata](../setup#dal-browser) o dal
+terminale. Il nome, il logo e il colore dell'app, gli amministratori e le funzionalità si possono cambiare dalle
+[Impostazioni](../administration/settings) e dagli [utenti](../administration/users).
+
+Poi apri il tuo [profilo](../basics/profile) per impostare il tuo nome, la lingua preferita e un contatto di emergenza.
 
 ## 2. Crea le zone
 

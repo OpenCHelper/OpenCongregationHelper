@@ -9,11 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Users**: in production, the root user can hand its role over to another super administrator who can log in, with
+  **Make root user** on their page after confirming its password; the former root user stays a super administrator,
+  and the protections of the root user move to the new one
+  ([#113](https://github.com/OpenCHelper/OpenCongregationHelper/pull/113)).
+- **Setup wizard**: a new installation can be completed from the browser, protected by a `SETUP_TOKEN`: it checks the
+  server, fills in the missing values of `.env` (testing the database and the emails first, and keeping a copy of the
+  file), shows how to run the scheduled tasks and the queue, creates the database and the root user, and sets the name,
+  logo and colour of the app, its administrators and its features. A summary comes before installing, reloading the
+  page goes on from the last step, and the token is removed from `.env` once installed
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- **Settings**: the name of the app can be changed from the General settings, instead of `APP_NAME` in `.env`
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- `och:doctor` also checks the PHP version and extensions, the HTTPS certificate, the push notifications, the timezone,
+  the two-factor authentication of the root user and a `SETUP_TOKEN` left after the installation
+  ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
+- **Assignments**: assigning a territory again for a campaign in which it has already been worked now asks for a
+  confirmation (from the territories list and the campaign assignments); the bulk assignment skips such territories
+  unless asked to include them, and the AI assistants ask the user before assigning it again
+  ([#114](https://github.com/OpenCHelper/OpenCongregationHelper/pull/114)).
+- **End-to-end tests**: browser tests of every feature of the app and of the main workflows (e.g. a zone, then a
+  territory in it, assigned and returned), run on every pull request on MySQL (the setup wizard on SQLite and MySQL),
+  while the unit and feature tests run on MySQL and SQLite; the ones for phones run on Android and on iPhone (Safari's
+  engine), and a failed test keeps a video and a trace to replay it
+  ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116),
+  [#117](https://github.com/OpenCHelper/OpenCongregationHelper/pull/117),
+  [#118](https://github.com/OpenCHelper/OpenCongregationHelper/pull/118)).
+- The busy timeout and the journal mode of SQLite can be set with `DB_BUSY_TIMEOUT` and `DB_JOURNAL_MODE`
+  ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116)).
 - **User guide**: the new **Backup and restore** page explains what to back up (database, `.env`, uploaded files and
-  keys of the AI assistants), how and how often, with or without shell access, and how to restore a backup.
+  keys of the AI assistants), how and how often, with or without shell access, and how to restore a backup
+  ([#119](https://github.com/OpenCHelper/OpenCongregationHelper/pull/119)).
 
 ### Changed
 
+- The table prefix (`DB_PREFIX`) now applies to every database (MariaDB, PostgreSQL, SQLite and SQL Server too), not
+  only to MySQL ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
 - **Users**: the **Access enabled?** filter of the list is now **Access**, with the options **With access** and
   **Virtual**, and the new **Email verified** and **Two-factor authentication** filters show the users who have (or
   have not) verified their email or set up two-factor authentication; each option shows how many users it matches
@@ -40,6 +71,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the timezone of the congregation, and each section has its own description. The page of an assignment in the app
   shows the start and end dates the same way, and the same section descriptions
   ([#86](https://github.com/OpenCHelper/OpenCongregationHelper/pull/86)).
+- **Assignments**: **End Assignment** returns a territory from the rows of the assignments in progress (also in the
+  assignment history of a territory, a user or a campaign) and from the top of the page of an assignment, instead of
+  editing its end date. On the rows, **Edit**, **Delete**, **Force delete** and **Restore** move to the **⋮** menu.
+  Deleting an assignment now explains that it leaves the history and the statistics of the territory, and that
+  permanently deleting it cannot be undone ([#110](https://github.com/OpenCHelper/OpenCongregationHelper/pull/110)).
 
 ### Removed
 
@@ -48,9 +84,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Assignments**: the assignments of a campaign no longer fail to open while some are in progress, nor do the other
+  lists of assignments with the campaign column hidden
+  ([#114](https://github.com/OpenCHelper/OpenCongregationHelper/pull/114)).
+- **AI assistants**: the connectors (e.g. in Claude) show the icon of the app, which the site lacked as `favicon.ico`
+  ([#115](https://github.com/OpenCHelper/OpenCongregationHelper/pull/115)).
+- **Roles**: every permission that the policies check (e.g. those of posters, publications, requests, storage
+  locations and tags) is now created on installation and on every update, and the role editor offers only the
+  permissions of the actions each resource has (e.g. no more **Replicate** or **Restore** where nothing can be
+  replicated or restored); the activity and mail logs, which only the super administrators read, have no permissions
+  any more. The permissions no longer offered stay on the roles that had them, but they allow nothing
+  ([#111](https://github.com/OpenCHelper/OpenCongregationHelper/pull/111)).
+- **Users**: there is always a super administrator who can log in: the last one can no longer lose its access or its
+  **super_admin** role, nor be deleted (from the list, its page or its profile), and the **super_admin** role can no
+  longer be deleted, renamed or moved to another guard. In production, the profile of the root user no longer offers
+  to delete the account, which always failed ([#113](https://github.com/OpenCHelper/OpenCongregationHelper/pull/113)).
 - **Migrations**: the settings migrations can be rolled back, so that running the migrations again after a
-  `migrate:rollback` no longer fails because a setting already exists.
-- `scripts/remote_artisan.sh` runs on macOS too (`#!/usr/bin/env bash`).
+  `migrate:rollback` no longer fails because a setting already exists
+  ([#119](https://github.com/OpenCHelper/OpenCongregationHelper/pull/119)).
+- `scripts/remote_artisan.sh` runs on macOS too (`#!/usr/bin/env bash`)
+  ([#119](https://github.com/OpenCHelper/OpenCongregationHelper/pull/119)).
 - **Territory maps**: the lines drawn on the map of a territory (e.g. a street to work) are now shown on the assignment
   page, on the shared page and on the dashboard, as are the areas split in two with **Cut Layers**; they were shown
   only on the territory's own map. The **Draw Text** tool is removed.
@@ -107,6 +160,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Notifications**: recording an assignment that is already returned no longer notifies it as assigned, correcting the
   date of a return no longer notifies it again, and virtual users no longer receive assignment or return request
   notifications ([#74](https://github.com/OpenCHelper/OpenCongregationHelper/pull/74)).
+- **Territories**: the page of a territory, its edit page and its form in the **Territories** tab of a zone open on
+  the **Map** tab when the territory has a map and on the **Image** tab when it has only an image. The edit page and
+  the form opened on the other tab, and the page of a territory with both a map and an image opened on the **Image**
+  tab ([#108](https://github.com/OpenCHelper/OpenCongregationHelper/pull/108)).
+- **AI assistants**: the deployments of the environments that keep their database (e.g. TEST) keep the keys signing
+  the tokens of the assistants, which were replaced on every deployment, disconnecting every assistant
+  ([#112](https://github.com/OpenCHelper/OpenCongregationHelper/pull/112)).
+- The fake data (`FakeDataSeeder`, used by the PR previews) could fail to seed when an assignment picked a campaign that
+  had already ended ([#116](https://github.com/OpenCHelper/OpenCongregationHelper/pull/116)).
 
 ### Security
 
@@ -139,6 +201,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   still block the sign-in with it for up to 15 minutes at a time. The new `TRUSTED_PROXIES` setting lists the addresses
   of the proxies in front of the app (by default `*`, any address, as Altervista needs): set it to the address of your
   proxy, or leave it empty if there is none, so that visitors can no longer pass themselves off as another IP address.
+- **Users**: outside of the production environment, the other users, super administrators included, can no longer
+  edit the root user by opening its edit page from the address bar (e.g. `/app/users/1/edit`): only the root user can
+  edit itself, as its disabled **Edit** button already said.
 
 ## [1.0.0-alpha15] - 2026-11-24
 

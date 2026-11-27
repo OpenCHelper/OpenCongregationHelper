@@ -55,7 +55,8 @@ class ManageUserAssignments extends ManageRelatedRecords
         $inherited_table->getColumn('assignee.full_name')->hidden();
 
         return $inherited_table
-            ->modifyQueryUsing(fn (Builder $query): Builder => TerritoryAssignmentResource::scopeToVisibleAssignments($query))
+            // The campaign is read by the highlight of every row, even with its column hidden
+            ->modifyQueryUsing(fn (Builder $query): Builder => TerritoryAssignmentResource::scopeToVisibleAssignments($query->with('campaign')))
             ->defaultSort('started_at', 'desc');
     }
 }

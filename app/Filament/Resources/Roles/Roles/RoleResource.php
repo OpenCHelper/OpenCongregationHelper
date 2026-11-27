@@ -26,6 +26,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Override;
 use UnitEnum;
@@ -64,12 +65,15 @@ class RoleResource extends Resource
                             ->schema([
                                 TextInput::make('name')
                                     ->label(__('filament-shield::filament-shield.field.name'))
+                                    // Renaming the super admin role would leave nobody able to manage the application
+                                    ->disabled(fn (?Model $record): bool => $record?->getAttribute('name') === Utils::getSuperAdminName())
                                     ->unique(ignoreRecord: true)
                                     ->required()
                                     ->maxLength(255),
 
                                 TextInput::make('guard_name')
                                     ->label(__('filament-shield::filament-shield.field.guard_name'))
+                                    ->disabled(fn (?Model $record): bool => $record?->getAttribute('name') === Utils::getSuperAdminName())
                                     ->default(Utils::getFilamentAuthGuard())
                                     ->nullable()
                                     ->maxLength(255),
@@ -119,8 +123,11 @@ class RoleResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                // Deleting the super admin role would leave nobody able to manage the application
+                DeleteAction::make()
+                    ->hidden(fn (Model $record): bool => $record->getAttribute('name') === Utils::getSuperAdminName()),
             ])
+            ->checkIfRecordIsSelectableUsing(fn (Model $record): bool => $record->getAttribute('name') !== Utils::getSuperAdminName())
             ->toolbarActions([
                 DeleteBulkAction::make(),
             ]);

@@ -9,9 +9,14 @@ use App\NativeMailFxTransport;
 use App\Policies\ActivityPolicy;
 use App\Policies\MailLogPolicy;
 use App\Policies\TagPolicy;
+use App\Settings\GeneralSettings;
 use App\Settings\SecuritySettings;
 use App\Support\AiAssistantConnections;
+use App\Support\AppName;
+use App\Support\EnvironmentFile;
+use App\Support\Installation;
 use App\Support\UserLocale;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use BezhanSalleh\LanguageSwitch\Http\Middleware\SwitchLanguageLocale;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Carbon\CarbonInterval;
@@ -24,15 +29,20 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Database\Console\WipeCommand;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -44,6 +54,7 @@ use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\LaravelSettings\Events\SettingsSaved;
 use Spatie\Translatable\Facades\Translatable;
 use STS\FilamentImpersonate\Facades\Impersonation;
 use Tapp\FilamentMailLog\Models\MailLog;
@@ -181,9 +192,82 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configurePasswordPolicy();
 
+        $this->configureAppName();
+
+        $this->configureSetup();
+
+        $this->protectSuperAdminRole();
+
         // Exported cells that a spreadsheet would run as a formula (e.g. a title starting with `=`) are written as text
         ExportColumn::configureUsing(function (ExportColumn $column): void {
             $column->preventFormulaInjection();
+        });
+    }
+
+    /**
+     * The super admin role cannot be deleted, renamed or moved to another guard, from wherever (e.g. the Delete button
+     * of the role's edit page, which comes from Shield): there must always be a super administrator to manage the
+     * application.
+     */
+    private function protectSuperAdminRole(): void
+    {
+        /** @var class-string<Model> $roleModel */
+        $roleModel = Utils::getRoleModel();
+        $isSuperAdminRole = fn (Model $role): bool => $role->getOriginal('name') === Utils::getSuperAdminName();
+
+        $roleModel::deleting(fn (Model $role): ?bool => $isSuperAdminRole($role) ? false : null);
+        $roleModel::updating(fn (Model $role): ?bool => $isSuperAdminRole($role) && $role->isDirty(['name', 'guard_name']) ? false : null);
+    }
+
+    /**
+     * While the application is not installed, the pages work without the database, which the setup wizard sets up: the
+     * sessions and the cache are kept in files, and the application key is created (in `.env`) when it is missing,
+     * so that the session cookies can be encrypted.
+     */
+    private function configureSetup(): void
+    {
+        if ($this->app->runningInConsole() || ! Installation::needsSetup()) {
+            return;
+        }
+
+        config(['session.driver' => 'file', 'cache.default' => 'file']);
+
+        // Already resolved by some packages while booting, with the store of the configuration
+        $this->app->forgetInstance('cache.store');
+        $this->app->forgetInstance(\Illuminate\Cache\RateLimiter::class);
+        Cache::clearResolvedInstances();
+        RateLimiter::clearResolvedInstances();
+
+        if (blank(config('app.key'))) {
+            $key = 'base64:'.base64_encode(Encrypter::generateKey((string) config('app.cipher')));
+            $environmentFile = new EnvironmentFile;
+
+            // Without a writable `.env` the key changes on every request: the wizard reports it
+            if ($environmentFile->isWritable()) {
+                $environmentFile->writeMissing(['APP_KEY' => $key]);
+            }
+
+            config(['app.key' => $key]);
+        }
+    }
+
+    /**
+     * Show the name of the application from the General settings (see `AppName`): on every web request, in the queued
+     * jobs and the scheduled tasks (e.g. the notifications they send), and as soon as it is changed. The other Artisan
+     * commands keep `APP_NAME`, so that they work without a database (e.g. while building a release).
+     */
+    private function configureAppName(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            $this->app->booted(fn () => AppName::apply());
+        }
+
+        Event::listen(JobProcessing::class, fn () => AppName::apply());
+        Event::listen(ScheduledTaskStarting::class, fn () => AppName::apply());
+        Event::listen(SettingsSaved::class, function (SettingsSaved $event): void {
+            if ($event->settings instanceof GeneralSettings) {
+                AppName::apply($event->settings);
+            }
         });
     }
 

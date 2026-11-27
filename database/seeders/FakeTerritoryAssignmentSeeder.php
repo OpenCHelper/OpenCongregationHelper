@@ -32,13 +32,14 @@ class FakeTerritoryAssignmentSeeder extends Seeder
      * Run the database seeds.
      *
      * Each territory gets at most one assignment, so that it is never assigned to two users at
-     * once, and only the campaigns already started (see `FakeCampaignSeeder`) are used.
+     * once, and only the campaigns already started and not terminated (see `FakeCampaignSeeder`) are used: a
+     * terminated campaign gets no new assignments.
      */
     public function run(): void
     {
         $users = User::all();
         $campaigns = Campaign::query()
-            ->where(fn ($query) => $query->whereNull('valid_from')->orWhere('valid_from', '<=', now()))
+            ->withActive()
             ->get();
 
         if ($campaigns->isEmpty()) {

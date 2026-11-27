@@ -17,6 +17,9 @@ l'assegnazione, che resta nello storico del territorio.
 4. Se vuoi, scegli una **Campagna** (vengono proposte solo le campagne non ancora terminate).
 5. Clicca **Crea**.
 
+Se il territorio è già stato lavorato (assegnato e riconsegnato) nella campagna scelta, una casella ti chiede di
+confermare che debba uscire di nuovo: di norma un territorio esce una sola volta per campagna.
+
 ![Assegnare un territorio](/docs/user-documentation/it/assignments/assets/assign-modal.webp)
 
 L'assegnatario riceve una notifica e un'email (tranne se è un utente virtuale), e il territorio risulta fuori
@@ -34,8 +37,10 @@ nell'elenco dei territori.
 
 L'assegnazione viene chiusa con la data di oggi e l'assegnatario riceve una notifica (tranne se è un utente virtuale).
 
-Da **Assegnazioni** non c'è un pulsante per riconsegnare un territorio: clicca **Modifica** sulla sua riga e imposta la
-**Data fine** (vedi [Storico delle assegnazioni](history#correggere-unassegnazione)).
+Puoi riconsegnarlo anche da **Assegnazioni** (e dallo storico delle assegnazioni di un territorio, di una persona o di
+una campagna): clicca **Termina assegnazione** sulla riga di un'assegnazione in corso, oppure in cima alla pagina
+dell'assegnazione. Per registrare una riconsegna in un'altra data, clicca invece **Modifica** nel menu **⋮** della riga
+e imposta la **Data fine** (vedi [Storico delle assegnazioni](history#correggere-unassegnazione)).
 
 ### Richieste di riconsegna
 
@@ -49,7 +54,8 @@ ruolo che lo permette.
 Nell'elenco **Territori**, spunta i territori, poi apri il menu delle **azioni di massa** e scegli:
 
 - **Assegna massivamente**: scegli la persona (e, se vuoi, una campagna) e clicca **Invia**. I territori già fuori
-  vengono saltati;
+  vengono saltati, come quelli già lavorati nella campagna scelta, a meno che spunti **Assegna anche …**, che li
+  elenca;
 - **Termina assegnazioni**: riconsegna, dopo una conferma, tutti i territori selezionati che sono fuori. Gli altri
   vengono saltati, come quelli che il tuo ruolo non ti permette di riconsegnare.
 

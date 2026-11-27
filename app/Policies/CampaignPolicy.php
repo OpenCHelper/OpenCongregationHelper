@@ -8,6 +8,10 @@ use App\Models\Campaign;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
+/**
+ * Only the actions offered by the resource have a permission (see `resources.manage` in `config/filament-shield.php`,
+ * which `ShieldSeeder` creates): the others are denied, since Filament would allow an action without a method here.
+ */
 class CampaignPolicy
 {
     use HandlesAuthorization;
@@ -64,11 +68,11 @@ class CampaignPolicy
 
     public function replicate(AuthUser $authUser, Campaign $campaign): bool
     {
-        return $authUser->can('Replicate:Campaign');
+        return false;
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:Campaign');
+        return false;
     }
 }

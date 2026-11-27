@@ -1,0 +1,225 @@
+name: E2E tests
+
+on:
+  # Every pull request (forks included), and what lands on main
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch: # Manually trigger a workflow run
+
+permissions:
+  contents: read
+
+env:
+  # Same major version installed in the Sail image (see docker-compose.yml)
+  node_version: "24.x"
+  php_extensions: >-
+    bcmath,calendar,ctype,curl,date,dom,exif,fileinfo,filter
+    ,gd,gettext,gmp,hash,iconv,imagick,intl,json,libxml,mbstring
+    ,mysqli,mysqlnd,openssl,pcre,PDO,pdo_mysql,pdo_sqlite
+    ,Phar,random,Reflection,session,SimpleXML,SPL,sqlite3,standard
+    ,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib
+
+jobs:
+  run-e2e-tests:
+    name: ${{ matrix.suite == 'setup-wizard' && format('E2E setup wizard ({0})', matrix.database) || 'E2E all' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.timeout }}
+
+    # The browser tests run once, on MySQL (the database of production and of the PR previews): the database support
+    # is tested by the Pest tests (`run-pest-tests.yml`), where the query layer is. The setup wizard is the exception:
+    # it configures the database of its run (see `tests/e2e/setup-wizard.spec.ts`), so it runs on each supported
+    # database. To add one (e.g. `mariadb` or `pgsql`), add a `setup-wizard` entry with its image, port and user.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Every project but the setup wizard: keep it in sync with the projects of `playwright.config.ts`
+          - suite: all
+            database: mysql
+            projects: --project=auth-setup --project=chromium --project=mobile --project=mobile-webkit --project=global-state
+            # WebKit for the `@mobile` tests on an iPhone (`mobile-webkit`)
+            browsers: chromium webkit
+            timeout: 45
+            # Same version as docker-compose.yml
+            mysql_image: mysql:8.0
+            port: 3306
+            username: root
+          - suite: setup-wizard
+            database: sqlite
+            projects: --project=setup-wizard
+            browsers: chromium
+            timeout: 15
+            mysql_image: ""
+          - suite: setup-wizard
+            database: mysql
+            projects: --project=setup-wizard
+            browsers: chromium
+            timeout: 15
+            mysql_image: mysql:8.0
+            port: 3306
+            username: root
+
+    # A service with an empty image is not started: only the runs on MySQL have it
+    services:
+      mysql:
+        image: ${{ matrix.mysql_image }}
+        env:
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent --host=127.0.0.1 -uroot -ppassword"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+
+    env:
+      # Read by `tests/e2e/support/serve.sh` and the setup wizard test
+      E2E_DB_CONNECTION: ${{ matrix.database }}
+      E2E_DB_HOST: 127.0.0.1
+      E2E_DB_PORT: ${{ matrix.port }}
+      E2E_DB_USERNAME: ${{ matrix.username }}
+      E2E_DB_PASSWORD: password
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP and Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          # The version of the platform of composer.json
+          php-version: "8.2"
+          extensions: ${{ env.php_extensions }}
+          coverage: none
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fail-fast: true
+
+      - name: Print the OPcache settings of PHP
+        run: php -i | grep -E "^opcache\.(enable|enable_cli|jit|jit_buffer_size) " || echo "OPcache is not loaded"
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.node_version }}
+          cache: npm
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v6
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-ansi --no-interaction --no-progress --no-scripts --optimize-autoloader
+
+      # The assets must be built after the Composer dependencies are installed, since the Filament themes import CSS
+      # from `vendor`
+      - name: Install NodeJS dependencies
+        run: npm ci
+
+      - name: Build front-end assets
+        run: npm run build
+
+      - name: Get Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          # One cache per suite, since each one installs its own browsers (`matrix.browsers`): a cache saved with fewer
+          # of them would miss the others
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.suite }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        env:
+          BROWSERS: ${{ matrix.browsers }}
+        # Word splitting is wanted: one argument per browser
+        run: npx playwright install --with-deps ${BROWSERS}
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        env:
+          BROWSERS: ${{ matrix.browsers }}
+        run: npx playwright install-deps ${BROWSERS}
+
+      - name: Run E2E tests
+        env:
+          PROJECTS: ${{ matrix.projects }}
+        run: |
+          # Note when the app server stops answering, with its processes and the memory at that moment (printed by
+          # the "Print the state of the test servers" step)
+          (
+            up=""
+            while true; do
+              if curl -s -o /dev/null --max-time 10 http://127.0.0.1:8010/up; then now=yes; else now=no; fi
+              if [[ "$now" != "$up" ]]; then
+                echo "$(date -u +%T) answering: ${now}"
+                ps -eo pid,ppid,etime,rss,args | grep -E "[p]hp .*-S " || echo "No PHP server is running"
+                free -m | head -2
+                up="$now"
+              fi
+              sleep 5
+            done
+          ) > "${RUNNER_TEMP}/server-watch.log" 2>&1 &
+
+          # Word splitting is wanted: one argument per project
+          # shellcheck disable=SC2086
+          npx playwright test ${PROJECTS}
+
+      # Printed at the end of the log (the earlier lines of a long log can be hard to reach): why the test servers may
+      # have stopped, e.g. a crash or the kernel killing them for lack of memory
+      - name: Print the state of the test servers
+        if: failure()
+        run: |
+          echo "::group::When the app server answered (checked every 5 seconds)"
+          cat "${RUNNER_TEMP}/server-watch.log" || true
+          echo "::endgroup::"
+          echo "::group::Errors of the test servers"
+          tail -n 200 storage/e2e/*/logs/server.log || true
+          echo "::endgroup::"
+          echo "::group::Last errors of the application"
+          grep -h "\.ERROR:" storage/e2e/*/logs/laravel.log | cut -c1-400 | tail -n 50 || true
+          echo "::endgroup::"
+          echo "::group::Processes killed by the kernel"
+          sudo dmesg 2>/dev/null | grep -iE "killed process|out of memory|segfault" | tail -n 20 || true
+          echo "::endgroup::"
+          echo "::group::Memory and PHP servers"
+          free -m
+          ps -eo pid,ppid,etime,rss,args | grep -E "[p]hp .*-S " || echo "No PHP server is running"
+          echo "::endgroup::"
+
+      - name: Upload test report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ matrix.suite }}-${{ matrix.database }}
+          path: |
+            playwright-report/
+            test-results/
+            storage/e2e/*/logs/
+          retention-days: 14
+
+      - name: Explain how to debug the failed tests
+        if: failure()
+        env:
+          REPORT: playwright-report-${{ matrix.suite }}-${{ matrix.database }}
+          RUN: ${{ matrix.suite }}, ${{ matrix.database }}
+        run: |
+          {
+            echo "### Debugging the failed E2E tests (${RUN})"
+            echo
+            echo "Download the \`${REPORT}\` artifact of this run, unzip it, then:"
+            echo
+            echo "- \`npx playwright show-report playwright-report\`: the report, with the screenshot, the video and the trace of each failed test;"
+            echo "- \`npx playwright show-trace test-results/<test>/trace.zip\` (or drop the file on https://trace.playwright.dev) to replay a test step by step, with the page, the network and the console;"
+            echo "- \`storage/e2e/<instance>/logs/laravel.log\`: the errors of the application."
+          } >> "$GITHUB_STEP_SUMMARY"

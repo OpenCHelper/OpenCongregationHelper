@@ -28,6 +28,13 @@ class DeleteUser implements DeletesUsers
             ]);
         }
 
+        // Nobody could manage the application anymore (see `UserObserver::guardDeletion()`)
+        if ($user->isLastSuperAdmin()) {
+            throw ValidationException::withMessages([
+                'password' => [__('profile.delete_account.last_super_admin')],
+            ]);
+        }
+
         DB::transaction(function () use ($user) {
             $user->deleteProfilePhoto();
             $user->tokens->each->delete();

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TerritoryAssignments\Actions;
 
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
 use App\Models\Campaign;
 use App\Models\Territory;
 use App\Models\TerritoryAssignment;
@@ -10,6 +11,7 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +34,7 @@ class CreateAssignmentAction extends Action
 
                 return $assignment === null || $assignment->ended_at !== null;
             })
-            ->schema([
+            ->schema(fn (Territory $record): array => [
                 Select::make('assignee_id')
                     ->label(__('filament-resources.territory_assignment.action_assigned_to'))
                     ->options(fn (): array => User::getAssigneeOptions())
@@ -41,7 +43,12 @@ class CreateAssignmentAction extends Action
                 Select::make('campaign_id')
                     ->label(__('filament-resources.territory_assignment.field_campaign'))
                     ->options(fn (): array => Campaign::query()->notTerminated()->pluck('name', 'id')->all())
-                    ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign')),
+                    ->placeholder(__('filament-resources.territory_assignment.placeholder_campaign'))
+                    ->live(),
+                TerritoryAssignmentResource::getCampaignRepeatConfirmation(
+                    fn (): int => $record->id,
+                    fn (Get $get): mixed => $get('campaign_id'),
+                ),
             ])
             ->action(function (Territory $record, array $data): void {
                 try {

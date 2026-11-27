@@ -41,12 +41,32 @@ class AssignTerritoryTool extends CongregationTool
             'campaign_id' => ['nullable', 'integer', Rule::exists(Campaign::class, 'id')],
             'started_at' => ['nullable', 'date', 'before_or_equal:today'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'confirm_campaign_repeat' => ['nullable', 'boolean'],
         ]);
 
         $territory = Territory::query()->find($validated['territory_id']);
 
         if ($territory === null) {
             return $this->notFound('territory');
+        }
+
+        $campaignId = $validated['campaign_id'] ?? null;
+
+        // A territory already worked in the campaign most likely should not go out again for it, as from the app
+        // (`TerritoryAssignmentResource::getCampaignRepeatConfirmation()`): only once the user confirms it
+        if (! ($validated['confirm_campaign_repeat'] ?? false) && TerritoryAssignment::territoryWorkedInCampaign($territory->id, $campaignId)) {
+            $campaign = Campaign::query()->find($campaignId);
+
+            // Not worth a confirmation when the assignment would be refused anyway (see TerritoryAssignmentObserver)
+            if (TerritoryAssignment::territoryHasOpenAssignment($territory->id)) {
+                return Response::error(__('validation.territory_assignment.already_assigned'));
+            }
+
+            if ($campaign?->isTerminated()) {
+                return Response::error(__('validation.campaign.not_terminated'));
+            }
+
+            return Response::error("Territory {$territory->name} has already been worked in the campaign {$campaign?->name}, so it most likely should not go out again for it. Tell the user and, only if they confirm, call this tool again with `confirm_campaign_repeat` set to true.");
         }
 
         // Only the date is given: a territory given today starts now (the observer's default), not at midnight
@@ -60,7 +80,7 @@ class AssignTerritoryTool extends CongregationTool
         // transaction makes the check atomic, as from the app (`CreateAssignmentAction`)
         $assignment = DB::transaction(fn (): TerritoryAssignment => $territory->assignments()->create(array_filter([
             'assignee_id' => $validated['assignee_id'],
-            'campaign_id' => $validated['campaign_id'] ?? null,
+            'campaign_id' => $campaignId,
             'started_at' => $startedAt,
             'notes' => $validated['notes'] ?? null,
             'created_by' => $this->user()?->id,
@@ -82,6 +102,7 @@ class AssignTerritoryTool extends CongregationTool
             'campaign_id' => $schema->integer()->description('The id of a campaign not ended yet, if the territory is assigned for it (see `list_campaigns`).'),
             'started_at' => $schema->string()->format('date')->description('When the territory was given (YYYY-MM-DD), not in the future. Default today.'),
             'notes' => $schema->string()->description('Notes about the assignment.'),
+            'confirm_campaign_repeat' => $schema->boolean()->description('Set to true only once the user confirmed to assign again a territory already worked in the same campaign.'),
         ];
     }
 }

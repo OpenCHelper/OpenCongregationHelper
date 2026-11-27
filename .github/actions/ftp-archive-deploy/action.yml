@@ -38,8 +38,8 @@ inputs:
     default: "."
   keep:
     description: >-
-      Paths of the live release moved into the new one (one per line), e.g. `.env` (managed on the server),
-      `storage/app`: they replace the copies of the new release
+      Paths of the live release (folders or files) moved into the new one (one per line), e.g. `.env` (managed on
+      the server), `storage/app`: they replace the copies of the new release, and those missing are skipped
     required: false
     default: ""
   exclude:

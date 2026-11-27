@@ -14,6 +14,7 @@ You choose where to host the webapp, you own the data.
 
 | Feature | What it does | Screenshot |
 | --- | --- | --- |
+| **Setup wizard** | Install from the browser, no terminal needed: it checks the server, fills in the `.env` file, creates the database and the root user, and sets up the congregation step by step | <a href="docs/user-documentation/en/setup.md#from-the-browser"><img src="docs/user-documentation/en/assets/setup-wizard.gif" alt="Setup wizard" width="300"></a> |
 | **Territories and zones** | Create territories one by one or import them from a CSV file, group them into zones, and add a map, an image (e.g. a scanned paper card), notes and tags | <a href="docs/user-documentation/en/territories/assets/territory-view.webp"><img src="docs/readme-screenshots/territory-view.webp" alt="Territories and zones" width="300"></a> |
 | **Assignments** | Record when a territory is given out and returned, with the full history of each one | <a href="docs/user-documentation/en/territories/assets/territory-assignment-history.webp"><img src="docs/readme-screenshots/territory-assignment-history.webp" alt="Assignments" width="300"></a> |
 | **Campaigns** | Follow special activities (e.g. the Memorial invitations) separately, with their dates and progress | <a href="docs/user-documentation/en/assignments/assets/campaign-view.webp"><img src="docs/readme-screenshots/campaign-view.webp" alt="Campaigns" width="300"></a> |
@@ -129,6 +130,34 @@ The preferred way of developing is by using **Docker Compose** to build the cont
     ```shell
     sail npm install && sail npm run dev
     ```
+
+### End-to-end tests
+
+The browser tests in [`tests/e2e`](./tests/e2e) use [Playwright](https://playwright.dev) on two instances of the
+application, each with its own `.env.e2e-*` file, storage (`storage/e2e/`) and database, so they never touch the
+development ones: `app`, installed and seeded with `E2eSeeder` (a user for each role, password `password`), and
+`setup`, empty, for the setup wizard. They are served by
+[`tests/e2e/support/serve.sh`](./tests/e2e/support/serve.sh) on the ports 8010 and 8011.
+
+They run on Chromium (desktop), and the ones tagged `@mobile` in their title also on a phone: an Android one (Pixel 7,
+Chromium) and an iPhone (iPhone 14, WebKit, the engine of Safari and of every browser on iOS). Run the tests of one of
+them with `npx playwright test --project=<name>` (`chromium`, `mobile` or `mobile-webkit`).
+
+1. Build the frontend assets and install the browsers (once):
+    ```shell
+    npm run build && npx playwright install chromium webkit
+    ```
+2. Run the tests (`npm run test:e2e:ui` opens the interactive runner):
+    ```shell
+    npm run test:e2e
+    ```
+
+They use SQLite by default: set `E2E_DB_CONNECTION` (`mysql`, `mariadb` or `pgsql`) and `E2E_DB_HOST`, `E2E_DB_PORT`,
+`E2E_DB_USERNAME`, `E2E_DB_PASSWORD` to run them on another database (the databases `e2e_app` and `e2e_setup` are
+created). Outside of CI, servers already running on the ports are reused: stop them to start from fresh data. The
+`E2E tests` workflow (`run-e2e-tests.yml`) runs them on MySQL, and the setup wizard on SQLite and MySQL: the support of
+the databases is tested by the `Pest tests` workflow (`run-pest-tests.yml`), on MySQL and SQLite, each with and
+without a table prefix.
 
 ### Run workflows locally
 

@@ -13,6 +13,9 @@ ruolo `super_admin`. Le opzioni sono raggruppate per area, con una pagina ciascu
 
 ![Impostazioni generali](/docs/user-documentation/it/administration/assets/settings-general.webp)
 
+- **Nome dell'app**: mostrato nella scheda del browser, nella barra in alto (quando non c'è un logo), sull'[app
+  installata](../basics/interface#installare-lapp) e nelle email. Parte da `APP_NAME`, che continua a identificare
+  l'installazione sul server;
 - **Indirizzo della Sala del Regno**: l'indirizzo della Sala del Regno della congregazione (facoltativo);
 - **Logo**: mostrato nella barra in alto al posto del nome (al massimo 2 MB);
 - **Colore principale**: il colore dei pulsanti, dei link e degli elementi selezionati, per gli utenti che non ne hanno
@@ -94,7 +97,7 @@ disattivati in modo predefinito:
 Agli utenti che hanno già effettuato l'accesso viene chiesto alla pagina successiva. Con entrambi attivi, prima
 confermano l'email, poi configurano l'autenticazione a due fattori.
 
-> ⚠️ **Attenzione:** perché l'utente root (il primo utente creato durante l'installazione) non resti mai bloccato fuori,
+> ⚠️ **Attenzione:** perché l'utente root (il primo utente creato durante l'installazione, se non ha ceduto il ruolo) non resti mai bloccato fuori,
 > un requisito si può attivare solo quando l'utente root lo soddisfa: configura prima l'autenticazione a due fattori o
 > conferma l'indirizzo email dell'utente root. Disattivare un requisito è sempre possibile. Inoltre all'utente root non
 > viene mai chiesto di confermare l'email, anche se la cambia in seguito, così che possa sempre raggiungere queste

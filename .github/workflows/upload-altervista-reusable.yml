@@ -343,11 +343,14 @@ jobs:
           php-handler: ${{ vars.SPACE_PHP_HANDLER }}
           router-previews: ${{ inputs.router-previews }}
           # `.env` is managed on the server (unless written by the build, see the `dotenv` input), and the files of the
-          # environment survive its releases
+          # environment survive its releases, as do the keys of the AI assistants unless the database is reset (new keys
+          # would disconnect every assistant; missing ones are created by `och:post-deploy`)
           keep: |
             ${{ inputs.dotenv == '' && '.env' || '' }}
             storage/app
             storage/logs
+            ${{ !inputs.reset-database && 'storage/oauth-private.key' || '' }}
+            ${{ !inputs.reset-database && 'storage/oauth-public.key' || '' }}
           # A release that changes no Composer package uploads only the autoloader of `vendor/`
           reuse-vendor: true
 

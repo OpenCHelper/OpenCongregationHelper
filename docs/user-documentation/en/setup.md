@@ -71,6 +71,8 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 | `PASSWORD_LEAK_CHECK` | When `APP_ENV` is `production`, the passwords need at least 12 characters (8 elsewhere). When this is `true`, they must not appear in a known data leak either: they are checked with [Have I Been Pwned](https://haveibeenpwned.com/Passwords), by sending only the first 5 characters of their SHA-1 hash to `api.pwnedpasswords.com`. If the service does not answer within 5 seconds the password is accepted. Defaults to `true` in production (set it to `false` on servers that cannot reach the service) and to `false` elsewhere. The super administrators can change it from the [Security settings](administration/settings#security). |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | How emails are sent. `failover` tries the native PHP `mail()` function first and falls back to the log. |
 | `QUEUE_CONNECTION` | `database` (recommended in production) or `sync` (emails are sent immediately, during the request). |
+| `SETUP_TOKEN` | Opens the [setup wizard](#from-the-browser) while the application is not installed. Choose a long random value: the wizard removes it from `.env` once installed. |
+| `SETUP_WIZARD` | `false` turns the setup wizard off, e.g. for the installations set up from the terminal. Defaults to `true`. |
 | `ARTISAN_CRON_TOKEN` | Secret required by the endpoints that process the queue and the scheduled jobs. If empty, those endpoints are disabled. |
 | `ENABLE_SHARED_PII` | When `true`, the public page of a shared assignment also shows the assignee's name and the territory notes. Defaults to `false`. |
 | `GUEST_ALLOW_RETURNING_ASSIGNMENT` | When `true`, whoever opens the public page of a shared assignment can ask the territory department to close it (as the assignee can from the application). Defaults to `false`. |
@@ -78,6 +80,43 @@ changing them in `.env`, or the settings not changed from those pages keep the p
 | `APP_VERSION_BRANCH_FILE`, `APP_VERSION_COMMIT_FILE` | Files the Git branch and commit are read from (by default `.git/HEAD` and `.git/refs/heads/<branch>`), shown in **About** in the user menu outside of `production`. Useful on servers without the `.git` folder. |
 
 ## Installation
+
+### From the browser
+
+![The setup wizard, from the setup token to the installed app](/docs/user-documentation/en/assets/setup-wizard.gif)
+
+Once the files are on the server (with the PHP dependencies and the frontend assets), add a `SETUP_TOKEN` of your
+choice to the `.env` file, then open the application: until it is installed, every page opens the **setup wizard**
+(`/setup`), which asks for the token and then:
+
+1. checks the server: PHP version and extensions, HTTPS and its certificate, writable folders and `.env` file;
+2. asks for the values missing from `.env` (address, timezone, language, database and email) and adds them to the file,
+   after checking that the database can be reached. The values already set are shown but never changed (the passwords
+   only as set), except the database settings (`DB_*`, table prefix included: a password left empty is kept) and the
+   mailer (`MAIL_MAILER`), which can be switched among those of `config/mail.php` so that the test email can be sent
+   another way. The database connection and the email settings can be tested before going on. The values with a fallback
+   in the configuration can be left empty. The keys of the [push notifications](#push-notifications) are created when
+   both are missing, and those of the [AI assistants](#ai-assistants) when missing;
+3. shows how to run the [scheduled tasks and the queue](#scheduled-tasks-and-emails), with a shell (the cron lines)
+   or without one (the addresses an external cron service calls, with their `ARTISAN_CRON_TOKEN`, created on request),
+   and lets you choose the queue (`QUEUE_CONNECTION`);
+4. creates the database tables and the permissions;
+5. creates the root user (a password can be generated), and can send a test email to it;
+6. sets the name, logo and colour of the app, its administrators (who are invited by email) and its features: the AI
+   assistants, the sharing of the assignments and the requirements of the accounts. Requiring the email confirmation
+   needs a test email that went through first; requiring two-factor authentication makes the root user set it up right
+   after logging in;
+7. shows a summary of the choices before installing.
+
+Reloading the page goes on from the last step completed, with the values typed so far (except the passwords). Before
+its first change, the wizard copies `.env` to `.env.backup-<date>-<time>`, next to it.
+
+The root user it creates is also written in `INITIAL_ROOT_*` (replacing their values), for `och:recover-root`, and
+`SETUP_TOKEN` is removed from `.env` (remove it yourself if the server sets it, or if the file cannot be written).
+Then log in as the root user. Without a token, the wizard only explains how to add
+one, so that nobody else can install the application first.
+
+### From the terminal
 
 1. Install the PHP dependencies and build the frontend assets:
 
@@ -108,7 +147,8 @@ changing them in `.env`, or the settings not changed from those pages keep the p
     php artisan och:doctor
     ```
 
-> 🔒 **The root user** is the user with ID 1. It can never be deleted nor impersonated and, outside of the `production`
+> 🔒 **The root user** is the user with ID 1, until it hands its role over to another super administrator (see
+> [Users](administration/users#handing-the-root-user-over)). It can never be deleted nor impersonated and, outside of the `production`
 > environment, its email, password, access and roles cannot be changed by anyone.
 
 ## Updating
@@ -137,10 +177,13 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 
 ## Troubleshooting
 
-- **`php artisan och:doctor`** checks the configuration (application key and URL, database and migrations, storage
-  link, keys of the AI assistants, root user and super administrators, emails, cron endpoints) and tells what to do
-  about each problem. It changes nothing, so it can run any time.
-- **`php artisan och:recover-root`** gives the access to the root user back when nobody can manage the application
+- **`php artisan och:doctor`** checks the configuration (application key and URL, HTTPS, database and migrations,
+  storage link, keys of the AI assistants, root user and its two-factor authentication, super administrators, emails,
+  push notifications, cron endpoints, a `SETUP_TOKEN` left after the installation) and tells what to do about each
+  problem. It changes nothing, so it can run any time. The [setup wizard](#from-the-browser) checks the server the same
+  way.
+- **`php artisan och:recover-root`** gives the access to the root user (the current one, also after a
+  [hand-over](administration/users#handing-the-root-user-over)) back when nobody can manage the application
   anymore (e.g. a lost password, or its access or roles removed in production): it sets its password from
   `INITIAL_ROOT_PASSWORD` (or asks for it), lets it log in again, marks its email as verified, turns off its two-factor
   authentication and makes it a super administrator. It asks for a confirmation, or needs `--force` when run without a

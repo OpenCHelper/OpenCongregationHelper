@@ -72,6 +72,10 @@ return [
             'label' => 'Permitir los asistentes de IA',
             'helper' => 'Cada usuario puede conectar un asistente de IA desde su perfil: puede leer y modificar lo mismo que ese usuario (p. ej. territorios, asignaciones), por lo que los datos se envían al proveedor del asistente. Al desactivarlo, se desconectan todos.',
         ],
+        'app_name' => [
+            'label' => 'Nombre de la aplicación',
+            'helper' => 'Se muestra en la pestaña del navegador, en la barra superior (sin logotipo), en la aplicación instalada y en los correos.',
+        ],
         'kingdom_hall_address' => [
             'label' => 'Dirección del Salón del Reino',
             'placeholder' => 'Calle, número, código postal y ciudad',

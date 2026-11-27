@@ -16,6 +16,8 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\RelationManagers\ContactsRelationManager;
 use App\Models\Department;
 use App\Models\User;
+use App\Policies\UserPolicy;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
@@ -36,6 +38,7 @@ use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Auth\Access\Response;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -84,6 +87,23 @@ class UserResource extends Resource
     public static function getNavigationGroup(): string|UnitEnum|null
     {
         return NavigationGroup::Administration;
+    }
+
+    /**
+     * Besides the policy, while the root user is protected only the root user itself can edit it: Shield allows
+     * everything to super administrators before the policy is asked. This covers the edit page and the Edit buttons,
+     * which then show the reason as their tooltip.
+     */
+    #[Override]
+    public static function getEditAuthorizationResponse(Model $record): Response
+    {
+        $response = parent::getEditAuthorizationResponse($record);
+
+        if ($response->denied() || ! $record instanceof User) {
+            return $response;
+        }
+
+        return UserPolicy::getRootUserProtectionResponse(Auth::user(), $record) ?? $response;
     }
 
     /**
@@ -156,7 +176,13 @@ class UserResource extends Resource
                                     .' '.__('filament-resources.user.field_can_login_invitation_helper'),
                                 default => __('filament-resources.user.field_can_login_helper'),
                             })
-                            ->disabled(fn (?User $record) => $record?->isRootUserProtected()),
+                            ->disabled(fn (?User $record) => $record?->isRootUserProtected())
+                            // There must always be a super administrator who can log in (see `UserObserver::updating()`)
+                            ->rule(fn (?User $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($record): void {
+                                if (! $value && $record?->isLastSuperAdmin()) {
+                                    $fail(__('filament-resources.user.last_super_admin_access'));
+                                }
+                            }),
                         Select::make('roles')
                             ->label(__('filament-resources.user.field_roles'))
                             ->hidden(fn (Get $get) => $get('can_login') === false)
@@ -165,6 +191,13 @@ class UserResource extends Resource
                                 || ! static::canManageRoles()
                             )
                             ->relationship('roles', 'name')
+                            ->rule(fn (?User $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($record): void {
+                                $superAdminRole = Utils::getRoleModel()::query()->where('name', Utils::getSuperAdminName())->value('id');
+
+                                if ($record?->isLastSuperAdmin() && ! in_array($superAdminRole, array_map('intval', (array) $value), true)) {
+                                    $fail(__('filament-resources.user.last_super_admin_role'));
+                                }
+                            })
                             ->multiple()
                             ->preload()
                             ->searchable()
@@ -338,21 +371,9 @@ class UserResource extends Resource
                 Impersonate::make()
                     ->requiresConfirmation()
                     ->redirectTo('/'),
+                // The policy denies editing the protected root user with a message, shown as the tooltip
                 EditAction::make()
-                    ->disabled(function (User $record) {
-                        $currentUser = Auth::user();
-
-                        return $record->isRootUserProtected() &&
-                               ! ($currentUser instanceof User && $currentUser->isRootUser());
-                    })
-                    ->tooltip(function (User $record) {
-                        $currentUser = Auth::user();
-
-                        return $record->isRootUserProtected() &&
-                               ! ($currentUser instanceof User && $currentUser->isRootUser())
-                            ? __('profile.root_user_protection.edit_action_disabled')
-                            : null;
-                    }),
+                    ->authorizationTooltip(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -1,0 +1,143 @@
+name: Pest tests
+
+on:
+  # Every pull request (forks included), and what lands on main
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch: # Manually trigger a workflow run
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  # Same major version installed in the Sail image (see docker-compose.yml)
+  node_version: "24.x"
+  php_extensions: >-
+    bcmath,calendar,ctype,curl,date,dom,exif,fileinfo,filter
+    ,gd,gettext,gmp,hash,iconv,imagick,intl,json,libxml,mbstring
+    ,mysqli,mysqlnd,openssl,pcre,PDO,pdo_mysql,pdo_sqlite
+    ,Phar,random,Reflection,session,SimpleXML,SPL,sqlite3,standard
+    ,tokenizer,xml,xmlreader,xmlwriter,xsl,zip,zlib
+
+jobs:
+  run-pest-tests:
+    name: Pest (${{ matrix.database }}, prefixed=${{ matrix.db-prefix != '' && 'yes' || 'no' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # The database support is tested here, where the query layer (raw SQL, JSON operators, migrations, prefixes) is
+    # exercised: the E2E tests only run on MySQL. To add a database (e.g. `mariadb` or `pgsql`), add it to `database`,
+    # an `include` entry with its image, port and user, and its PHP extension to `php_extensions`.
+    #
+    # Each database also runs with the longest table prefix: the PR previews share one database, prefixing their tables
+    # with `p<N>_` (`DB_PREFIX`), so this catches raw SQL missing the prefix and, on MySQL, index names longer than its
+    # 64 characters.
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [mysql, sqlite]
+        db-prefix: ["", "p9999_"]
+        include:
+          - database: mysql
+            # Same version as docker-compose.yml
+            image: mysql:8.0
+            port: 3306
+            username: root
+          - database: sqlite
+            image: ""
+          # The coverage is measured once
+          - database: mysql
+            db-prefix: ""
+            coverage: true
+
+    # A service with an empty image is not started: only the runs on a database server have it
+    services:
+      database:
+        image: ${{ matrix.image }}
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          # The parallel processes connect to it to create their own `testing_test_<N>` databases
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent --host=127.0.0.1 -uroot -ppassword"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+
+    # The real environment variables win over `.env` and the `<env>` entries of phpunit.xml
+    env:
+      DB_CONNECTION: ${{ matrix.database }}
+      DB_HOST: 127.0.0.1
+      # Not empty on SQLite either: the setup wizard tests fall back to them for the database server fields
+      DB_PORT: ${{ matrix.port || 3306 }}
+      DB_USERNAME: ${{ matrix.username || 'root' }}
+      DB_PASSWORD: password
+      # A file on SQLite, like the installations (each parallel process creates its own `<file>_test_<N>`): an in-memory
+      # database is lost when `db:wipe` disconnects from it (see `SharedDatabaseSafetyTest`)
+      DB_DATABASE: ${{ matrix.database == 'sqlite' && format('{0}/database/testing.sqlite', github.workspace) || 'testing' }}
+      DB_PREFIX: ${{ matrix.db-prefix }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP and Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          # The version of the platform of composer.json, and of the Sail image
+          php-version: "8.2"
+          extensions: ${{ env.php_extensions }}
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
+          # Only the code measured by phpunit.xml (`<source>`), not `vendor/`
+          ini-values: ${{ matrix.coverage && 'pcov.directory=app' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fail-fast: true
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.node_version }}
+          cache: npm
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v6
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-ansi --no-interaction --no-progress --no-scripts --optimize-autoloader
+
+      - name: Prepare Laravel environment
+        run: |
+          set -e
+
+          cp .env.example .env
+
+          # Print environment variables for debugging
+          echo "Environment variables:"
+          sed 's/^/    | /' < .env
+
+          php artisan key:generate --force
+
+          if [[ "$DB_CONNECTION" == "sqlite" ]]; then
+            touch "$DB_DATABASE"
+          fi
+
+      # The assets must be built after the Composer dependencies are installed, since the Filament themes import CSS
+      # from `vendor`
+      - name: Install NodeJS dependencies
+        run: npm ci
+
+      - name: Build front-end assets
+        run: npm run build
+
+      - name: Run tests${{ matrix.coverage && ' (with coverage)' || '' }}
+        run: php artisan test --parallel ${{ matrix.database != 'sqlite' && '--drop-databases' || '' }} ${{ matrix.coverage && '--coverage' || '' }}

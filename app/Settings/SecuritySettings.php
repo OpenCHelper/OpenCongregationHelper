@@ -26,6 +26,12 @@ class SecuritySettings extends ConfigSettings
      */
     public ?bool $password_leak_check = null;
 
+    /**
+     * The ID of the root user: the first user, until the root user hands its role over to another super administrator.
+     * Read it through `User::rootUserId()`, which also works before this setting exists (e.g. during the installation).
+     */
+    public int $root_user_id = 1;
+
     public static function group(): string
     {
         return 'security';

@@ -1,8 +1,9 @@
 @php
     use Filament\Support\Icons\Heroicon;
 
-    // A user who has assignments cannot be deleted (see `UserObserver::guardDeletion()`): the form only explains it
-    $canBeDeleted = ! auth()->user()->isRootUserProtected() && ! auth()->user()->hasAssignments();
+    // The root user, a user who has assignments and the last super administrator who can log in cannot be deleted (see
+    // `UserObserver::guardDeletion()`): the form only explains it
+    $canBeDeleted = ! auth()->user()->isRootUser() && ! auth()->user()->hasAssignments() && ! auth()->user()->isLastSuperAdmin();
 @endphp
 
 <div>
@@ -11,7 +12,7 @@
         :heading="__('profile.delete_account.title')"
         :description="__('profile.delete_account.description')"
     >
-        @if (auth()->user()->isRootUserProtected())
+        @if (auth()->user()->isRootUser())
             <x-filament::callout
                 color="danger"
                 :icon="Heroicon::OutlinedNoSymbol"
@@ -22,6 +23,12 @@
                 color="warning"
                 :icon="Heroicon::OutlinedNoSymbol"
                 :description="__('profile.delete_account.has_assignments')"
+            />
+        @elseif (auth()->user()->isLastSuperAdmin())
+            <x-filament::callout
+                color="warning"
+                :icon="Heroicon::OutlinedNoSymbol"
+                :description="__('profile.delete_account.last_super_admin')"
             />
         @else
             <p class="text-sm text-gray-500 dark:text-gray-400">
