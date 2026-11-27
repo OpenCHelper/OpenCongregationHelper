@@ -9,12 +9,24 @@ use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\Logs;
+use App\Filament\Resources\Activitylogs\ActivitylogResource;
+use App\Filament\Resources\Campaigns\CampaignResource;
 use App\Filament\Resources\Departments\DepartmentResource;
+use App\Filament\Resources\MailLogs\MailLogResource;
+use App\Filament\Resources\Posters\PosterResource;
+use App\Filament\Resources\PublicationRequests\PublicationRequestResource;
+use App\Filament\Resources\Publications\PublicationResource;
+use App\Filament\Resources\PublicationSubscribers\PublicationSubscriberResource;
+use App\Filament\Resources\Roles\Roles\RoleResource;
+use App\Filament\Resources\StorageLocations\StorageLocationResource;
+use App\Filament\Resources\Tags\TagResource;
+use App\Filament\Resources\Territories\TerritoryResource;
+use App\Filament\Resources\TerritoryAssignments\TerritoryAssignmentResource;
+use App\Filament\Resources\TerritoryZones\TerritoryZoneResource;
 use App\Filament\Widgets\NoDashboardAccess;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TerritoryCoverage;
 use App\Filament\Widgets\TerritoryGlobalMap;
-use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 
@@ -201,23 +213,45 @@ return [
 
     'resources' => [
         'subject' => 'model',
+        // Only the actions that the resources offer: the others would be permissions that do nothing (e.g. only the
+        // territories, zones, assignments and campaigns are soft deleted, and only the publications are reordered).
+        // The policies check these permissions only, and `ShieldSeeder` creates them.
         'manage' => [
+            CampaignResource::class => [
+                'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny',
+                'restore', 'restoreAny', 'forceDelete', 'forceDeleteAny',
+            ],
             // The departments are defined by the application: only their members can be changed
             DepartmentResource::class => [
                 'viewAny',
                 'view',
                 'update',
             ],
-            RoleResource::class => [
-                'viewAny',
-                'view',
-                'create',
-                'update',
-                'delete',
+            PosterResource::class => ['viewAny', 'view', 'create', 'update', 'delete', 'deleteAny'],
+            PublicationRequestResource::class => ['viewAny', 'view', 'create', 'update', 'delete', 'deleteAny'],
+            PublicationResource::class => ['viewAny', 'view', 'create', 'update', 'delete', 'reorder'],
+            // The subscriptions are changed, never deleted
+            PublicationSubscriberResource::class => ['viewAny', 'view', 'create', 'update'],
+            RoleResource::class => ['viewAny', 'view', 'create', 'update', 'delete', 'deleteAny'],
+            StorageLocationResource::class => ['viewAny', 'view', 'create', 'update', 'delete'],
+            TagResource::class => ['viewAny', 'view', 'create', 'update', 'delete', 'deleteAny'],
+            TerritoryAssignmentResource::class => [
+                'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny',
+                'restore', 'restoreAny', 'forceDelete', 'forceDeleteAny',
+            ],
+            TerritoryResource::class => [
+                'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny',
+                'restore', 'restoreAny', 'forceDelete', 'forceDeleteAny',
+            ],
+            TerritoryZoneResource::class => [
+                'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny',
+                'restore', 'restoreAny', 'forceDelete', 'forceDeleteAny',
             ],
         ],
         'exclude' => [
-            //
+            // Only the super administrators read the logs (see the `view-logs` gate): no role can grant them
+            ActivitylogResource::class,
+            MailLogResource::class,
         ],
     ],
 

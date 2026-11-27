@@ -31,17 +31,20 @@ Il ruolo **super_admin** (*Super Admin*) può fare tutto, comprese le azioni ris
 
 ## Significato dei permessi
 
-Per la maggior parte delle risorse (Territorio, Zona, Assegnazione, Campagna, Utente, …) esistono gli stessi permessi
-(*Reparto* ha solo **View Any**, **View** e **Update**, *Ruolo* solo **View Any**, **View**, **Create**, **Update** e
-**Delete**):
+Ogni risorsa ha i permessi delle azioni che offre:
 
-| Permesso | Permette di |
-|----------|-------------|
-| **View Any** | aprire l'elenco di quella risorsa |
-| **View** | aprire i dettagli di un record |
-| **Create** / **Update** / **Delete** | creare, modificare, eliminare i record |
-| **Restore**, **Force Delete** (e le versioni *Any*) | ripristinare i record eliminati, eliminarli definitivamente |
-| **Replicate**, **Reorder** | non usati al momento |
+| Permesso | Permette di | Risorse |
+|----------|-------------|---------|
+| **View Any** | aprire l'elenco di quella risorsa | tutte |
+| **View** | aprire i dettagli di un record | tutte |
+| **Create** / **Update** | creare, modificare i record | tutte (*Reparto* solo **Update**) |
+| **Delete** | eliminare un record | tutte tranne *Reparto* e *Pubblicazioni periodiche* |
+| **Delete Any** | eliminare insieme i record selezionati | Territorio, Zona, Assegnazione, Campagna, Utente, Poster, Richiesta, Tag, Ruolo |
+| **Restore**, **Force Delete** (e le versioni *Any*) | ripristinare i record eliminati, eliminarli definitivamente | Territorio, Zona, Assegnazione, Campagna |
+| **Reorder** | cambiare l'ordine dell'elenco | Pubblicazione |
+
+*Utente* ha anche **Restore**, **Force Delete** (e le versioni *Any*), **Replicate** e **Reorder**, non usati al
+momento. Il registro delle attività e quello delle email non hanno permessi: solo i super amministratori li leggono.
 
 Alcuni permessi hanno un significato particolare:
 

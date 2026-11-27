@@ -8,67 +8,71 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Tapp\FilamentMailLog\Models\MailLog;
 
+/**
+ * Only the super administrators read the logs (see the `view-logs` gate), so the resource is excluded from Shield and
+ * no role can grant its permissions; it can't be changed. Filament would allow an action without a method here.
+ */
 class MailLogPolicy
 {
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:MailLog');
+        return $authUser->can('view-logs');
     }
 
     public function view(AuthUser $authUser, MailLog $mailLog): bool
     {
-        return $authUser->can('View:MailLog');
+        return $authUser->can('view-logs');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:MailLog');
+        return false;
     }
 
     public function update(AuthUser $authUser, MailLog $mailLog): bool
     {
-        return $authUser->can('Update:MailLog');
+        return false;
     }
 
     public function delete(AuthUser $authUser, MailLog $mailLog): bool
     {
-        return $authUser->can('Delete:MailLog');
+        return false;
     }
 
     public function deleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('DeleteAny:MailLog');
+        return false;
     }
 
     public function restore(AuthUser $authUser, MailLog $mailLog): bool
     {
-        return $authUser->can('Restore:MailLog');
+        return false;
     }
 
     public function forceDelete(AuthUser $authUser, MailLog $mailLog): bool
     {
-        return $authUser->can('ForceDelete:MailLog');
+        return false;
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:MailLog');
+        return false;
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:MailLog');
+        return false;
     }
 
     public function replicate(AuthUser $authUser, MailLog $mailLog): bool
     {
-        return $authUser->can('Replicate:MailLog');
+        return false;
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:MailLog');
+        return false;
     }
 }

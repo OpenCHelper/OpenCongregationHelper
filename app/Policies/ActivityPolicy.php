@@ -8,67 +8,71 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Activitylog\Models\Activity;
 
+/**
+ * Only the super administrators read the logs (see the `view-logs` gate), so the resource is excluded from Shield and
+ * no role can grant its permissions; it can't be changed. Filament would allow an action without a method here.
+ */
 class ActivityPolicy
 {
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:Activity');
+        return $authUser->can('view-logs');
     }
 
     public function view(AuthUser $authUser, Activity $activity): bool
     {
-        return $authUser->can('View:Activity');
+        return $authUser->can('view-logs');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:Activity');
+        return false;
     }
 
     public function update(AuthUser $authUser, Activity $activity): bool
     {
-        return $authUser->can('Update:Activity');
+        return false;
     }
 
     public function delete(AuthUser $authUser, Activity $activity): bool
     {
-        return $authUser->can('Delete:Activity');
+        return false;
     }
 
     public function deleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('DeleteAny:Activity');
+        return false;
     }
 
     public function restore(AuthUser $authUser, Activity $activity): bool
     {
-        return $authUser->can('Restore:Activity');
+        return false;
     }
 
     public function forceDelete(AuthUser $authUser, Activity $activity): bool
     {
-        return $authUser->can('ForceDelete:Activity');
+        return false;
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:Activity');
+        return false;
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:Activity');
+        return false;
     }
 
     public function replicate(AuthUser $authUser, Activity $activity): bool
     {
-        return $authUser->can('Replicate:Activity');
+        return false;
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:Activity');
+        return false;
     }
 }
