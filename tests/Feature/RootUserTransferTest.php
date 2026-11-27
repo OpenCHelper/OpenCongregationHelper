@@ -169,8 +169,17 @@ test('the first user is the root user while the settings table does not exist ye
 });
 
 test('other errors reading the root user setting are raised', function () {
-    config(['settings.repositories.database.table' => 'users']);
     app()->forgetScopedInstances();
 
-    expect(fn () => User::rootUserId())->toThrow(QueryException::class);
+    // The settings table exists, but reading it fails (e.g. a lost connection), the same way on every database
+    $failed = false;
+    DB::connection()->beforeExecuting(function (string $query) use (&$failed): void {
+        if (! $failed && str_contains($query, 'settings')) {
+            $failed = true;
+
+            throw new QueryException(DB::connection()->getName(), $query, [], new PDOException('Connection lost'));
+        }
+    });
+
+    expect(fn () => User::rootUserId())->toThrow(QueryException::class, 'Connection lost');
 });
