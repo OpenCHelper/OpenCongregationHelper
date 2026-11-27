@@ -126,6 +126,11 @@ export PHP_CLI_SERVER_WORKERS="${PHP_CLI_SERVER_WORKERS:-6}"
 #
 # Its log of each connection and request is left out (as `php artisan serve` does), keeping the errors, also written
 # to `logs/server.log` of the instance (e.g. a crash of the server, kept with the test results on CI).
+#
+# The workers write at the same time, so a line can be cut by the line of another worker: its end (e.g. `.3.3.0`, the
+# version of a script) is left on a line of its own, without spaces, unlike the errors and their stack traces.
+server_log_noise='\[[0-9]{3}\]: [A-Z]+ /|127\.0\.0\.1:[0-9]+ (Accepted|Closing|Closed without sending a request)'
+server_log_noise+='|PHP [0-9.]+ Development Server|Failed to poll event|^[^[:space:]]*$'
 cd public
 exec php -d variables_order=EGPCS -d opcache.jit=disable -S "127.0.0.1:${port}" ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php \
-    2> >(grep --line-buffered -vE '^\[[0-9]+\] \[[^]]+\] (127\.0\.0\.1:[0-9]+ (Accepted|Closing|\[[0-9]{3}\]: )|PHP [0-9.]+ Development Server|Failed to poll event|Closed without sending a request)' | tee -a "${LARAVEL_STORAGE_PATH}/logs/server.log" >&2)
+    2> >(grep --line-buffered -vE "${server_log_noise}" | tee -a "${LARAVEL_STORAGE_PATH}/logs/server.log" >&2)
