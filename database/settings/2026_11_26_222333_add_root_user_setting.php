@@ -15,6 +15,6 @@ return new class extends SettingsMigration
 
     public function down(): void
     {
-        $this->migrator->delete('security.root_user_id');
+        $this->migrator->deleteIfExists('security.root_user_id');
     }
 };
