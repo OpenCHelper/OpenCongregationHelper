@@ -3,14 +3,22 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test, expect } from '@playwright/test';
 import { php } from './support/artisan';
+import { appInstance } from '../../playwright.config';
 
 /**
- * The token of the Artisan endpoints, kept in the storage of the `app` instance (see `EnsureArtisanToken`). The same one
+ * The token of the Artisan endpoints, kept in the storage of the seeded instance (see `EnsureArtisanToken`). The same one
  * is written by every run, and never removed, so that the runs in parallel never pull it from under each other: the
  * storage is emptied when `serve.sh` starts anyway.
  */
 const artisanToken = 'e2e-artisan-token';
-const artisanTokenFile = path.join(fileURLToPath(new URL('../..', import.meta.url)), 'storage', 'e2e', 'app', 'framework', '.artisan-token');
+const artisanTokenFile = path.join(
+    fileURLToPath(new URL('../..', import.meta.url)),
+    'storage',
+    'e2e',
+    appInstance,
+    'framework',
+    '.artisan-token',
+);
 
 /**
  * The token of the cron endpoints (`ARTISAN_CRON_TOKEN` in `serve.sh`).
