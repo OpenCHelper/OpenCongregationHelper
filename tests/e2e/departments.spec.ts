@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { test, expect, uniqueName } from './support/fixtures';
+import { test, expect, uniqueName, users } from './support/fixtures';
 import { php } from './support/artisan';
 import { confirmModal, expectNotification, labelled, modal, row, rowAction, visit } from './support/filament';
 
@@ -83,7 +83,7 @@ test.describe('Departments', () => {
 
         const territories = row(adminPage, 'Territory Department');
         await expect(territories).toContainText('Territories, zones, assignments and campaigns.');
-        await expect(territories).toContainText('Sam Servant');
+        await expect(territories).toContainText(users.servant.name);
         for (const section of ['Territories', 'Zones', 'Assignments', 'Campaigns']) {
             await expect(territories.getByRole('listitem').filter({ hasText: section })).toBeVisible();
         }
@@ -100,7 +100,7 @@ test.describe('Departments', () => {
 
         await expect(adminPage).toHaveURL(new RegExp(`/app/departments/${departmentId('territories')}$`));
         await expect(adminPage.getByRole('heading', { name: 'Territory Department', level: 1 })).toBeVisible();
-        await expect(adminPage.getByRole('definition').filter({ hasText: 'Sam Servant' })).toBeVisible();
+        await expect(adminPage.getByRole('definition').filter({ hasText: users.servant.name })).toBeVisible();
 
         const servant = row(adminPage, 'servant@e2e.test');
         await expect(servant).toContainText('Overseer');

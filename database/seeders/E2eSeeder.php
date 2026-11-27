@@ -31,9 +31,9 @@ class E2eSeeder extends Seeder
      * @var array<string, array{first_name: string, last_name: string, role: ?string}>
      */
     public const USERS = [
-        'admin@e2e.test' => ['first_name' => 'Ada', 'last_name' => 'Admin', 'role' => 'super_admin'],
-        'servant@e2e.test' => ['first_name' => 'Sam', 'last_name' => 'Servant', 'role' => 'territory_servant'],
-        'overseer@e2e.test' => ['first_name' => 'Olga', 'last_name' => 'Overseer', 'role' => 'service_overseer'],
+        'admin@e2e.test' => ['first_name' => 'Adam', 'last_name' => 'Admin', 'role' => 'super_admin'],
+        'servant@e2e.test' => ['first_name' => 'Simon', 'last_name' => 'Servant', 'role' => 'territory_servant'],
+        'overseer@e2e.test' => ['first_name' => 'Oscar', 'last_name' => 'Overseer', 'role' => 'service_overseer'],
         'group@e2e.test' => ['first_name' => 'Gino', 'last_name' => 'Group', 'role' => 'group_overseer'],
         'publisher@e2e.test' => ['first_name' => 'Paul', 'last_name' => 'Publisher', 'role' => 'publisher'],
         'norole@e2e.test' => ['first_name' => 'Nora', 'last_name' => 'Norole', 'role' => null],

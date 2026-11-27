@@ -1,4 +1,4 @@
-import { test, expect, pageAs, uniqueName } from './support/fixtures';
+import { test, expect, pageAs, uniqueName, users } from './support/fixtures';
 import { php } from './support/artisan';
 import { confirmModal, expectNotification, field, modal, row, rowAction, searchTable, visit } from './support/filament';
 import type { Role } from './support/users';
@@ -106,7 +106,7 @@ test.describe('Activity Logs', () => {
         const activity = adminPage.locator('.fi-ta-row').filter({ has: adminPage.locator(`a[href$="/app/activitylogs/${activityId}"]`) });
         await expect(activity).toContainText(`Territory Zone # ${zoneId}`);
         await expect(activity).toContainText('Created');
-        await expect(activity).toContainText('Ada Admin');
+        await expect(activity).toContainText(users.admin.name);
 
         await activity.getByRole('link').first().click();
         await expect(adminPage.getByRole('heading', { name: 'View Activity Log', level: 1 })).toBeVisible();

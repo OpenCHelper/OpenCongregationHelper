@@ -3,9 +3,9 @@
  */
 export const users = {
     root: { email: 'root@e2e.test', password: 'RootPassword123', name: 'Root User' },
-    admin: { email: 'admin@e2e.test', password: 'password', name: 'Ada Admin' },
-    servant: { email: 'servant@e2e.test', password: 'password', name: 'Sam Servant' },
-    overseer: { email: 'overseer@e2e.test', password: 'password', name: 'Olga Overseer' },
+    admin: { email: 'admin@e2e.test', password: 'password', name: 'Adam Admin' },
+    servant: { email: 'servant@e2e.test', password: 'password', name: 'Simon Servant' },
+    overseer: { email: 'overseer@e2e.test', password: 'password', name: 'Oscar Overseer' },
     group: { email: 'group@e2e.test', password: 'password', name: 'Gino Group' },
     publisher: { email: 'publisher@e2e.test', password: 'password', name: 'Paul Publisher' },
     norole: { email: 'norole@e2e.test', password: 'password', name: 'Nora Norole' },
