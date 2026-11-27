@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#107](https://github.com/OpenCHelper/OpenCongregationHelper/pull/107)).
 - **Assignments**: assigning a territory again for a campaign in which it has already been worked now asks for a
   confirmation (from the territories list and the campaign assignments); the bulk assignment skips such territories
-  unless asked to include them.
+  unless asked to include them, and the AI assistants ask the user before assigning it again.
 
 ### Changed
 
