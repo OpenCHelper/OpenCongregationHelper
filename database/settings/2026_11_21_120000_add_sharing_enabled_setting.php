@@ -11,4 +11,12 @@ return new class extends SettingsMigration
     {
         $this->migrator->add('territories.sharing_enabled', true);
     }
+
+    /**
+     * Reverse the migrations, so that running them again (e.g. after `migrate:rollback`) does not find the setting.
+     */
+    public function down(): void
+    {
+        $this->migrator->deleteIfExists('territories.sharing_enabled');
+    }
 };

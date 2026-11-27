@@ -79,15 +79,19 @@ it('drops the unused team tables and rolls them back', function () {
         ->and(Schema::hasColumn('users', 'current_team_id'))->toBeFalse();
 });
 
-it('rolls back the password leak check setting and adds it again', function () {
-    $passwordLeakCheck = require database_path('settings/2026_11_25_120620_add_password_leak_check_setting.php');
+it('rolls back the settings and adds them again', function (string $file) {
+    $migration = require $file;
+    $settings = fn () => DB::table('settings')->get(['group', 'name'])->map(fn (object $setting): string => "{$setting->group}.{$setting->name}");
+    preg_match_all("/migrator->add\\('([^']+)'/", file_get_contents($file), $matches);
 
-    $passwordLeakCheck->down();
+    $migration->down();
 
-    expect(DB::table('settings')->where('group', 'security')->where('name', 'password_leak_check')->exists())->toBeFalse();
+    expect($settings()->intersect($matches[1]))->toBeEmpty();
 
-    // Adding it again would throw if the rollback had left it in place
-    $passwordLeakCheck->up();
+    // Adding them again would throw if the rollback had left any of them in place
+    $migration->up();
 
-    expect(DB::table('settings')->where('group', 'security')->where('name', 'password_leak_check')->exists())->toBeTrue();
-});
+    expect($settings()->intersect($matches[1])->sort()->values()->all())->toBe(collect($matches[1])->sort()->values()->all());
+})->with(fn (): array => collect(glob(dirname(__DIR__, 2).'/database/settings/*.php'))
+    ->mapWithKeys(fn (string $file): array => [basename($file, '.php') => [$file]])
+    ->all());
