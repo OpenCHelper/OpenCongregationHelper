@@ -114,5 +114,8 @@ fi
 # server of PHP is started directly, from `public/` (as `php artisan serve` does), to fill `$_ENV`, where Laravel reads
 # `LARAVEL_STORAGE_PATH` from.
 export PHP_CLI_SERVER_WORKERS="${PHP_CLI_SERVER_WORKERS:-6}"
+#
+# Its log of each connection and request is left out (as `php artisan serve` does), keeping the errors.
 cd public
-exec php -d variables_order=EGPCS -S "127.0.0.1:${port}" ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php
+exec php -d variables_order=EGPCS -S "127.0.0.1:${port}" ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php \
+    2> >(grep --line-buffered -vE '^\[[0-9]+\] \[[^]]+\] (127\.0\.0\.1:[0-9]+ (Accepted|Closing|\[[0-9]{3}\]: )|PHP [0-9.]+ Development Server|Failed to poll event)' >&2)
