@@ -18,6 +18,10 @@ const environmentOf = (instance: Instance): NodeJS.ProcessEnv => ({
     ...process.env,
     APP_ENV: `e2e-${nameOf(instance)}`,
     LARAVEL_STORAGE_PATH: path.join(root, 'storage', 'e2e', nameOf(instance)),
+    // Its own caches, as in `serve.sh`: a cached development configuration would skip its `.env`
+    APP_CONFIG_CACHE: path.join(root, 'storage', 'e2e', nameOf(instance), 'framework', 'cache', 'config.php'),
+    APP_ROUTES_CACHE: path.join(root, 'storage', 'e2e', nameOf(instance), 'framework', 'cache', 'routes.php'),
+    APP_EVENTS_CACHE: path.join(root, 'storage', 'e2e', nameOf(instance), 'framework', 'cache', 'events.php'),
 });
 
 /**

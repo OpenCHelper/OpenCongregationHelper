@@ -21,6 +21,12 @@ cd "$(dirname "$0")/../../.."
 
 export APP_ENV="e2e-${instance}"
 export LARAVEL_STORAGE_PATH="${PWD}/storage/e2e/${instance}"
+# The caches of the configuration, routes and events of the instance, in its storage (emptied below): a cache of the
+# development one (`php artisan config:cache` or `optimize`) would make Laravel skip `.env.e2e-<instance>`, and reach
+# the development database
+export APP_CONFIG_CACHE="${LARAVEL_STORAGE_PATH}/framework/cache/config.php"
+export APP_ROUTES_CACHE="${LARAVEL_STORAGE_PATH}/framework/cache/routes.php"
+export APP_EVENTS_CACHE="${LARAVEL_STORAGE_PATH}/framework/cache/events.php"
 
 connection="${E2E_DB_CONNECTION:-sqlite}"
 env_file=".env.${APP_ENV}"
