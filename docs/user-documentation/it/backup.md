@@ -42,9 +42,14 @@ Se il database è condiviso con altre applicazioni o installazioni e le tabelle 
 (`DB_PREFIX`, es. `och_`), esporta solo le tabelle che iniziano con esso (la password viene chiesta due volte):
 
 ```shell
-mysqldump --single-transaction --default-character-set=utf8mb4 -u <utente> -p <database> \
-    $(mysql -N -u <utente> -p <database> -e "SHOW TABLES LIKE 'och\_%'") > och-backup.sql
+tables=$(mysql -N -u <utente> -p <database> -e "SHOW TABLES LIKE 'och\_%'")
+test -n "$tables" && mysqldump --single-transaction --default-character-set=utf8mb4 -u <utente> -p <database> \
+    $tables > och-backup.sql
 ```
+
+Scrivi il tuo prefisso al posto di `och\_` (con una `\` prima di ogni `_`). Se nessuna tabella inizia con esso, non
+viene esportato nulla: controlla il prefisso, perché `mysqldump` senza i nomi delle tabelle esporterebbe l'intero
+database, comprese le tabelle delle altre applicazioni.
 
 **Senza accesso alla shell** (es. su Altervista), usa lo strumento per il database del pannello dell'hosting, di solito
 phpMyAdmin: apri il database, scegli **Esporta** e il formato **SQL**. Con un prefisso delle tabelle, scegli il metodo
@@ -114,8 +119,9 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
 4. Elimina le tabelle dell'installazione, poi importa il dump, così che non resti nessuna tabella creata dopo il backup:
     - **con accesso alla shell**, `php artisan config:clear` fa leggere all'applicazione il file `.env` appena rimesso
       (invece delle impostazioni in cache), `php artisan db:wipe --force` elimina le tabelle dell'installazione (solo
-      quelle che iniziano con `DB_PREFIX`, se è impostato), poi `mysql -u <utente> -p <database> < och-backup.sql`
-      importa il dump;
+      quelle che iniziano con `DB_PREFIX`, se è impostato: senza prefisso elimina **tutte** le tabelle del database,
+      quindi se il database è condiviso con un'altra applicazione elimina a mano solo quelle di questa), poi
+      `mysql -u <utente> -p <database> < och-backup.sql` importa il dump;
     - **senza accesso alla shell**, in phpMyAdmin seleziona le tabelle dell'installazione (solo quelle che iniziano con
       il prefisso, se c'è) e scegli **Elimina**, togliendo nella conferma la spunta dal controllo delle chiavi esterne
       (altrimenti alcune tabelle potrebbero non essere eliminate), poi importa il dump dalla scheda **Importa**.

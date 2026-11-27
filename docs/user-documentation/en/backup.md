@@ -42,9 +42,14 @@ If the database is shared with other applications or installations and the table
 (`DB_PREFIX`, e.g. `och_`), export only the tables starting with it (the password is asked twice):
 
 ```shell
-mysqldump --single-transaction --default-character-set=utf8mb4 -u <user> -p <database> \
-    $(mysql -N -u <user> -p <database> -e "SHOW TABLES LIKE 'och\_%'") > och-backup.sql
+tables=$(mysql -N -u <user> -p <database> -e "SHOW TABLES LIKE 'och\_%'")
+test -n "$tables" && mysqldump --single-transaction --default-character-set=utf8mb4 -u <user> -p <database> \
+    $tables > och-backup.sql
 ```
+
+Write your prefix instead of `och\_` (with a `\` before each `_`). If no table starts with it, nothing is exported:
+check the prefix, since `mysqldump` without the names of the tables would export the whole database, the tables of the
+other applications included.
 
 **Without shell access** (e.g. on Altervista), use the database tool of the hosting panel, usually phpMyAdmin: open the
 database, choose **Export** and the **SQL** format. With a table prefix, choose the **Custom** export method and select
@@ -112,8 +117,9 @@ scripts/remote_artisan.sh --base-url https://och-instance.example.com \
    behind:
     - **with shell access**, `php artisan config:clear` makes the application read the `.env` file just put back
       (instead of the cached settings), `php artisan db:wipe --force` drops the tables of the installation (only those
-      starting with `DB_PREFIX`, when it is set), then `mysql -u <user> -p <database> < och-backup.sql` imports the
-      dump;
+      starting with `DB_PREFIX`, when it is set: without a prefix it drops **every** table of the database, so if the
+      database is shared with another application drop the tables of this one by hand instead), then
+      `mysql -u <user> -p <database> < och-backup.sql` imports the dump;
     - **without shell access**, in phpMyAdmin select the tables of the installation (only those starting with the
       prefix, if any) and choose **Drop**, unticking **Enable foreign key checks** in the confirmation (otherwise some
       tables may refuse to be dropped), then import the dump from the **Import** tab.
