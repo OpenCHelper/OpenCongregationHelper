@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * The end-to-end tests (see the "End-to-end tests" section of `README.md`).
+ * The end-to-end tests (see the "End-to-end tests" section of `CONTRIBUTING.md`).
  *
  * Two instances of the application are served by `tests/e2e/support/serve.sh`, each with its own `.env`, storage and
  * database: `app`, installed and seeded with `E2eSeeder`, and `setup`, empty, for the setup wizard.
